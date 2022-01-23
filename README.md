@@ -1,0 +1,2 @@
+# mainflux-ui
+Mainflux UI
