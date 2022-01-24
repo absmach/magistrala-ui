@@ -1,0 +1,100 @@
+{{define "channel"}}
+<!doctype html>
+<html lang="en">
+  {{template "header"}}
+
+  <body>
+    <main role="main">
+      <div class="container-fluid">
+        <div class="row">
+
+          {{template "navbar" .}}
+
+          <!-- Partial goes here -->
+          <div class="col-md-4">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateChannelModal">
+              Update
+            </button>
+            <td><a type="button" class="btn btn-primary" href= {{printf "%s/delete" .ID}}>
+              Delete
+            </a></td>
+            <div class="modal fade" id="updateChannelModal" tabindex="-1" role="dialog" aria-labelledby="updateChannelModalLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="updateChannelModalLabel">Update Channel</h5>
+                  </div>
+                  <div class="modal-body">
+                    <form method="post">
+                      <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" name="name" id="name" aria-describedby="nameHelp" value="{{.Channel.Name}}">
+                        <div id="nameHelp" class="form-text">Enter device name.</div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="meatadata" class="form-label">Metadata</label>
+                        <input type="text" class="form-control" name= "metadata" id="metadata" value="{{toJSON .Channel.Metadata}}">
+                        <div id="metadataHelp" class="form-text">Enter device metadata in JSON format.</div>
+                      </div>
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <a class="btn btn-primary" href="/channelconn/{{.Channel.ID}}" role="button">Connections</a>
+            <div class="modal fade" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="connectModal" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="connectModal">Connect</h5>
+                  </div>
+                  <div class="modal-body">
+                    <form action="/connect" method="post">
+                      <div class="mb-3">
+                        <label for="name" class="form-label">Channel ID</label>
+                        <input type="text" class="form-control" name="thingID" id="thingID" aria-describedby="chanelIDHelp">
+                        <input type="text" class="invisible" name="chanID" id="chanID" aria-describedby="channelIDHelp" value="{{.Channel.ID}}">
+                        <div id="channelIDHelp" class="form-text">Enter channel ID.</div>
+                      </div>
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th scope="row">CHANNEL</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <tr>
+                    <th>Name</th>
+                    <td>{{.Channel.Name}}</td>
+                  </tr>
+                  <th>ID</th>
+                  <td>{{.Channel.ID}}</td>
+                </tr>
+                <tr>
+                  <th>Metadata</th>
+                  <td>
+                    <pre>{{toJSON .Channel.Metadata}}</pre>
+                    </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- End of partial-->
+
+        </div>
+      </div> <!-- /container -->
+    </main>
+
+    {{template "footer"}}
+
+  </body>
+</html>
+{{end}}
