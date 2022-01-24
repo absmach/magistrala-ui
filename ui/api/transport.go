@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"time"
 
+	"mainflux-ui/ui"
+
 	kitot "github.com/go-kit/kit/tracing/opentracing"
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/go-zoo/bone"
@@ -18,7 +20,6 @@ import (
 	"github.com/mainflux/mainflux/pkg/errors"
 	"github.com/mainflux/mainflux/pkg/messaging"
 	"github.com/mainflux/mainflux/things"
-	"github.com/mainflux/mainflux/ui"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc/codes"

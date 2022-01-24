@@ -4,10 +4,11 @@
 package api
 
 import (
+	"mainflux-ui/ui"
+
 	"github.com/mainflux/mainflux/auth"
 	"github.com/mainflux/mainflux/pkg/messaging"
 	"github.com/mainflux/mainflux/things"
-	"github.com/mainflux/mainflux/ui"
 )
 
 const (

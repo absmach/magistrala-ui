@@ -11,10 +11,11 @@ import (
 	"fmt"
 	"time"
 
+	"mainflux-ui/ui"
+
 	log "github.com/mainflux/mainflux/logger"
 	"github.com/mainflux/mainflux/pkg/messaging"
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
-	"github.com/mainflux/mainflux/ui"
 )
 
 var _ ui.Service = (*loggingMiddleware)(nil)

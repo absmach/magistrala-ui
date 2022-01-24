@@ -8,6 +8,8 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"mainflux-ui/ui"
+	"mainflux-ui/ui/api"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,19 +17,16 @@ import (
 	"syscall"
 	"time"
 
-	"google.golang.org/grpc/credentials"
-
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	"github.com/mainflux/mainflux"
 	"github.com/mainflux/mainflux/logger"
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
 	thingsapi "github.com/mainflux/mainflux/things/api/auth/grpc"
-	"github.com/mainflux/ui"
-	"github.com/mainflux/ui/api"
 	"github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	jconfig "github.com/uber/jaeger-client-go/config"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 const (

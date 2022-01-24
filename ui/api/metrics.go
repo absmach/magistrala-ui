@@ -10,10 +10,11 @@ import (
 	"context"
 	"time"
 
+	"mainflux-ui/ui"
+
 	"github.com/go-kit/kit/metrics"
 	"github.com/mainflux/mainflux/pkg/messaging"
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
-	"github.com/mainflux/mainflux/ui"
 )
 
 var _ ui.Service = (*metricsMiddleware)(nil)
