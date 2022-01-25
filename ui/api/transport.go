@@ -30,7 +30,7 @@ const (
 	contentType = "text/html"
 	staticDir   = "ui/web/static"
 	// TODO -this is a temporary token and it will be removed once auth proxy is in place.
-	token       = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDE1MTkyNjEsImlhdCI6MTY0MTQ4MzI2MSwiaXNzIjoibWFpbmZsdXguYXV0aCIsInN1YiI6ImZscDFAZW1haWwuY29tIiwiaXNzdWVyX2lkIjoiYzkzY2FmYjMtYjNhNy00ZTdmLWE0NzAtMTVjMTRkOGVkMWUwIiwidHlwZSI6MH0.cqDOZdqiH9sXd1yuDwsv6-Mtb6_nVe_4c6cJK-iJ-Ig"
+	token       = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDMxNDQ1NjksImlhdCI6MTY0MzEwODU2OSwiaXNzIjoibWFpbmZsdXguYXV0aCIsInN1YiI6ImZscDFAZW1haWwuY29tIiwiaXNzdWVyX2lkIjoiYzkzY2FmYjMtYjNhNy00ZTdmLWE0NzAtMTVjMTRkOGVkMWUwIiwidHlwZSI6MH0.07uAe6ZiBE-7EhWab-5w-OgtdYWxcTf68JjEURE5Pfk"
 	offsetKey   = "offset"
 	limitKey    = "limit"
 	nameKey     = "name"

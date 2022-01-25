@@ -87,7 +87,7 @@ func (req updateThingReq) validate() error {
 type createChannelsReq struct {
 	token    string
 	Name     string                 `json:"name,omitempty"`
-	Key      string                 `json:"key,omitempty"`
+	ID       string                 `json:"key,omitempty"`
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
 }
 

@@ -133,7 +133,7 @@ func createChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 		// }
 
 		ch := sdk.Channel{
-			Key:      req.Key,
+			ID:       req.ID,
 			Name:     req.Name,
 			Metadata: req.Metadata,
 		}
