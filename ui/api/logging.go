@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"time"
 
-	"mainflux-ui/ui"
+	"github.com/ultravioletrs/mainflux-ui/ui"
 
 	log "github.com/mainflux/mainflux/logger"
 	"github.com/mainflux/mainflux/pkg/messaging"

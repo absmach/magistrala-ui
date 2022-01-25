@@ -10,7 +10,7 @@ import (
 	"context"
 	"time"
 
-	"mainflux-ui/ui"
+	"github.com/ultravioletrs/mainflux-ui/ui"
 
 	"github.com/go-kit/kit/metrics"
 	"github.com/mainflux/mainflux/pkg/messaging"

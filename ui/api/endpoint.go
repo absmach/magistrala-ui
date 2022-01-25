@@ -7,7 +7,7 @@ import (
 	"context"
 	"net/http"
 
-	"mainflux-ui/ui"
+	"github.com/ultravioletrs/mainflux-ui/ui"
 
 	"github.com/go-kit/kit/endpoint"
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"

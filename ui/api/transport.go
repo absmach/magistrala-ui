@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"time"
 
-	"mainflux-ui/ui"
+	"github.com/ultravioletrs/mainflux-ui/ui"
 
 	kitot "github.com/go-kit/kit/tracing/opentracing"
 	kithttp "github.com/go-kit/kit/transport/http"
@@ -241,7 +241,7 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 	// 	opts...,
 	// ))
 
-	r.GetFunc("/version", mainflux.Version("ui"))
+	r.GetFunc("/version", mainflux.Health("ui"))
 	r.Handle("/metrics", promhttp.Handler())
 
 	// Static file handler

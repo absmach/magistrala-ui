@@ -8,8 +8,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"mainflux-ui/ui"
-	"mainflux-ui/ui/api"
 	"net/http"
 	"os"
 	"os/signal"
@@ -25,6 +23,8 @@ import (
 	"github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	jconfig "github.com/uber/jaeger-client-go/config"
+	"github.com/ultravioletrs/mainflux-ui/ui"
+	"github.com/ultravioletrs/mainflux-ui/ui/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 )
