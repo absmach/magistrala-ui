@@ -6,7 +6,7 @@ require (
 	github.com/go-kit/kit v0.12.0
 	github.com/go-zoo/bone v1.3.0
 	github.com/golang/protobuf v1.5.2
-	github.com/mainflux/mainflux v0.0.0-20220124201853-42dd813521e1
+	github.com/mainflux/mainflux v0.0.0-20220127100827-81b2a1a2d34d
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/prometheus/client_golang v1.12.0
 	github.com/stretchr/testify v1.7.0
