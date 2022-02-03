@@ -141,28 +141,37 @@ func (mm *metricsMiddleware) Connect(ctx context.Context, token string, chIDs, t
 	return mm.svc.Connect(ctx, token, chIDs, thIDs)
 }
 
-func (mm *metricsMiddleware) ListThingConnections(ctx context.Context, token, id string) (b []byte, err error) {
+func (mm *metricsMiddleware) ListThingByChannel(ctx context.Context, token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		mm.counter.With("method", "view_connections").Add(1)
-		mm.latency.With("method", "view_connections").Observe(time.Since(begin).Seconds())
+		mm.counter.With("method", "list_things_by_channel").Add(1)
+		mm.latency.With("method", "list_things_by_channel").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ListThingConnections(ctx, token, id)
+	return mm.svc.ListThingByChannel(ctx, token, id)
 }
 
-func (mm *metricsMiddleware) ListChannelConnections(ctx context.Context, token, id string) (b []byte, err error) {
+func (mm *metricsMiddleware) ListGroupMembers(ctx context.Context, token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		mm.counter.With("method", "view_connections").Add(1)
-		mm.latency.With("method", "view_connections").Observe(time.Since(begin).Seconds())
+		mm.counter.With("method", "list_group_members").Add(1)
+		mm.latency.With("method", "list_group_members").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ListChannelConnections(ctx, token, id)
+	return mm.svc.ListGroupMembers(ctx, token, id)
+}
+
+func (mm *metricsMiddleware) ListChannelsByThing(ctx context.Context, token, id string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "list_channels_by_thing").Add(1)
+		mm.latency.With("method", "list_channels_by_thing").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.ListChannelsByThing(ctx, token, id)
 }
 
 func (mm *metricsMiddleware) DisconnectThing(ctx context.Context, token string, chIDs, thIDs []string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		mm.counter.With("method", "disconnect").Add(1)
-		mm.latency.With("method", "disconnect").Observe(time.Since(begin).Seconds())
+		mm.counter.With("method", "disconnect_thing").Add(1)
+		mm.latency.With("method", "disconnect_thing").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
 	return mm.svc.DisconnectThing(ctx, token, chIDs, thIDs)

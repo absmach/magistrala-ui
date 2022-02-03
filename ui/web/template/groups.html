@@ -30,12 +30,22 @@
                       <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
                         <input type="text" class="form-control" name="name" id="name" aria-describedby="nameHelp">
-                        <div id="nameHelp" class="form-text">Enter device name.</div>
+                        <div id="nameHelp" class="form-text">Enter groups name.</div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <input type="text" class="form-control" name="description" id="description" aria-describedby="descriptionHelp">
+                        <div id="descriptionHelp" class="form-text">Enter groups description.</div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="parentid" class="form-label">Parent ID</label>
+                        <input type="text" class="form-control" name="parentid" id="parentid" aria-describedby="parentidHelp">
+                        <div id="parentidHelp" class="form-text">Enter groups parent.</div>
                       </div>
                       <div class="mb-3">
                         <label for="meatadata" class="form-label">Metadata</label>
                         <input type="text" class="form-control" name= "metadata" id="metadata" value="{}">
-                        <div id="metadataHelp" class="form-text">Enter device metadata in JSON format.</div>
+                        <div id="metadataHelp" class="form-text">Enter groups metadata in JSON format.</div>
                       </div>
                       <button type="submit" class="btn btn-primary">Submit</button>
                     </form>

@@ -47,6 +47,13 @@ type listThingsReq struct {
 	token string
 }
 
+func (req listThingsReq) validate() error {
+	if req.token == "" {
+		return things.ErrUnauthorizedAccess
+	}
+	return nil
+}
+
 type viewResourceReq struct {
 	token string
 	id    string
@@ -72,7 +79,9 @@ type updateThingReq struct {
 }
 
 func (req updateThingReq) validate() error {
-
+	if req.token == "" {
+		return things.ErrUnauthorizedAccess
+	}
 	if req.id == "" {
 		return things.ErrMalformedEntity
 	}
@@ -93,6 +102,9 @@ type createChannelsReq struct {
 
 func (req createChannelsReq) validate() error {
 	if req.token == "" {
+		return things.ErrUnauthorizedAccess
+	}
+	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
 	}
 
@@ -111,7 +123,9 @@ type updateChannelReq struct {
 }
 
 func (req updateChannelReq) validate() error {
-
+	if req.token == "" {
+		return things.ErrUnauthorizedAccess
+	}
 	if req.id == "" {
 		return things.ErrMalformedEntity
 	}
@@ -125,6 +139,13 @@ func (req updateChannelReq) validate() error {
 
 type listChannelsReq struct {
 	token string
+}
+
+func (req listChannelsReq) validate() error {
+	if req.token == "" {
+		return things.ErrUnauthorizedAccess
+	}
+	return nil
 }
 
 type createGroupsReq struct {
@@ -152,15 +173,23 @@ type listGroupsReq struct {
 	token string
 }
 
+func (req listGroupsReq) validate() error {
+	if req.token == "" {
+		return things.ErrUnauthorizedAccess
+	}
+	return nil
+}
+
 type updateGroupReq struct {
-	token    string
-	id       string
-	Name     string                 `json:"name,omitempty"`
-	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	token       string
+	id          string
+	Name        string                 `json:"name,omitempty"`
+	Description string                 `json:"description,omitempty"`
+	ParentID    string                 `json:"parent_id,omitempty"`
+	Metadata    map[string]interface{} `json:"metadata,omitempty"`
 }
 
 func (req updateGroupReq) validate() error {
-
 	if req.token == "" {
 		return things.ErrMalformedEntity
 	}
@@ -179,9 +208,9 @@ type connectThingReq struct {
 }
 
 func (req connectThingReq) validate() error {
-	// if req.token == "" {
-	// 	return things.ErrUnauthorizedAccess
-	// }
+	if req.token == "" {
+		return things.ErrUnauthorizedAccess
+	}
 
 	if req.ChanID == "" || req.ThingID == "" {
 		return things.ErrMalformedEntity
@@ -197,9 +226,9 @@ type connectChannelReq struct {
 }
 
 func (req connectChannelReq) validate() error {
-	// if req.token == "" {
-	// 	return things.ErrUnauthorizedAccess
-	// }
+	if req.token == "" {
+		return things.ErrUnauthorizedAccess
+	}
 
 	if req.ChanID == "" || req.ThingID == "" {
 		return things.ErrMalformedEntity
@@ -215,9 +244,9 @@ type disconnectThingReq struct {
 }
 
 func (req disconnectThingReq) validate() error {
-	// if req.token == "" {
-	// 	return things.ErrUnauthorizedAccess
-	// }
+	if req.token == "" {
+		return things.ErrUnauthorizedAccess
+	}
 
 	if req.ChanID == "" || req.ThingID == "" {
 		return things.ErrMalformedEntity
@@ -233,9 +262,9 @@ type disconnectChannelReq struct {
 }
 
 func (req disconnectChannelReq) validate() error {
-	// if req.token == "" {
-	// 	return things.ErrUnauthorizedAccess
-	// }
+	if req.token == "" {
+		return things.ErrUnauthorizedAccess
+	}
 
 	if req.ChanID == "" || req.ThingID == "" {
 		return things.ErrMalformedEntity
@@ -285,6 +314,26 @@ type publishReq struct {
 	token    string
 }
 
+func (req publishReq) validate() error {
+	if req.token == "" {
+		return things.ErrMalformedEntity
+	}
+
+	if req.thingKey == "" {
+		return auth.ErrMalformedEntity
+	}
+
+	return nil
+}
+
 type sendMessageReq struct {
 	token string
+}
+
+func (req sendMessageReq) validate() error {
+	if req.token == "" {
+		return things.ErrMalformedEntity
+	}
+
+	return nil
 }

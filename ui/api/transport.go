@@ -30,7 +30,7 @@ const (
 	contentType = "text/html"
 	staticDir   = "ui/web/static"
 	// TODO -this is a temporary token and it will be removed once auth proxy is in place.
-	token       = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDMxNDQ1NjksImlhdCI6MTY0MzEwODU2OSwiaXNzIjoibWFpbmZsdXguYXV0aCIsInN1YiI6ImZscDFAZW1haWwuY29tIiwiaXNzdWVyX2lkIjoiYzkzY2FmYjMtYjNhNy00ZTdmLWE0NzAtMTVjMTRkOGVkMWUwIiwidHlwZSI6MH0.07uAe6ZiBE-7EhWab-5w-OgtdYWxcTf68JjEURE5Pfk"
+	token       = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDM4NDI4MDYsImlhdCI6MTY0MzgwNjgwNiwiaXNzIjoibWFpbmZsdXguYXV0aCIsInN1YiI6InJvZG5leTJAdGVzdC5jb20iLCJpc3N1ZXJfaWQiOiI5MWE5MTg4NC0xYjM2LTQ1YTctOTU0Ni03M2RlMGRkNjYwNTMiLCJ0eXBlIjowfQ.t4QDoG7_46S5N82prx_4jduV7mfWQZ2KEBOegaReKvo"
 	offsetKey   = "offset"
 	limitKey    = "limit"
 	nameKey     = "name"
@@ -136,15 +136,22 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 		opts...,
 	))
 
-	r.Get("/thingconn/:id", kithttp.NewServer(
-		kitot.TraceServer(tracer, "view_connection")(listThingConnectionsEndpoint(svc)),
+	r.Get("/things/:id/channels", kithttp.NewServer(
+		kitot.TraceServer(tracer, "list_things_by_channel")(listThingsByChannelEndpoint(svc)),
 		decodeView,
 		encodeResponse,
 		opts...,
 	))
 
-	r.Get("/channelconn/:id", kithttp.NewServer(
-		kitot.TraceServer(tracer, "view_connection")(listChannelConnectionsEndpoint(svc)),
+	r.Get("/groups/:id/members", kithttp.NewServer(
+		kitot.TraceServer(tracer, "list_group_members")(listGroupMembersEndpoint(svc)),
+		decodeView,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Get("/channels/:id/things", kithttp.NewServer(
+		kitot.TraceServer(tracer, "list_channels_by_thing")(listChannelsByThingEndpoint(svc)),
 		decodeView,
 		encodeResponse,
 		opts...,
@@ -199,6 +206,13 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 		opts...,
 	))
 
+	r.Post("/groups/:id", kithttp.NewServer(
+		kitot.TraceServer(tracer, "update_group")(updateGroupEndpoint(svc)),
+		decodeGroupUpdate,
+		encodeResponse,
+		opts...,
+	))
+
 	r.Post("/groups/:id/members", kithttp.NewServer(
 		kitot.TraceServer(tracer, "assign")(assignEndpoint(svc)),
 		decodeAssignRequest,
@@ -233,13 +247,6 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 		encodeResponse,
 		opts...,
 	))
-
-	// r.Post("/channels/:id/messages/*", kithttp.NewServer(
-	// 	kitot.TraceServer(tracer, "publish")(sendMessageEndpoint(svc)),
-	// 	decodeRequest,
-	// 	encodeResponse,
-	// 	opts...,
-	// ))
 
 	r.GetFunc("/version", mainflux.Health("ui"))
 	r.Handle("/metrics", promhttp.Handler())
@@ -403,9 +410,11 @@ func decodeGroupCreation(_ context.Context, r *http.Request) (interface{}, error
 		return nil, err
 	}
 	req := createGroupsReq{
-		token:    getAuthorization(r),
-		Name:     r.PostFormValue("name"),
-		Metadata: meta,
+		token:       getAuthorization(r),
+		Name:        r.PostFormValue("name"),
+		Description: r.PostFormValue("description"),
+		ParentID:    r.PostFormValue("parentid"),
+		Metadata:    meta,
 	}
 
 	return req, nil

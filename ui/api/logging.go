@@ -186,9 +186,9 @@ func (lm *loggingMiddleware) Connect(ctx context.Context, token string, chIDs, t
 	return lm.svc.Connect(ctx, token, chIDs, thIDs)
 }
 
-func (lm *loggingMiddleware) ListThingConnections(ctx context.Context, token, id string) (b []byte, err error) {
+func (lm *loggingMiddleware) ListThingByChannel(ctx context.Context, token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method view_connections for token %s and connections %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method list_things_by_channel for token %s and connections %s took %s to complete", token, id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -196,12 +196,12 @@ func (lm *loggingMiddleware) ListThingConnections(ctx context.Context, token, id
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.ListThingConnections(ctx, token, id)
+	return lm.svc.ListThingByChannel(ctx, token, id)
 }
 
-func (lm *loggingMiddleware) ListChannelConnections(ctx context.Context, token, id string) (b []byte, err error) {
+func (lm *loggingMiddleware) ListGroupMembers(ctx context.Context, token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method view_connections for token %s and connections %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method list_group_members for token %s and connections %s took %s to complete", token, id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -209,7 +209,20 @@ func (lm *loggingMiddleware) ListChannelConnections(ctx context.Context, token, 
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.ListChannelConnections(ctx, token, id)
+	return lm.svc.ListGroupMembers(ctx, token, id)
+}
+
+func (lm *loggingMiddleware) ListChannelsByThing(ctx context.Context, token, id string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method list_channels_by_thing for token %s and connections %s took %s to complete", token, id, time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.ListChannelsByThing(ctx, token, id)
 }
 
 func (lm *loggingMiddleware) DisconnectThing(ctx context.Context, token string, chIDs, thIDs []string) (b []byte, err error) {

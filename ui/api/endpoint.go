@@ -27,9 +27,9 @@ func createThingEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(createThingsReq)
 
-		// if err := req.validate(); err != nil {
-		// 	return nil, err
-		// }
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
 		th := sdk.Thing{
 			Key:      req.Key,
@@ -51,9 +51,9 @@ func viewThingEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(viewResourceReq)
 
-		// if err := req.validate(); err != nil {
-		// 	return nil, err
-		// }
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
 		res, err := svc.ViewThing(ctx, req.token, req.id)
 		if err != nil {
@@ -69,9 +69,9 @@ func listThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(listThingsReq)
 
-		// if err := req.validate(); err != nil {
-		// 	return nil, err
-		// }
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
 		res, err := svc.ListThings(ctx, req.token)
 		return uiRes{
@@ -84,9 +84,9 @@ func updateThingEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateThingReq)
 
-		// if err := req.validate(); err != nil {
-		// 	return nil, err
-		// }
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
 		uth := sdk.Thing{
 			ID:       req.id,
@@ -108,9 +108,9 @@ func removeThingEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(viewResourceReq)
 
-		// if err := req.validate(); err != nil {
-		// 	return nil, err
-		// }
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
 		res, err := svc.RemoveThing(ctx, req.token, req.id)
 		if err != nil {
@@ -128,9 +128,9 @@ func createChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(createChannelsReq)
 
-		// if err := req.validate(); err != nil {
-		// 	return nil, err
-		// }
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
 		ch := sdk.Channel{
 			ID:       req.ID,
@@ -152,9 +152,9 @@ func viewChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(viewResourceReq)
 
-		// if err := req.validate(); err != nil {
-		// 	return nil, err
-		// }
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
 		res, err := svc.ViewChannel(ctx, req.token, req.id)
 		if err != nil {
@@ -170,9 +170,9 @@ func updateChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateChannelReq)
 
-		// if err := req.validate(); err != nil {
-		// 	return nil, err
-		// }
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
 		uch := sdk.Channel{
 			ID:       req.id,
@@ -194,9 +194,9 @@ func listChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(listChannelsReq)
 
-		// if err := req.validate(); err != nil {
-		// 	return nil, err
-		// }
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
 		res, err := svc.ListChannels(ctx, req.token)
 		return uiRes{
@@ -209,9 +209,9 @@ func removeChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(viewResourceReq)
 
-		// if err := req.validate(); err != nil {
-		// 	return nil, err
-		// }
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
 		res, err := svc.RemoveChannel(ctx, req.token, req.id)
 		if err != nil {
@@ -243,15 +243,15 @@ func connectThingEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func listThingConnectionsEndpoint(svc ui.Service) endpoint.Endpoint {
+func listThingsByChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(viewResourceReq)
 
-		// if err := req.validate(); err != nil {
-		// 	return nil, err
-		// }
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
-		res, err := svc.ListThingConnections(ctx, req.token, req.id)
+		res, err := svc.ListThingByChannel(ctx, req.token, req.id)
 		if err != nil {
 			return nil, err
 		}
@@ -261,15 +261,33 @@ func listThingConnectionsEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func listChannelConnectionsEndpoint(svc ui.Service) endpoint.Endpoint {
+func listGroupMembersEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(viewResourceReq)
 
-		// if err := req.validate(); err != nil {
-		// 	return nil, err
-		// }
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
-		res, err := svc.ListChannelConnections(ctx, req.token, req.id)
+		res, err := svc.ListGroupMembers(ctx, req.token, req.id)
+		if err != nil {
+			return nil, err
+		}
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
+func listChannelsByThingEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(viewResourceReq)
+
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.ListChannelsByThing(ctx, req.token, req.id)
 		if err != nil {
 			return nil, err
 		}
@@ -319,9 +337,9 @@ func createGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(createGroupsReq)
 
-		// if err := req.validate(); err != nil {
-		// 	return nil, err
-		// }
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
 		gr := sdk.Group{
 			Name:        req.Name,
@@ -345,9 +363,9 @@ func listGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(listGroupsReq)
 
-		// if err := req.validate(); err != nil {
-		// 	return nil, err
-		// }
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
 		res, err := svc.ListGroups(ctx, req.token)
 		return uiRes{
@@ -360,9 +378,9 @@ func viewGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(viewResourceReq)
 
-		// if err := req.validate(); err != nil {
-		// 	return nil, err
-		// }
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
 		res, err := svc.ViewGroup(ctx, req.token, req.id)
 		if err != nil {
@@ -414,9 +432,9 @@ func updateGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateGroupReq)
 
-		// if err := req.validate(); err != nil {
-		// 	return nil, err
-		// }
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
 		ugr := sdk.Group{
 			ID:       req.id,
@@ -438,9 +456,9 @@ func removeGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(viewResourceReq)
 
-		// if err := req.validate(); err != nil {
-		// 	return nil, err
-		// }
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
 		res, err := svc.RemoveGroup(ctx, req.token, req.id)
 		if err != nil {
@@ -457,9 +475,9 @@ func removeGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 func sendMessageEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(sendMessageReq)
-		// if err := req.validate(); err != nil {
-		// 	return nil, err
-		// }
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 		res, err := svc.SendMessage(ctx, req.token)
 		if err != nil {
 			return nil, err
