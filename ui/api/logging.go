@@ -43,6 +43,32 @@ func (lm *loggingMiddleware) Index(ctx context.Context, token string) (b []byte,
 	return lm.svc.Index(ctx, token)
 }
 
+func (lm *loggingMiddleware) Login(ctx context.Context) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method login took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.Login(ctx)
+}
+
+func (lm *loggingMiddleware) Token(ctx context.Context, username, password string) (token string, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method token took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.Token(ctx, username, password)
+}
+
 func (lm *loggingMiddleware) CreateThings(ctx context.Context, token string, things ...sdk.Thing) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method create_things took %s to complete", time.Since(begin))

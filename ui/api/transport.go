@@ -30,7 +30,7 @@ const (
 	contentType = "text/html"
 	staticDir   = "ui/web/static"
 	// TODO -this is a temporary token and it will be removed once auth proxy is in place.
-	token       = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDM4NDI4MDYsImlhdCI6MTY0MzgwNjgwNiwiaXNzIjoibWFpbmZsdXguYXV0aCIsInN1YiI6InJvZG5leTJAdGVzdC5jb20iLCJpc3N1ZXJfaWQiOiI5MWE5MTg4NC0xYjM2LTQ1YTctOTU0Ni03M2RlMGRkNjYwNTMiLCJ0eXBlIjowfQ.t4QDoG7_46S5N82prx_4jduV7mfWQZ2KEBOegaReKvo"
+	// token       = ""
 	offsetKey   = "offset"
 	limitKey    = "limit"
 	nameKey     = "name"
@@ -47,6 +47,7 @@ const (
 var (
 	errMalformedData     = errors.New("malformed request data")
 	errMalformedSubtopic = errors.New("malformed subtopic")
+	errNoCookie          = errors.New("failed to read token cookie")
 	redirectURL          = ""
 	// channelPartRegExp    = regexp.MustCompile(`^/channels/([\w\-]+)/messages(/[^?]*)?(\?.*)?$`)
 )
@@ -248,6 +249,20 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 		opts...,
 	))
 
+	r.Get("/login", kithttp.NewServer(
+		kitot.TraceServer(tracer, "login")(loginEndpoint(svc)),
+		decodeLoginRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/login", kithttp.NewServer(
+		kitot.TraceServer(tracer, "token")(tokenEndpoint(svc)),
+		decodeTokenRequest,
+		encodeResponse,
+		opts...,
+	))
+
 	r.GetFunc("/version", mainflux.Health("ui"))
 	r.Handle("/metrics", promhttp.Handler())
 
@@ -259,8 +274,24 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 }
 
 func decodeIndexRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
 	req := indexReq{
-		token: getAuthorization(r),
+		token: token,
+	}
+
+	return req, nil
+}
+
+func decodeLoginRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	// token, err := getAuthorization(r)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	req := loginReq{
+		// token: token,
 	}
 
 	return req, nil
@@ -272,8 +303,13 @@ func decodeThingCreation(_ context.Context, r *http.Request) (interface{}, error
 		return nil, err
 	}
 
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+
 	req := createThingsReq{
-		token:    getAuthorization(r),
+		token:    token,
 		Name:     r.PostFormValue("name"),
 		Metadata: meta,
 	}
@@ -281,14 +317,27 @@ func decodeThingCreation(_ context.Context, r *http.Request) (interface{}, error
 	return req, nil
 }
 
-func getAuthorization(r *http.Request) string {
-	return token
-	// return r.Header.Get("Authorization")
+func getAuthorization(r *http.Request) (string, error) {
+	// return token
+	c, err := r.Cookie("token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			return "", errors.Wrap(errNoCookie, err)
+		}
+		//handle the error gracefully
+		return "", err
+	}
+
+	return c.Value, nil
 }
 
 func decodeView(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
 	req := viewResourceReq{
-		token: getAuthorization(r),
+		token: token,
 		id:    bone.GetValue(r, "id"),
 	}
 	return req, nil
@@ -300,8 +349,12 @@ func decodeThingUpdate(_ context.Context, r *http.Request) (interface{}, error) 
 		return nil, err
 	}
 
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
 	req := updateThingReq{
-		token:    getAuthorization(r),
+		token:    token,
 		id:       bone.GetValue(r, "id"),
 		Name:     r.PostFormValue("name"),
 		Metadata: meta,
@@ -310,8 +363,12 @@ func decodeThingUpdate(_ context.Context, r *http.Request) (interface{}, error) 
 }
 
 func decodeListThingsRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
 	req := listThingsReq{
-		token: getAuthorization(r),
+		token: token,
 	}
 
 	return req, nil
@@ -322,9 +379,13 @@ func decodeChannelsCreation(_ context.Context, r *http.Request) (interface{}, er
 	if err := json.Unmarshal([]byte(r.PostFormValue("metadata")), &meta); err != nil {
 		return nil, err
 	}
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
 
 	req := createChannelsReq{
-		token:    getAuthorization(r),
+		token:    token,
 		Name:     r.PostFormValue("name"),
 		Metadata: meta,
 	}
@@ -337,9 +398,12 @@ func decodeChannelUpdate(_ context.Context, r *http.Request) (interface{}, error
 	if err := json.Unmarshal([]byte(r.PostFormValue("metadata")), &meta); err != nil {
 		return nil, err
 	}
-
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
 	req := updateChannelReq{
-		token:    getAuthorization(r),
+		token:    token,
 		id:       bone.GetValue(r, "id"),
 		Name:     r.PostFormValue("name"),
 		Metadata: meta,
@@ -348,8 +412,12 @@ func decodeChannelUpdate(_ context.Context, r *http.Request) (interface{}, error
 }
 
 func decodeListChannelsRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
 	req := listChannelsReq{
-		token: getAuthorization(r),
+		token: token,
 	}
 
 	return req, nil
@@ -359,8 +427,12 @@ func decodeConnect(_ context.Context, r *http.Request) (interface{}, error) {
 	r.ParseForm()
 	chanID := r.Form.Get("chanID")
 	thingID := r.Form.Get("thingID")
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
 	req := connectThingReq{
-		token:   getAuthorization(r),
+		token:   token,
 		ChanID:  chanID,
 		ThingID: thingID,
 	}
@@ -371,8 +443,12 @@ func decodeDisconnectThing(_ context.Context, r *http.Request) (interface{}, err
 	r.ParseForm()
 	chanID := r.Form.Get("chanID")
 	thingID := r.Form.Get("thingID")
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
 	req := disconnectThingReq{
-		token:   getAuthorization(r),
+		token:   token,
 		ChanID:  chanID,
 		ThingID: thingID,
 	}
@@ -383,8 +459,12 @@ func decodeDisconnectChannel(_ context.Context, r *http.Request) (interface{}, e
 	r.ParseForm()
 	chanID := r.Form.Get("chanID")
 	thingID := r.Form.Get("thingID")
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
 	req := disconnectChannelReq{
-		token:   getAuthorization(r),
+		token:   token,
 		ThingID: thingID,
 		ChanID:  chanID,
 	}
@@ -393,9 +473,13 @@ func decodeDisconnectChannel(_ context.Context, r *http.Request) (interface{}, e
 
 func decodeUnassignRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	r.ParseForm()
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
 	req := unassignReq{
 		assignReq{
-			token:   getAuthorization(r),
+			token:   token,
 			groupID: r.PostFormValue("groupId"),
 			Type:    r.PostFormValue("Type"),
 			Member:  r.PostFormValue("memberId"),
@@ -409,8 +493,12 @@ func decodeGroupCreation(_ context.Context, r *http.Request) (interface{}, error
 	if err := json.Unmarshal([]byte(r.PostFormValue("metadata")), &meta); err != nil {
 		return nil, err
 	}
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
 	req := createGroupsReq{
-		token:       getAuthorization(r),
+		token:       token,
 		Name:        r.PostFormValue("name"),
 		Description: r.PostFormValue("description"),
 		ParentID:    r.PostFormValue("parentid"),
@@ -421,8 +509,12 @@ func decodeGroupCreation(_ context.Context, r *http.Request) (interface{}, error
 }
 
 func decodeListGroupsRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
 	req := listGroupsReq{
-		token: getAuthorization(r),
+		token: token,
 	}
 
 	return req, nil
@@ -430,9 +522,12 @@ func decodeListGroupsRequest(ctx context.Context, r *http.Request) (interface{},
 
 func decodeAssignRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	memberid := r.PostFormValue("memberId")
-
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
 	req := assignReq{
-		token:   getAuthorization(r),
+		token:   token,
 		groupID: bone.GetValue(r, "id"),
 		Type:    r.PostFormValue("Type"),
 		Member:  memberid,
@@ -446,9 +541,12 @@ func decodeGroupUpdate(_ context.Context, r *http.Request) (interface{}, error) 
 	if err := json.Unmarshal([]byte(r.PostFormValue("metadata")), &meta); err != nil {
 		return nil, err
 	}
-
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
 	req := updateGroupReq{
-		token:    getAuthorization(r),
+		token:    token,
 		id:       bone.GetValue(r, "id"),
 		Name:     r.PostFormValue("name"),
 		Metadata: meta,
@@ -469,18 +567,39 @@ func decodePublishRequest(ctx context.Context, r *http.Request) (interface{}, er
 		Created:  time.Now().UnixNano(),
 	}
 
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+
 	req := publishReq{
 		msg:      msg,
 		thingKey: thingKey,
-		token:    getAuthorization(r),
+		token:    token,
+	}
+
+	return req, nil
+}
+
+func decodeTokenRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	username := r.PostFormValue("username")
+	password := r.PostFormValue("password")
+
+	req := tokenReq{
+		username: username,
+		password: password,
 	}
 
 	return req, nil
 }
 
 func decodeSendMessageRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
 	req := sendMessageReq{
-		token: getAuthorization(r),
+		token: token,
 	}
 
 	return req, nil
@@ -498,7 +617,7 @@ func decodePayload(body io.ReadCloser) ([]byte, error) {
 
 func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
 	w.Header().Set("Content-Type", contentType)
-	ar, ok := response.(uiRes)
+	ar, ok := response.(uiRes) //response.(uiRes) //response.(mainflux.Response)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
 		return nil
@@ -517,10 +636,14 @@ func encodeResponse(_ context.Context, w http.ResponseWriter, response interface
 }
 
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
-	switch err {
-	case errMalformedData, errMalformedSubtopic:
+	switch true {
+	case errors.Contains(err, errNoCookie):
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("cao"))
+	case errors.Contains(err, errMalformedData),
+		errors.Contains(err, errMalformedSubtopic):
 		w.WriteHeader(http.StatusBadRequest)
-	case things.ErrUnauthorizedAccess:
+	case errors.Contains(err, things.ErrUnauthorizedAccess):
 		w.WriteHeader(http.StatusForbidden)
 	default:
 		if e, ok := status.FromError(err); ok {

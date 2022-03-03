@@ -80,9 +80,13 @@ func main() {
 
 	msgContentType := string(sdk.CTJSONSenML)
 	sdkConf := sdk.Config{
-		ThingsURL:       "http://localhost:8182",
 		AuthURL:         "http://localhost:8189",
+		BootstrapURL:    "",
+		CertsURL:        "",
 		HTTPAdapterURL:  "http://localhost:8185",
+		ReaderURL:       "",
+		ThingsURL:       "http://localhost:8182",
+		UsersURL:        "http://localhost:8180",
 		MsgContentType:  sdk.ContentType(msgContentType),
 		TLSVerification: false,
 	}

@@ -5,6 +5,7 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/ultravioletrs/mainflux-ui/ui"
@@ -499,5 +500,32 @@ func publishMessageEndpoint(svc ui.Service) endpoint.Endpoint {
 		return uiRes{
 			html: res,
 		}, err
+	}
+}
+
+func loginEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		// req := request.(loginReq)
+		res, err := svc.Login(ctx)
+		return uiRes{
+			code: 0,
+			html: res,
+		}, err
+	}
+}
+
+func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(tokenReq)
+		token, err := svc.Token(ctx, req.username, req.password)
+		fmt.Println(token)
+		if err != nil {
+			return nil, err
+		}
+		tkr := uiRes{
+			headers: map[string]string{"Set-Cookie": fmt.Sprintf("token=%s;", token)},
+		}
+
+		return tkr, nil
 	}
 }
