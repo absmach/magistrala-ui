@@ -174,7 +174,6 @@ type listGroupsReq struct {
 }
 
 type loginReq struct {
-	// token string
 }
 
 func (req listGroupsReq) validate() error {

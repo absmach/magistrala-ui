@@ -29,8 +29,6 @@ import (
 const (
 	contentType = "text/html"
 	staticDir   = "ui/web/static"
-	// TODO -this is a temporary token and it will be removed once auth proxy is in place.
-	// token       = ""
 	offsetKey   = "offset"
 	limitKey    = "limit"
 	nameKey     = "name"
@@ -622,7 +620,7 @@ func decodePayload(body io.ReadCloser) ([]byte, error) {
 
 func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
 	w.Header().Set("Content-Type", contentType)
-	ar, ok := response.(uiRes) //response.(uiRes) //response.(mainflux.Response)
+	ar, ok := response.(uiRes)
 	if !ok {
 		w.WriteHeader(http.StatusInternalServerError)
 		return nil
