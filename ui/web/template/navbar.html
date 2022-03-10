@@ -37,6 +37,13 @@
             Messages
           </a>
         </li>
+        <li class="nav-item">
+          {{$active = "logout"}}
+          <a class="nav-link" {{if eq .NavbarActive $active}} class="active" style="background-color:gray"{{end}} href="/logout">
+            <i class="fas fa-exchange-alt"></i>
+            Logout
+          </a>
+        </li>        
       </ul>
     </div>
 </nav>

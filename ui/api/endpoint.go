@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/mainflux/mainflux/pkg/errors"
 	"github.com/ultravioletrs/mainflux-ui/ui"
 
 	"github.com/go-kit/kit/endpoint"
@@ -505,7 +506,6 @@ func publishMessageEndpoint(svc ui.Service) endpoint.Endpoint {
 
 func loginEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		// req := request.(loginReq)
 		res, err := svc.Login(ctx)
 		return uiRes{
 			code: 0,
@@ -518,14 +518,25 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(tokenReq)
 		token, err := svc.Token(ctx, req.username, req.password)
-		fmt.Println(token)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(errUnauthorized, err)
 		}
 		tkr := uiRes{
-			headers: map[string]string{"Set-Cookie": fmt.Sprintf("token=%s;", token)},
+			code:    http.StatusFound,
+			headers: map[string]string{"Set-Cookie": fmt.Sprintf("token=%s;", token), "Location": "/"},
 		}
 
 		return tkr, nil
+	}
+}
+
+func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		res, err := svc.Logout(ctx)
+		return uiRes{
+			code:    http.StatusFound,
+			html:    res,
+			headers: map[string]string{"Set-Cookie": "token=;Max-Age=0;", "Location": "/login"},
+		}, err
 	}
 }

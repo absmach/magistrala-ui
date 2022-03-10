@@ -48,6 +48,7 @@ var (
 	errMalformedData     = errors.New("malformed request data")
 	errMalformedSubtopic = errors.New("malformed subtopic")
 	errNoCookie          = errors.New("failed to read token cookie")
+	errUnauthorized      = errors.New("failed to login")
 	redirectURL          = ""
 	// channelPartRegExp    = regexp.MustCompile(`^/channels/([\w\-]+)/messages(/[^?]*)?(\?.*)?$`)
 )
@@ -263,6 +264,13 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 		opts...,
 	))
 
+	r.Get("/logout", kithttp.NewServer(
+		kitot.TraceServer(tracer, "logout")(logoutEndpoint(svc)),
+		decodeLogoutRequest,
+		encodeResponse,
+		opts...,
+	))
+
 	r.GetFunc("/version", mainflux.Health("ui"))
 	r.Handle("/metrics", promhttp.Handler())
 
@@ -286,13 +294,7 @@ func decodeIndexRequest(ctx context.Context, r *http.Request) (interface{}, erro
 }
 
 func decodeLoginRequest(ctx context.Context, r *http.Request) (interface{}, error) {
-	// token, err := getAuthorization(r)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	req := loginReq{
-		// token: token,
-	}
+	req := loginReq{}
 
 	return req, nil
 }
@@ -318,13 +320,11 @@ func decodeThingCreation(_ context.Context, r *http.Request) (interface{}, error
 }
 
 func getAuthorization(r *http.Request) (string, error) {
-	// return token
 	c, err := r.Cookie("token")
 	if err != nil {
 		if err == http.ErrNoCookie {
 			return "", errors.Wrap(errNoCookie, err)
 		}
-		//handle the error gracefully
 		return "", err
 	}
 
@@ -593,6 +593,11 @@ func decodeTokenRequest(ctx context.Context, r *http.Request) (interface{}, erro
 	return req, nil
 }
 
+func decodeLogoutRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	req := sendMessageReq{}
+	return req, nil
+}
+
 func decodeSendMessageRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	token, err := getAuthorization(r)
 	if err != nil {
@@ -637,9 +642,10 @@ func encodeResponse(_ context.Context, w http.ResponseWriter, response interface
 
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	switch true {
-	case errors.Contains(err, errNoCookie):
-		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("cao"))
+	case errors.Contains(err, errNoCookie),
+		errors.Contains(err, errUnauthorized):
+		w.Header().Set("Location", "/login")
+		w.WriteHeader(http.StatusFound)
 	case errors.Contains(err, errMalformedData),
 		errors.Contains(err, errMalformedSubtopic):
 		w.WriteHeader(http.StatusBadRequest)

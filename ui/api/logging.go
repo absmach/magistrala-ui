@@ -56,6 +56,19 @@ func (lm *loggingMiddleware) Login(ctx context.Context) (b []byte, err error) {
 	return lm.svc.Login(ctx)
 }
 
+func (lm *loggingMiddleware) Logout(ctx context.Context) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method logout took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.Logout(ctx)
+}
+
 func (lm *loggingMiddleware) Token(ctx context.Context, username, password string) (token string, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method token took %s to complete", time.Since(begin))
