@@ -6,6 +6,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -325,8 +326,8 @@ func getAuthorization(r *http.Request) (string, error) {
 		}
 		return "", err
 	}
-
-	return c.Value, nil
+	token := fmt.Sprintf("Bearer %s", c.Value)
+	return token, nil
 }
 
 func decodeView(_ context.Context, r *http.Request) (interface{}, error) {
