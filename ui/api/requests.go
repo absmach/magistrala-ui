@@ -173,6 +173,9 @@ type listGroupsReq struct {
 	token string
 }
 
+type loginReq struct {
+}
+
 func (req listGroupsReq) validate() error {
 	if req.token == "" {
 		return things.ErrUnauthorizedAccess
@@ -312,6 +315,11 @@ type publishReq struct {
 	msg      messaging.Message
 	thingKey string
 	token    string
+}
+
+type tokenReq struct {
+	username string
+	password string
 }
 
 func (req publishReq) validate() error {

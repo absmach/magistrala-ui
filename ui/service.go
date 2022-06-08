@@ -38,6 +38,9 @@ var (
 // Service specifies coap service API.
 type Service interface {
 	Index(ctx context.Context, token string) ([]byte, error)
+	Login(ctx context.Context) ([]byte, error)
+	Logout(ctx context.Context) ([]byte, error)
+	Token(ctx context.Context, username, password string) (string, error)
 	CreateThings(ctx context.Context, token string, things ...sdk.Thing) ([]byte, error)
 	ViewThing(ctx context.Context, token, id string) ([]byte, error)
 	UpdateThing(ctx context.Context, token, id string, thing sdk.Thing) ([]byte, error)
@@ -548,4 +551,36 @@ func (gs *uiService) SendMessage(ctx context.Context, token string) ([]byte, err
 		println(err.Error())
 	}
 	return btpl.Bytes(), nil
+}
+
+func (gs *uiService) Login(ctx context.Context) ([]byte, error) {
+	tpl, err := parseTemplate("login", "login.html")
+	if err != nil {
+		return []byte{}, err
+	}
+
+	data := struct {
+		NavbarActive string
+	}{
+		"dashboard",
+	}
+
+	var btpl bytes.Buffer
+	if err := tpl.ExecuteTemplate(&btpl, "login", data); err != nil {
+		println(err.Error())
+	}
+
+	return btpl.Bytes(), nil
+}
+
+func (gs *uiService) Logout(ctx context.Context) ([]byte, error) {
+	return nil, nil
+}
+
+func (gs *uiService) Token(ctx context.Context, username, password string) (string, error) {
+	token, err := gs.sdk.CreateToken(sdk.User{Email: username, Password: password})
+	if err != nil {
+		return token, err
+	}
+	return token, nil
 }

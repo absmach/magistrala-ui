@@ -43,6 +43,33 @@ func (mm *metricsMiddleware) Index(ctx context.Context, token string) (b []byte,
 	return mm.svc.Index(ctx, token)
 }
 
+func (mm *metricsMiddleware) Login(ctx context.Context) (b []byte, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "login").Add(1)
+		mm.latency.With("method", "login").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.Login(ctx)
+}
+
+func (mm *metricsMiddleware) Logout(ctx context.Context) (b []byte, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "logout").Add(1)
+		mm.latency.With("method", "logout").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.Logout(ctx)
+}
+
+func (mm *metricsMiddleware) Token(ctx context.Context, username, password string) (string, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "token").Add(1)
+		mm.latency.With("method", "token").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.Token(ctx, username, password)
+}
+
 func (mm *metricsMiddleware) CreateThings(ctx context.Context, token string, things ...sdk.Thing) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "create_things").Add(1)

@@ -1,0 +1,37 @@
+{{define "login"}}
+<!doctype html>
+<html lang="en">
+  {{template "header"}}
+
+  <body>
+    <main role="main">
+      <div class="container-fluid">
+        <div class="row">
+
+          <!-- Partial goes here -->
+          <div class="col-md-4">
+            <form method="post">
+              <div class="mb-3">
+                <label for="username" class="form-label">Username (e-mail)</label>
+                <input type="text" class="form-control" name="username" id="username" aria-describedby="usernameHelp">
+                <div id="usernameHelp" class="form-text">Enter e-mail address.</div>
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" name="password" id="password" aria-describedby="passwordHelp">
+                <div id="passwordHelp" class="form-text">Enter password.</div>
+              </div>
+              <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+          </div>
+          <!-- End of partial-->
+
+        </div>
+      </div> <!-- /container -->
+    </main>
+
+    {{template "footer"}}
+
+  </body>
+</html>
+{{end}}

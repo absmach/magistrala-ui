@@ -4,6 +4,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/mainflux/mainflux"
@@ -11,12 +12,36 @@ import (
 
 var (
 	_ mainflux.Response = (*uiRes)(nil)
+	_ mainflux.Response = (*tokenRes)(nil)
 )
 
 type uiRes struct {
 	code    int
 	headers map[string]string
 	html    []byte
+}
+
+type tokenRes struct {
+	token   string
+	created bool
+}
+
+func (res tokenRes) Code() int {
+	return http.StatusCreated
+}
+
+func (res tokenRes) Headers() map[string]string {
+	if res.created {
+		return map[string]string{
+			"Set-Cookie": fmt.Sprintf("token%s;", res.token),
+		}
+	}
+
+	return map[string]string{}
+}
+
+func (res tokenRes) Empty() bool {
+	return res.token == ""
 }
 
 func (res uiRes) Code() int {
