@@ -7,8 +7,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -30,16 +28,6 @@ import (
 const (
 	contentType = "text/html"
 	staticDir   = "ui/web/static"
-	offsetKey   = "offset"
-	limitKey    = "limit"
-	nameKey     = "name"
-	orderKey    = "order"
-	dirKey      = "dir"
-	metadataKey = "metadata"
-	disconnKey  = "disconnected"
-	sharedKey   = "shared"
-	defOffset   = 0
-	defLimit    = 10
 	protocol    = "http"
 )
 
@@ -607,16 +595,6 @@ func decodeSendMessageRequest(ctx context.Context, r *http.Request) (interface{}
 	}
 
 	return req, nil
-}
-
-func decodePayload(body io.ReadCloser) ([]byte, error) {
-	payload, err := ioutil.ReadAll(body)
-	if err != nil {
-		return nil, errMalformedData
-	}
-	defer body.Close()
-
-	return payload, nil
 }
 
 func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {

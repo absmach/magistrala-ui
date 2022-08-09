@@ -11,14 +11,7 @@ import (
 	"github.com/mainflux/mainflux/things"
 )
 
-const (
-	maxLimitSize = 100
-	maxNameSize  = 1024
-	nameOrder    = "name"
-	idOrder      = "id"
-	ascDir       = "asc"
-	descDir      = "desc"
-)
+const maxNameSize = 1024
 
 type indexReq struct {
 	token string
@@ -211,24 +204,6 @@ type connectThingReq struct {
 }
 
 func (req connectThingReq) validate() error {
-	if req.token == "" {
-		return things.ErrUnauthorizedAccess
-	}
-
-	if req.ChanID == "" || req.ThingID == "" {
-		return things.ErrMalformedEntity
-	}
-
-	return nil
-}
-
-type connectChannelReq struct {
-	token   string
-	ThingID string `json:"thing_id,omitempty"`
-	ChanID  string `json:"chan_id,omitempty"`
-}
-
-func (req connectChannelReq) validate() error {
 	if req.token == "" {
 		return things.ErrUnauthorizedAccess
 	}

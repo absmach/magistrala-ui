@@ -493,6 +493,9 @@ func sendMessageEndpoint(svc ui.Service) endpoint.Endpoint {
 func publishMessageEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(publishReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 		res, err := svc.Publish(ctx, req.thingKey, req.msg)
 		if err != nil {
 			return nil, err
