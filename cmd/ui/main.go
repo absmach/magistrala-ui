@@ -37,7 +37,6 @@ const (
 	defRedirectURL       = "http://localhost:9090/"
 	defJaegerURL         = ""
 	defThingsAuthURL     = "localhost:8181"
-	defAuthURL           = "localhost:8189"
 	defThingsAuthTimeout = "1s"
 
 	envLogLevel          = "MF_GUI_LOG_LEVEL"
@@ -122,7 +121,7 @@ func main() {
 	}()
 
 	go func() {
-		c := make(chan os.Signal)
+		c := make(chan os.Signal, 2)
 		signal.Notify(c, syscall.SIGINT)
 		errs <- fmt.Errorf("%s", <-c)
 	}()
