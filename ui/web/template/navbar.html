@@ -26,21 +26,28 @@
         <li class="nav-item active">
           {{$active = "groups"}}
           <a class="nav-link" {{if eq .NavbarActive $active}} style="color:black"{{end}} href="/groups">
-            <i class="fas fa-exchange-alt"></i>
+            <i class="fas fa-layer-group"></i>
             Groups
           </a>
         </li>
         <li class="nav-item">
           {{$active = "messages"}}
           <a class="nav-link" {{if eq .NavbarActive $active}} class="active" style="background-color:gray"{{end}} href="/messages">
-            <i class="fas fa-exchange-alt"></i>
+            <i class="fas fa-envelope-open-text"></i>
             Messages
+          </a>
+        </li>
+        <li class="nav-item">
+          {{$active = "users"}}
+          <a class="nav-link" {{if eq .NavbarActive $active}} class="active" style="background-color:gray"{{end}} href="/users">
+            <i class="fas fa-users"></i>
+            users
           </a>
         </li>
         <li class="nav-item">
           {{$active = "logout"}}
           <a class="nav-link" {{if eq .NavbarActive $active}} class="active" style="background-color:gray"{{end}} href="/logout">
-            <i class="fas fa-exchange-alt"></i>
+            <i class="fas fa-sign-out-alt"></i>
             Logout
           </a>
         </li>        

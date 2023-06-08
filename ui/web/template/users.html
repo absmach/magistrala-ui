@@ -1,0 +1,112 @@
+{{define "users"}}
+<!doctype html>
+<html lang="en">
+  {{template "header"}}
+
+  <body>
+    <main role="main">
+      <div class="container-fluid">
+        <div class="row">
+
+          {{template "navbar" .}}
+
+          <!-- Partial goes here -->
+          <div class="col-md-4">
+
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+              Add
+            </button>
+
+            <!-- Modal -->
+            <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="addUserModalLabel">Add User</h5>
+                  </div>
+                  <div class="modal-body">
+                    <form method="post">
+                      <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="text" class="form-control" name="email" id="email" aria-describedby="emailHelp">
+                        <div id="emailHelp" class="form-text">Enter user email.</div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="text" class="form-control" name="password" id="password" aria-describedby="passwordHelp">
+                        <div id="passwordHelp" class="form-text">Enter user password.</div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="groups" class="form-label">Group</label>
+                        <input type="text" class="form-control" name="groups" id="groups" aria-describedby="groupHelp" value="[]">
+                        <div id="groupHelp" class="form-text">Enter user group.</div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="meatadata" class="form-label">Metadata</label>
+                        <input type="text" class="form-control" name= "metadata" id="metadata" value="{}">
+                        <div id="metadataHelp" class="form-text">Enter user metadata in JSON format.</div>
+                      </div>
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUsersModal">
+              Add Users
+            </button>
+
+            <!-- Modal -->
+            <div class="modal fade" id="addUsersModal" tabindex="-1" role="dialog" aria-labelledby="addUsersModalLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="addUsersModalLabel">Add Channels</h5>
+                  </div>
+                  <div class="modal-body">
+                    <form method="post" enctype="multipart/form-data" action="/users/bulk">
+                      <div class="form-group">
+                        <label for="Usersfile">Add csv file containing users names and passwords with metadata. The metadata field can be empty</label>
+                        <input type="file" class="form-control-file" id="usersFile" name="usersFile">
+                        <button type="submit" value="upload" class="btn btn-primary">Submit</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">EMAIL</th>
+                  <th scope="col">ID</th>
+                  <th scope="col">GROUPS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{range $i, $u := .Users}}
+                  <tr>
+                    <th scope="row">{{$i}}</th>
+                    <td>{{$u.Email}}</td>
+                    <td><a href={{printf "/users/%s" $u.ID}}>{{$u.ID}}</a></td>
+                    <td>{{$u.Groups}}</td>
+                  </tr>
+                {{end}}
+              </tbody>
+            </table>
+          </div>
+          <!-- End of partial-->
+
+        </div>
+      </div> <!-- /container -->
+    </main>
+
+    {{template "footer"}}
+
+  </body>
+</html>
+{{end}}

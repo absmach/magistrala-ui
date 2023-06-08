@@ -5,11 +5,16 @@ package sdk
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/mainflux/mainflux"
+	"github.com/mainflux/mainflux/internal/apiutil"
 )
 
 const (
@@ -24,9 +29,6 @@ const (
 )
 
 var (
-	// ErrUnauthorized indicates that entity creation failed.
-	ErrUnauthorized = errors.New("unauthorized, missing credentials")
-
 	// ErrFailedCreation indicates that entity creation failed.
 	ErrFailedCreation = errors.New("failed to create entity")
 
@@ -87,6 +89,16 @@ type User struct {
 	Password string                 `json:"password,omitempty"`
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
 }
+type PageMetadata struct {
+	Total    uint64                 `json:"total"`
+	Offset   uint64                 `json:"offset"`
+	Limit    uint64                 `json:"limit"`
+	Level    uint64                 `json:"level,omitempty"`
+	Email    string                 `json:"email,omitempty"`
+	Name     string                 `json:"name,omitempty"`
+	Type     string                 `json:"type,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
+}
 
 // Group represents mainflux users group.
 type Group struct {
@@ -112,12 +124,6 @@ type Channel struct {
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
 }
 
-// Member represents group member.
-type Member struct {
-	ID   string
-	Type string
-}
-
 type Key struct {
 	ID        string
 	Type      uint32
@@ -132,8 +138,11 @@ type SDK interface {
 	// CreateUser registers mainflux user.
 	CreateUser(token string, user User) (string, error)
 
-	// User returns user object.
-	User(token string) (User, error)
+	// User returns user object by id.
+	User(token, id string) (User, error)
+
+	// Users returns list of users.
+	Users(token string, pm PageMetadata) (UsersPage, error)
 
 	// CreateToken receives credentials and returns user token.
 	CreateToken(user User) (string, error)
@@ -151,7 +160,7 @@ type SDK interface {
 	CreateThings(things []Thing, token string) ([]Thing, error)
 
 	// Things returns page of things.
-	Things(token string, offset, limit uint64, name string) (ThingsPage, error)
+	Things(token string, pm PageMetadata) (ThingsPage, error)
 
 	// ThingsByChannel returns page of things that are connected or not connected
 	// to specified channel.
@@ -172,8 +181,8 @@ type SDK interface {
 	// DeleteGroup deletes users group.
 	DeleteGroup(id, token string) error
 
-	// Groups returns page of users groups.
-	Groups(offset, limit uint64, token string) (GroupsPage, error)
+	// Groups returns page of groups.
+	Groups(meta PageMetadata, token string) (GroupsPage, error)
 
 	// Parents returns page of users groups.
 	Parents(id string, offset, limit uint64, token string) (GroupsPage, error)
@@ -212,7 +221,7 @@ type SDK interface {
 	CreateChannels(channels []Channel, token string) ([]Channel, error)
 
 	// Channels returns page of channels.
-	Channels(token string, offset, limit uint64, name string) (ChannelsPage, error)
+	Channels(token string, pm PageMetadata) (ChannelsPage, error)
 
 	// ChannelsByThing returns page of channels that are connected or not connected
 	// to specified thing.
@@ -270,7 +279,7 @@ type SDK interface {
 	RevokeCert(thingID, certID, token string) error
 
 	// Issue issues a new key, returning its token value alongside.
-	Issue(token string, key Key) (issueKeyRes, error)
+	Issue(token string, duration time.Duration) (KeyRes, error)
 
 	// Revoke removes the key with the provided ID that is issued by the user identified by the provided key.
 	Revoke(token, id string) error
@@ -330,7 +339,7 @@ func NewSDK(conf Config) SDK {
 
 func (sdk mfSDK) sendRequest(req *http.Request, token, contentType string) (*http.Response, error) {
 	if token != "" {
-		req.Header.Set("Authorization", token)
+		req.Header.Set("Authorization", apiutil.BearerPrefix+token)
 	}
 
 	if contentType != "" {
@@ -338,4 +347,51 @@ func (sdk mfSDK) sendRequest(req *http.Request, token, contentType string) (*htt
 	}
 
 	return sdk.client.Do(req)
+}
+
+func (sdk mfSDK) sendThingRequest(req *http.Request, key, contentType string) (*http.Response, error) {
+	if key != "" {
+		req.Header.Set("Authorization", apiutil.ThingPrefix+key)
+	}
+
+	if contentType != "" {
+		req.Header.Add("Content-Type", contentType)
+	}
+
+	return sdk.client.Do(req)
+}
+
+func (sdk mfSDK) withQueryParams(baseURL, endpoint string, pm PageMetadata) (string, error) {
+	q, err := pm.query()
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s/%s?%s", baseURL, endpoint, q), nil
+}
+
+func (pm PageMetadata) query() (string, error) {
+	q := url.Values{}
+	q.Add("total", strconv.FormatUint(pm.Total, 10))
+	q.Add("offset", strconv.FormatUint(pm.Offset, 10))
+	q.Add("limit", strconv.FormatUint(pm.Limit, 10))
+	if pm.Level != 0 {
+		q.Add("level", strconv.FormatUint(pm.Level, 10))
+	}
+	if pm.Email != "" {
+		q.Add("email", pm.Email)
+	}
+	if pm.Name != "" {
+		q.Add("name", pm.Name)
+	}
+	if pm.Type != "" {
+		q.Add("type", pm.Type)
+	}
+	if pm.Metadata != nil {
+		md, err := json.Marshal(pm.Metadata)
+		if err != nil {
+			return "", err
+		}
+		q.Add("metadata", string(md))
+	}
+	return q.Encode(), nil
 }

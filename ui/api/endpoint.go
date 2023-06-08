@@ -27,7 +27,7 @@ func indexEndpoint(svc ui.Service) endpoint.Endpoint {
 
 func createThingEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(createThingsReq)
+		req := request.(createThingReq)
 
 		if err := req.validate(); err != nil {
 			return nil, err
@@ -43,6 +43,30 @@ func createThingEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
+func createThingsEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(createThingsReq)
+
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		things := []sdk.Thing{}
+		for i := range req.Names {
+			th := sdk.Thing{
+				Name: req.Names[i],
+			}
+			things = append(things, th)
+		}
+		res, err := svc.CreateThings(ctx, req.token, things...)
+		if err != nil {
+			return nil, err
+		}
 		return uiRes{
 			html: res,
 		}, err
@@ -128,7 +152,7 @@ func removeThingEndpoint(svc ui.Service) endpoint.Endpoint {
 
 func createChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(createChannelsReq)
+		req := request.(createChannelReq)
 
 		if err := req.validate(); err != nil {
 			return nil, err
@@ -144,6 +168,30 @@ func createChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
+func createChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(createChannelsReq)
+
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		channels := []sdk.Channel{}
+		for i := range req.Names {
+			ch := sdk.Channel{
+				Name: req.Names[i],
+			}
+			channels = append(channels, ch)
+		}
+		res, err := svc.CreateChannels(ctx, req.token, channels...)
+		if err != nil {
+			return nil, err
+		}
 		return uiRes{
 			html: res,
 		}, err
@@ -337,20 +385,20 @@ func disconnectChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 
 func createGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(createGroupsReq)
+		cgr := request.(createGroupsReq)
 
-		if err := req.validate(); err != nil {
+		if err := cgr.validate(); err != nil {
 			return nil, err
 		}
 
 		gr := sdk.Group{
-			Name:        req.Name,
-			Description: req.Description,
-			ParentID:    req.ParentID,
-			Metadata:    req.Metadata,
+			Name:        cgr.Name,
+			Description: cgr.Description,
+			ParentID:    cgr.ParentID,
+			Metadata:    cgr.Metadata,
 		}
 
-		res, err := svc.CreateGroups(ctx, req.token, gr)
+		res, err := svc.CreateGroups(ctx, cgr.token, gr)
 		if err != nil {
 			return nil, err
 		}
@@ -401,7 +449,6 @@ func assignEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-
 		res, err := svc.Assign(ctx, req.token, req.groupID, req.Type, req.Member)
 		if err != nil {
 			return nil, err
@@ -540,6 +587,134 @@ func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
 			code:    http.StatusFound,
 			html:    res,
 			headers: map[string]string{"Set-Cookie": "token=;Max-Age=0;", "Location": "/login"},
+		}, err
+	}
+}
+
+func createUserEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(createUserReq)
+
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		user := sdk.User{
+			Email:    req.Email,
+			Groups:   req.Groups,
+			Password: req.Password,
+			Metadata: req.Metadata,
+		}
+		res, err := svc.CreateUser(ctx, req.token, user)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
+func createUsersEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(createUsersReq)
+
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		users := []sdk.User{}
+		for i := range req.Emails {
+			user := sdk.User{
+				Email:    req.Emails[i],
+				Password: req.Passwords[i],
+			}
+			users = append(users, user)
+		}
+		res, err := svc.CreateUser(ctx, req.token, users...)
+		if err != nil {
+			return nil, err
+		}
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
+func viewUserEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(viewResourceReq)
+
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.ViewUser(ctx, req.token, req.id)
+		if err != nil {
+			return nil, err
+		}
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
+func listUsersEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(listUsersReq)
+
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		res, err := svc.ListUsers(ctx, req.token)
+		if err != nil {
+			return nil, err
+		}
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
+func updateUserEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(updateUserReq)
+
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		user := sdk.User{
+			ID:       req.id,
+			Email:    req.Email,
+			Groups:   req.Group,
+			Metadata: req.Metadata,
+		}
+
+		res, err := svc.UpdateUser(ctx, req.token, req.id, user)
+		if err != nil {
+			return nil, err
+		}
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
+func updateUserPasswordEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(updateUserPasswordReq)
+
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.UpdateUserPassword(ctx, req.token, req.id, req.OldPass, req.NewPass)
+		if err != nil {
+			return nil, err
+		}
+		return uiRes{
+			html: res,
 		}, err
 	}
 }

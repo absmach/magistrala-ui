@@ -36,8 +36,17 @@ const (
 	defPort              = "9090"
 	defRedirectURL       = "http://localhost:9090/"
 	defJaegerURL         = ""
-	defThingsAuthURL     = "localhost:8181"
+	defAuthGRPCPort      = "8181"
 	defThingsAuthTimeout = "1s"
+	defAuthPort          = "8189"
+	defBootstrapPort     = ""
+	defCertsPort         = ""
+	defHTTPAdapterPort   = "8185"
+	defReaderPort        = ""
+	defThingsPort        = "8182"
+	defUsersPort         = "8180"
+	defTLSVerification   = "false"
+	defBaseURL           = "http://localhost"
 
 	envLogLevel          = "MF_GUI_LOG_LEVEL"
 	envClientTLS         = "MF_GUI_CLIENT_TLS"
@@ -45,19 +54,30 @@ const (
 	envPort              = "MF_GUI_PORT"
 	envRedirectURL       = "MF_GUI_REDIRECT_URL"
 	envJaegerURL         = "MF_JAEGER_URL"
-	envThingsAuthURL     = "MF_THINGS_AUTH_GRPC_URL"
+	envAuthGRPCPort      = "MF_AUTH_GRPC_PORT"
 	envThingsAuthTimeout = "MF_THINGS_AUTH_GRPC_TIMEOUT"
+	envAuthPort          = "MF_AUTH_HTTP_PORT"
+	envBootstrapPort     = "MF_BOOTSTRAP_PORT"
+	envCertsPort         = "MF_CERTS_HTTP_PORT"
+	envHTTPAdapterPort   = "MF_HTTP_ADAPTER_PORT"
+	envReaderPort        = "MF_READER_PORT"
+	envThingsPort        = "MF_THINGS_HTTP_PORT"
+	envUsersPort         = "MF_USERS_HTTP_PORT"
+	envTLSVerification   = "MF_VERIFICATION_TLS"
+	envBaseURL           = "MF_SDK_BASE_URL"
 )
 
 type config struct {
+	baseURL           string
 	logLevel          string
 	port              string
 	redirectURL       string
 	clientTLS         bool
 	caCerts           string
 	jaegerURL         string
-	thingsAuthURL     string
+	authGRPCURL       string
 	thingsAuthTimeout time.Duration
+	sdkConfig         sdk.Config
 }
 
 func main() {
@@ -77,19 +97,7 @@ func main() {
 	thingsTracer, thingsCloser := initJaeger("things", cfg.jaegerURL, logger)
 	defer thingsCloser.Close()
 
-	msgContentType := string(sdk.CTJSONSenML)
-	sdkConf := sdk.Config{
-		AuthURL:         "http://localhost:8189",
-		BootstrapURL:    "",
-		CertsURL:        "",
-		HTTPAdapterURL:  "http://localhost:8185",
-		ReaderURL:       "",
-		ThingsURL:       "http://localhost:8182",
-		UsersURL:        "http://localhost:8180",
-		MsgContentType:  sdk.ContentType(msgContentType),
-		TLSVerification: false,
-	}
-	sdk := sdk.NewSDK(sdkConf)
+	sdk := sdk.NewSDK(cfg.sdkConfig)
 
 	tc := thingsapi.NewClient(conn, thingsTracer, cfg.thingsAuthTimeout)
 
@@ -135,21 +143,36 @@ func loadConfig() config {
 	if err != nil {
 		log.Fatalf("Invalid value passed for %s\n", envClientTLS)
 	}
-
+	mfTLS, err := strconv.ParseBool(mainflux.Env(envTLSVerification, defTLSVerification))
+	if err != nil {
+		log.Fatalf("Invalid value passed for %s\n", envTLSVerification)
+	}
 	authTimeout, err := time.ParseDuration(mainflux.Env(envThingsAuthTimeout, defThingsAuthTimeout))
 	if err != nil {
 		log.Fatalf("Invalid %s value: %s", envThingsAuthTimeout, err.Error())
 	}
-
+	baseURL := mainflux.Env(envBaseURL, defBaseURL)
 	return config{
+		baseURL:           baseURL,
 		logLevel:          mainflux.Env(envLogLevel, defLogLevel),
 		port:              mainflux.Env(envPort, defPort),
 		redirectURL:       mainflux.Env(envRedirectURL, defRedirectURL),
 		clientTLS:         tls,
 		caCerts:           mainflux.Env(envCACerts, defCACerts),
 		jaegerURL:         mainflux.Env(envJaegerURL, defJaegerURL),
-		thingsAuthURL:     mainflux.Env(envThingsAuthURL, defThingsAuthURL),
+		authGRPCURL:       fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envAuthGRPCPort, defAuthGRPCPort)),
 		thingsAuthTimeout: authTimeout,
+		sdkConfig: sdk.Config{
+			AuthURL:         fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envAuthPort, defAuthPort)),
+			BootstrapURL:    fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envBootstrapPort, defBootstrapPort)),
+			CertsURL:        fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envCertsPort, defCertsPort)),
+			HTTPAdapterURL:  fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envHTTPAdapterPort, defHTTPAdapterPort)),
+			ReaderURL:       fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envReaderPort, defReaderPort)),
+			ThingsURL:       fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envThingsPort, defThingsPort)),
+			UsersURL:        fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envUsersPort, defUsersPort)),
+			MsgContentType:  sdk.ContentType(string(sdk.CTJSONSenML)),
+			TLSVerification: mfTLS,
+		},
 	}
 }
 
@@ -193,7 +216,7 @@ func connectToThings(cfg config, logger logger.Logger) *grpc.ClientConn {
 		opts = append(opts, grpc.WithInsecure())
 	}
 
-	conn, err := grpc.Dial(cfg.thingsAuthURL, opts...)
+	conn, err := grpc.Dial(cfg.authGRPCURL, opts...)
 	if err != nil {
 		logger.Error(fmt.Sprintf("Failed to connect to things service: %s", err))
 		os.Exit(1)

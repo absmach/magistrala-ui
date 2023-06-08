@@ -5,8 +5,7 @@ package api
 
 import (
 	"context"
-	"errors"
-	"io"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -19,25 +18,31 @@ import (
 	"github.com/go-zoo/bone"
 	"github.com/mainflux/mainflux"
 	adapter "github.com/mainflux/mainflux/http"
+	"github.com/mainflux/mainflux/internal/apiutil"
+	"github.com/mainflux/mainflux/logger"
+	"github.com/mainflux/mainflux/pkg/errors"
 	"github.com/mainflux/mainflux/pkg/messaging"
-	"github.com/mainflux/mainflux/things"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-const protocol = "http"
+const (
+	protocol    = "http"
+	ctSenmlJSON = "application/senml+json"
+	ctSenmlCBOR = "application/senml+cbor"
+	ctJSON      = "application/json"
+)
 
 var (
-	errMalformedData     = errors.New("malformed request data")
 	errMalformedSubtopic = errors.New("malformed subtopic")
 )
 
 var channelPartRegExp = regexp.MustCompile(`^/channels/([\w\-]+)/messages(/[^?]*)?(\?.*)?$`)
 
 // MakeHandler returns a HTTP handler for API endpoints.
-func MakeHandler(svc adapter.Service, tracer opentracing.Tracer) http.Handler {
+func MakeHandler(svc adapter.Service, tracer opentracing.Tracer, logger logger.Logger) http.Handler {
 	opts := []kithttp.ServerOption{
 		kithttp.ServerErrorEncoder(encodeError),
 	}
@@ -93,50 +98,48 @@ func parseSubtopic(subtopic string) (string, error) {
 }
 
 func decodeRequest(ctx context.Context, r *http.Request) (interface{}, error) {
-	channelParts := channelPartRegExp.FindStringSubmatch(r.RequestURI)
-	if len(channelParts) < 2 {
-		return nil, errMalformedData
+	ct := r.Header.Get("Content-Type")
+	if ct != ctSenmlJSON && ct != ctJSON && ct != ctSenmlCBOR {
+		return nil, errors.ErrUnsupportedContentType
 	}
 
-	chanID := bone.GetValue(r, "id")
+	channelParts := channelPartRegExp.FindStringSubmatch(r.RequestURI)
+	if len(channelParts) < 2 {
+		return nil, errors.ErrMalformedEntity
+	}
+
 	subtopic, err := parseSubtopic(channelParts[2])
 	if err != nil {
 		return nil, err
 	}
-	token := r.Header.Get("Authorization")
-	if _, pass, ok := r.BasicAuth(); ok {
+
+	var token string
+	_, pass, ok := r.BasicAuth()
+	switch {
+	case ok:
 		token = pass
+	case !ok:
+		token = apiutil.ExtractThingKey(r)
 	}
 
-	payload, err := decodePayload(r.Body)
+	payload, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		return nil, err
+		return nil, errors.ErrMalformedEntity
 	}
-
-	msg := messaging.Message{
-		Protocol: protocol,
-		Channel:  chanID,
-		Subtopic: subtopic,
-		Payload:  payload,
-		Created:  time.Now().UnixNano(),
-	}
+	defer r.Body.Close()
 
 	req := publishReq{
-		msg:   msg,
+		msg: messaging.Message{
+			Protocol: protocol,
+			Channel:  bone.GetValue(r, "id"),
+			Subtopic: subtopic,
+			Payload:  payload,
+			Created:  time.Now().UnixNano(),
+		},
 		token: token,
 	}
 
 	return req, nil
-}
-
-func decodePayload(body io.ReadCloser) ([]byte, error) {
-	payload, err := ioutil.ReadAll(body)
-	if err != nil {
-		return nil, errMalformedData
-	}
-	defer body.Close()
-
-	return payload, nil
 }
 
 func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
@@ -145,21 +148,40 @@ func encodeResponse(_ context.Context, w http.ResponseWriter, response interface
 }
 
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
-	switch err {
-	case errMalformedData, errMalformedSubtopic:
-		w.WriteHeader(http.StatusBadRequest)
-	case things.ErrUnauthorizedAccess:
+	switch {
+	case errors.Contains(err, errors.ErrAuthentication),
+		err == apiutil.ErrBearerToken:
+		w.WriteHeader(http.StatusUnauthorized)
+	case errors.Contains(err, errors.ErrAuthorization):
 		w.WriteHeader(http.StatusForbidden)
+	case errors.Contains(err, errors.ErrUnsupportedContentType):
+		w.WriteHeader(http.StatusUnsupportedMediaType)
+	case errors.Contains(err, errMalformedSubtopic),
+		errors.Contains(err, errors.ErrMalformedEntity):
+		w.WriteHeader(http.StatusBadRequest)
+
 	default:
-		if e, ok := status.FromError(err); ok {
+		switch e, ok := status.FromError(err); {
+		case ok:
 			switch e.Code() {
+			case codes.Unauthenticated:
+				w.WriteHeader(http.StatusUnauthorized)
 			case codes.PermissionDenied:
 				w.WriteHeader(http.StatusForbidden)
+			case codes.Internal:
+				w.WriteHeader(http.StatusInternalServerError)
 			default:
-				w.WriteHeader(http.StatusServiceUnavailable)
+				w.WriteHeader(http.StatusInternalServerError)
 			}
-			return
+		default:
+			w.WriteHeader(http.StatusInternalServerError)
 		}
-		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	if errorVal, ok := err.(errors.Error); ok {
+		w.Header().Set("Content-Type", ctJSON)
+		if err := json.NewEncoder(w).Encode(apiutil.ErrorRes{Err: errorVal.Msg()}); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+		}
 	}
 }

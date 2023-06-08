@@ -8,7 +8,7 @@ import (
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/mainflux/mainflux"
-	"github.com/mainflux/mainflux/things"
+	"github.com/mainflux/mainflux/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -39,12 +39,12 @@ func (tc thingsClient) CanAccessByKey(ctx context.Context, req *mainflux.AccessB
 	}
 
 	if key == "" {
-		return nil, things.ErrUnauthorizedAccess
+		return nil, errors.ErrAuthentication
 	}
 
 	id, ok := tc.things[key]
 	if !ok {
-		return nil, status.Error(codes.PermissionDenied, "invalid credentials provided")
+		return nil, status.Error(codes.Unauthenticated, "invalid credentials provided")
 	}
 
 	return &mainflux.ThingID{Value: id}, nil

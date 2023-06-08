@@ -1,0 +1,112 @@
+{{define "user"}}
+<!doctype html>
+<html lang="en">
+  {{template "header"}}
+
+  <body>
+    <main role="main">
+      <div class="container-fluid">
+        <div class="row">
+
+          {{template "navbar" .}}
+
+          <!-- Partial goes here -->
+          <div class="col-md-4">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateUserModal">
+              Update
+            </button>
+            <div class="modal fade" id="updateUserModal" tabindex="-1" role="dialog" aria-labelledby="updateUserModalLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="updateUserModalLabel">Update User</h5>
+                  </div>
+                  <div class="modal-body">
+                    <form method="post">
+                      <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="text" class="form-control" name="email" id="email" aria-describedby="emailHelp" value="{{.User.Email}}">
+                        <div id="emailHelp" class="form-text">Enter user email.</div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="groups" class="form-label">Group</label>
+                        <input type="text" class="form-control" name="groups" id="groups" aria-describedby="groupHelp" value="{{.User.Groups}}">
+                        <div id="groupHelp" class="form-text">Enter user group.</div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="meatadata" class="form-label">Metadata</label>
+                        <input type="text" class="form-control" name="metadata" id="metadata" value="{{toJSON .User.Metadata}}">
+                        <div id="metadataHelp" class="form-text">Enter user metadata in JSON format.</div>
+                      </div>
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateUserPasswordModal">
+              Update User Password
+            </button>
+            <div class="modal fade" id="updateUserPasswordModal" tabindex="-1" role="dialog" aria-labelledby="updateUserPasswordModalLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="updateUserPasswordModalLabel">Update User Password</h5>
+                  </div>
+                  <div class="modal-body">
+                    <form method="post">
+                      <div class="mb-3">
+                        <label for="oldpass" class="form-label">Old Password</label>
+                        <input type="text" class="form-control" name="oldpass" id="oldpass" aria-describedby="oldpassHelp">
+                        <div id="oldpassHelp" class="form-text">Enter old password.</div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="newpass" class="form-label">New Password</label>
+                        <input type="text" class="form-control" name="newpass" id="newpass" aria-describedby="newpassHelp">
+                        <div id="newpassHelp" class="form-text">Enter new password.</div>
+                      </div>
+                      <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th scope="row">USER</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th>Email</th>
+                  <td>{{.User.Email}}</td>
+                </tr>
+                <tr>
+                  <th>ID</th>
+                  <td>{{.User.ID}}</td>
+                </tr>
+                <tr>
+                  <th>Groups</th>
+                  <td>{{.User.Groups}}</td>
+                </tr>
+                <tr>
+                  <th>Metadata</th>
+                  <td>
+                    <pre>{{toJSON .User.Metadata}}</pre>
+                    </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- End of partial-->
+
+        </div>
+      </div> <!-- /container -->
+    </main>
+
+    {{template "footer"}}
+
+  </body>
+</html>
+{{end}}

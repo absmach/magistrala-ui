@@ -5,9 +5,11 @@ package api
 
 import (
 	"context"
+	"encoding/csv"
 	"encoding/json"
-	"fmt"
+	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/ultravioletrs/mainflux-ui/ui"
@@ -18,7 +20,6 @@ import (
 	"github.com/mainflux/mainflux"
 	"github.com/mainflux/mainflux/pkg/errors"
 	"github.com/mainflux/mainflux/pkg/messaging"
-	"github.com/mainflux/mainflux/things"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc/codes"
@@ -56,8 +57,15 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 	))
 
 	r.Post("/things", kithttp.NewServer(
-		kitot.TraceServer(tracer, "create_things")(createThingEndpoint(svc)),
+		kitot.TraceServer(tracer, "create_thing")(createThingEndpoint(svc)),
 		decodeThingCreation,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/things/bulk", kithttp.NewServer(
+		kitot.TraceServer(tracer, "create_things")(createThingsEndpoint(svc)),
+		decodeThingsCreation,
 		encodeResponse,
 		opts...,
 	))
@@ -91,7 +99,14 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 	))
 
 	r.Post("/channels", kithttp.NewServer(
-		kitot.TraceServer(tracer, "create_channels")(createChannelEndpoint(svc)),
+		kitot.TraceServer(tracer, "create_channel")(createChannelEndpoint(svc)),
+		decodeChannelCreation,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/channels/bulk", kithttp.NewServer(
+		kitot.TraceServer(tracer, "create_channels")(createChannelsEndpoint(svc)),
 		decodeChannelsCreation,
 		encodeResponse,
 		opts...,
@@ -258,6 +273,48 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 		opts...,
 	))
 
+	r.Post("/users", kithttp.NewServer(
+		kitot.TraceServer(tracer, "create_user")(createUserEndpoint(svc)),
+		decodeUserCreation,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/users/bulk", kithttp.NewServer(
+		kitot.TraceServer(tracer, "create_user")(createUsersEndpoint(svc)),
+		decodeUsersCreation,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Get("/users/:id", kithttp.NewServer(
+		kitot.TraceServer(tracer, "view_user")(viewUserEndpoint(svc)),
+		decodeView,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/users/:id", kithttp.NewServer(
+		kitot.TraceServer(tracer, "update_user")(updateUserEndpoint(svc)),
+		decodeUserUpdate,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/users/:id", kithttp.NewServer(
+		kitot.TraceServer(tracer, "update_user_password")(updateUserPasswordEndpoint(svc)),
+		decodeUserChangePassword,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Get("/users", kithttp.NewServer(
+		kitot.TraceServer(tracer, "list_users")(listUsersEndpoint(svc)),
+		decodeListUsersRequest,
+		encodeResponse,
+		opts...,
+	))
+
 	r.GetFunc("/version", mainflux.Health("ui"))
 	r.Handle("/metrics", promhttp.Handler())
 
@@ -297,13 +354,46 @@ func decodeThingCreation(_ context.Context, r *http.Request) (interface{}, error
 		return nil, err
 	}
 
-	req := createThingsReq{
+	req := createThingReq{
 		token:    token,
 		Name:     r.PostFormValue("name"),
 		Metadata: meta,
 	}
 
 	return req, nil
+}
+
+func decodeThingsCreation(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+	file, handler, err := r.FormFile("thingsFile")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	if !strings.HasSuffix(handler.Filename, ".csv") {
+		return nil, errors.New("unsupported file type")
+	}
+	csvr := csv.NewReader(file)
+
+	names := []string{}
+	for {
+		row, err := csvr.Read()
+		if err != nil {
+			if err == io.EOF {
+				req := createThingsReq{
+					token: token,
+					Names: names,
+				}
+				return req, nil
+			}
+			return nil, err
+		}
+		names = append(names, string(row[0]))
+	}
 }
 
 func getAuthorization(r *http.Request) (string, error) {
@@ -314,8 +404,7 @@ func getAuthorization(r *http.Request) (string, error) {
 		}
 		return "", err
 	}
-	token := fmt.Sprintf("Bearer %s", c.Value)
-	return token, nil
+	return c.Value, nil
 }
 
 func decodeView(_ context.Context, r *http.Request) (interface{}, error) {
@@ -361,7 +450,7 @@ func decodeListThingsRequest(ctx context.Context, r *http.Request) (interface{},
 	return req, nil
 }
 
-func decodeChannelsCreation(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeChannelCreation(_ context.Context, r *http.Request) (interface{}, error) {
 	var meta map[string]interface{}
 	if err := json.Unmarshal([]byte(r.PostFormValue("metadata")), &meta); err != nil {
 		return nil, err
@@ -371,13 +460,46 @@ func decodeChannelsCreation(_ context.Context, r *http.Request) (interface{}, er
 		return nil, err
 	}
 
-	req := createChannelsReq{
+	req := createChannelReq{
 		token:    token,
 		Name:     r.PostFormValue("name"),
 		Metadata: meta,
 	}
 
 	return req, nil
+}
+
+func decodeChannelsCreation(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+	file, handler, err := r.FormFile("channelsFile")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	if !strings.HasSuffix(handler.Filename, ".csv") {
+		return nil, errors.New("unsupported file type")
+	}
+	csvr := csv.NewReader(file)
+
+	names := []string{}
+	for {
+		row, err := csvr.Read()
+		if err != nil {
+			if err == io.EOF {
+				req := createChannelsReq{
+					token: token,
+					Names: names,
+				}
+				return req, nil
+			}
+			return nil, err
+		}
+		names = append(names, string(row[0]))
+	}
 }
 
 func decodeChannelUpdate(_ context.Context, r *http.Request) (interface{}, error) {
@@ -411,7 +533,9 @@ func decodeListChannelsRequest(ctx context.Context, r *http.Request) (interface{
 }
 
 func decodeConnect(_ context.Context, r *http.Request) (interface{}, error) {
-	r.ParseForm()
+	if err := r.ParseForm(); err != nil {
+		return nil, err
+	}
 	chanID := r.Form.Get("chanID")
 	thingID := r.Form.Get("thingID")
 	token, err := getAuthorization(r)
@@ -427,7 +551,9 @@ func decodeConnect(_ context.Context, r *http.Request) (interface{}, error) {
 }
 
 func decodeDisconnectThing(_ context.Context, r *http.Request) (interface{}, error) {
-	r.ParseForm()
+	if err := r.ParseForm(); err != nil {
+		return nil, err
+	}
 	chanID := r.Form.Get("chanID")
 	thingID := r.Form.Get("thingID")
 	token, err := getAuthorization(r)
@@ -443,7 +569,9 @@ func decodeDisconnectThing(_ context.Context, r *http.Request) (interface{}, err
 }
 
 func decodeDisconnectChannel(_ context.Context, r *http.Request) (interface{}, error) {
-	r.ParseForm()
+	if err := r.ParseForm(); err != nil {
+		return nil, err
+	}
 	chanID := r.Form.Get("chanID")
 	thingID := r.Form.Get("thingID")
 	token, err := getAuthorization(r)
@@ -459,7 +587,9 @@ func decodeDisconnectChannel(_ context.Context, r *http.Request) (interface{}, e
 }
 
 func decodeUnassignRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	r.ParseForm()
+	if err := r.ParseForm(); err != nil {
+		return nil, err
+	}
 	token, err := getAuthorization(r)
 	if err != nil {
 		return nil, err
@@ -519,7 +649,6 @@ func decodeAssignRequest(_ context.Context, r *http.Request) (interface{}, error
 		Type:    r.PostFormValue("Type"),
 		Member:  memberid,
 	}
-	println(req.Type)
 	return req, nil
 }
 
@@ -613,7 +742,10 @@ func encodeResponse(_ context.Context, w http.ResponseWriter, response interface
 	if ar.Empty() {
 		return nil
 	}
-	w.Write(ar.html)
+	_, err := w.Write(ar.html)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -626,7 +758,7 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	case errors.Contains(err, errMalformedData),
 		errors.Contains(err, errMalformedSubtopic):
 		w.WriteHeader(http.StatusBadRequest)
-	case errors.Contains(err, things.ErrUnauthorizedAccess):
+	case errors.Contains(err, ui.ErrUnauthorizedAccess):
 		w.WriteHeader(http.StatusForbidden)
 	default:
 		if e, ok := status.FromError(err); ok {
@@ -640,4 +772,114 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		}
 		w.WriteHeader(http.StatusInternalServerError)
 	}
+}
+
+func decodeUserCreation(_ context.Context, r *http.Request) (interface{}, error) {
+	var meta map[string]interface{}
+	if err := json.Unmarshal([]byte(r.PostFormValue("metadata")), &meta); err != nil {
+		return nil, err
+	}
+	var groups []string
+	if err := json.Unmarshal([]byte(r.PostFormValue("groups")), &groups); err != nil {
+		return nil, err
+	}
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+
+	req := createUserReq{
+		token:    token,
+		Email:    r.PostFormValue("email"),
+		Password: r.PostFormValue("password"),
+		Groups:   groups,
+		Metadata: meta,
+	}
+
+	return req, nil
+}
+
+func decodeUsersCreation(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+	file, handler, err := r.FormFile("usersFile")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	if !strings.HasSuffix(handler.Filename, ".csv") {
+		return nil, errors.New("unsupported file type")
+	}
+	csvr := csv.NewReader(file)
+
+	emails := []string{}
+	passwords := []string{}
+	for {
+		row, err := csvr.Read()
+		if err != nil {
+			if err == io.EOF {
+				req := createUsersReq{
+					token:     token,
+					Emails:    emails,
+					Passwords: passwords,
+				}
+				return req, nil
+			}
+			return nil, err
+		}
+		emails = append(emails, string(row[0]))
+		passwords = append(passwords, string(row[1]))
+	}
+}
+
+func decodeUserUpdate(_ context.Context, r *http.Request) (interface{}, error) {
+	var meta map[string]interface{}
+	if err := json.Unmarshal([]byte(r.PostFormValue("metadata")), &meta); err != nil {
+		return nil, err
+	}
+	var groups []string
+	if err := json.Unmarshal([]byte(r.PostFormValue("groups")), &groups); err != nil {
+		return nil, err
+	}
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+	req := updateUserReq{
+		token:    token,
+		id:       bone.GetValue(r, "id"),
+		Email:    r.PostFormValue("email"),
+		Group:    groups,
+		Metadata: meta,
+	}
+	return req, nil
+}
+
+func decodeListUsersRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+	req := listUsersReq{
+		token: token,
+	}
+
+	return req, nil
+}
+
+func decodeUserChangePassword(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+	req := updateUserPasswordReq{
+		token:   token,
+		id:      bone.GetValue(r, "id"),
+		OldPass: r.PostFormValue("oldpass"),
+		NewPass: r.PostFormValue("newpass"),
+	}
+	return req, nil
 }

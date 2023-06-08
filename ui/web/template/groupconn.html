@@ -74,13 +74,12 @@
                 {{range $i, $m := .Members}}
                   <tr>
                     <th scope="row">{{$i}}</th>
-                    <td>{{$m.ID}}</td>
-                    <td>{{$m.Type}}</td>
+                    <td>{{$m}}</td>
+                    <!-- <td>{{$m.Type}}</td> -->
                     <td>
                       <form action="/unassign" method="post">
                         <input type="hidden" name="groupId" id="groupId" value="{{$g}}">
-                        <input type="hidden" name="memberId" id="memberId" value="{{$m.ID}}">
-                        <input type="hidden" name="type" id="type" value="{{$m.Type}}">
+                        <input type="hidden" name="memberId" id="memberId" value="{{$m}}">
                         <button type="submit" class="btn btn-danger btn-sm">Unassign</button>
                       </form>
                     </td>

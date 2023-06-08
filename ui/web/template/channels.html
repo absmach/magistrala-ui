@@ -44,6 +44,32 @@
               </div>
             </div>
 
+                         <!-- Button trigger modal -->
+             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addChannelsModal">
+              Add Channels
+            </button>
+
+            <!-- Modal -->
+            <div class="modal fade" id="addChannelsModal" tabindex="-1" role="dialog" aria-labelledby="addChannelsModalLabel" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="addChannelsModalLabel">Add Channels</h5>
+                  </div>
+                  <div class="modal-body">
+                    <form method="post" enctype="multipart/form-data" action="/channels/bulk">
+                      <div class="form-group">
+                        <label for="Channelsfile">Add csv file containing channels names with metadata. The metadata field can be empty</label>
+                        <input type="file" class="form-control-file" id="channelsFile" name="channelsFile">
+                        <button type="submit" value="upload" class="btn btn-primary">Submit</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
             <table class="table table-striped">
               <thead>
                 <tr>

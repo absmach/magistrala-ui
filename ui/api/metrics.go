@@ -293,3 +293,47 @@ func (mm *metricsMiddleware) SendMessage(ctx context.Context, token string) (b [
 
 	return mm.svc.SendMessage(ctx, token)
 }
+
+func (mm *metricsMiddleware) CreateUser(ctx context.Context, token string, users ...sdk.User) (b []byte, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "create_users").Add(1)
+		mm.latency.With("method", "create_users").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.CreateUser(ctx, token, users...)
+}
+
+func (mm *metricsMiddleware) ViewUser(ctx context.Context, token, id string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "view_user").Add(1)
+		mm.latency.With("method", "view_user").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.ViewUser(ctx, token, id)
+}
+
+func (mm *metricsMiddleware) UpdateUser(ctx context.Context, token, id string, user sdk.User) (b []byte, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "update_user").Add(1)
+		mm.latency.With("method", "update_user").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.UpdateUser(ctx, token, id, user)
+}
+func (mm *metricsMiddleware) UpdateUserPassword(ctx context.Context, token, id, oldPass, newPass string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "update_user_password").Add(1)
+		mm.latency.With("method", "update_user_password").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.UpdateUserPassword(ctx, token, id, oldPass, newPass)
+}
+
+func (mm *metricsMiddleware) ListUsers(ctx context.Context, token string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "list_users").Add(1)
+		mm.latency.With("method", "list_users").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.ListUsers(ctx, token)
+}

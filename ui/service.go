@@ -66,6 +66,11 @@ type Service interface {
 	RemoveGroup(ctx context.Context, token, id string) ([]byte, error)
 	Publish(ctx context.Context, thingKey string, msg messaging.Message) ([]byte, error)
 	SendMessage(ctx context.Context, token string) ([]byte, error)
+	CreateUser(ctx context.Context, token string, user ...sdk.User) ([]byte, error)
+	ViewUser(ctx context.Context, token, id string) ([]byte, error)
+	UpdateUser(ctx context.Context, token, id string, user sdk.User) ([]byte, error)
+	UpdateUserPassword(ctx context.Context, token, id, oldPass, newPass string) ([]byte, error)
+	ListUsers(ctx context.Context, token string) ([]byte, error)
 }
 
 var _ Service = (*uiService)(nil)
@@ -141,8 +146,12 @@ func (gs *uiService) ListThings(ctx context.Context, token string) ([]byte, erro
 	if err != nil {
 		return []byte{}, err
 	}
-
-	thsPage, err := gs.sdk.Things(token, 0, 100, "")
+	filter := sdk.PageMetadata{
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
+	}
+	thsPage, err := gs.sdk.Things(token, filter)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -257,7 +266,12 @@ func (gs *uiService) ListChannels(ctx context.Context, token string) ([]byte, er
 		return []byte{}, err
 	}
 
-	chsPage, err := gs.sdk.Channels(token, 0, 100, "")
+	filter := sdk.PageMetadata{
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
+	}
+	chsPage, err := gs.sdk.Channels(token, filter)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -344,7 +358,7 @@ func (gs *uiService) ListGroupMembers(ctx context.Context, token, id string) ([]
 		return []byte{}, err
 	}
 
-	mbsPage, err := gs.sdk.Members(id, token, 0, 100)
+	members, err := gs.sdk.Members(id, token, 0, 100)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -353,12 +367,12 @@ func (gs *uiService) ListGroupMembers(ctx context.Context, token, id string) ([]
 		NavbarActive string
 		ID           string
 		Group        sdk.Group
-		Members      []sdk.Member
+		Members      []string
 	}{
 		"groups",
 		id,
 		group,
-		mbsPage.Members,
+		members.Members,
 	}
 
 	var btpl bytes.Buffer
@@ -443,7 +457,12 @@ func (gs *uiService) ListGroups(ctx context.Context, token string) ([]byte, erro
 		return []byte{}, err
 	}
 
-	grpPage, err := gs.sdk.Groups(0, 100, token)
+	filter := sdk.PageMetadata{
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
+	}
+	grpPage, err := gs.sdk.Groups(filter, token)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -474,7 +493,8 @@ func (gs *uiService) ViewGroup(ctx context.Context, token, id string) ([]byte, e
 	if err != nil {
 		return []byte{}, err
 	}
-	msPage, err := gs.sdk.Members(id, token, 0, 100)
+
+	members, err := gs.sdk.Members(id, token, 0, 100)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -482,12 +502,12 @@ func (gs *uiService) ViewGroup(ctx context.Context, token, id string) ([]byte, e
 		NavbarActive string
 		ID           string
 		Group        sdk.Group
-		Members      []sdk.Member
+		Members      []string
 	}{
 		"groups",
 		id,
 		group,
-		msPage.Members,
+		members.Members,
 	}
 
 	var btpl bytes.Buffer
@@ -583,4 +603,92 @@ func (gs *uiService) Token(ctx context.Context, username, password string) (stri
 		return token, err
 	}
 	return token, nil
+}
+
+func (gs *uiService) CreateUser(ctx context.Context, token string, users ...sdk.User) ([]byte, error) {
+	for i := range users {
+		_, err := gs.sdk.CreateUser(token, users[i])
+		if err != nil {
+			return []byte{}, err
+		}
+	}
+	return gs.ListUsers(ctx, token)
+}
+
+func (gs *uiService) ViewUser(ctx context.Context, token, id string) ([]byte, error) {
+	tpl, err := parseTemplate("user", "user.html")
+	if err != nil {
+		return []byte{}, err
+	}
+	user, err := gs.sdk.User(id, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	data := struct {
+		NavbarActive string
+		ID           string
+		User         sdk.User
+	}{
+		"user",
+		id,
+		user,
+	}
+
+	var btpl bytes.Buffer
+	if err := tpl.ExecuteTemplate(&btpl, "user", data); err != nil {
+		println(err.Error())
+	}
+	return btpl.Bytes(), nil
+}
+func (gs *uiService) UpdateUser(ctx context.Context, token, id string, user sdk.User) ([]byte, error) {
+	if err := gs.sdk.UpdateUser(user, token); err != nil {
+		return []byte{}, err
+	}
+	return gs.ViewUser(ctx, token, id)
+}
+func (gs *uiService) UpdateUserPassword(ctx context.Context, token, id, oldPass, newPass string) ([]byte, error) {
+	user, err := gs.sdk.User(token, id)
+	if err != nil {
+		return []byte{}, err
+	}
+	if err := gs.sdk.UpdatePassword(oldPass, newPass, token); err != nil {
+		return []byte{}, err
+	}
+	user.Password = newPass
+	token, err = gs.sdk.CreateToken(user)
+	if err != nil {
+		return []byte{}, err
+	}
+	return gs.ViewUser(ctx, token, id)
+}
+func (gs *uiService) ListUsers(ctx context.Context, token string) ([]byte, error) {
+	tpl, err := parseTemplate("users", "users.html")
+	if err != nil {
+		return []byte{}, err
+	}
+	filter := sdk.PageMetadata{
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
+	}
+	users, err := gs.sdk.Users(token, filter)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	data := struct {
+		NavbarActive string
+		Users        []sdk.User
+	}{
+		"users",
+		users.Users,
+	}
+
+	var btpl bytes.Buffer
+	if err := tpl.ExecuteTemplate(&btpl, "users", data); err != nil {
+		println(err.Error())
+	}
+
+	return btpl.Bytes(), nil
 }
