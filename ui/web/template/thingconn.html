@@ -11,7 +11,7 @@
           {{template "navbar" .}}
 
           <!-- Partial goes here -->
-          <div class="col-md-4">
+          <div class="col-md-9">
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#connectModal">
               Connect
             </button>
@@ -22,12 +22,17 @@
                     <h5 class="modal-title" id="connectModal">Connect</h5>
                   </div>
                   <div class="modal-body">
-                    <form action="/connect" method="post">
+                    <form action="/things/{{.Thing.ID}}/connect" method="post">
                       <div class="mb-3">
                         <label for="name" class="form-label">Channel ID</label>
-                        <input type="text" class="form-control" name="chanID" id="chanID" aria-describedby="chanelIDHelp">
+                        <input type="text" class="form-control" name="channelID" id="channelID" aria-describedby="chanelIDHelp">
                         <input type="text" class="invisible" name="thingID" id="thingID" aria-describedby="thingIDHelp" value="{{.Thing.ID}}">
                         <div id="channelIDHelp" class="form-text">Enter channel ID.</div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="actions" class="form-label">Actions</label>
+                        <input type="text" class="form-control" name="actions" id="actions" aria-describedby="actionsHelp">
+                        <div id="actionsHelp" class="form-text">Enter thing actions.</div>
                       </div>
                       <button type="submit" class="btn btn-primary">Submit</button>
                     </form>
@@ -52,7 +57,7 @@
                 </tr>
                 <tr>
                   <th>Key</th>
-                  <td>{{.Thing.Key}}</td>
+                  <td>{{.Thing.Credentials.Secret}}</td>
                 </tr>
                 <tr>
                   <th>Metadata</th>
@@ -62,7 +67,7 @@
                 </tr>
               </tbody>
             </table>
-            {{ $t := .Thing.ID }}
+            {{ $t := .Thing}}
             <table class="table table-striped">
               <thead>
                 <tr>
@@ -76,9 +81,9 @@
                     <td>{{$c.Name}}</td>
                     <td><a href={{printf "/channels/%s" $c.ID}}>{{$c.ID}}</a></td>
                     <td>
-                      <form action="/disconnect" method="post">
-                        <input type="hidden" name="thingID" id="thingID" value="{{$t}}">
-                        <input type="hidden" name="chanID" id="chanID" value="{{$c.ID}}">
+                      <form action="/disconnectChannel" method="post">
+                        <input type="hidden" name="thingID" id="thingID" value="{{$t.ID}}">
+                        <input type="hidden" name="channelID" id="channelID" value="{{$c.ID}}">
                         <button type="submit" class="btn btn-danger btn-sm">Disconnect</button>
                       </form>
                     </td>

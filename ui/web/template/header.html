@@ -10,12 +10,46 @@
     <!-- Bootstrap core CSS -->
     <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="/fontawesome/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/header.css">
+    <script src="/js/clipboard.js"></script>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-light bg-light">
-        <div class="container-fluid">
-          <span class="navbar-brand mb-0 h1">MAINFLUX</span>
+
+    <div class="hero">
+      <nav>
+        <img src="/images/logo.png" class= "logo">
+        <div class="organization-name"> 
+          <h>Mainflux</h>
+          </div>
+        <div class="user-icon">
+          <i class="fas fa-user-circle" style= "font-size: 32px" onclick="toggleMenu()"></i>
+        </div>
+        <div class="sub-menu-wrap" id="subMenu">
+          <div class="sub-menu">
+            <div class= "user-info">
+              <i class="fas fa-user-circle" style= "font-size: 32px" class="user-pic"></i>
+              <h3>Admin</h3>
+            </div>
+              <hr>
+            <a class="sub-menu-link"  class="active"  href="/password">
+            <i class="fas fa-solid fa-lock"></i>
+              <p>Password reset</p>
+              <span>></span>
+            </a>
+               <a class="sub-menu-link"  class="active" href="/logout">
+              <i class="fas fa-sign-out-alt"></i>
+                 <p>Logout</p>
+                 <span>></span>
+            </a>
+          </div>
         </div>
       </nav>
+    </div>
+  
+    <script>
+      let subMenu= document.getElementById("subMenu");
+    function toggleMenu() {
+      subMenu.classList.toggle("open-menu");
+    }
+    </script>
 </head>
 {{end}}

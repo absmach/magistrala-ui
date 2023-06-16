@@ -10,6 +10,27 @@
           </a>
         </li>
         <li class="nav-item">
+          {{$active = "users"}}
+          <a class="nav-link" {{if eq .NavbarActive $active}} class="active" style="color:black"{{end}} href="/users">
+            <i class="fas fa-users"></i>
+            Users
+          </a>
+        </li>
+        <li class="nav-item active">
+          {{$active = "groups"}}
+          <a class="nav-link" {{if eq .NavbarActive $active}} style="color:black"{{end}} href="/groups">
+            <i class="fas fa-layer-group"></i>
+            Groups
+          </a>
+        </li>
+        <li class="nav-item">
+          {{$active = "policies"}}
+          <a class="nav-link" {{if eq .NavbarActive $active}} class="active" style="color:black"{{end}} href="/policies">
+            <i class="fas fa-solid fa-shield-alt"></i>
+            Policies
+          </a>
+        </li>  
+        <li class="nav-item">
           {{$active = "things"}}
           <a class="nav-link active" {{if eq .NavbarActive $active}} style="color:black" {{end}} href="/things">
             <i class="fas fa-microchip"></i>
@@ -23,34 +44,6 @@
             Channels
           </a>
         </li>
-        <li class="nav-item active">
-          {{$active = "groups"}}
-          <a class="nav-link" {{if eq .NavbarActive $active}} style="color:black"{{end}} href="/groups">
-            <i class="fas fa-layer-group"></i>
-            Groups
-          </a>
-        </li>
-        <li class="nav-item">
-          {{$active = "messages"}}
-          <a class="nav-link" {{if eq .NavbarActive $active}} class="active" style="background-color:gray"{{end}} href="/messages">
-            <i class="fas fa-envelope-open-text"></i>
-            Messages
-          </a>
-        </li>
-        <li class="nav-item">
-          {{$active = "users"}}
-          <a class="nav-link" {{if eq .NavbarActive $active}} class="active" style="background-color:gray"{{end}} href="/users">
-            <i class="fas fa-users"></i>
-            users
-          </a>
-        </li>
-        <li class="nav-item">
-          {{$active = "logout"}}
-          <a class="nav-link" {{if eq .NavbarActive $active}} class="active" style="background-color:gray"{{end}} href="/logout">
-            <i class="fas fa-sign-out-alt"></i>
-            Logout
-          </a>
-        </li>        
       </ul>
     </div>
 </nav>

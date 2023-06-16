@@ -1,34 +1,44 @@
 {{define "login"}}
 <!doctype html>
 <html lang="en">
-  {{template "header"}}
+  <head>
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/fontawesome/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="/css/login.css">
 
-  <body>
-    <main role="main">
-      <div class="container-fluid">
-        <div class="row">
-
-          <!-- Partial goes here -->
-          <div class="col-md-4">
-            <form method="post">
-              <div class="mb-3">
-                <label for="username" class="form-label">Username (e-mail)</label>
-                <input type="text" class="form-control" name="username" id="username" aria-describedby="usernameHelp">
-                <div id="usernameHelp" class="form-text">Enter e-mail address.</div>
-              </div>
-              <div class="mb-3">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" name="password" id="password" aria-describedby="passwordHelp">
-                <div id="passwordHelp" class="form-text">Enter password.</div>
-              </div>
-              <button type="submit" class="btn btn-primary">Login</button>
-            </form>
-          </div>
-          <!-- End of partial-->
-
+    <div class="hero">
+      <nav>
+        <img src="/images/logo.png" class= "logo">
+        <div class="organization-name"> 
+          <h>Mainflux</h>
         </div>
-      </div> <!-- /container -->
-    </main>
+      </nav>
+    </div>
+
+  </head>
+  <body>
+    <div class="container">
+      <div class="form-box">
+        <h1>LOGIN</h1>
+        <form method="post">
+          <div class="input-group">
+            <div class="input-field">
+              <i class="fas fa-solid fa-envelope"></i>
+              <input type="email" name="username" id="username" placeholder="Email Address">
+            </div>
+            <div class="input-field">
+              <i class="fas fa-solid fa-lock"></i>
+              <input type="password" name="password" id="password" placeholder="Password">
+            </div>
+          </div>
+          <div class="btn-field">
+            <button type="submit">Login</button>
+          </div>
+
+        </form>
+      </div>
+
+    </div> <!-- /container -->
 
     {{template "footer"}}
 

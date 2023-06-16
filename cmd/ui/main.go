@@ -13,71 +13,55 @@ import (
 	"os/signal"
 	"strconv"
 	"syscall"
-	"time"
 
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	"github.com/mainflux/mainflux"
 	"github.com/mainflux/mainflux/logger"
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
-	thingsapi "github.com/mainflux/mainflux/things/api/auth/grpc"
 	"github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	jconfig "github.com/uber/jaeger-client-go/config"
 	"github.com/ultravioletrs/mainflux-ui/ui"
 	"github.com/ultravioletrs/mainflux-ui/ui/api"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 const (
-	defLogLevel          = "info"
-	defClientTLS         = "false"
-	defCACerts           = ""
-	defPort              = "9090"
-	defRedirectURL       = "http://localhost:9090/"
-	defJaegerURL         = ""
-	defAuthGRPCPort      = "8181"
-	defThingsAuthTimeout = "1s"
-	defAuthPort          = "8189"
-	defBootstrapPort     = ""
-	defCertsPort         = ""
-	defHTTPAdapterPort   = "8185"
-	defReaderPort        = ""
-	defThingsPort        = "8182"
-	defUsersPort         = "8180"
-	defTLSVerification   = "false"
-	defBaseURL           = "http://localhost"
+	defLogLevel        = "info"
+	defClientTLS       = "false"
+	defCACerts         = ""
+	defPort            = "9090"
+	defRedirectURL     = "http://localhost:9090/"
+	defJaegerURL       = ""
+	defHTTPAdapterPort = "8008"
+	defReaderPort      = ""
+	defThingsPort      = "9000"
+	defUsersPort       = "9002"
+	defTLSVerification = "false"
+	defBaseURL         = "http://localhost"
 
-	envLogLevel          = "MF_GUI_LOG_LEVEL"
-	envClientTLS         = "MF_GUI_CLIENT_TLS"
-	envCACerts           = "MF_GUI_CA_CERTS"
-	envPort              = "MF_GUI_PORT"
-	envRedirectURL       = "MF_GUI_REDIRECT_URL"
-	envJaegerURL         = "MF_JAEGER_URL"
-	envAuthGRPCPort      = "MF_AUTH_GRPC_PORT"
-	envThingsAuthTimeout = "MF_THINGS_AUTH_GRPC_TIMEOUT"
-	envAuthPort          = "MF_AUTH_HTTP_PORT"
-	envBootstrapPort     = "MF_BOOTSTRAP_PORT"
-	envCertsPort         = "MF_CERTS_HTTP_PORT"
-	envHTTPAdapterPort   = "MF_HTTP_ADAPTER_PORT"
-	envReaderPort        = "MF_READER_PORT"
-	envThingsPort        = "MF_THINGS_HTTP_PORT"
-	envUsersPort         = "MF_USERS_HTTP_PORT"
-	envTLSVerification   = "MF_VERIFICATION_TLS"
-	envBaseURL           = "MF_SDK_BASE_URL"
+	envLogLevel        = "MF_GUI_LOG_LEVEL"
+	envClientTLS       = "MF_GUI_CLIENT_TLS"
+	envCACerts         = "MF_GUI_CA_CERTS"
+	envPort            = "MF_GUI_PORT"
+	envRedirectURL     = "MF_GUI_REDIRECT_URL"
+	envJaegerURL       = "MF_JAEGER_URL"
+	envHTTPAdapterPort = "MF_HTTP_ADAPTER_PORT"
+	envReaderPort      = "MF_READER_PORT"
+	envThingsPort      = "MF_THINGS_HTTP_PORT"
+	envUsersPort       = "MF_USERS_HTTP_PORT"
+	envTLSVerification = "MF_VERIFICATION_TLS"
+	envBaseURL         = "MF_SDK_BASE_URL"
 )
 
 type config struct {
-	baseURL           string
-	logLevel          string
-	port              string
-	redirectURL       string
-	clientTLS         bool
-	caCerts           string
-	jaegerURL         string
-	authGRPCURL       string
-	thingsAuthTimeout time.Duration
-	sdkConfig         sdk.Config
+	baseURL     string
+	logLevel    string
+	port        string
+	redirectURL string
+	clientTLS   bool
+	caCerts     string
+	jaegerURL   string
+	sdkConfig   sdk.Config
 }
 
 func main() {
@@ -88,20 +72,12 @@ func main() {
 		log.Fatalf(err.Error())
 	}
 
-	conn := connectToThings(cfg, logger)
-	defer conn.Close()
-
 	tracer, closer := initJaeger("ui", cfg.jaegerURL, logger)
 	defer closer.Close()
 
-	thingsTracer, thingsCloser := initJaeger("things", cfg.jaegerURL, logger)
-	defer thingsCloser.Close()
-
 	sdk := sdk.NewSDK(cfg.sdkConfig)
 
-	tc := thingsapi.NewClient(conn, thingsTracer, cfg.thingsAuthTimeout)
-
-	svc := ui.New(tc, sdk)
+	svc := ui.New(sdk)
 
 	svc = api.LoggingMiddleware(svc, logger)
 	svc = api.MetricsMiddleware(
@@ -147,25 +123,16 @@ func loadConfig() config {
 	if err != nil {
 		log.Fatalf("Invalid value passed for %s\n", envTLSVerification)
 	}
-	authTimeout, err := time.ParseDuration(mainflux.Env(envThingsAuthTimeout, defThingsAuthTimeout))
-	if err != nil {
-		log.Fatalf("Invalid %s value: %s", envThingsAuthTimeout, err.Error())
-	}
 	baseURL := mainflux.Env(envBaseURL, defBaseURL)
 	return config{
-		baseURL:           baseURL,
-		logLevel:          mainflux.Env(envLogLevel, defLogLevel),
-		port:              mainflux.Env(envPort, defPort),
-		redirectURL:       mainflux.Env(envRedirectURL, defRedirectURL),
-		clientTLS:         tls,
-		caCerts:           mainflux.Env(envCACerts, defCACerts),
-		jaegerURL:         mainflux.Env(envJaegerURL, defJaegerURL),
-		authGRPCURL:       fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envAuthGRPCPort, defAuthGRPCPort)),
-		thingsAuthTimeout: authTimeout,
+		baseURL:     baseURL,
+		logLevel:    mainflux.Env(envLogLevel, defLogLevel),
+		port:        mainflux.Env(envPort, defPort),
+		redirectURL: mainflux.Env(envRedirectURL, defRedirectURL),
+		clientTLS:   tls,
+		caCerts:     mainflux.Env(envCACerts, defCACerts),
+		jaegerURL:   mainflux.Env(envJaegerURL, defJaegerURL),
 		sdkConfig: sdk.Config{
-			AuthURL:         fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envAuthPort, defAuthPort)),
-			BootstrapURL:    fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envBootstrapPort, defBootstrapPort)),
-			CertsURL:        fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envCertsPort, defCertsPort)),
 			HTTPAdapterURL:  fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envHTTPAdapterPort, defHTTPAdapterPort)),
 			ReaderURL:       fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envReaderPort, defReaderPort)),
 			ThingsURL:       fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envThingsPort, defThingsPort)),
@@ -198,28 +165,4 @@ func initJaeger(svcName, url string, logger logger.Logger) (opentracing.Tracer, 
 	}
 
 	return tracer, closer
-}
-
-func connectToThings(cfg config, logger logger.Logger) *grpc.ClientConn {
-	var opts []grpc.DialOption
-	if cfg.clientTLS {
-		if cfg.caCerts != "" {
-			tpc, err := credentials.NewClientTLSFromFile(cfg.caCerts, "")
-			if err != nil {
-				logger.Error(fmt.Sprintf("Failed to load certs: %s", err))
-				os.Exit(1)
-			}
-			opts = append(opts, grpc.WithTransportCredentials(tpc))
-		}
-	} else {
-		logger.Info("gRPC communication is not encrypted")
-		opts = append(opts, grpc.WithInsecure())
-	}
-
-	conn, err := grpc.Dial(cfg.authGRPCURL, opts...)
-	if err != nil {
-		logger.Error(fmt.Sprintf("Failed to connect to things service: %s", err))
-		os.Exit(1)
-	}
-	return conn
 }

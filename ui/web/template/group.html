@@ -10,69 +10,10 @@
 
           {{template "navbar" .}}
 
-          <!-- Partial goes here -->
-          <div class="col-md-4">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateGroupModal">
-              Update
-            </button>
-            <td><a type="button" class="btn btn-primary" href= {{printf "%s/delete" .ID}}>
-              Delete
-            </a></td>
-            <div class="modal fade" id="updateGroupModal" tabindex="-1" role="dialog" aria-labelledby="updateGroupModalLabel" aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="updateGroupModalLabel">Update Group</h5>
-                  </div>
-                  <div class="modal-body">
-                    <form method="post">
-                      <div class="mb-3">
-                        <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control" name="name" id="name" aria-describedby="nameHelp" value="{{.Group.Name}}">
-                        <div id="nameHelp" class="form-text">Enter group name.</div>
-                      </div>
-                      <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <input type="text" class="form-control" name="description" id="description" aria-describedby="descriptionHelp" value="{{.Group.Description}}">
-                        <div id="descriptionHelp" class="form-text">Enter group description.</div>
-                      </div>
-                      <div class="mb-3">
-                        <label for="parentid" class="form-label">Parent ID</label>
-                        <input type="text" class="form-control" name="parentid" id="parentid" aria-describedby="parentidHelp" value="{{.Group.ParentID}}">
-                        <div id="parentidHelp" class="form-text">Enter group parent id.</div>
-                      </div>
-                      <div class="mb-3">
-                        <label for="meatadata" class="form-label">Metadata</label>
-                        <input type="text" class="form-control" name="metadata" id="metadata" value="{{toJSON .Group.Metadata}}">
-                        <div id="metadataHelp" class="form-text">Enter group metadata in JSON format.</div>
-                      </div>
-                      <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div class="col-md-9">
             <a class="btn btn-primary" href="/groups/{{.Group.ID}}/members" role="button">Connections</a>
-            <div class="modal fade" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="connectModal" aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="connectModal">Connect</h5>
-                  </div>
-                  <div class="modal-body">
-                    <form action="/connect" method="post">
-                      <div class="mb-3">
-                        <label for="name" class="form-label">Channel ID</label>
-                        <input type="text" class="form-control" name="chanID" id="chanID" aria-describedby="chanelIDHelp">
-                        <input type="text" class="invisible" name="groupID" id="groupID" aria-describedby="groupIDHelp" value="{{.Group.ID}}">
-                        <div id="channelIDHelp" class="form-text">Enter channel ID.</div>
-                      </div>
-                      <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
+      
+
             <table class="table table-striped">
               <thead>
                 <tr>
@@ -81,37 +22,196 @@
               </thead>
               <tbody>
                 <tr>
-                  <th>ID</th>
-                  <td>{{.Group.ID}}</td>
+                  <th>NAME</th>
+                  <td class="editable" contenteditable="false" data-field="name">
+                    {{.Group.Name}}
+                  </td>
+                  <td>
+                    <button class="edit-btn" onclick="editRow('name')">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <div class="save-cancel-buttons" style="display: none;">
+                      <button class="save-btn" onclick="saveRow('name')">
+                        Save
+                      </button>
+                      <button class="cancel-btn" onclick="cancelEditRow('name')">
+                        Cancel
+                      </button>
+                    </div>
+                  </td>
                 </tr>
                 <tr>
-                  <th>NAME</th>
-                  <td>{{.Group.Name}}</td>
+                  <th>ID</th>
+                  <td>
+                    {{.Group.ID}}
+                  </td>
                 </tr>
                 <tr>
                   <th>Description</th>
-                  <td>{{.Group.Description}}</td>
-                </tr>
-                <tr>
-                  <th>Parent ID</th>
-                  <td>{{.Group.ParentID}}</td>
+                  <td class="editable" contenteditable="false" data-field="description">
+                    {{.Group.Description}}
+                  </td>
+                  <td>
+                    <button class="edit-btn" onclick="editRow('description')">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <div class="save-cancel-buttons" style="display: none;">
+                      <button class="save-btn" onclick="saveRow('description')">
+                        Save
+                      </button>
+                      <button class="cancel-btn" onclick="cancelEditRow('description')">
+                        Cancel
+                      </button>
+                    </div>
+                  </td>
                 </tr>
                 <tr>
                   <th>Metadata</th>
+                  <td class="editable" contenteditable="false" data-field="metadata">
+                    {{toJSON .Group.Metadata}}
+                  </td>
                   <td>
-                    <pre>{{toJSON .Group.Metadata}}</pre>
-                    </td>
+                    <button class="edit-btn" onclick="editRow('metadata')">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <div class="save-cancel-buttons" style="display: none;">
+                      <button class="save-btn" onclick="saveRow('metadata')">
+                        Save
+                      </button>
+                      <button class="cancel-btn" onclick="cancelEditRow('metadata')">
+                        Cancel
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <!-- End of partial-->
-
         </div>
-      </div> <!-- /container -->
+      </div>
     </main>
+    <style>
+      button.edit-btn {
+        border: none;
+        background: none;
+        padding: 0;
+      }
+      .save-cancel-buttons button {
+        padding: 4px 4px;
+        margin-right: 10px;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .save-btn {
+        background-color: #4051b5;
+        color: #fff;
+      }
+      .cancel-btn {
+        background-color: #ebe5e5;
+        color: #070606;
+      }
+    </style>
+    <script>
+      function makeEditable(cell) {
+        cell.setAttribute("contenteditable", "true");
+        cell.dataset.originalContent = cell.innerHTML;
+      }
+  
+      function makeUneditable(cell) {
+        const originalContent = cell.dataset.originalContent;
+        cell.innerHTML = originalContent;
+        cell.setAttribute("contenteditable", "false");
+      }
+  
+      function showButtons(editBtn, saveCancelBtn) {
+        editBtn.style.display = "none";
+        saveCancelBtn.style.display = "inline-block";
+      }
+      function hideButtons(editBtn, saveCancelBtn) {
+        editBtn.style.display = "inline-block";
+        saveCancelBtn.style.display = "none";
+      }
+  
+      function editRow(field) {
+        const cell = document.querySelector(`td[data-field='${field}']`);
+        const editBtn = cell.parentNode.querySelector(".edit-btn");
+        const saveCancelBtn = cell.parentNode.querySelector(".save-cancel-buttons");
+  
+        //make the row editable
+        makeEditable(cell);
+  
+        //Hide edit button and show save and cancel buttons
+        showButtons(editBtn, saveCancelBtn);
+      }
+  
+      function cancelEditRow(field) {
+        const cell = document.querySelector(`td[data-field='${field}']`);
+        const editBtn = cell.parentNode.querySelector(".edit-btn");
+        const saveCancelBtn = cell.parentNode.querySelector(".save-cancel-buttons");
+  
+        //Restore original values in the row
+        makeUneditable(cell);
+  
+        //show the edit button and hide the save and cancel buttons
+        hideButtons(editBtn, saveCancelBtn);
+      }
+  
+      function saveRow(field) {
+        const cell = document.querySelector(`td[data-field='${field}']`);
+        const editBtn = cell.parentNode.querySelector(".edit-btn");
+        const saveCancelBtn = cell.parentNode.querySelector(".save-cancel-buttons");
+  
+        //Get the updated value from the nameCell
+        const updatedValue = cell.textContent.trim();
+  
+        //send the updated value to the server using a post request
+        let url;
+        let data;
+        if (field === 'name' || field === 'description') {
+          url = '/groups/{{.Group.ID}}';
+          data = {[field]: updatedValue};
+        }else if(field === 'metadata') {
+          url = '/groups/{{.Group.ID}}';
+          data = {[field]: JSON.parse(updatedValue)};
+        }
+  
+        if (url) {
+          fetch(url, {
+            method: "POST",
+            body: JSON.stringify(data),
+            headers: {
+              "Content-Type": "application/json"
+            }
+          })
+          .then(response => {
+            if (response.ok) {
+              //make the row uneditable
+              cell.setAttribute("contenteditable","false");
+  
+              //show edit button and hide save and cancel buttons
+              hideButtons(editBtn, saveCancelBtn);
+            }
+          })
+          .catch(error => {
+            //Restore original values in the row if there is an error
+            makeUneditable(cell);
+  
+            //show edit button and hide save and cancel buttons
+            hideButtons(editBtn, saveCancelBtn);
+  
+            console.error("Error", error);
+          });
+        } else {
+          console.error("Invalid field:", field);
+        }
+  
+      } 
+  
+    </script>
 
-    {{template "footer"}}
+      {{template "footer"}}
 
   </body>
 </html>

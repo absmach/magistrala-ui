@@ -1,0 +1,121 @@
+{{define "groups"}}
+<!doctype html>
+<html lang="en">
+  {{template "header"}}
+
+  <body>
+    <main role="main">
+        <div class="container-fluid">
+            <div class="row">
+
+            {{template "navbar" .}}
+
+            <!-- Partial goes here -->
+                <div class="col-md-9">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPolicyModal">
+                        Add Policy
+                    </button>
+                    <div class="modal fade" id="addPolicyModal" tabindex="-1" role="dialog" aria-labelledby="addPolicyModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="addPolicyModalLabel">Add Policy</h5>
+                                </div>
+                                <div class="modal-body">
+                                    <form method="post">
+                                        <div class="mb-3">
+                                            <label for="subject" class="form-label">Subject</label>
+                                            <input type="text" class="form-control" name="subject" id="subject" aria-describedby="subjectHelp">
+                                            <div id="subjectHelp" class="form-text">Enter Subject.</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="object" class="form-label">Object</label>
+                                            <input type="text" class="form-control" name="object" id="object" aria-describedby="objectHelp">
+                                            <div id="objectHelp" class="form-text">Enter Object.</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="actions" class="form-label">Actions</label>
+                                            <input type="text" class="form-control" name="actions" id="actions" aria-describedby="actionsHelp">
+                                            <div id="actionsHelp" class="form-text">Enter Actions.</div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Submit</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Subject</th>
+                                <th scope="col">Object</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range $i, $p := .Policies}}
+                                <tr>
+                                    <th scope="row">{{$i}}</th>
+                                    <td><a href={{printf "/users/%s" $p.Subject}}>{{$p.Subject}}</a></td>
+                                    <td><a href={{printf "/groups/%s" $p.Object}}>{{$p.Object}}</a></td>
+                                    <td>{{$p.Actions}}</td>
+                                    <td>
+                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updatePolicyModal">
+                                            Update
+                                        </button>
+                                        <div class="modal fade" id="updatePolicyModal" tabindex="-1" role="dialog" aria-labelledby="updatePolicyModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog" role="document">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="updatePolicyModalLabel">Update Policy</h5>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <form action="/policies/update" method="post">
+                                                            <div class="mb-3">
+                                                                <label for="subject" class="form-label">Subject</label>
+                                                                <input type="text" class="form-control" name="subject" id="subject" aria-describedby="subjectHelp" value="{{$p.Subject}}">
+                                                                <div id="subjectHelp" class="form-text">Enter subject.</div>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label for="object" class="form-label">Object</label>
+                                                                <input type="text" class="form-control" name="object" id="object" aria-describedby="objectHelp" value="{{$p.Object}}">
+                                                                <div id="objectHelp" class="form-text">Enter Object.</div>
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <label for="actions" class="form-label">Actions</label>
+                                                                <input type="text" class="form-control" name="actions" id="actions" aria-describedby="actionsHelp" value="{{$p.Actions}}">
+                                                                <div id="actionsHelp" class="form-text">Enter Actions.</div>
+                                                            </div>
+                                                            <button type="submit" class="btn btn-primary">Submit</button>
+                                                        </form>
+                                                       
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <form action="/policies/delete" method="post">
+                                            <input type="hidden" name="subject" id="subject" value="{{$p.Subject}}">
+                                            <input type="hidden" name="object" id="object" value="{{$p.Object}}">
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </td>
+                                    </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            <!-- End of partial-->
+
+            </div>
+        </div> <!-- /container -->
+    </main>
+
+    {{template "footer"}}
+
+  </body>
+</html>
+{{end}}

@@ -1,100 +1,236 @@
 {{define "channel"}}
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  {{template "header"}}
+{{template "header"}}
 
-  <body>
-    <main role="main">
-      <div class="container-fluid">
-        <div class="row">
+<body>
+  <main role="main">
+    <div class="container-fluid">
+      <div class="row">
 
-          {{template "navbar" .}}
+        {{template "navbar" .}}
 
-          <!-- Partial goes here -->
-          <div class="col-md-4">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateChannelModal">
-              Update
-            </button>
-            <td><a type="button" class="btn btn-primary" href= {{printf "%s/delete" .ID}}>
-              Delete
-            </a></td>
-            <div class="modal fade" id="updateChannelModal" tabindex="-1" role="dialog" aria-labelledby="updateChannelModalLabel" aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="updateChannelModalLabel">Update Channel</h5>
-                  </div>
-                  <div class="modal-body">
-                    <form method="post">
-                      <div class="mb-3">
-                        <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control" name="name" id="name" aria-describedby="nameHelp" value="{{.Channel.Name}}">
-                        <div id="nameHelp" class="form-text">Enter device name.</div>
-                      </div>
-                      <div class="mb-3">
-                        <label for="meatadata" class="form-label">Metadata</label>
-                        <input type="text" class="form-control" name= "metadata" id="metadata" value="{{toJSON .Channel.Metadata}}">
-                        <div id="metadataHelp" class="form-text">Enter device metadata in JSON format.</div>
-                      </div>
-                      <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                  </div>
+        <div class="col-md-9">
+          <a class="btn btn-primary" href="/channels/{{.Channel.ID}}/things" role="button" >Connections</a>
+          <div class="modal fade" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="connectModal" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="connectModal">Connect</h5>
+                </div>
+                <div class="modal-body">
+                  <form action="/connect" method="post">
+                    <div class="mb-3">
+                      <label for="thingID" class="form-label">Thing ID</label>
+                      <input type="text" class="form-control" name="thingID" id="thingID" aria-describedby="thingIDHelp">
+                      <input type="text" class="invisible" name="chanID" id="chanID" aria-describedby="channelIDHelp" value="{{.Channel.ID}}">
+                      <div id="thingIDHelp" class="form-text">Enter thing ID.</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                  </form>
                 </div>
               </div>
             </div>
-            <a class="btn btn-primary" href="/channels/{{.Channel.ID}}/things" role="button">Connections</a>
-            <div class="modal fade" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="connectModal" aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="connectModal">Connect</h5>
-                  </div>
-                  <div class="modal-body">
-                    <form action="/connect" method="post">
-                      <div class="mb-3">
-                        <label for="name" class="form-label">Channel ID</label>
-                        <input type="text" class="form-control" name="thingID" id="thingID" aria-describedby="chanelIDHelp">
-                        <input type="text" class="invisible" name="chanID" id="chanID" aria-describedby="channelIDHelp" value="{{.Channel.ID}}">
-                        <div id="channelIDHelp" class="form-text">Enter channel ID.</div>
-                      </div>
-                      <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th scope="row">CHANNEL</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <tr>
-                    <th>Name</th>
-                    <td>{{.Channel.Name}}</td>
-                  </tr>
-                  <th>ID</th>
-                  <td>{{.Channel.ID}}</td>
-                </tr>
-                <tr>
-                  <th>Metadata</th>
-                  <td>
-                    <pre>{{toJSON .Channel.Metadata}}</pre>
-                    </td>
-                </tr>
-              </tbody>
-            </table>
           </div>
-          <!-- End of partial-->
-
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th scope="row">CHANNEL</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th>NAME</th>
+                <td class="editable" contenteditable="false" data-field="name">
+                  {{.Channel.Name}}
+                </td>
+                <td>
+                  <button class="edit-btn" onclick="editRow('name')">
+                    <i class="fas fa-pencil-alt"></i>
+                  </button>
+                  <div class="save-cancel-buttons" style="display: none;">
+                    <button class="save-btn" onclick="saveRow('name')">
+                      Save
+                    </button>
+                    <button class="cancel-btn" onclick="cancelEditRow('name')">
+                      Cancel
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th>ID</th>
+                <td>
+                  {{.Channel.ID}}
+                </td>
+              </tr>
+              <tr>
+                <th>Description</th>
+                <td class="editable" contenteditable="false" data-field="description">
+                  {{.Channel.Description}}
+                </td>
+                <td>
+                  <button class="edit-btn" onclick="editRow('description')">
+                    <i class="fas fa-pencil-alt"></i>
+                  </button>
+                  <div class="save-cancel-buttons" style="display: none;">
+                    <button class="save-btn" onclick="saveRow('description')">
+                      Save
+                    </button>
+                    <button class="cancel-btn" onclick="cancelEditRow('description')">
+                      Cancel
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th>Metadata</th>
+                <td class="editable" contenteditable="false" data-field="metadata">
+                  {{toJSON .Channel.Metadata}}
+                </td>
+                <td>
+                  <button class="edit-btn" onclick="editRow('metadata')">
+                    <i class="fas fa-pencil-alt"></i>
+                  </button>
+                  <div class="save-cancel-buttons" style="display: none;">
+                    <button class="save-btn" onclick="saveRow('metadata')">
+                      Save
+                    </button>
+                    <button class="cancel-btn" onclick="cancelEditRow('metadata')">
+                      Cancel
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </div> <!-- /container -->
-    </main>
+      </div>
+    </div>
+  </main>
+  <style>
+    button.edit-btn {
+      border: none;
+      background: none;
+      padding: 0;
+    }
+    .save-cancel-buttons button {
+      padding: 4px 4px;
+      margin-right: 10px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .save-btn {
+      background-color: #4051b5;
+      color: #fff;
+    }
+    .cancel-btn {
+      background-color: #ebe5e5;
+      color: #070606;
+    }
+  </style>
 
-    {{template "footer"}}
+  <script>
+    function makeEditable(cell) {
+      cell.setAttribute("contenteditable", "true");
+      cell.dataset.originalContent = cell.innerHTML;
+    }
 
-  </body>
+    function makeUneditable(cell) {
+      const originalContent = cell.dataset.originalContent;
+      cell.innerHTML = originalContent;
+      cell.setAttribute("contenteditable", "false");
+    }
+
+    function showButtons(editBtn, saveCancelBtn) {
+      editBtn.style.display = "none";
+      saveCancelBtn.style.display = "inline-block";
+    }
+    function hideButtons(editBtn, saveCancelBtn) {
+      editBtn.style.display = "inline-block";
+      saveCancelBtn.style.display = "none";
+    }
+
+    function editRow(field) {
+      const cell = document.querySelector(`td[data-field='${field}']`);
+      const editBtn = cell.parentNode.querySelector(".edit-btn");
+      const saveCancelBtn = cell.parentNode.querySelector(".save-cancel-buttons");
+
+      //make the row editable
+      makeEditable(cell);
+
+      //Hide edit button and show save and cancel buttons
+      showButtons(editBtn, saveCancelBtn);
+    }
+
+    function cancelEditRow(field) {
+      const cell = document.querySelector(`td[data-field='${field}']`);
+      const editBtn = cell.parentNode.querySelector(".edit-btn");
+      const saveCancelBtn = cell.parentNode.querySelector(".save-cancel-buttons");
+
+      //Restore original values in the row
+      makeUneditable(cell);
+
+      //show the edit button and hide the save and cancel buttons
+      hideButtons(editBtn, saveCancelBtn);
+    }
+
+    function saveRow(field) {
+      const cell = document.querySelector(`td[data-field='${field}']`);
+      const editBtn = cell.parentNode.querySelector(".edit-btn");
+      const saveCancelBtn = cell.parentNode.querySelector(".save-cancel-buttons");
+
+      //Get the updated value from the nameCell
+      const updatedValue = cell.textContent.trim();
+
+      //send the updated value to the server using a post request
+      let url;
+      let data;
+      if (field === 'name' || field === 'description') {
+        url = '/channels/{{.Channel.ID}}';
+        data = {[field]: updatedValue};
+      }else if(field === 'metadata') {
+        url = '/channels/{{.Channel.ID}}';
+        data = {[field]: JSON.parse(updatedValue)};
+      }
+
+      if (url) {
+        fetch(url, {
+          method: "POST",
+          body: JSON.stringify(data),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        })
+        .then(response => {
+          if (response.ok) {
+            //make the row uneditable
+            cell.setAttribute("contenteditable","false");
+
+            //show edit button and hide save and cancel buttons
+            hideButtons(editBtn, saveCancelBtn);
+          }
+        })
+        .catch(error => {
+          //Restore original values in the row if there is an error
+          makeUneditable(cell);
+
+          //show edit button and hide save and cancel buttons
+          hideButtons(editBtn, saveCancelBtn);
+
+          console.error("Error", error);
+        });
+      } else {
+        console.error("Invalid field:", field);
+      }
+
+    } 
+
+  </script>
+
+  {{template "footer"}}
+</body>
 </html>
 {{end}}

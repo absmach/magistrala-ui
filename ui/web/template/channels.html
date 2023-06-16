@@ -1,8 +1,11 @@
 {{define "channels"}}
 <!doctype html>
 <html lang="en">
-  {{template "header"}}
-
+  <head>
+    <link rel="stylesheet" type="text/css" href="/css/slider.css">
+    {{template "header"}}
+  </head>
+ 
   <body>
     <main role="main">
       <div class="container-fluid">
@@ -11,7 +14,7 @@
           {{template "navbar" .}}
 
           <!-- Partial goes here -->
-          <div class="col-md-4">
+          <div class="col-md-9">
 
             <!-- Button trigger modal -->
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addChannelModal">
@@ -26,16 +29,24 @@
                     <h5 class="modal-title" id="addChannelModalLabel">Add Channel</h5>
                   </div>
                   <div class="modal-body">
-                    <form method="post">
+                    <form method="post" onsubmit="return validateForm()">
                       <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control" name="name" id="name" aria-describedby="nameHelp">
-                        <div id="nameHelp" class="form-text">Enter device name.</div>
+                        <input type="text" class="form-control" name="name" id="name" aria-describedby="nameHelp" placeholder="Channel Name">
+                        <div id="nameError" class="error-message"></div>
                       </div>
                       <div class="mb-3">
-                        <label for="meatadata" class="form-label">Metadata</label>
+                        <label for="parentID" class="form-label">Parent ID</label>
+                        <input type="text" class="form-control" name="parentID" id="parentID" aria-describedby="parentIDHelp" placeholder="Parent ID">
+                      </div>
+                      <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <input type="text" class="form-control" name="description" id="description" aria-describedby="descriptionHelp" placeholder="Channel Description">
+                      </div>
+                      <div class="mb-3">
+                        <label for="metadata" class="form-label">Metadata</label>
                         <input type="text" class="form-control" name= "metadata" id="metadata" value="{}">
-                        <div id="metadataHelp" class="form-text">Enter device metadata in JSON format.</div>
+                        <div id="metadataHelp" class="form-text">Enter channel metadata in JSON format.</div>
                       </div>
                       <button type="submit" class="btn btn-primary">Submit</button>
                     </form>
@@ -69,7 +80,6 @@
               </div>
             </div>
 
-
             <table class="table table-striped">
               <thead>
                 <tr>
@@ -83,11 +93,72 @@
                   <tr>
                     <th scope="row">{{$i}}</th>
                     <td>{{$c.Name}}</td>
-                    <td><a href={{printf "/channels/%s" $c.ID}}>{{$c.ID}}</a></td>
+                    <td>
+                      <div class="copy-con-container">
+                        <a href={{printf "/channels/%s" $c.ID}}>{{$c.ID}}</a>
+                        <button class="copy-icon" onclick="copyToClipboard(this)">
+                          <i class="far fa-copy"></i>
+                        </button>
+                      </div>
+                    </td>
+                    <td>
+                      <form action="/channels/status" method="post">
+                        <input type="hidden" name="channelID" id="channelID" value="{{$c.ID}}">
+                        <input type="hidden" name="status" id="status" value="disabled">
+                        <button type="submit" class="btn btn-sm">
+                          <i class="fas fa-trash-alt"></i>
+                        </button>
+                      </form>
+                    </td>
                   </tr>
                 {{end}}
               </tbody>
             </table>
+
+            <style>
+              .copy-icon {
+                background: none;
+                border: none;
+                padding: 0;
+                cursor: pointer;
+                font-size: 1rem;
+                color: #000;
+                margin-left: 10px;
+              }
+
+              .copy-icon:focus {
+                outline: none;
+              }
+
+              .success-icon {
+                color: green;
+              }
+              .error-message{
+                font-size: 15px;
+                color: #e60303;
+              }
+
+          </style>
+
+            <script>
+              function validateForm() {
+                var name = document.getElementById("name").value;
+
+                var nameError = document.getElementById("nameError");
+
+                nameError.innerHTML="";
+
+                var isValid = true;
+                if (name==="") {
+                  nameError.innerHTML= "Field Required!";
+                  isValid = false
+                }
+
+                return isValid;
+              }
+            </script>
+
+
           </div>
           <!-- End of partial-->
 

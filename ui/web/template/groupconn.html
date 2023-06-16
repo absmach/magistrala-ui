@@ -11,7 +11,7 @@
           {{template "navbar" .}}
 
           <!-- Partial goes here -->
-          <div class="col-md-4">
+          <div class="col-md-9">
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#connectModal">
               Assign
             </button>
@@ -24,17 +24,43 @@
                   <div class="modal-body">
                     <form action="/groups/{{.Group.ID}}/members" method="post">
                       <div class="mb-3">
-                        <label for="name" class="form-label">Member ID</label>
-                        <input type="text" class="form-control" name="memberId" id="memberId" aria-describedby="memberIdHelp">
-                        <div id="memberIdHelp" class="form-text">Enter member ID (channel, thing or user).</div>
-                        <select class="form-select" aria-label="Default select example" name="Type" id="Type">
-                          <option selected>Choose type</option>
-                          <option value="user">User</option>
-                          <option value="thing">Thing</option>
-                          <option value="channel">Channel</option>
-                        </select>
+                        <label for="memberID" class="form-label">Member ID</label>
+                        <input type="text" class="form-control" name="memberID" id="memberID" aria-describedby="memberIDHelp">
+                        <div id="memberIDHelp" class="form-text">Enter member ID (channel, thing or user).</div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="Type" class="form-label">Member Type</label>
+                        <input type="text" class="form-control" name="Type" id="Type" aria-describedby="TypeHelp">
+                        <div id="TypeHelp" class="form-text">Enter member Type.</div>
                       </div>
                       <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#unassignModal">
+              unassign
+            </button>
+            <div class="modal fade" id="unassignModal" tabindex="-1" role="dialog" aria-labelledby="unassignModal" aria-hidden="true">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="unassignModal">unassign</h5>
+                  </div>
+                  <div class="modal-body">
+                    <form action="/groups/{{.Group.ID}}/unassign" method="post">
+                      <div class="mb-3">
+                        <label for="memberId" class="form-label">Member ID</label>
+                        <input type="text" class="form-control" name="memberId" id="memberId" aria-describedby="memberIdHelp">
+                        <div id="memberIdHelp" class="form-text">Enter member ID.</div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="Type" class="form-label">Member Type</label>
+                        <input type="text" class="form-control" name="Type" id="Type" aria-describedby="TypeHelp">
+                        <div id="TypeHelp" class="form-text">Enter member Type.</div>
+                      </div>
+                      <button type="submit" class="btn btn-danger btn-sm">Unassign</button>
                     </form>
                   </div>
                 </div>
@@ -74,14 +100,9 @@
                 {{range $i, $m := .Members}}
                   <tr>
                     <th scope="row">{{$i}}</th>
-                    <td>{{$m}}</td>
-                    <!-- <td>{{$m.Type}}</td> -->
+                    <td>{{$m.Name}}</td>
+                    <td><a href={{printf "/users/%s" $m.ID}}>{{$m.ID}}</a></td>
                     <td>
-                      <form action="/unassign" method="post">
-                        <input type="hidden" name="groupId" id="groupId" value="{{$g}}">
-                        <input type="hidden" name="memberId" id="memberId" value="{{$m}}">
-                        <button type="submit" class="btn btn-danger btn-sm">Unassign</button>
-                      </form>
                     </td>
                   </tr>
                 {{end}}

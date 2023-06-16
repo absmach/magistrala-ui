@@ -1,7 +1,11 @@
 {{define "users"}}
 <!doctype html>
 <html lang="en">
-  {{template "header"}}
+  <head>
+    <link rel="stylesheet" type="text/css" href="/css/slider.css">
+    {{template "header"}}
+  </head>
+ 
 
   <body>
     <main role="main">
@@ -11,7 +15,7 @@
           {{template "navbar" .}}
 
           <!-- Partial goes here -->
-          <div class="col-md-4">
+          <div class="col-md-9">
 
             <!-- Button trigger modal -->
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
@@ -26,25 +30,30 @@
                     <h5 class="modal-title" id="addUserModalLabel">Add User</h5>
                   </div>
                   <div class="modal-body">
-                    <form method="post">
+                    <form method="post" onsubmit="return validateForm()">
                       <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="text" class="form-control" name="email" id="email" aria-describedby="emailHelp">
-                        <div id="emailHelp" class="form-text">Enter user email.</div>
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" name="name" id="name" aria-describedby="nameHelp" placeholder="User Name">
+                        <div id="nameError" class="error-message"></div>
                       </div>
                       <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="text" class="form-control" name="password" id="password" aria-describedby="passwordHelp">
-                        <div id="passwordHelp" class="form-text">Enter user password.</div>
+                        <label for="identity" class="form-label">Identity</label>
+                        <input type="text" class="form-control" name="identity" id="identity" aria-describedby="identityHelp" placeholder="User Identity">
+                        <div id="identityError" class="error-message"></div>
                       </div>
                       <div class="mb-3">
-                        <label for="groups" class="form-label">Group</label>
-                        <input type="text" class="form-control" name="groups" id="groups" aria-describedby="groupHelp" value="[]">
-                        <div id="groupHelp" class="form-text">Enter user group.</div>
+                        <label for="secret" class="form-label">Secret</label>
+                        <input type="text" class="form-control" name="secret" id="secret" aria-describedby="secretHelp" placeholder="User Secret">
+                        <div id="secretError" class="error-message"></div>
                       </div>
                       <div class="mb-3">
-                        <label for="meatadata" class="form-label">Metadata</label>
-                        <input type="text" class="form-control" name= "metadata" id="metadata" value="{}">
+                        <label for="tags" class="form-label">Tags</label>
+                        <input type="text" class="form-control" name="tags" id="tags" aria-describedby="tagHelp" value="[]">
+                        <div id="tagHelp" class="form-text">Enter user tags as a string slice.</div>
+                      </div>
+                      <div class="mb-3">
+                        <label for="metadata" class="form-label">Metadata</label>
+                        <input type="text" class="form-control" name= "metadata" id="metadata"  value="{}">
                         <div id="metadataHelp" class="form-text">Enter user metadata in JSON format.</div>
                       </div>
                       <button type="submit" class="btn btn-primary">Submit</button>
@@ -63,12 +72,12 @@
               <div class="modal-dialog" role="document">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title" id="addUsersModalLabel">Add Channels</h5>
+                    <h5 class="modal-title" id="addUsersModalLabel">Add Users</h5>
                   </div>
                   <div class="modal-body">
                     <form method="post" enctype="multipart/form-data" action="/users/bulk">
                       <div class="form-group">
-                        <label for="Usersfile">Add csv file containing users names and passwords with metadata. The metadata field can be empty</label>
+                        <label for="usersFile">Add csv file containing users names and passwords with metadata. The metadata field can be empty</label>
                         <input type="file" class="form-control-file" id="usersFile" name="usersFile">
                         <button type="submit" value="upload" class="btn btn-primary">Submit</button>
                       </div>
@@ -78,26 +87,104 @@
               </div>
             </div>
 
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">EMAIL</th>
-                  <th scope="col">ID</th>
-                  <th scope="col">GROUPS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{range $i, $u := .Users}}
+              <table class="table table-striped">
+                <thead>
                   <tr>
-                    <th scope="row">{{$i}}</th>
-                    <td>{{$u.Email}}</td>
-                    <td><a href={{printf "/users/%s" $u.ID}}>{{$u.ID}}</a></td>
-                    <td>{{$u.Groups}}</td>
+                    <th scope="col">#</th>
+                    <th scope="col">Name</th>
+                    <th scope="col">ID</th>
                   </tr>
-                {{end}}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {{range $i, $u := .Users}}
+                    <tr>
+                      <th scope="row">{{$i}}</th>
+                      <td>{{$u.Name}}</td>
+                      <td>
+                        <div class="copy-con-container">
+                          <a href={{printf "/users/%s" $u.ID}}>{{$u.ID}}</a>
+                          <button class="copy-icon" onclick="copyToClipboard(this)">
+                            <i class="far fa-copy"></i>
+                          </button>
+                        </div>
+                      </td>
+                      <td>
+                        <form action="/users/status" method="post">
+                          <input type="hidden" name="userID" id="userID" value="{{$u.ID}}">
+                          <input type="hidden" name="status" id="status" value="disabled">
+                          <button type="submit" class="btn btn-sm">
+                            <i class="fas fa-trash-alt"></i>
+                          </button>
+                        </form>
+                      </td>
+                    </tr>
+                  {{end}}
+                </tbody>
+              </table>
+
+              <style>
+                  .copy-icon {
+                    background: none;
+                    border: none;
+                    padding: 0;
+                    cursor: pointer;
+                    font-size: 1rem;
+                    color: #000;
+                    margin-left: 10px;
+                  }
+
+                  .copy-icon:focus {
+                    outline: none;
+                  }
+
+                  .success-icon {
+                    color: green;
+                  }
+                  .error-message{
+                    font-size: 15px;
+                    color: #e60303;
+                  }
+
+              </style>
+
+              <script>
+
+                function validateForm() {
+                  var name = document.getElementById("name").value;
+                  var identity = document.getElementById("identity").value;
+                  var secret = document.getElementById("secret").value;
+
+                  var nameError = document.getElementById("nameError");
+                  var identityError = document.getElementById("identityError");
+                  var secretError = document.getElementById("secretError");
+
+                  nameError.innerHTML = "";
+                  identityError.innerHTML = "";
+                  secretError.innerHTML = "";
+
+
+                  var isValid = true;
+
+                  if (name === "") {
+                    nameError.innerHTML = "Field Required!";
+                    isValid = false;
+                  }
+
+                  if (identity === "") {
+                    identityError.innerHTML = "Field Required!";
+                    isValid = false;
+                  }
+
+                  if (secret === "") {
+                    secretError.innerHTML = "Field Required!";
+                    isValid = false;
+                  }
+
+                  return isValid;
+                }
+              </script>
+            
+              
           </div>
           <!-- End of partial-->
 

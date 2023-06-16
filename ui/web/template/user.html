@@ -11,66 +11,7 @@
           {{template "navbar" .}}
 
           <!-- Partial goes here -->
-          <div class="col-md-4">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateUserModal">
-              Update
-            </button>
-            <div class="modal fade" id="updateUserModal" tabindex="-1" role="dialog" aria-labelledby="updateUserModalLabel" aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="updateUserModalLabel">Update User</h5>
-                  </div>
-                  <div class="modal-body">
-                    <form method="post">
-                      <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="text" class="form-control" name="email" id="email" aria-describedby="emailHelp" value="{{.User.Email}}">
-                        <div id="emailHelp" class="form-text">Enter user email.</div>
-                      </div>
-                      <div class="mb-3">
-                        <label for="groups" class="form-label">Group</label>
-                        <input type="text" class="form-control" name="groups" id="groups" aria-describedby="groupHelp" value="{{.User.Groups}}">
-                        <div id="groupHelp" class="form-text">Enter user group.</div>
-                      </div>
-                      <div class="mb-3">
-                        <label for="meatadata" class="form-label">Metadata</label>
-                        <input type="text" class="form-control" name="metadata" id="metadata" value="{{toJSON .User.Metadata}}">
-                        <div id="metadataHelp" class="form-text">Enter user metadata in JSON format.</div>
-                      </div>
-                      <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#updateUserPasswordModal">
-              Update User Password
-            </button>
-            <div class="modal fade" id="updateUserPasswordModal" tabindex="-1" role="dialog" aria-labelledby="updateUserPasswordModalLabel" aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="updateUserPasswordModalLabel">Update User Password</h5>
-                  </div>
-                  <div class="modal-body">
-                    <form method="post">
-                      <div class="mb-3">
-                        <label for="oldpass" class="form-label">Old Password</label>
-                        <input type="text" class="form-control" name="oldpass" id="oldpass" aria-describedby="oldpassHelp">
-                        <div id="oldpassHelp" class="form-text">Enter old password.</div>
-                      </div>
-                      <div class="mb-3">
-                        <label for="newpass" class="form-label">New Password</label>
-                        <input type="text" class="form-control" name="newpass" id="newpass" aria-describedby="newpassHelp">
-                        <div id="newpassHelp" class="form-text">Enter new password.</div>
-                      </div>
-                      <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div class="col-md-9">
             <table class="table table-striped">
               <thead>
                 <tr>
@@ -79,22 +20,84 @@
               </thead>
               <tbody>
                 <tr>
-                  <th>Email</th>
-                  <td>{{.User.Email}}</td>
+                  <th>Name</th>
+                  <td class="editable" contenteditable="false" data-field="name">
+                    {{.User.Name}}
+                  </td>
+                  <td>
+                    <button class="edit-btn" onclick="editRow('name')">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <div class="save-cancel-buttons" style="display: none;">
+                      <button class="save-btn" onclick="saveRow('name')">
+                        Save
+                      </button>
+                      <button class="cancel-btn" onclick="cancelEditRow('name')">
+                        Cancel
+                      </button>
+                    </div>
+                  </td>
                 </tr>
                 <tr>
                   <th>ID</th>
                   <td>{{.User.ID}}</td>
                 </tr>
                 <tr>
-                  <th>Groups</th>
-                  <td>{{.User.Groups}}</td>
+                  <th>Identity</th>
+                  <td class="editable" contenteditable="false" data-field="identity">
+                    {{.User.Credentials.Identity}}
+                    </td>
+                    <td>
+                      <button class="edit-btn" onclick="editRow('identity')">
+                        <i class="fas fa-pencil-alt"></i>
+                      </button>
+                      <div class="save-cancel-buttons" style="display: none;">
+                        <button class="save-btn" onclick="saveRow('identity')">
+                          Save
+                        </button>
+                        <button class="cancel-btn" onclick="cancelEditRow('identity')">
+                          Cancel
+                        </button>
+                      </div>
+                    </td>
+                </tr>
+                <tr>
+                  <th>Tags</th>
+                  <td class="editable" contenteditable="false" data-field="tags">
+                    {{.User.Tags}}
+                  </td>
+                  <td>
+                    <button class="edit-btn" onclick="editRow('tags')">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <div class="save-cancel-buttons" style="display: none;">
+                      <button class="save-btn" onclick="saveRow('tags')">
+                        Save
+                      </button>
+                      <button class="cancel-btn" onclick="cancelEditRow('tags')">
+                        Cancel
+                      </button>
+                    </div>
+                  </td>
                 </tr>
                 <tr>
                   <th>Metadata</th>
+                  <td class="editable" contenteditable="false" data-field="metadata">
+                    {{toJSON .User.Metadata}}
+                  </td>
                   <td>
-                    <pre>{{toJSON .User.Metadata}}</pre>
-                    </td>
+                    <button class="edit-btn" onclick="editRow('metadata')">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <div class="save-cancel-buttons" style="display: none;">
+                      <button class="save-btn" onclick="saveRow('metadata')">
+                        Save
+                      </button>
+                      <button class="cancel-btn" onclick="cancelEditRow('metadata')">
+                        Cancel
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -104,6 +107,135 @@
         </div>
       </div> <!-- /container -->
     </main>
+
+    <style>
+      button.edit-btn {
+        border: none;
+        background: none;
+        padding: 0;
+      }
+      .save-cancel-buttons button {
+        padding: 4px 4px; /* Adjust the padding values as per your preference */
+        margin-right: 10px; /* Add some margin between the buttons */
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .save-btn {
+        background-color: #4051b5;
+        color: #fff;
+      }
+      .cancel-btn {
+        background-color: #ebe5e5;
+        color: #070606;
+      }
+    </style>
+
+    <script>
+      function makeEditable(cell) {
+        cell.setAttribute("contenteditable", "true");
+        cell.dataset.originalContent = cell.innerHTML;
+      }
+
+      function makeUneditable(cell) {
+        const originalContent = cell.dataset.originalContent;
+        cell.innerHTML = originalContent;
+        cell.setAttribute("contenteditable", "false");
+      }
+
+      function showButtons(editBtn, saveCancelBtn) {
+        editBtn.style.display = "none";
+        saveCancelBtn.style.display = "inline-block";
+      }
+
+      function hideButtons(editBtn, saveCancelBtn) {
+        editBtn.style.display = "inline-block";
+        saveCancelBtn.style.display = "none";
+      }
+
+      function editRow(field) {
+        const cell = document.querySelector(`td[data-field='${field}']`);
+        const editBtn = cell.parentNode.querySelector(".edit-btn");
+        const saveCancelBtn = cell.parentNode.querySelector(".save-cancel-buttons"); 
+
+        // Make the row editable
+        makeEditable(cell);
+
+        // Hide the edit button and show save and cancel buttons
+        showButtons(editBtn, saveCancelBtn);
+      }
+
+      function saveRow(field) {
+        const cell = document.querySelector(`td[data-field='${field}']`);
+        const editBtn = cell.parentNode.querySelector(".edit-btn");
+        const saveCancelBtn = cell.parentNode.querySelector(".save-cancel-buttons"); 
+
+        // Get the updated value from the nameCell
+        const updatedValue = cell.textContent.trim();
+
+        // Send the updated value to the server using a POST request
+        let url;
+        let data;
+        if (field === 'name') {
+          url = '/users/{{.User.ID}}';
+          data = { [field]: updatedValue };
+        }else if(field == 'metadata'){
+          url = '/users/{{.User.ID}}';
+          data = { [field]: JSON.parse(updatedValue) };
+        }else if (field === 'identity'){
+          url = '/users/{{.User.ID}}/identity';
+          data = { [field]: updatedValue };
+        } else if (field === 'tags') {
+          url = '/users/{{.User.ID}}/tags';
+          data = { [field]:JSON.parse(updatedValue)};
+        }
+
+        if (url) {
+          // const data = { [field]: updatedValue };
+
+          fetch(url, {
+            method: "POST",
+            body: JSON.stringify(data),
+            headers: {
+              "Content-Type": "application/json"
+            }
+          })
+          .then(response => {
+            if (response.ok) {
+              // Make the row uneditable
+              cell.setAttribute("contenteditable", "false");
+
+              // Show edit button and hide save and cancel buttons
+              hideButtons(editBtn, saveCancelBtn);
+            }
+          })
+          .catch(error => {
+            // Restore original values in the row if there is an error
+            makeUneditable(cell);
+
+            // Show edit button and hide save and cancel buttons
+            hideButtons(editBtn, saveCancelBtn);
+
+            console.error("Error", error);
+          });
+        } else {
+          console.error("Invalid field:", field);
+        }
+      }
+
+      function cancelEditRow(field) {
+        const cell = document.querySelector(`td[data-field='${field}']`);
+        const editBtn = cell.parentNode.querySelector(".edit-btn");
+        const saveCancelBtn = cell.parentNode.querySelector(".save-cancel-buttons"); 
+        // Restore original values in the row
+        makeUneditable(cell);
+
+        // Show the edit button and hide the save and cancel buttons
+        hideButtons(editBtn, saveCancelBtn);
+      }
+
+    </script>
 
     {{template "footer"}}
 
