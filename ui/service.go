@@ -576,16 +576,28 @@ func (gs *uiService) ListChannelsByThing(ctx context.Context, token, id string) 
 		return []byte{}, err
 	}
 
+	filter := sdk.PageMetadata{
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
+	}
+	allchsPage, err := gs.sdk.Channels(filter, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	data := struct {
 		NavbarActive string
 		ID           string
 		Thing        sdk.Thing
 		Channels     []sdk.Channel
+		AllChannels  []sdk.Channel
 	}{
 		"things",
 		id,
 		thing,
 		chsPage.Channels,
+		allchsPage.Channels,
 	}
 
 	var btpl bytes.Buffer
@@ -640,16 +652,28 @@ func (gs *uiService) ListThingsByChannel(ctx context.Context, token, id string) 
 		return []byte{}, err
 	}
 
+	filter := sdk.PageMetadata{
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
+	}
+	allthsPage, err := gs.sdk.Things(filter, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	data := struct {
 		NavbarActive string
 		ID           string
 		Channel      sdk.Channel
 		Things       []sdk.Thing
+		AllThings    []sdk.Thing
 	}{
 		"channels",
 		id,
 		channel,
 		thsPage.Things,
+		allthsPage.Things,
 	}
 
 	var btpl bytes.Buffer
@@ -680,16 +704,28 @@ func (gs *uiService) ListGroupMembers(ctx context.Context, token, id string) ([]
 		return []byte{}, err
 	}
 
+	filter := sdk.PageMetadata{
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
+	}
+	users, err := gs.sdk.Users(filter, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	data := struct {
 		NavbarActive string
 		ID           string
 		Group        sdk.Group
 		Members      []sdk.User
+		Users        []sdk.User
 	}{
 		"groups",
 		id,
 		group,
 		members.Members,
+		users.Users,
 	}
 
 	var btpl bytes.Buffer
@@ -842,16 +878,30 @@ func (gs *uiService) ListPolicies(ctx context.Context, token string) ([]byte, er
 		return []byte{}, err
 	}
 
+	grpPage, err := gs.sdk.Groups(filter, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	users, err := gs.sdk.Users(filter, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	data := struct {
 		NavbarActive string
 		Policies     []sdk.Policy
+		Groups       []sdk.Group
+		Users        []sdk.User
 	}{
 		"policies",
 		plcPage.Policies,
+		grpPage.Groups,
+		users.Users,
 	}
 
 	var btpl bytes.Buffer
-	if err := tpl.ExecuteTemplate(&btpl, "groups", data); err != nil {
+	if err := tpl.ExecuteTemplate(&btpl, "policies", data); err != nil {
 		println(err.Error())
 	}
 

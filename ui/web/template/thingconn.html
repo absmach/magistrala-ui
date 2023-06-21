@@ -1,8 +1,9 @@
 {{define "thingconn"}}
 <!doctype html>
 <html lang="en">
-  {{template "header"}}
-
+  <head>
+    {{template "header"}}
+  </head>
   <body>
     <main role="main">
       <div class="container-fluid">
@@ -24,15 +25,23 @@
                   <div class="modal-body">
                     <form action="/things/{{.Thing.ID}}/connect" method="post">
                       <div class="mb-3">
-                        <label for="name" class="form-label">Channel ID</label>
-                        <input type="text" class="form-control" name="channelID" id="channelID" aria-describedby="chanelIDHelp">
-                        <input type="text" class="invisible" name="thingID" id="thingID" aria-describedby="thingIDHelp" value="{{.Thing.ID}}">
-                        <div id="channelIDHelp" class="form-text">Enter channel ID.</div>
+                        <label for="channelID" class="form-label">Channel</label>
+                        <input type="text" name="channelFilter" id="channelFilter" placeholder="Filter by Channel ID" oninput="filterItem(this.value,'channelID')">
+                        <select class="form-select" name="channelID" id="channelID" required>
+                          <option value="">...</option>
+                          {{range .AllChannels}}
+                            <option value="{{.ID}}">{{.Name}}</option>
+                          {{end}}
+                        </select>
+                        <div id="channelIDHelp" class="form-text">Select a channel.</div>
                       </div>
                       <div class="mb-3">
                         <label for="actions" class="form-label">Actions</label>
-                        <input type="text" class="form-control" name="actions" id="actions" aria-describedby="actionsHelp">
-                        <div id="actionsHelp" class="form-text">Enter thing actions.</div>
+                        <select class="form-select" name="actions" id="actions" aria-describedby="actionsHelp" multiple required>
+                          <option value="m_read">m_read</option>
+                          <option value="m_write">m_write</option>
+                        </select>
+                        <div id="actionsHelp" class="form-text">Select Actions (multiple selections allowed).</div>
                       </div>
                       <button type="submit" class="btn btn-primary">Submit</button>
                     </form>
@@ -97,6 +106,20 @@
         </div>
       </div> <!-- /container -->
     </main>
+    <script>
+      function filterItem(filterValue, selectId) {
+        const itemSelect = document.getElementById(selectId);
+        const options = itemSelect.getElementsByTagName("option");
+
+        for (let i = 0; i < options.length; i++) {
+          const option = options[i];
+          const itemId = option.value;
+          const itemName = option.innerHTML;
+          const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
+          option.style.display = shouldShow ? "" : "none";
+        }
+      }
+    </script>
 
     {{template "footer"}}
 

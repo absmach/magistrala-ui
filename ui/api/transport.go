@@ -991,12 +991,8 @@ func decodeConnectThing(_ context.Context, r *http.Request) (interface{}, error)
 	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
-	chanID := r.Form.Get("channelID")
+	chanID := bone.GetValue(r, "id")
 	thingID := r.Form.Get("thingID")
-	var actions []string
-	if err := json.Unmarshal([]byte(r.Form.Get("actions")), &actions); err != nil {
-		return nil, err
-	}
 	token, err := getAuthorization(r)
 	if err != nil {
 		return nil, err
@@ -1004,7 +1000,7 @@ func decodeConnectThing(_ context.Context, r *http.Request) (interface{}, error)
 	connIDs := sdk.ConnectionIDs{
 		ChannelIDs: []string{chanID},
 		ThingIDs:   []string{thingID},
-		Actions:    actions,
+		Actions:    r.PostForm["actions"],
 	}
 	req := connectThingReq{
 		token:   token,
@@ -1019,11 +1015,7 @@ func decodeConnectChannel(_ context.Context, r *http.Request) (interface{}, erro
 		return nil, err
 	}
 	chanID := r.Form.Get("channelID")
-	thingID := r.Form.Get("thingID")
-	var actions []string
-	if err := json.Unmarshal([]byte(r.Form.Get("actions")), &actions); err != nil {
-		return nil, err
-	}
+	thingID := bone.GetValue(r, "id")
 	token, err := getAuthorization(r)
 	if err != nil {
 		return nil, err
@@ -1031,7 +1023,7 @@ func decodeConnectChannel(_ context.Context, r *http.Request) (interface{}, erro
 	connIDs := sdk.ConnectionIDs{
 		ChannelIDs: []string{chanID},
 		ThingIDs:   []string{thingID},
-		Actions:    actions,
+		Actions:    r.PostForm["actions"],
 	}
 	req := connectChannelReq{
 		token:   token,
@@ -1236,10 +1228,7 @@ func decodeAssignRequest(_ context.Context, r *http.Request) (interface{}, error
 	}
 
 	memberid := r.PostFormValue("memberID")
-	var memberType []string
-	if err := json.Unmarshal([]byte(r.PostFormValue("Type")), &memberType); err != nil {
-		return nil, err
-	}
+	memberType := r.PostForm["Type"]
 
 	req := assignReq{
 		token:    token,
@@ -1256,8 +1245,8 @@ func decodeUnassignRequest(_ context.Context, r *http.Request) (interface{}, err
 	if err != nil {
 		return nil, err
 	}
-	MemberId := r.PostFormValue("memberId")
-	memberType := r.PostFormValue("Type")
+	MemberId := r.PostFormValue("memberID")
+	memberType := r.PostForm["Type"]
 
 	req := unassignReq{
 		token:    token,
@@ -1301,15 +1290,11 @@ func decodeAddPolicyRequest(_ context.Context, r *http.Request) (interface{}, er
 	if err != nil {
 		return nil, err
 	}
-	var actions []string
-	if err := json.Unmarshal([]byte(r.PostFormValue("actions")), &actions); err != nil {
-		return nil, err
-	}
 
 	policy := sdk.Policy{
 		Subject: r.PostFormValue("subject"),
 		Object:  r.PostFormValue("object"),
-		Actions: actions,
+		Actions: r.PostForm["actions"],
 	}
 
 	req := addPolicyReq{

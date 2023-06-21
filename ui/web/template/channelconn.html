@@ -24,15 +24,23 @@
                   <div class="modal-body">
                     <form action="/channels/{{.Channel.ID}}/connectThing" method="post">
                       <div class="mb-3">
-                        <label for="thingID" class="form-label">Thing ID</label>
-                        <input type="text" class="form-control" name="thingID" id="thingID" aria-describedby="thingIDHelp">
-                        <input type="text" class="invisible" name="channelID" id="channelID" aria-describedby="channelIDHelp" value="{{.Channel.ID}}">
-                        <div id="thingIDHelp" class="form-text">Enter Thing ID.</div>
+                        <label for="thingID" class="form-label">Thing</label>
+                        <input type="text" name="thingFilter" id="thingFilter" placeholder="Filter by thing ID" oninput="filterItem(this.value,'thingID')">
+                        <select class="form-select" name="thingID" id="thingID" required>
+                          <option value="">...</option>
+                          {{range .AllThings}}
+                            <option value="{{.ID}}">{{.Name}}</option>
+                          {{end}}
+                        </select>
+                        <div id="thingIDHelp" class="form-text">Select a thing.</div>
                       </div>
                       <div class="mb-3">
                         <label for="actions" class="form-label">Actions</label>
-                        <input type="text" class="form-control" name="actions" id="actions" aria-describedby="actionsHelp">
-                        <div id="actionsHelp" class="form-text">Enter thing actions.</div>
+                        <select class="form-select" name="actions" id="actions" aria-describedby="actionsHelp" multiple required>
+                          <option value="m_read">m_read</option>
+                          <option value="m_write">m_write</option>
+                        </select>
+                        <div id="actionsHelp" class="form-text">Select Actions (multiple selections allowed).</div>
                       </div>
                       <button type="submit" class="btn btn-primary">Submit</button>
                     </form>
@@ -56,7 +64,7 @@
                     <form method="post" enctype="multipart/form-data" action="/connect">
                       <div class="form-group">
                         <label for="connectThingsfile">Add csv file containing things ID's.</label>
-                        <input type="file" class="form-control-file" id="ConnectThingsFile" name="ConnectThingsFile">
+                        <input type="file" class="form-control-file" id="ConnectThingsFile" name="ConnectThingsFile" required>
                         <button type="submit" value="upload" class="btn btn-primary">Submit</button>
                       </div>
                     </form>
@@ -101,14 +109,14 @@
                     <td>{{$t.Name}}</td>
                     <td><a href={{printf "/things/%s" $t.ID}}>{{$t.ID}}</a></td>
                     <td>
-                      <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#sendMessageModal{{$i}}{{$i}}">
+                      <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#sendMessageModal{{$i}}">
                         Send Message
                       </button>
                       <div class="modal fade" id="sendMessageModal{{$i}}" tabindex="-1" role="dialog" aria-labelledby="sendMessageModalLabel{{$i}}" aria-hidden="true">
                         <div class="modal-dialog" role="document">
                           <div class="modal-content">
                             <div class="modal-header">
-                              <h5 class="modal-title" id="sendMessageModalLabel{{$i}}{{$i}}">Send Message</h5>
+                              <h5 class="modal-title" id="sendMessageModalLabel{{$i}}">Send Message</h5>
                             </div>
                             <div class="modal-body">
                               <form action="/messages" method="post">
@@ -143,6 +151,20 @@
         </div>
       </div> <!-- /container -->
     </main>
+    <script>
+      function filterItem(filterValue, selectId) {
+        const itemSelect = document.getElementById(selectId);
+        const options = itemSelect.getElementsByTagName("option");
+
+        for (let i = 0; i < options.length; i++) {
+          const option = options[i];
+          const itemId = option.value;
+          const itemName = option.innerHTML;
+          const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
+          option.style.display = shouldShow ? "" : "none";
+        }
+      }
+    </script>
 
     {{template "footer"}}
 

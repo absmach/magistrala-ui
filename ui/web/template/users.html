@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <link rel="stylesheet" type="text/css" href="/css/slider.css">
     {{template "header"}}
   </head>
  
@@ -33,28 +32,28 @@
                     <form method="post" onsubmit="return validateForm()">
                       <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control" name="name" id="name" aria-describedby="nameHelp" placeholder="User Name">
-                        <div id="nameError" class="error-message"></div>
+                        <input type="text" class="form-control" name="name" id="name" placeholder="User Name" required>
                       </div>
                       <div class="mb-3">
                         <label for="identity" class="form-label">Identity</label>
-                        <input type="text" class="form-control" name="identity" id="identity" aria-describedby="identityHelp" placeholder="User Identity">
-                        <div id="identityError" class="error-message"></div>
+                        <input type="text" class="form-control" name="identity" id="identity" placeholder="User Identity" required>
                       </div>
                       <div class="mb-3">
                         <label for="secret" class="form-label">Secret</label>
-                        <input type="text" class="form-control" name="secret" id="secret" aria-describedby="secretHelp" placeholder="User Secret">
+                        <input type="text" class="form-control" name="secret" id="secret" placeholder="User Secret" required>
                         <div id="secretError" class="error-message"></div>
                       </div>
                       <div class="mb-3">
                         <label for="tags" class="form-label">Tags</label>
                         <input type="text" class="form-control" name="tags" id="tags" aria-describedby="tagHelp" value="[]">
                         <div id="tagHelp" class="form-text">Enter user tags as a string slice.</div>
+                        <div id="tagsError" class="error-message"></div>
                       </div>
                       <div class="mb-3">
                         <label for="metadata" class="form-label">Metadata</label>
                         <input type="text" class="form-control" name= "metadata" id="metadata"  value="{}">
                         <div id="metadataHelp" class="form-text">Enter user metadata in JSON format.</div>
+                        <div id="metadataError" class="error-message"></div>
                       </div>
                       <button type="submit" class="btn btn-primary">Submit</button>
                     </form>
@@ -78,7 +77,7 @@
                     <form method="post" enctype="multipart/form-data" action="/users/bulk">
                       <div class="form-group">
                         <label for="usersFile">Add csv file containing users names and passwords with metadata. The metadata field can be empty</label>
-                        <input type="file" class="form-control-file" id="usersFile" name="usersFile">
+                        <input type="file" class="form-control-file" id="usersFile" name="usersFile" required>
                         <button type="submit" value="upload" class="btn btn-primary">Submit</button>
                       </div>
                     </form>
@@ -140,6 +139,7 @@
                   .success-icon {
                     color: green;
                   }
+                  
                   .error-message{
                     font-size: 15px;
                     color: #e60303;
@@ -150,33 +150,45 @@
               <script>
 
                 function validateForm() {
-                  var name = document.getElementById("name").value;
-                  var identity = document.getElementById("identity").value;
                   var secret = document.getElementById("secret").value;
+                  var tagsInput = document.getElementById("tags").value;
+                  var metadataInput = document.getElementById("metadata").value;
 
-                  var nameError = document.getElementById("nameError");
-                  var identityError = document.getElementById("identityError");
+
                   var secretError = document.getElementById("secretError");
+                  var tagsError = document.getElementById("tagsError");
+                  var metadataError = document.getElementById("metadataError");
 
-                  nameError.innerHTML = "";
-                  identityError.innerHTML = "";
+                  var tags;
+                  var metadata;
+
                   secretError.innerHTML = "";
+                  tagsError.innerHTML = "";
+                  metadataError.innerHTML = "";
 
 
                   var isValid = true;
 
-                  if (name === "") {
-                    nameError.innerHTML = "Field Required!";
+                  if (secret.length <8){
+                    secretError.innerHTML = "Secret must have a minimum of 8 characters";
+                    isValid = false;
+                  }
+                  try{
+                    tags = JSON.parse(tagsInput);
+                  }catch(error){
+                    tagsError.innerHTML = "Please enter valid tags as a string array!";
                     isValid = false;
                   }
 
-                  if (identity === "") {
-                    identityError.innerHTML = "Field Required!";
+                  if (!Array.isArray(tags) || !tags.every(function(tag) {return typeof tag === "string";})){
+                    tagsError.innerHTML = "Tags must be a string array!";
                     isValid = false;
                   }
 
-                  if (secret === "") {
-                    secretError.innerHTML = "Field Required!";
+                  try{
+                    metadata = JSON.parse(metadataInput);
+                  }catch(error){
+                    metadataError.innerHTML = "Please enter valid metadata in JSON format!";
                     isValid = false;
                   }
 

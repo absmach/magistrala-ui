@@ -499,7 +499,7 @@ type assignReq struct {
 	token    string
 	groupID  string
 	Type     []string `json:"Type,omitempty"`
-	MemberID string   `json:"member_id,omitempty"`
+	MemberID string   `json:"memberID,omitempty"`
 }
 
 func (req assignReq) validate() error {
@@ -517,8 +517,8 @@ func (req assignReq) validate() error {
 type unassignReq struct {
 	token    string
 	groupID  string
-	Type     string `json:"type,omitempty"`
-	MemberID string `json:"member_id"`
+	Type     []string `json:"type,omitempty"`
+	MemberID string   `json:"memberId,omitempty"`
 }
 
 func (req unassignReq) validate() error {

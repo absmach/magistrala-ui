@@ -12,26 +12,6 @@
 
         <div class="col-md-9">
           <a class="btn btn-primary" href="/channels/{{.Channel.ID}}/things" role="button" >Connections</a>
-          <div class="modal fade" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="connectModal" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="connectModal">Connect</h5>
-                </div>
-                <div class="modal-body">
-                  <form action="/connect" method="post">
-                    <div class="mb-3">
-                      <label for="thingID" class="form-label">Thing ID</label>
-                      <input type="text" class="form-control" name="thingID" id="thingID" aria-describedby="thingIDHelp">
-                      <input type="text" class="invisible" name="chanID" id="chanID" aria-describedby="channelIDHelp" value="{{.Channel.ID}}">
-                      <div id="thingIDHelp" class="form-text">Enter thing ID.</div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                  </form>
-                </div>
-              </div>
-            </div>
-          </div>
           <table class="table table-striped">
             <thead>
               <tr>
@@ -104,6 +84,7 @@
               </tr>
             </tbody>
           </table>
+          <div id="error-message" class="error-message"></div>
         </div>
       </div>
     </div>
@@ -130,6 +111,10 @@
       background-color: #ebe5e5;
       color: #070606;
     }
+    .error-message {
+        color: red;
+        display: block;
+      }
   </style>
 
   <script>
@@ -169,6 +154,9 @@
       const cell = document.querySelector(`td[data-field='${field}']`);
       const editBtn = cell.parentNode.querySelector(".edit-btn");
       const saveCancelBtn = cell.parentNode.querySelector(".save-cancel-buttons");
+      const errorMessage = document.getElementById("error-message");
+
+      errorMessage.textContent= '';
 
       //Restore original values in the row
       makeUneditable(cell);
@@ -181,6 +169,7 @@
       const cell = document.querySelector(`td[data-field='${field}']`);
       const editBtn = cell.parentNode.querySelector(".edit-btn");
       const saveCancelBtn = cell.parentNode.querySelector(".save-cancel-buttons");
+      const errorMessage = document.getElementById("error-message");
 
       //Get the updated value from the nameCell
       const updatedValue = cell.textContent.trim();
@@ -192,8 +181,14 @@
         url = '/channels/{{.Channel.ID}}';
         data = {[field]: updatedValue};
       }else if(field === 'metadata') {
-        url = '/channels/{{.Channel.ID}}';
-        data = {[field]: JSON.parse(updatedValue)};
+        try {
+            const metadata = JSON.parse(updatedValue);
+            url = '/channels/{{.Channel.ID}}';
+            data = { [field]: metadata };
+          } catch (error) {
+            errorMessage.textContent = 'Metadata must be a valid JSON object!';
+            return;
+          }
       }
 
       if (url) {

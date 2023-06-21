@@ -20,15 +20,17 @@
     <div class="container">
       <div class="form-box">
         <h1>LOGIN</h1>
-        <form method="post">
+        <form id="form" method="post">
           <div class="input-group">
             <div class="input-field">
               <i class="fas fa-solid fa-envelope"></i>
               <input type="email" name="username" id="username" placeholder="Email Address">
+              <div class="error-message"></div>
             </div>
             <div class="input-field">
               <i class="fas fa-solid fa-lock"></i>
               <input type="password" name="password" id="password" placeholder="Password">
+              <div class="error-message"></div>
             </div>
           </div>
           <div class="btn-field">

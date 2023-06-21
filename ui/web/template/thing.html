@@ -13,26 +13,6 @@
           <!-- Partial goes here -->
           <div class="col-md-9">
             <a class="btn btn-primary" href="/things/{{.Thing.ID}}/channels" role="button">Connections</a>
-            <div class="modal fade" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="connectModal" aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="connectModal">Connect</h5>
-                  </div>
-                  <div class="modal-body">
-                    <form action="/connect" method="post">
-                      <div class="mb-3">
-                        <label for="name" class="form-label">Channel ID</label>
-                        <input type="text" class="form-control" name="chanID" id="chanID" aria-describedby="chanelIDHelp">
-                        <input type="text" class="invisible" name="thingID" id="thingID" aria-describedby="thingIDHelp" value="{{.Thing.ID}}">
-                        <div id="channelIDHelp" class="form-text">Enter channel ID.</div>
-                      </div>
-                      <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
             <table class="table table-striped">
               <thead>
                 <tr>
@@ -141,6 +121,7 @@
                 </tr>
               </tbody>
             </table>
+            <div id="error-message" class="error-message"></div>
           </div>
           <!-- End of partial-->
 
@@ -154,6 +135,7 @@
         background: none;
         padding: 0;
       }
+
       .save-cancel-buttons button {
         padding: 4px 4px; /* Adjust the padding values as per your preference */
         margin-right: 10px; /*Add some margin between the buttons */
@@ -162,13 +144,20 @@
         font-weight: bold;
         cursor: pointer;
       }
+
       .save-btn {
         background-color: #4051b5;
         color: #fff;
       }
+
       .cancel-btn {
         background-color: #ebe5e5;
         color: #070606;
+      }
+      
+      .error-message {
+        color: red;
+        display: block;
       }
     </style>
     
@@ -210,6 +199,7 @@
         const cell = document.querySelector(`td[data-field='${field}']`);
         const editBtn = cell.parentNode.querySelector(".edit-btn");
         const saveCancelBtn = cell.parentNode.querySelector(".save-cancel-buttons"); 
+        const errorMessage = document.getElementById("error-message");
 
         // Get the updated value from the nameCell
         const updatedValue = cell.textContent.trim();
@@ -221,18 +211,40 @@
           url = '/things/{{.Thing.ID}}';
           data = { [field]: updatedValue };
         }else if(field == 'metadata'){
-          url = '/things/{{.Thing.ID}}';
-          data = { [field]: JSON.parse(updatedValue) };
+          try {
+            const metadata = JSON.parse(updatedValue);
+            url = '/things/{{.Thing.ID}}';
+            data = { [field]: metadata };
+          } catch (error) {
+            errorMessage.textContent = 'Metadata must be a valid JSON object!';
+            return;
+          }
         }else if (field === 'secret'){
+          if (updatedValue.length<8){
+            errorMessage.textContent= 'Secret must have a minimum of 8 characters!';
+            return;
+          }
           url = '/things/{{.Thing.ID}}/secret';
           data = { [field]: updatedValue };
         } else if (field === 'tags') {
-          url = '/things/{{.Thing.ID}}/tags';
-          data = { [field]:JSON.parse(updatedValue)};
+          try {
+            const tags = JSON.parse(updatedValue);
+            if (!Array.isArray(tags) || !tags.every(function(tag) {return typeof tag === "string";})){
+              errorMessage.textContent = 'Tags must be a string array!';
+              return;
+            }
+            url = '/things/{{.Thing.ID}}/tags';
+            data = { [field]:JSON.parse(updatedValue)};
+          } catch (error) {
+            errorMessage.textContent = 'Tags must be a valid string array';
+            return;
+          }
         } else if (field === 'owner') {
           url = '/things/{{.Thing.ID}}/owner';
           data = {[field]:updatedValue};
         }
+
+        errorMessage.textContent = '';
 
         if (url) {
           fetch(url, {
@@ -268,7 +280,11 @@
       function cancelEditRow(field) {
         const cell = document.querySelector(`td[data-field='${field}']`);
         const editBtn = cell.parentNode.querySelector(".edit-btn");
-        const saveCancelBtn = cell.parentNode.querySelector(".save-cancel-buttons"); 
+        const saveCancelBtn = cell.parentNode.querySelector(".save-cancel-buttons");
+        const errorMessage = document.getElementById("error-message");
+        
+        errorMessage.textContent= '';
+
         // Restore original values in the row
         makeUneditable(cell);
 

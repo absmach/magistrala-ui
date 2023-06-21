@@ -323,7 +323,9 @@ func createThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			html: res,
+			code:    http.StatusFound,
+			html:    res,
+			headers: map[string]string{"Location": "/things"},
 		}, err
 	}
 }
@@ -510,7 +512,9 @@ func createChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			html: res,
+			code:    http.StatusFound,
+			html:    res,
+			headers: map[string]string{"Location": "/channels"},
 		}, err
 	}
 }
@@ -869,7 +873,7 @@ func unassignEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.Unassign(ctx, req.token, req.groupID, req.MemberID, []string{req.Type})
+		res, err := svc.Unassign(ctx, req.token, req.groupID, req.MemberID, req.Type)
 		if err != nil {
 			return nil, err
 		}

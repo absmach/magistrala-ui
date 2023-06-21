@@ -1,7 +1,9 @@
 {{define "groupconn"}}
 <!doctype html>
 <html lang="en">
-  {{template "header"}}
+  <head>
+    {{template "header"}}
+  </head>
 
   <body>
     <main role="main">
@@ -25,13 +27,26 @@
                     <form action="/groups/{{.Group.ID}}/members" method="post">
                       <div class="mb-3">
                         <label for="memberID" class="form-label">Member ID</label>
-                        <input type="text" class="form-control" name="memberID" id="memberID" aria-describedby="memberIDHelp">
-                        <div id="memberIDHelp" class="form-text">Enter member ID (channel, thing or user).</div>
+                        <input type="text" name="memberFilter" id="memberFilterAssign" placeholder="Filter by member ID" oninput="filterItem(this.value, 'memberIDAssign')">
+                        <select class="form-select" name="memberID" id="memberIDAssign" required>
+                          <option value="">...</option>
+                          {{range .Users}}
+                            <option value="{{.ID}}">{{.Name}}</option>
+                          {{end}}
+                        </select>
                       </div>
                       <div class="mb-3">
                         <label for="Type" class="form-label">Member Type</label>
-                        <input type="text" class="form-control" name="Type" id="Type" aria-describedby="TypeHelp">
-                        <div id="TypeHelp" class="form-text">Enter member Type.</div>
+                        <select class="form-control" name="Type" id="Type" aria-describedby="TypeHelp" multiple required>
+                          <option value="g_update">g_update</option>
+                          <option value="g_list">g_list</option>
+                          <option value="g_delete">g_delete</option>
+                          <option value="g_add">g_add</option>
+                          <option value="c_update">c_update</option>
+                          <option value="c_list">c_list</option>
+                          <option value="c_delete">c_delete</option>
+                        </select>
+                        <div id="TypeHelp" class="form-text">Select member Type.</div>
                       </div>
                       <button type="submit" class="btn btn-primary">Submit</button>
                     </form>
@@ -52,13 +67,26 @@
                     <form action="/groups/{{.Group.ID}}/unassign" method="post">
                       <div class="mb-3">
                         <label for="memberId" class="form-label">Member ID</label>
-                        <input type="text" class="form-control" name="memberId" id="memberId" aria-describedby="memberIdHelp">
-                        <div id="memberIdHelp" class="form-text">Enter member ID.</div>
+                        <input type="text" name="memberFilter" id="memberFilterUnassign" placeholder="Filter by member ID" oninput="filterItem(this.value , 'memberIDUnassign')">
+                        <select class="form-select" name="memberID" id="memberIDUnassign" required >
+                          <option value="">...</option>
+                          {{range .Members}}
+                            <option value="{{.ID}}">{{.Name}}</option>
+                          {{end}}
+                        </select>
                       </div>
                       <div class="mb-3">
                         <label for="Type" class="form-label">Member Type</label>
-                        <input type="text" class="form-control" name="Type" id="Type" aria-describedby="TypeHelp">
-                        <div id="TypeHelp" class="form-text">Enter member Type.</div>
+                        <select class="form-control" name="Type" id="Type" aria-describedby="TypeHelp" multiple required>
+                          <option value="g_update">g_update</option>
+                          <option value="g_list">g_list</option>
+                          <option value="g_delete">g_delete</option>
+                          <option value="g_add">g_add</option>
+                          <option value="c_update">c_update</option>
+                          <option value="c_list">c_list</option>
+                          <option value="c_delete">c_delete</option>
+                        </select>
+                        <div id="TypeHelp" class="form-text">Select member Type.</div>
                       </div>
                       <button type="submit" class="btn btn-danger btn-sm">Unassign</button>
                     </form>
@@ -114,6 +142,20 @@
         </div>
       </div> <!-- /container -->
     </main>
+    <script>
+      function filterItem(filterValue, selectId) {
+        const itemSelect = document.getElementById(selectId);
+        const options = itemSelect.getElementsByTagName("option");
+
+        for (let i = 0; i < options.length; i++) {
+          const option = options[i];
+          const itemId = option.value;
+          const itemName = option.innerHTML;
+          const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
+          option.style.display = shouldShow ? "" : "none";
+        }
+      }
+    </script>
 
     {{template "footer"}}
 

@@ -2,8 +2,7 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <link rel="stylesheet" type="text/css" href="/css/slider.css">
-    {{template "header"}}
+   {{template "header"}}
   </head>
 
   <body>
@@ -32,21 +31,27 @@
                     <form method="post" onsubmit="return validateForm()">
                       <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control" name="name" id="name" aria-describedby="nameHelp" placeholder="Group Name">
-                        <div id="nameError" class="error-message"></div>
+                        <input type="text" class="form-control" name="name" id="name" placeholder="Group Name" required>
                       </div>
                       <div class="mb-3">
                         <label for="description" class="form-label">Description</label>
-                        <input type="text" class="form-control" name="description" id="description" aria-describedby="descriptionHelp" placeholder="Group Description">
+                        <input type="text" class="form-control" name="description" id="description" placeholder="Group Description">
                       </div>
                       <div class="mb-3">
-                        <label for="parentID" class="form-label">parent ID</label>
-                        <input type="text" class="form-control" name="parentID" id="parentID" aria-describedby="parentIDHelp" placeholder="Parent ID">
+                        <label for="parentID" class="form-label">Parent ID</label>
+                        <input type="text" name="parentFilter" id="parentFilter" placeholder="Filter by parent ID" oninput="filterItem(this.value,'parentID')">
+                        <select class="form-select" name="parentID" id="parentID">
+                          <option value="">...</option>
+                          {{range .Groups}}
+                            <option value="{{.ID}}">{{.Name}}</option>
+                          {{end}}
+                        </select>
                       </div>
                       <div class="mb-3">
-                        <label for="meatadata" class="form-label">Metadata</label>
+                        <label for="metadata" class="form-label">Metadata</label>
                         <input type="text" class="form-control" name= "metadata" id="metadata" value="{}">
                         <div id="metadataHelp" class="form-text">Enter groups metadata in JSON format.</div>
+                        <div id="metadataError" class="error-message"></div>
                       </div>
                       <button type="submit" class="btn btn-primary">Submit</button>
                     </form>
@@ -108,6 +113,7 @@
               .success-icon {
                 color: green;
               }
+              
               .error-message{
                 font-size: 15px;
                 color: #e60303;
@@ -116,17 +122,32 @@
           </style>
 
           <script>
+            function filterItem(filterValue, selectId) {
+              const itemSelect = document.getElementById(selectId);
+              const options = itemSelect.getElementsByTagName("option");
+
+              for (let i = 0; i < options.length; i++) {
+                const option = options[i];
+                const itemId = option.value;
+                const itemName = option.innerHTML;
+                const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
+                option.style.display = shouldShow ? "" : "none";
+              }
+            }
             function validateForm() {
-              var name = document.getElementById("name").value;
+              var metadataInput = document.getElementById("metadata").value;
+              var metadataError = document.getElementById("metadataError");
+              var metadata;
 
-              var nameError = document.getElementById("nameError");
-
-              nameError.innerHTML="";
+              metadataError.innerHTML = "";
 
               var isValid = true;
-              if (name==="") {
-                nameError.innerHTML= "Field Required!";
-                isValid = false
+
+              try {
+                metadata = JSON.parse(metadataInput);
+              }catch(error){
+                metadataError.innerHTML = "Please enter a valid metadaat in JSON  format!";
+                isValid = false;
               }
 
               return isValid;

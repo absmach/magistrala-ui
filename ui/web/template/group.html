@@ -86,6 +86,7 @@
                 </tr>
               </tbody>
             </table>
+            <div id="error-message" class="error-message"></div>
           </div>
         </div>
       </div>
@@ -96,6 +97,7 @@
         background: none;
         padding: 0;
       }
+
       .save-cancel-buttons button {
         padding: 4px 4px;
         margin-right: 10px;
@@ -104,13 +106,20 @@
         font-weight: bold;
         cursor: pointer;
       }
+
       .save-btn {
         background-color: #4051b5;
         color: #fff;
       }
+
       .cancel-btn {
         background-color: #ebe5e5;
         color: #070606;
+      }
+      
+      .error-message {
+        color: red;
+        display: block;
       }
     </style>
     <script>
@@ -150,6 +159,9 @@
         const cell = document.querySelector(`td[data-field='${field}']`);
         const editBtn = cell.parentNode.querySelector(".edit-btn");
         const saveCancelBtn = cell.parentNode.querySelector(".save-cancel-buttons");
+        const errorMessage = document.getElementById("error-message");
+
+        errorMessage.textContent= '';
   
         //Restore original values in the row
         makeUneditable(cell);
@@ -162,6 +174,7 @@
         const cell = document.querySelector(`td[data-field='${field}']`);
         const editBtn = cell.parentNode.querySelector(".edit-btn");
         const saveCancelBtn = cell.parentNode.querySelector(".save-cancel-buttons");
+        const errorMessage = document.getElementById("error-message");
   
         //Get the updated value from the nameCell
         const updatedValue = cell.textContent.trim();
@@ -173,8 +186,14 @@
           url = '/groups/{{.Group.ID}}';
           data = {[field]: updatedValue};
         }else if(field === 'metadata') {
-          url = '/groups/{{.Group.ID}}';
-          data = {[field]: JSON.parse(updatedValue)};
+          try {
+            const metadata = JSON.parse(updatedValue);
+            url = '/groups/{{.Group.ID}}';
+            data = { [field]: metadata };
+          } catch (error) {
+            errorMessage.textContent = 'Metadata must be a valid JSON object!';
+            return;
+          }
         }
   
         if (url) {
