@@ -10,10 +10,11 @@
         <div class="container-fluid">
             <div class="row">
 
-            {{template "navbar" .}}
+                {{template "navbar" .}}
 
-            <!-- Partial goes here -->
+                <!-- Partial goes here -->
                 <div class="col-md-9">
+
                     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPolicyModal">
                         Add Policy
                     </button>
@@ -67,87 +68,94 @@
                         </div>
                     </div>
 
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Subject</th>
-                                <th scope="col">Object</th>
-                                <th scope="col">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {{range $i, $p := .Policies}}
+                    <div class="table-container">
+                        <table id="itemsTable" class="table table-striped">
+                            <thead>
                                 <tr>
-                                    <th scope="row">{{$i}}</th>
-                                    <td><a href={{printf "/users/%s" $p.Subject}}>{{$p.Subject}}</a></td>
-                                    <td><a href={{printf "/groups/%s" $p.Object}}>{{$p.Object}}</a></td>
-                                    <td>{{$p.Actions}}</td>
-                                    <td>
-                                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#updatePolicyModal">
-                                            Update
-                                        </button>
-                                        <div class="modal fade" id="updatePolicyModal" tabindex="-1" role="dialog" aria-labelledby="updatePolicyModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog" role="document">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title" id="updatePolicyModalLabel">Update Policy</h5>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <form action="/policies/update" method="post">
-                                                            <div class="mb-3">
-                                                                <label for="subject" class="form-label">Subject</label>
-                                                                <input type="text" class="form-control" name="subject" id="subject" aria-describedby="subjectHelp" value="{{$p.Subject}}">
-                                                                <div id="subjectHelp" class="form-text">Enter subject.</div>
-                                                            </div>
-                                                            <div class="mb-3">
-                                                                <label for="object" class="form-label">Object</label>
-                                                                <input type="text" class="form-control" name="object" id="object" aria-describedby="objectHelp" value="{{$p.Object}}">
-                                                                <div id="objectHelp" class="form-text">Enter Object.</div>
-                                                            </div>
-                                                            <div class="mb-3">
-                                                                <label for="actions" class="form-label">Actions</label>
-                                                                <input type="text" class="form-control" name="actions" id="actions" aria-describedby="actionsHelp" value="{{$p.Actions}}">
-                                                                <div id="actionsHelp" class="form-text">Enter Actions.</div>
-                                                            </div>
-                                                            <button type="submit" class="btn btn-primary">Submit</button>
-                                                        </form>
-                                                       
+                                    <th scope="col">#</th>
+                                    <th scope="col">Subject</th>
+                                    <th scope="col">Object</th>
+                                    <th scope="col">Actions</th>
+                                    <th scope="col"></th>
+                                    <th scope="col"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range $i, $p := .Policies}}
+                                    <tr>
+                                        <th scope="row">{{$i}}</th>
+                                        <td><a href={{printf "/users/%s" $p.Subject}}>{{$p.Subject}}</a></td>
+                                        <td><a href={{printf "/groups/%s" $p.Object}}>{{$p.Object}}</a></td>
+                                        <td class="editable" contenteditable="false" data-field="actions" >{{toSlice $p.Actions}}</td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#updatePolicyModal{{$i}}">
+                                                <i class="fas fa-pencil-alt"></i>
+                                            </button>
+                                            <div class="modal fade" id="updatePolicyModal{{$i}}" tabindex="-1" role="dialog" aria-labelledby="updatePolicyModalLabel{{$i}}" aria-hidden="true">
+                                                <div class="modal-dialog" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="updatePolicyModalLabel{{$i}}">Update Policy</h5>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <form action="/policies/update" method="post">
+                                                                <div class="mb-3">
+                                                                    <label for="actions" class="form-label">Actions</label>
+                                                                    <input type="hidden" name="subject" id="subject" value="{{$p.Subject}}">
+                                                                    <input type="hidden" name="object" id="object" value="{{$p.Object}}">
+                                                                    <input type="text" class="form-control" name="actions" id="actions" aria-describedby="actionsHelp" value="{{toSlice $p.Actions}}">
+                                                                    <div id="actionsHelp" class="form-text">Enter Actions.</div>
+                                                                </div>
+                                                                <button type="submit" class="btn btn-primary">Submit</button>
+                                                            </form>
+                                                           
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <form action="/policies/delete" method="post">
-                                            <input type="hidden" name="subject" id="subject" value="{{$p.Subject}}">
-                                            <input type="hidden" name="object" id="object" value="{{$p.Object}}">
-                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-                                        </form>
-                                    </td>
+                                        </td>
+                                        <td>
+                                            <form action="/policies/delete" method="post">
+                                                <input type="hidden" name="subject" id="subject" value="{{$p.Subject}}">
+                                                <input type="hidden" name="object" id="object" value="{{$p.Object}}">
+                                                <button type="submit" class="btn btn-sm">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                  </button>
+                                            </form>
+                                        </td>
                                     </tr>
-                            {{end}}
-                        </tbody>
-                    </table>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                    
                 </div>
-            <!-- End of partial-->
+                <!-- End of partial-->
 
             </div>
         </div> <!-- /container -->
     </main>
     <script>
-         function filterItem(filterValue, selectId) {
-        const itemSelect = document.getElementById(selectId);
-        const options = itemSelect.getElementsByTagName("option");
+       $(document).ready(function() {
+          $('#itemsTable').DataTable({
+          scrollY: '400px', // Set the desired height for vertical scrolling
+          scrollCollapse: true,
+          paging: true // Enable pagination
+          });
+        });
+        function filterItem(filterValue, selectId) {
+            const itemSelect = document.getElementById(selectId);
+            const options = itemSelect.getElementsByTagName("option");
 
-        for (let i = 0; i < options.length; i++) {
-          const option = options[i];
-          const itemId = option.value;
-          const itemName = option.innerHTML;
-          const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
-          option.style.display = shouldShow ? "" : "none";
+            for (let i = 0; i < options.length; i++) {
+            const option = options[i];
+            const itemId = option.value;
+            const itemName = option.innerHTML;
+            const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
+            option.style.display = shouldShow ? "" : "none";
+            }
         }
-      }
+
       </script>
     {{template "footer"}}
 

@@ -63,8 +63,8 @@
                   <div class="modal-body">
                     <form method="post" enctype="multipart/form-data" action="/connect">
                       <div class="form-group">
-                        <label for="connectThingsfile">Add csv file containing things ID's.</label>
-                        <input type="file" class="form-control-file" id="ConnectThingsFile" name="ConnectThingsFile" required>
+                        <label for="connectThingsFile">Add csv file containing things ID's.</label>
+                        <input type="file" class="form-control-file" id="connectThingsFile" name="connectThingsFile" required>
                         <button type="submit" value="upload" class="btn btn-primary">Submit</button>
                       </div>
                     </form>
@@ -91,60 +91,63 @@
             </table>
 
             {{ $c := .Channel.ID }}
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th colspan="4">CONNECTED THINGS</th>
-                </tr>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">NAME</th>
-                  <th scope="col">ID</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{range $i, $t := .Things}}
+            <div class="table-container">
+              <h4 style="font-weight: bold; font-size: 22px; margin-top: 50px; margin-bottom: 20px;">CONNECTED THINGS</h4>
+              <table id="itemsTable" class="table table-striped">
+                <thead>
                   <tr>
-                    <th scope="row">{{$i}}</th>
-                    <td>{{$t.Name}}</td>
-                    <td><a href={{printf "/things/%s" $t.ID}}>{{$t.ID}}</a></td>
-                    <td>
-                      <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#sendMessageModal{{$i}}">
-                        Send Message
-                      </button>
-                      <div class="modal fade" id="sendMessageModal{{$i}}" tabindex="-1" role="dialog" aria-labelledby="sendMessageModalLabel{{$i}}" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                          <div class="modal-content">
-                            <div class="modal-header">
-                              <h5 class="modal-title" id="sendMessageModalLabel{{$i}}">Send Message</h5>
-                            </div>
-                            <div class="modal-body">
-                              <form action="/messages" method="post">
-                                <input type="hidden" name="channelID" id="channelID" value="{{$c}}">
-                                <input type="hidden" name="thingKey" id="thingKey" value="{{$t.Credentials.Secret}}">
-                                <div class="mb-3">
-                                  <label for="message" class="form-label">Message</label>
-                                  <input type="text" class="form-control" name="message" id="message" aria-describedby="messageHelp">
-                                  <div id="messageHelp" class="form-text">Enter Message.</div>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Submit</button>
-                              </form>
+                    <th scope="col">#</th>
+                    <th scope="col">NAME</th>
+                    <th scope="col">ID</th>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{range $i, $t := .Things}}
+                    <tr>
+                      <th scope="row">{{$i}}</th>
+                      <td>{{$t.Name}}</td>
+                      <td><a href={{printf "/things/%s" $t.ID}}>{{$t.ID}}</a></td>
+                      <td>
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#sendMessageModal{{$i}}">
+                          Send Message
+                        </button>
+                        <div class="modal fade" id="sendMessageModal{{$i}}" tabindex="-1" role="dialog" aria-labelledby="sendMessageModalLabel{{$i}}" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="sendMessageModalLabel{{$i}}">Send Message</h5>
+                              </div>
+                              <div class="modal-body">
+                                <form action="/messages" method="post">
+                                  <input type="hidden" name="channelID" id="channelID" value="{{$c}}">
+                                  <input type="hidden" name="thingKey" id="thingKey" value="{{$t.Credentials.Secret}}">
+                                  <div class="mb-3">
+                                    <label for="message" class="form-label">Message</label>
+                                    <textarea class="form-control" name="message" id="message" aria-describedby="messageHelp"></textarea>
+                                    <div id="messageHelp" class="form-text">Enter Message.</div>
+                                  </div>
+                                  <button type="submit" class="btn btn-primary">Submit</button>
+                                </form>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td>
-                      <form action="/disconnectThing" method="post">
-                        <input type="hidden" name="channelID" id="channelID" value="{{$c}}">
-                        <input type="hidden" name="thingID" id="thingID" value="{{$t.ID}}">
-                        <button type="submit" class="btn btn-danger btn-sm">Disconnect</button>
-                      </form>
-                    </td>
-                  </tr>
-                {{end}}
-              </tbody>
-            </table>
+                      </td>
+                      <td>
+                        <form action="/disconnectThing" method="post">
+                          <input type="hidden" name="channelID" id="channelID" value="{{$c}}">
+                          <input type="hidden" name="thingID" id="thingID" value="{{$t.ID}}">
+                          <button type="submit" class="btn btn-danger btn-sm">Disconnect</button>
+                        </form>
+                      </td>
+                    </tr>
+                  {{end}}
+                </tbody>
+              </table>
+            </div>
+          
           </div>
           <!-- End of partial-->
 
@@ -152,6 +155,13 @@
       </div> <!-- /container -->
     </main>
     <script>
+      $(document).ready(function() {
+        $('#itemsTable').DataTable({
+          scrollY: '200px', // Set the desired height for vertical scrolling
+          scrollCollapse: true,
+          paging: true, // Enable pagination
+        });
+      });
       function filterItem(filterValue, selectId) {
         const itemSelect = document.getElementById(selectId);
         const options = itemSelect.getElementsByTagName("option");

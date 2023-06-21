@@ -45,5 +45,16 @@
     {{template "footer"}}
 
   </body>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('form').addEventListener('submit',function(){
+        //get the entered username
+        var username = document.getElementById('username').value;
+
+        //save the username to local storage
+        localStorage.setItem('username',username);
+      });
+    });
+  </script>
 </html>
 {{end}}

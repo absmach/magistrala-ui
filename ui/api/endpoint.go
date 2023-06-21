@@ -94,7 +94,7 @@ func createUserEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 		user := req.user
-		res, err := svc.CreateUser(ctx, req.token, user)
+		res, err := svc.CreateUsers(ctx, req.token, user)
 		if err != nil {
 			return nil, err
 		}
@@ -123,7 +123,7 @@ func createUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 			}
 			users = append(users, user)
 		}
-		res, err := svc.CreateUser(ctx, req.token, users...)
+		res, err := svc.CreateUsers(ctx, req.token, users...)
 		if err != nil {
 			return nil, err
 		}
@@ -245,13 +245,32 @@ func updateUserIdentityEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func updateUserStatusEndpoint(svc ui.Service) endpoint.Endpoint {
+func enableUserEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateUserStatusReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.UpdateUserStatus(ctx, req.token, req.UserID, req.Status)
+		res, err := svc.EnableUser(ctx, req.token, req.UserID)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code:    http.StatusFound,
+			html:    res,
+			headers: map[string]string{"Location": "/users"},
+		}, err
+	}
+}
+
+func disableUserEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(updateUserStatusReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		res, err := svc.DisableUser(ctx, req.token, req.UserID)
 		if err != nil {
 			return nil, err
 		}
@@ -432,13 +451,32 @@ func updateThingSecretEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func updateThingStatusEndpoint(svc ui.Service) endpoint.Endpoint {
+func enableThingEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateThingStatusReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.UpdateThingStatus(ctx, req.token, req.ThingID, req.Status)
+		res, err := svc.EnableThing(ctx, req.token, req.ThingID)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code:    http.StatusFound,
+			html:    res,
+			headers: map[string]string{"Location": "/things"},
+		}, err
+	}
+}
+
+func disableThingEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(updateThingStatusReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		res, err := svc.DisableThing(ctx, req.token, req.ThingID)
 		if err != nil {
 			return nil, err
 		}
@@ -732,13 +770,32 @@ func listChannelsByThingEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func updateChannelStatusEndpoint(svc ui.Service) endpoint.Endpoint {
+func enableChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateChannelStatusReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.UpdateChannelStatus(ctx, req.token, req.ChannelID, req.Status)
+		res, err := svc.EnableChannel(ctx, req.token, req.ChannelID)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code:    http.StatusFound,
+			html:    res,
+			headers: map[string]string{"Location": "/channels"},
+		}, err
+	}
+}
+
+func disableChannelEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(updateChannelStatusReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		res, err := svc.DisableChannel(ctx, req.token, req.ChannelID)
 		if err != nil {
 			return nil, err
 		}
@@ -766,6 +823,33 @@ func createGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			html: res,
+		}, err
+	}
+}
+
+func createGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(createGroupsReq)
+
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		groups := []sdk.Group{}
+		for i := range req.Names {
+			gr := sdk.Group{
+				Name: req.Names[i],
+			}
+			groups = append(groups, gr)
+		}
+		res, err := svc.CreateGroups(ctx, req.token, groups...)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code:    http.StatusFound,
+			html:    res,
+			headers: map[string]string{"Location": "/groups"},
 		}, err
 	}
 }
@@ -884,13 +968,32 @@ func unassignEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func updateGroupStatusEndpoint(svc ui.Service) endpoint.Endpoint {
+func enableGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateGroupStatusReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.UpdateGroupStatus(ctx, req.token, req.GroupID, req.Status)
+		res, err := svc.EnableGroup(ctx, req.token, req.GroupID)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code:    http.StatusFound,
+			html:    res,
+			headers: map[string]string{"Location": "/groups"},
+		}, err
+	}
+}
+
+func disableGroupEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(updateGroupStatusReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		res, err := svc.DisableGroup(ctx, req.token, req.GroupID)
 		if err != nil {
 			return nil, err
 		}
@@ -976,7 +1079,7 @@ func publishMessageEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.Publish(ctx, req.token, req.thingKey, req.msg)
+		res, err := svc.Publish(ctx, req.token, req.thingKey, req.Msg)
 		if err != nil {
 			return nil, err
 		}
@@ -1007,6 +1110,24 @@ func wsConnectionEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 		res, err := svc.WsConnection(ctx, req.ChanID, req.ThingKey)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
+func listDeletedClientsEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(listDeletedClientsReq)
+
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		res, err := svc.ListDeletedClients(ctx, req.token)
 		if err != nil {
 			return nil, err
 		}

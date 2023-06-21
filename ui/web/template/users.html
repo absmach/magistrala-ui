@@ -76,7 +76,7 @@
                   <div class="modal-body">
                     <form method="post" enctype="multipart/form-data" action="/users/bulk">
                       <div class="form-group">
-                        <label for="usersFile">Add csv file containing users names and passwords with metadata. The metadata field can be empty</label>
+                        <label for="usersFile">Add csv file containing users names and passwords </label>
                         <input type="file" class="form-control-file" id="usersFile" name="usersFile" required>
                         <button type="submit" value="upload" class="btn btn-primary">Submit</button>
                       </div>
@@ -85,13 +85,14 @@
                 </div>
               </div>
             </div>
-
-              <table class="table table-striped">
+            <div class="table-container">
+              <table id="itemsTable" class="table table-striped">
                 <thead>
                   <tr>
                     <th scope="col">#</th>
                     <th scope="col">Name</th>
                     <th scope="col">ID</th>
+                    <th scope="col"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -108,9 +109,8 @@
                         </div>
                       </td>
                       <td>
-                        <form action="/users/status" method="post">
+                        <form action="/users/disabled" method="post">
                           <input type="hidden" name="userID" id="userID" value="{{$u.ID}}">
-                          <input type="hidden" name="status" id="status" value="disabled">
                           <button type="submit" class="btn btn-sm">
                             <i class="fas fa-trash-alt"></i>
                           </button>
@@ -120,82 +120,7 @@
                   {{end}}
                 </tbody>
               </table>
-
-              <style>
-                  .copy-icon {
-                    background: none;
-                    border: none;
-                    padding: 0;
-                    cursor: pointer;
-                    font-size: 1rem;
-                    color: #000;
-                    margin-left: 10px;
-                  }
-
-                  .copy-icon:focus {
-                    outline: none;
-                  }
-
-                  .success-icon {
-                    color: green;
-                  }
-                  
-                  .error-message{
-                    font-size: 15px;
-                    color: #e60303;
-                  }
-
-              </style>
-
-              <script>
-
-                function validateForm() {
-                  var secret = document.getElementById("secret").value;
-                  var tagsInput = document.getElementById("tags").value;
-                  var metadataInput = document.getElementById("metadata").value;
-
-
-                  var secretError = document.getElementById("secretError");
-                  var tagsError = document.getElementById("tagsError");
-                  var metadataError = document.getElementById("metadataError");
-
-                  var tags;
-                  var metadata;
-
-                  secretError.innerHTML = "";
-                  tagsError.innerHTML = "";
-                  metadataError.innerHTML = "";
-
-
-                  var isValid = true;
-
-                  if (secret.length <8){
-                    secretError.innerHTML = "Secret must have a minimum of 8 characters";
-                    isValid = false;
-                  }
-                  try{
-                    tags = JSON.parse(tagsInput);
-                  }catch(error){
-                    tagsError.innerHTML = "Please enter valid tags as a string array!";
-                    isValid = false;
-                  }
-
-                  if (!Array.isArray(tags) || !tags.every(function(tag) {return typeof tag === "string";})){
-                    tagsError.innerHTML = "Tags must be a string array!";
-                    isValid = false;
-                  }
-
-                  try{
-                    metadata = JSON.parse(metadataInput);
-                  }catch(error){
-                    metadataError.innerHTML = "Please enter valid metadata in JSON format!";
-                    isValid = false;
-                  }
-
-                  return isValid;
-                }
-              </script>
-            
+            </div>
               
           </div>
           <!-- End of partial-->
@@ -203,6 +128,59 @@
         </div>
       </div> <!-- /container -->
     </main>
+
+    <script>
+      $(document).ready(function() {
+        $('#itemsTable').DataTable({
+          scrollY: '400px', // Set the desired height for vertical scrolling
+          scrollCollapse: true,
+          paging: true // Enable pagination
+        });
+      });
+      function validateForm() {
+        var secret = document.getElementById("secret").value;
+        var tagsInput = document.getElementById("tags").value;
+        var metadataInput = document.getElementById("metadata").value;
+        var secretError = document.getElementById("secretError");
+        var tagsError = document.getElementById("tagsError");
+        var metadataError = document.getElementById("metadataError");
+
+        var tags;
+        var metadata;
+
+        secretError.innerHTML = "";
+        tagsError.innerHTML = "";
+        metadataError.innerHTML = "";
+
+
+        var isValid = true;
+
+        if (secret.length <8){
+          secretError.innerHTML = "Secret must have a minimum of 8 characters";
+          isValid = false;
+        }
+        try{
+          tags = JSON.parse(tagsInput);
+        }catch(error){
+          tagsError.innerHTML = "Please enter valid tags as a string array!";
+          isValid = false;
+        }
+
+        if (!Array.isArray(tags) || !tags.every(function(tag) {return typeof tag === "string";})){
+          tagsError.innerHTML = "Tags must be a string array!";
+          isValid = false;
+        }
+
+        try{
+          metadata = JSON.parse(metadataInput);
+        }catch(error){
+          metadataError.innerHTML = "Please enter valid metadata in JSON format!";
+          isValid = false;
+        }
+
+        return isValid;
+      }
+    </script>
 
     {{template "footer"}}
 

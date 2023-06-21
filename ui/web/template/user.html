@@ -64,7 +64,7 @@
                 <tr>
                   <th>Tags</th>
                   <td class="editable" contenteditable="false" data-field="tags">
-                    {{.User.Tags}}
+                    {{toSlice .User.Tags}}
                   </td>
                   <td>
                     <button class="edit-btn" onclick="editRow('tags')">
@@ -207,7 +207,7 @@
               return;
             }
             url = '/users/{{.User.ID}}/tags';
-          data = { [field]:JSON.parse(updatedValue)};
+          data = { [field]:tags};
           } catch (error) {
             errorMessage.textContent = 'Tags must be a valid string array';
             return;

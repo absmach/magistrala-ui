@@ -95,9 +95,9 @@ func (lm *loggingMiddleware) Logout(ctx context.Context) (b []byte, err error) {
 	return lm.svc.Logout(ctx)
 }
 
-func (lm *loggingMiddleware) CreateUser(ctx context.Context, token string, user ...sdk.User) (b []byte, err error) {
+func (lm *loggingMiddleware) CreateUsers(ctx context.Context, token string, user ...sdk.User) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method create_user took %s to complete", time.Since(begin))
+		message := fmt.Sprintf("Method create_users took %s to complete", time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -105,7 +105,7 @@ func (lm *loggingMiddleware) CreateUser(ctx context.Context, token string, user 
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.CreateUser(ctx, token, user...)
+	return lm.svc.CreateUsers(ctx, token, user...)
 }
 
 func (lm *loggingMiddleware) ListUsers(ctx context.Context, token string) (b []byte, err error) {
@@ -186,9 +186,9 @@ func (lm *loggingMiddleware) UpdateUserPassword(ctx context.Context, token, id, 
 	return lm.svc.UpdateUserPassword(ctx, token, id, oldPass, newPass)
 }
 
-func (lm *loggingMiddleware) UpdateUserStatus(ctx context.Context, token, id, status string) (b []byte, err error) {
+func (lm *loggingMiddleware) EnableUser(ctx context.Context, token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method update_user_status for token %s and user %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method enable_user for token %s and user %s took %s to complete", token, id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -196,7 +196,20 @@ func (lm *loggingMiddleware) UpdateUserStatus(ctx context.Context, token, id, st
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.UpdateUserStatus(ctx, token, id, status)
+	return lm.svc.EnableUser(ctx, token, id)
+}
+
+func (lm *loggingMiddleware) DisableUser(ctx context.Context, token, id string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method disable_user for token %s and user %s took %s to complete", token, id, time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.DisableUser(ctx, token, id)
 }
 
 func (lm *loggingMiddleware) CreateThing(ctx context.Context, token string, thing ...sdk.Thing) (b []byte, err error) {
@@ -290,9 +303,9 @@ func (lm *loggingMiddleware) UpdateThingSecret(ctx context.Context, token, id, s
 	return lm.svc.UpdateThingSecret(ctx, token, id, secret)
 }
 
-func (lm *loggingMiddleware) UpdateThingStatus(ctx context.Context, token, id, status string) (b []byte, err error) {
+func (lm *loggingMiddleware) EnableThing(ctx context.Context, token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method update_thing_status for token %s and thing %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method enable_thing for token %s and thing %s took %s to complete", token, id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -300,7 +313,20 @@ func (lm *loggingMiddleware) UpdateThingStatus(ctx context.Context, token, id, s
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.UpdateThingStatus(ctx, token, id, status)
+	return lm.svc.EnableThing(ctx, token, id)
+}
+
+func (lm *loggingMiddleware) DisableThing(ctx context.Context, token, id string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method disable_thing for token %s and thing %s took %s to complete", token, id, time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.DisableThing(ctx, token, id)
 }
 
 func (lm *loggingMiddleware) UpdateThingOwner(ctx context.Context, token, id string, thing sdk.Thing) (b []byte, err error) {
@@ -368,9 +394,9 @@ func (lm *loggingMiddleware) ListChannels(ctx context.Context, token string) (b 
 	return lm.svc.ListChannels(ctx, token)
 }
 
-func (lm *loggingMiddleware) UpdateChannelStatus(ctx context.Context, token, id, status string) (b []byte, err error) {
+func (lm *loggingMiddleware) EnableChannel(ctx context.Context, token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method update_channel_status for token %s and channel %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method enable_channel for token %s and channel %s took %s to complete", token, id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -378,7 +404,20 @@ func (lm *loggingMiddleware) UpdateChannelStatus(ctx context.Context, token, id,
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.UpdateChannelStatus(ctx, token, id, status)
+	return lm.svc.EnableChannel(ctx, token, id)
+}
+
+func (lm *loggingMiddleware) DisableChannel(ctx context.Context, token, id string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method disable_channel for token %s and channel %s took %s to complete", token, id, time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.DisableChannel(ctx, token, id)
 }
 
 func (lm *loggingMiddleware) Connect(ctx context.Context, token string, chIDs, thIDs []string) (b []byte, err error) {
@@ -576,9 +615,9 @@ func (lm *loggingMiddleware) ListGroupMembers(ctx context.Context, token, id str
 	return lm.svc.ListGroupMembers(ctx, token, id)
 }
 
-func (lm *loggingMiddleware) UpdateGroupStatus(ctx context.Context, token, id, status string) (b []byte, err error) {
+func (lm *loggingMiddleware) EnableGroup(ctx context.Context, token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method update_group_status for token %s and group %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method enable_group for token %s and group %s took %s to complete", token, id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -586,7 +625,20 @@ func (lm *loggingMiddleware) UpdateGroupStatus(ctx context.Context, token, id, s
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.UpdateGroupStatus(ctx, token, id, status)
+	return lm.svc.EnableGroup(ctx, token, id)
+}
+
+func (lm *loggingMiddleware) DisableGroup(ctx context.Context, token, id string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method disable_group for token %s and group %s took %s to complete", token, id, time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.DisableGroup(ctx, token, id)
 }
 
 func (lm *loggingMiddleware) AddPolicy(ctx context.Context, token string, policy sdk.Policy) (b []byte, err error) {
@@ -682,4 +734,17 @@ func (lm *loggingMiddleware) WsConnection(ctx context.Context, chID, thKey strin
 	}(time.Now())
 
 	return lm.svc.WsConnection(ctx, chID, thKey)
+}
+
+func (lm *loggingMiddleware) ListDeletedClients(ctx context.Context, token string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method list_deleted_clients took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.ListDeletedClients(ctx, token)
 }

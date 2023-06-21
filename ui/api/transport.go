@@ -110,8 +110,15 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 		opts...,
 	))
 
-	r.Post("/users/status", kithttp.NewServer(
-		kitot.TraceServer(tracer, "change_user_status")(updateUserStatusEndpoint(svc)),
+	r.Post("/users/enabled", kithttp.NewServer(
+		kitot.TraceServer(tracer, "enable_user")(enableUserEndpoint(svc)),
+		decodeUserStatusUpdate,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/users/disabled", kithttp.NewServer(
+		kitot.TraceServer(tracer, "disable_user")(disableUserEndpoint(svc)),
 		decodeUserStatusUpdate,
 		encodeResponse,
 		opts...,
@@ -166,8 +173,15 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 		opts...,
 	))
 
-	r.Post("/things/status", kithttp.NewServer(
-		kitot.TraceServer(tracer, "change_thing_status")(updateThingStatusEndpoint(svc)),
+	r.Post("/things/enabled", kithttp.NewServer(
+		kitot.TraceServer(tracer, "enable_thing")(enableThingEndpoint(svc)),
+		decodeThingStatusUpdate,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/things/disabled", kithttp.NewServer(
+		kitot.TraceServer(tracer, "disable_thing")(disableThingEndpoint(svc)),
 		decodeThingStatusUpdate,
 		encodeResponse,
 		opts...,
@@ -243,8 +257,15 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 		opts...,
 	))
 
-	r.Post("/channels/status", kithttp.NewServer(
-		kitot.TraceServer(tracer, "change_channel_status")(updateChannelStatusEndpoint(svc)),
+	r.Post("/channels/enabled", kithttp.NewServer(
+		kitot.TraceServer(tracer, "enable_channel")(enableChannelEndpoint(svc)),
+		decodeChannelStatusUpdate,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/channels/disabled", kithttp.NewServer(
+		kitot.TraceServer(tracer, "disable_channel")(disableChannelEndpoint(svc)),
 		decodeChannelStatusUpdate,
 		encodeResponse,
 		opts...,
@@ -306,7 +327,7 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 	))
 
 	r.Post("/groups", kithttp.NewServer(
-		kitot.TraceServer(tracer, "create_groups")(createGroupEndpoint(svc)),
+		kitot.TraceServer(tracer, "create_group")(createGroupEndpoint(svc)),
 		decodeGroupCreation,
 		encodeResponse,
 		opts...,
@@ -319,8 +340,22 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 		opts...,
 	))
 
-	r.Post("/groups/status", kithttp.NewServer(
-		kitot.TraceServer(tracer, "change_group_status")(updateGroupStatusEndpoint(svc)),
+	r.Post("/groups/bulk", kithttp.NewServer(
+		kitot.TraceServer(tracer, "create_groups")(createGroupsEndpoint(svc)),
+		decodeGroupsCreation,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/groups/enabled", kithttp.NewServer(
+		kitot.TraceServer(tracer, "enable_group")(enableGroupEndpoint(svc)),
+		decodeGroupStatusUpdate,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/groups/disabled", kithttp.NewServer(
+		kitot.TraceServer(tracer, "disable_group")(disableGroupEndpoint(svc)),
 		decodeGroupStatusUpdate,
 		encodeResponse,
 		opts...,
@@ -406,6 +441,13 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 	r.Post("/readmessages", kithttp.NewServer(
 		kitot.TraceServer(tracer, "ws_connection")(wsConnectionEndpoint(svc)),
 		decodeWsConnectionRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Get("/deleted", kithttp.NewServer(
+		kitot.TraceServer(tracer, "list_deleted_clients")(listDeletedClientsEndpoint(svc)),
+		decodeListDeletedClientsRequest,
 		encodeResponse,
 		opts...,
 	))
@@ -640,6 +682,7 @@ func decodeUserPasswordUpdate(_ context.Context, r *http.Request) (interface{}, 
 
 	return req, nil
 }
+
 func decodeUserStatusUpdate(_ context.Context, r *http.Request) (interface{}, error) {
 	token, err := getAuthorization(r)
 	if err != nil {
@@ -649,7 +692,6 @@ func decodeUserStatusUpdate(_ context.Context, r *http.Request) (interface{}, er
 	req := updateUserStatusReq{
 		token:  token,
 		UserID: r.PostFormValue("userID"),
-		Status: r.PostFormValue("status"),
 	}
 
 	return req, nil
@@ -833,7 +875,6 @@ func decodeThingStatusUpdate(_ context.Context, r *http.Request) (interface{}, e
 	req := updateThingStatusReq{
 		token:   token,
 		ThingID: r.PostFormValue("thingID"),
-		Status:  r.PostFormValue("status"),
 	}
 
 	return req, nil
@@ -1158,7 +1199,6 @@ func decodeChannelStatusUpdate(_ context.Context, r *http.Request) (interface{},
 	req := updateChannelStatusReq{
 		token:     token,
 		ChannelID: r.PostFormValue("channelID"),
-		Status:    r.PostFormValue("status"),
 	}
 
 	return req, nil
@@ -1187,7 +1227,40 @@ func decodeGroupCreation(_ context.Context, r *http.Request) (interface{}, error
 	return req, nil
 }
 
-func decodeListGroupsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeGroupsCreation(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+	file, handler, err := r.FormFile("groupsFile")
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	if !strings.HasSuffix(handler.Filename, ".csv") {
+		return nil, errors.New("unsupported file type")
+	}
+	csvr := csv.NewReader(file)
+
+	names := []string{}
+	for {
+		row, err := csvr.Read()
+		if err != nil {
+			if err == io.EOF {
+				req := createGroupsReq{
+					token: token,
+					Names: names,
+				}
+				return req, nil
+			}
+			return nil, err
+		}
+		names = append(names, string(row[0]))
+	}
+}
+
+func decodeListGroupsRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	token, err := getAuthorization(r)
 	if err != nil {
 		return nil, err
@@ -1267,7 +1340,6 @@ func decodeGroupStatusUpdate(_ context.Context, r *http.Request) (interface{}, e
 	req := updateGroupStatusReq{
 		token:   token,
 		GroupID: r.PostFormValue("groupID"),
-		Status:  r.PostFormValue("status"),
 	}
 
 	return req, nil
@@ -1373,7 +1445,7 @@ func decodePublishRequest(_ context.Context, r *http.Request) (interface{}, erro
 	}
 
 	req := publishReq{
-		msg:      &msg,
+		Msg:      &msg,
 		thingKey: r.Form.Get("thingKey"),
 		token:    token,
 	}
@@ -1410,6 +1482,18 @@ func decodeWsConnectionRequest(_ context.Context, r *http.Request) (interface{},
 	req := wsConnectionReq{
 		ChanID:   chanID,
 		ThingKey: thingKey,
+	}
+
+	return req, nil
+}
+
+func decodeListDeletedClientsRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+	req := listDeletedClientsReq{
+		token: token,
 	}
 
 	return req, nil

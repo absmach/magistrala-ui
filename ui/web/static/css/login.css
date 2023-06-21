@@ -102,3 +102,16 @@ input{
     cursor: pointer;
     transition: background 1s;
 }
+
+footer {
+    background:#4051b5;
+    color: #fff;
+    padding: 20px;
+    height: 50px;
+    text-align: center;
+    font-size: 18px;
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: 0;
+}

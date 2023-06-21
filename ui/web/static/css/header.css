@@ -60,12 +60,13 @@ nav{
 
   .user-info{
     display: flex;
-    align-items: center;
+    align-items: baseline;
     font-weight: 500;
   }
 
   .user-info h3{
     margin-left: 15px;
+    font-size: 20px;
   }
 
   .sub-menu hr{
@@ -78,7 +79,7 @@ nav{
 
   .sub-menu-link{
     display: flex;
-    align-items: center;
+    align-items: baseline;
     text-decoration: none;
     color: #525252;
     margin: 12px 0;

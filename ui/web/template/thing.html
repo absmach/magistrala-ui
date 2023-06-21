@@ -65,7 +65,7 @@
                 <tr>
                   <th>Tags</th>
                   <td class="editable" contenteditable="false" data-field="tags">
-                    {{.Thing.Tags}}
+                    {{toSlice .Thing.Tags}}
                   </td>
                   <td>
                     <button class="edit-btn" onclick="editRow('tags')">
@@ -135,7 +135,6 @@
         background: none;
         padding: 0;
       }
-
       .save-cancel-buttons button {
         padding: 4px 4px; /* Adjust the padding values as per your preference */
         margin-right: 10px; /*Add some margin between the buttons */
@@ -144,17 +143,14 @@
         font-weight: bold;
         cursor: pointer;
       }
-
       .save-btn {
         background-color: #4051b5;
         color: #fff;
       }
-
       .cancel-btn {
         background-color: #ebe5e5;
         color: #070606;
       }
-      
       .error-message {
         color: red;
         display: block;

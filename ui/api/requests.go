@@ -46,6 +46,7 @@ type createUsersReq struct {
 	Names     []string
 	Emails    []string
 	Passwords []string
+	Metadata  map[string]interface{}
 }
 
 func (req createUsersReq) validate() error {
@@ -131,15 +132,11 @@ func (req updateUserIdentityReq) validate() error {
 type updateUserStatusReq struct {
 	token  string
 	UserID string `json:"userId,omitempty"`
-	Status string `json:"status,omitempty"`
 }
 
 func (req updateUserStatusReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
-	}
-	if req.Status == "" {
-		return ui.ErrMalformedEntity
 	}
 
 	return nil
@@ -241,15 +238,11 @@ func (req updateThingSecretReq) validate() error {
 type updateThingStatusReq struct {
 	token   string
 	ThingID string `json:"thingID,omitempty"`
-	Status  string `json:"status,omitempty"`
 }
 
 func (req updateThingStatusReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
-	}
-	if req.Status == "" {
-		return ui.ErrMalformedEntity
 	}
 
 	return nil
@@ -436,15 +429,11 @@ func (req disconnectReq) validate() error {
 type updateChannelStatusReq struct {
 	token     string
 	ChannelID string `json:"channelID,omitempty"`
-	Status    string `json:"status,omitempty"`
 }
 
 func (req updateChannelStatusReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
-	}
-	if req.Status == "" {
-		return ui.ErrMalformedEntity
 	}
 
 	return nil
@@ -456,6 +445,21 @@ type createGroupReq struct {
 }
 
 func (req createGroupReq) validate() error {
+	if req.token == "" {
+		return ui.ErrUnauthorizedAccess
+	}
+
+	return nil
+}
+
+type createGroupsReq struct {
+	token        string
+	Names        []string                 `json:"name,omitempty"`
+	Descriptions []string                 `json:"description,omitempty"`
+	Metadatas    []map[string]interface{} `json:"metadata,omitempty"`
+}
+
+func (req createGroupsReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
 	}
@@ -536,15 +540,11 @@ func (req unassignReq) validate() error {
 type updateGroupStatusReq struct {
 	token   string
 	GroupID string `json:"groupId,omitempty"`
-	Status  string `json:"status,omitempty"`
 }
 
 func (req updateGroupStatusReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
-	}
-	if req.Status == "" {
-		return ui.ErrMalformedEntity
 	}
 
 	return nil
@@ -599,9 +599,9 @@ func (req deletePolicyReq) validate() error {
 }
 
 type publishReq struct {
-	msg      *messaging.Message
 	thingKey string
 	token    string
+	Msg      *messaging.Message
 }
 
 func (req publishReq) validate() error {
@@ -632,5 +632,16 @@ func (req wsConnectionReq) validate() error {
 		return ui.ErrMalformedEntity
 	}
 
+	return nil
+}
+
+type listDeletedClientsReq struct {
+	token string
+}
+
+func (req listDeletedClientsReq) validate() error {
+	if req.token == "" {
+		return ui.ErrUnauthorizedAccess
+	}
 	return nil
 }

@@ -70,8 +70,8 @@
                   <div class="modal-body">
                     <form method="post" enctype="multipart/form-data" action="/channels/bulk">
                       <div class="form-group">
-                        <label for="Channelsfile">Add csv file containing channels names with metadata. The metadata field can be empty</label>
-                        <input type="file" class="form-control-file" id="channelsFile" name="channelsFile">
+                        <label for="channelsFile">Add csv file containing channels names with metadata. The metadata field can be empty</label>
+                        <input type="file" class="form-control-file" id="channelsFile" name="channelsFile" required>
                         <button type="submit" value="upload" class="btn btn-primary">Submit</button>
                       </div>
                     </form>
@@ -79,93 +79,96 @@
                 </div>
               </div>
             </div>
-
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">NAME</th>
-                  <th scope="col">ID</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{range $i, $c := .Channels}}
+            <div class="table-container">
+              <table id="itemsTable" class="table table-striped">
+                <thead>
                   <tr>
-                    <th scope="row">{{$i}}</th>
-                    <td>{{$c.Name}}</td>
-                    <td>
-                      <div class="copy-con-container">
-                        <a href={{printf "/channels/%s" $c.ID}}>{{$c.ID}}</a>
-                        <button class="copy-icon" onclick="copyToClipboard(this)">
-                          <i class="far fa-copy"></i>
-                        </button>
-                      </div>
-                    </td>
-                    <td>
-                      <form action="/channels/status" method="post">
-                        <input type="hidden" name="channelID" id="channelID" value="{{$c.ID}}">
-                        <input type="hidden" name="status" id="status" value="disabled">
-                        <button type="submit" class="btn btn-sm">
-                          <i class="fas fa-trash-alt"></i>
-                        </button>
-                      </form>
-                    </td>
+                    <th scope="col">#</th>
+                    <th scope="col">NAME</th>
+                    <th scope="col">ID</th>
+                    <th scope="col"></th>
                   </tr>
-                {{end}}
-              </tbody>
-            </table>
-
-            <style>
-              .copy-icon {
-                background: none;
-                border: none;
-                padding: 0;
-                cursor: pointer;
-                font-size: 1rem;
-                color: #000;
-                margin-left: 10px;
-              }
-
-              .copy-icon:focus {
-                outline: none;
-              }
-
-              .success-icon {
-                color: green;
-              }
-              
-              .error-message{
-                font-size: 15px;
-                color: #e60303;
-              }
-
-          </style>
-
-            <script>
-              function validateForm() {
-                var name = document.getElementById("name").value;
-
-                var nameError = document.getElementById("nameError");
-
-                nameError.innerHTML="";
-
-                var isValid = true;
-                if (name==="") {
-                  nameError.innerHTML= "Field Required!";
-                  isValid = false
-                }
-
-                return isValid;
-              }
-            </script>
-
-
+                </thead>
+                <tbody>
+                  {{range $i, $c := .Channels}}
+                    <tr>
+                      <th scope="row">{{$i}}</th>
+                      <td>{{$c.Name}}</td>
+                      <td>
+                        <div class="copy-con-container">
+                          <a href={{printf "/channels/%s" $c.ID}}>{{$c.ID}}</a>
+                          <button class="copy-icon" onclick="copyToClipboard(this)">
+                            <i class="far fa-copy"></i>
+                          </button>
+                        </div>
+                      </td>
+                      <td>
+                        <form action="/channels/disabled" method="post">
+                          <input type="hidden" name="channelID" id="channelID" value="{{$c.ID}}">
+                          <button type="submit" class="btn btn-sm">
+                            <i class="fas fa-trash-alt"></i>
+                          </button>
+                        </form>
+                      </td>
+                    </tr>
+                  {{end}}
+                </tbody>
+              </table>
+            </div>
           </div>
           <!-- End of partial-->
 
         </div>
       </div> <!-- /container -->
     </main>
+    <script>
+       $(document).ready(function() {
+        $('#itemsTable').DataTable({
+          scrollY: '400px', // Set the desired height for vertical scrolling
+          scrollCollapse: true,
+          paging: true // Enable pagination
+        });
+      });
+
+      function filterItem(filterValue, selectId) {
+        const itemSelect = document.getElementById(selectId);
+        const options = itemSelect.getElementsByTagName("option");
+
+        for (let i = 0; i < options.length; i++) {
+          const option = options[i];
+          const itemId = option.value;
+          const itemName = option.innerHTML;
+          const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
+          option.style.display = shouldShow ? "" : "none";
+        }
+      }
+      function validateForm() {
+        var name = document.getElementById("name").value;
+        var metadataInput = document.getElementById("metadata").value;
+
+        var nameError = document.getElementById("nameError");
+        var metadataError = document.getElementById("metadataError");
+
+        var metadata;
+
+        nameError.innerHTML = "";
+        metadataError.innerHTML = "";
+
+        var isValid = true;
+        if (name==="") {
+          nameError.innerHTML= "Field Required!";
+          isValid = false
+        }
+        try {
+        metadata = JSON.parse(metadataInput);
+      }catch(error){
+        metadataError.innerHTML = "Please enter a valid metadaat in JSON  format!";
+        isValid = false;
+      }
+
+        return isValid;
+      }
+    </script>
 
     {{template "footer"}}
 

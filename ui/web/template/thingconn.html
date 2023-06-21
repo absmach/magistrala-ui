@@ -64,42 +64,38 @@
                   <th>ID</th>
                   <td>{{.Thing.ID}}</td>
                 </tr>
-                <tr>
-                  <th>Key</th>
-                  <td>{{.Thing.Credentials.Secret}}</td>
-                </tr>
-                <tr>
-                  <th>Metadata</th>
-                  <td>
-                    <pre>{{toJSON .Thing.Metadata}}</pre>
-                    </td>
-                </tr>
               </tbody>
             </table>
             {{ $t := .Thing}}
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th colspan="4">CONNECTED CHANNELS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {{range $i, $c := .Channels}}
+            <div class="table-container">
+              <h4 style="font-weight: bold; font-size: 22px; margin-top: 50px; margin-bottom: 20px;">CONNECTED CHANNELS</h4>
+              <table id="itemsTable" class="table table-striped">
+                <thead>
                   <tr>
-                    <th scope="row">{{$i}}</th>
-                    <td>{{$c.Name}}</td>
-                    <td><a href={{printf "/channels/%s" $c.ID}}>{{$c.ID}}</a></td>
-                    <td>
-                      <form action="/disconnectChannel" method="post">
-                        <input type="hidden" name="thingID" id="thingID" value="{{$t.ID}}">
-                        <input type="hidden" name="channelID" id="channelID" value="{{$c.ID}}">
-                        <button type="submit" class="btn btn-danger btn-sm">Disconnect</button>
-                      </form>
-                    </td>
+                    <th scope="col">#</th>
+                    <th scope="col">NAME</th>
+                    <th scope="col">ID</th>
+                    <th scope="col"></th>
                   </tr>
-                {{end}}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {{range $i, $c := .Channels}}
+                    <tr>
+                      <th scope="row">{{$i}}</th>
+                      <td>{{$c.Name}}</td>
+                      <td><a href={{printf "/channels/%s" $c.ID}}>{{$c.ID}}</a></td>
+                      <td>
+                        <form action="/disconnectChannel" method="post">
+                          <input type="hidden" name="thingID" id="thingID" value="{{$t.ID}}">
+                          <input type="hidden" name="channelID" id="channelID" value="{{$c.ID}}">
+                          <button type="submit" class="btn btn-danger btn-sm">Disconnect</button>
+                        </form>
+                      </td>
+                    </tr>
+                  {{end}}
+                </tbody>
+              </table>
+            </div>
           </div>
           <!-- End of partial-->
 
@@ -107,6 +103,13 @@
       </div> <!-- /container -->
     </main>
     <script>
+      $(document).ready(function() {
+        $('#itemsTable').DataTable({
+          scrollY: '200px', // Set the desired height for vertical scrolling
+          scrollCollapse: true,
+          paging: true, // Enable pagination
+        });
+      });
       function filterItem(filterValue, selectId) {
         const itemSelect = document.getElementById(selectId);
         const options = itemSelect.getElementsByTagName("option");
