@@ -214,15 +214,6 @@ func (mm *metricsMiddleware) DisableUser(ctx context.Context, token, id string) 
 	return mm.svc.DisableUser(ctx, token, id)
 }
 
-func (mm *metricsMiddleware) CreateThing(ctx context.Context, token string, thing sdk.Thing) (b []byte, err error) {
-	defer func(begin time.Time) {
-		mm.counter.With("method", "create_thing").Add(1)
-		mm.latency.With("method", "create_thing").Observe(time.Since(begin).Seconds())
-	}(time.Now())
-
-	return mm.svc.CreateThing(ctx, token, thing)
-}
-
 func (mm *metricsMiddleware) CreateThings(ctx context.Context, token string, things ...sdk.Thing) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "create_things").Add(1)
@@ -302,15 +293,6 @@ func (mm *metricsMiddleware) UpdateThingOwner(ctx context.Context, token, id str
 	}(time.Now())
 
 	return mm.svc.UpdateThingOwner(ctx, token, id, thing)
-}
-
-func (mm *metricsMiddleware) CreateChannel(ctx context.Context, token string, channel sdk.Channel) (b []byte, err error) {
-	defer func(begin time.Time) {
-		mm.counter.With("method", "create_channel").Add(1)
-		mm.latency.With("method", "create_channel").Observe(time.Since(begin).Seconds())
-	}(time.Now())
-
-	return mm.svc.CreateChannel(ctx, token, channel)
 }
 
 func (mm *metricsMiddleware) CreateChannels(ctx context.Context, token string, channels ...sdk.Channel) (b []byte, err error) {

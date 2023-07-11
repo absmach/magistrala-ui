@@ -40,6 +40,7 @@ var (
 	errUnauthorized      = errors.New("failed to login")
 	ErrAuthentication    = errors.New("failed to perform authentication over the entity")
 	referer              = ""
+	ErrSecretError       = errors.New("invalid entity secret")
 )
 
 // MakeHandler returns a HTTP handler for API endpoints.
@@ -816,7 +817,6 @@ func getAuthorization(r *http.Request) (string, error) {
 func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
 	w.Header().Set("Content-Type", contentType)
 	ar, _ := response.(uiRes)
-
 	for k, v := range ar.Headers() {
 		w.Header().Set(k, v)
 	}
@@ -853,6 +853,10 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	case errors.Contains(err, ErrAuthentication):
 		w.Header().Set("Location", "/refresh_token")
 		w.WriteHeader(http.StatusSeeOther)
+	case errors.Contains(err, ErrSecretError):
+		w.Header().Set("Location", "/password")
+		w.WriteHeader(http.StatusFound)
+
 	default:
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {

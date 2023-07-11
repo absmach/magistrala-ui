@@ -451,7 +451,7 @@ func createThingEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.CreateThing(ctx, req.token, req.thing)
+		res, err := svc.CreateThings(ctx, req.token, req.thing)
 		if err != nil {
 			return nil, err
 		}
@@ -641,25 +641,6 @@ func updateThingOwnerEndpoint(svc ui.Service) endpoint.Endpoint {
 			Owner: req.Owner,
 		}
 		res, err := svc.UpdateThingOwner(ctx, req.token, req.id, thing)
-		if err != nil {
-			return nil, err
-		}
-
-		return uiRes{
-			html: res,
-		}, err
-	}
-}
-
-func createChannelEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(createChannelReq)
-
-		if err := req.validate(); err != nil {
-			return nil, err
-		}
-
-		res, err := svc.CreateChannel(ctx, req.token, req.Channel)
 		if err != nil {
 			return nil, err
 		}

@@ -59,7 +59,6 @@ type Service interface {
 	UpdateUserOwner(ctx context.Context, token, userID string, user sdk.User) ([]byte, error)
 	EnableUser(ctx context.Context, token, userID string) ([]byte, error)
 	DisableUser(ctx context.Context, token, userID string) ([]byte, error)
-	CreateThing(ctx context.Context, token string, thing sdk.Thing) ([]byte, error)
 	CreateThings(ctx context.Context, token string, things ...sdk.Thing) ([]byte, error)
 	ListThings(ctx context.Context, token string) ([]byte, error)
 	ViewThing(ctx context.Context, token, id string) ([]byte, error)
@@ -69,7 +68,6 @@ type Service interface {
 	UpdateThingOwner(ctx context.Context, token, id string, thing sdk.Thing) ([]byte, error)
 	EnableThing(ctx context.Context, token, id string) ([]byte, error)
 	DisableThing(ctx context.Context, token, id string) ([]byte, error)
-	CreateChannel(ctx context.Context, token string, channel sdk.Channel) ([]byte, error)
 	CreateChannels(ctx context.Context, token string, channels ...sdk.Channel) ([]byte, error)
 	ListChannels(ctx context.Context, token string) ([]byte, error)
 	ViewChannel(ctx context.Context, token, id string) ([]byte, error)
@@ -277,9 +275,29 @@ func (gs *uiService) UpdatePassword(ctx context.Context, token, oldPass, newPass
 }
 
 func (gs *uiService) CreateUsers(ctx context.Context, token string, users ...sdk.User) ([]byte, error) {
-	for i := range users {
-		if _, err := gs.sdk.CreateUser(users[i], token); err != nil {
-			return []byte{}, err
+	filter := sdk.PageMetadata{
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
+	}
+	existingUsers, err := gs.sdk.Users(filter, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	for _, user := range users {
+		existing := false
+		for _, existingUser := range existingUsers.Users {
+			if existingUser.Credentials.Identity == user.Credentials.Identity {
+				existing = true
+				break
+			}
+		}
+		if !existing {
+			_, err := gs.sdk.CreateUser(user, token)
+			if err != nil {
+				return []byte{}, err
+			}
 		}
 	}
 	return gs.ListUsers(ctx, token)
@@ -391,10 +409,33 @@ func (gs *uiService) DisableUser(ctx context.Context, token, userID string) ([]b
 	return gs.ListUsers(ctx, token)
 }
 
-func (gs *uiService) CreateThing(ctx context.Context, token string, thing sdk.Thing) ([]byte, error) {
-	if _, err := gs.sdk.CreateThing(thing, token); err != nil {
+func (gs *uiService) CreateThings(ctx context.Context, token string, things ...sdk.Thing) ([]byte, error) {
+	filter := sdk.PageMetadata{
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
+	}
+	existingThings, err := gs.sdk.Things(filter, token)
+	if err != nil {
 		return []byte{}, err
 	}
+
+	for _, thing := range things {
+		existing := false
+		for _, existingThing := range existingThings.Things {
+			if existingThing.Credentials.Secret == thing.Credentials.Secret {
+				existing = true
+				break
+			}
+		}
+		if !existing {
+			_, err := gs.sdk.CreateThing(thing, token)
+			if err != nil {
+				return []byte{}, err
+			}
+		}
+	}
+
 	return gs.ListThings(ctx, token)
 }
 
@@ -504,25 +545,30 @@ func (gs *uiService) DisableThing(ctx context.Context, token, id string) ([]byte
 	return gs.ListThings(ctx, token)
 }
 
-func (gs *uiService) CreateThings(ctx context.Context, token string, things ...sdk.Thing) ([]byte, error) {
-	if _, err := gs.sdk.CreateThings(things, token); err != nil {
-		return []byte{}, err
-	}
-
-	return gs.ListThings(ctx, token)
-}
-
-func (gs *uiService) CreateChannel(ctx context.Context, token string, channel sdk.Channel) ([]byte, error) {
-	if _, err := gs.sdk.CreateChannel(channel, token); err != nil {
-		return []byte{}, err
-	}
-
-	return gs.ListChannels(ctx, token)
-}
-
 func (gs *uiService) CreateChannels(ctx context.Context, token string, channels ...sdk.Channel) ([]byte, error) {
-	if _, err := gs.sdk.CreateChannels(channels, token); err != nil {
+	filter := sdk.PageMetadata{
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
+	}
+	existingChannels, err := gs.sdk.Channels(filter, token)
+	if err != nil {
 		return []byte{}, err
+	}
+	for _, channel := range channels {
+		existing := false
+		for _, existingChannel := range existingChannels.Channels {
+			if existingChannel.Name == channel.Name {
+				existing = true
+				break
+			}
+		}
+		if !existing {
+			_, err := gs.sdk.CreateChannel(channel, token)
+			if err != nil {
+				return []byte{}, err
+			}
+		}
 	}
 
 	return gs.ListChannels(ctx, token)
@@ -909,10 +955,28 @@ func (gs *uiService) ListGroupMembers(ctx context.Context, token, id string) ([]
 }
 
 func (gs *uiService) CreateGroups(ctx context.Context, token string, groups ...sdk.Group) ([]byte, error) {
-	for i := range groups {
-		_, err := gs.sdk.CreateGroup(groups[i], token)
-		if err != nil {
-			return []byte{}, err
+	filter := sdk.PageMetadata{
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
+	}
+	existingGroups, err := gs.sdk.Groups(filter, token)
+	if err != nil {
+		return []byte{}, err
+	}
+	for _, group := range groups {
+		existing := false
+		for _, existingGroup := range existingGroups.Groups {
+			if existingGroup.Name == group.Name {
+				existing = true
+				break
+			}
+		}
+		if !existing {
+			_, err := gs.sdk.CreateGroup(group, token)
+			if err != nil {
+				return []byte{}, err
+			}
 		}
 	}
 	return gs.ListGroups(ctx, token)

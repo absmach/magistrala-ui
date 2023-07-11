@@ -287,19 +287,6 @@ func (lm *loggingMiddleware) DisableUser(ctx context.Context, token, id string) 
 	return lm.svc.DisableUser(ctx, token, id)
 }
 
-func (lm *loggingMiddleware) CreateThing(ctx context.Context, token string, thing sdk.Thing) (b []byte, err error) {
-	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method create_thing took %s to complete", time.Since(begin))
-		if err != nil {
-			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
-			return
-		}
-		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
-	}(time.Now())
-
-	return lm.svc.CreateThing(ctx, token, thing)
-}
-
 func (lm *loggingMiddleware) CreateThings(ctx context.Context, token string, things ...sdk.Thing) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method create_things took %s to complete", time.Since(begin))
