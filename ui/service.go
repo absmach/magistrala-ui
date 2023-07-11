@@ -188,7 +188,7 @@ func (gs *uiService) Login(ctx context.Context) ([]byte, error) {
 }
 
 func (gs *uiService) PasswordReset(ctx context.Context) ([]byte, error) {
-	tpl, err := parseTemplate("passwordreset", "passwordreset.html")
+	tpl, err := parseTemplate("updatePassword", "updatePassword.html")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -200,7 +200,7 @@ func (gs *uiService) PasswordReset(ctx context.Context) ([]byte, error) {
 	}
 
 	var btpl bytes.Buffer
-	if err := tpl.ExecuteTemplate(&btpl, "passwordreset", data); err != nil {
+	if err := tpl.ExecuteTemplate(&btpl, "updatePassword", data); err != nil {
 		println(err.Error())
 	}
 
