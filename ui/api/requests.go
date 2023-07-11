@@ -12,6 +12,7 @@ import (
 const maxNameSize = 1024
 
 type indexReq struct {
+	token string
 }
 
 type loginReq struct {
@@ -23,6 +24,10 @@ type PasswordResetReq struct {
 type tokenReq struct {
 	Identity string `json:"identity"`
 	Secret   string `json:"secret"`
+}
+
+type refreshTokenReq struct {
+	RefreshToken string
 }
 
 type createUserReq struct {
@@ -144,7 +149,6 @@ func (req updateUserStatusReq) validate() error {
 
 type updateUserPasswordReq struct {
 	token   string
-	id      string
 	OldPass string `json:"oldpass,omitempty"`
 	NewPass string `json:"newpass,omitempty"`
 }
@@ -364,8 +368,7 @@ func (req connectChannelReq) validate() error {
 
 type connectReq struct {
 	token   string
-	ChanID  []string `json:"chan_id,omitempty"`
-	ThingID []string `json:"thing_id,omitempty"`
+	ConnIDs sdk.ConnectionIDs
 }
 
 func (req connectReq) validate() error {
@@ -414,8 +417,7 @@ func (req disconnectChannelReq) validate() error {
 
 type disconnectReq struct {
 	token   string
-	ChanID  []string `json:"chan_id,omitempty"`
-	ThingID []string `json:"thing_id,omitempty"`
+	ConnIDs sdk.ConnectionIDs
 }
 
 func (req disconnectReq) validate() error {
@@ -432,6 +434,32 @@ type updateChannelStatusReq struct {
 }
 
 func (req updateChannelStatusReq) validate() error {
+	if req.token == "" {
+		return ui.ErrUnauthorizedAccess
+	}
+
+	return nil
+}
+
+type addThingsPolicyReq struct {
+	token   string
+	ConnIDs sdk.ConnectionIDs
+}
+
+func (req addThingsPolicyReq) validate() error {
+	if req.token == "" {
+		return ui.ErrUnauthorizedAccess
+	}
+
+	return nil
+}
+
+type deleteThingsPolicyReq struct {
+	token   string
+	ConnIDs sdk.ConnectionIDs
+}
+
+func (req deleteThingsPolicyReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
 	}
@@ -521,8 +549,7 @@ func (req assignReq) validate() error {
 type unassignReq struct {
 	token    string
 	groupID  string
-	Type     []string `json:"type,omitempty"`
-	MemberID string   `json:"memberId,omitempty"`
+	MemberID string `json:"memberId,omitempty"`
 }
 
 func (req unassignReq) validate() error {
@@ -616,15 +643,32 @@ func (req publishReq) validate() error {
 	return nil
 }
 
+type sendMessageReq struct {
+}
+
 type readMessageReq struct {
+	token string
+}
+
+func (req readMessageReq) validate() error {
+	if req.token == "" {
+		return ui.ErrMalformedEntity
+	}
+
+	return nil
 }
 
 type wsConnectionReq struct {
+	token    string
 	ChanID   string `json:"chan_id,omitempty"`
 	ThingKey string `json:"thing_key,omitempty"`
 }
 
 func (req wsConnectionReq) validate() error {
+	if req.token == "" {
+		return ui.ErrMalformedEntity
+	}
+
 	if req.ChanID == "" {
 		return ui.ErrMalformedEntity
 	}

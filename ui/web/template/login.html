@@ -1,60 +1,52 @@
 {{define "login"}}
 <!doctype html>
 <html lang="en">
-  <head>
-    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/fontawesome/css/all.min.css">
-    <link rel="stylesheet" type="text/css" href="/css/login.css">
 
-    <div class="hero">
-      <nav>
-        <img src="/images/logo.png" class= "logo">
-        <div class="organization-name"> 
-          <h>Mainflux</h>
+<head>
+  <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/fontawesome/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="/css/login.css">
+
+  <div class="hero">
+    <nav class="loginNav">
+      <img src="/images/logo.png" class="logo">
+      <div class="organization-name">
+        <h>Mainflux</h>
+      </div>
+    </nav>
+  </div>
+
+</head>
+
+<body>
+  <div class="container">
+    <div class="form-box">
+      <h1>LOGIN</h1>
+      <form id="form" method="post">
+        <div class="input-group">
+          <div class="input-field">
+            <i class="fas fa-solid fa-envelope"></i>
+            <input type="email" name="username" id="username" placeholder="Email Address">
+            <div class="error-message"></div>
+          </div>
+          <div class="input-field">
+            <i class="fas fa-solid fa-lock"></i>
+            <input type="password" name="password" id="password" placeholder="Password">
+            <div class="error-message"></div>
+          </div>
         </div>
-      </nav>
+        <div class="btn-field">
+          <button type="submit">Login</button>
+        </div>
+
+      </form>
     </div>
 
-  </head>
-  <body>
-    <div class="container">
-      <div class="form-box">
-        <h1>LOGIN</h1>
-        <form id="form" method="post">
-          <div class="input-group">
-            <div class="input-field">
-              <i class="fas fa-solid fa-envelope"></i>
-              <input type="email" name="username" id="username" placeholder="Email Address">
-              <div class="error-message"></div>
-            </div>
-            <div class="input-field">
-              <i class="fas fa-solid fa-lock"></i>
-              <input type="password" name="password" id="password" placeholder="Password">
-              <div class="error-message"></div>
-            </div>
-          </div>
-          <div class="btn-field">
-            <button type="submit">Login</button>
-          </div>
+  </div> <!-- /container -->
 
-        </form>
-      </div>
+  {{template "footer"}}
 
-    </div> <!-- /container -->
+</body>
 
-    {{template "footer"}}
-
-  </body>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      document.getElementById('form').addEventListener('submit',function(){
-        //get the entered username
-        var username = document.getElementById('username').value;
-
-        //save the username to local storage
-        localStorage.setItem('username',username);
-      });
-    });
-  </script>
 </html>
 {{end}}

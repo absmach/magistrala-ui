@@ -27,7 +27,7 @@
           {{$active = "policies"}}
           <a class="nav-link" {{if eq .NavbarActive $active}} style="color:black"{{end}} href="/policies">
             <i class="fas fa-solid fa-shield-alt"></i>
-            Policies
+            Users Policies
           </a>
         </li>  
         <li class="nav-item">
@@ -44,6 +44,13 @@
             Channels
           </a>
         </li>
+        <li class="nav-item">
+          {{$active = "thingsPolicies"}}
+          <a class="nav-link" {{if eq .NavbarActive $active}} style="color:black"{{end}} href="/things_policies">
+            <i class="fas fa-solid fa-shield-alt"></i>
+            Things Policies
+          </a>
+        </li>  
         <li class="nav-item">
           {{$active = "deleted"}}
           <a class="nav-link" {{if eq .NavbarActive $active}} style="color:black"{{end}} href="/deleted">

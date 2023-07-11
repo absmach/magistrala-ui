@@ -42,7 +42,6 @@ var (
 
 // MakeHandler returns a HTTP handler for API endpoints.
 func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) http.Handler {
-	// redirectURL = redirect
 	opts := []kithttp.ServerOption{
 		kithttp.ServerErrorEncoder(encodeError),
 	}
@@ -68,6 +67,14 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 		encodeResponse,
 		opts...,
 	))
+
+	r.Get("/refresh_token", kithttp.NewServer(
+		kitot.TraceServer(tracer, "refresh_token")(refreshTokenEndpoint(svc)),
+		decodeRefreshTokenRequest,
+		encodeResponse,
+		opts...,
+	))
+
 	r.Get("/logout", kithttp.NewServer(
 		kitot.TraceServer(tracer, "logout")(logoutEndpoint(svc)),
 		decodeLogoutRequest,
@@ -76,8 +83,8 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 	))
 
 	r.Post("/password", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_user_password")(updateUserPasswordEndpoint(svc)),
-		decodeUserPasswordUpdate,
+		kitot.TraceServer(tracer, "update_user_password")(updatePasswordEndpoint(svc)),
+		decodePasswordUpdate,
 		encodeResponse,
 		opts...,
 	))
@@ -326,6 +333,34 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 		opts...,
 	))
 
+	r.Get("/things_policies", kithttp.NewServer(
+		kitot.TraceServer(tracer, "view_things_policies")(listThingsPoliciesEndpoint(svc)),
+		decodeListPoliciesRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/things_policies", kithttp.NewServer(
+		kitot.TraceServer(tracer, "add_things_policy")(addThingsPolicyEndpoint(svc)),
+		decodeAddThingsPolicyRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/things_policies/update", kithttp.NewServer(
+		kitot.TraceServer(tracer, "update_things_policy")(updateThingsPolicyEndpoint(svc)),
+		decodeUpdatePolicyRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/things_policies/delete", kithttp.NewServer(
+		kitot.TraceServer(tracer, "delete_things_policy")(deleteThingsPolicyEndpoint(svc)),
+		decodeDeleteThingsPolicyRequest,
+		encodeResponse,
+		opts...,
+	))
+
 	r.Post("/groups", kithttp.NewServer(
 		kitot.TraceServer(tracer, "create_group")(createGroupEndpoint(svc)),
 		decodeGroupCreation,
@@ -462,17 +497,19 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 	return r
 }
 
-func decodeIndexRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	_, err := getAuthorization(r)
+func decodeIndexRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
 	if err != nil {
 		return nil, err
 	}
-	req := indexReq{}
+	req := indexReq{
+		token: token,
+	}
 
 	return req, nil
 }
 
-func decodeLoginRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeLoginRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	req := loginReq{}
 
 	return req, nil
@@ -484,7 +521,7 @@ func decodePasswordReset(_ context.Context, r *http.Request) (interface{}, error
 	return req, nil
 }
 
-func decodeTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeTokenRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	identity := r.PostFormValue("username")
 	secret := r.PostFormValue("password")
 
@@ -496,9 +533,25 @@ func decodeTokenRequest(_ context.Context, r *http.Request) (interface{}, error)
 	return req, nil
 }
 
-func decodeLogoutRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeRefreshTokenRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	c, err := r.Cookie("refresh_token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			return "", errors.Wrap(errNoCookie, err)
+		}
+		return "", err
+	}
+	req := refreshTokenReq{
+		RefreshToken: c.Value,
+	}
 
-	return nil, nil
+	return req, nil
+}
+
+func decodeLogoutRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	req := sendMessageReq{}
+
+	return req, nil
 }
 
 func decodeUserCreation(_ context.Context, r *http.Request) (interface{}, error) {
@@ -575,7 +628,7 @@ func decodeUsersCreation(_ context.Context, r *http.Request) (interface{}, error
 
 }
 
-func decodeListUsersRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeListUsersRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	token, err := getAuthorization(r)
 	if err != nil {
 		return nil, err
@@ -668,14 +721,13 @@ func decodeUserIdentityUpdate(_ context.Context, r *http.Request) (interface{}, 
 	return req, nil
 }
 
-func decodeUserPasswordUpdate(_ context.Context, r *http.Request) (interface{}, error) {
+func decodePasswordUpdate(_ context.Context, r *http.Request) (interface{}, error) {
 	token, err := getAuthorization(r)
 	if err != nil {
 		return nil, err
 	}
 	req := updateUserPasswordReq{
 		token:   token,
-		id:      bone.GetValue(r, "id"),
 		OldPass: r.PostFormValue("oldpass"),
 		NewPass: r.PostFormValue("newpass"),
 	}
@@ -720,6 +772,12 @@ func encodeResponse(_ context.Context, w http.ResponseWriter, response interface
 	for k, v := range ar.Headers() {
 		w.Header().Set(k, v)
 	}
+
+	// Add cookies to the response header
+	for _, cookie := range ar.Cookies() {
+		http.SetCookie(w, cookie)
+	}
+
 	w.WriteHeader(ar.Code())
 
 	if ar.Empty() {
@@ -790,7 +848,7 @@ func decodeThingCreation(_ context.Context, r *http.Request) (interface{}, error
 	return req, nil
 }
 
-func decodeListThingsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeListThingsRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	token, err := getAuthorization(r)
 	if err != nil {
 		return nil, err
@@ -1016,7 +1074,7 @@ func decodeChannelUpdate(_ context.Context, r *http.Request) (interface{}, error
 	return req, nil
 }
 
-func decodeListChannelsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeListChannelsRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	token, err := getAuthorization(r)
 	if err != nil {
 		return nil, err
@@ -1097,10 +1155,13 @@ func decodeConnect(_ context.Context, r *http.Request) (interface{}, error) {
 		row, err := csvr.Read()
 		if err != nil {
 			if err == io.EOF {
+				connIDs := sdk.ConnectionIDs{
+					ChannelIDs: chanIDs,
+					ThingIDs:   thingIDs,
+				}
 				req := connectReq{
 					token:   token,
-					ChanID:  chanIDs,
-					ThingID: thingIDs,
+					ConnIDs: connIDs,
 				}
 
 				return req, nil
@@ -1174,10 +1235,13 @@ func decodeDisconnect(_ context.Context, r *http.Request) (interface{}, error) {
 		row, err := csvr.Read()
 		if err != nil {
 			if err == io.EOF {
+				connIDs := sdk.ConnectionIDs{
+					ChannelIDs: chanIDs,
+					ThingIDs:   thingIDs,
+				}
 				req := disconnectReq{
 					token:   token,
-					ChanID:  chanIDs,
-					ThingID: thingIDs,
+					ConnIDs: connIDs,
 				}
 
 				return req, nil
@@ -1201,6 +1265,48 @@ func decodeChannelStatusUpdate(_ context.Context, r *http.Request) (interface{},
 		ChannelID: r.PostFormValue("channelID"),
 	}
 
+	return req, nil
+}
+
+func decodeAddThingsPolicyRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+
+	thingID := r.PostFormValue("subject")
+	chanID := r.PostFormValue("object")
+
+	connIDs := sdk.ConnectionIDs{
+		ChannelIDs: []string{chanID},
+		ThingIDs:   []string{thingID},
+		Actions:    r.PostForm["actions"],
+	}
+	req := addThingsPolicyReq{
+		token:   token,
+		ConnIDs: connIDs,
+	}
+	return req, nil
+}
+
+func decodeDeleteThingsPolicyRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+
+	thingID := r.PostFormValue("subject")
+	chanID := r.PostFormValue("object")
+
+	connIDs := sdk.ConnectionIDs{
+		ChannelIDs: []string{chanID},
+		ThingIDs:   []string{thingID},
+		Actions:    r.PostForm["actions"],
+	}
+	req := deleteThingsPolicyReq{
+		token:   token,
+		ConnIDs: connIDs,
+	}
 	return req, nil
 }
 
@@ -1319,12 +1425,10 @@ func decodeUnassignRequest(_ context.Context, r *http.Request) (interface{}, err
 		return nil, err
 	}
 	MemberId := r.PostFormValue("memberID")
-	memberType := r.PostForm["Type"]
 
 	req := unassignReq{
 		token:    token,
 		groupID:  bone.GetValue(r, "id"),
-		Type:     memberType,
 		MemberID: MemberId,
 	}
 
@@ -1345,7 +1449,7 @@ func decodeGroupStatusUpdate(_ context.Context, r *http.Request) (interface{}, e
 	return req, nil
 }
 
-func decodeListPoliciesRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeListPoliciesRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	token, err := getAuthorization(r)
 	if err != nil {
 		return nil, err
@@ -1357,7 +1461,7 @@ func decodeListPoliciesRequest(_ context.Context, r *http.Request) (interface{},
 	return req, nil
 }
 
-func decodeAddPolicyRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeAddPolicyRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	token, err := getAuthorization(r)
 	if err != nil {
 		return nil, err
@@ -1377,7 +1481,7 @@ func decodeAddPolicyRequest(_ context.Context, r *http.Request) (interface{}, er
 	return req, nil
 }
 
-func decodeUpdatePolicyRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeUpdatePolicyRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
@@ -1404,7 +1508,7 @@ func decodeUpdatePolicyRequest(_ context.Context, r *http.Request) (interface{},
 	return req, nil
 }
 
-func decodeDeletePolicyRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeDeletePolicyRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
@@ -1426,7 +1530,7 @@ func decodeDeletePolicyRequest(_ context.Context, r *http.Request) (interface{},
 	return req, nil
 }
 
-func decodePublishRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodePublishRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
@@ -1453,25 +1557,27 @@ func decodePublishRequest(_ context.Context, r *http.Request) (interface{}, erro
 	return req, nil
 }
 
-func decodeReadMessageRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeReadMessageRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
-	_, err := getAuthorization(r)
+	token, err := getAuthorization(r)
 	if err != nil {
 		return nil, err
 	}
 
-	req := readMessageReq{}
+	req := readMessageReq{
+		token: token,
+	}
 
 	return req, nil
 }
 
-func decodeWsConnectionRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeWsConnectionRequest(ctx context.Context, r *http.Request) (interface{}, error) {
 	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
-	_, err := getAuthorization(r)
+	token, err := getAuthorization(r)
 	if err != nil {
 		return nil, err
 	}
@@ -1480,6 +1586,7 @@ func decodeWsConnectionRequest(_ context.Context, r *http.Request) (interface{},
 	thingKey := r.Form.Get("thingKey")
 
 	req := wsConnectionReq{
+		token:    token,
 		ChanID:   chanID,
 		ThingKey: thingKey,
 	}

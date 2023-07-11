@@ -54,46 +54,6 @@
                 </div>
               </div>
             </div>
-            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#unassignModal">
-              unassign
-            </button>
-            <div class="modal fade" id="unassignModal" tabindex="-1" role="dialog" aria-labelledby="unassignModal" aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="unassignModal">unassign</h5>
-                  </div>
-                  <div class="modal-body">
-                    <form action="/groups/{{.Group.ID}}/unassign" method="post">
-                      <div class="mb-3">
-                        <label for="memberIDUnassign" class="form-label">Member ID</label>
-                        <input type="text" name="memberFilter" id="memberFilterUnassign" placeholder="Filter by member ID" oninput="filterItem(this.value , 'memberIDUnassign')">
-                        <select class="form-select" name="memberID" id="memberIDUnassign" required >
-                          <option value="">...</option>
-                          {{range .Members}}
-                            <option value="{{.ID}}">{{.Name}}</option>
-                          {{end}}
-                        </select>
-                      </div>
-                      <div class="mb-3">
-                        <label for="Type" class="form-label">Member Type</label>
-                        <select class="form-control" name="Type" id="Type" aria-describedby="TypeHelp" multiple required>
-                          <option value="g_update">g_update</option>
-                          <option value="g_list">g_list</option>
-                          <option value="g_delete">g_delete</option>
-                          <option value="g_add">g_add</option>
-                          <option value="c_update">c_update</option>
-                          <option value="c_list">c_list</option>
-                          <option value="c_delete">c_delete</option>
-                        </select>
-                        <div id="TypeHelp" class="form-text">Select member Type.</div>
-                      </div>
-                      <button type="submit" class="btn btn-danger btn-sm">Unassign</button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
             <table class="table table-striped">
               <thead>
                 <tr>
@@ -119,14 +79,33 @@
                     <th scope="col">#</th>
                     <th scope="col">NAME</th>
                     <th scope="col">ID</th>
+                    <th scope="col">ACTIONS</th>
+                    <th scope="col"></th>
                   </tr>
                 </thead>
                 <tbody>
+                  {{$policies := .Policies}}
+                  {{$groupID := .Group.ID}}
                   {{range $i, $m := .Members}}
                     <tr>
                       <th scope="row">{{$i}}</th>
                       <td>{{$m.Name}}</td>
                       <td><a href={{printf "/users/%s" $m.ID}}>{{$m.ID}}</a></td>
+                        {{range $p := $policies}}
+                            {{if (eq $m.ID $p.Subject)}}
+                              {{if (eq $groupID $p.Object)}}
+                                <td>{{toSlice $p.Actions}}</td>
+                              {{end}}
+                            {{end}}
+                          {{end}}
+                      <td>
+                        <form action="/groups/{{$groupID}}/unassign" method="post">
+                          <input type="hidden" name="memberID" id="memberID" value="{{$m.ID}}">
+                          <button type="submit" class="btn btn-sm">
+                            <i class="fas fa-trash-alt"></i>
+                          </button>
+                        </form>
+                      </td>
                     </tr>
                   {{end}}
                 </tbody>
@@ -138,14 +117,19 @@
         </div>
       </div> <!-- /container -->
     </main>
+
+    {{template "footer"}}
+    
     <script>
-      $(document).ready(function() {
-        $('#itemsTable').DataTable({
-          scrollY: '200px', // Set the desired height for vertical scrolling
-          scrollCollapse: true,
-          paging: true, // Enable pagination
+     document.addEventListener('DOMContentLoaded', function() {
+        new simpleDatatables.DataTable('#itemsTable', {
+          searchable: true,
+          scrollY: "300px",
+          sortable: true,
+          pagination: true,
         });
       });
+
       function filterItem(filterValue, selectId) {
         const itemSelect = document.getElementById(selectId);
         const options = itemSelect.getElementsByTagName("option");
@@ -159,9 +143,6 @@
         }
       }
     </script>
-
-    {{template "footer"}}
-
   </body>
 </html>
 {{end}}

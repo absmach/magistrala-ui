@@ -99,16 +99,25 @@
                     <th scope="col">#</th>
                     <th scope="col">NAME</th>
                     <th scope="col">ID</th>
+                    <th scope="col">ACTIONS</th>
                     <th scope="col"></th>
                     <th scope="col"></th>
                   </tr>
                 </thead>
                 <tbody>
+                  {{$policies := .Policies}}
                   {{range $i, $t := .Things}}
                     <tr>
                       <th scope="row">{{$i}}</th>
                       <td>{{$t.Name}}</td>
                       <td><a href={{printf "/things/%s" $t.ID}}>{{$t.ID}}</a></td>
+                      {{range $p :=$policies}}
+                        {{if (eq $t.ID $p.Subject)}}
+                          {{if (eq $c $p.Object)}}
+                            <td>{{toSlice $p.Actions}}</td>
+                          {{end}}
+                        {{end}}
+                      {{end}}
                       <td>
                         <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#sendMessageModal{{$i}}">
                           Send Message
@@ -154,14 +163,19 @@
         </div>
       </div> <!-- /container -->
     </main>
+
+    {{template "footer"}}
+    
     <script>
-      $(document).ready(function() {
-        $('#itemsTable').DataTable({
-          scrollY: '200px', // Set the desired height for vertical scrolling
-          scrollCollapse: true,
-          paging: true, // Enable pagination
+      document.addEventListener('DOMContentLoaded', function() {
+        new simpleDatatables.DataTable('#itemsTable', {
+          searchable: true,
+          scrollY: "300px",
+          sortable: true,
+          pagination: true,
         });
       });
+
       function filterItem(filterValue, selectId) {
         const itemSelect = document.getElementById(selectId);
         const options = itemSelect.getElementsByTagName("option");
@@ -175,9 +189,6 @@
         }
       }
     </script>
-
-    {{template "footer"}}
-
   </body>
 </html>
 {{end}}

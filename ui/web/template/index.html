@@ -1,29 +1,40 @@
 {{define "index"}}
 <!doctype html>
 <html lang="en">
-  {{template "header"}}
-  <body>
-    <main role="main">
-      <div class="container-fluid">
-        <div class="row">
+{{template "header"}}
 
-          {{template "navbar" .}}
+<body>
+  <main role="main">
+    <div class="container-fluid">
+      <div class="row">
 
-          <!-- Partial goes here -->
-          <div class="col-md-9">
-            <h2>Dashboard</h2>
-            <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper.
-              Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
-            <p><a class="btn btn-secondary" href="#" role="button">View details &raquo;</a></p>
-          </div>
-          <!-- End of partial-->
+        {{template "navbar" .}}
 
+        <!-- Partial goes here -->
+        <div class="col-md-9">
+          <h2>Dashboard</h2>
+          <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta
+            felis euismod semper.
+            Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet
+            risus.</p>
+          <p><a class="btn btn-secondary" href="#" role="button">View details &raquo;</a></p>
         </div>
-      </div> <!-- /container -->
-    </main>
+        <!-- End of partial-->
 
-    {{template "footer"}}
+      </div>
+    </div> <!-- /container -->
+  </main>
 
-  </body>
+  {{template "footer"}}
+
+  <script>
+    // Get the user's name from Go template's data
+    var username = "{{.User.Name}}";
+
+    // Store the user's name in local storage
+    localStorage.setItem("username", username);
+  </script>
+</body>
+
 </html>
 {{end}}

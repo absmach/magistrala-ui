@@ -1,73 +1,90 @@
 {{define "header"}}
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
 
-    <title>Mainflux</title>
+  <title>Mainflux</title>
 
-    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/fontawesome/css/all.min.css">
-    <link rel="stylesheet" type="text/css" href="/css/main.css">
-    <link href="/css/header.css" rel="stylesheet" type="text/css" >
-   
-    <script src="/DataTables/jQuery-3.6.0/jquery-3.6.0.min.js" ></script>
-    <link href="/DataTables/datatables.min.css" rel="stylesheet"/>
-    <script src="/DataTables/datatables.min.js" defer></script>
+  <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/fontawesome/css/all.min.css">
+  <link rel="stylesheet" type="text/css" href="/css/main.css">
+  <link href="/css/header.css" rel="stylesheet" type="text/css" >
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css">
+  <script src="/js/clipboard.js"defer></script>
 
-    <script src="/js/clipboard.js"defer></script>
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        // Retrieve the username from local storage
-        var savedUsername = localStorage.getItem('username');
-    
-        // Update the username in the header
-        if (savedUsername) {
-          var usernameElement = document.getElementById('username');
-          if (usernameElement) {
-            usernameElement.textContent = savedUsername;
-          }
-        }
-      });
-    </script>
-
-    <div class="hero">
-      <nav>
-        <img src="/images/logo.png" class= "logo">
-        <div class="organization-name"> 
-          <h>Mainflux</h>
-          </div>
-        <div class="user-icon">
-          <i class="fas fa-user-circle" style= "font-size: 32px" onclick="toggleMenu()"></i>
-        </div>
-        <div class="sub-menu-wrap" id="subMenu">
-          <div class="sub-menu">
-            <div class= "user-info">
-              <i class="fas fa-user-circle" style= "font-size: 32px" class="user-pic"></i>
-              <p id="username"></p>
-            </div>
-              <hr>
-            <a class="sub-menu-link"  class="active"  href="/password">
-            <i class="fas fa-solid fa-lock"></i>
-              <p>Password reset</p>
-              <span>></span>
-            </a>
-               <a class="sub-menu-link"  class="active" href="/logout">
-              <i class="fas fa-sign-out-alt"></i>
-                 <p>Logout</p>
-                 <span>></span>
-            </a>
-          </div>
-        </div>
-      </nav>
-    </div>
+  <script defer>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Retrieve the username from local storage
+      var savedUsername = localStorage.getItem('username');
   
-    <script>
-      let subMenu= document.getElementById("subMenu");
+      // Update the username in the header
+      if (savedUsername) {
+        var usernameElement = document.getElementById('username');
+        if (usernameElement) {
+          usernameElement.textContent = savedUsername;
+        }
+      }
+    });
+    function refreshToken(){
+      url = '/refresh_token';
+      fetch(url, {
+        method: "GET",
+        headers: {
+          "Content-Type":"application/json"
+        }
+      })
+      .then(response => {
+        if(response.ok){
+          console.log('Token refreshed');
+        }
+      })
+      .catch(error => {
+        console.error("Failed to refresh token:", error);
+      });
+    }
+
+    setInterval(refreshToken, 600000);
+  </script>
+</head>
+
+<header>
+  <div class="hero">
+    <nav class="headerNav">
+      <img src="/images/logo.png" class= "logo">
+      <div class="organization-name"> 
+        <h>Mainflux</h>
+        </div>
+      <div class="user-icon">
+        <i class="fas fa-user-circle" style= "font-size: 32px" onclick="toggleMenu()"></i>
+      </div>
+      <div class="sub-menu-wrap" id="subMenu">
+        <div class="sub-menu">
+          <div class= "user-info">
+            <i class="fas fa-user-circle" style= "font-size: 32px" class="user-pic"></i>
+            <p id="username"></p>
+          </div>
+            <hr>
+          <a class="sub-menu-link" href="/password">
+          <i class="fas fa-solid fa-lock"></i>
+            <p>Password reset</p>
+            <span>></span>
+          </a>
+             <a class="sub-menu-link" href="/logout">
+            <i class="fas fa-sign-out-alt"></i>
+               <p>Logout</p>
+               <span>></span>
+          </a>
+        </div>
+      </div>
+    </nav>
+  </div>
+  <script>
+    let subMenu= document.getElementById("subMenu");
     function toggleMenu() {
       subMenu.classList.toggle("open-menu");
     }
-    </script>
-</head>
+  </script>
+</header>
 {{end}}

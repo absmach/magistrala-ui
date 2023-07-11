@@ -2,7 +2,6 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <link rel="stylesheet" type="text/css" href="/css/slider.css">
     {{template "header"}}
   </head>
  
@@ -32,21 +31,27 @@
                     <form method="post" onsubmit="return validateForm()">
                       <div class="mb-3">
                         <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control" name="name" id="name" aria-describedby="nameHelp" placeholder="Channel Name">
-                        <div id="nameError" class="error-message"></div>
+                        <input type="text" class="form-control" name="name" id="name"  placeholder="Channel Name" required>
                       </div>
                       <div class="mb-3">
                         <label for="parentID" class="form-label">Parent ID</label>
-                        <input type="text" class="form-control" name="parentID" id="parentID" aria-describedby="parentIDHelp" placeholder="Parent ID">
-                      </div>
+                        <input type="text" name="parentFilter" id="parentFilter" placeholder="Filter by parent ID" oninput="filterItem(this.value, 'parentID')">
+                        <select class="form-select" name="parentID" id="parentID">
+                          <option value="">...</option>
+                          {{range $i, $c := .Channels}}
+                            <option value="{{$c.ID}}">{{$c.Name}}</option>
+                          {{end}}
+                        </select>
+                      </div>                      
                       <div class="mb-3">
                         <label for="description" class="form-label">Description</label>
-                        <input type="text" class="form-control" name="description" id="description" aria-describedby="descriptionHelp" placeholder="Channel Description">
+                        <input type="text" class="form-control" name="description" id="description"  placeholder="Channel Description">
                       </div>
                       <div class="mb-3">
                         <label for="metadata" class="form-label">Metadata</label>
                         <input type="text" class="form-control" name= "metadata" id="metadata" value="{}">
                         <div id="metadataHelp" class="form-text">Enter channel metadata in JSON format.</div>
+                        <div id="metadataError" class="error-message"></div>
                       </div>
                       <button type="submit" class="btn btn-primary">Submit</button>
                     </form>
@@ -121,12 +126,16 @@
         </div>
       </div> <!-- /container -->
     </main>
+    
+    {{template "footer"}}
+
     <script>
-       $(document).ready(function() {
-        $('#itemsTable').DataTable({
-          scrollY: '400px', // Set the desired height for vertical scrolling
-          scrollCollapse: true,
-          paging: true // Enable pagination
+      document.addEventListener('DOMContentLoaded', function() {
+        new simpleDatatables.DataTable('#itemsTable', {
+          searchable: true,
+          scrollY: "300px",
+          sortable: true,
+          pagination: true,
         });
       });
 
@@ -169,8 +178,6 @@
         return isValid;
       }
     </script>
-
-    {{template "footer"}}
 
   </body>
 </html>

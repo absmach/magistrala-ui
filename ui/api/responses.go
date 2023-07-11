@@ -17,6 +17,7 @@ var (
 
 type uiRes struct {
 	code    int
+	cookies []*http.Cookie
 	headers map[string]string
 	html    []byte
 }
@@ -58,6 +59,10 @@ func (res uiRes) Headers() map[string]string {
 	}
 
 	return res.headers
+}
+
+func (res uiRes) Cookies() []*http.Cookie {
+	return res.cookies
 }
 
 func (res uiRes) Empty() bool {

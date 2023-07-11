@@ -36,21 +36,24 @@ var (
 
 // Service specifies coap service API.
 type Service interface {
-	Index(ctx context.Context) ([]byte, error)
+	Index(ctx context.Context, token string) ([]byte, error)
 	Login(ctx context.Context) ([]byte, error)
 	Logout(ctx context.Context) ([]byte, error)
 	PasswordReset(ctx context.Context) ([]byte, error)
+	UpdatePassword(ctx context.Context, token, oldPass, newPass string) ([]byte, error)
+	UserProfile(ctx context.Context, token string) (sdk.User, error)
 	Token(ctx context.Context, user sdk.User) (sdk.Token, error)
+	RefreshToken(ctx context.Context, refreshToken string) (sdk.Token, error)
 	CreateUsers(ctx context.Context, token string, user ...sdk.User) ([]byte, error)
 	ListUsers(ctx context.Context, token string) ([]byte, error)
-	ViewUser(ctx context.Context, token, id string) ([]byte, error)
-	UpdateUser(ctx context.Context, token, id string, user sdk.User) ([]byte, error)
-	UpdateUserTags(ctx context.Context, token, id string, user sdk.User) ([]byte, error)
-	UpdateUserIdentity(ctx context.Context, token, id string, user sdk.User) ([]byte, error)
-	UpdateUserPassword(ctx context.Context, token, id, oldPass, newPass string) ([]byte, error)
-	EnableUser(ctx context.Context, token, id string) ([]byte, error)
-	DisableUser(ctx context.Context, token, id string) ([]byte, error)
-	CreateThing(ctx context.Context, token string, thing ...sdk.Thing) ([]byte, error)
+	ViewUser(ctx context.Context, token, userID string) ([]byte, error)
+	UpdateUser(ctx context.Context, token, userID string, user sdk.User) ([]byte, error)
+	UpdateUserTags(ctx context.Context, token, userID string, user sdk.User) ([]byte, error)
+	UpdateUserIdentity(ctx context.Context, token, userID string, user sdk.User) ([]byte, error)
+	UpdateUserOwner(ctx context.Context, token, userID string, user sdk.User) ([]byte, error)
+	EnableUser(ctx context.Context, token, userID string) ([]byte, error)
+	DisableUser(ctx context.Context, token, userID string) ([]byte, error)
+	CreateThing(ctx context.Context, token string, thing sdk.Thing) ([]byte, error)
 	CreateThings(ctx context.Context, token string, things ...sdk.Thing) ([]byte, error)
 	ListThings(ctx context.Context, token string) ([]byte, error)
 	ViewThing(ctx context.Context, token, id string) ([]byte, error)
@@ -60,6 +63,7 @@ type Service interface {
 	UpdateThingOwner(ctx context.Context, token, id string, thing sdk.Thing) ([]byte, error)
 	EnableThing(ctx context.Context, token, id string) ([]byte, error)
 	DisableThing(ctx context.Context, token, id string) ([]byte, error)
+	CreateChannel(ctx context.Context, token string, channel sdk.Channel) ([]byte, error)
 	CreateChannels(ctx context.Context, token string, channels ...sdk.Channel) ([]byte, error)
 	ListChannels(ctx context.Context, token string) ([]byte, error)
 	ViewChannel(ctx context.Context, token, id string) ([]byte, error)
@@ -68,16 +72,20 @@ type Service interface {
 	ListThingsByChannel(ctx context.Context, token, id string) ([]byte, error)
 	EnableChannel(ctx context.Context, token, id string) ([]byte, error)
 	DisableChannel(ctx context.Context, token, id string) ([]byte, error)
-	Connect(ctx context.Context, token string, chIDs, thIDs []string) ([]byte, error)
-	Disconnect(ctx context.Context, token string, chIDs, thIDs []string) ([]byte, error)
+	Connect(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
+	Disconnect(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
 	ConnectThing(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
 	DisconnectThing(ctx context.Context, thID, chID, token string) ([]byte, error)
 	ConnectChannel(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
 	DisconnectChannel(ctx context.Context, thID, chID, token string) ([]byte, error)
+	AddThingsPolicy(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
+	DeleteThingsPolicy(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
+	ListThingsPolicies(ctx context.Context, token string) ([]byte, error)
+	UpdateThingsPolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error)
 	CreateGroups(ctx context.Context, token string, groups ...sdk.Group) ([]byte, error)
 	ListGroupMembers(ctx context.Context, token, id string) ([]byte, error)
 	Assign(ctx context.Context, token, groupID, memberID string, memberType []string) ([]byte, error)
-	Unassign(ctx context.Context, token, groupID, memberID string, memberType []string) ([]byte, error)
+	Unassign(ctx context.Context, token, groupID, memberID string) ([]byte, error)
 	ViewGroup(ctx context.Context, token, id string) ([]byte, error)
 	UpdateGroup(ctx context.Context, token, id string, group sdk.Group) ([]byte, error)
 	ListGroups(ctx context.Context, token string) ([]byte, error)
@@ -88,8 +96,8 @@ type Service interface {
 	ListPolicies(ctx context.Context, token string) ([]byte, error)
 	DeletePolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error)
 	Publish(ctx context.Context, token, thKey string, msg *messaging.Message) ([]byte, error)
-	ReadMessage(ctx context.Context) ([]byte, error)
-	WsConnection(ctx context.Context, chID, thKey string) ([]byte, error)
+	ReadMessage(ctx context.Context, token string) ([]byte, error)
+	WsConnection(ctx context.Context, token, chID, thKey string) ([]byte, error)
 	ListDeletedClients(ctx context.Context, token string) ([]byte, error)
 }
 
@@ -132,16 +140,23 @@ func parseTemplate(name string, tmpls ...string) (tpl *template.Template, err er
 	return tpl, nil
 }
 
-func (gs *uiService) Index(ctx context.Context) ([]byte, error) {
+func (gs *uiService) Index(ctx context.Context, token string) ([]byte, error) {
 	tpl, err := parseTemplate("index", "index.html")
+	if err != nil {
+		return []byte{}, err
+	}
+
+	user, err := gs.UserProfile(ctx, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
 	data := struct {
 		NavbarActive string
+		User         sdk.User
 	}{
 		"dashboard",
+		user,
 	}
 
 	var btpl bytes.Buffer
@@ -200,7 +215,31 @@ func (gs *uiService) Token(ctx context.Context, user sdk.User) (sdk.Token, error
 	return token, nil
 }
 
+func (gs *uiService) RefreshToken(cxt context.Context, refreshToken string) (sdk.Token, error) {
+	token, err := gs.sdk.RefreshToken(refreshToken)
+	if err != nil {
+		return sdk.Token{}, err
+	}
+	return token, nil
+}
+
 func (gs *uiService) Logout(ctx context.Context) ([]byte, error) {
+	return nil, nil
+}
+
+func (gs *uiService) UserProfile(ctx context.Context, token string) (sdk.User, error) {
+	user, err := gs.sdk.UserProfile(token)
+	if err != nil {
+		return sdk.User{}, err
+	}
+
+	return user, nil
+}
+
+func (gs *uiService) UpdatePassword(ctx context.Context, token, oldPass, newPass string) ([]byte, error) {
+	if _, err := gs.sdk.UpdatePassword(oldPass, newPass, token); err != nil {
+		return []byte{}, err
+	}
 	return nil, nil
 }
 
@@ -245,12 +284,12 @@ func (gs *uiService) ListUsers(ctx context.Context, token string) ([]byte, error
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) ViewUser(ctx context.Context, token, id string) ([]byte, error) {
+func (gs *uiService) ViewUser(ctx context.Context, token, userID string) ([]byte, error) {
 	tpl, err := parseTemplate("user", "user.html")
 	if err != nil {
 		return []byte{}, err
 	}
-	user, err := gs.sdk.User(id, token)
+	user, err := gs.sdk.User(userID, token)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -261,7 +300,7 @@ func (gs *uiService) ViewUser(ctx context.Context, token, id string) ([]byte, er
 		User         sdk.User
 	}{
 		"user",
-		id,
+		userID,
 		user,
 	}
 
@@ -273,58 +312,57 @@ func (gs *uiService) ViewUser(ctx context.Context, token, id string) ([]byte, er
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) UpdateUser(ctx context.Context, token, id string, user sdk.User) ([]byte, error) {
+func (gs *uiService) UpdateUser(ctx context.Context, token, userID string, user sdk.User) ([]byte, error) {
 	if _, err := gs.sdk.UpdateUser(user, token); err != nil {
 		return []byte{}, err
 	}
 
-	return gs.ViewUser(ctx, token, id)
+	return gs.ViewUser(ctx, token, userID)
 }
 
-func (gs *uiService) UpdateUserTags(ctx context.Context, token, id string, user sdk.User) ([]byte, error) {
+func (gs *uiService) UpdateUserTags(ctx context.Context, token, userID string, user sdk.User) ([]byte, error) {
 	if _, err := gs.sdk.UpdateUserTags(user, token); err != nil {
 		return []byte{}, err
 	}
 
-	return gs.ViewUser(ctx, token, id)
+	return gs.ViewUser(ctx, token, userID)
 }
 
-func (gs *uiService) UpdateUserIdentity(ctx context.Context, token, id string, user sdk.User) ([]byte, error) {
+func (gs *uiService) UpdateUserIdentity(ctx context.Context, token, userID string, user sdk.User) ([]byte, error) {
 	if _, err := gs.sdk.UpdateUserIdentity(user, token); err != nil {
 		return []byte{}, err
 	}
 
-	return gs.ViewUser(ctx, token, id)
+	return gs.ViewUser(ctx, token, userID)
 }
 
-func (gs *uiService) UpdateUserPassword(ctx context.Context, token, id, oldPass, newPass string) ([]byte, error) {
-	if _, err := gs.sdk.UpdatePassword(oldPass, newPass, token); err != nil {
+func (gs *uiService) UpdateUserOwner(ctx context.Context, token, userID string, user sdk.User) ([]byte, error) {
+	if _, err := gs.sdk.UpdateUserIdentity(user, token); err != nil {
 		return []byte{}, err
 	}
-	return nil, nil
+
+	return gs.ViewUser(ctx, token, userID)
 }
 
-func (gs *uiService) EnableUser(ctx context.Context, token, id string) ([]byte, error) {
-	if _, err := gs.sdk.EnableUser(id, token); err != nil {
+func (gs *uiService) EnableUser(ctx context.Context, token, userID string) ([]byte, error) {
+	if _, err := gs.sdk.EnableUser(userID, token); err != nil {
 		return []byte{}, err
 	}
 	return gs.ListUsers(ctx, token)
 }
 
-func (gs *uiService) DisableUser(ctx context.Context, token, id string) ([]byte, error) {
-	if _, err := gs.sdk.DisableUser(id, token); err != nil {
+func (gs *uiService) DisableUser(ctx context.Context, token, userID string) ([]byte, error) {
+	if _, err := gs.sdk.DisableUser(userID, token); err != nil {
 		return []byte{}, err
 	}
 
 	return gs.ListUsers(ctx, token)
 }
 
-func (gs *uiService) CreateThing(ctx context.Context, token string, things ...sdk.Thing) ([]byte, error) {
-	for i := range things {
-		_, err := gs.sdk.CreateThing(things[i], token)
-		if err != nil {
-			return []byte{}, err
-		}
+func (gs *uiService) CreateThing(ctx context.Context, token string, thing sdk.Thing) ([]byte, error) {
+	_, err := gs.sdk.CreateThing(thing, token)
+	if err != nil {
+		return []byte{}, err
 	}
 	return gs.ListThings(ctx, token)
 }
@@ -435,23 +473,29 @@ func (gs *uiService) DisableThing(ctx context.Context, token, id string) ([]byte
 }
 
 func (gs *uiService) CreateThings(ctx context.Context, token string, things ...sdk.Thing) ([]byte, error) {
-	for i := range things {
-		_, err := gs.sdk.CreateThing(things[i], token)
-		if err != nil {
-			return []byte{}, err
-		}
+	_, err := gs.sdk.CreateThings(things, token)
+	if err != nil {
+		return []byte{}, err
 	}
 
 	return gs.ListThings(ctx, token)
 }
 
-func (gs *uiService) CreateChannels(ctx context.Context, token string, channels ...sdk.Channel) ([]byte, error) {
-	for i := range channels {
-		_, err := gs.sdk.CreateChannel(channels[i], token)
-		if err != nil {
-			return []byte{}, err
-		}
+func (gs *uiService) CreateChannel(ctx context.Context, token string, channel sdk.Channel) ([]byte, error) {
+	_, err := gs.sdk.CreateChannel(channel, token)
+	if err != nil {
+		return []byte{}, err
 	}
+
+	return gs.ListChannels(ctx, token)
+}
+
+func (gs *uiService) CreateChannels(ctx context.Context, token string, channels ...sdk.Channel) ([]byte, error) {
+	_, err := gs.sdk.CreateChannels(channels, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	return gs.ListChannels(ctx, token)
 }
 
@@ -600,18 +644,25 @@ func (gs *uiService) ListChannelsByThing(ctx context.Context, token, id string) 
 		return []byte{}, err
 	}
 
+	plcPage, err := gs.sdk.ListThingsPolicies(filter, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	data := struct {
 		NavbarActive string
 		ID           string
 		Thing        sdk.Thing
 		Channels     []sdk.Channel
 		AllChannels  []sdk.Channel
+		Policies     []sdk.Policy
 	}{
 		"things",
 		id,
 		thing,
 		chsPage.Channels,
 		allchsPage.Channels,
+		plcPage.Policies,
 	}
 
 	var btpl bytes.Buffer
@@ -621,28 +672,20 @@ func (gs *uiService) ListChannelsByThing(ctx context.Context, token, id string) 
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) Connect(ctx context.Context, token string, chIDs, thIDs []string) ([]byte, error) {
-	cids := sdk.ConnectionIDs{
-		ThingIDs:   thIDs,
-		ChannelIDs: chIDs,
-	}
-	if err := gs.sdk.Connect(cids, token); err != nil {
+func (gs *uiService) Connect(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error) {
+	if err := gs.sdk.Connect(connIDs, token); err != nil {
 		return []byte{}, err
 	}
 
-	return gs.ListThingsByChannel(ctx, token, chIDs[0])
+	return gs.ListThingsByChannel(ctx, token, connIDs.ChannelIDs[0])
 }
 
-func (gs *uiService) Disconnect(ctx context.Context, token string, chIDs, thIDs []string) ([]byte, error) {
-	cids := sdk.ConnectionIDs{
-		ThingIDs:   thIDs,
-		ChannelIDs: chIDs,
-	}
-	if err := gs.sdk.Disconnect(cids, token); err != nil {
+func (gs *uiService) Disconnect(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error) {
+	if err := gs.sdk.Disconnect(connIDs, token); err != nil {
 		return []byte{}, err
 	}
 
-	return gs.ListThingsByChannel(ctx, token, chIDs[0])
+	return gs.ListThingsByChannel(ctx, token, connIDs.ChannelIDs[0])
 }
 
 func (gs *uiService) ListThingsByChannel(ctx context.Context, token, id string) ([]byte, error) {
@@ -676,18 +719,25 @@ func (gs *uiService) ListThingsByChannel(ctx context.Context, token, id string) 
 		return []byte{}, err
 	}
 
+	plcPage, err := gs.sdk.ListThingsPolicies(filter, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	data := struct {
 		NavbarActive string
 		ID           string
 		Channel      sdk.Channel
 		Things       []sdk.Thing
 		AllThings    []sdk.Thing
+		Policies     []sdk.Policy
 	}{
 		"channels",
 		id,
 		channel,
 		thsPage.Things,
 		allthsPage.Things,
+		plcPage.Policies,
 	}
 
 	var btpl bytes.Buffer
@@ -695,6 +745,76 @@ func (gs *uiService) ListThingsByChannel(ctx context.Context, token, id string) 
 		println(err.Error())
 	}
 	return btpl.Bytes(), nil
+}
+
+func (gs *uiService) ListThingsPolicies(ctx context.Context, token string) ([]byte, error) {
+	tpl, err := parseTemplate("thingsPolicies", "thingsPolicies.html")
+	if err != nil {
+		return []byte{}, err
+	}
+
+	filter := sdk.PageMetadata{
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
+	}
+	plcPage, err := gs.sdk.ListThingsPolicies(filter, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	chsPage, err := gs.sdk.Channels(filter, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	thsPage, err := gs.sdk.Things(filter, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	data := struct {
+		NavbarActive string
+		Policies     []sdk.Policy
+		Channels     []sdk.Channel
+		Things       []sdk.Thing
+	}{
+		"thingsPolicies",
+		plcPage.Policies,
+		chsPage.Channels,
+		thsPage.Things,
+	}
+
+	var btpl bytes.Buffer
+	if err := tpl.ExecuteTemplate(&btpl, "thingsPolicies", data); err != nil {
+		println(err.Error())
+	}
+
+	return btpl.Bytes(), nil
+}
+
+func (gs *uiService) AddThingsPolicy(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error) {
+	if err := gs.sdk.Connect(connIDs, token); err != nil {
+		return []byte{}, err
+	}
+
+	return gs.ListThingsPolicies(ctx, token)
+}
+
+func (gs *uiService) DeleteThingsPolicy(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error) {
+	if err := gs.sdk.Disconnect(connIDs, token); err != nil {
+		return []byte{}, err
+	}
+
+	return gs.ListThingsPolicies(ctx, token)
+}
+
+func (gs *uiService) UpdateThingsPolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error) {
+	if err := gs.sdk.UpdateThingsPolicy(policy, token); err != nil {
+		return []byte{}, err
+	}
+
+	return gs.ListThingsPolicies(ctx, token)
 }
 
 func (gs *uiService) ListGroupMembers(ctx context.Context, token, id string) ([]byte, error) {
@@ -728,18 +848,25 @@ func (gs *uiService) ListGroupMembers(ctx context.Context, token, id string) ([]
 		return []byte{}, err
 	}
 
+	plcPage, err := gs.sdk.ListPolicies(filter, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	data := struct {
 		NavbarActive string
 		ID           string
 		Group        sdk.Group
 		Members      []sdk.User
 		Users        []sdk.User
+		Policies     []sdk.Policy
 	}{
 		"groups",
 		id,
 		group,
 		members.Members,
 		users.Users,
+		plcPage.Policies,
 	}
 
 	var btpl bytes.Buffer
@@ -802,25 +929,14 @@ func (gs *uiService) ViewGroup(ctx context.Context, token, id string) ([]byte, e
 		return []byte{}, err
 	}
 
-	pgm := sdk.PageMetadata{
-		Offset: 0,
-		Limit:  100,
-	}
-
-	members, err := gs.sdk.Members(id, pgm, token)
-	if err != nil {
-		return []byte{}, err
-	}
 	data := struct {
 		NavbarActive string
 		ID           string
 		Group        sdk.Group
-		Members      []sdk.User
 	}{
 		"groups",
 		id,
 		group,
-		members.Members,
 	}
 
 	var btpl bytes.Buffer
@@ -838,7 +954,7 @@ func (gs *uiService) Assign(ctx context.Context, token, groupID, memberID string
 	return gs.ListGroupMembers(ctx, token, groupID)
 }
 
-func (gs *uiService) Unassign(ctx context.Context, token, groupID, memberID string, memberType []string) ([]byte, error) {
+func (gs *uiService) Unassign(ctx context.Context, token, groupID, memberID string) ([]byte, error) {
 	if err := gs.sdk.Unassign(memberID, groupID, token); err != nil {
 		return []byte{}, err
 	}
@@ -948,7 +1064,7 @@ func (gs *uiService) Publish(ctx context.Context, token, thKey string, msg *mess
 	return gs.ListThingsByChannel(ctx, token, msg.Channel)
 }
 
-func (gs *uiService) ReadMessage(ctx context.Context) ([]byte, error) {
+func (gs *uiService) ReadMessage(ctx context.Context, token string) ([]byte, error) {
 	tpl, err := parseTemplate("messagesread", "messagesread.html")
 	if err != nil {
 		return []byte{}, err
@@ -968,7 +1084,7 @@ func (gs *uiService) ReadMessage(ctx context.Context) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) WsConnection(ctx context.Context, chID, thKey string) ([]byte, error) {
+func (gs *uiService) WsConnection(ctx context.Context, token, chID, thKey string) ([]byte, error) {
 	tpl, err := parseTemplate("messagesread", "messagesread.html")
 	if err != nil {
 		return []byte{}, err

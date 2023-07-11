@@ -189,36 +189,35 @@
       </div> <!-- /container -->
     </main>
 
-    <script>
-        $(document).ready(function() {
-            $('#usersTable').DataTable({
-            scrollY: '400px', // Set the desired height for vertical scrolling
-            scrollCollapse: true,
-            paging: true // Enable pagination
-            });
-            $('#groupsTable').DataTable({
-            scrollY: '400px', // Set the desired height for vertical scrolling
-            scrollCollapse: true,
-            paging: true // Enable pagination
-            });
-            $('#thingsTable').DataTable({
-            scrollY: '400px', // Set the desired height for vertical scrolling
-            scrollCollapse: true,
-            paging: true // Enable pagination
-            });
-            $('#channelsTable').DataTable({
-            scrollY: '400px', // Set the desired height for vertical scrolling
-            scrollCollapse: true,
-            paging: true // Enable pagination
-            });
-            $('a[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
-            $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
-        });
-        });
-    </script>
-
     {{template "footer"}}
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var tables = [
+                '#usersTable',
+                '#groupsTable',
+                '#thingsTable',
+                '#channelsTable'
+            ];
 
+            // Initialize all tables
+            tables.forEach(function(tableId) {
+                var datatable=new simpleDatatables.DataTable(tableId, {
+                    searchable: true,
+                    scrollY: '300px',
+                    sortable: true,
+                    pagination: true
+                });
+                // Adjust table columns on tab change
+                document.querySelectorAll('a[data-bs-toggle="tab"]').forEach(function(tab) {
+                    tab.addEventListener('shown.bs.tab', function() {
+                        datatable.refresh();
+                    });
+                });
+            });   
+        });
+
+    </script>
   </body>
 </html>
 {{end}}

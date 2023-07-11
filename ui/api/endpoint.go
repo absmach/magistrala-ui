@@ -5,7 +5,6 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/mainflux/mainflux/pkg/errors"
@@ -17,7 +16,8 @@ import (
 
 func indexEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		res, err := svc.Index(ctx)
+		req := request.(indexReq)
+		res, err := svc.Index(ctx, req.token)
 
 		return uiRes{
 			html: res,
@@ -64,10 +64,63 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		accessToken := token.AccessToken
+		refreshToken := token.RefreshToken
+
+		cookies := []*http.Cookie{
+			{
+				Name:     "token",
+				Value:    accessToken,
+				Path:     "/",
+				HttpOnly: true,
+			},
+			{
+				Name:     "refresh_token",
+				Value:    refreshToken,
+				Path:     "/",
+				HttpOnly: true,
+			},
+		}
 
 		tkr := uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Set-Cookie": fmt.Sprintf("token=%s;", accessToken), "Location": "/"},
+			cookies: cookies,
+			headers: map[string]string{"Location": "/"},
+		}
+
+		return tkr, nil
+	}
+}
+
+func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(refreshTokenReq)
+
+		token, err := svc.RefreshToken(ctx, req.RefreshToken)
+		if err != nil {
+			return nil, errors.Wrap(errUnauthorized, err)
+		}
+
+		newAccessToken := token.AccessToken
+		newRefreshToken := token.RefreshToken
+
+		cookies := []*http.Cookie{
+			{
+				Name:     "token",
+				Value:    newAccessToken,
+				Path:     "/",
+				HttpOnly: true,
+			},
+			{
+				Name:     "refresh_token",
+				Value:    newRefreshToken,
+				Path:     "/",
+				HttpOnly: true,
+			},
+		}
+
+		tkr := uiRes{
+			code:    http.StatusFound,
+			cookies: cookies,
 		}
 
 		return tkr, nil
@@ -78,10 +131,27 @@ func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		res, err := svc.Logout(ctx)
 
+		cookies := []*http.Cookie{
+			{
+				Name:     "token",
+				Value:    "",
+				Path:     "/",
+				MaxAge:   -1,
+				HttpOnly: true,
+			},
+			{
+				Name:     "refresh_token",
+				Value:    "",
+				Path:     "/",
+				MaxAge:   -1,
+				HttpOnly: true,
+			},
+		}
 		return uiRes{
 			code:    http.StatusFound,
 			html:    res,
-			headers: map[string]string{"Set-Cookie": "token=;Max-Age=0;", "Location": "/login"},
+			cookies: cookies,
+			headers: map[string]string{"Location": "/login"},
 		}, err
 	}
 }
@@ -283,7 +353,7 @@ func disableUserEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func updateUserPasswordEndpoint(svc ui.Service) endpoint.Endpoint {
+func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateUserPasswordReq)
 
@@ -291,15 +361,33 @@ func updateUserPasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.UpdateUserPassword(ctx, req.token, req.id, req.OldPass, req.NewPass)
+		res, err := svc.UpdatePassword(ctx, req.token, req.OldPass, req.NewPass)
 		if err != nil {
 			return nil, err
+		}
+
+		cookies := []*http.Cookie{
+			{
+				Name:     "token",
+				Value:    "",
+				Path:     "/",
+				MaxAge:   -1,
+				HttpOnly: true,
+			},
+			{
+				Name:     "refresh_token",
+				Value:    "",
+				Path:     "/",
+				MaxAge:   -1,
+				HttpOnly: true,
+			},
 		}
 
 		return uiRes{
 			code:    http.StatusFound,
 			html:    res,
-			headers: map[string]string{"Set-Cookie": "token=;Max-Age=0;", "Location": "/login"},
+			cookies: cookies,
+			headers: map[string]string{"Location": "/login"},
 		}, err
 	}
 }
@@ -519,7 +607,7 @@ func createChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.CreateChannels(ctx, req.token, req.Channel)
+		res, err := svc.CreateChannel(ctx, req.token, req.Channel)
 		if err != nil {
 			return nil, err
 		}
@@ -626,7 +714,7 @@ func connectEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.Connect(ctx, cr.token, cr.ChanID, cr.ThingID)
+		res, err := svc.Connect(ctx, cr.token, cr.ConnIDs)
 		if err != nil {
 			return nil, err
 		}
@@ -645,7 +733,7 @@ func disconnectEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.Disconnect(ctx, dcr.token, dcr.ChanID, dcr.ThingID)
+		res, err := svc.Disconnect(ctx, dcr.token, dcr.ConnIDs)
 		if err != nil {
 			return nil, err
 		}
@@ -808,6 +896,73 @@ func disableChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
+func listThingsPoliciesEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(listPoliciesReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		res, err := svc.ListThingsPolicies(ctx, req.token)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
+func addThingsPolicyEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(addThingsPolicyReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		res, err := svc.AddThingsPolicy(ctx, req.token, req.ConnIDs)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
+func updateThingsPolicyEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(updatePolicyReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		res, err := svc.UpdateThingsPolicy(ctx, req.token, req.Policy)
+		if err != nil {
+			return nil, err
+		}
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
+func deleteThingsPolicyEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(deleteThingsPolicyReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		res, err := svc.DeleteThingsPolicy(ctx, req.token, req.ConnIDs)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
 func createGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		cgr := request.(createGroupReq)
@@ -957,7 +1112,7 @@ func unassignEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.Unassign(ctx, req.token, req.groupID, req.MemberID, req.Type)
+		res, err := svc.Unassign(ctx, req.token, req.groupID, req.MemberID)
 		if err != nil {
 			return nil, err
 		}
@@ -1092,7 +1247,11 @@ func publishMessageEndpoint(svc ui.Service) endpoint.Endpoint {
 
 func readMessageEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		res, err := svc.ReadMessage(ctx)
+		req := request.(readMessageReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		res, err := svc.ReadMessage(ctx, req.token)
 		if err != nil {
 			return nil, err
 		}
@@ -1109,7 +1268,7 @@ func wsConnectionEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.WsConnection(ctx, req.ChanID, req.ThingKey)
+		res, err := svc.WsConnection(ctx, req.token, req.ChanID, req.ThingKey)
 		if err != nil {
 			return nil, err
 		}

@@ -66,6 +66,7 @@
                 </tr>
               </tbody>
             </table>
+            {{$policies := .Policies}}
             {{ $t := .Thing}}
             <div class="table-container">
               <h4 style="font-weight: bold; font-size: 22px; margin-top: 50px; margin-bottom: 20px;">CONNECTED CHANNELS</h4>
@@ -76,6 +77,7 @@
                     <th scope="col">NAME</th>
                     <th scope="col">ID</th>
                     <th scope="col"></th>
+                    <th scope="col"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -84,6 +86,13 @@
                       <th scope="row">{{$i}}</th>
                       <td>{{$c.Name}}</td>
                       <td><a href={{printf "/channels/%s" $c.ID}}>{{$c.ID}}</a></td>
+                      {{range $p :=$policies}}
+                        {{if (eq $c.ID $p.Object)}}
+                          {{if (eq $t.ID $p.Subject)}}
+                            <td>{{toSlice $p.Actions}}</td>
+                          {{end}}
+                        {{end}}
+                      {{end}}
                       <td>
                         <form action="/disconnectChannel" method="post">
                           <input type="hidden" name="thingID" id="thingID" value="{{$t.ID}}">
@@ -102,14 +111,19 @@
         </div>
       </div> <!-- /container -->
     </main>
+
+    {{template "footer"}}
+    
     <script>
-      $(document).ready(function() {
-        $('#itemsTable').DataTable({
-          scrollY: '200px', // Set the desired height for vertical scrolling
-          scrollCollapse: true,
-          paging: true, // Enable pagination
+      document.addEventListener('DOMContentLoaded', function() {
+        new simpleDatatables.DataTable('#itemsTable', {
+          searchable: true,
+          scrollY: "200px",
+          sortable: true,
+          pagination: true,
         });
       });
+
       function filterItem(filterValue, selectId) {
         const itemSelect = document.getElementById(selectId);
         const options = itemSelect.getElementsByTagName("option");
@@ -123,9 +137,6 @@
         }
       }
     </script>
-
-    {{template "footer"}}
-
   </body>
 </html>
 {{end}}

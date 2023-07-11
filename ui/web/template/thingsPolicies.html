@@ -1,0 +1,152 @@
+{{define "thingsPolicies"}}
+<!DOCTYPE html>
+<html lang="en">
+    {{template "header"}}
+    <body>
+        <main role="main">
+            <div class="container-fluid">
+                <div class="row">
+                    {{template "navbar" .}}
+
+                    <div class="col-md-9">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addThingPolicyModal">
+                            Add Policy
+                        </button>
+                        <div class="modal fade" id="addThingPolicyModal" tabindex="-1" role="dialog" aria-labelledby="addThingPolicyModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="addThingPolicyModalLabel">Add Policy</h5>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form method="post">
+                                            <div class="mb-3">
+                                                <label for="subject" class="form-label">Subject</label>
+                                                <input type="text" name="subjectFilter" id="subjectFilter" placeholder="Filter by subject" oninput="filterItem(this.value, 'subject')"> 
+                                                <select class="form-select" name="subject" id="subject" required>
+                                                    <option value="">...</option>
+                                                    {{range .Things}}
+                                                        <option value="{{.ID}}">{{.Name}}</option>
+                                                    {{end}}
+                                                </select>
+                                                <div id="subjectHelp" class="form-text">Select a subject.</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="object" class="form-label">Object</label>
+                                                <input type="text" name="objectFilter" id="objectFilter" placeholder="Filter by object" oninput="filterItem(this.value, 'object')"> 
+                                                <select class="form-select" name="object" id="object" required>
+                                                    <option value="">...</option>
+                                                    {{range .Channels}}
+                                                        <option value="{{.ID}}">{{.Name}}</option>
+                                                    {{end}}
+                                                </select>
+                                                <div id="objectHelp" class="form-text">Select an object.</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="actions" class="form-label">Actions</label>
+                                                <select class="form-select" name="actions" id="actions" aria-describedby="actionsHelp" multiple required>
+                                                    <option value="m_read">m_read</option>
+                                                    <option value="m_write">m_write</option>
+                                                </select>
+                                                <div id="actionsHelp" class="form-text">Select Actions (multiple selections allowed).</div>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Submit</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <table id="itemsTable" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Subject</th>
+                                        <th scope="col">Object</th>
+                                        <th scope="col">Actions</th>
+                                        <th scope="col"></th>
+                                        <th scope="col"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{range $i, $p := .Policies}}
+                                        <tr>
+                                            <th scope="row">{{$i}}</th>
+                                            <td><a href={{printf "/things/%s" $p.Subject}}>{{$p.Subject}}</a></td>
+                                            <td><a href={{printf "/channels/%s" $p.Object}}>{{$p.Object}}</a></td>
+                                            <td class="editable" contenteditable="false" data-field="actions" >{{toSlice $p.Actions}}</td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#updatePolicyModal{{$i}}">
+                                                    <i class="fas fa-pencil-alt"></i>
+                                                </button>
+                                                <div class="modal fade" id="updatePolicyModal{{$i}}" tabindex="-1" role="dialog" aria-labelledby="updatePolicyModalLabel{{$i}}" aria-hidden="true">
+                                                    <div class="modal-dialog" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title" id="updatePolicyModalLabel{{$i}}">Update Policy</h5>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <form action="/things_policies/update" method="post">
+                                                                    <div class="mb-3">
+                                                                        <label for="actions" class="form-label">Actions</label>
+                                                                        <input type="hidden" name="subject" id="subject" value="{{$p.Subject}}">
+                                                                        <input type="hidden" name="object" id="object" value="{{$p.Object}}">
+                                                                        <input type="text" class="form-control" name="actions" id="actions" aria-describedby="actionsHelp" value="{{toSlice $p.Actions}}">
+                                                                        <div id="actionsHelp" class="form-text">Enter Actions.</div>
+                                                                    </div>
+                                                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                                                </form>
+                                                               
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <form action="/things_policies/delete" method="post">
+                                                    <input type="hidden" name="subject" id="subject" value="{{$p.Subject}}">
+                                                    <input type="hidden" name="object" id="object" value="{{$p.Object}}">
+                                                    <button type="submit" class="btn btn-sm">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                      </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {{end}}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        {{template "footer"}}
+        
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                new simpleDatatables.DataTable('#itemsTable', {
+                searchable: true,
+                scrollY: "300px",
+                sortable: true,
+                pagination: true,
+                });
+            });
+
+            function filterItem(filterValue, selectId) {
+                const itemSelect = document.getElementById(selectId);
+                const options = itemSelect.getElementsByTagName("option");
+
+                for (let i = 0; i < options.length; i++) {
+                const option = options[i];
+                const itemId = option.value;
+                const itemName = option.innerHTML;
+                const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
+                option.style.display = shouldShow ? "" : "none";
+                }
+            }
+        </script>
+    </body>
+</html>
+{{end}}

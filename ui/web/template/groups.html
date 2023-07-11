@@ -127,14 +127,18 @@
       </div> <!-- /container -->
     </main>
 
+    {{template "footer"}}
+
     <script>
-      $(document).ready(function() {
-        $('#itemsTable').DataTable({
-          scrollY: '400px', // Set the desired height for vertical scrolling
-          scrollCollapse: true,
-          paging: true // Enable pagination
+      document.addEventListener('DOMContentLoaded', function() {
+        new simpleDatatables.DataTable('#itemsTable', {
+          searchable: true,
+          scrollY: "300px",
+          sortable: true,
+          pagination: true,
         });
       });
+
       function validateForm() {
         var name = document.getElementById("name").value;
         var metadataInput = document.getElementById("metadata").value;
@@ -174,8 +178,6 @@
         }
       }
     </script>
-
-    {{template "footer"}}
 
   </body>
 </html>
