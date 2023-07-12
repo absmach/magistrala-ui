@@ -68,6 +68,7 @@ type Service interface {
 	UpdateThingOwner(ctx context.Context, token, id string, thing sdk.Thing) ([]byte, error)
 	EnableThing(ctx context.Context, token, id string) ([]byte, error)
 	DisableThing(ctx context.Context, token, id string) ([]byte, error)
+	CreateChannel(ctx context.Context, token string, channel sdk.Channel) ([]byte, error)
 	CreateChannels(ctx context.Context, token string, channels ...sdk.Channel) ([]byte, error)
 	ListChannels(ctx context.Context, token string) ([]byte, error)
 	ViewChannel(ctx context.Context, token, id string) ([]byte, error)
@@ -543,6 +544,15 @@ func (gs *uiService) DisableThing(ctx context.Context, token, id string) ([]byte
 	}
 
 	return gs.ListThings(ctx, token)
+}
+
+func (gs *uiService) CreateChannel(ctx context.Context, token string, channel sdk.Channel) ([]byte, error) {
+	_, err := gs.sdk.CreateChannel(channel, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return gs.ListChannels(ctx, token)
 }
 
 func (gs *uiService) CreateChannels(ctx context.Context, token string, channels ...sdk.Channel) ([]byte, error) {

@@ -40,7 +40,7 @@ var (
 	errUnauthorized      = errors.New("failed to login")
 	ErrAuthentication    = errors.New("failed to perform authentication over the entity")
 	referer              = ""
-	ErrSecretError       = errors.New("invalid entity secret")
+	ErrSecretError       = errors.New("wrong secret")
 )
 
 // MakeHandler returns a HTTP handler for API endpoints.
