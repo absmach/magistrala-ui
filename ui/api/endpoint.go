@@ -119,7 +119,8 @@ func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		tkr := uiRes{
-			code:    http.StatusFound,
+			code:    http.StatusSeeOther,
+			headers: map[string]string{"Location": req.ref},
 			cookies: cookies,
 		}
 

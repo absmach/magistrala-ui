@@ -13,40 +13,6 @@
   <link href="/css/header.css" rel="stylesheet" type="text/css" >
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css">
   <script src="/js/clipboard.js"defer></script>
-
-  <script defer>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Retrieve the username from local storage
-      var savedUsername = localStorage.getItem('username');
-  
-      // Update the username in the header
-      if (savedUsername) {
-        var usernameElement = document.getElementById('username');
-        if (usernameElement) {
-          usernameElement.textContent = savedUsername;
-        }
-      }
-    });
-    function refreshToken(){
-      url = '/refresh_token';
-      fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type":"application/json"
-        }
-      })
-      .then(response => {
-        if(response.ok){
-          console.log('Token refreshed');
-        }
-      })
-      .catch(error => {
-        console.error("Failed to refresh token:", error);
-      });
-    }
-
-    setInterval(refreshToken, 600000);
-  </script>
 </head>
 
 <header>
@@ -80,7 +46,19 @@
       </div>
     </nav>
   </div>
-  <script>
+  <script defer>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Retrieve the username from local storage
+      var savedUsername = localStorage.getItem('username');
+  
+      // Update the username in the header
+      if (savedUsername) {
+        var usernameElement = document.getElementById('username');
+        if (usernameElement) {
+          usernameElement.textContent = savedUsername;
+        }
+      }
+    });
     let subMenu= document.getElementById("subMenu");
     function toggleMenu() {
       subMenu.classList.toggle("open-menu");

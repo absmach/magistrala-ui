@@ -38,6 +38,8 @@ var (
 	errMalformedSubtopic = errors.New("malformed subtopic")
 	errNoCookie          = errors.New("failed to read token cookie")
 	errUnauthorized      = errors.New("failed to login")
+	ErrAuthentication    = errors.New("failed to perform authentication over the entity")
+	referer              = ""
 )
 
 // MakeHandler returns a HTTP handler for API endpoints.
@@ -537,18 +539,19 @@ func decodeRefreshTokenRequest(ctx context.Context, r *http.Request) (interface{
 	c, err := r.Cookie("refresh_token")
 	if err != nil {
 		if err == http.ErrNoCookie {
-			return "", errors.Wrap(errNoCookie, err)
+			return nil, errors.Wrap(errNoCookie, err)
 		}
-		return "", err
+		return nil, err
 	}
 	req := refreshTokenReq{
 		RefreshToken: c.Value,
+		ref:          referer,
 	}
 
 	return req, nil
 }
 
-func decodeLogoutRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+func decodeLogoutRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	req := sendMessageReq{}
 
 	return req, nil
@@ -750,6 +753,7 @@ func decodeUserStatusUpdate(_ context.Context, r *http.Request) (interface{}, er
 }
 
 func getAuthorization(r *http.Request) (string, error) {
+	referer = r.URL.String()
 	c, err := r.Cookie("token")
 	if err != nil {
 		if err == http.ErrNoCookie {
@@ -763,11 +767,7 @@ func getAuthorization(r *http.Request) (string, error) {
 
 func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
 	w.Header().Set("Content-Type", contentType)
-	ar, ok := response.(uiRes)
-	if !ok {
-		w.WriteHeader(http.StatusInternalServerError)
-		return nil
-	}
+	ar, _ := response.(uiRes)
 
 	for k, v := range ar.Headers() {
 		w.Header().Set(k, v)
@@ -802,6 +802,9 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		w.WriteHeader(http.StatusBadRequest)
 	case errors.Contains(err, ui.ErrUnauthorizedAccess):
 		w.WriteHeader(http.StatusForbidden)
+	case errors.Contains(err, ErrAuthentication):
+		w.Header().Set("Location", "/refresh_token")
+		w.WriteHeader(http.StatusSeeOther)
 	default:
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {

@@ -929,14 +929,25 @@ func (gs *uiService) ViewGroup(ctx context.Context, token, id string) ([]byte, e
 		return []byte{}, err
 	}
 
+	pgm := sdk.PageMetadata{
+		Offset: 0,
+		Limit:  100,
+	}
+
+	members, err := gs.sdk.Members(id, pgm, token)
+	if err != nil {
+		return []byte{}, err
+	}
 	data := struct {
 		NavbarActive string
 		ID           string
 		Group        sdk.Group
+		Members      []sdk.User
 	}{
 		"groups",
 		id,
 		group,
+		members.Members,
 	}
 
 	var btpl bytes.Buffer

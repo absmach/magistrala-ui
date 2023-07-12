@@ -28,6 +28,7 @@ type tokenReq struct {
 
 type refreshTokenReq struct {
 	RefreshToken string
+	ref          string
 }
 
 type createUserReq struct {
