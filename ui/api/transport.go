@@ -41,6 +41,7 @@ var (
 	ErrAuthentication    = errors.New("failed to perform authentication over the entity")
 	referer              = ""
 	ErrSecretError       = errors.New("wrong secret")
+	ErrConflict          = errors.New("entity already exists")
 )
 
 // MakeHandler returns a HTTP handler for API endpoints.

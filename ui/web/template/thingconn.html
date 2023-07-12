@@ -86,13 +86,15 @@
                       <th scope="row">{{$i}}</th>
                       <td>{{$c.Name}}</td>
                       <td><a href={{printf "/channels/%s" $c.ID}}>{{$c.ID}}</a></td>
-                      {{range $p :=$policies}}
-                        {{if (eq $c.ID $p.Object)}}
-                          {{if (eq $t.ID $p.Subject)}}
-                            <td>{{toSlice $p.Actions}}</td>
+                      <td>
+                        {{range $p :=$policies}}
+                          {{if (eq $c.ID $p.Object)}}
+                            {{if (eq $t.ID $p.Subject)}}
+                              {{toSlice $p.Actions}}
+                            {{end}}
                           {{end}}
                         {{end}}
-                      {{end}}
+                      </td>
                       <td>
                         <form action="/disconnectChannel" method="post">
                           <input type="hidden" name="thingID" id="thingID" value="{{$t.ID}}">

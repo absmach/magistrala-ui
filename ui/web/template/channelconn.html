@@ -126,13 +126,15 @@
                       <th scope="row">{{$i}}</th>
                       <td>{{$t.Name}}</td>
                       <td><a href={{printf "/things/%s" $t.ID}}>{{$t.ID}}</a></td>
-                      {{range $p :=$policies}}
-                        {{if (eq $t.ID $p.Subject)}}
-                          {{if (eq $c $p.Object)}}
-                            <td>{{toSlice $p.Actions}}</td>
+                      <td>
+                        {{range $p :=$policies}}
+                          {{if (eq $t.ID $p.Subject)}}
+                            {{if (eq $c $p.Object)}}
+                              {{toSlice $p.Actions}}
+                            {{end}}
                           {{end}}
                         {{end}}
-                      {{end}}
+                      </td>
                       <td>
                         <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#sendMessageModal{{$i}}">
                           Send Message

@@ -91,13 +91,15 @@
                       <th scope="row">{{$i}}</th>
                       <td>{{$m.Name}}</td>
                       <td><a href={{printf "/users/%s" $m.ID}}>{{$m.ID}}</a></td>
-                        {{range $p := $policies}}
+                        <td>
+                          {{range $p := $policies}}
                             {{if (eq $m.ID $p.Subject)}}
                               {{if (eq $groupID $p.Object)}}
-                                <td>{{toSlice $p.Actions}}</td>
+                                {{toSlice $p.Actions}}
                               {{end}}
                             {{end}}
                           {{end}}
+                        </td>
                       <td>
                         <form action="/groups/{{$groupID}}/unassign" method="post">
                           <input type="hidden" name="memberID" id="memberID" value="{{$m.ID}}">

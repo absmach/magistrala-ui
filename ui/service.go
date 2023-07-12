@@ -33,6 +33,8 @@ var (
 
 	// ErrInvalidResetPass indicates an invalid reset password.
 	ErrInvalidResetPass = errors.New("invalid reset password")
+	// ErrConflict indicates that entity already exists.
+	ErrConflict = errors.New("entity already exists")
 
 	tmplFiles = []string{"header.html", "footer.html", "navbar.html"}
 )
