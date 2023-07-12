@@ -651,6 +651,25 @@ func updateThingOwnerEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
+func createChannelEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(createChannelReq)
+
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.CreateChannel(ctx, req.token, req.Channel)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
 func createChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(createChannelsReq)

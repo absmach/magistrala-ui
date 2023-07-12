@@ -295,6 +295,15 @@ func (mm *metricsMiddleware) UpdateThingOwner(ctx context.Context, token, id str
 	return mm.svc.UpdateThingOwner(ctx, token, id, thing)
 }
 
+func (mm *metricsMiddleware) CreateChannel(ctx context.Context, token string, channel sdk.Channel) (b []byte, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "create_channel").Add(1)
+		mm.latency.With("method", "create_channel").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.CreateChannel(ctx, token, channel)
+}
+
 func (mm *metricsMiddleware) CreateChannels(ctx context.Context, token string, channels ...sdk.Channel) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "create_channels").Add(1)
