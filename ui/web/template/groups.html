@@ -14,6 +14,14 @@
 
           <!-- Partial goes here -->
           <div class="col-md-9">
+            {{ if ne .AlertMessage "" }}
+            <div id="alert-popup" class="alert alert-danger">
+              <span class="close-button" onclick="closeAlertPopup()">&times;</span>
+               <h5 class="alert-messsage">
+                {{ .AlertMessage }}
+               </h5>
+            </div>
+            {{ end }}
 
             <!-- Button trigger modal -->
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGroupModal">
@@ -128,6 +136,36 @@
     </main>
 
     {{template "footer"}}
+    <style>
+      .alert-popup {
+          /* position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%); */
+          /* background-color: #d8d507;
+          border: 1px solid #df562d; */
+          border-radius: 4px;
+          padding: 10px;
+          z-index: 1;
+      }
+      
+      .alert-message {
+          display: flex;
+          align-items: center;
+      }
+      
+      .close-button {
+          color: #aaa;
+          font-size: 18px;
+          font-weight: bold;
+          cursor: pointer;
+          margin-left: 10px;
+      }
+      
+      .close-button:hover {
+          color: black;
+      }
+    </style>
 
     <script>
       document.addEventListener('DOMContentLoaded', function() {
@@ -176,6 +214,9 @@
           const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
           option.style.display = shouldShow ? "" : "none";
         }
+      }
+      function closeAlertPopup() {
+        document.getElementById("alert-popup").style.display = "none";
       }
     </script>
 

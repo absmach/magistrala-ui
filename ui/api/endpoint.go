@@ -265,7 +265,7 @@ func listUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.ListUsers(ctx, req.token)
+		res, err := svc.ListUsers(ctx, req.token, "")
 		if err != nil {
 			return nil, err
 		}
@@ -496,7 +496,7 @@ func listThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.ListThings(ctx, req.token)
+		res, err := svc.ListThings(ctx, req.token, "")
 		if err != nil {
 			return nil, err
 		}
@@ -659,7 +659,7 @@ func createChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.CreateChannel(ctx, req.token, req.Channel)
+		res, err := svc.CreateChannels(ctx, req.token, req.Channel)
 		if err != nil {
 			return nil, err
 		}
@@ -750,7 +750,7 @@ func listChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListChannels(ctx, req.token)
+		res, err := svc.ListChannels(ctx, req.token, "")
 
 		return uiRes{
 			html: res,
@@ -1088,7 +1088,7 @@ func listGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListGroups(ctx, req.token)
+		res, err := svc.ListGroups(ctx, req.token, "")
 		return uiRes{
 			html: res,
 		}, err

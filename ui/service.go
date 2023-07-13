@@ -53,7 +53,7 @@ type Service interface {
 	Token(ctx context.Context, user sdk.User) (sdk.Token, error)
 	RefreshToken(ctx context.Context, refreshToken string) (sdk.Token, error)
 	CreateUsers(ctx context.Context, token string, user ...sdk.User) ([]byte, error)
-	ListUsers(ctx context.Context, token string) ([]byte, error)
+	ListUsers(ctx context.Context, token, alertMessage string) ([]byte, error)
 	ViewUser(ctx context.Context, token, userID string) ([]byte, error)
 	UpdateUser(ctx context.Context, token, userID string, user sdk.User) ([]byte, error)
 	UpdateUserTags(ctx context.Context, token, userID string, user sdk.User) ([]byte, error)
@@ -62,7 +62,7 @@ type Service interface {
 	EnableUser(ctx context.Context, token, userID string) ([]byte, error)
 	DisableUser(ctx context.Context, token, userID string) ([]byte, error)
 	CreateThings(ctx context.Context, token string, things ...sdk.Thing) ([]byte, error)
-	ListThings(ctx context.Context, token string) ([]byte, error)
+	ListThings(ctx context.Context, token, alertMessage string) ([]byte, error)
 	ViewThing(ctx context.Context, token, id string) ([]byte, error)
 	UpdateThing(ctx context.Context, token, id string, thing sdk.Thing) ([]byte, error)
 	UpdateThingTags(ctx context.Context, token, id string, thing sdk.Thing) ([]byte, error)
@@ -70,9 +70,8 @@ type Service interface {
 	UpdateThingOwner(ctx context.Context, token, id string, thing sdk.Thing) ([]byte, error)
 	EnableThing(ctx context.Context, token, id string) ([]byte, error)
 	DisableThing(ctx context.Context, token, id string) ([]byte, error)
-	CreateChannel(ctx context.Context, token string, channel sdk.Channel) ([]byte, error)
 	CreateChannels(ctx context.Context, token string, channels ...sdk.Channel) ([]byte, error)
-	ListChannels(ctx context.Context, token string) ([]byte, error)
+	ListChannels(ctx context.Context, token, alertMessage string) ([]byte, error)
 	ViewChannel(ctx context.Context, token, id string) ([]byte, error)
 	UpdateChannel(ctx context.Context, token, id string, channel sdk.Channel) ([]byte, error)
 	ListChannelsByThing(ctx context.Context, token, id string) ([]byte, error)
@@ -96,7 +95,7 @@ type Service interface {
 	Unassign(ctx context.Context, token, groupID, memberID string) ([]byte, error)
 	ViewGroup(ctx context.Context, token, id string) ([]byte, error)
 	UpdateGroup(ctx context.Context, token, id string, group sdk.Group) ([]byte, error)
-	ListGroups(ctx context.Context, token string) ([]byte, error)
+	ListGroups(ctx context.Context, token, alertMessage string) ([]byte, error)
 	EnableGroup(ctx context.Context, token, id string) ([]byte, error)
 	DisableGroup(ctx context.Context, token, id string) ([]byte, error)
 	AddPolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error)
@@ -278,35 +277,21 @@ func (gs *uiService) UpdatePassword(ctx context.Context, token, oldPass, newPass
 }
 
 func (gs *uiService) CreateUsers(ctx context.Context, token string, users ...sdk.User) ([]byte, error) {
-	filter := sdk.PageMetadata{
-		Offset: uint64(0),
-		Total:  uint64(100),
-		Limit:  uint64(100),
-	}
-	existingUsers, err := gs.sdk.Users(filter, token)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	for _, user := range users {
-		existing := false
-		for _, existingUser := range existingUsers.Users {
-			if existingUser.Credentials.Identity == user.Credentials.Identity {
-				existing = true
-				break
+	var alertMessage string
+	for i := range users {
+		_, err := gs.sdk.CreateUser(users[i], token)
+		if err != nil {
+			if errors.Contains(err, ErrConflict) {
+				alertMessage = "User already Exists"
+				continue
 			}
-		}
-		if !existing {
-			_, err := gs.sdk.CreateUser(user, token)
-			if err != nil {
-				return []byte{}, err
-			}
+			return []byte{}, err
 		}
 	}
-	return gs.ListUsers(ctx, token)
+	return gs.ListUsers(ctx, token, alertMessage)
 }
 
-func (gs *uiService) ListUsers(ctx context.Context, token string) ([]byte, error) {
+func (gs *uiService) ListUsers(ctx context.Context, token, alertMessage string) ([]byte, error) {
 	tpl, err := parseTemplate("users", "users.html")
 	if err != nil {
 		return []byte{}, err
@@ -324,9 +309,11 @@ func (gs *uiService) ListUsers(ctx context.Context, token string) ([]byte, error
 	data := struct {
 		NavbarActive string
 		Users        []sdk.User
+		AlertMessage string
 	}{
 		"users",
 		users.Users,
+		alertMessage,
 	}
 
 	var btpl bytes.Buffer
@@ -401,7 +388,7 @@ func (gs *uiService) EnableUser(ctx context.Context, token, userID string) ([]by
 	if _, err := gs.sdk.EnableUser(userID, token); err != nil {
 		return []byte{}, err
 	}
-	return gs.ListUsers(ctx, token)
+	return gs.ListUsers(ctx, token, "")
 }
 
 func (gs *uiService) DisableUser(ctx context.Context, token, userID string) ([]byte, error) {
@@ -409,40 +396,25 @@ func (gs *uiService) DisableUser(ctx context.Context, token, userID string) ([]b
 		return []byte{}, err
 	}
 
-	return gs.ListUsers(ctx, token)
+	return gs.ListUsers(ctx, token, "")
 }
 
 func (gs *uiService) CreateThings(ctx context.Context, token string, things ...sdk.Thing) ([]byte, error) {
-	filter := sdk.PageMetadata{
-		Offset: uint64(0),
-		Total:  uint64(100),
-		Limit:  uint64(100),
-	}
-	existingThings, err := gs.sdk.Things(filter, token)
-	if err != nil {
-		return []byte{}, err
-	}
-
+	var alertMessage string
 	for _, thing := range things {
-		existing := false
-		for _, existingThing := range existingThings.Things {
-			if existingThing.Credentials.Secret == thing.Credentials.Secret {
-				existing = true
-				break
+		_, err := gs.sdk.CreateThing(thing, token)
+		if err != nil {
+			if errors.Contains(err, ErrConflict) {
+				alertMessage = "Thing already Exists!"
+				continue
 			}
-		}
-		if !existing {
-			_, err := gs.sdk.CreateThing(thing, token)
-			if err != nil {
-				return []byte{}, err
-			}
+			return []byte{}, err
 		}
 	}
-
-	return gs.ListThings(ctx, token)
+	return gs.ListThings(ctx, token, alertMessage)
 }
 
-func (gs *uiService) ListThings(ctx context.Context, token string) ([]byte, error) {
+func (gs *uiService) ListThings(ctx context.Context, token, alertMessage string) ([]byte, error) {
 	tpl, err := parseTemplate("things", "things.html")
 	if err != nil {
 		return []byte{}, err
@@ -461,9 +433,11 @@ func (gs *uiService) ListThings(ctx context.Context, token string) ([]byte, erro
 	data := struct {
 		NavbarActive string
 		Things       []sdk.Thing
+		AlertMessage string
 	}{
 		"things",
 		things.Things,
+		alertMessage,
 	}
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "things", data); err != nil {
@@ -529,7 +503,7 @@ func (gs *uiService) UpdateThingOwner(ctx context.Context, token, id string, thi
 		return []byte{}, nil
 	}
 
-	return gs.ListThings(ctx, token)
+	return gs.ListThings(ctx, token, "")
 }
 
 func (gs *uiService) EnableThing(ctx context.Context, token, id string) ([]byte, error) {
@@ -537,7 +511,7 @@ func (gs *uiService) EnableThing(ctx context.Context, token, id string) ([]byte,
 		return []byte{}, err
 	}
 
-	return gs.ListThings(ctx, token)
+	return gs.ListThings(ctx, token, "")
 }
 
 func (gs *uiService) DisableThing(ctx context.Context, token, id string) ([]byte, error) {
@@ -545,48 +519,25 @@ func (gs *uiService) DisableThing(ctx context.Context, token, id string) ([]byte
 		return []byte{}, err
 	}
 
-	return gs.ListThings(ctx, token)
-}
-
-func (gs *uiService) CreateChannel(ctx context.Context, token string, channel sdk.Channel) ([]byte, error) {
-	_, err := gs.sdk.CreateChannel(channel, token)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	return gs.ListChannels(ctx, token)
+	return gs.ListThings(ctx, token, "")
 }
 
 func (gs *uiService) CreateChannels(ctx context.Context, token string, channels ...sdk.Channel) ([]byte, error) {
-	filter := sdk.PageMetadata{
-		Offset: uint64(0),
-		Total:  uint64(100),
-		Limit:  uint64(100),
-	}
-	existingChannels, err := gs.sdk.Channels(filter, token)
-	if err != nil {
-		return []byte{}, err
-	}
+	var alertMessage string
 	for _, channel := range channels {
-		existing := false
-		for _, existingChannel := range existingChannels.Channels {
-			if existingChannel.Name == channel.Name {
-				existing = true
-				break
+		_, err := gs.sdk.CreateChannel(channel, token)
+		if err != nil {
+			if errors.Contains(err, ErrConflict) {
+				alertMessage = "Channel already Exists"
+				continue
 			}
-		}
-		if !existing {
-			_, err := gs.sdk.CreateChannel(channel, token)
-			if err != nil {
-				return []byte{}, err
-			}
+			return []byte{}, err
 		}
 	}
-
-	return gs.ListChannels(ctx, token)
+	return gs.ListChannels(ctx, token, alertMessage)
 }
 
-func (gs *uiService) ListChannels(ctx context.Context, token string) ([]byte, error) {
+func (gs *uiService) ListChannels(ctx context.Context, token, alertMessage string) ([]byte, error) {
 	tpl, err := parseTemplate("channels", "channels.html")
 	if err != nil {
 		return []byte{}, err
@@ -606,9 +557,11 @@ func (gs *uiService) ListChannels(ctx context.Context, token string) ([]byte, er
 	data := struct {
 		NavbarActive string
 		Channels     []sdk.Channel
+		AlertMessage string
 	}{
 		"channels",
 		chsPage.Channels,
+		alertMessage,
 	}
 
 	var btpl bytes.Buffer
@@ -659,7 +612,7 @@ func (gs *uiService) EnableChannel(ctx context.Context, token, id string) ([]byt
 		return []byte{}, err
 	}
 
-	return gs.ListChannels(ctx, token)
+	return gs.ListChannels(ctx, token, "")
 }
 
 func (gs *uiService) DisableChannel(ctx context.Context, token, id string) ([]byte, error) {
@@ -667,7 +620,7 @@ func (gs *uiService) DisableChannel(ctx context.Context, token, id string) ([]by
 		return []byte{}, err
 	}
 
-	return gs.ListChannels(ctx, token)
+	return gs.ListChannels(ctx, token, "")
 }
 
 func (gs *uiService) ConnectThing(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error) {
@@ -967,34 +920,21 @@ func (gs *uiService) ListGroupMembers(ctx context.Context, token, id string) ([]
 }
 
 func (gs *uiService) CreateGroups(ctx context.Context, token string, groups ...sdk.Group) ([]byte, error) {
-	filter := sdk.PageMetadata{
-		Offset: uint64(0),
-		Total:  uint64(100),
-		Limit:  uint64(100),
-	}
-	existingGroups, err := gs.sdk.Groups(filter, token)
-	if err != nil {
-		return []byte{}, err
-	}
+	var alertMessage string
 	for _, group := range groups {
-		existing := false
-		for _, existingGroup := range existingGroups.Groups {
-			if existingGroup.Name == group.Name {
-				existing = true
-				break
+		_, err := gs.sdk.CreateGroup(group, token)
+		if err != nil {
+			if errors.Contains(err, ErrConflict) {
+				alertMessage = "Group already Exists"
+				continue
 			}
-		}
-		if !existing {
-			_, err := gs.sdk.CreateGroup(group, token)
-			if err != nil {
-				return []byte{}, err
-			}
+			return []byte{}, err
 		}
 	}
-	return gs.ListGroups(ctx, token)
+	return gs.ListGroups(ctx, token, alertMessage)
 }
 
-func (gs *uiService) ListGroups(ctx context.Context, token string) ([]byte, error) {
+func (gs *uiService) ListGroups(ctx context.Context, token, alertMessage string) ([]byte, error) {
 	tpl, err := parseTemplate("groups", "groups.html")
 	if err != nil {
 		return []byte{}, err
@@ -1013,9 +953,11 @@ func (gs *uiService) ListGroups(ctx context.Context, token string) ([]byte, erro
 	data := struct {
 		NavbarActive string
 		Groups       []sdk.Group
+		AlertMessage string
 	}{
 		"groups",
 		grpPage.Groups,
+		alertMessage,
 	}
 
 	var btpl bytes.Buffer
@@ -1093,7 +1035,7 @@ func (gs *uiService) EnableGroup(ctx context.Context, token, id string) ([]byte,
 		return []byte{}, err
 	}
 
-	return gs.ListGroups(ctx, token)
+	return gs.ListGroups(ctx, token, "")
 }
 
 func (gs *uiService) DisableGroup(ctx context.Context, token, id string) ([]byte, error) {
@@ -1101,7 +1043,7 @@ func (gs *uiService) DisableGroup(ctx context.Context, token, id string) ([]byte
 		return []byte{}, err
 	}
 
-	return gs.ListGroups(ctx, token)
+	return gs.ListGroups(ctx, token, "")
 }
 
 func (gs *uiService) AddPolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error) {
