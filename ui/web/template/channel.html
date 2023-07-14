@@ -206,6 +206,8 @@
 
             //show edit button and hide save and cancel buttons
             hideButtons(editBtn, saveCancelBtn);
+          }else{
+            throw new Error("Response not OK");
           }
         })
         .catch(error => {
@@ -216,6 +218,7 @@
           hideButtons(editBtn, saveCancelBtn);
 
           console.error("Error", error);
+          errorMessage.textContent= "Entity already exists";
         });
       } else {
         console.error("Invalid field:", field);
