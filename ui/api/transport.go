@@ -461,28 +461,28 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer, ins
 		opts...,
 	))
 
-	r.Get("/policies", kithttp.NewServer(
+	r.Get("/users_policies", kithttp.NewServer(
 		kitot.TraceServer(tracer, "view_policies")(listPoliciesEndpoint(svc)),
 		decodeListPoliciesRequest,
 		encodeResponse,
 		opts...,
 	))
 
-	r.Post("/policies", kithttp.NewServer(
+	r.Post("/users_policies", kithttp.NewServer(
 		kitot.TraceServer(tracer, "add_policy")(addPolicyEndpoint(svc)),
 		decodeAddPolicyRequest,
 		encodeResponse,
 		opts...,
 	))
 
-	r.Post("/policies/update", kithttp.NewServer(
+	r.Post("/users_policies/update", kithttp.NewServer(
 		kitot.TraceServer(tracer, "update_policy")(updatePolicyEndpoint(svc)),
 		decodeUpdatePolicyRequest,
 		encodeResponse,
 		opts...,
 	))
 
-	r.Post("/policies/delete", kithttp.NewServer(
+	r.Post("/users_policies/delete", kithttp.NewServer(
 		kitot.TraceServer(tracer, "delete_policy")(deletePolicyEndpoint(svc)),
 		decodeDeletePolicyRequest,
 		encodeResponse,
