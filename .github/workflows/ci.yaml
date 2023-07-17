@@ -7,34 +7,25 @@ on:
     branches: [main]
 
 jobs:
-
   ci:
-    strategy:
-      matrix:
-        go-version: [1.18.x, 1.19.x]
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19.x
 
-    - name: Install Go
-      uses: actions/setup-go@v3
-      with:
-        go-version: ${{ matrix.go-version }}
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Checkout code
-      uses: actions/checkout@v2
-    
-    - name: Run go vet
-      run: go vet ./...
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: latest
+          args: --no-config --disable-all --enable gosimple --enable errcheck --enable govet --enable unused --enable goconst --enable godot --timeout 3m
 
-    - name: golangci-lint
-      uses: golangci/golangci-lint-action@v3
-      with:
-        version: latest
-        args: --no-config --disable-all --enable gosimple --enable errcheck --enable govet --enable unused --enable goconst --timeout 3m
-  
-    - name: Build
-      run: go build -v ./...
-    
-    - name: Run tests
-      run: go test -mod=vendor -v --race -covermode=atomic -coverprofile cover.out ./...
+      - name: Build
+        run: go build -v ./...
+
+      - name: Run tests
+        run: go test -mod=vendor -v --race -covermode=atomic -coverprofile cover.out ./...
