@@ -82,6 +82,7 @@
                 </thead>
                 <tbody>
                   {{range $i, $c := .Channels}}
+                  {{$disableButton := true}}
                     <tr>
                       <th scope="row">{{$i}}</th>
                       <td>{{$c.Name}}</td>
@@ -91,6 +92,7 @@
                           {{if (eq $c.ID $p.Object)}}
                             {{if (eq $t.ID $p.Subject)}}
                               {{toSlice $p.Actions}}
+                              {{$disableButton = false}}
                             {{end}}
                           {{end}}
                         {{end}}
@@ -99,7 +101,7 @@
                         <form action="/disconnectChannel" method="post">
                           <input type="hidden" name="thingID" id="thingID" value="{{$t.ID}}">
                           <input type="hidden" name="channelID" id="channelID" value="{{$c.ID}}">
-                          <button type="submit" class="btn btn-danger btn-sm">Disconnect</button>
+                          <button type="submit" class="btn btn-danger btn-sm" {{if $disableButton}}disabled{{end}}>Disconnect</button>
                         </form>
                       </td>
                     </tr>

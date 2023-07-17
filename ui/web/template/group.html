@@ -21,13 +21,18 @@
                 </tr>
               </thead>
               <tbody>
+                <!-- {{$userID := .User.ID}} -->
+                {{$disableButton := true}}
+                {{if (hasAuthority .User.ID .Group.ID "g_update" "group")}}
+                  {{$disableButton =false}}
+                {{end}}
                 <tr>
                   <th>NAME</th>
                   <td class="editable" contenteditable="false" data-field="name">
                     {{.Group.Name}}
                   </td>
                   <td>
-                    <button class="edit-btn" onclick="editRow('name')">
+                    <button class="edit-btn" onclick="editRow('name')" {{if $disableButton}}disabled{{end}}>
                       <i class="fas fa-pencil-alt"></i>
                     </button>
                     <div class="save-cancel-buttons" style="display: none;">
@@ -52,7 +57,7 @@
                     {{.Group.Description}}
                   </td>
                   <td>
-                    <button class="edit-btn" onclick="editRow('description')">
+                    <button class="edit-btn" onclick="editRow('description')" {{if $disableButton}}disabled{{end}}>
                       <i class="fas fa-pencil-alt"></i>
                     </button>
                     <div class="save-cancel-buttons" style="display: none;">
@@ -71,7 +76,7 @@
                     {{toJSON .Group.Metadata}}
                   </td>
                   <td>
-                    <button class="edit-btn" onclick="editRow('metadata')">
+                    <button class="edit-btn" onclick="editRow('metadata')" {{if $disableButton}}disabled{{end}}>
                       <i class="fas fa-pencil-alt"></i>
                     </button>
                     <div class="save-cancel-buttons" style="display: none;">
@@ -208,7 +213,8 @@
               //show edit button and hide save and cancel buttons
               hideButtons(editBtn, saveCancelBtn);
             }else{
-              throw new Error("Response not OK");
+              throw new Error(response.statusText);
+              console.log(response.statusText)
             }
           })
           .catch(error => {

@@ -86,6 +86,8 @@
                 <tbody>
                   {{$policies := .Policies}}
                   {{$groupID := .Group.ID}}
+                  {{$userID := .User.ID}}
+                  {{$disableButton := true}}
                   {{range $i, $m := .Members}}
                     <tr>
                       <th scope="row">{{$i}}</th>
@@ -96,14 +98,20 @@
                             {{if (eq $m.ID $p.Subject)}}
                               {{if (eq $groupID $p.Object)}}
                                 {{toSlice $p.Actions}}
+                                 <!-- {{if (hasAuthority $userID $m.ID "c_delete" "client")}}
+                                    {{$disableButton =false}}
+                                  {{end}} -->
                               {{end}}
                             {{end}}
                           {{end}}
                         </td>
                       <td>
+                        {{if (hasAuthority $userID $m.ID "c_delete" "client")}}
+                          {{$disableButton =false}}
+                        {{end}}
                         <form action="/groups/{{$groupID}}/unassign" method="post">
                           <input type="hidden" name="memberID" id="memberID" value="{{$m.ID}}">
-                          <button type="submit" class="btn btn-sm">
+                          <button type="submit" class="btn btn-sm" {{if $disableButton}}disabled{{end}}>
                             <i class="fas fa-trash-alt"></i>
                           </button>
                         </form>

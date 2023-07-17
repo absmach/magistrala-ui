@@ -101,6 +101,8 @@
                   </tr>
                 </thead>
                 <tbody>
+                  {{$userID := .User.ID}}
+                  {{$disableButton := true}}
                   {{range $i, $g := .Groups}}
                     <tr>
                       <th scope="row">{{$i}}</th>
@@ -114,10 +116,13 @@
                         </div>
                       </td>
                       <td>
+                        {{if (hasAuthority $userID $g.ID "g_delete" "group")}}
+                          {{$disableButton =false}}
+                        {{end}}
                         <form action="/groups/disabled" method="post">
                           <input type="hidden" name="groupID" id="groupID" value="{{$g.ID}}">
                           <input type="hidden" name="status" id="status" value="disabled">
-                          <button type="submit" class="btn btn-sm">
+                          <button type="submit" class="btn btn-sm" {{if $disableButton}}disabled{{end}}>
                             <i class="fas fa-trash-alt"></i>
                           </button>
                         </form>

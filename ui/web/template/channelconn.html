@@ -121,6 +121,7 @@
                 </thead>
                 <tbody>
                   {{$policies := .Policies}}
+                  {{$sendMessage:= false}}
                   {{range $i, $t := .Things}}
                     <tr>
                       <th scope="row">{{$i}}</th>
@@ -131,12 +132,13 @@
                           {{if (eq $t.ID $p.Subject)}}
                             {{if (eq $c $p.Object)}}
                               {{toSlice $p.Actions}}
+                              {{$sendMessage = contains $p.Actions "m_write"}}
                             {{end}}
                           {{end}}
                         {{end}}
                       </td>
                       <td>
-                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#sendMessageModal{{$i}}">
+                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#sendMessageModal{{$i}}" {{if not $sendMessage}}disabled{{end}}>
                           Send Message
                         </button>
                         <div class="modal fade" id="sendMessageModal{{$i}}" tabindex="-1" role="dialog" aria-labelledby="sendMessageModalLabel{{$i}}" aria-hidden="true">

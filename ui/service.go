@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"strings"
 
 	"github.com/mainflux/mainflux/pkg/errors"
 	"github.com/mainflux/mainflux/pkg/messaging"
@@ -121,7 +122,7 @@ func New(sdk sdk.SDK) Service {
 	}
 }
 
-func parseTemplate(name string, tmpls ...string) (tpl *template.Template, err error) {
+func (gs *uiService) parseTemplate(name string, tmpls ...string) (tpl *template.Template, err error) {
 	tpl = template.New(name)
 	tpl = tpl.Funcs(template.FuncMap{
 		"toJSON": func(data map[string]interface{}) string {
@@ -131,6 +132,27 @@ func parseTemplate(name string, tmpls ...string) (tpl *template.Template, err er
 		"toSlice": func(data []string) string {
 			ret, _ := json.Marshal(data)
 			return string(ret)
+		},
+		"contains": func(data []string, substring string) bool {
+			for i := range data {
+				if strings.Contains(data[i], substring) {
+					return true
+				}
+			}
+			return false
+		},
+		"hasAuthority": func(subject, object, action, entityType string) bool {
+			aReq := sdk.AccessRequest{
+				Subject:    subject,
+				Object:     object,
+				Action:     action,
+				EntityType: entityType,
+			}
+
+			authorized, _ := gs.sdk.Authorize(aReq, "")
+			fmt.Println(authorized)
+
+			return authorized
 		},
 	})
 
@@ -148,7 +170,7 @@ func parseTemplate(name string, tmpls ...string) (tpl *template.Template, err er
 }
 
 func (gs *uiService) Index(ctx context.Context, token string) ([]byte, error) {
-	tpl, err := parseTemplate("index", "index.html")
+	tpl, err := gs.parseTemplate("index", "index.html")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -175,7 +197,7 @@ func (gs *uiService) Index(ctx context.Context, token string) ([]byte, error) {
 }
 
 func (gs *uiService) Login(ctx context.Context) ([]byte, error) {
-	tpl, err := parseTemplate("login", "login.html")
+	tpl, err := gs.parseTemplate("login", "login.html")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -292,7 +314,7 @@ func (gs *uiService) CreateUsers(ctx context.Context, token string, users ...sdk
 }
 
 func (gs *uiService) ListUsers(ctx context.Context, token, alertMessage string) ([]byte, error) {
-	tpl, err := parseTemplate("users", "users.html")
+	tpl, err := gs.parseTemplate("users", "users.html")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -325,7 +347,7 @@ func (gs *uiService) ListUsers(ctx context.Context, token, alertMessage string) 
 }
 
 func (gs *uiService) ViewUser(ctx context.Context, token, userID string) ([]byte, error) {
-	tpl, err := parseTemplate("user", "user.html")
+	tpl, err := gs.parseTemplate("user", "user.html")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -415,7 +437,7 @@ func (gs *uiService) CreateThings(ctx context.Context, token string, things ...s
 }
 
 func (gs *uiService) ListThings(ctx context.Context, token, alertMessage string) ([]byte, error) {
-	tpl, err := parseTemplate("things", "things.html")
+	tpl, err := gs.parseTemplate("things", "things.html")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -447,7 +469,7 @@ func (gs *uiService) ListThings(ctx context.Context, token, alertMessage string)
 }
 
 func (gs *uiService) ViewThing(ctx context.Context, token, id string) ([]byte, error) {
-	tpl, err := parseTemplate("thing", "thing.html")
+	tpl, err := gs.parseTemplate("thing", "thing.html")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -538,7 +560,7 @@ func (gs *uiService) CreateChannels(ctx context.Context, token string, channels 
 }
 
 func (gs *uiService) ListChannels(ctx context.Context, token, alertMessage string) ([]byte, error) {
-	tpl, err := parseTemplate("channels", "channels.html")
+	tpl, err := gs.parseTemplate("channels", "channels.html")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -573,7 +595,7 @@ func (gs *uiService) ListChannels(ctx context.Context, token, alertMessage strin
 }
 
 func (gs *uiService) ViewChannel(ctx context.Context, token, id string) ([]byte, error) {
-	tpl, err := parseTemplate("channel", "channel.html")
+	tpl, err := gs.parseTemplate("channel", "channel.html")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -664,7 +686,7 @@ func (gs *uiService) DisconnectChannel(ctx context.Context, thID, chID, token st
 }
 
 func (gs *uiService) ListChannelsByThing(ctx context.Context, token, id string) ([]byte, error) {
-	tpl, err := parseTemplate("thingconn", "thingconn.html")
+	tpl, err := gs.parseTemplate("thingconn", "thingconn.html")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -734,7 +756,7 @@ func (gs *uiService) Disconnect(ctx context.Context, token string, connIDs sdk.C
 }
 
 func (gs *uiService) ListThingsByChannel(ctx context.Context, token, id string) ([]byte, error) {
-	tpl, err := parseTemplate("channelconn", "channelconn.html")
+	tpl, err := gs.parseTemplate("channelconn", "channelconn.html")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -795,7 +817,7 @@ func (gs *uiService) ListThingsByChannel(ctx context.Context, token, id string) 
 }
 
 func (gs *uiService) ListThingsPolicies(ctx context.Context, token string) ([]byte, error) {
-	tpl, err := parseTemplate("thingsPolicies", "thingsPolicies.html")
+	tpl, err := gs.parseTemplate("thingsPolicies", "thingsPolicies.html")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -865,7 +887,7 @@ func (gs *uiService) UpdateThingsPolicy(ctx context.Context, token string, polic
 }
 
 func (gs *uiService) ListGroupMembers(ctx context.Context, token, id string) ([]byte, error) {
-	tpl, err := parseTemplate("groupconn", "groupconn.html")
+	tpl, err := gs.parseTemplate("groupconn", "groupconn.html")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -903,6 +925,7 @@ func (gs *uiService) ListGroupMembers(ctx context.Context, token, id string) ([]
 		Members      []sdk.User
 		Users        []sdk.User
 		Policies     []sdk.Policy
+		User         sdk.User
 	}{
 		"groups",
 		id,
@@ -910,6 +933,7 @@ func (gs *uiService) ListGroupMembers(ctx context.Context, token, id string) ([]
 		members.Members,
 		users.Users,
 		plcPage.Policies,
+		user,
 	}
 
 	var btpl bytes.Buffer
@@ -935,7 +959,7 @@ func (gs *uiService) CreateGroups(ctx context.Context, token string, groups ...s
 }
 
 func (gs *uiService) ListGroups(ctx context.Context, token, alertMessage string) ([]byte, error) {
-	tpl, err := parseTemplate("groups", "groups.html")
+	tpl, err := gs.parseTemplate("groups", "groups.html")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -950,14 +974,21 @@ func (gs *uiService) ListGroups(ctx context.Context, token, alertMessage string)
 		return []byte{}, err
 	}
 
+	user, err := gs.UserProfile(ctx, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	data := struct {
 		NavbarActive string
 		Groups       []sdk.Group
 		AlertMessage string
+		User         sdk.User
 	}{
 		"groups",
 		grpPage.Groups,
 		alertMessage,
+		user,
 	}
 
 	var btpl bytes.Buffer
@@ -969,7 +1000,7 @@ func (gs *uiService) ListGroups(ctx context.Context, token, alertMessage string)
 }
 
 func (gs *uiService) ViewGroup(ctx context.Context, token, id string) ([]byte, error) {
-	tpl, err := parseTemplate("group", "group.html")
+	tpl, err := gs.parseTemplate("group", "group.html")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -979,25 +1010,21 @@ func (gs *uiService) ViewGroup(ctx context.Context, token, id string) ([]byte, e
 		return []byte{}, err
 	}
 
-	pgm := sdk.PageMetadata{
-		Offset: 0,
-		Limit:  100,
-	}
-
-	members, err := gs.sdk.Members(id, pgm, token)
+	user, err := gs.UserProfile(ctx, token)
 	if err != nil {
 		return []byte{}, err
 	}
+
 	data := struct {
 		NavbarActive string
 		ID           string
 		Group        sdk.Group
-		Members      []sdk.User
+		User         sdk.User
 	}{
 		"groups",
 		id,
 		group,
-		members.Members,
+		user,
 	}
 
 	var btpl bytes.Buffer
@@ -1055,7 +1082,7 @@ func (gs *uiService) AddPolicy(ctx context.Context, token string, policy sdk.Pol
 }
 
 func (gs *uiService) ListPolicies(ctx context.Context, token string) ([]byte, error) {
-	tpl, err := parseTemplate("policies", "policies.html")
+	tpl, err := gs.parseTemplate("policies", "policies.html")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -1126,7 +1153,7 @@ func (gs *uiService) Publish(ctx context.Context, token, thKey string, msg *mess
 }
 
 func (gs *uiService) ReadMessage(ctx context.Context, token string) ([]byte, error) {
-	tpl, err := parseTemplate("messagesread", "messagesread.html")
+	tpl, err := gs.parseTemplate("messagesread", "messagesread.html")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -1146,7 +1173,7 @@ func (gs *uiService) ReadMessage(ctx context.Context, token string) ([]byte, err
 }
 
 func (gs *uiService) WsConnection(ctx context.Context, token, chID, thKey string) ([]byte, error) {
-	tpl, err := parseTemplate("messagesread", "messagesread.html")
+	tpl, err := gs.parseTemplate("messagesread", "messagesread.html")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -1170,7 +1197,7 @@ func (gs *uiService) WsConnection(ctx context.Context, token, chID, thKey string
 }
 
 func (gs *uiService) ListDeletedClients(ctx context.Context, token string) ([]byte, error) {
-	tpl, err := parseTemplate("deletedClients", "deletedClients.html")
+	tpl, err := gs.parseTemplate("deletedClients", "deletedClients.html")
 	if err != nil {
 		return []byte{}, err
 	}
