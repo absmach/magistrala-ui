@@ -14,7 +14,12 @@
 
           <!-- Partial goes here -->
           <div class="col-md-9">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#connectModal">
+            {{$userID := .User.ID}}
+            {{$disableAssign := true}}
+            {{if (hasAuthority $userID .Group.ID "g_add" "group")}}
+              {{$disableAssign =false}}
+            {{end}}
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#connectModal" {{if $disableAssign}}disabled{{end}}>
               Assign
             </button>
             <div class="modal fade" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="connectModal" aria-hidden="true">
@@ -86,7 +91,6 @@
                 <tbody>
                   {{$policies := .Policies}}
                   {{$groupID := .Group.ID}}
-                  {{$userID := .User.ID}}
                   {{$disableButton := true}}
                   {{range $i, $m := .Members}}
                     <tr>

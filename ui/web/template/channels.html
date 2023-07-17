@@ -42,8 +42,8 @@
                         <input type="text" class="form-control" name="name" id="name"  placeholder="Channel Name" required>
                       </div>
                       <div class="mb-3">
-                        <label for="parentID" class="form-label">Parent ID</label>
-                        <input type="text" name="parentFilter" id="parentFilter" placeholder="Filter by parent ID" oninput="filterItem(this.value, 'parentID')">
+                        <label for="parentID" class="form-label">Parent Name</label>
+                        <input type="text" name="parentFilter" id="parentFilter" placeholder="Filter by parent name" oninput="filterItem(this.value, 'parentID')">
                         <select class="form-select" name="parentID" id="parentID">
                           <option value="">...</option>
                           {{range $i, $c := .Channels}}
@@ -138,12 +138,6 @@
     {{template "footer"}}
     <style>
       .alert-popup {
-          /* position: fixed;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%); */
-          /* background-color: #d8d507;
-          border: 1px solid #df562d; */
           border-radius: 4px;
           padding: 10px;
           z-index: 1;
