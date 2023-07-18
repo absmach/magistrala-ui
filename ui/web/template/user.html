@@ -19,13 +19,17 @@
                 </tr>
               </thead>
               <tbody>
+                {{$disableButton := true}}
+                {{if (hasAuthority .LoggedUser.ID .User.ID "c_update" "client")}}
+                  {{$disableButton =false}}
+                {{end}}
                 <tr>
                   <th>Name</th>
                   <td class="editable" contenteditable="false" data-field="name">
                     {{.User.Name}}
                   </td>
                   <td>
-                    <button class="edit-btn" onclick="editRow('name')">
+                    <button class="edit-btn" onclick="editRow('name')" {{if $disableButton}}disabled{{end}}>
                       <i class="fas fa-pencil-alt"></i>
                     </button>
                     <div class="save-cancel-buttons" style="display: none;">
@@ -48,7 +52,7 @@
                     {{.User.Credentials.Identity}}
                     </td>
                     <td>
-                      <button class="edit-btn" onclick="editRow('identity')">
+                      <button class="edit-btn" onclick="editRow('identity')" {{if $disableButton}}disabled{{end}}>
                         <i class="fas fa-pencil-alt"></i>
                       </button>
                       <div class="save-cancel-buttons" style="display: none;">
@@ -67,7 +71,7 @@
                     {{toSlice .User.Tags}}
                   </td>
                   <td>
-                    <button class="edit-btn" onclick="editRow('tags')">
+                    <button class="edit-btn" onclick="editRow('tags')" {{if $disableButton}}disabled{{end}}>
                       <i class="fas fa-pencil-alt"></i>
                     </button>
                     <div class="save-cancel-buttons" style="display: none;">
@@ -86,7 +90,7 @@
                     {{toJSON .User.Metadata}}
                   </td>
                   <td>
-                    <button class="edit-btn" onclick="editRow('metadata')">
+                    <button class="edit-btn" onclick="editRow('metadata')" {{if $disableButton}}disabled{{end}}>
                       <i class="fas fa-pencil-alt"></i>
                     </button>
                     <div class="save-cancel-buttons" style="display: none;">

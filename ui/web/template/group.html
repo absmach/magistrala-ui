@@ -21,7 +21,6 @@
                 </tr>
               </thead>
               <tbody>
-                <!-- {{$userID := .User.ID}} -->
                 {{$disableButton := true}}
                 {{if (hasAuthority .User.ID .Group.ID "g_update" "group")}}
                   {{$disableButton =false}}

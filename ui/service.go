@@ -363,15 +363,21 @@ func (gs *uiService) ViewUser(ctx context.Context, token, userID string) ([]byte
 	if err != nil {
 		return []byte{}, err
 	}
+	loggedUser, err := gs.UserProfile(ctx, token)
+	if err != nil {
+		return []byte{}, err
+	}
 
 	data := struct {
 		NavbarActive string
 		ID           string
 		User         sdk.User
+		LoggedUser   sdk.User
 	}{
 		"user",
 		userID,
 		user,
+		loggedUser,
 	}
 
 	var btpl bytes.Buffer

@@ -102,8 +102,8 @@
                 </thead>
                 <tbody>
                   {{$userID := .User.ID}}
-                  {{$disableButton := true}}
                   {{range $i, $g := .Groups}}
+                    {{$disableButton := true}}
                     <tr>
                       <th scope="row">{{$i}}</th>
                       <td>{{$g.Name}}</td>
