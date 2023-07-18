@@ -43,13 +43,13 @@
                       <div class="mb-3">
                         <label for="Type" class="form-label">Member Type</label>
                         <select class="form-control" name="Type" id="Type" aria-describedby="TypeHelp" multiple required>
-                          <option value="g_update">g_update</option>
-                          <option value="g_list">g_list</option>
-                          <option value="g_delete">g_delete</option>
-                          <option value="g_add">g_add</option>
-                          <option value="c_update">c_update</option>
-                          <option value="c_list">c_list</option>
-                          <option value="c_delete">c_delete</option>
+                          <option value="g_update" {{if not (hasAuthority $userID .Group.ID "g_update" "group")}}disabled{{end}}>g_update</option>
+                          <option value="g_list" {{if not (hasAuthority $userID .Group.ID "g_list" "group")}}disabled{{end}}>g_list</option>
+                          <option value="g_delete" {{if not (hasAuthority $userID .Group.ID "g_delete" "group")}}disabled{{end}}>g_delete</option>
+                          <option value="g_add" {{if not (hasAuthority $userID .Group.ID "g_add" "group")}}disabled{{end}}>g_add</option>
+                          <option value="c_update" {{if not (hasAuthority $userID .Group.ID "c_update" "group")}}disabled{{end}}>c_update</option>
+                          <option value="c_list" {{if not (hasAuthority $userID .Group.ID "c_list" "group")}}disabled{{end}}>c_list</option>
+                          <option value="c_delete" {{if not (hasAuthority $userID .Group.ID "c_delete" "group")}}disabled{{end}}>c_delete</option>
                         </select>
                         <div id="TypeHelp" class="form-text">Select member Type.</div>
                       </div>
