@@ -104,6 +104,8 @@
                   </tr>
                 </thead>
                 <tbody>
+                  {{$userID := .User.ID}}
+                  {{$disableButton := true}}
                   {{range $i, $u := .Users}}
                     <tr>
                       <th scope="row">{{$i}}</th>
@@ -117,9 +119,12 @@
                         </div>
                       </td>
                       <td>
+                        {{if (hasAuthority $userID $u.ID "c_delete" "client")}}
+                          {{$disableButton = false}}
+                        {{end}}
                         <form action="/users/disabled" method="post">
                           <input type="hidden" name="userID" id="userID" value="{{$u.ID}}">
-                          <button type="submit" class="btn btn-sm">
+                          <button type="submit" class="btn btn-sm" {{if $disableButton}}disabled{{end}}>
                             <i class="fas fa-trash-alt"></i>
                           </button>
                         </form>
@@ -140,12 +145,6 @@
     {{template "footer"}}
     <style>
       .alert-popup {
-          /* position: fixed;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%); */
-          /* background-color: #d8d507;
-          border: 1px solid #df562d; */
           border-radius: 4px;
           padding: 10px;
           z-index: 1;

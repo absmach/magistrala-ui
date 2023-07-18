@@ -150,6 +150,7 @@ func (gs *uiService) parseTemplate(name string, tmpls ...string) (tpl *template.
 			}
 
 			authorized, _ := gs.sdk.Authorize(aReq, "")
+			fmt.Println(authorized)
 
 			return authorized
 		},
@@ -318,11 +319,17 @@ func (gs *uiService) ListUsers(ctx context.Context, token, alertMessage string) 
 		return []byte{}, err
 	}
 	pgm := sdk.PageMetadata{
-		Offset: uint64(0),
-		Total:  uint64(100),
-		Limit:  uint64(100),
+		Offset:     uint64(0),
+		Total:      uint64(100),
+		Limit:      uint64(100),
+		Visibility: "all",
 	}
 	users, err := gs.sdk.Users(pgm, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	user, err := gs.UserProfile(ctx, token)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -331,10 +338,12 @@ func (gs *uiService) ListUsers(ctx context.Context, token, alertMessage string) 
 		NavbarActive string
 		Users        []sdk.User
 		AlertMessage string
+		User         sdk.User
 	}{
 		"users",
 		users.Users,
 		alertMessage,
+		user,
 	}
 
 	var btpl bytes.Buffer
