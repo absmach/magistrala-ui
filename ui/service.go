@@ -150,7 +150,6 @@ func (gs *uiService) parseTemplate(name string, tmpls ...string) (tpl *template.
 			}
 
 			authorized, _ := gs.sdk.Authorize(aReq, "")
-			fmt.Println(authorized)
 
 			return authorized
 		},
