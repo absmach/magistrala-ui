@@ -537,6 +537,19 @@ func (lm *loggingMiddleware) ConnectThing(ctx context.Context, token string, con
 	return lm.svc.ConnectThing(ctx, token, connIDs)
 }
 
+func (lm *loggingMiddleware) ShareThing(ctx context.Context, token, chanID, userID string, actions []string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method share_thing for token %s, channel %v and user %v took %s to complete", token, chanID, userID, time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.ShareThing(ctx, token, chanID, userID, actions)
+}
+
 func (lm *loggingMiddleware) DisconnectThing(ctx context.Context, thID, chID, token string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method disconnect_thing for token %s, channel %v and thing %v took %s to complete", token, chID, thID, time.Since(begin))

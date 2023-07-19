@@ -764,6 +764,25 @@ func connectThingEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
+func shareThingEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		sr := request.(shareThingReq)
+
+		if err := sr.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.ShareThing(ctx, sr.token, sr.ChanID, sr.UserID, sr.Actions)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
 func connectChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		cr := request.(connectChannelReq)
