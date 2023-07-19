@@ -81,18 +81,21 @@
                   </tr>
                 </thead>
                 <tbody>
+                  {{$userID := .User.ID}}
                   {{range $i, $c := .Channels}}
                   {{$disableButton := true}}
+                  {{if (hasAuthority $userID $c.ID "g_list" "group" )}}
+                    {{$disableButton =false}}
+                  {{end}}
                     <tr>
                       <th scope="row">{{$i}}</th>
                       <td>{{$c.Name}}</td>
-                      <td><a href={{printf "/channels/%s" $c.ID}}>{{$c.ID}}</a></td>
+                      <td>{{if $disableButton}}{{$c.ID}}{{end}}{{if not $disableButton}}<a href={{printf "/channels/%s" $c.ID}}>{{$c.ID}}</a>{{end}}</td>
                       <td>
                         {{range $p :=$policies}}
                           {{if (eq $c.ID $p.Object)}}
                             {{if (eq $t.ID $p.Subject)}}
                               {{toSlice $p.Actions}}
-                              {{$disableButton = false}}
                             {{end}}
                           {{end}}
                         {{end}}

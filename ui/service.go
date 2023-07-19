@@ -730,6 +730,11 @@ func (gs *uiService) ListChannelsByThing(ctx context.Context, token, id string) 
 		return []byte{}, err
 	}
 
+	user, err := gs.UserProfile(ctx, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	data := struct {
 		NavbarActive string
 		ID           string
@@ -737,6 +742,7 @@ func (gs *uiService) ListChannelsByThing(ctx context.Context, token, id string) 
 		Channels     []sdk.Channel
 		AllChannels  []sdk.Channel
 		Policies     []sdk.Policy
+		User         sdk.User
 	}{
 		"things",
 		id,
@@ -744,6 +750,7 @@ func (gs *uiService) ListChannelsByThing(ctx context.Context, token, id string) 
 		chsPage.Channels,
 		allchsPage.Channels,
 		plcPage.Policies,
+		user,
 	}
 
 	var btpl bytes.Buffer
