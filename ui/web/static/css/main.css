@@ -70,7 +70,6 @@ footer {
   .table-container {
     margin-top: 20px;
   }
-
   /* css for alert popup message */
   .alert-popup {
     border-radius: 4px;
@@ -78,12 +77,10 @@ footer {
     z-index: 1;
     position: relative;
   }
-  
   .alert-message {
     display: flex;
     align-items: center;
   }
-  
   .close-button {
     position: absolute;
     top: 5px;
@@ -94,7 +91,6 @@ footer {
     cursor: pointer;
     margin-left: 10px;
   }
-  
   .close-button:hover {
       color: black;
   }
