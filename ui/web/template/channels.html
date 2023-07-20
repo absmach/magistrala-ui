@@ -17,10 +17,10 @@
             {{ if ne .AlertMessage "" }}
             <div id="alert-popup" class="alert alert-danger">
               <span class="close-button" onclick="closeAlertPopup()">&times;</span>
-               <h5 class="alert-messsage">
-                {{ .AlertMessage }}
-               </h5>
-            </div>
+              <h5 class="alert-messsage">
+              {{ .AlertMessage }}
+              </h5>
+            </div>         
             {{ end }}
 
             <!-- Button trigger modal -->
@@ -141,6 +141,7 @@
           border-radius: 4px;
           padding: 10px;
           z-index: 1;
+          position: relative;
       }
       
       .alert-message {
@@ -149,11 +150,14 @@
       }
       
       .close-button {
-          color: #aaa;
-          font-size: 18px;
-          font-weight: bold;
-          cursor: pointer;
-          margin-left: 10px;
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        color: #aaa;
+        font-size: 30px;
+        font-weight: bold;
+        cursor: pointer;
+        margin-left: 10px;
       }
       
       .close-button:hover {

@@ -11,7 +11,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"strings"
+
+	"golang.org/x/exp/slices"
 
 	"github.com/mainflux/mainflux/pkg/errors"
 	"github.com/mainflux/mainflux/pkg/messaging"
@@ -134,12 +135,8 @@ func (gs *uiService) parseTemplate(name string, tmpls ...string) (tpl *template.
 			return string(ret)
 		},
 		"contains": func(data []string, substring string) bool {
-			for i := range data {
-				if strings.Contains(data[i], substring) {
-					return true
-				}
-			}
-			return false
+
+			return slices.Contains(data, substring)
 		},
 		"hasAuthority": func(subject, object, action, entityType string) bool {
 			aReq := sdk.AccessRequest{

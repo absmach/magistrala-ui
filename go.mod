@@ -9,6 +9,7 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/prometheus/client_golang v1.16.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
+	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1
 	google.golang.org/grpc v1.56.1
 )
 
