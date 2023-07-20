@@ -38,11 +38,10 @@ var (
 	errMalformedSubtopic = errors.New("malformed subtopic")
 	errNoCookie          = errors.New("failed to read token cookie")
 	errUnauthorized      = errors.New("failed to login")
-	ErrAuthentication    = errors.New("failed to perform authentication over the entity")
+	errAuthentication    = errors.New("failed to perform authentication over the entity")
+	errSecretError       = errors.New("wrong secret")
+	errForbidden         = errors.New("failed to perform authorization over the entity")
 	referer              = ""
-	ErrSecretError       = errors.New("wrong secret")
-	ErrConflict          = errors.New("entity already exists")
-	ErrForbidden         = errors.New("failed to perform authorization over the entity")
 )
 
 // MakeHandler returns a HTTP handler for API endpoints.
@@ -852,10 +851,10 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		w.WriteHeader(http.StatusBadRequest)
 	case errors.Contains(err, ui.ErrUnauthorizedAccess):
 		w.WriteHeader(http.StatusForbidden)
-	case errors.Contains(err, ErrAuthentication):
+	case errors.Contains(err, errAuthentication):
 		w.Header().Set("Location", "/refresh_token")
 		w.WriteHeader(http.StatusSeeOther)
-	case errors.Contains(err, ErrSecretError):
+	case errors.Contains(err, errSecretError):
 		w.Header().Set("Location", "/password")
 		w.WriteHeader(http.StatusFound)
 
