@@ -70,7 +70,9 @@ footer {
   .table-container {
     margin-top: 20px;
   }
+
   /* css for alert popup message */
+  
   .alert-popup {
     border-radius: 4px;
     padding: 10px;
