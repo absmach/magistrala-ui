@@ -43,70 +43,125 @@ var (
 
 // Service specifies coap service API.
 type Service interface {
+	//Index displays the landing page of the UI.
 	Index(ctx context.Context, token string) ([]byte, error)
+	//Login displays the login page.
 	Login(ctx context.Context) ([]byte, error)
+	//Logout deletes the access token and refresh token from the cookies and logs the user out of the UI.
 	Logout(ctx context.Context) ([]byte, error)
 	PasswordResetRequest(ctx context.Context, email string) ([]byte, error)
 	PasswordReset(ctx context.Context, token, password, confirmPass string) ([]byte, error)
 	ShowPasswordReset(ctx context.Context) ([]byte, error)
 	PasswordUpdate(ctx context.Context) ([]byte, error)
 	UpdatePassword(ctx context.Context, token, oldPass, newPass string) ([]byte, error)
+	//UserProfile retrieves information about the logged in user.
 	UserProfile(ctx context.Context, token string) (sdk.User, error)
+	//Token provides a user with an access token and a refresh token.
 	Token(ctx context.Context, user sdk.User) (sdk.Token, error)
+	//RefreshToken retrieves a new access token and refresh token from the provided refresh token.
 	RefreshToken(ctx context.Context, refreshToken string) (sdk.Token, error)
+	//CreateUsers creates new users.
 	CreateUsers(ctx context.Context, token string, user ...sdk.User) ([]byte, error)
+	//ListUsers retrieves users owned/shared by a user.
 	ListUsers(ctx context.Context, token, alertMessage string) ([]byte, error)
+	//ViewUser retrieves information about the user with the given ID.
 	ViewUser(ctx context.Context, token, userID string) ([]byte, error)
+	//UpdateUser updates the user with the given ID.
 	UpdateUser(ctx context.Context, token, userID string, user sdk.User) ([]byte, error)
+	//UpdateUserTags updates the tags of the user with the given ID.
 	UpdateUserTags(ctx context.Context, token, userID string, user sdk.User) ([]byte, error)
+	//UpdateUserIdentity updates the identity of the user with the given ID.
 	UpdateUserIdentity(ctx context.Context, token, userID string, user sdk.User) ([]byte, error)
+	//UpdateUserOwner updates the owner of the user with the given ID.
 	UpdateUserOwner(ctx context.Context, token, userID string, user sdk.User) ([]byte, error)
+	//EnableUser updates the status of a user with the given ID to enabled.
 	EnableUser(ctx context.Context, token, userID string) ([]byte, error)
+	//DisableUser updates the status of a user with the given ID to disabled.
 	DisableUser(ctx context.Context, token, userID string) ([]byte, error)
+	//CreateThings creates new things.
 	CreateThings(ctx context.Context, token string, things ...sdk.Thing) ([]byte, error)
+	//ListThings retrieves things owned/shared by a user.
 	ListThings(ctx context.Context, token, alertMessage string) ([]byte, error)
+	//ViewThing retrieves information about the thing with the given ID.
 	ViewThing(ctx context.Context, token, id string) ([]byte, error)
+	//UpdateThing updates the thing with the given ID.
 	UpdateThing(ctx context.Context, token, id string, thing sdk.Thing) ([]byte, error)
+	//UpdateThingTags updates the tags of the thing with the given ID.
 	UpdateThingTags(ctx context.Context, token, id string, thing sdk.Thing) ([]byte, error)
+	//UpdateThingSecret updates the secret of the thing with the given ID.
 	UpdateThingSecret(ctx context.Context, token, id, secret string) ([]byte, error)
+	//UpdateThingOwner updates the owner of the thing with the given ID
 	UpdateThingOwner(ctx context.Context, token, id string, thing sdk.Thing) ([]byte, error)
+	//EnableThing updates the status of the thing with the given ID to enabled.
 	EnableThing(ctx context.Context, token, id string) ([]byte, error)
+	//DisableThing updates the status of the thing with the given ID to disabled
 	DisableThing(ctx context.Context, token, id string) ([]byte, error)
+	//CreateChannels creates new channels.
 	CreateChannels(ctx context.Context, token string, channels ...sdk.Channel) ([]byte, error)
+	//ListChannels retrieves channels owned/shared by a user.
 	ListChannels(ctx context.Context, token, alertMessage string) ([]byte, error)
+	//ViewChannel retrievs information about the channel with the given ID.
 	ViewChannel(ctx context.Context, token, id string) ([]byte, error)
+	//UpdateChannel updates the channel with the given ID.
 	UpdateChannel(ctx context.Context, token, id string, channel sdk.Channel) ([]byte, error)
+	//ListChannelsByThing retrieves a list of channels based on the given thing ID.
 	ListChannelsByThing(ctx context.Context, token, id string) ([]byte, error)
+	//ListThingsByChannel retrieves a list of things based on the given channel ID.
 	ListThingsByChannel(ctx context.Context, token, id string) ([]byte, error)
+	//EnableChannel updates the status of the channel with the given ID to enabled.
 	EnableChannel(ctx context.Context, token, id string) ([]byte, error)
+	//DisableChannel updates the status of the channel with the given ID to disabled.
 	DisableChannel(ctx context.Context, token, id string) ([]byte, error)
+	// Connect bulk connects things to channel(s) specified by ID.
 	Connect(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
+	//Disconnect bulk disconnects thinfs to channel(s) specified by ID.
 	Disconnect(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
+	//ConnectThing connects a thing to a channel specified by ID.
 	ConnectThing(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
 	ShareThing(ctx context.Context, token, chanID, userID string, actions []string) ([]byte, error)
 	DisconnectThing(ctx context.Context, thID, chID, token string) ([]byte, error)
+	//Connect Channel connects a channel to a thing specified by ID.
 	ConnectChannel(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
+	//DisconnectChannel disconnects a channel from a thing specified by ID.
 	DisconnectChannel(ctx context.Context, thID, chID, token string) ([]byte, error)
 	AddThingsPolicy(ctx context.Context, token string, Policy sdk.Policy) ([]byte, error)
 	DeleteThingsPolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error)
 	ListThingsPolicies(ctx context.Context, token string) ([]byte, error)
+	//UpdateThingsPolicy updates the policy that a thing has over a channel.
 	UpdateThingsPolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error)
+	//CreateGroups creates new groups.
 	CreateGroups(ctx context.Context, token string, groups ...sdk.Group) ([]byte, error)
+	//ListGroupMembers retrieves the members of a group with a given ID.
 	ListGroupMembers(ctx context.Context, token, id string) ([]byte, error)
+	//Assign adds a user to a group.
 	Assign(ctx context.Context, token, groupID, memberID string, memberType []string) ([]byte, error)
+	//Unassign removes a user from a group.
 	Unassign(ctx context.Context, token, groupID, memberID string) ([]byte, error)
+	//ViewGroup retrieves information about a group with a given ID.
 	ViewGroup(ctx context.Context, token, id string) ([]byte, error)
+	//UpdateGroup updates the group with the given ID
 	UpdateGroup(ctx context.Context, token, id string, group sdk.Group) ([]byte, error)
+	//ListGroups retrieves the groups owned/shared by a user.
 	ListGroups(ctx context.Context, token, alertMessage string) ([]byte, error)
+	//EnableGroup updates the status of the group to enabled.
 	EnableGroup(ctx context.Context, token, id string) ([]byte, error)
+	//DisableGroup updates the status of the group to disabled.
 	DisableGroup(ctx context.Context, token, id string) ([]byte, error)
+	//AddPolicy updates a user's policy on a group effectively adding the user to the group.
 	AddPolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error)
+	//UpdatePolicy updates the policy a user has over a group.
 	UpdatePolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error)
+	//ListPolicies retrieves the policies of the users.
 	ListPolicies(ctx context.Context, token string) ([]byte, error)
+	//DeletePolicy removes a user's policies on a group effectively removing the user from the group.
 	DeletePolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error)
+	//Publish facilitates a thing publishin messages to a channel.
 	Publish(ctx context.Context, token, thKey string, msg *messaging.Message) ([]byte, error)
+	//ReadMessage facilitates a thing reading messages published in a channel.
 	ReadMessage(ctx context.Context, token string) ([]byte, error)
+	//WsConnection creates a web socket connection that allows continuous reading of messages published in a channel.
 	WsConnection(ctx context.Context, token, chID, thKey string) ([]byte, error)
+	//ListDeletedClients retrieves a list of clients that have been deleted.
 	ListDeletedClients(ctx context.Context, token string) ([]byte, error)
 }
 
