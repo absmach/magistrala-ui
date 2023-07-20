@@ -150,6 +150,7 @@ func (gs *uiService) parseTemplate(name string, tmpls ...string) (tpl *template.
 			}
 
 			authorized, _ := gs.sdk.Authorize(aReq, "")
+			fmt.Println(authorized)
 
 			return authorized
 		},
@@ -465,14 +466,21 @@ func (gs *uiService) ListThings(ctx context.Context, token, alertMessage string)
 		return []byte{}, err
 	}
 
+	user, err := gs.UserProfile(ctx, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	data := struct {
 		NavbarActive string
 		Things       []sdk.Thing
 		AlertMessage string
+		User         sdk.User
 	}{
 		"things",
 		things.Things,
 		alertMessage,
+		user,
 	}
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "things", data); err != nil {
@@ -491,14 +499,21 @@ func (gs *uiService) ViewThing(ctx context.Context, token, id string) ([]byte, e
 		return []byte{}, err
 	}
 
+	user, err := gs.UserProfile(ctx, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	data := struct {
 		NavbarActive string
 		ID           string
 		Thing        sdk.Thing
+		User         sdk.User
 	}{
 		"thing",
 		id,
 		thing,
+		user,
 	}
 
 	var btpl bytes.Buffer

@@ -110,7 +110,12 @@
                   </tr>
                 </thead>
                 <tbody>
+                  {{$userID := .User.ID}}
                   {{range $i, $t := .Things}}
+                    {{$disableButton := true}}
+                    {{if (hasAuthority $userID $t.ID "c_delete" "client")}}
+                      {{$disableButton = false}}
+                    {{end}}
                     <tr>
                       <th scope="row">{{$i}}</th>
                       <td>{{$t.Name}}</td>
@@ -125,7 +130,7 @@
                       <td>
                        <form action="/things/disabled" method="post">
                         <input type="hidden" name="thingID" id="thingID" value="{{$t.ID}}">
-                        <button type="submit" class="btn btn-sm">
+                        <button type="submit" class="btn btn-sm" {{if $disableButton}}disabled{{end}}>
                           <i class="fas fa-trash-alt"></i>
                         </button>
                        </form>

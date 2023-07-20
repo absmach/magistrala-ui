@@ -20,13 +20,17 @@
                 </tr>
               </thead>
               <tbody>
+                {{$disableButton := true}}
+                {{if (hasAuthority .User.ID .Thing.ID "c_update" "client")}}
+                  {{$disableButton =false}}
+                {{end}}
                 <tr>
                   <th>Name</th>
                   <td class="editable" contenteditable="false" data-field="name">
                     {{.Thing.Name}}
                   </td>
                   <td>
-                    <button class="edit-btn" onclick="editRow('name')">
+                    <button class="edit-btn" onclick="editRow('name')"{{if $disableButton}}disabled{{end}}>
                       <i class="fas fa-pencil-alt"></i>
                     </button>
                     <div class="save-cancel-buttons" style="display: none;">
@@ -49,7 +53,7 @@
                     {{.Thing.Credentials.Secret}}
                   </td>
                   <td>
-                    <button class="edit-btn" onclick="editRow('secret')">
+                    <button class="edit-btn" onclick="editRow('secret')" {{if $disableButton}}disabled{{end}}>
                       <i class="fas fa-pencil-alt"></i>
                     </button>
                     <div class="save-cancel-buttons" style="display: none;">
@@ -68,7 +72,7 @@
                     {{toSlice .Thing.Tags}}
                   </td>
                   <td>
-                    <button class="edit-btn" onclick="editRow('tags')">
+                    <button class="edit-btn" onclick="editRow('tags')" {{if $disableButton}}disabled{{end}}>
                       <i class="fas fa-pencil-alt"></i>
                     </button>
                     <div class="save-cancel-buttons" style="display: none;">
@@ -87,7 +91,7 @@
                     {{.Thing.Owner}}
                   </td>
                   <td>
-                    <button class="edit-btn" onclick="editRow('owner')">
+                    <button class="edit-btn" onclick="editRow('owner')" {{if $disableButton}}disabled{{end}}>
                       <i class="fas fa-pencil-alt"></i>
                     </button>
                     <div class="save-cancel-buttons" style="display: none;">
@@ -106,7 +110,7 @@
                     {{toJSON .Thing.Metadata}}
                   </td>
                   <td>
-                    <button class="edit-btn" onclick="editRow('metadata')">
+                    <button class="edit-btn" onclick="editRow('metadata')" {{if $disableButton}}disabled{{end}}>
                       <i class="fas fa-pencil-alt"></i>
                     </button>
                     <div class="save-cancel-buttons" style="display: none;">
