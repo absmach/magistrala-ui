@@ -360,12 +360,13 @@ func (gs *uiService) CreateUsers(ctx context.Context, token string, users ...sdk
 		if err != nil {
 			if errors.Contains(err, ErrConflict) {
 				alertMessage = "User already Exists"
-				continue
+				htmlPage, _ := gs.ListUsers(ctx, token, alertMessage)
+				return htmlPage, ErrConflict
 			}
 			return []byte{}, err
 		}
 	}
-	return gs.ListUsers(ctx, token, alertMessage)
+	return gs.ListUsers(ctx, token, "")
 }
 
 func (gs *uiService) ListUsers(ctx context.Context, token, alertMessage string) ([]byte, error) {
@@ -497,12 +498,13 @@ func (gs *uiService) CreateThings(ctx context.Context, token string, things ...s
 		if err != nil {
 			if errors.Contains(err, ErrConflict) {
 				alertMessage = "Thing already Exists!"
-				continue
+				htmlPage, _ := gs.ListThings(ctx, token, alertMessage)
+				return htmlPage, ErrConflict
 			}
 			return []byte{}, err
 		}
 	}
-	return gs.ListThings(ctx, token, alertMessage)
+	return gs.ListThings(ctx, token, "")
 }
 
 func (gs *uiService) ListThings(ctx context.Context, token, alertMessage string) ([]byte, error) {
@@ -636,7 +638,6 @@ func (gs *uiService) CreateChannels(ctx context.Context, token string, channels 
 				alertMessage = "Channel already Exists"
 				htmlPage, _ := gs.ListChannels(ctx, token, alertMessage)
 				return htmlPage, ErrConflict
-				// continue
 			}
 			return []byte{}, err
 		}
@@ -1042,12 +1043,13 @@ func (gs *uiService) CreateGroups(ctx context.Context, token string, groups ...s
 		if err != nil {
 			if errors.Contains(err, ErrConflict) {
 				alertMessage = "Group already Exists"
-				continue
+				htmlPage, _ := gs.ListGroups(ctx, token, alertMessage)
+				return htmlPage, ErrConflict
 			}
 			return []byte{}, err
 		}
 	}
-	return gs.ListGroups(ctx, token, alertMessage)
+	return gs.ListGroups(ctx, token, "")
 }
 
 func (gs *uiService) ListGroups(ctx context.Context, token, alertMessage string) ([]byte, error) {
