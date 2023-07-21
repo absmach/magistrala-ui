@@ -40,7 +40,6 @@ var (
 	errUnauthorized      = errors.New("failed to login")
 	errAuthentication    = errors.New("failed to perform authentication over the entity")
 	errSecretError       = errors.New("wrong secret")
-	errForbidden         = errors.New("failed to perform authorization over the entity")
 	referer              = ""
 )
 
