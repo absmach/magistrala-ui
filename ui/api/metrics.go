@@ -43,13 +43,13 @@ func (mm *metricsMiddleware) Index(ctx context.Context, token string) (b []byte,
 	return mm.svc.Index(ctx, token)
 }
 
-func (mm *metricsMiddleware) Login(ctx context.Context) (b []byte, err error) {
+func (mm *metricsMiddleware) Login(ctx context.Context, alertMessage string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "login").Add(1)
 		mm.latency.With("method", "login").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.Login(ctx)
+	return mm.svc.Login(ctx, alertMessage)
 }
 
 func (mm *metricsMiddleware) PasswordResetRequest(ctx context.Context, email string) (b []byte, err error) {

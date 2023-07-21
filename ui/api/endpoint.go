@@ -27,7 +27,7 @@ func indexEndpoint(svc ui.Service) endpoint.Endpoint {
 
 func loginEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		res, err := svc.Login(ctx)
+		res, err := svc.Login(ctx, "")
 
 		return uiRes{
 			code: http.StatusOK,
@@ -107,6 +107,21 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		token, err := svc.Token(ctx, user)
 		if err != nil {
+			if errors.Contains(err, errAuthentication) {
+				resp, err := svc.Login(ctx, "Wrong Email")
+				return uiRes{
+					code:    http.StatusBadRequest,
+					html:    resp,
+					headers: map[string]string{"Location": "/login"},
+				}, err
+			} else if errors.Contains(err, errSecretError) {
+				resp, err := svc.Login(ctx, "Wrong Password")
+				return uiRes{
+					code:    http.StatusBadRequest,
+					html:    resp,
+					headers: map[string]string{"Location": "/login"},
+				}, err
+			}
 			return nil, errors.Wrap(errUnauthorized, err)
 		}
 

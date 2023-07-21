@@ -43,7 +43,7 @@ func (lm *loggingMiddleware) Index(ctx context.Context, token string) (b []byte,
 	return lm.svc.Index(ctx, token)
 }
 
-func (lm *loggingMiddleware) Login(ctx context.Context) (b []byte, err error) {
+func (lm *loggingMiddleware) Login(ctx context.Context, alertMessage string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method login took %s to complete", time.Since(begin))
 		if err != nil {
@@ -53,7 +53,7 @@ func (lm *loggingMiddleware) Login(ctx context.Context) (b []byte, err error) {
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.Login(ctx)
+	return lm.svc.Login(ctx, alertMessage)
 }
 
 func (lm *loggingMiddleware) PasswordResetRequest(ctx context.Context, email string) (b []byte, err error) {

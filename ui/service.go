@@ -46,7 +46,7 @@ type Service interface {
 	//Index displays the landing page of the UI.
 	Index(ctx context.Context, token string) ([]byte, error)
 	//Login displays the login page.
-	Login(ctx context.Context) ([]byte, error)
+	Login(ctx context.Context, alertMessage string) ([]byte, error)
 	//Logout deletes the access token and refresh token from the cookies and logs the user out of the UI.
 	Logout(ctx context.Context) ([]byte, error)
 	PasswordResetRequest(ctx context.Context, email string) ([]byte, error)
@@ -247,7 +247,7 @@ func (gs *uiService) Index(ctx context.Context, token string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) Login(ctx context.Context) ([]byte, error) {
+func (gs *uiService) Login(ctx context.Context, alertMessage string) ([]byte, error) {
 	tpl, err := gs.parseTemplate("login", "login.html")
 	if err != nil {
 		return []byte{}, err
@@ -255,8 +255,10 @@ func (gs *uiService) Login(ctx context.Context) ([]byte, error) {
 
 	data := struct {
 		NavbarActive string
+		AlertMessage string
 	}{
 		"dashboard",
+		alertMessage,
 	}
 
 	var btpl bytes.Buffer
