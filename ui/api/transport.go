@@ -853,9 +853,6 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	case errors.Contains(err, errAuthentication):
 		w.Header().Set("Location", "/refresh_token")
 		w.WriteHeader(http.StatusSeeOther)
-	case errors.Contains(err, errSecretError):
-		w.Header().Set("Location", "/password")
-		w.WriteHeader(http.StatusFound)
 
 	default:
 		if e, ok := status.FromError(err); ok {

@@ -92,7 +92,7 @@ func (lm *loggingMiddleware) ShowPasswordReset(ctx context.Context) (b []byte, e
 	return lm.svc.ShowPasswordReset(ctx)
 }
 
-func (lm *loggingMiddleware) PasswordUpdate(ctx context.Context) (b []byte, err error) {
+func (lm *loggingMiddleware) PasswordUpdate(ctx context.Context, alertMessage string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method password_update took %s to complete", time.Since(begin))
 		if err != nil {
@@ -102,7 +102,7 @@ func (lm *loggingMiddleware) PasswordUpdate(ctx context.Context) (b []byte, err 
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.PasswordUpdate(ctx)
+	return lm.svc.PasswordUpdate(ctx, alertMessage)
 }
 
 func (lm *loggingMiddleware) Token(ctx context.Context, user sdk.User) (token sdk.Token, err error) {

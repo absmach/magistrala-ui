@@ -38,12 +38,59 @@ func loginEndpoint(svc ui.Service) endpoint.Endpoint {
 
 func showUpdatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		res, err := svc.PasswordUpdate(ctx)
+		res, err := svc.PasswordUpdate(ctx, "")
 
 		return uiRes{
 			code: http.StatusOK,
 			html: res,
 		}, err
+	}
+}
+
+func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(updateUserPasswordReq)
+
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.UpdatePassword(ctx, req.token, req.OldPass, req.NewPass)
+		if err != nil {
+			if errors.Contains(err, errSecretError) {
+				resp, err := svc.PasswordUpdate(ctx, "Wrong Old Password")
+				return uiRes{
+					code:    http.StatusBadRequest,
+					html:    resp,
+					headers: map[string]string{"Location": "/password"},
+				}, err
+			}
+			return nil, err
+		}
+
+		cookies := []*http.Cookie{
+			{
+				Name:     "token",
+				Value:    "",
+				Path:     "/",
+				MaxAge:   -1,
+				HttpOnly: true,
+			},
+			{
+				Name:     "refresh_token",
+				Value:    "",
+				Path:     "/",
+				MaxAge:   -1,
+				HttpOnly: true,
+			},
+		}
+
+		return uiRes{
+			code:    http.StatusFound,
+			html:    res,
+			cookies: cookies,
+			headers: map[string]string{"Location": "/login"},
+		}, nil
 	}
 }
 
@@ -421,45 +468,6 @@ func disableUserEndpoint(svc ui.Service) endpoint.Endpoint {
 			html:    res,
 			headers: map[string]string{"Location": "/users"},
 		}, err
-	}
-}
-
-func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(updateUserPasswordReq)
-
-		if err := req.validate(); err != nil {
-			return nil, err
-		}
-
-		res, err := svc.UpdatePassword(ctx, req.token, req.OldPass, req.NewPass)
-		if err != nil {
-			return nil, err
-		}
-
-		cookies := []*http.Cookie{
-			{
-				Name:     "token",
-				Value:    "",
-				Path:     "/",
-				MaxAge:   -1,
-				HttpOnly: true,
-			},
-			{
-				Name:     "refresh_token",
-				Value:    "",
-				Path:     "/",
-				MaxAge:   -1,
-				HttpOnly: true,
-			},
-		}
-
-		return uiRes{
-			code:    http.StatusFound,
-			html:    res,
-			cookies: cookies,
-			headers: map[string]string{"Location": "/login"},
-		}, nil
 	}
 }
 

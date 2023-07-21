@@ -52,7 +52,7 @@ type Service interface {
 	PasswordResetRequest(ctx context.Context, email string) ([]byte, error)
 	PasswordReset(ctx context.Context, token, password, confirmPass string) ([]byte, error)
 	ShowPasswordReset(ctx context.Context) ([]byte, error)
-	PasswordUpdate(ctx context.Context) ([]byte, error)
+	PasswordUpdate(ctx context.Context, alertMessage string) ([]byte, error)
 	UpdatePassword(ctx context.Context, token, oldPass, newPass string) ([]byte, error)
 	//UserProfile retrieves information about the logged in user.
 	UserProfile(ctx context.Context, token string) (sdk.User, error)
@@ -282,7 +282,7 @@ func (gs *uiService) PasswordReset(ctx context.Context, token, password, confirm
 }
 
 func (gs *uiService) ShowPasswordReset(ctx context.Context) ([]byte, error) {
-	tpl, err := parseTemplate("resetPassword", "resetPassword.html")
+	tpl, err := gs.parseTemplate("resetPassword", "resetPassword.html")
 	if err != nil {
 		return []byte{}, err
 	}
@@ -293,16 +293,18 @@ func (gs *uiService) ShowPasswordReset(ctx context.Context) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) PasswordUpdate(ctx context.Context) ([]byte, error) {
-	tpl, err := parseTemplate("updatePassword", "updatePassword.html")
+func (gs *uiService) PasswordUpdate(ctx context.Context, alertMessage string) ([]byte, error) {
+	tpl, err := gs.parseTemplate("updatePassword", "updatePassword.html")
 	if err != nil {
 		return []byte{}, err
 	}
 
 	data := struct {
 		NavbarActive string
+		AlertMessage string
 	}{
 		"password",
+		alertMessage,
 	}
 
 	var btpl bytes.Buffer
