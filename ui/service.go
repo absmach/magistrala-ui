@@ -630,12 +630,14 @@ func (gs *uiService) CreateChannels(ctx context.Context, token string, channels 
 		if err != nil {
 			if errors.Contains(err, ErrConflict) {
 				alertMessage = "Channel already Exists"
-				continue
+				htmlPage, _ := gs.ListChannels(ctx, token, alertMessage)
+				return htmlPage, ErrConflict
+				// continue
 			}
 			return []byte{}, err
 		}
 	}
-	return gs.ListChannels(ctx, token, alertMessage)
+	return gs.ListChannels(ctx, token, "")
 }
 
 func (gs *uiService) ListChannels(ctx context.Context, token, alertMessage string) ([]byte, error) {
