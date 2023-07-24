@@ -118,6 +118,7 @@ type Service interface {
 	Disconnect(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
 	//ConnectThing connects a thing to a channel specified by ID.
 	ConnectThing(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
+	//ShareThing shares things connected to a channel with a user
 	ShareThing(ctx context.Context, token, chanID, userID string, actions []string) ([]byte, error)
 	DisconnectThing(ctx context.Context, thID, chID, token string) ([]byte, error)
 	//Connect Channel connects a channel to a thing specified by ID.
