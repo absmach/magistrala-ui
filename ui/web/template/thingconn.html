@@ -83,14 +83,10 @@
                 <tbody>
                   {{$userID := .User.ID}}
                   {{range $i, $c := .Channels}}
-                  {{$disableButton := true}}
-                  {{if (hasAuthority $userID $c.ID "g_list" "group" )}}
-                    {{$disableButton =false}}
-                  {{end}}
                     <tr>
                       <th scope="row">{{$i}}</th>
                       <td>{{$c.Name}}</td>
-                      <td>{{if $disableButton}}{{$c.ID}}{{end}}{{if not $disableButton}}<a href={{printf "/channels/%s" $c.ID}}>{{$c.ID}}</a>{{end}}</td>
+                      <td><a href={{printf "/channels/%s" $c.ID}}>{{$c.ID}}</a></td>
                       <td>
                         {{range $p :=$policies}}
                           {{if (eq $c.ID $p.Object)}}
@@ -104,7 +100,7 @@
                         <form action="/disconnectChannel" method="post">
                           <input type="hidden" name="thingID" id="thingID" value="{{$t.ID}}">
                           <input type="hidden" name="channelID" id="channelID" value="{{$c.ID}}">
-                          <button type="submit" class="btn btn-danger btn-sm" {{if $disableButton}}disabled{{end}}>Disconnect</button>
+                          <button type="submit" class="btn btn-danger btn-sm">Disconnect</button>
                         </form>
                       </td>
                     </tr>

@@ -96,28 +96,30 @@
                     {{$disableButton =false}}
                   {{end}}
                   {{range $i, $m := .Members}}
-                    <tr>
-                      <th scope="row">{{$i}}</th>
-                      <td>{{$m.Name}}</td>
-                      <td><a href={{printf "/users/%s" $m.ID}}>{{$m.ID}}</a></td>
-                        <td>
-                          {{range $p := $policies}}
-                            {{if (eq $m.ID $p.Subject)}}
-                              {{if (eq $groupID $p.Object)}}
-                                {{toSlice $p.Actions}}
+                    {{if hasAuthority $userID $m.ID "c_list" "client"}}
+                      <tr>
+                        <th scope="row">{{$i}}</th>
+                        <td>{{$m.Name}}</td>
+                        <td><a href={{printf "/users/%s" $m.ID}}>{{$m.ID}}</a></td>
+                          <td>
+                            {{range $p := $policies}}
+                              {{if (eq $m.ID $p.Subject)}}
+                                {{if (eq $groupID $p.Object)}}
+                                  {{toSlice $p.Actions}}
+                                {{end}}
                               {{end}}
                             {{end}}
-                          {{end}}
+                          </td>
+                        <td>
+                          <form action="/groups/{{$groupID}}/unassign" method="post">
+                            <input type="hidden" name="memberID" id="memberID" value="{{$m.ID}}">
+                            <button type="submit" class="btn btn-sm" {{if $disableButton}}disabled{{end}}>
+                              <i class="fas fa-trash-alt"></i>
+                            </button>
+                          </form>
                         </td>
-                      <td>
-                        <form action="/groups/{{$groupID}}/unassign" method="post">
-                          <input type="hidden" name="memberID" id="memberID" value="{{$m.ID}}">
-                          <button type="submit" class="btn btn-sm" {{if $disableButton}}disabled{{end}}>
-                            <i class="fas fa-trash-alt"></i>
-                          </button>
-                        </form>
-                      </td>
-                    </tr>
+                      </tr>
+                    {{end}}
                   {{end}}
                 </tbody>
               </table>
