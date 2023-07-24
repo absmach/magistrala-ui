@@ -354,6 +354,24 @@ func (req connectThingReq) validate() error {
 	return nil
 }
 
+type shareThingReq struct {
+	token   string
+	UserID  string
+	ChanID  string
+	Actions []string
+}
+
+func (req shareThingReq) validate() error {
+	if req.token == "" {
+		return ui.ErrUnauthorizedAccess
+	} else if req.UserID == "" {
+		return ui.ErrMalformedEntity
+	} else if req.ChanID == "" {
+		return ui.ErrMalformedEntity
+	}
+	return nil
+}
+
 type connectChannelReq struct {
 	token   string
 	ConnIDs sdk.ConnectionIDs

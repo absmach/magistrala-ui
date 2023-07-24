@@ -75,6 +75,7 @@ type Service interface {
 	Connect(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
 	Disconnect(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
 	ConnectThing(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
+	ShareThing(ctx context.Context, token, chanID, userID string, actions []string) ([]byte, error)
 	DisconnectThing(ctx context.Context, thID, chID, token string) ([]byte, error)
 	ConnectChannel(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
 	DisconnectChannel(ctx context.Context, thID, chID, token string) ([]byte, error)
@@ -373,9 +374,10 @@ func (gs *uiService) ListThings(ctx context.Context, token string) ([]byte, erro
 		return []byte{}, err
 	}
 	filter := sdk.PageMetadata{
-		Offset: uint64(0),
-		Total:  uint64(100),
-		Limit:  uint64(100),
+		Offset:     uint64(0),
+		Total:      uint64(100),
+		Limit:      uint64(100),
+		Visibility: "all",
 	}
 	things, err := gs.sdk.Things(filter, token)
 	if err != nil {
@@ -506,9 +508,10 @@ func (gs *uiService) ListChannels(ctx context.Context, token string) ([]byte, er
 	}
 
 	filter := sdk.PageMetadata{
-		Offset: uint64(0),
-		Total:  uint64(100),
-		Limit:  uint64(100),
+		Offset:     uint64(0),
+		Total:      uint64(100),
+		Limit:      uint64(100),
+		Visibility: "all",
 	}
 	chsPage, err := gs.sdk.Channels(filter, token)
 	if err != nil {
@@ -588,6 +591,14 @@ func (gs *uiService) ConnectThing(ctx context.Context, token string, connIDs sdk
 	}
 
 	return gs.ListThingsByChannel(ctx, token, connIDs.ChannelIDs[0])
+}
+
+func (gs *uiService) ShareThing(ctx context.Context, token, chanID, userID string, actions []string) ([]byte, error) {
+	if err := gs.sdk.ShareThing(chanID, userID, actions, token); err != nil {
+		return []byte{}, err
+	}
+
+	return gs.ListThingsByChannel(ctx, token, chanID)
 }
 
 func (gs *uiService) DisconnectThing(ctx context.Context, thID, chID, token string) ([]byte, error) {
@@ -723,6 +734,10 @@ func (gs *uiService) ListThingsByChannel(ctx context.Context, token, id string) 
 	if err != nil {
 		return []byte{}, err
 	}
+	users, err := gs.sdk.Users(filter, token)
+	if err != nil {
+		return []byte{}, err
+	}
 
 	data := struct {
 		NavbarActive string
@@ -731,6 +746,7 @@ func (gs *uiService) ListThingsByChannel(ctx context.Context, token, id string) 
 		Things       []sdk.Thing
 		AllThings    []sdk.Thing
 		Policies     []sdk.Policy
+		Users        []sdk.User
 	}{
 		"channels",
 		id,
@@ -738,6 +754,7 @@ func (gs *uiService) ListThingsByChannel(ctx context.Context, token, id string) 
 		thsPage.Things,
 		allthsPage.Things,
 		plcPage.Policies,
+		users.Users,
 	}
 
 	var btpl bytes.Buffer

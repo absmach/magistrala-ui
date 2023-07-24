@@ -18,6 +18,7 @@ import (
 	"github.com/mainflux/mainflux"
 	"github.com/mainflux/mainflux/logger"
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
+	"github.com/mainflux/mainflux/pkg/uuid"
 	"github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	jconfig "github.com/uber/jaeger-client-go/config"
@@ -38,6 +39,7 @@ const (
 	defUsersPort       = "9002"
 	defTLSVerification = "false"
 	defBaseURL         = "http://localhost"
+	defInstanceID      = ""
 
 	envLogLevel        = "MF_GUI_LOG_LEVEL"
 	envClientTLS       = "MF_GUI_CLIENT_TLS"
@@ -51,6 +53,7 @@ const (
 	envUsersPort       = "MF_USERS_HTTP_PORT"
 	envTLSVerification = "MF_VERIFICATION_TLS"
 	envBaseURL         = "MF_SDK_BASE_URL"
+	envInstanceID      = "MF_UI_INSTANCE_ID"
 )
 
 type config struct {
@@ -61,11 +64,21 @@ type config struct {
 	clientTLS   bool
 	caCerts     string
 	jaegerURL   string
+	instanceID  string
 	sdkConfig   sdk.Config
 }
 
 func main() {
 	cfg := loadConfig()
+
+	instanceID := cfg.instanceID
+	if instanceID == "" {
+		if uuid, err := uuid.New().ID(); err != nil {
+			log.Fatalf("Failed to generate instanceID: %s", err)
+		} else {
+			instanceID = uuid
+		}
+	}
 
 	logger, err := logger.New(os.Stdout, cfg.logLevel)
 	if err != nil {
@@ -101,7 +114,7 @@ func main() {
 	go func() {
 		p := fmt.Sprintf(":%s", cfg.port)
 		logger.Info(fmt.Sprintf("GUI service started on port %s", cfg.port))
-		errs <- http.ListenAndServe(p, api.MakeHandler(svc, cfg.redirectURL, tracer))
+		errs <- http.ListenAndServe(p, api.MakeHandler(svc, cfg.redirectURL, tracer, instanceID))
 	}()
 
 	go func() {
@@ -132,6 +145,7 @@ func loadConfig() config {
 		clientTLS:   tls,
 		caCerts:     mainflux.Env(envCACerts, defCACerts),
 		jaegerURL:   mainflux.Env(envJaegerURL, defJaegerURL),
+		instanceID:  mainflux.Env(envInstanceID, defInstanceID),
 		sdkConfig: sdk.Config{
 			HTTPAdapterURL:  fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envHTTPAdapterPort, defHTTPAdapterPort)),
 			ReaderURL:       fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envReaderPort, defReaderPort)),

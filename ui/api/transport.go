@@ -43,7 +43,7 @@ var (
 )
 
 // MakeHandler returns a HTTP handler for API endpoints.
-func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) http.Handler {
+func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer, instanceID string) http.Handler {
 	opts := []kithttp.ServerOption{
 		kithttp.ServerErrorEncoder(encodeError),
 	}
@@ -306,6 +306,12 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 		encodeResponse,
 		opts...,
 	))
+	r.Post("/channels/:id/shareThing", kithttp.NewServer(
+		kitot.TraceServer(tracer, "share_thing")(shareThingEndpoint(svc)),
+		decodeShareThingRequest,
+		encodeResponse,
+		opts...,
+	))
 
 	r.Post("/disconnectThing", kithttp.NewServer(
 		kitot.TraceServer(tracer, "disconnect_thing")(disconnectThingEndpoint(svc)),
@@ -489,7 +495,7 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer) htt
 		opts...,
 	))
 
-	r.GetFunc("/version", mainflux.Health("ui"))
+	r.GetFunc("/version", mainflux.Health("ui", instanceID))
 	r.Handle("/metrics", promhttp.Handler())
 
 	// Static file handler
@@ -1110,6 +1116,27 @@ func decodeConnectThing(_ context.Context, r *http.Request) (interface{}, error)
 	}
 
 	return req, nil
+}
+
+func decodeShareThingRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	if err := r.ParseForm(); err != nil {
+		return nil, err
+	}
+	chanID := bone.GetValue(r, "id")
+	userID := r.Form.Get("userID")
+	actions := r.PostForm["actions"]
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+	req := shareThingReq{
+		token:   token,
+		ChanID:  chanID,
+		UserID:  userID,
+		Actions: actions,
+	}
+	return req, nil
+
 }
 
 func decodeConnectChannel(_ context.Context, r *http.Request) (interface{}, error) {

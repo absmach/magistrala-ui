@@ -15,6 +15,11 @@
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#connectModal">
               Connect Thing
             </button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shareThingModal">
+              Share Things
+            </button>
+
+            <!--Modal-->
             <div class="modal fade" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="connectModal" aria-hidden="true">
               <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -25,7 +30,7 @@
                     <form action="/channels/{{.Channel.ID}}/connectThing" method="post">
                       <div class="mb-3">
                         <label for="thingID" class="form-label">Thing</label>
-                        <input type="text" name="thingFilter" id="thingFilter" placeholder="Filter by thing ID" oninput="filterItem(this.value,'thingID')">
+                        <input type="text" name="thingFilter" id="thingFilter" placeholder="Filter by thing" oninput="filterItem(this.value,'thingID')">
                         <select class="form-select" name="thingID" id="thingID" required>
                           <option value="">...</option>
                           {{range .AllThings}}
@@ -48,30 +53,40 @@
                 </div>
               </div>
             </div>
-
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#connectThingsModal">
-              Connect Things
-            </button>
-
-            <!-- Modal -->
-            <div class="modal fade" id="connectThingsModal" tabindex="-1" role="dialog" aria-labelledby="connectThingsModalLabel" aria-hidden="true">
+            <div class="modal fade" id="shareThingModal" tabindex="-1" role="dialog" aria-labelledby="shareThingModal" aria-hidden="true">
               <div class="modal-dialog" role="document">
                 <div class="modal-content">
                   <div class="modal-header">
-                    <h5 class="modal-title" id="connectThingsModalLabel">Connect Things</h5>
+                    <h5 class="modal-title" id="shareThingModal">Share Thing</h5>
                   </div>
                   <div class="modal-body">
-                    <form method="post" enctype="multipart/form-data" action="/connect">
-                      <div class="form-group">
-                        <label for="connectThingsFile">Add csv file containing things ID's.</label>
-                        <input type="file" class="form-control-file" id="connectThingsFile" name="connectThingsFile" required>
-                        <button type="submit" value="upload" class="btn btn-primary">Submit</button>
+                    <form action="/channels/{{.Channel.ID}}/shareThing" method="post">
+                      <div class="mb-3">
+                        <label for="userID" class="form-label">USer</label>
+                        <input type="text" name="userFilter" id="userFilter" placeholder="Filter by User" oninput="filterItem(this.value,'userID')">
+                        <select class="form-select" name="userID" id="userID" required>
+                          <option value="">...</option>
+                          {{range .Users}}
+                            <option value="{{.ID}}">{{.Name}}</option>
+                          {{end}}
+                        </select>
                       </div>
+                      <div class="mb-3">
+                        <label for="actions" class="form-label">Actions</label>
+                        <select class="form-select" name="actions" id="actions" aria-describedby="actionsHelp" multiple required>
+                          <option value="c_list">c_list</option>
+                          <option value="c_update">c_update</option>
+                          <option value="c_delete">c_delete</option>
+                        </select>
+                        <div id="actionsHelp" class="form-text">Select Actions (multiple selections allowed).</div>
+                      </div>
+                      <button type="submit" class="btn btn-primary">Submit</button>
                     </form>
                   </div>
                 </div>
               </div>
             </div>
+            <!--modal end-->
             <table class="table">
               <thead>
                 <tr>

@@ -385,6 +385,15 @@ func (mm *metricsMiddleware) ConnectThing(ctx context.Context, token string, con
 	return mm.svc.ConnectThing(ctx, token, connIDs)
 }
 
+func (mm *metricsMiddleware) ShareThing(ctx context.Context, token, chanID, userID string, actions []string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "share_thing").Add(1)
+		mm.latency.With("method", "share_thing").Observe(float64(time.Since(begin).Seconds()))
+	}(time.Now())
+
+	return mm.svc.ShareThing(ctx, token, chanID, userID, actions)
+}
+
 func (mm *metricsMiddleware) DisconnectThing(ctx context.Context, thID, chID, token string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "disconnect_thing").Add(1)
