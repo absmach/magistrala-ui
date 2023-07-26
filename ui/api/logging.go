@@ -56,9 +56,45 @@ func (lm *loggingMiddleware) Login(ctx context.Context) (b []byte, err error) {
 	return lm.svc.Login(ctx)
 }
 
-func (lm *loggingMiddleware) PasswordReset(ctx context.Context) (b []byte, err error) {
+func (lm *loggingMiddleware) PasswordResetRequest(ctx context.Context, email string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method password_reset_request took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.PasswordResetRequest(ctx, email)
+}
+
+func (lm *loggingMiddleware) PasswordReset(ctx context.Context, token, password, confPassword string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method password_reset took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.PasswordReset(ctx, token, password, confPassword)
+}
+
+func (lm *loggingMiddleware) ShowPasswordReset(ctx context.Context) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method show_password_reset took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.ShowPasswordReset(ctx)
+}
+
+func (lm *loggingMiddleware) PasswordUpdate(ctx context.Context) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method password_update took %s to complete", time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -66,7 +102,7 @@ func (lm *loggingMiddleware) PasswordReset(ctx context.Context) (b []byte, err e
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.PasswordReset(ctx)
+	return lm.svc.PasswordUpdate(ctx)
 }
 
 func (lm *loggingMiddleware) Token(ctx context.Context, user sdk.User) (token sdk.Token, err error) {

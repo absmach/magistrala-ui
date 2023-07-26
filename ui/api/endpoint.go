@@ -38,7 +38,7 @@ func loginEndpoint(svc ui.Service) endpoint.Endpoint {
 
 func showUpdatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		res, err := svc.PasswordReset(ctx)
+		res, err := svc.PasswordUpdate(ctx)
 
 		return uiRes{
 			code: 0,
@@ -153,6 +153,57 @@ func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
 			html:    res,
 			cookies: cookies,
 			headers: map[string]string{"Location": "/login"},
+		}, err
+	}
+}
+
+func passwordResetRequestEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(passwordResetRequestReq)
+
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		res, err := svc.PasswordResetRequest(ctx, req.Email)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code:    http.StatusFound,
+			html:    res,
+			headers: map[string]string{"Location": "/login"},
+		}, nil
+	}
+}
+
+func passwordResetEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(passwordResetReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.PasswordReset(ctx, req.token, req.Password, req.ConfirmPassword)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code:    http.StatusFound,
+			html:    res,
+			headers: map[string]string{"Location": "/login"},
+		}, nil
+	}
+}
+
+func showPasswordResetEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		res, err := svc.ShowPasswordReset(ctx)
+
+		return uiRes{
+			code: 0,
+			html: res,
 		}, err
 	}
 }

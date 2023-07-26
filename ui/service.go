@@ -31,6 +31,9 @@ var (
 	// invalid username or password).
 	ErrMalformedEntity = errors.New("malformed entity specification")
 
+	// ErrInvalidResetPass indicates an invalid reset password.
+	ErrInvalidResetPass = errors.New("invalid reset password")
+
 	tmplFiles = []string{"header.html", "footer.html", "navbar.html"}
 )
 
@@ -39,7 +42,10 @@ type Service interface {
 	Index(ctx context.Context, token string) ([]byte, error)
 	Login(ctx context.Context) ([]byte, error)
 	Logout(ctx context.Context) ([]byte, error)
-	PasswordReset(ctx context.Context) ([]byte, error)
+	PasswordResetRequest(ctx context.Context, email string) ([]byte, error)
+	PasswordReset(ctx context.Context, token, password, confirmPass string) ([]byte, error)
+	ShowPasswordReset(ctx context.Context) ([]byte, error)
+	PasswordUpdate(ctx context.Context) ([]byte, error)
 	UpdatePassword(ctx context.Context, token, oldPass, newPass string) ([]byte, error)
 	UserProfile(ctx context.Context, token string) (sdk.User, error)
 	Token(ctx context.Context, user sdk.User) (sdk.Token, error)
@@ -188,7 +194,36 @@ func (gs *uiService) Login(ctx context.Context) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) PasswordReset(ctx context.Context) ([]byte, error) {
+func (gs *uiService) PasswordResetRequest(ctx context.Context, email string) ([]byte, error) {
+	err := gs.sdk.ResetPasswordRequest(email)
+	if err != nil {
+		fmt.Println(err.Error())
+		return []byte{}, err
+	}
+	return gs.Login(ctx)
+}
+
+func (gs *uiService) PasswordReset(ctx context.Context, token, password, confirmPass string) ([]byte, error) {
+	err := gs.sdk.ResetPassword(token, password, confirmPass)
+	if err != nil {
+		return []byte{}, err
+	}
+	return gs.Login(ctx)
+}
+
+func (gs *uiService) ShowPasswordReset(ctx context.Context) ([]byte, error) {
+	tpl, err := parseTemplate("resetPassword", "resetPassword.html")
+	if err != nil {
+		return []byte{}, err
+	}
+	var btpl bytes.Buffer
+	if err := tpl.ExecuteTemplate(&btpl, "resetPassword", ""); err != nil {
+		println(err.Error())
+	}
+	return btpl.Bytes(), nil
+}
+
+func (gs *uiService) PasswordUpdate(ctx context.Context) ([]byte, error) {
 	tpl, err := parseTemplate("updatePassword", "updatePassword.html")
 	if err != nil {
 		return []byte{}, err

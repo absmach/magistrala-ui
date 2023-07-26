@@ -38,8 +38,30 @@
         <div class="btn-field">
           <button type="submit">Login</button>
         </div>
-
       </form>
+      <button type="button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">
+        Forgot Password?
+      </button>
+    </div>
+    <div>
+      <div class="modal fade" id="forgotPasswordModal" tabindex="-1" role="dialog" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="forgotPasswordModalLabel">Enter email</h5>
+            </div>
+            <div class="modal-body">
+              <form method="post" action="/password/reset">
+                <div class="mb-3">
+                  <label for="email" class="form-label">Email</label>
+                  <input type="email" class="form-control" name="email" id="email" placeholder="Email" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div> <!-- /container -->

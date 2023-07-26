@@ -18,7 +18,7 @@ type indexReq struct {
 type loginReq struct {
 }
 
-type PasswordResetReq struct {
+type showPasswordUpdateReq struct {
 }
 
 type tokenReq struct {
@@ -162,6 +162,42 @@ func (req updateUserPasswordReq) validate() error {
 		return ui.ErrMalformedEntity
 	}
 	return nil
+}
+
+type passwordResetRequestReq struct {
+	Email string `json:"email,omitempty"`
+}
+
+func (req passwordResetRequestReq) validate() error {
+	if req.Email == "" {
+		return ui.ErrMalformedEntity
+	}
+	return nil
+}
+
+type passwordResetReq struct {
+	token           string
+	Password        string
+	ConfirmPassword string
+}
+
+func (req passwordResetReq) validate() error {
+	if req.token == "" {
+		return ui.ErrUnauthorizedAccess
+	}
+	if req.Password == "" {
+		return ui.ErrMalformedEntity
+	}
+	if req.ConfirmPassword == "" {
+		return ui.ErrMalformedEntity
+	}
+	if req.Password != req.ConfirmPassword {
+		return ui.ErrInvalidResetPass
+	}
+	return nil
+}
+
+type showPasswordResetReq struct {
 }
 
 type createThingReq struct {
