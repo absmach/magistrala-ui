@@ -195,17 +195,14 @@ func (gs *uiService) Login(ctx context.Context) ([]byte, error) {
 }
 
 func (gs *uiService) PasswordResetRequest(ctx context.Context, email string) ([]byte, error) {
-	err := gs.sdk.ResetPasswordRequest(email)
-	if err != nil {
-		fmt.Println(err.Error())
+	if err := gs.sdk.ResetPasswordRequest(email); err != nil {
 		return []byte{}, err
 	}
 	return gs.Login(ctx)
 }
 
 func (gs *uiService) PasswordReset(ctx context.Context, token, password, confirmPass string) ([]byte, error) {
-	err := gs.sdk.ResetPassword(token, password, confirmPass)
-	if err != nil {
+	if err := gs.sdk.ResetPassword(token, password, confirmPass); err != nil {
 		return []byte{}, err
 	}
 	return gs.Login(ctx)

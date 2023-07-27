@@ -30,7 +30,7 @@ func loginEndpoint(svc ui.Service) endpoint.Endpoint {
 		res, err := svc.Login(ctx)
 
 		return uiRes{
-			code: 0,
+			code: http.StatusOK,
 			html: res,
 		}, err
 	}
@@ -41,7 +41,7 @@ func showUpdatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 		res, err := svc.PasswordUpdate(ctx)
 
 		return uiRes{
-			code: 0,
+			code: http.StatusOK,
 			html: res,
 		}, err
 	}
@@ -202,7 +202,7 @@ func showPasswordResetEndpoint(svc ui.Service) endpoint.Endpoint {
 		res, err := svc.ShowPasswordReset(ctx)
 
 		return uiRes{
-			code: 0,
+			code: http.StatusOK,
 			html: res,
 		}, err
 	}

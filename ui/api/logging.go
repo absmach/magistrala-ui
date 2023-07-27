@@ -58,7 +58,7 @@ func (lm *loggingMiddleware) Login(ctx context.Context) (b []byte, err error) {
 
 func (lm *loggingMiddleware) PasswordResetRequest(ctx context.Context, email string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method password_reset_request took %s to complete", time.Since(begin))
+		message := fmt.Sprintf("Method password_reset_request  for email %s took %s to complete", email, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 		}
@@ -70,7 +70,7 @@ func (lm *loggingMiddleware) PasswordResetRequest(ctx context.Context, email str
 
 func (lm *loggingMiddleware) PasswordReset(ctx context.Context, token, password, confPassword string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method password_reset took %s to complete", time.Since(begin))
+		message := fmt.Sprintf("Method password_reset for token %s took %s to complete", token, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 		}
