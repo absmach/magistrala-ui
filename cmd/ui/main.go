@@ -40,6 +40,7 @@ const (
 	defTLSVerification = "false"
 	defBaseURL         = "http://localhost"
 	defInstanceID      = ""
+	defHostURL         = "http://localhost:9090"
 
 	envLogLevel        = "MF_GUI_LOG_LEVEL"
 	envClientTLS       = "MF_GUI_CLIENT_TLS"
@@ -54,6 +55,7 @@ const (
 	envTLSVerification = "MF_VERIFICATION_TLS"
 	envBaseURL         = "MF_SDK_BASE_URL"
 	envInstanceID      = "MF_UI_INSTANCE_ID"
+	envHostURL         = "MF_UI_HOST_URL"
 )
 
 type config struct {
@@ -71,18 +73,15 @@ type config struct {
 func main() {
 	cfg := loadConfig()
 
-	instanceID := cfg.instanceID
-	if instanceID == "" {
-		if uuid, err := uuid.New().ID(); err != nil {
-			log.Fatalf("Failed to generate instanceID: %s", err)
-		} else {
-			instanceID = uuid
-		}
-	}
-
 	logger, err := logger.New(os.Stdout, cfg.logLevel)
 	if err != nil {
 		log.Fatalf(err.Error())
+	}
+
+	if cfg.instanceID == "" {
+		if cfg.instanceID, err = uuid.New().ID(); err != nil {
+			log.Fatalf("Failed to generate instanceID: %s", err)
+		}
 	}
 
 	tracer, closer := initJaeger("ui", cfg.jaegerURL, logger)
@@ -114,7 +113,7 @@ func main() {
 	go func() {
 		p := fmt.Sprintf(":%s", cfg.port)
 		logger.Info(fmt.Sprintf("GUI service started on port %s", cfg.port))
-		errs <- http.ListenAndServe(p, api.MakeHandler(svc, cfg.redirectURL, tracer, instanceID))
+		errs <- http.ListenAndServe(p, api.MakeHandler(svc, cfg.redirectURL, tracer, cfg.instanceID))
 	}()
 
 	go func() {
@@ -151,6 +150,7 @@ func loadConfig() config {
 			ReaderURL:       fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envReaderPort, defReaderPort)),
 			ThingsURL:       fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envThingsPort, defThingsPort)),
 			UsersURL:        fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envUsersPort, defUsersPort)),
+			HostURL:         mainflux.Env(envHostURL, defHostURL),
 			MsgContentType:  sdk.ContentType(string(sdk.CTJSONSenML)),
 			TLSVerification: mfTLS,
 		},

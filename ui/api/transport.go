@@ -93,7 +93,27 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer, ins
 
 	r.Get("/password", kithttp.NewServer(
 		kitot.TraceServer(tracer, "show_update_password")(showUpdatePasswordEndpoint(svc)),
+		decodeShowPasswordUpdate,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/password/reset", kithttp.NewServer(
+		kitot.TraceServer(tracer, "password_reset_req")(passwordResetRequestEndpoint(svc)),
+		decodePasswordResetRequest,
+		encodeResponse,
+		opts...,
+	))
+	r.Post("/reset-request", kithttp.NewServer(
+		kitot.TraceServer(tracer, "password_reset")(passwordResetEndpoint(svc)),
 		decodePasswordReset,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Get("/reset-request", kithttp.NewServer(
+		kitot.TraceServer(tracer, "show_password_reset")(showPasswordResetEndpoint(svc)),
+		decodeShowPasswordReset,
 		encodeResponse,
 		opts...,
 	))
@@ -523,8 +543,44 @@ func decodeLoginRequest(ctx context.Context, r *http.Request) (interface{}, erro
 	return req, nil
 }
 
+func decodeShowPasswordUpdate(_ context.Context, r *http.Request) (interface{}, error) {
+	req := showPasswordUpdateReq{}
+
+	return req, nil
+}
+
+func decodePasswordUpdate(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+	req := updateUserPasswordReq{
+		token:   token,
+		OldPass: r.PostFormValue("oldpass"),
+		NewPass: r.PostFormValue("newpass"),
+	}
+
+	return req, nil
+}
+
+func decodePasswordResetRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	req := passwordResetRequestReq{
+		Email: r.PostFormValue("email"),
+	}
+	return req, nil
+}
+
 func decodePasswordReset(_ context.Context, r *http.Request) (interface{}, error) {
-	req := PasswordResetReq{}
+	req := passwordResetReq{
+		token:           bone.GetQuery(r, "token")[0],
+		Password:        r.PostFormValue("password"),
+		ConfirmPassword: r.PostFormValue("confirmPassword"),
+	}
+	return req, nil
+}
+
+func decodeShowPasswordReset(_ context.Context, r *http.Request) (interface{}, error) {
+	req := showPasswordResetReq{}
 
 	return req, nil
 }
@@ -725,20 +781,6 @@ func decodeUserIdentityUpdate(_ context.Context, r *http.Request) (interface{}, 
 		token:    token,
 		id:       id,
 		Identity: data.Identity,
-	}
-
-	return req, nil
-}
-
-func decodePasswordUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
-	if err != nil {
-		return nil, err
-	}
-	req := updateUserPasswordReq{
-		token:   token,
-		OldPass: r.PostFormValue("oldpass"),
-		NewPass: r.PostFormValue("newpass"),
 	}
 
 	return req, nil

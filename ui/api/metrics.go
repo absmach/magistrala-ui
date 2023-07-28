@@ -52,13 +52,40 @@ func (mm *metricsMiddleware) Login(ctx context.Context) (b []byte, err error) {
 	return mm.svc.Login(ctx)
 }
 
-func (mm *metricsMiddleware) PasswordReset(ctx context.Context) (b []byte, err error) {
+func (mm *metricsMiddleware) PasswordResetRequest(ctx context.Context, email string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "password_reset_request").Add(1)
+		mm.latency.With("method", "password_reset_request").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.PasswordResetRequest(ctx, email)
+}
+
+func (mm *metricsMiddleware) PasswordReset(ctx context.Context, token, password, confirmPassword string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "password_reset").Add(1)
 		mm.latency.With("method", "password_reset").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.PasswordReset(ctx)
+	return mm.svc.PasswordReset(ctx, token, password, confirmPassword)
+}
+
+func (mm *metricsMiddleware) ShowPasswordReset(ctx context.Context) (b []byte, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "show_password_reset").Add(1)
+		mm.latency.With("method", "show_password_reset").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.ShowPasswordReset(ctx)
+}
+
+func (mm *metricsMiddleware) PasswordUpdate(ctx context.Context) (b []byte, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "password_update").Add(1)
+		mm.latency.With("method", "password_update").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.PasswordUpdate(ctx)
 }
 
 func (mm *metricsMiddleware) Token(ctx context.Context, user sdk.User) (sdk.Token, error) {

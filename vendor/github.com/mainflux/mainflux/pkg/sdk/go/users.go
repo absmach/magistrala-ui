@@ -10,12 +10,13 @@ import (
 )
 
 const (
-	usersEndpoint        = "users"
-	enableEndpoint       = "enable"
-	disableEndpoint      = "disable"
-	issueTokenEndpoint   = "tokens/issue"
-	refreshTokenEndpoint = "tokens/refresh"
-	membersEndpoint      = "members"
+	usersEndpoint         = "users"
+	enableEndpoint        = "enable"
+	disableEndpoint       = "disable"
+	issueTokenEndpoint    = "tokens/issue"
+	refreshTokenEndpoint  = "tokens/refresh"
+	membersEndpoint       = "members"
+	PasswordResetEndpoint = "password"
 )
 
 // User represents mainflux user its credentials.
@@ -140,7 +141,7 @@ func (sdk mfSDK) UpdateUser(user User, token string) (User, errors.SDKError) {
 	if err := json.Unmarshal(body, &user); err != nil {
 		return User{}, errors.NewSDKError(err)
 	}
-	
+
 	return user, nil
 }
 
@@ -161,7 +162,7 @@ func (sdk mfSDK) UpdateUserTags(user User, token string) (User, errors.SDKError)
 	if err := json.Unmarshal(body, &user); err != nil {
 		return User{}, errors.NewSDKError(err)
 	}
-	
+
 	return user, nil
 }
 
@@ -186,6 +187,32 @@ func (sdk mfSDK) UpdateUserIdentity(user User, token string) (User, errors.SDKEr
 	}
 
 	return user, nil
+}
+
+func (sdk mfSDK) ResetPasswordRequest(email string) errors.SDKError {
+	var rpr = resetPasswordRequestreq{Email: email, Host: sdk.HostURL}
+
+	data, err := json.Marshal(rpr)
+	if err != nil {
+		return errors.NewSDKError(err)
+	}
+	url := fmt.Sprintf("%s/%s/reset-request", sdk.usersURL, PasswordResetEndpoint)
+	_, _, sdkerr := sdk.processRequest(http.MethodPost, url, "", string(CTJSON), data, http.StatusCreated)
+
+	return sdkerr
+}
+
+func (sdk mfSDK) ResetPassword(token, password, confPass string) errors.SDKError {
+	var rpr = resetPasswordReq{Token: token, Password: password, ConfPass: confPass}
+
+	data, err := json.Marshal(rpr)
+	if err != nil {
+		return errors.NewSDKError(err)
+	}
+	url := fmt.Sprintf("%s/%s/reset", sdk.usersURL, PasswordResetEndpoint)
+	_, _, sdkerr := sdk.processRequest(http.MethodPut, url, "", string(CTJSON), data, http.StatusCreated)
+
+	return sdkerr
 }
 
 func (sdk mfSDK) UpdatePassword(oldPass, newPass, token string) (User, errors.SDKError) {
