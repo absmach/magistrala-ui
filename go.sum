@@ -52,6 +52,8 @@ github.com/lestrrat-go/httprc v1.0.4 h1:bAZymwoZQb+Oq8MEbyipag7iSq6YIga8Wj6GOiJG
 github.com/lestrrat-go/iter v1.0.2 h1:gMXo1q4c2pHmC3dn8LzRhJfP1ceCbgSiT9lUydIzltI=
 github.com/lestrrat-go/jwx/v2 v2.0.11 h1:ViHMnaMeaO0qV16RZWBHM7GTrAnX2aFLVKofc7FuKLQ=
 github.com/lestrrat-go/option v1.0.1 h1:oAzP2fvZGQKWkvHa1/SAcFolBEca1oN+mQ7eooNBEYU=
+github.com/mainflux/mainflux v0.0.0-20230718143131-41be96a6e777 h1:9HJ1CLdBo+m9XIoeYXa9rVL5BiWV7j4HOQsrhlo18WM=
+github.com/mainflux/mainflux v0.0.0-20230718143131-41be96a6e777/go.mod h1:FoeJ13mrfikrsFDW6bOb3C44D5gZ5m9Jt249G1sLKq0=
 github.com/mainflux/senml v1.5.0 h1:GAd1y1eMohfa6sVYcr2iQfVfkkh9l/q7B1TWF5L68xs=
 github.com/mainflux/senml v1.5.0/go.mod h1:SMX76mM5yenjLVjZOM27+njCGkP+AA64O46nRQiBRlE=
 github.com/matttproud/golang_protobuf_extensions v1.0.4 h1:mmDVorXM7PCGKw94cs5zkfA9PSy5pEvNWRP0ET0TIVo=
