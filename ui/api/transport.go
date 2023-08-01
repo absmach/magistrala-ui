@@ -154,6 +154,34 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer, ins
 		opts...,
 	))
 
+	r.Get("/users/policies", kithttp.NewServer(
+		kitot.TraceServer(tracer, "view_policies")(listPoliciesEndpoint(svc)),
+		decodeListPoliciesRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/users/policies", kithttp.NewServer(
+		kitot.TraceServer(tracer, "add_policy")(addPolicyEndpoint(svc)),
+		decodeAddPolicyRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/users/policies/update", kithttp.NewServer(
+		kitot.TraceServer(tracer, "update_policy")(updatePolicyEndpoint(svc)),
+		decodeUpdatePolicyRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/users/policies/delete", kithttp.NewServer(
+		kitot.TraceServer(tracer, "delete_policy")(deletePolicyEndpoint(svc)),
+		decodeDeletePolicyRequest,
+		encodeResponse,
+		opts...,
+	))
+
 	r.Get("/users/:id", kithttp.NewServer(
 		kitot.TraceServer(tracer, "view_user")(viewUserEndpoint(svc)),
 		decodeView,
@@ -213,6 +241,34 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer, ins
 	r.Post("/things/disabled", kithttp.NewServer(
 		kitot.TraceServer(tracer, "disable_thing")(disableThingEndpoint(svc)),
 		decodeThingStatusUpdate,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Get("/things/policies", kithttp.NewServer(
+		kitot.TraceServer(tracer, "view_things_policies")(listThingsPoliciesEndpoint(svc)),
+		decodeListPoliciesRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/things/policies", kithttp.NewServer(
+		kitot.TraceServer(tracer, "add_things_policy")(addThingsPolicyEndpoint(svc)),
+		decodeAddThingsPolicyRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/things/policies/update", kithttp.NewServer(
+		kitot.TraceServer(tracer, "update_things_policy")(updateThingsPolicyEndpoint(svc)),
+		decodeUpdatePolicyRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/things/policies/delete", kithttp.NewServer(
+		kitot.TraceServer(tracer, "delete_things_policy")(deleteThingsPolicyEndpoint(svc)),
+		decodeDeleteThingsPolicyRequest,
 		encodeResponse,
 		opts...,
 	))
@@ -362,34 +418,6 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer, ins
 		opts...,
 	))
 
-	r.Get("/things_policies", kithttp.NewServer(
-		kitot.TraceServer(tracer, "view_things_policies")(listThingsPoliciesEndpoint(svc)),
-		decodeListPoliciesRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/things_policies", kithttp.NewServer(
-		kitot.TraceServer(tracer, "add_things_policy")(addThingsPolicyEndpoint(svc)),
-		decodeAddThingsPolicyRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/things_policies/update", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_things_policy")(updateThingsPolicyEndpoint(svc)),
-		decodeUpdatePolicyRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/things_policies/delete", kithttp.NewServer(
-		kitot.TraceServer(tracer, "delete_things_policy")(deleteThingsPolicyEndpoint(svc)),
-		decodeDeleteThingsPolicyRequest,
-		encodeResponse,
-		opts...,
-	))
-
 	r.Post("/groups", kithttp.NewServer(
 		kitot.TraceServer(tracer, "create_group")(createGroupEndpoint(svc)),
 		decodeGroupCreation,
@@ -456,34 +484,6 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer, ins
 	r.Post("/groups/:id/unassign", kithttp.NewServer(
 		kitot.TraceServer(tracer, "unassign")(unassignEndpoint(svc)),
 		decodeUnassignRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/users_policies", kithttp.NewServer(
-		kitot.TraceServer(tracer, "view_policies")(listPoliciesEndpoint(svc)),
-		decodeListPoliciesRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/users_policies", kithttp.NewServer(
-		kitot.TraceServer(tracer, "add_policy")(addPolicyEndpoint(svc)),
-		decodeAddPolicyRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/users_policies/update", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_policy")(updatePolicyEndpoint(svc)),
-		decodeUpdatePolicyRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/users_policies/delete", kithttp.NewServer(
-		kitot.TraceServer(tracer, "delete_policy")(deletePolicyEndpoint(svc)),
-		decodeDeletePolicyRequest,
 		encodeResponse,
 		opts...,
 	))

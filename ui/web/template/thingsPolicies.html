@@ -87,7 +87,7 @@
                                                                 <h5 class="modal-title" id="updatePolicyModalLabel{{$i}}">Update Policy</h5>
                                                             </div>
                                                             <div class="modal-body">
-                                                                <form action="/things_policies/update" method="post">
+                                                                <form action="/things/policies/update" method="post">
                                                                     <div class="mb-3">
                                                                         <label for="actions" class="form-label">Actions</label>
                                                                         <input type="hidden" name="subject" id="subject" value="{{$p.Subject}}">
@@ -104,7 +104,7 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <form action="/things_policies/delete" method="post">
+                                                <form action="/things/policies/delete" method="post">
                                                     <input type="hidden" name="subject" id="subject" value="{{$p.Subject}}">
                                                     <input type="hidden" name="object" id="object" value="{{$p.Object}}">
                                                     <button type="submit" class="btn btn-sm">
