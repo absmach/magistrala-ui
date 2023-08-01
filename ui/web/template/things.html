@@ -113,7 +113,7 @@
                   {{$userID := .User.ID}}
                   {{range $i, $t := .Things}}
                     {{$disableButton := true}}
-                    {{if (hasAuthority $userID $t.ID "c_delete" "client")}}
+                    {{if (thingCanAccess $userID $t.ID "c_delete" "client")}}
                       {{$disableButton = false}}
                     {{end}}
                     <tr>

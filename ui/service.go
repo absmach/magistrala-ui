@@ -206,6 +206,19 @@ func (gs *uiService) parseTemplate(name string, tmpls ...string) (tpl *template.
 
 			return authorized
 		},
+		"thingCanAccess": func(subject, object, action, entityType string) bool {
+			var aReq = sdk.AccessRequest{
+				Subject:    subject,
+				Object:     object,
+				Action:     action,
+				EntityType: entityType,
+			}
+
+			thingCanAccess, _, err := gs.sdk.ThingCanAccess(aReq, "")
+
+			fmt.Println(err)
+			return thingCanAccess
+		},
 	})
 
 	a := append(tmplFiles, tmpls...)
