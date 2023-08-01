@@ -16,7 +16,7 @@
           <div class="col-md-9">
             {{$userID := .User.ID}}
             {{$disableAssign := true}}
-            {{if (hasAuthority $userID .Group.ID "g_add" "group")}}
+            {{if (authorizeUser $userID .Group.ID "g_add" "group")}}
               {{$disableAssign =false}}
             {{end}}
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#connectModal" {{if $disableAssign}}disabled{{end}}>
@@ -43,13 +43,13 @@
                       <div class="mb-3">
                         <label for="Type" class="form-label">Member Type</label>
                         <select class="form-control" name="Type" id="Type" aria-describedby="TypeHelp" multiple required>
-                          <option value="g_update" {{if not (hasAuthority $userID .Group.ID "g_update" "group")}}disabled{{end}}>g_update</option>
-                          <option value="g_list" {{if not (hasAuthority $userID .Group.ID "g_list" "group")}}disabled{{end}}>g_list</option>
-                          <option value="g_delete" {{if not (hasAuthority $userID .Group.ID "g_delete" "group")}}disabled{{end}}>g_delete</option>
-                          <option value="g_add" {{if not (hasAuthority $userID .Group.ID "g_add" "group")}}disabled{{end}}>g_add</option>
-                          <option value="c_update" {{if not (hasAuthority $userID .Group.ID "c_update" "group")}}disabled{{end}}>c_update</option>
-                          <option value="c_list" {{if not (hasAuthority $userID .Group.ID "c_list" "group")}}disabled{{end}}>c_list</option>
-                          <option value="c_delete" {{if not (hasAuthority $userID .Group.ID "c_delete" "group")}}disabled{{end}}>c_delete</option>
+                          <option value="g_update" {{if not (authorizeUser $userID .Group.ID "g_update" "group")}}disabled{{end}}>g_update</option>
+                          <option value="g_list" {{if not (authorizeUser $userID .Group.ID "g_list" "group")}}disabled{{end}}>g_list</option>
+                          <option value="g_delete" {{if not (authorizeUser $userID .Group.ID "g_delete" "group")}}disabled{{end}}>g_delete</option>
+                          <option value="g_add" {{if not (authorizeUser $userID .Group.ID "g_add" "group")}}disabled{{end}}>g_add</option>
+                          <option value="c_update" {{if not (authorizeUser $userID .Group.ID "c_update" "group")}}disabled{{end}}>c_update</option>
+                          <option value="c_list" {{if not (authorizeUser $userID .Group.ID "c_list" "group")}}disabled{{end}}>c_list</option>
+                          <option value="c_delete" {{if not (authorizeUser $userID .Group.ID "c_delete" "group")}}disabled{{end}}>c_delete</option>
                         </select>
                         <div id="TypeHelp" class="form-text">Select member Type.</div>
                       </div>
@@ -96,7 +96,7 @@
                     {{$disableButton =false}}
                   {{end}}
                   {{range $i, $m := .Members}}
-                    {{if hasAuthority $userID $m.ID "c_list" "client"}}
+                    {{if authorizeUser $userID $m.ID "c_list" "client"}}
                       <tr>
                         <th scope="row">{{$i}}</th>
                         <td>{{$m.Name}}</td>

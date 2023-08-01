@@ -120,9 +120,11 @@
                   </tr>
                 </thead>
                 <tbody>
+                  {{$chanID := .Channel.ID}}
                   {{$policies := .Policies}}
                   {{$sendMessage:= false}}
                   {{range $i, $t := .Things}}
+                    {{$sendMessage = authorizeThing $t.ID $chanID "m_write" "group"}}
                     <tr>
                       <th scope="row">{{$i}}</th>
                       <td>{{$t.Name}}</td>
@@ -132,7 +134,6 @@
                           {{if (eq $t.ID $p.Subject)}}
                             {{if (eq $c $p.Object)}}
                               {{toSlice $p.Actions}}
-                              {{$sendMessage = contains $p.Actions "m_write"}}
                             {{end}}
                           {{end}}
                         {{end}}

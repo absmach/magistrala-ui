@@ -22,7 +22,7 @@
               </thead>
               <tbody>
                 {{$disableButton := true}}
-                {{if (hasAuthority .User.ID .Group.ID "g_update" "group")}}
+                {{if (authorizeUser .User.ID .Group.ID "g_update" "group")}}
                   {{$disableButton =false}}
                 {{end}}
                 <tr>

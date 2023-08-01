@@ -116,7 +116,7 @@
                         </div>
                       </td>
                       <td>
-                        {{if (hasAuthority $userID $g.ID "g_delete" "group")}}
+                        {{if (authorizeUser $userID $g.ID "g_delete" "group")}}
                           {{$disableButton =false}}
                         {{end}}
                         <form action="/groups/disabled" method="post">

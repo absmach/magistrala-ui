@@ -194,7 +194,7 @@ func (gs *uiService) parseTemplate(name string, tmpls ...string) (tpl *template.
 
 			return slices.Contains(data, substring)
 		},
-		"hasAuthority": func(subject, object, action, entityType string) bool {
+		"authorizeUser": func(subject, object, action, entityType string) bool {
 			aReq := sdk.AccessRequest{
 				Subject:    subject,
 				Object:     object,
@@ -202,11 +202,11 @@ func (gs *uiService) parseTemplate(name string, tmpls ...string) (tpl *template.
 				EntityType: entityType,
 			}
 
-			authorized, _ := gs.sdk.Authorize(aReq, "")
+			authorized, _ := gs.sdk.AuthorizeUser(aReq, "")
 
 			return authorized
 		},
-		"thingCanAccess": func(subject, object, action, entityType string) bool {
+		"authorizeThing": func(subject, object, action, entityType string) bool {
 			var aReq = sdk.AccessRequest{
 				Subject:    subject,
 				Object:     object,
@@ -214,10 +214,10 @@ func (gs *uiService) parseTemplate(name string, tmpls ...string) (tpl *template.
 				EntityType: entityType,
 			}
 
-			thingCanAccess, _, err := gs.sdk.ThingCanAccess(aReq, "")
+			authorizeThing, _, _ := gs.sdk.AuthorizeThing(aReq, "")
 
-			fmt.Println(err)
-			return thingCanAccess
+			fmt.Println(authorizeThing)
+			return authorizeThing
 		},
 	})
 
@@ -676,14 +676,21 @@ func (gs *uiService) ListChannels(ctx context.Context, token, alertMessage strin
 		return []byte{}, err
 	}
 
+	user, err := gs.UserProfile(ctx, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	data := struct {
 		NavbarActive string
 		Channels     []sdk.Channel
 		AlertMessage string
+		User         sdk.User
 	}{
 		"channels",
 		chsPage.Channels,
 		alertMessage,
+		user,
 	}
 
 	var btpl bytes.Buffer
@@ -705,14 +712,21 @@ func (gs *uiService) ViewChannel(ctx context.Context, token, id string) ([]byte,
 		return []byte{}, err
 	}
 
+	user, err := gs.UserProfile(ctx, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	data := struct {
 		NavbarActive string
 		ID           string
 		Channel      sdk.Channel
+		User         sdk.User
 	}{
 		"channels",
 		id,
 		channel,
+		user,
 	}
 
 	var btpl bytes.Buffer

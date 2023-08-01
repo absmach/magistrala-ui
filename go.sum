@@ -55,8 +55,13 @@ github.com/lestrrat-go/httprc v1.0.4 h1:bAZymwoZQb+Oq8MEbyipag7iSq6YIga8Wj6GOiJG
 github.com/lestrrat-go/iter v1.0.2 h1:gMXo1q4c2pHmC3dn8LzRhJfP1ceCbgSiT9lUydIzltI=
 github.com/lestrrat-go/jwx/v2 v2.0.11 h1:ViHMnaMeaO0qV16RZWBHM7GTrAnX2aFLVKofc7FuKLQ=
 github.com/lestrrat-go/option v1.0.1 h1:oAzP2fvZGQKWkvHa1/SAcFolBEca1oN+mQ7eooNBEYU=
+<<<<<<< HEAD
 github.com/mainflux/mainflux v0.0.0-20230802100956-23a665b54ad6 h1:Tx7wYuJG08IBxudRIVGknFzzvusXWk9U5ZC4dkzDGSY=
 github.com/mainflux/mainflux v0.0.0-20230802100956-23a665b54ad6/go.mod h1:gtHQkw1NZv6HNbUKRqSRdJYIo0y5vs2MFB7ZL15p5w8=
+=======
+github.com/mainflux/mainflux v0.0.0-20230731172004-38992085bd74 h1:d3F0qgDnzbflDiwE+YeT/zpcpxv7MrlALhfH2L8V/+s=
+github.com/mainflux/mainflux v0.0.0-20230731172004-38992085bd74/go.mod h1:gtHQkw1NZv6HNbUKRqSRdJYIo0y5vs2MFB7ZL15p5w8=
+>>>>>>> aebffeb (add authorizeThing)
 github.com/mainflux/senml v1.5.0 h1:GAd1y1eMohfa6sVYcr2iQfVfkkh9l/q7B1TWF5L68xs=
 github.com/mainflux/senml v1.5.0/go.mod h1:SMX76mM5yenjLVjZOM27+njCGkP+AA64O46nRQiBRlE=
 github.com/matttproud/golang_protobuf_extensions v1.0.4 h1:mmDVorXM7PCGKw94cs5zkfA9PSy5pEvNWRP0ET0TIVo=

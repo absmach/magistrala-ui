@@ -103,7 +103,12 @@
                   </tr>
                 </thead>
                 <tbody>
+                  {{$userID := .User.ID}}
                   {{range $i, $c := .Channels}}
+                    {{$disableButton := true}}
+                    {{if (authorizeThing $userID $c.ID "g_delete" "group")}}
+                      {{$disableButton = false}}
+                    {{end}}
                     <tr>
                       <th scope="row">{{$i}}</th>
                       <td>{{$c.Name}}</td>
@@ -118,7 +123,7 @@
                       <td>
                         <form action="/channels/disabled" method="post">
                           <input type="hidden" name="channelID" id="channelID" value="{{$c.ID}}">
-                          <button type="submit" class="btn btn-sm">
+                          <button type="submit" class="btn btn-sm" {{if $disableButton}}disabled{{end}}>
                             <i class="fas fa-trash-alt"></i>
                           </button>
                         </form>
