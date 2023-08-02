@@ -39,6 +39,9 @@ var (
 	ErrConflict = errors.New("entity already exists")
 
 	tmplFiles = []string{"header.html", "footer.html", "navbar.html"}
+
+	userActions  = []string{"g_list", "g_update", "g_delete", "g_add", "c_list", "c_update", "c_delete"}
+	thingActions = []string{"m_read", "m_write"}
 )
 
 // Service specifies coap service API.
@@ -216,7 +219,6 @@ func (gs *uiService) parseTemplate(name string, tmpls ...string) (tpl *template.
 
 			authorizeThing, _, _ := gs.sdk.AuthorizeThing(aReq, "")
 
-			fmt.Println(authorizeThing)
 			return authorizeThing
 		},
 	})
@@ -972,8 +974,6 @@ func (gs *uiService) ListThingsPolicies(ctx context.Context, token string) ([]by
 		return []byte{}, err
 	}
 
-	actions := []string{"m_read", "m_write"}
-
 	data := struct {
 		NavbarActive string
 		Policies     []sdk.Policy
@@ -985,7 +985,7 @@ func (gs *uiService) ListThingsPolicies(ctx context.Context, token string) ([]by
 		plcPage.Policies,
 		chsPage.Channels,
 		thsPage.Things,
-		actions,
+		thingActions,
 	}
 
 	var btpl bytes.Buffer
@@ -1060,6 +1060,7 @@ func (gs *uiService) ListGroupMembers(ctx context.Context, token, id string) ([]
 		Users        []sdk.User
 		Policies     []sdk.Policy
 		User         sdk.User
+		Actions      []string
 	}{
 		"groups",
 		id,
@@ -1068,6 +1069,7 @@ func (gs *uiService) ListGroupMembers(ctx context.Context, token, id string) ([]
 		users.Users,
 		plcPage.Policies,
 		user,
+		userActions,
 	}
 
 	var btpl bytes.Buffer
@@ -1245,8 +1247,6 @@ func (gs *uiService) ListPolicies(ctx context.Context, token string) ([]byte, er
 		return []byte{}, err
 	}
 
-	actions := []string{"g_list", "g_update", "g_delete", "g_add", "c_list", "c_delete"}
-
 	data := struct {
 		NavbarActive string
 		Policies     []sdk.Policy
@@ -1258,7 +1258,7 @@ func (gs *uiService) ListPolicies(ctx context.Context, token string) ([]byte, er
 		plcPage.Policies,
 		grpPage.Groups,
 		users.Users,
-		actions,
+		userActions,
 	}
 
 	var btpl bytes.Buffer
