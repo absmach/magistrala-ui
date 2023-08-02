@@ -1560,15 +1560,11 @@ func decodeUpdatePolicyRequest(ctx context.Context, r *http.Request) (interface{
 	if err != nil {
 		return nil, err
 	}
-	var actions []string
-	if err := json.Unmarshal([]byte(r.Form.Get("actions")), &actions); err != nil {
-		return nil, err
-	}
 
 	policy := sdk.Policy{
 		Subject: r.Form.Get("subject"),
 		Object:  r.Form.Get("object"),
-		Actions: actions,
+		Actions: r.PostForm["actions"],
 	}
 
 	req := updatePolicyReq{

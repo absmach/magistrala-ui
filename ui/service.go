@@ -972,16 +972,20 @@ func (gs *uiService) ListThingsPolicies(ctx context.Context, token string) ([]by
 		return []byte{}, err
 	}
 
+	actions := []string{"m_read", "m_write"}
+
 	data := struct {
 		NavbarActive string
 		Policies     []sdk.Policy
 		Channels     []sdk.Channel
 		Things       []sdk.Thing
+		Actions      []string
 	}{
 		"thingsPolicies",
 		plcPage.Policies,
 		chsPage.Channels,
 		thsPage.Things,
+		actions,
 	}
 
 	var btpl bytes.Buffer
