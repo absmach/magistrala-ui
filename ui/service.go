@@ -1245,16 +1245,20 @@ func (gs *uiService) ListPolicies(ctx context.Context, token string) ([]byte, er
 		return []byte{}, err
 	}
 
+	actions := []string{"g_list", "g_update", "g_delete", "g_add", "c_list", "c_delete"}
+
 	data := struct {
 		NavbarActive string
 		Policies     []sdk.Policy
 		Groups       []sdk.Group
 		Users        []sdk.User
+		Actions      []string
 	}{
 		"policies",
 		plcPage.Policies,
 		grpPage.Groups,
 		users.Users,
+		actions,
 	}
 
 	var btpl bytes.Buffer

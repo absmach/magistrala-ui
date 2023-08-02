@@ -81,6 +81,7 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                {{$actions := .Actions}}
                                 {{range $i, $p := .Policies}}
                                     <tr>
                                         <th scope="row">{{$i}}</th>
@@ -103,8 +104,14 @@
                                                                     <label for="actions" class="form-label">Actions</label>
                                                                     <input type="hidden" name="subject" id="subject" value="{{$p.Subject}}">
                                                                     <input type="hidden" name="object" id="object" value="{{$p.Object}}">
-                                                                    <input type="text" class="form-control" name="actions" id="actions" aria-describedby="actionsHelp" value="{{toSlice $p.Actions}}">
-                                                                    <div id="actionsHelp" class="form-text">Enter Actions.</div>
+                                                                    <select class="form-select" name="actions" id="actions" aria-describedby="actionsHelp" multiple required>
+                                                                        {{$policyActions := $p.Actions}}                                                    
+                                                                        {{range $i, $a := $actions}}
+                                                                            {{$selected := contains $policyActions $a}}
+                                                                            <option value="{{$a}}" {{if $selected}}selected{{end}}>{{$a}}</option>
+                                                                        {{end}}
+                                                                    </select>
+                                                                    <div id="actionsHelp" class="form-text">Select Actions (multiple selections allowed).</div>
                                                                 </div>
                                                                 <button type="submit" class="btn btn-primary">Submit</button>
                                                             </form>
