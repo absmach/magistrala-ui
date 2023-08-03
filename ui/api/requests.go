@@ -497,8 +497,8 @@ func (req updateChannelStatusReq) validate() error {
 }
 
 type addThingsPolicyReq struct {
-	token   string
-	ConnIDs sdk.ConnectionIDs
+	token  string
+	Policy sdk.Policy `json:"policy,omitempty"`
 }
 
 func (req addThingsPolicyReq) validate() error {
@@ -510,8 +510,8 @@ func (req addThingsPolicyReq) validate() error {
 }
 
 type deleteThingsPolicyReq struct {
-	token   string
-	ConnIDs sdk.ConnectionIDs
+	token  string
+	Policy sdk.Policy `json:"policy,omitempty"`
 }
 
 func (req deleteThingsPolicyReq) validate() error {

@@ -457,22 +457,22 @@ func (mm *metricsMiddleware) ListThingsPolicies(ctx context.Context, token strin
 	return mm.svc.ListThingsPolicies(ctx, token)
 }
 
-func (mm *metricsMiddleware) AddThingsPolicy(ctx context.Context, token string, connIDs sdk.ConnectionIDs) (b []byte, err error) {
+func (mm *metricsMiddleware) AddThingsPolicy(ctx context.Context, token string, policy sdk.Policy) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "add_things_policy").Add(1)
 		mm.latency.With("method", "add_things_policy").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.AddThingsPolicy(ctx, token, connIDs)
+	return mm.svc.AddThingsPolicy(ctx, token, policy)
 }
 
-func (mm *metricsMiddleware) DeleteThingsPolicy(ctx context.Context, token string, connIDs sdk.ConnectionIDs) (b []byte, err error) {
+func (mm *metricsMiddleware) DeleteThingsPolicy(ctx context.Context, token string, policy sdk.Policy) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "add_things_policy").Add(1)
 		mm.latency.With("method", "add_things_policy").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.DeleteThingsPolicy(ctx, token, connIDs)
+	return mm.svc.DeleteThingsPolicy(ctx, token, policy)
 }
 
 func (mm *metricsMiddleware) UpdateThingsPolicy(ctx context.Context, token string, policy sdk.Policy) (b []byte, err error) {

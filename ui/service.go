@@ -85,8 +85,8 @@ type Service interface {
 	DisconnectThing(ctx context.Context, thID, chID, token string) ([]byte, error)
 	ConnectChannel(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
 	DisconnectChannel(ctx context.Context, thID, chID, token string) ([]byte, error)
-	AddThingsPolicy(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
-	DeleteThingsPolicy(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
+	AddThingsPolicy(ctx context.Context, token string, Policy sdk.Policy) ([]byte, error)
+	DeleteThingsPolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error)
 	ListThingsPolicies(ctx context.Context, token string) ([]byte, error)
 	UpdateThingsPolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error)
 	CreateGroups(ctx context.Context, token string, groups ...sdk.Group) ([]byte, error)
@@ -278,8 +278,7 @@ func (gs *uiService) UpdatePassword(ctx context.Context, token, oldPass, newPass
 
 func (gs *uiService) CreateUsers(ctx context.Context, token string, users ...sdk.User) ([]byte, error) {
 	for i := range users {
-		_, err := gs.sdk.CreateUser(users[i], token)
-		if err != nil {
+		if _, err := gs.sdk.CreateUser(users[i], token); err != nil {
 			return []byte{}, err
 		}
 	}
@@ -291,12 +290,12 @@ func (gs *uiService) ListUsers(ctx context.Context, token string) ([]byte, error
 	if err != nil {
 		return []byte{}, err
 	}
-	filter := sdk.PageMetadata{
+	pgm := sdk.PageMetadata{
 		Offset: uint64(0),
 		Total:  uint64(100),
 		Limit:  uint64(100),
 	}
-	users, err := gs.sdk.Users(filter, token)
+	users, err := gs.sdk.Users(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -393,8 +392,7 @@ func (gs *uiService) DisableUser(ctx context.Context, token, userID string) ([]b
 }
 
 func (gs *uiService) CreateThing(ctx context.Context, token string, thing sdk.Thing) ([]byte, error) {
-	_, err := gs.sdk.CreateThing(thing, token)
-	if err != nil {
+	if _, err := gs.sdk.CreateThing(thing, token); err != nil {
 		return []byte{}, err
 	}
 	return gs.ListThings(ctx, token)
@@ -405,13 +403,13 @@ func (gs *uiService) ListThings(ctx context.Context, token string) ([]byte, erro
 	if err != nil {
 		return []byte{}, err
 	}
-	filter := sdk.PageMetadata{
+	pgm := sdk.PageMetadata{
 		Offset:     uint64(0),
 		Total:      uint64(100),
 		Limit:      uint64(100),
 		Visibility: "all",
 	}
-	things, err := gs.sdk.Things(filter, token)
+	things, err := gs.sdk.Things(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -507,8 +505,7 @@ func (gs *uiService) DisableThing(ctx context.Context, token, id string) ([]byte
 }
 
 func (gs *uiService) CreateThings(ctx context.Context, token string, things ...sdk.Thing) ([]byte, error) {
-	_, err := gs.sdk.CreateThings(things, token)
-	if err != nil {
+	if _, err := gs.sdk.CreateThings(things, token); err != nil {
 		return []byte{}, err
 	}
 
@@ -516,8 +513,7 @@ func (gs *uiService) CreateThings(ctx context.Context, token string, things ...s
 }
 
 func (gs *uiService) CreateChannel(ctx context.Context, token string, channel sdk.Channel) ([]byte, error) {
-	_, err := gs.sdk.CreateChannel(channel, token)
-	if err != nil {
+	if _, err := gs.sdk.CreateChannel(channel, token); err != nil {
 		return []byte{}, err
 	}
 
@@ -525,8 +521,7 @@ func (gs *uiService) CreateChannel(ctx context.Context, token string, channel sd
 }
 
 func (gs *uiService) CreateChannels(ctx context.Context, token string, channels ...sdk.Channel) ([]byte, error) {
-	_, err := gs.sdk.CreateChannels(channels, token)
-	if err != nil {
+	if _, err := gs.sdk.CreateChannels(channels, token); err != nil {
 		return []byte{}, err
 	}
 
@@ -668,8 +663,9 @@ func (gs *uiService) ListChannelsByThing(ctx context.Context, token, id string) 
 		return []byte{}, err
 	}
 	pgm := sdk.PageMetadata{
-		Offset: 0,
-		Limit:  100,
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
 	}
 
 	chsPage, err := gs.sdk.ChannelsByThing(id, pgm, token)
@@ -677,17 +673,12 @@ func (gs *uiService) ListChannelsByThing(ctx context.Context, token, id string) 
 		return []byte{}, err
 	}
 
-	filter := sdk.PageMetadata{
-		Offset: uint64(0),
-		Total:  uint64(100),
-		Limit:  uint64(100),
-	}
-	allchsPage, err := gs.sdk.Channels(filter, token)
+	allchsPage, err := gs.sdk.Channels(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	plcPage, err := gs.sdk.ListThingsPolicies(filter, token)
+	plcPage, err := gs.sdk.ListThingPolicies(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -743,8 +734,9 @@ func (gs *uiService) ListThingsByChannel(ctx context.Context, token, id string) 
 	}
 
 	pgm := sdk.PageMetadata{
-		Offset: 0,
-		Limit:  100,
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
 	}
 
 	thsPage, err := gs.sdk.ThingsByChannel(id, pgm, token)
@@ -752,21 +744,16 @@ func (gs *uiService) ListThingsByChannel(ctx context.Context, token, id string) 
 		return []byte{}, err
 	}
 
-	filter := sdk.PageMetadata{
-		Offset: uint64(0),
-		Total:  uint64(100),
-		Limit:  uint64(100),
-	}
-	allthsPage, err := gs.sdk.Things(filter, token)
+	allthsPage, err := gs.sdk.Things(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	plcPage, err := gs.sdk.ListThingsPolicies(filter, token)
+	plcPage, err := gs.sdk.ListThingPolicies(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
-	users, err := gs.sdk.Users(filter, token)
+	users, err := gs.sdk.Users(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -802,22 +789,22 @@ func (gs *uiService) ListThingsPolicies(ctx context.Context, token string) ([]by
 		return []byte{}, err
 	}
 
-	filter := sdk.PageMetadata{
+	pgm := sdk.PageMetadata{
 		Offset: uint64(0),
 		Total:  uint64(100),
 		Limit:  uint64(100),
 	}
-	plcPage, err := gs.sdk.ListThingsPolicies(filter, token)
+	plcPage, err := gs.sdk.ListThingPolicies(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	chsPage, err := gs.sdk.Channels(filter, token)
+	chsPage, err := gs.sdk.Channels(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	thsPage, err := gs.sdk.Things(filter, token)
+	thsPage, err := gs.sdk.Things(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -842,16 +829,16 @@ func (gs *uiService) ListThingsPolicies(ctx context.Context, token string) ([]by
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) AddThingsPolicy(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error) {
-	if err := gs.sdk.Connect(connIDs, token); err != nil {
+func (gs *uiService) AddThingsPolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error) {
+	if err := gs.sdk.CreateThingPolicy(policy, token); err != nil {
 		return []byte{}, err
 	}
 
 	return gs.ListThingsPolicies(ctx, token)
 }
 
-func (gs *uiService) DeleteThingsPolicy(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error) {
-	if err := gs.sdk.Disconnect(connIDs, token); err != nil {
+func (gs *uiService) DeleteThingsPolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error) {
+	if err := gs.sdk.DeleteThingPolicy(policy, token); err != nil {
 		return []byte{}, err
 	}
 
@@ -859,7 +846,7 @@ func (gs *uiService) DeleteThingsPolicy(ctx context.Context, token string, connI
 }
 
 func (gs *uiService) UpdateThingsPolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error) {
-	if err := gs.sdk.UpdateThingsPolicy(policy, token); err != nil {
+	if err := gs.sdk.UpdateThingPolicy(policy, token); err != nil {
 		return []byte{}, err
 	}
 
@@ -878,8 +865,9 @@ func (gs *uiService) ListGroupMembers(ctx context.Context, token, id string) ([]
 	}
 
 	pgm := sdk.PageMetadata{
-		Offset: 0,
-		Limit:  100,
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
 	}
 
 	members, err := gs.sdk.Members(id, pgm, token)
@@ -887,17 +875,12 @@ func (gs *uiService) ListGroupMembers(ctx context.Context, token, id string) ([]
 		return []byte{}, err
 	}
 
-	filter := sdk.PageMetadata{
-		Offset: uint64(0),
-		Total:  uint64(100),
-		Limit:  uint64(100),
-	}
-	users, err := gs.sdk.Users(filter, token)
+	users, err := gs.sdk.Users(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	plcPage, err := gs.sdk.ListPolicies(filter, token)
+	plcPage, err := gs.sdk.ListUserPolicies(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -941,12 +924,12 @@ func (gs *uiService) ListGroups(ctx context.Context, token string) ([]byte, erro
 		return []byte{}, err
 	}
 
-	filter := sdk.PageMetadata{
+	pgm := sdk.PageMetadata{
 		Offset: uint64(0),
 		Total:  uint64(100),
 		Limit:  uint64(100),
 	}
-	grpPage, err := gs.sdk.Groups(filter, token)
+	grpPage, err := gs.sdk.Groups(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -1046,7 +1029,7 @@ func (gs *uiService) DisableGroup(ctx context.Context, token, id string) ([]byte
 }
 
 func (gs *uiService) AddPolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error) {
-	if err := gs.sdk.CreatePolicy(policy, token); err != nil {
+	if err := gs.sdk.CreateUserPolicy(policy, token); err != nil {
 		return []byte{}, err
 	}
 
@@ -1059,22 +1042,22 @@ func (gs *uiService) ListPolicies(ctx context.Context, token string) ([]byte, er
 		return []byte{}, err
 	}
 
-	filter := sdk.PageMetadata{
+	pgm := sdk.PageMetadata{
 		Offset: uint64(0),
 		Total:  uint64(100),
 		Limit:  uint64(100),
 	}
-	plcPage, err := gs.sdk.ListPolicies(filter, token)
+	plcPage, err := gs.sdk.ListUserPolicies(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	grpPage, err := gs.sdk.Groups(filter, token)
+	grpPage, err := gs.sdk.Groups(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	users, err := gs.sdk.Users(filter, token)
+	users, err := gs.sdk.Users(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -1100,7 +1083,7 @@ func (gs *uiService) ListPolicies(ctx context.Context, token string) ([]byte, er
 }
 
 func (gs *uiService) UpdatePolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error) {
-	if err := gs.sdk.UpdatePolicy(policy, token); err != nil {
+	if err := gs.sdk.UpdateUserPolicy(policy, token); err != nil {
 		return []byte{}, err
 	}
 
@@ -1108,7 +1091,7 @@ func (gs *uiService) UpdatePolicy(ctx context.Context, token string, policy sdk.
 }
 
 func (gs *uiService) DeletePolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error) {
-	if err := gs.sdk.DeletePolicy(policy, token); err != nil {
+	if err := gs.sdk.DeleteUserPolicy(policy, token); err != nil {
 		return []byte{}, err
 	}
 
@@ -1173,25 +1156,25 @@ func (gs *uiService) ListDeletedClients(ctx context.Context, token string) ([]by
 	if err != nil {
 		return []byte{}, err
 	}
-	filter := sdk.PageMetadata{
+	pgm := sdk.PageMetadata{
 		Offset: uint64(0),
 		Total:  uint64(100),
 		Limit:  uint64(100),
 		Status: "disabled",
 	}
-	users, err := gs.sdk.Users(filter, token)
+	users, err := gs.sdk.Users(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
-	groups, err := gs.sdk.Groups(filter, token)
+	groups, err := gs.sdk.Groups(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
-	things, err := gs.sdk.Things(filter, token)
+	things, err := gs.sdk.Things(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
-	channels, err := gs.sdk.Channels(filter, token)
+	channels, err := gs.sdk.Channels(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}

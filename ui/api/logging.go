@@ -638,7 +638,7 @@ func (lm *loggingMiddleware) ListThingsPolicies(ctx context.Context, token strin
 	return lm.svc.ListThingsPolicies(ctx, token)
 }
 
-func (lm *loggingMiddleware) AddThingsPolicy(ctx context.Context, token string, connIDs sdk.ConnectionIDs) (b []byte, err error) {
+func (lm *loggingMiddleware) AddThingsPolicy(ctx context.Context, token string, policy sdk.Policy) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method add_things_policy for token %s took %s to complete", token, time.Since(begin))
 		if err != nil {
@@ -648,10 +648,10 @@ func (lm *loggingMiddleware) AddThingsPolicy(ctx context.Context, token string, 
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.AddThingsPolicy(ctx, token, connIDs)
+	return lm.svc.AddThingsPolicy(ctx, token, policy)
 }
 
-func (lm *loggingMiddleware) DeleteThingsPolicy(ctx context.Context, token string, connIDs sdk.ConnectionIDs) (b []byte, err error) {
+func (lm *loggingMiddleware) DeleteThingsPolicy(ctx context.Context, token string, policy sdk.Policy) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method delete_things_policy for token %s took %s to complete", token, time.Since(begin))
 		if err != nil {
@@ -661,7 +661,7 @@ func (lm *loggingMiddleware) DeleteThingsPolicy(ctx context.Context, token strin
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.DeleteThingsPolicy(ctx, token, connIDs)
+	return lm.svc.DeleteThingsPolicy(ctx, token, policy)
 }
 
 func (lm *loggingMiddleware) UpdateThingsPolicy(ctx context.Context, token string, policy sdk.Policy) (b []byte, err error) {

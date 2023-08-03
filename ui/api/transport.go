@@ -1346,18 +1346,17 @@ func decodeAddThingsPolicyRequest(ctx context.Context, r *http.Request) (interfa
 		return nil, err
 	}
 
-	thingID := r.PostFormValue("subject")
-	chanID := r.PostFormValue("object")
+	policy := sdk.Policy{
+		Subject: r.PostFormValue("subject"),
+		Object:  r.PostFormValue("object"),
+		Actions: r.PostForm["actions"],
+	}
 
-	connIDs := sdk.ConnectionIDs{
-		ChannelIDs: []string{chanID},
-		ThingIDs:   []string{thingID},
-		Actions:    r.PostForm["actions"],
-	}
 	req := addThingsPolicyReq{
-		token:   token,
-		ConnIDs: connIDs,
+		token:  token,
+		Policy: policy,
 	}
+
 	return req, nil
 }
 
@@ -1367,18 +1366,17 @@ func decodeDeleteThingsPolicyRequest(ctx context.Context, r *http.Request) (inte
 		return nil, err
 	}
 
-	thingID := r.PostFormValue("subject")
-	chanID := r.PostFormValue("object")
+	policy := sdk.Policy{
+		Subject: r.PostFormValue("subject"),
+		Object:  r.PostFormValue("object"),
+		Actions: r.PostForm["actions"],
+	}
 
-	connIDs := sdk.ConnectionIDs{
-		ChannelIDs: []string{chanID},
-		ThingIDs:   []string{thingID},
-		Actions:    r.PostForm["actions"],
-	}
 	req := deleteThingsPolicyReq{
-		token:   token,
-		ConnIDs: connIDs,
+		token:  token,
+		Policy: policy,
 	}
+
 	return req, nil
 }
 

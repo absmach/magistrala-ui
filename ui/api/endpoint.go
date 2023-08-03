@@ -990,7 +990,7 @@ func addThingsPolicyEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.AddThingsPolicy(ctx, req.token, req.ConnIDs)
+		res, err := svc.AddThingsPolicy(ctx, req.token, req.Policy)
 		if err != nil {
 			return nil, err
 		}
@@ -1023,7 +1023,7 @@ func deleteThingsPolicyEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.DeleteThingsPolicy(ctx, req.token, req.ConnIDs)
+		res, err := svc.DeleteThingsPolicy(ctx, req.token, req.Policy)
 		if err != nil {
 			return nil, err
 		}
