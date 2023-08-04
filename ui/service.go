@@ -35,11 +35,11 @@ var (
 
 	// ErrInvalidResetPass indicates an invalid reset password.
 	ErrInvalidResetPass = errors.New("invalid reset password")
+
 	// ErrConflict indicates that entity already exists.
 	ErrConflict = errors.New("entity already exists")
 
-	tmplFiles = []string{"header.html", "footer.html", "navbar.html"}
-
+	tmplFiles    = []string{"header.html", "footer.html", "navbar.html"}
 	userActions  = []string{"g_list", "g_update", "g_delete", "g_add", "c_list", "c_update", "c_delete"}
 	thingActions = []string{"m_read", "m_write"}
 )
@@ -52,10 +52,15 @@ type Service interface {
 	Login(ctx context.Context, alertMessage string) ([]byte, error)
 	// Logout deletes the access token and refresh token from the cookies and logs the user out of the UI.
 	Logout(ctx context.Context) ([]byte, error)
+	// PasswordResetRequest sends an email with a link to the password reset page with a valid request token.
 	PasswordResetRequest(ctx context.Context, email string) ([]byte, error)
+	// PasswordReset resets the user's password.
 	PasswordReset(ctx context.Context, token, password, confirmPass string) ([]byte, error)
+	// ShowPasswordReset displays the password reset page.
 	ShowPasswordReset(ctx context.Context) ([]byte, error)
+	// PasswordUpdate displays the password update page.
 	PasswordUpdate(ctx context.Context, alertMessage string) ([]byte, error)
+	// UpdatePassword updates the user's old password to the new password.
 	UpdatePassword(ctx context.Context, token, oldPass, newPass string) ([]byte, error)
 	// UserProfile retrieves information about the logged in user.
 	UserProfile(ctx context.Context, token string) (sdk.User, error)
@@ -289,14 +294,14 @@ func (gs *uiService) PasswordResetRequest(ctx context.Context, email string) ([]
 	if err := gs.sdk.ResetPasswordRequest(email); err != nil {
 		return []byte{}, err
 	}
-	return gs.Login(ctx)
+	return gs.Login(ctx, fmt.Sprintf("Reset password link sent to %s", email))
 }
 
 func (gs *uiService) PasswordReset(ctx context.Context, token, password, confirmPass string) ([]byte, error) {
 	if err := gs.sdk.ResetPassword(token, password, confirmPass); err != nil {
 		return []byte{}, err
 	}
-	return gs.Login(ctx)
+	return gs.Login(ctx, "")
 }
 
 func (gs *uiService) ShowPasswordReset(ctx context.Context) ([]byte, error) {
@@ -1038,6 +1043,11 @@ func (gs *uiService) ListGroupMembers(ctx context.Context, token, id string) ([]
 	}
 
 	members, err := gs.sdk.Members(id, pgm, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	user, err := gs.UserProfile(ctx, token)
 	if err != nil {
 		return []byte{}, err
 	}

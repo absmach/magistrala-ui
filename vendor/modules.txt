@@ -37,11 +37,7 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
-<<<<<<< HEAD
-# github.com/mainflux/mainflux v0.0.0-20230802100956-23a665b54ad6
-=======
-# github.com/mainflux/mainflux v0.0.0-20230731172004-38992085bd74
->>>>>>> aebffeb (add authorizeThing)
+# github.com/mainflux/mainflux v0.0.0-20230802225058-1d80301455c3
 ## explicit; go 1.20
 github.com/mainflux/mainflux
 github.com/mainflux/mainflux/logger

@@ -327,7 +327,7 @@ func createUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusCreated,
+			code:    http.StatusFound,
 			html:    res,
 			headers: map[string]string{"Location": "/users"},
 		}, nil
@@ -1383,8 +1383,9 @@ func updatePolicyEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			html:    res,
+			headers: map[string]string{"Location": "/users/policies"},
 		}, nil
 	}
 }

@@ -166,12 +166,8 @@ func (sdk mfSDK) UpdateBootstrap(cfg BootstrapConfig, token string) errors.SDKEr
 	}
 
 	url := fmt.Sprintf("%s/%s/%s", sdk.bootstrapURL, configsEndpoint, cfg.ThingID)
-<<<<<<< HEAD
 
 	_, _, sdkerr := sdk.processRequest(http.MethodPut, url, token, data, nil, http.StatusOK)
-=======
-	_, _, sdkerr := sdk.processRequest(http.MethodPut, url, token, string(CTJSON), data, http.StatusOK)
->>>>>>> aebffeb (add authorizeThing)
 
 	return sdkerr
 }
@@ -189,11 +185,7 @@ func (sdk mfSDK) UpdateBootstrapCerts(id, clientCert, clientKey, ca, token strin
 		return BootstrapConfig{}, errors.NewSDKError(err)
 	}
 
-<<<<<<< HEAD
 	_, body, sdkerr := sdk.processRequest(http.MethodPatch, url, token, data, nil, http.StatusOK)
-=======
-	_, body, sdkerr := sdk.processRequest(http.MethodPatch, url, token, string(CTJSON), data, http.StatusOK)
->>>>>>> aebffeb (add authorizeThing)
 
 	var bc BootstrapConfig
 	if err := json.Unmarshal(body, &bc); err != nil {

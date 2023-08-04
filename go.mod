@@ -5,11 +5,7 @@ go 1.19
 require (
 	github.com/go-kit/kit v0.12.0
 	github.com/go-zoo/bone v1.3.0
-<<<<<<< HEAD
-	github.com/mainflux/mainflux v0.0.0-20230802100956-23a665b54ad6
-=======
-	github.com/mainflux/mainflux v0.0.0-20230731172004-38992085bd74
->>>>>>> aebffeb (add authorizeThing)
+	github.com/mainflux/mainflux v0.0.0-20230802225058-1d80301455c3
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/prometheus/client_golang v1.16.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible
