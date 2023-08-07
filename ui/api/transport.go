@@ -38,7 +38,8 @@ var (
 	errMalformedSubtopic = errors.New("malformed subtopic")
 	errNoCookie          = errors.New("failed to read token cookie")
 	errUnauthorized      = errors.New("failed to login")
-	ErrAuthentication    = errors.New("failed to perform authentication over the entity")
+	errAuthentication    = errors.New("failed to perform authentication over the entity")
+	errSecretError       = errors.New("wrong secret")
 	referer              = ""
 )
 
@@ -153,6 +154,34 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer, ins
 		opts...,
 	))
 
+	r.Get("/users/policies", kithttp.NewServer(
+		kitot.TraceServer(tracer, "view_policies")(listPoliciesEndpoint(svc)),
+		decodeListPoliciesRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/users/policies", kithttp.NewServer(
+		kitot.TraceServer(tracer, "add_policy")(addPolicyEndpoint(svc)),
+		decodeAddPolicyRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/users/policies/update", kithttp.NewServer(
+		kitot.TraceServer(tracer, "update_policy")(updatePolicyEndpoint(svc)),
+		decodeUpdatePolicyRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/users/policies/delete", kithttp.NewServer(
+		kitot.TraceServer(tracer, "delete_policy")(deletePolicyEndpoint(svc)),
+		decodeDeletePolicyRequest,
+		encodeResponse,
+		opts...,
+	))
+
 	r.Get("/users/:id", kithttp.NewServer(
 		kitot.TraceServer(tracer, "view_user")(viewUserEndpoint(svc)),
 		decodeView,
@@ -212,6 +241,34 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer, ins
 	r.Post("/things/disabled", kithttp.NewServer(
 		kitot.TraceServer(tracer, "disable_thing")(disableThingEndpoint(svc)),
 		decodeThingStatusUpdate,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Get("/things/policies", kithttp.NewServer(
+		kitot.TraceServer(tracer, "view_things_policies")(listThingsPoliciesEndpoint(svc)),
+		decodeListPoliciesRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/things/policies", kithttp.NewServer(
+		kitot.TraceServer(tracer, "add_things_policy")(addThingsPolicyEndpoint(svc)),
+		decodeAddThingsPolicyRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/things/policies/update", kithttp.NewServer(
+		kitot.TraceServer(tracer, "update_things_policy")(updateThingsPolicyEndpoint(svc)),
+		decodeUpdatePolicyRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/things/policies/delete", kithttp.NewServer(
+		kitot.TraceServer(tracer, "delete_things_policy")(deleteThingsPolicyEndpoint(svc)),
+		decodeDeleteThingsPolicyRequest,
 		encodeResponse,
 		opts...,
 	))
@@ -361,34 +418,6 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer, ins
 		opts...,
 	))
 
-	r.Get("/things_policies", kithttp.NewServer(
-		kitot.TraceServer(tracer, "view_things_policies")(listThingsPoliciesEndpoint(svc)),
-		decodeListPoliciesRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/things_policies", kithttp.NewServer(
-		kitot.TraceServer(tracer, "add_things_policy")(addThingsPolicyEndpoint(svc)),
-		decodeAddThingsPolicyRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/things_policies/update", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_things_policy")(updateThingsPolicyEndpoint(svc)),
-		decodeUpdatePolicyRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/things_policies/delete", kithttp.NewServer(
-		kitot.TraceServer(tracer, "delete_things_policy")(deleteThingsPolicyEndpoint(svc)),
-		decodeDeleteThingsPolicyRequest,
-		encodeResponse,
-		opts...,
-	))
-
 	r.Post("/groups", kithttp.NewServer(
 		kitot.TraceServer(tracer, "create_group")(createGroupEndpoint(svc)),
 		decodeGroupCreation,
@@ -455,34 +484,6 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer, ins
 	r.Post("/groups/:id/unassign", kithttp.NewServer(
 		kitot.TraceServer(tracer, "unassign")(unassignEndpoint(svc)),
 		decodeUnassignRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/policies", kithttp.NewServer(
-		kitot.TraceServer(tracer, "view_policies")(listPoliciesEndpoint(svc)),
-		decodeListPoliciesRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/policies", kithttp.NewServer(
-		kitot.TraceServer(tracer, "add_policy")(addPolicyEndpoint(svc)),
-		decodeAddPolicyRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/policies/update", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_policy")(updatePolicyEndpoint(svc)),
-		decodeUpdatePolicyRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/policies/delete", kithttp.NewServer(
-		kitot.TraceServer(tracer, "delete_policy")(deletePolicyEndpoint(svc)),
-		decodeDeletePolicyRequest,
 		encodeResponse,
 		opts...,
 	))
@@ -816,7 +817,6 @@ func getAuthorization(r *http.Request) (string, error) {
 func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
 	w.Header().Set("Content-Type", contentType)
 	ar, _ := response.(uiRes)
-
 	for k, v := range ar.Headers() {
 		w.Header().Set(k, v)
 	}
@@ -850,9 +850,10 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		w.WriteHeader(http.StatusBadRequest)
 	case errors.Contains(err, ui.ErrUnauthorizedAccess):
 		w.WriteHeader(http.StatusForbidden)
-	case errors.Contains(err, ErrAuthentication):
+	case errors.Contains(err, errAuthentication):
 		w.Header().Set("Location", "/refresh_token")
 		w.WriteHeader(http.StatusSeeOther)
+
 	default:
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
@@ -1559,15 +1560,11 @@ func decodeUpdatePolicyRequest(ctx context.Context, r *http.Request) (interface{
 	if err != nil {
 		return nil, err
 	}
-	var actions []string
-	if err := json.Unmarshal([]byte(r.Form.Get("actions")), &actions); err != nil {
-		return nil, err
-	}
 
 	policy := sdk.Policy{
 		Subject: r.Form.Get("subject"),
 		Object:  r.Form.Get("object"),
-		Actions: actions,
+		Actions: r.PostForm["actions"],
 	}
 
 	req := updatePolicyReq{

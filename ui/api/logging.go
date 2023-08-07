@@ -43,7 +43,7 @@ func (lm *loggingMiddleware) Index(ctx context.Context, token string) (b []byte,
 	return lm.svc.Index(ctx, token)
 }
 
-func (lm *loggingMiddleware) Login(ctx context.Context) (b []byte, err error) {
+func (lm *loggingMiddleware) Login(ctx context.Context, alertMessage string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method login took %s to complete", time.Since(begin))
 		if err != nil {
@@ -53,7 +53,7 @@ func (lm *loggingMiddleware) Login(ctx context.Context) (b []byte, err error) {
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.Login(ctx)
+	return lm.svc.Login(ctx, alertMessage)
 }
 
 func (lm *loggingMiddleware) PasswordResetRequest(ctx context.Context, email string) (b []byte, err error) {
@@ -92,7 +92,7 @@ func (lm *loggingMiddleware) ShowPasswordReset(ctx context.Context) (b []byte, e
 	return lm.svc.ShowPasswordReset(ctx)
 }
 
-func (lm *loggingMiddleware) PasswordUpdate(ctx context.Context) (b []byte, err error) {
+func (lm *loggingMiddleware) PasswordUpdate(ctx context.Context, alertMessage string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method password_update took %s to complete", time.Since(begin))
 		if err != nil {
@@ -102,7 +102,7 @@ func (lm *loggingMiddleware) PasswordUpdate(ctx context.Context) (b []byte, err 
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.PasswordUpdate(ctx)
+	return lm.svc.PasswordUpdate(ctx, alertMessage)
 }
 
 func (lm *loggingMiddleware) Token(ctx context.Context, user sdk.User) (token sdk.Token, err error) {
@@ -183,7 +183,7 @@ func (lm *loggingMiddleware) CreateUsers(ctx context.Context, token string, user
 	return lm.svc.CreateUsers(ctx, token, user...)
 }
 
-func (lm *loggingMiddleware) ListUsers(ctx context.Context, token string) (b []byte, err error) {
+func (lm *loggingMiddleware) ListUsers(ctx context.Context, token, alertMessage string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method list_users took %s to complete", time.Since(begin))
 		if err != nil {
@@ -193,7 +193,7 @@ func (lm *loggingMiddleware) ListUsers(ctx context.Context, token string) (b []b
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.ListUsers(ctx, token)
+	return lm.svc.ListUsers(ctx, token, alertMessage)
 }
 
 func (lm *loggingMiddleware) ViewUser(ctx context.Context, token, id string) (b []byte, err error) {
@@ -287,19 +287,6 @@ func (lm *loggingMiddleware) DisableUser(ctx context.Context, token, id string) 
 	return lm.svc.DisableUser(ctx, token, id)
 }
 
-func (lm *loggingMiddleware) CreateThing(ctx context.Context, token string, thing sdk.Thing) (b []byte, err error) {
-	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method create_thing took %s to complete", time.Since(begin))
-		if err != nil {
-			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
-			return
-		}
-		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
-	}(time.Now())
-
-	return lm.svc.CreateThing(ctx, token, thing)
-}
-
 func (lm *loggingMiddleware) CreateThings(ctx context.Context, token string, things ...sdk.Thing) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method create_things took %s to complete", time.Since(begin))
@@ -313,7 +300,7 @@ func (lm *loggingMiddleware) CreateThings(ctx context.Context, token string, thi
 	return lm.svc.CreateThings(ctx, token, things...)
 }
 
-func (lm *loggingMiddleware) ListThings(ctx context.Context, token string) (b []byte, err error) {
+func (lm *loggingMiddleware) ListThings(ctx context.Context, token, alertMessage string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method list_things took %s to complete", time.Since(begin))
 		if err != nil {
@@ -323,7 +310,7 @@ func (lm *loggingMiddleware) ListThings(ctx context.Context, token string) (b []
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.ListThings(ctx, token)
+	return lm.svc.ListThings(ctx, token, alertMessage)
 }
 
 func (lm *loggingMiddleware) ViewThing(ctx context.Context, token, id string) (b []byte, err error) {
@@ -417,19 +404,6 @@ func (lm *loggingMiddleware) UpdateThingOwner(ctx context.Context, token, id str
 	return lm.svc.UpdateThingOwner(ctx, token, id, thing)
 }
 
-func (lm *loggingMiddleware) CreateChannel(ctx context.Context, token string, channel sdk.Channel) (b []byte, err error) {
-	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method create_channel took %s to complete", time.Since(begin))
-		if err != nil {
-			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
-			return
-		}
-		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
-	}(time.Now())
-
-	return lm.svc.CreateChannel(ctx, token, channel)
-}
-
 func (lm *loggingMiddleware) CreateChannels(ctx context.Context, token string, channels ...sdk.Channel) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method create_channels took %s to complete", time.Since(begin))
@@ -469,7 +443,7 @@ func (lm *loggingMiddleware) UpdateChannel(ctx context.Context, token, id string
 	return lm.svc.UpdateChannel(ctx, token, id, channel)
 }
 
-func (lm *loggingMiddleware) ListChannels(ctx context.Context, token string) (b []byte, err error) {
+func (lm *loggingMiddleware) ListChannels(ctx context.Context, token, alertMessage string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method list_channels took %s to complete", time.Since(begin))
 		if err != nil {
@@ -479,7 +453,7 @@ func (lm *loggingMiddleware) ListChannels(ctx context.Context, token string) (b 
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.ListChannels(ctx, token)
+	return lm.svc.ListChannels(ctx, token, alertMessage)
 }
 
 func (lm *loggingMiddleware) EnableChannel(ctx context.Context, token, id string) (b []byte, err error) {
@@ -690,7 +664,7 @@ func (lm *loggingMiddleware) CreateGroups(ctx context.Context, token string, gro
 	return lm.svc.CreateGroups(ctx, token, groups...)
 }
 
-func (lm *loggingMiddleware) ListGroups(ctx context.Context, token string) (b []byte, err error) {
+func (lm *loggingMiddleware) ListGroups(ctx context.Context, token, alertMessage string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method list_groups took %s to complete", time.Since(begin))
 		if err != nil {
@@ -700,7 +674,7 @@ func (lm *loggingMiddleware) ListGroups(ctx context.Context, token string) (b []
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.ListGroups(ctx, token)
+	return lm.svc.ListGroups(ctx, token, alertMessage)
 }
 
 func (lm *loggingMiddleware) ViewGroup(ctx context.Context, token, id string) (b []byte, err error) {

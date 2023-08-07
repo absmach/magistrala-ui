@@ -14,7 +14,13 @@
 
           <!-- Partial goes here -->
           <div class="col-md-9">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#connectModal">
+            {{$userID := .User.ID}}
+            {{$groupID := .Group.ID}}
+            {{$disableAssign := true}}
+            {{if (authorizeUser $userID .Group.ID "g_add" "group")}}
+              {{$disableAssign =false}}
+            {{end}}
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#connectModal" {{if $disableAssign}}disabled{{end}}>
               Assign
             </button>
             <div class="modal fade" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="connectModal" aria-hidden="true">
@@ -38,13 +44,9 @@
                       <div class="mb-3">
                         <label for="Type" class="form-label">Member Type</label>
                         <select class="form-control" name="Type" id="Type" aria-describedby="TypeHelp" multiple required>
-                          <option value="g_update">g_update</option>
-                          <option value="g_list">g_list</option>
-                          <option value="g_delete">g_delete</option>
-                          <option value="g_add">g_add</option>
-                          <option value="c_update">c_update</option>
-                          <option value="c_list">c_list</option>
-                          <option value="c_delete">c_delete</option>
+                          {{range $i, $a := .Actions}}
+                          <option value="{{$a}}" {{if not (authorizeUser $userID $groupID $a "group")}}disabled{{end}}>{{$a}}</option>
+                          {{end}}
                         </select>
                         <div id="TypeHelp" class="form-text">Select member Type.</div>
                       </div>
@@ -85,28 +87,35 @@
                 </thead>
                 <tbody>
                   {{$policies := .Policies}}
-                  {{$groupID := .Group.ID}}
+                  {{$disableButton := true}}
+                  {{if (eq .Group.OwnerID .User.ID)}}
+                    {{$disableButton =false}}
+                  {{end}}
                   {{range $i, $m := .Members}}
-                    <tr>
-                      <th scope="row">{{$i}}</th>
-                      <td>{{$m.Name}}</td>
-                      <td><a href={{printf "/users/%s" $m.ID}}>{{$m.ID}}</a></td>
-                        {{range $p := $policies}}
-                            {{if (eq $m.ID $p.Subject)}}
-                              {{if (eq $groupID $p.Object)}}
-                                <td>{{toSlice $p.Actions}}</td>
+                    {{if authorizeUser $userID $m.ID "c_list" "client"}}
+                      <tr>
+                        <th scope="row">{{$i}}</th>
+                        <td>{{$m.Name}}</td>
+                        <td><a href={{printf "/users/%s" $m.ID}}>{{$m.ID}}</a></td>
+                          <td>
+                            {{range $p := $policies}}
+                              {{if (eq $m.ID $p.Subject)}}
+                                {{if (eq $groupID $p.Object)}}
+                                  {{toSlice $p.Actions}}
+                                {{end}}
                               {{end}}
                             {{end}}
-                          {{end}}
-                      <td>
-                        <form action="/groups/{{$groupID}}/unassign" method="post">
-                          <input type="hidden" name="memberID" id="memberID" value="{{$m.ID}}">
-                          <button type="submit" class="btn btn-sm">
-                            <i class="fas fa-trash-alt"></i>
-                          </button>
-                        </form>
-                      </td>
-                    </tr>
+                          </td>
+                        <td>
+                          <form action="/groups/{{$groupID}}/unassign" method="post">
+                            <input type="hidden" name="memberID" id="memberID" value="{{$m.ID}}">
+                            <button type="submit" class="btn btn-sm" {{if $disableButton}}disabled{{end}}>
+                              <i class="fas fa-trash-alt"></i>
+                            </button>
+                          </form>
+                        </td>
+                      </tr>
+                    {{end}}
                   {{end}}
                 </tbody>
               </table>

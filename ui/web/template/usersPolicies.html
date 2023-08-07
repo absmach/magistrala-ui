@@ -51,13 +51,9 @@
                                         <div class="mb-3">
                                             <label for="actions" class="form-label">Actions</label>
                                             <select class="form-select" name="actions" id="actions" aria-describedby="actionsHelp" multiple required>
-                                                <option value="g_update">g_update</option>
-                                                <option value="g_list">g_list</option>
-                                                <option value="g_delete">g_delete</option>
-                                                <option value="g_add">g_add</option>
-                                                <option value="c_update">c_update</option>
-                                                <option value="c_list">c_list</option>
-                                                <option value="c_delete">c_delete</option>
+                                                {{range $i, $a := .Actions}}
+                                                <option value="{{$a}}">{{$a}}</option>
+                                                {{end}}
                                             </select>
                                             <div id="actionsHelp" class="form-text">Select Actions (multiple selections allowed).</div>
                                         </div>
@@ -81,6 +77,7 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                {{$actions := .Actions}}
                                 {{range $i, $p := .Policies}}
                                     <tr>
                                         <th scope="row">{{$i}}</th>
@@ -98,13 +95,19 @@
                                                             <h5 class="modal-title" id="updatePolicyModalLabel{{$i}}">Update Policy</h5>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <form action="/policies/update" method="post">
+                                                            <form action="/users/policies/update" method="post">
                                                                 <div class="mb-3">
                                                                     <label for="actions" class="form-label">Actions</label>
                                                                     <input type="hidden" name="subject" id="subject" value="{{$p.Subject}}">
                                                                     <input type="hidden" name="object" id="object" value="{{$p.Object}}">
-                                                                    <input type="text" class="form-control" name="actions" id="actions" aria-describedby="actionsHelp" value="{{toSlice $p.Actions}}">
-                                                                    <div id="actionsHelp" class="form-text">Enter Actions.</div>
+                                                                    <select class="form-select" name="actions" id="actions" aria-describedby="actionsHelp" multiple required>
+                                                                        {{$policyActions := $p.Actions}}                                                    
+                                                                        {{range $i, $a := $actions}}
+                                                                            {{$selected := contains $policyActions $a}}
+                                                                            <option value="{{$a}}" {{if $selected}}selected{{end}}>{{$a}}</option>
+                                                                        {{end}}
+                                                                    </select>
+                                                                    <div id="actionsHelp" class="form-text">Select Actions (multiple selections allowed).</div>
                                                                 </div>
                                                                 <button type="submit" class="btn btn-primary">Submit</button>
                                                             </form>
@@ -115,7 +118,7 @@
                                             </div>
                                         </td>
                                         <td>
-                                            <form action="/policies/delete" method="post">
+                                            <form action="/users/policies/delete" method="post">
                                                 <input type="hidden" name="subject" id="subject" value="{{$p.Subject}}">
                                                 <input type="hidden" name="object" id="object" value="{{$p.Object}}">
                                                 <button type="submit" class="btn btn-sm">

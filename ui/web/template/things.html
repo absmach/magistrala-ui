@@ -15,6 +15,14 @@
 
           <!-- Partial goes here -->
           <div class="col-md-9">
+            {{ if ne .AlertMessage "" }}
+            <div id="alert-popup" class="alert alert-danger">
+              <span class="close-button" onclick="closeAlertPopup()">&times;</span>
+               <h5 class="alert-messsage">
+                {{ .AlertMessage }}
+               </h5>
+            </div>
+            {{ end }}
 
             <!-- Button trigger modal -->
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addThingModal">
@@ -102,7 +110,12 @@
                   </tr>
                 </thead>
                 <tbody>
+                  {{$userID := .User.ID}}
                   {{range $i, $t := .Things}}
+                    {{$disableButton := true}}
+                    {{if (authorizeThing $userID $t.ID "c_delete" "client")}}
+                      {{$disableButton = false}}
+                    {{end}}
                     <tr>
                       <th scope="row">{{$i}}</th>
                       <td>{{$t.Name}}</td>
@@ -117,7 +130,7 @@
                       <td>
                        <form action="/things/disabled" method="post">
                         <input type="hidden" name="thingID" id="thingID" value="{{$t.ID}}">
-                        <button type="submit" class="btn btn-sm">
+                        <button type="submit" class="btn btn-sm" {{if $disableButton}}disabled{{end}}>
                           <i class="fas fa-trash-alt"></i>
                         </button>
                        </form>
@@ -196,6 +209,9 @@
         }
 
         return isValid;
+      }
+      function closeAlertPopup() {
+        document.getElementById("alert-popup").style.display = "none";
       }
     </script>
   </body>

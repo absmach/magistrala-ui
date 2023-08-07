@@ -15,6 +15,14 @@
 
           <!-- Partial goes here -->
           <div class="col-md-9">
+            {{ if ne .AlertMessage "" }}
+            <div id="alert-popup" class="alert alert-danger">
+              <span class="close-button" onclick="closeAlertPopup()">&times;</span>
+               <h5 class="alert-messsage">
+                {{ .AlertMessage }}
+               </h5>
+            </div>
+            {{ end }}
 
             <!-- Button trigger modal -->
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
@@ -36,7 +44,7 @@
                       </div>
                       <div class="mb-3">
                         <label for="identity" class="form-label">Identity</label>
-                        <input type="text" class="form-control" name="identity" id="identity" placeholder="User Identity" required>
+                        <input type="email" class="form-control" name="identity" id="identity" placeholder="User Identity" required>
                       </div>
                       <div class="mb-3">
                         <label for="secret" class="form-label">Secret</label>
@@ -96,7 +104,12 @@
                   </tr>
                 </thead>
                 <tbody>
+                  {{$userID := .User.ID}}
                   {{range $i, $u := .Users}}
+                    {{$disableButton := true}}
+                    {{if (authorizeUser $userID $u.ID "c_delete" "client")}}
+                      {{$disableButton = false}}
+                    {{end}}
                     <tr>
                       <th scope="row">{{$i}}</th>
                       <td>{{$u.Name}}</td>
@@ -111,7 +124,7 @@
                       <td>
                         <form action="/users/disabled" method="post">
                           <input type="hidden" name="userID" id="userID" value="{{$u.ID}}">
-                          <button type="submit" class="btn btn-sm">
+                          <button type="submit" class="btn btn-sm" {{if $disableButton}}disabled{{end}}>
                             <i class="fas fa-trash-alt"></i>
                           </button>
                         </form>
@@ -183,6 +196,9 @@
         }
 
         return isValid;
+      }
+      function closeAlertPopup() {
+        document.getElementById("alert-popup").style.display = "none";
       }
     </script>
   </body>

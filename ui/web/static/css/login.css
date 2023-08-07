@@ -103,6 +103,11 @@ input{
     transition: background 1s;
 }
 
+.error-message{
+    font-size: 15px;
+    color: #e60303;
+  }
+
 footer {
     background:#4051b5;
     color: #fff;

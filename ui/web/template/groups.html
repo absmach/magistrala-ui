@@ -14,6 +14,14 @@
 
           <!-- Partial goes here -->
           <div class="col-md-9">
+            {{ if ne .AlertMessage "" }}
+            <div id="alert-popup" class="alert alert-danger">
+              <span class="close-button" onclick="closeAlertPopup()">&times;</span>
+               <h5 class="alert-messsage">
+                {{ .AlertMessage }}
+               </h5>
+            </div>
+            {{ end }}
 
             <!-- Button trigger modal -->
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGroupModal">
@@ -93,7 +101,9 @@
                   </tr>
                 </thead>
                 <tbody>
+                  {{$userID := .User.ID}}
                   {{range $i, $g := .Groups}}
+                    {{$disableButton := true}}
                     <tr>
                       <th scope="row">{{$i}}</th>
                       <td>{{$g.Name}}</td>
@@ -106,10 +116,13 @@
                         </div>
                       </td>
                       <td>
+                        {{if (authorizeUser $userID $g.ID "g_delete" "group")}}
+                          {{$disableButton =false}}
+                        {{end}}
                         <form action="/groups/disabled" method="post">
                           <input type="hidden" name="groupID" id="groupID" value="{{$g.ID}}">
                           <input type="hidden" name="status" id="status" value="disabled">
-                          <button type="submit" class="btn btn-sm">
+                          <button type="submit" class="btn btn-sm" {{if $disableButton}}disabled{{end}}>
                             <i class="fas fa-trash-alt"></i>
                           </button>
                         </form>
@@ -176,6 +189,9 @@
           const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
           option.style.display = shouldShow ? "" : "none";
         }
+      }
+      function closeAlertPopup() {
+        document.getElementById("alert-popup").style.display = "none";
       }
     </script>
 

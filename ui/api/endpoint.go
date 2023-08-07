@@ -14,6 +14,16 @@ import (
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
 )
 
+func getErrorMessage(err error) string {
+	switch {
+	case errors.Contains(err, errAuthentication):
+		return "wrong email"
+	case errors.Contains(err, errSecretError):
+		return "wrong password"
+	}
+	return "internal server error"
+}
+
 func indexEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(indexReq)
@@ -27,7 +37,7 @@ func indexEndpoint(svc ui.Service) endpoint.Endpoint {
 
 func loginEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		res, err := svc.Login(ctx)
+		res, err := svc.Login(ctx, "")
 
 		return uiRes{
 			code: http.StatusOK,
@@ -38,12 +48,57 @@ func loginEndpoint(svc ui.Service) endpoint.Endpoint {
 
 func showUpdatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		res, err := svc.PasswordUpdate(ctx)
+		res, err := svc.PasswordUpdate(ctx, "")
 
 		return uiRes{
 			code: http.StatusOK,
 			html: res,
 		}, err
+	}
+}
+
+func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(updateUserPasswordReq)
+
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.UpdatePassword(ctx, req.token, req.OldPass, req.NewPass)
+		if err != nil {
+			errorMessage := getErrorMessage(err)
+			resp, err := svc.PasswordUpdate(ctx, errorMessage)
+			return uiRes{
+				code:    http.StatusBadRequest,
+				html:    resp,
+				headers: map[string]string{"Location": "/password"},
+			}, err
+		}
+
+		cookies := []*http.Cookie{
+			{
+				Name:     "token",
+				Value:    "",
+				Path:     "/",
+				MaxAge:   -1,
+				HttpOnly: true,
+			},
+			{
+				Name:     "refresh_token",
+				Value:    "",
+				Path:     "/",
+				MaxAge:   -1,
+				HttpOnly: true,
+			},
+		}
+
+		return uiRes{
+			code:    http.StatusFound,
+			html:    res,
+			cookies: cookies,
+			headers: map[string]string{"Location": "/login"},
+		}, nil
 	}
 }
 
@@ -60,7 +115,13 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		token, err := svc.Token(ctx, user)
 		if err != nil {
-			return nil, errors.Wrap(errUnauthorized, err)
+			errorMessage := getErrorMessage(err)
+			resp, err := svc.Login(ctx, errorMessage)
+			return uiRes{
+				code:    http.StatusBadRequest,
+				html:    resp,
+				headers: map[string]string{"Location": "/login"},
+			}, err
 		}
 
 		accessToken := token.AccessToken
@@ -218,12 +279,19 @@ func createUserEndpoint(svc ui.Service) endpoint.Endpoint {
 		user := req.user
 		res, err := svc.CreateUsers(ctx, req.token, user)
 		if err != nil {
+			if err == ui.ErrConflict {
+				return uiRes{
+					code: http.StatusConflict,
+					html: res,
+				}, nil
+			}
 			return nil, err
 		}
 
 		return uiRes{
+			code: http.StatusCreated,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -247,6 +315,13 @@ func createUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 		res, err := svc.CreateUsers(ctx, req.token, users...)
 		if err != nil {
+			if err == ui.ErrConflict {
+				return uiRes{
+					code:    http.StatusConflict,
+					html:    res,
+					headers: map[string]string{"Location": "/users"},
+				}, nil
+			}
 			return nil, err
 		}
 
@@ -254,7 +329,7 @@ func createUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 			code:    http.StatusFound,
 			html:    res,
 			headers: map[string]string{"Location": "/users"},
-		}, err
+		}, nil
 	}
 }
 
@@ -265,14 +340,15 @@ func listUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.ListUsers(ctx, req.token)
+		res, err := svc.ListUsers(ctx, req.token, "")
 		if err != nil {
 			return nil, err
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -290,8 +366,9 @@ func viewUserEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -315,8 +392,9 @@ func updateUserEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -337,8 +415,9 @@ func updateUserTagsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -362,8 +441,9 @@ func updateUserIdentityEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -405,45 +485,6 @@ func disableUserEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(updateUserPasswordReq)
-
-		if err := req.validate(); err != nil {
-			return nil, err
-		}
-
-		res, err := svc.UpdatePassword(ctx, req.token, req.OldPass, req.NewPass)
-		if err != nil {
-			return nil, err
-		}
-
-		cookies := []*http.Cookie{
-			{
-				Name:     "token",
-				Value:    "",
-				Path:     "/",
-				MaxAge:   -1,
-				HttpOnly: true,
-			},
-			{
-				Name:     "refresh_token",
-				Value:    "",
-				Path:     "/",
-				MaxAge:   -1,
-				HttpOnly: true,
-			},
-		}
-
-		return uiRes{
-			code:    http.StatusFound,
-			html:    res,
-			cookies: cookies,
-			headers: map[string]string{"Location": "/login"},
-		}, err
-	}
-}
-
 func createThingEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(createThingReq)
@@ -451,14 +492,20 @@ func createThingEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.CreateThing(ctx, req.token, req.thing)
+		res, err := svc.CreateThings(ctx, req.token, req.thing)
 		if err != nil {
+			if err == ui.ErrConflict {
+				return uiRes{
+					code: http.StatusConflict,
+					html: res,
+				}, nil
+			}
 			return nil, err
 		}
 
 		return uiRes{
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -478,6 +525,13 @@ func createThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 		res, err := svc.CreateThings(ctx, req.token, things...)
 		if err != nil {
+			if err == ui.ErrConflict {
+				return uiRes{
+					code:    http.StatusConflict,
+					html:    res,
+					headers: map[string]string{"Location": "/things"},
+				}, nil
+			}
 			return nil, err
 		}
 
@@ -485,7 +539,7 @@ func createThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 			code:    http.StatusFound,
 			html:    res,
 			headers: map[string]string{"Location": "/things"},
-		}, err
+		}, nil
 	}
 }
 
@@ -496,14 +550,15 @@ func listThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.ListThings(ctx, req.token)
+		res, err := svc.ListThings(ctx, req.token, "")
 		if err != nil {
 			return nil, err
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -521,8 +576,9 @@ func viewThingEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -546,8 +602,9 @@ func updateThingEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -568,8 +625,9 @@ func updateThingTagsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -586,8 +644,9 @@ func updateThingSecretEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -606,7 +665,7 @@ func enableThingEndpoint(svc ui.Service) endpoint.Endpoint {
 			code:    http.StatusFound,
 			html:    res,
 			headers: map[string]string{"Location": "/things"},
-		}, err
+		}, nil
 	}
 }
 
@@ -625,7 +684,7 @@ func disableThingEndpoint(svc ui.Service) endpoint.Endpoint {
 			code:    http.StatusFound,
 			html:    res,
 			headers: map[string]string{"Location": "/things"},
-		}, err
+		}, nil
 	}
 }
 
@@ -646,8 +705,9 @@ func updateThingOwnerEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -659,14 +719,20 @@ func createChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.CreateChannel(ctx, req.token, req.Channel)
+		res, err := svc.CreateChannels(ctx, req.token, req.Channel)
 		if err != nil {
+			if err == ui.ErrConflict {
+				return uiRes{
+					code: http.StatusConflict,
+					html: res,
+				}, nil
+			}
 			return nil, err
 		}
 
 		return uiRes{
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -686,14 +752,20 @@ func createChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 		res, err := svc.CreateChannels(ctx, req.token, channels...)
 		if err != nil {
+			if err == ui.ErrConflict {
+				return uiRes{
+					code:    http.StatusConflict,
+					html:    res,
+					headers: map[string]string{"Location": "/channels"},
+				}, nil
+			}
 			return nil, err
 		}
-
 		return uiRes{
 			code:    http.StatusFound,
 			html:    res,
 			headers: map[string]string{"Location": "/channels"},
-		}, err
+		}, nil
 	}
 }
 
@@ -711,8 +783,9 @@ func viewChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -737,8 +810,9 @@ func updateChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -750,11 +824,15 @@ func listChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListChannels(ctx, req.token)
+		res, err := svc.ListChannels(ctx, req.token, "")
+		if err != nil {
+			return nil, err
+		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -773,7 +851,7 @@ func connectEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -792,7 +870,7 @@ func disconnectEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -811,7 +889,7 @@ func connectThingEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -849,7 +927,7 @@ func connectChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -868,7 +946,7 @@ func disconnectThingEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -887,7 +965,7 @@ func disconnectChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -905,8 +983,9 @@ func listThingsByChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -924,8 +1003,9 @@ func listChannelsByThingEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -979,8 +1059,9 @@ func listThingsPoliciesEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -997,7 +1078,7 @@ func addThingsPolicyEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1012,8 +1093,9 @@ func updateThingsPolicyEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1029,8 +1111,9 @@ func deleteThingsPolicyEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1044,12 +1127,18 @@ func createGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		res, err := svc.CreateGroups(ctx, cgr.token, cgr.Group)
 		if err != nil {
+			if err == ui.ErrConflict {
+				return uiRes{
+					code: http.StatusConflict,
+					html: res,
+				}, nil
+			}
 			return nil, err
 		}
 
 		return uiRes{
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1069,6 +1158,13 @@ func createGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 		res, err := svc.CreateGroups(ctx, req.token, groups...)
 		if err != nil {
+			if err == ui.ErrConflict {
+				return uiRes{
+					code:    http.StatusConflict,
+					html:    res,
+					headers: map[string]string{"Location": "/groups"},
+				}, nil
+			}
 			return nil, err
 		}
 
@@ -1076,7 +1172,7 @@ func createGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 			code:    http.StatusFound,
 			html:    res,
 			headers: map[string]string{"Location": "/groups"},
-		}, err
+		}, nil
 	}
 }
 
@@ -1088,10 +1184,14 @@ func listGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListGroups(ctx, req.token)
+		res, err := svc.ListGroups(ctx, req.token, "")
+		if err != nil {
+			return nil, err
+		}
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1109,8 +1209,9 @@ func listGroupMembersEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1128,8 +1229,9 @@ func viewGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1154,8 +1256,9 @@ func updateGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1172,7 +1275,7 @@ func assignEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1189,8 +1292,9 @@ func unassignEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1209,7 +1313,7 @@ func enableGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 			code:    http.StatusFound,
 			html:    res,
 			headers: map[string]string{"Location": "/groups"},
-		}, err
+		}, nil
 	}
 }
 
@@ -1228,7 +1332,7 @@ func disableGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 			code:    http.StatusFound,
 			html:    res,
 			headers: map[string]string{"Location": "/groups"},
-		}, err
+		}, nil
 	}
 }
 
@@ -1244,8 +1348,9 @@ func listPoliciesEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1262,7 +1367,7 @@ func addPolicyEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1277,8 +1382,10 @@ func updatePolicyEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 		return uiRes{
-			html: res,
-		}, err
+			code:    http.StatusFound,
+			html:    res,
+			headers: map[string]string{"Location": "/users/policies"},
+		}, nil
 	}
 }
 
@@ -1294,8 +1401,10 @@ func deletePolicyEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			html: res,
-		}, err
+			code:    http.StatusFound,
+			html:    res,
+			headers: map[string]string{"Location": "/users/policies"},
+		}, nil
 	}
 }
 
@@ -1311,8 +1420,9 @@ func publishMessageEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1328,8 +1438,9 @@ func readMessageEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1346,7 +1457,7 @@ func wsConnectionEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1363,7 +1474,8 @@ func listDeletedClientsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }

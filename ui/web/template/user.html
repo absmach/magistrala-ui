@@ -19,13 +19,17 @@
                 </tr>
               </thead>
               <tbody>
+                {{$disableButton := true}}
+                {{if (authorizeUser .LoggedUser.ID .User.ID "c_update" "client")}}
+                  {{$disableButton =false}}
+                {{end}}
                 <tr>
                   <th>Name</th>
                   <td class="editable" contenteditable="false" data-field="name">
                     {{.User.Name}}
                   </td>
                   <td>
-                    <button class="edit-btn" onclick="editRow('name')">
+                    <button class="edit-btn" onclick="editRow('name')" {{if $disableButton}}disabled{{end}}>
                       <i class="fas fa-pencil-alt"></i>
                     </button>
                     <div class="save-cancel-buttons" style="display: none;">
@@ -41,6 +45,12 @@
                 <tr>
                   <th>ID</th>
                   <td>{{.User.ID}}</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <th>Owner</th>
+                  <td>{{.User.Owner}}</td>
+                  <td></td>
                 </tr>
                 <tr>
                   <th>Identity</th>
@@ -48,7 +58,7 @@
                     {{.User.Credentials.Identity}}
                     </td>
                     <td>
-                      <button class="edit-btn" onclick="editRow('identity')">
+                      <button class="edit-btn" onclick="editRow('identity')" {{if $disableButton}}disabled{{end}}>
                         <i class="fas fa-pencil-alt"></i>
                       </button>
                       <div class="save-cancel-buttons" style="display: none;">
@@ -67,7 +77,7 @@
                     {{toSlice .User.Tags}}
                   </td>
                   <td>
-                    <button class="edit-btn" onclick="editRow('tags')">
+                    <button class="edit-btn" onclick="editRow('tags')" {{if $disableButton}}disabled{{end}}>
                       <i class="fas fa-pencil-alt"></i>
                     </button>
                     <div class="save-cancel-buttons" style="display: none;">
@@ -86,7 +96,7 @@
                     {{toJSON .User.Metadata}}
                   </td>
                   <td>
-                    <button class="edit-btn" onclick="editRow('metadata')">
+                    <button class="edit-btn" onclick="editRow('metadata')" {{if $disableButton}}disabled{{end}}>
                       <i class="fas fa-pencil-alt"></i>
                     </button>
                     <div class="save-cancel-buttons" style="display: none;">
@@ -180,6 +190,9 @@
         // Get the updated value from the nameCell
         const updatedValue = cell.textContent.trim();
 
+        // Email format validation regular expression
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
         // Send the updated value to the server using a POST request
         let url;
         let data;
@@ -197,6 +210,10 @@
           }
           
         }else if (field === 'identity'){
+          if (!emailRegex.test(updatedValue)){
+            errorMessage.textContent = 'Identity should be in email format!';
+            return;
+          }
           url = '/users/{{.User.ID}}/identity';
           data = { [field]: updatedValue };
         } else if (field === 'tags') {
@@ -235,6 +252,9 @@
               // Show edit button and hide save and cancel buttons
               hideButtons(editBtn, saveCancelBtn);
             }
+            else{
+              throw new Error("Response not OK");
+            }
           })
           .catch(error => {
             // Restore original values in the row if there is an error
@@ -244,6 +264,7 @@
             hideButtons(editBtn, saveCancelBtn);
 
             console.error("Error", error);
+            errorMessage.textContent= "Entity already exists";
           });
         } else {
           console.error("Invalid field:", field);

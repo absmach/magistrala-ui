@@ -43,13 +43,13 @@ func (mm *metricsMiddleware) Index(ctx context.Context, token string) (b []byte,
 	return mm.svc.Index(ctx, token)
 }
 
-func (mm *metricsMiddleware) Login(ctx context.Context) (b []byte, err error) {
+func (mm *metricsMiddleware) Login(ctx context.Context, alertMessage string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "login").Add(1)
 		mm.latency.With("method", "login").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.Login(ctx)
+	return mm.svc.Login(ctx, alertMessage)
 }
 
 func (mm *metricsMiddleware) PasswordResetRequest(ctx context.Context, email string) (b []byte, err error) {
@@ -79,13 +79,13 @@ func (mm *metricsMiddleware) ShowPasswordReset(ctx context.Context) (b []byte, e
 	return mm.svc.ShowPasswordReset(ctx)
 }
 
-func (mm *metricsMiddleware) PasswordUpdate(ctx context.Context) (b []byte, err error) {
+func (mm *metricsMiddleware) PasswordUpdate(ctx context.Context, alertMessage string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "password_update").Add(1)
 		mm.latency.With("method", "password_update").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.PasswordUpdate(ctx)
+	return mm.svc.PasswordUpdate(ctx, alertMessage)
 }
 
 func (mm *metricsMiddleware) Token(ctx context.Context, user sdk.User) (sdk.Token, error) {
@@ -142,13 +142,13 @@ func (mm *metricsMiddleware) CreateUsers(ctx context.Context, token string, user
 	return mm.svc.CreateUsers(ctx, token, users...)
 }
 
-func (mm *metricsMiddleware) ListUsers(ctx context.Context, token string) (b []byte, err error) {
+func (mm *metricsMiddleware) ListUsers(ctx context.Context, token, alertMessage string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "list_users").Add(1)
 		mm.latency.With("method", "list_users").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ListUsers(ctx, token)
+	return mm.svc.ListUsers(ctx, token, alertMessage)
 }
 
 func (mm *metricsMiddleware) ViewUser(ctx context.Context, token, id string) (b []byte, err error) {
@@ -214,15 +214,6 @@ func (mm *metricsMiddleware) DisableUser(ctx context.Context, token, id string) 
 	return mm.svc.DisableUser(ctx, token, id)
 }
 
-func (mm *metricsMiddleware) CreateThing(ctx context.Context, token string, thing sdk.Thing) (b []byte, err error) {
-	defer func(begin time.Time) {
-		mm.counter.With("method", "create_thing").Add(1)
-		mm.latency.With("method", "create_thing").Observe(time.Since(begin).Seconds())
-	}(time.Now())
-
-	return mm.svc.CreateThing(ctx, token, thing)
-}
-
 func (mm *metricsMiddleware) CreateThings(ctx context.Context, token string, things ...sdk.Thing) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "create_things").Add(1)
@@ -232,13 +223,13 @@ func (mm *metricsMiddleware) CreateThings(ctx context.Context, token string, thi
 	return mm.svc.CreateThings(ctx, token, things...)
 }
 
-func (mm *metricsMiddleware) ListThings(ctx context.Context, token string) (b []byte, err error) {
+func (mm *metricsMiddleware) ListThings(ctx context.Context, token, alertMessage string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "list_things").Add(1)
 		mm.latency.With("method", "list_things").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ListThings(ctx, token)
+	return mm.svc.ListThings(ctx, token, alertMessage)
 }
 
 func (mm *metricsMiddleware) ViewThing(ctx context.Context, token, id string) (b []byte, err error) {
@@ -304,15 +295,6 @@ func (mm *metricsMiddleware) UpdateThingOwner(ctx context.Context, token, id str
 	return mm.svc.UpdateThingOwner(ctx, token, id, thing)
 }
 
-func (mm *metricsMiddleware) CreateChannel(ctx context.Context, token string, channel sdk.Channel) (b []byte, err error) {
-	defer func(begin time.Time) {
-		mm.counter.With("method", "create_channel").Add(1)
-		mm.latency.With("method", "create_channel").Observe(time.Since(begin).Seconds())
-	}(time.Now())
-
-	return mm.svc.CreateChannel(ctx, token, channel)
-}
-
 func (mm *metricsMiddleware) CreateChannels(ctx context.Context, token string, channels ...sdk.Channel) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "create_channels").Add(1)
@@ -340,13 +322,13 @@ func (mm *metricsMiddleware) UpdateChannel(ctx context.Context, token, id string
 	return mm.svc.UpdateChannel(ctx, token, id, channel)
 }
 
-func (mm *metricsMiddleware) ListChannels(ctx context.Context, token string) (b []byte, err error) {
+func (mm *metricsMiddleware) ListChannels(ctx context.Context, token, alertMessage string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "list_channels").Add(1)
 		mm.latency.With("method", "list_channels").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ListChannels(ctx, token)
+	return mm.svc.ListChannels(ctx, token, alertMessage)
 }
 
 func (mm *metricsMiddleware) EnableChannel(ctx context.Context, token, id string) (b []byte, err error) {
@@ -493,13 +475,13 @@ func (mm *metricsMiddleware) CreateGroups(ctx context.Context, token string, gro
 	return mm.svc.CreateGroups(ctx, token, groups...)
 }
 
-func (mm *metricsMiddleware) ListGroups(ctx context.Context, token string) (b []byte, err error) {
+func (mm *metricsMiddleware) ListGroups(ctx context.Context, token, alertMessage string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "list_groups").Add(1)
 		mm.latency.With("method", "list_groups").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ListGroups(ctx, token)
+	return mm.svc.ListGroups(ctx, token, alertMessage)
 }
 
 func (mm *metricsMiddleware) ViewGroup(ctx context.Context, token, id string) (b []byte, err error) {
@@ -630,8 +612,8 @@ func (mm *metricsMiddleware) WsConnection(ctx context.Context, token, chID, thKe
 
 func (mm *metricsMiddleware) ListDeletedClients(ctx context.Context, token string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		mm.counter.With("method", "list_users").Add(1)
-		mm.latency.With("method", "list_users").Observe(time.Since(begin).Seconds())
+		mm.counter.With("method", "list_deleted_clients").Add(1)
+		mm.latency.With("method", "list_deleted_clients").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
 	return mm.svc.ListDeletedClients(ctx, token)
