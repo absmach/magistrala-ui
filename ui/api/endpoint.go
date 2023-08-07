@@ -17,7 +17,7 @@ import (
 func getErrorMessage(err error) string {
 	switch {
 	case errors.Contains(err, errAuthentication):
-		return "wrong Email"
+		return "wrong email"
 	case errors.Contains(err, errSecretError):
 		return "wrong password"
 	}
