@@ -58,6 +58,13 @@
             Deleted clients
           </a>
         </li>
+        <li class="nav-item">
+          {{$active = "bootstraps"}}
+          <a class="nav-link" {{if eq .NavbarActive $active}} style="color:black"{{end}} href="/bootstraps">
+            <i class="fas fa-solid fa-broadcast-tower"></i>
+            Bootstraps
+          </a>
+        </li>
       </ul>
     </div>
 </nav>

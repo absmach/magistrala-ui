@@ -618,3 +618,93 @@ func (mm *metricsMiddleware) ListDeletedClients(ctx context.Context, token strin
 
 	return mm.svc.ListDeletedClients(ctx, token)
 }
+
+// GetRemoteTerminal adds metrics middleware to get remote terminal method.
+func (mm *metricsMiddleware) GetRemoteTerminal(ctx context.Context, id string) ([]byte, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "remote_terminal").Add(1)
+		mm.latency.With("method", "remote_terminal").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.GetRemoteTerminal(ctx, id)
+}
+
+// ProcessTerminalCommand adds metrics middleware to process terminal command method.
+func (mm *metricsMiddleware) ProcessTerminalCommand(ctx context.Context, id, token, command string, res chan string) error {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "remote_terminal").Add(1)
+		mm.latency.With("method", "remote_terminal").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.ProcessTerminalCommand(ctx, id, token, command, res)
+}
+
+// CreateBootstrap adds metrics middleware to create bootstrap method.
+func (mm *metricsMiddleware) CreateBootstrap(ctx context.Context, token string, config ...sdk.BootstrapConfig) ([]byte, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "create_bootstrap").Add(1)
+		mm.latency.With("method", "create_bootstrap").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.CreateBootstrap(ctx, token, config...)
+}
+
+// DeleteBootstrap adds metrics middleware to delete bootstrap method.
+func (mm *metricsMiddleware) DeleteBootstrap(ctx context.Context, token string, id string) ([]byte, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "delete_bootstrap").Add(1)
+		mm.latency.With("method", "delete_bootstrap").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.DeleteBootstrap(ctx, token, id)
+}
+
+// ListBootstrap adds metrics middleware to list bootstrap method.
+func (mm *metricsMiddleware) ListBootstrap(ctx context.Context, token string) ([]byte, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "list_bootstrap").Add(1)
+		mm.latency.With("method", "list_bootstrap").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.ListBootstrap(ctx, token)
+}
+
+// UpdateBootstrap adds metrics middleware to update bootstrap method.
+func (mm *metricsMiddleware) UpdateBootstrap(ctx context.Context, token string, config sdk.BootstrapConfig) ([]byte, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "update_bootstrap").Add(1)
+		mm.latency.With("method", "update_bootstrap").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.UpdateBootstrap(ctx, token, config)
+}
+
+// UpdateBootstrapCerts adds metrics middleware to update bootstrap certs method.
+func (mm *metricsMiddleware) UpdateBootstrapCerts(ctx context.Context, token string, config sdk.BootstrapConfig) ([]byte, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "update_bootstrap_certs").Add(1)
+		mm.latency.With("method", "update_bootstrap_certs").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.UpdateBootstrapCerts(ctx, token, config)
+}
+
+// UpdateBootstrapConnections adds metrics middleware to  update bootstrap connections method.
+func (mm *metricsMiddleware) UpdateBootstrapConnections(ctx context.Context, token string, config sdk.BootstrapConfig) ([]byte, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "update_bootstrap_connections").Add(1)
+		mm.latency.With("method", "update_bootstrap_connections").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.UpdateBootstrapConnections(ctx, token, config)
+}
+
+// ViewBootstrap adds metrics middleware to view bootstrap method.
+func (mm *metricsMiddleware) ViewBootstrap(ctx context.Context, token string, id string) ([]byte, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "view_bootstrap").Add(1)
+		mm.latency.With("method", "view_bootstrap").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.ViewBootstrap(ctx, token, id)
+}

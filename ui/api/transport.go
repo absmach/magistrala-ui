@@ -516,7 +516,63 @@ func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer, ins
 		opts...,
 	))
 
-	r.GetFunc("/version", mainflux.Health("ui", instanceID))
+	r.Get("/bootstraps", kithttp.NewServer(
+		kitot.TraceServer(tracer, "list_bootstrap")(listBootstrap(svc)),
+		decodeListBoostrapRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/bootstraps", kithttp.NewServer(
+		kitot.TraceServer(tracer, "create_bootstrap")(createBootstrap(svc)),
+		decodeCreateBootstrapRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Get("/bootstrap/:id", kithttp.NewServer(
+		kitot.TraceServer(tracer, "view_bootstrap")(viewBootstrap(svc)),
+		decodeView,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/bootstrap/:id", kithttp.NewServer(
+		kitot.TraceServer(tracer, "update_bootstrap")(updateBootstrap(svc)),
+		decodeUpdateBootstrap,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/bootstrap/:id/certs", kithttp.NewServer(
+		kitot.TraceServer(tracer, "update_bootstrap_certs")(updateBootstrapCerts(svc)),
+		decodeUpdateBootstrapCerts,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/bootstrap/:id/connections", kithttp.NewServer(
+		kitot.TraceServer(tracer, "update_bootstrap_connections")(updateBootstrapConnections(svc)),
+		decodeUpdateBootstrapConnections,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Get("/bootstrap/:id/terminal", kithttp.NewServer(
+		kitot.TraceServer(tracer, "edge_terminal")(getTerminalEndpoint(svc)),
+		decodeView,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/bootstrap/:id/terminal/input", kithttp.NewServer(
+		kitot.TraceServer(tracer, "edge_terminal_input")(handleTerminalInputEndpoint(svc)),
+		decodeTerminalCommandRequest,
+		encodeJSONResponse,
+		opts...,
+	))
+
+	r.GetFunc("/health", mainflux.Health("ui", instanceID))
 	r.Handle("/metrics", promhttp.Handler())
 
 	// Static file handler
@@ -839,8 +895,24 @@ func encodeResponse(_ context.Context, w http.ResponseWriter, response interface
 	return nil
 }
 
+func encodeJSONResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+	if ar, ok := response.(mainflux.Response); ok {
+		for k, v := range ar.Headers() {
+			w.Header().Set(k, v)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(ar.Code())
+
+		if ar.Empty() {
+			return nil
+		}
+	}
+
+	return json.NewEncoder(w).Encode(response)
+}
+
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
-	switch true {
+	switch {
 	case errors.Contains(err, errNoCookie),
 		errors.Contains(err, errUnauthorized):
 		w.Header().Set("Location", "/login")
@@ -1671,4 +1743,108 @@ func decodeListDeletedClientsRequest(ctx context.Context, r *http.Request) (inte
 	}
 
 	return req, nil
+}
+
+func decodeTerminalCommandRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+	req := bootstrapCommandReq{
+		token:   token,
+		id:      bone.GetValue(r, "id"),
+		command: strings.ReplaceAll(strings.Trim(r.PostFormValue("command"), " "), " ", ","),
+	}
+	return req, nil
+}
+
+func decodeListBoostrapRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+	req := listBootstrapReq{
+		token: token,
+	}
+
+	return req, nil
+}
+
+func decodeCreateBootstrapRequest(ctx context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+
+	var channels []string
+	if err := json.Unmarshal([]byte(r.FormValue("channels")), &channels); err != nil {
+		return nil, err
+	}
+
+	req := createBootstrapReq{
+		token:       token,
+		ThingID:     r.FormValue("thingID"),
+		ExternalID:  r.FormValue("externalID"),
+		ExternalKey: r.FormValue("externalKey"),
+		Channels:    channels,
+		Name:        r.FormValue("name"),
+		Content:     r.FormValue("content"),
+		ClientCert:  r.FormValue("clientCert"),
+		ClientKey:   r.FormValue("clientKey"),
+		CACert:      r.FormValue("CACert"),
+	}
+
+	return req, nil
+}
+
+func decodeUpdateBootstrap(ctx context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+
+	var data updateBootstrapReq
+	err = json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		return nil, err
+	}
+	data.token = token
+	data.id = bone.GetValue(r, "id")
+
+	return data, nil
+}
+
+func decodeUpdateBootstrapCerts(ctx context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+
+	var data updateBootstrapCertReq
+	err = json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		return nil, err
+	}
+	data.thingID = bone.GetValue(r, "id")
+	data.token = token
+
+	return data, nil
+}
+
+func decodeUpdateBootstrapConnections(ctx context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+
+	var data updateBootstrapConnReq
+	err = json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		return nil, err
+	}
+
+	data.id = bone.GetValue(r, "id")
+	data.token = token
+
+	return data, nil
 }

@@ -7,6 +7,8 @@ import (
 	"context"
 	"net/http"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/mainflux/mainflux/pkg/errors"
 	"github.com/ultravioletrs/mainflux-ui/ui"
 
@@ -1477,5 +1479,181 @@ func listDeletedClientsEndpoint(svc ui.Service) endpoint.Endpoint {
 			code: http.StatusOK,
 			html: res,
 		}, nil
+	}
+}
+
+func getTerminalEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(viewResourceReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		res, err := svc.GetRemoteTerminal(ctx, req.id)
+		if err != nil {
+			return nil, err
+		}
+		return uiRes{
+			html: res,
+		}, nil
+	}
+}
+
+func handleTerminalInputEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(bootstrapCommandReq)
+
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		// Create a channel to receive the command result
+		ch := make(chan string)
+
+		g, ctx := errgroup.WithContext(ctx)
+
+		// Start a goroutine to process the command asynchronously
+		g.Go(func() error {
+			return svc.ProcessTerminalCommand(ctx, req.id, req.token, req.command, ch)
+		})
+
+		if err := g.Wait(); err != nil {
+			return nil, err
+		}
+
+		// Receive the command result from the channel
+		result := <-ch
+
+		return terminalResponse{
+			Command: req.command,
+			Result:  result,
+		}, nil
+	}
+}
+
+func viewBootstrap(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(viewResourceReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		res, err := svc.ViewBootstrap(ctx, req.token, req.id)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
+func listBootstrap(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(listBootstrapReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		res, err := svc.ListBootstrap(ctx, req.token)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
+func updateBootstrap(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(updateBootstrapReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		cfg := sdk.BootstrapConfig{
+			ThingID: req.id,
+			Name:    req.Name,
+			Content: req.Content,
+		}
+		res, err := svc.UpdateBootstrap(ctx, req.token, cfg)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
+func updateBootstrapCerts(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(updateBootstrapCertReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		cfg := sdk.BootstrapConfig{
+			ThingID:    req.thingID,
+			ClientCert: req.ClientCert,
+			ClientKey:  req.ClientKey,
+			CACert:     req.CACert,
+		}
+		res, err := svc.UpdateBootstrapCerts(ctx, req.token, cfg)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
+func updateBootstrapConnections(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(updateBootstrapConnReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		cfg := sdk.BootstrapConfig{
+			ThingID:  req.id,
+			Channels: req.Channels,
+		}
+		res, err := svc.UpdateBootstrapConnections(ctx, req.token, cfg)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			html: res,
+		}, err
+	}
+}
+
+func createBootstrap(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(createBootstrapReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		cfg := sdk.BootstrapConfig{
+			ThingID:     req.ThingID,
+			Channels:    req.Channels,
+			ExternalID:  req.ExternalID,
+			ExternalKey: req.ExternalKey,
+			Name:        req.Name,
+			ClientCert:  req.ClientCert,
+			ClientKey:   req.ClientKey,
+			CACert:      req.CACert,
+			Content:     req.Content,
+		}
+		res, err := svc.CreateBootstrap(ctx, req.token, cfg)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			html: res,
+		}, err
 	}
 }

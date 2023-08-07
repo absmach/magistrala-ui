@@ -744,3 +744,119 @@ func (req listDeletedClientsReq) validate() error {
 	}
 	return nil
 }
+
+type bootstrapCommandReq struct {
+	token   string
+	command string
+	id      string
+}
+
+func (req bootstrapCommandReq) validate() error {
+	if req.token == "" {
+		return ui.ErrUnauthorizedAccess
+	}
+
+	if req.id == "" {
+		return ui.ErrMalformedEntity
+	}
+
+	return nil
+}
+
+type listBootstrapReq struct {
+	token string
+}
+
+func (req listBootstrapReq) validate() error {
+	if req.token == "" {
+		return ui.ErrUnauthorizedAccess
+	}
+
+	return nil
+}
+
+type updateBootstrapReq struct {
+	token   string
+	id      string
+	Name    string `json:"name"`
+	Content string `json:"content"`
+}
+
+func (req updateBootstrapReq) validate() error {
+	if req.token == "" {
+		return ui.ErrUnauthorizedAccess
+	}
+
+	if req.id == "" {
+		return ui.ErrMalformedEntity
+	}
+
+	return nil
+}
+
+type updateBootstrapCertReq struct {
+	token      string
+	thingID    string
+	ClientCert string `json:"clientCert"`
+	ClientKey  string `json:"clientKey"`
+	CACert     string `json:"CAcert"`
+}
+
+func (req updateBootstrapCertReq) validate() error {
+	if req.token == "" {
+		return ui.ErrUnauthorizedAccess
+	}
+
+	if req.thingID == "" {
+		return ui.ErrMalformedEntity
+	}
+
+	return nil
+}
+
+type updateBootstrapConnReq struct {
+	token    string
+	id       string
+	Channels []string `json:"channels"`
+}
+
+func (req updateBootstrapConnReq) validate() error {
+	if req.token == "" {
+		return ui.ErrUnauthorizedAccess
+	}
+
+	if req.id == "" {
+		return ui.ErrMalformedEntity
+	}
+
+	return nil
+}
+
+type createBootstrapReq struct {
+	token       string
+	ThingID     string   `json:"thingID"`
+	ExternalID  string   `json:"externalID"`
+	ExternalKey string   `json:"externalKey"`
+	Channels    []string `json:"channels"`
+	Name        string   `json:"name"`
+	Content     string   `json:"content"`
+	ClientCert  string   `json:"clientCert"`
+	ClientKey   string   `json:"clientKey"`
+	CACert      string   `json:"CAcert"`
+}
+
+func (req createBootstrapReq) validate() error {
+	if req.token == "" {
+		return ui.ErrUnauthorizedAccess
+	}
+
+	if req.ExternalID == "" {
+		return ui.ErrMalformedEntity
+	}
+
+	if req.ExternalKey == "" {
+		return ui.ErrMalformedEntity
+	}
+
+	return nil
+}

@@ -875,3 +875,128 @@ func (lm *loggingMiddleware) ListDeletedClients(ctx context.Context, token strin
 
 	return lm.svc.ListDeletedClients(ctx, token)
 }
+
+// GetRemoteTerminal adds logging middleware to remote terminal.
+func (lm *loggingMiddleware) GetRemoteTerminal(ctx context.Context, id string) (res []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method remote_terminal with id %s took %s to complete", id, time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.GetRemoteTerminal(ctx, id)
+}
+
+// ProcessTerminalCommand adds logging middleware to async function ProcessTerminalCommand.
+func (lm *loggingMiddleware) ProcessTerminalCommand(ctx context.Context, id, token, command string, res chan string) (err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method remote_terminal took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.ProcessTerminalCommand(ctx, id, token, command, res)
+}
+
+// CreateBootstrap adds logging middleware to create bootstrap method.
+func (lm *loggingMiddleware) CreateBootstrap(ctx context.Context, token string, config ...sdk.BootstrapConfig) (data []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method create_bootstrap took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.CreateBootstrap(ctx, token, config...)
+}
+
+// DeleteBootstrap adds logging middleware to delete bootstrap method.
+func (lm *loggingMiddleware) DeleteBootstrap(ctx context.Context, token string, id string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method delete_bootstrap took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.DeleteBootstrap(ctx, token, id)
+}
+
+// ListBootstrap adds logging middleware to list bootstrap method.
+func (lm *loggingMiddleware) ListBootstrap(ctx context.Context, token string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method list_bootstrap took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.ListBootstrap(ctx, token)
+}
+
+// UpdateBootstrap adds logging middleware to update bootstrap method.
+func (lm *loggingMiddleware) UpdateBootstrap(ctx context.Context, token string, config sdk.BootstrapConfig) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method update_bootstrap took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.UpdateBootstrap(ctx, token, config)
+}
+
+// UpdateBootstrapCerts adds logging middleware to update bootstrap certs method.
+func (lm *loggingMiddleware) UpdateBootstrapCerts(ctx context.Context, token string, config sdk.BootstrapConfig) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method update_bootstrap_certs took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.UpdateBootstrapCerts(ctx, token, config)
+}
+
+// UpdateBootstrapConnections adds logging middleware to update bootstrap connections method.
+func (lm *loggingMiddleware) UpdateBootstrapConnections(ctx context.Context, token string, config sdk.BootstrapConfig) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method update_bootstrap_connections took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.UpdateBootstrapConnections(ctx, token, config)
+}
+
+// ViewBootstrap adds logging middleware to view bootstrap method.
+func (lm *loggingMiddleware) ViewBootstrap(ctx context.Context, token string, id string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method view_bootstrap took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.ViewBootstrap(ctx, token, id)
+}

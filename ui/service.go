@@ -11,11 +11,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"log"
+	"sync"
+	"time"
 
 	"golang.org/x/exp/slices"
 
+	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/mainflux/agent/pkg/bootstrap"
 	"github.com/mainflux/mainflux/pkg/errors"
 	"github.com/mainflux/mainflux/pkg/messaging"
+	"github.com/mainflux/senml"
 
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
 )
@@ -44,7 +50,7 @@ var (
 	thingActions = []string{"m_read", "m_write"}
 )
 
-// Service specifies coap service API.
+// Service specifies service API.
 type Service interface {
 	// Index displays the landing page of the UI.
 	Index(ctx context.Context, token string) ([]byte, error)
@@ -175,6 +181,24 @@ type Service interface {
 	WsConnection(ctx context.Context, token, chID, thKey string) ([]byte, error)
 	// ListDeletedClients retrieves a list of clients that have been deleted.
 	ListDeletedClients(ctx context.Context, token string) ([]byte, error)
+	// CreateBootstrap creates a new bootstrap config.
+	CreateBootstrap(ctx context.Context, token string, config ...sdk.BootstrapConfig) ([]byte, error)
+	// ListBootstrap retrieves all bootstrap configs.
+	ListBootstrap(ctx context.Context, token string) ([]byte, error)
+	// UpdateBootstrap allows update of bootstrap name and content.
+	UpdateBootstrap(ctx context.Context, token string, config sdk.BootstrapConfig) ([]byte, error)
+	// UpdateBootstrapConnections updates connected channels on bootstrap configs.
+	UpdateBootstrapConnections(ctx context.Context, token string, config sdk.BootstrapConfig) ([]byte, error)
+	// UpdateBootstrapCerts updates bootstrap certs.
+	UpdateBootstrapCerts(ctx context.Context, token string, config sdk.BootstrapConfig) ([]byte, error)
+	// DeleteBootstrap deletes bootstrap config given an id.
+	DeleteBootstrap(ctx context.Context, token, id string) ([]byte, error)
+	// ViewBootstrap retrieves a bootstrap config by thing id.
+	ViewBootstrap(ctx context.Context, token, id string) ([]byte, error)
+	// GetRemoteTerminal returns remote terminal for a bootstrap config with mainflux agent installed.
+	GetRemoteTerminal(ctx context.Context, id string) ([]byte, error)
+	// ProcessTerminalCommand sends mqtt command to agent and retrieves a response asynchronously.
+	ProcessTerminalCommand(ctx context.Context, id, token, command string, res chan string) error
 }
 
 var _ Service = (*uiService)(nil)
@@ -1399,4 +1423,231 @@ func (gs *uiService) ListDeletedClients(ctx context.Context, token string) ([]by
 	}
 
 	return btpl.Bytes(), nil
+}
+
+func (us *uiService) GetRemoteTerminal(ctx context.Context, id string) ([]byte, error) {
+	tmpl, err := us.parseTemplate("remoteTerminal", "terminal.html")
+	if err != nil {
+		return []byte{}, err
+	}
+	data := struct {
+		NavbarActive string
+		ThingID      string
+	}{
+		NavbarActive: "bootstraps",
+		ThingID:      id,
+	}
+	var btpl bytes.Buffer
+	if err := tmpl.ExecuteTemplate(&btpl, "remoteTerminal", data); err != nil {
+		println(err.Error())
+	}
+
+	return btpl.Bytes(), nil
+}
+
+func (us *uiService) ProcessTerminalCommand(ctx context.Context, id, tkn, command string, res chan string) error {
+	cfg, err := us.sdk.ViewBootstrap(id, tkn)
+	if err != nil {
+		return err
+	}
+
+	var content bootstrap.ServicesConfig
+
+	if err := json.Unmarshal([]byte(cfg.Content), &content); err != nil {
+		return err
+	}
+
+	channels, ok := cfg.Channels.([]sdk.Channel)
+	if !ok {
+		return errors.New("invalid channels")
+	}
+
+	pubTopic := fmt.Sprintf("channels/%s/messages/req", channels[0].ID)
+	subTopic := fmt.Sprintf("channels/%s/messages/res/#", channels[0].ID)
+
+	opts := mqtt.NewClientOptions().SetCleanSession(true).SetAutoReconnect(true)
+
+	opts.AddBroker(content.Agent.MQTT.URL)
+	if content.Agent.MQTT.Username == "" || content.Agent.MQTT.Password == "" {
+		opts.SetUsername(cfg.ThingID)
+		opts.SetPassword(cfg.ThingKey)
+	} else {
+		opts.SetUsername(content.Agent.MQTT.Username)
+		opts.SetPassword(content.Agent.MQTT.Password)
+	}
+
+	opts.SetClientID(fmt.Sprintf("ui-terminal-%s", cfg.ThingID))
+	client := mqtt.NewClient(opts)
+
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		return token.Error()
+	}
+
+	req := []senml.Record{
+		{BaseName: "1", Name: "exec", StringValue: &command},
+	}
+	reqByte, err1 := json.Marshal(req)
+	if err1 != nil {
+		return err1
+	}
+
+	token := client.Publish(pubTopic, 0, false, string(reqByte))
+	token.Wait()
+
+	if token.Error() != nil {
+		return token.Error()
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	errChan := make(chan error)
+
+	client.Subscribe(subTopic, 0, func(c mqtt.Client, m mqtt.Message) {
+		var data []senml.Record
+		if err := json.Unmarshal(m.Payload(), &data); err != nil {
+			errChan <- err
+		}
+		res <- *data[0].StringValue
+		wg.Done()
+	})
+
+	select {
+	case <-ctx.Done():
+		log.Println("ProcessTerminalCommand canceled")
+	case <-time.After(time.Second * 5):
+		log.Println("Timeout occurred")
+		res <- "timeout"
+	case err := <-errChan:
+		return err
+	case <-res:
+		wg.Wait()
+	}
+
+	client.Disconnect(250)
+	return nil
+}
+
+func (us *uiService) ListBootstrap(ctx context.Context, token string) ([]byte, error) {
+	tpl, err := us.parseTemplate("bootstraps", "bootstraps.html")
+	if err != nil {
+		return []byte{}, err
+	}
+	filter := sdk.PageMetadata{
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
+	}
+	bootstraps, err := us.sdk.Bootstraps(filter, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	things, err := us.sdk.Things(filter, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	data := struct {
+		NavbarActive string
+		Bootstraps   []sdk.BootstrapConfig
+		Things       []sdk.Thing
+	}{
+		"bootstraps",
+		bootstraps.Configs,
+		things.Things,
+	}
+
+	var btpl bytes.Buffer
+	if err := tpl.ExecuteTemplate(&btpl, "bootstraps", data); err != nil {
+		println(err.Error())
+	}
+
+	return btpl.Bytes(), nil
+}
+func (us *uiService) ViewBootstrap(ctx context.Context, token, id string) ([]byte, error) {
+	tpl, err := us.parseTemplate("bootstrap", "bootstrap.html")
+	if err != nil {
+		return []byte{}, err
+	}
+
+	bootstrap, err := us.sdk.ViewBootstrap(id, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	switch channels := bootstrap.Channels.(type) {
+	case []sdk.Channel:
+		var strChannels []string
+		for _, chann := range channels {
+			strChannels = append(strChannels, chann.ID)
+		}
+		bootstrap.Channels = strChannels
+	case []string:
+		bootstrap.Channels = channels
+	case nil:
+		bootstrap.Channels = []string{}
+	default:
+		return nil, errors.New("invalid channels")
+	}
+
+	data := struct {
+		NavbarActive string
+		Bootstrap    sdk.BootstrapConfig
+	}{
+		"bootstraps",
+		bootstrap,
+	}
+
+	var btpl bytes.Buffer
+	if err := tpl.ExecuteTemplate(&btpl, "bootstrap", data); err != nil {
+		println(err.Error())
+	}
+
+	return btpl.Bytes(), nil
+}
+
+func (us *uiService) CreateBootstrap(ctx context.Context, token string, configs ...sdk.BootstrapConfig) ([]byte, error) {
+	for _, cfg := range configs {
+		_, err := us.sdk.AddBootstrap(cfg, token)
+		if err != nil {
+			return []byte{}, err
+		}
+	}
+	return us.ListBootstrap(ctx, token)
+}
+
+func (us *uiService) DeleteBootstrap(ctx context.Context, token, id string) ([]byte, error) {
+	if err := us.sdk.RemoveBootstrap(id, token); err != nil {
+		return []byte{}, err
+	}
+
+	return us.ListBootstrap(ctx, token)
+}
+
+func (us *uiService) UpdateBootstrap(ctx context.Context, token string, config sdk.BootstrapConfig) ([]byte, error) {
+	if err := us.sdk.UpdateBootstrap(config, token); err != nil {
+		return []byte{}, err
+	}
+
+	return us.ViewBootstrap(ctx, token, config.ThingID)
+}
+
+func (us *uiService) UpdateBootstrapCerts(ctx context.Context, token string, config sdk.BootstrapConfig) ([]byte, error) {
+	if _, err := us.sdk.UpdateBootstrapCerts(config.ThingID, config.ClientCert, config.ClientKey, config.CACert, token); err != nil {
+		return []byte{}, err
+	}
+
+	return us.ViewBootstrap(ctx, token, config.ThingID)
+}
+
+func (us *uiService) UpdateBootstrapConnections(ctx context.Context, token string, config sdk.BootstrapConfig) ([]byte, error) {
+	channels, ok := config.Channels.([]string)
+	if !ok {
+		return nil, errors.New("invalid channel")
+	}
+	if err := us.sdk.UpdateBootstrapConnection(config.ThingID, channels, token); err != nil {
+		return []byte{}, err
+	}
+
+	return us.ViewBootstrap(ctx, token, config.ThingID)
 }

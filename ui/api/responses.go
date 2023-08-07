@@ -13,6 +13,7 @@ import (
 var (
 	_ mainflux.Response = (*uiRes)(nil)
 	_ mainflux.Response = (*tokenRes)(nil)
+	_ mainflux.Response = (*terminalResponse)(nil)
 )
 
 type uiRes struct {
@@ -67,4 +68,21 @@ func (res uiRes) Cookies() []*http.Cookie {
 
 func (res uiRes) Empty() bool {
 	return res.html == nil
+}
+
+type terminalResponse struct {
+	Command string `json:"command"`
+	Result  string `json:"result"`
+}
+
+func (*terminalResponse) Code() int {
+	return http.StatusOK
+}
+
+func (*terminalResponse) Empty() bool {
+	return false
+}
+
+func (*terminalResponse) Headers() map[string]string {
+	return map[string]string{}
 }

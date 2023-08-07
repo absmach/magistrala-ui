@@ -36,6 +36,7 @@ const (
 	defReaderPort      = ""
 	defThingsPort      = "9000"
 	defUsersPort       = "9002"
+	defBootstrapPort   = "9013"
 	defTLSVerification = "false"
 	defBaseURL         = "http://localhost"
 	defInstanceID      = ""
@@ -55,6 +56,7 @@ const (
 	envBaseURL         = "MF_SDK_BASE_URL"
 	envInstanceID      = "MF_UI_INSTANCE_ID"
 	envHostURL         = "MF_UI_HOST_URL"
+	envBootstrapPort   = "MF_BOOTSTRAP_PORT"
 )
 
 type config struct {
@@ -152,6 +154,7 @@ func loadConfig() config {
 			HostURL:         mainflux.Env(envHostURL, defHostURL),
 			MsgContentType:  sdk.ContentType(string(sdk.CTJSONSenML)),
 			TLSVerification: mfTLS,
+			BootstrapURL:    fmt.Sprintf("%s:%s/things", baseURL, mainflux.Env(envBootstrapPort, defBootstrapPort)),
 		},
 	}
 }
