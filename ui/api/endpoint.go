@@ -14,7 +14,7 @@ import (
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
 )
 
-func GetErrorMessage(_ context.Context, err error) string {
+func getErrorMessage(err error) string {
 	switch {
 	case errors.Contains(err, errAuthentication):
 		return "wrong Email"
@@ -67,7 +67,7 @@ func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		res, err := svc.UpdatePassword(ctx, req.token, req.OldPass, req.NewPass)
 		if err != nil {
-			errorMessage := GetErrorMessage(ctx, err)
+			errorMessage := getErrorMessage(err)
 			resp, err := svc.PasswordUpdate(ctx, errorMessage)
 			return uiRes{
 				code:    http.StatusBadRequest,
@@ -115,7 +115,7 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		token, err := svc.Token(ctx, user)
 		if err != nil {
-			errorMessage := GetErrorMessage(ctx, err)
+			errorMessage := getErrorMessage(err)
 			resp, err := svc.Login(ctx, errorMessage)
 			return uiRes{
 				code:    http.StatusBadRequest,
