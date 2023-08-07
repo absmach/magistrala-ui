@@ -612,8 +612,8 @@ func (mm *metricsMiddleware) WsConnection(ctx context.Context, token, chID, thKe
 
 func (mm *metricsMiddleware) ListDeletedClients(ctx context.Context, token string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		mm.counter.With("method", "list_users").Add(1)
-		mm.latency.With("method", "list_users").Observe(time.Since(begin).Seconds())
+		mm.counter.With("method", "list_deleted_clients").Add(1)
+		mm.latency.With("method", "list_deleted_clients").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
 	return mm.svc.ListDeletedClients(ctx, token)

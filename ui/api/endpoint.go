@@ -14,6 +14,16 @@ import (
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
 )
 
+func GetErrorMessage(_ context.Context, err error) string {
+	switch {
+	case errors.Contains(err, errAuthentication):
+		return "wrong Email"
+	case errors.Contains(err, errSecretError):
+		return "wrong password"
+	}
+	return "internal server error"
+}
+
 func indexEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(indexReq)
@@ -57,15 +67,13 @@ func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		res, err := svc.UpdatePassword(ctx, req.token, req.OldPass, req.NewPass)
 		if err != nil {
-			if errors.Contains(err, errSecretError) {
-				resp, err := svc.PasswordUpdate(ctx, "Wrong Old Password")
-				return uiRes{
-					code:    http.StatusBadRequest,
-					html:    resp,
-					headers: map[string]string{"Location": "/password"},
-				}, err
-			}
-			return nil, err
+			errorMessage := GetErrorMessage(ctx, err)
+			resp, err := svc.PasswordUpdate(ctx, errorMessage)
+			return uiRes{
+				code:    http.StatusBadRequest,
+				html:    resp,
+				headers: map[string]string{"Location": "/password"},
+			}, err
 		}
 
 		cookies := []*http.Cookie{
@@ -107,22 +115,13 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		token, err := svc.Token(ctx, user)
 		if err != nil {
-			if errors.Contains(err, errAuthentication) {
-				resp, err := svc.Login(ctx, "Wrong Email")
-				return uiRes{
-					code:    http.StatusBadRequest,
-					html:    resp,
-					headers: map[string]string{"Location": "/login"},
-				}, err
-			} else if errors.Contains(err, errSecretError) {
-				resp, err := svc.Login(ctx, "Wrong Password")
-				return uiRes{
-					code:    http.StatusBadRequest,
-					html:    resp,
-					headers: map[string]string{"Location": "/login"},
-				}, err
-			}
-			return nil, errors.Wrap(errUnauthorized, err)
+			errorMessage := GetErrorMessage(ctx, err)
+			resp, err := svc.Login(ctx, errorMessage)
+			return uiRes{
+				code:    http.StatusBadRequest,
+				html:    resp,
+				headers: map[string]string{"Location": "/login"},
+			}, err
 		}
 
 		accessToken := token.AccessToken

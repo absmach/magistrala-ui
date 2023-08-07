@@ -133,8 +133,11 @@ type Service interface {
 	ConnectChannel(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
 	// DisconnectChannel disconnects a channel from a thing specified by ID.
 	DisconnectChannel(ctx context.Context, thID, chID, token string) ([]byte, error)
+	// AddThingsPolicy adds a thing's policy on a channel.
 	AddThingsPolicy(ctx context.Context, token string, Policy sdk.Policy) ([]byte, error)
+	// DeleteThingsPolicy removes a thing's policy on a channel
 	DeleteThingsPolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error)
+	// ListThingsPolicies retrieves the policies of things.
 	ListThingsPolicies(ctx context.Context, token string) ([]byte, error)
 	// UpdateThingsPolicy updates the policy that a thing has over a channel.
 	UpdateThingsPolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error)
@@ -156,7 +159,7 @@ type Service interface {
 	EnableGroup(ctx context.Context, token, id string) ([]byte, error)
 	// DisableGroup updates the status of the group to disabled.
 	DisableGroup(ctx context.Context, token, id string) ([]byte, error)
-	// AddPolicy updates a user's policy on a group effectively adding the user to the group.
+	// AddPolicy adds a user's policy on a group effectively adding the user to the group.
 	AddPolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error)
 	// UpdatePolicy updates the policy a user has over a group.
 	UpdatePolicy(ctx context.Context, token string, policy sdk.Policy) ([]byte, error)
