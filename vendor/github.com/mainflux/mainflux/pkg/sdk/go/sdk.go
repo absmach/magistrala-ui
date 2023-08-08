@@ -804,7 +804,7 @@ type SDK interface {
 	//  fmt.Println(err)
 	SetContentType(ct ContentType) errors.SDKError
 
-	// Health returns things service health check.
+	// Health returns service health check.
 	//
 	// example:
 	//  health, _ := sdk.Health("service")
