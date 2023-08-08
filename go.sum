@@ -67,8 +67,10 @@ github.com/hashicorp/go-secure-stdlib/strutil v0.1.2 h1:kes8mmyCpxJsI7FTwtzRqEy9
 github.com/hashicorp/go-sockaddr v1.0.2 h1:ztczhD1jLxIRjVejw8gFomI1BQZOe2WoVOu0SyteCQc=
 github.com/hashicorp/hcl v1.0.0 h1:0Anlzjpi4vEasTeNFn2mLJgTSwt0+6sfsiTG8qcWGx4=
 github.com/hashicorp/vault/api v1.9.2 h1:YjkZLJ7K3inKgMZ0wzCU9OHqc+UqMQyXsPXnf3Cl2as=
+github.com/jackc/pgio v1.0.0 h1:g12B9UwVnzGhueNavwioyEEpAmqMe1E/BN9ES+8ovkE=
 github.com/jackc/pgpassfile v1.0.0 h1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM=
 github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a h1:bbPeKD0xmW/Y25WS6cokEszi5g+S0QxI/d45PkRi7Nk=
+github.com/jackc/pgtype v1.14.0 h1:y+xUdabmyMkJLyApYuPj38mW+aAIqCe5uuBB51rH3Vw=
 github.com/jackc/pgx/v5 v5.4.1 h1:oKfB/FhuVtit1bBM3zNRRsZ925ZkMN3HXL+LgLUM9lE=
 github.com/jmoiron/sqlx v1.3.5 h1:vFFPA71p1o5gAeqtEAwLU4dnX2napprKtHr7PYIcN3g=
 github.com/klauspost/compress v1.16.7 h1:2mk3MPGNzKyxErAw8YaohYh69+pa4sIQSC0fPGCFR9I=
@@ -92,8 +94,8 @@ github.com/mainflux/agent v0.11.1-0.20230724130550-0cd3f4c8c27c h1:qDlZcB6dQjRk/
 github.com/mainflux/agent v0.11.1-0.20230724130550-0cd3f4c8c27c/go.mod h1:P3Vcibeywrzbu4B72ZRX2AdZDUW1oJF2ll3qwr8hW+c=
 github.com/mainflux/export v0.1.1-0.20230724124847-67d0bc7f38cb h1:+Zz1+/lX3bmt2AWyJHG2yVsJ7vqa0Q2XIYagG1dHj5c=
 github.com/mainflux/export v0.1.1-0.20230724124847-67d0bc7f38cb/go.mod h1:speJE1lnq2emg5o4DqEoOe6nOgFRd0AEYSBBV2bCGKg=
-github.com/mainflux/mainflux v0.0.0-20230804132554-ca52a5a38d19 h1:efZ+8jD4S9v3jWEWl/M4RDJuu1mv/0eep6VKmg8p5io=
-github.com/mainflux/mainflux v0.0.0-20230804132554-ca52a5a38d19/go.mod h1:N1M7LhMt/mvgjn0Z5m2kRfJir6aTv0mDOJZPNKVcacI=
+github.com/mainflux/mainflux v0.0.0-20230808124232-b4b625ddb125 h1:FhaGUsQtK7LjbcKcX+aQ4i95ORWLII7D/FGn6XpK2JM=
+github.com/mainflux/mainflux v0.0.0-20230808124232-b4b625ddb125/go.mod h1:N1M7LhMt/mvgjn0Z5m2kRfJir6aTv0mDOJZPNKVcacI=
 github.com/mainflux/senml v1.5.0 h1:GAd1y1eMohfa6sVYcr2iQfVfkkh9l/q7B1TWF5L68xs=
 github.com/mainflux/senml v1.5.0/go.mod h1:SMX76mM5yenjLVjZOM27+njCGkP+AA64O46nRQiBRlE=
 github.com/matttproud/golang_protobuf_extensions v1.0.4 h1:mmDVorXM7PCGKw94cs5zkfA9PSy5pEvNWRP0ET0TIVo=

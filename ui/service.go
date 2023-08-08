@@ -134,6 +134,7 @@ type Service interface {
 	ConnectThing(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
 	// ShareThing shares things connected to a channel with a user
 	ShareThing(ctx context.Context, token, chanID, userID string, actions []string) ([]byte, error)
+	// DisconnectThing disconnects a thing from a channel specified by ID.
 	DisconnectThing(ctx context.Context, thID, chID, token string) ([]byte, error)
 	// Connect Channel connects a channel to a thing specified by ID.
 	ConnectChannel(ctx context.Context, token string, connIDs sdk.ConnectionIDs) ([]byte, error)
@@ -252,6 +253,12 @@ func (gs *uiService) parseTemplate(name string, tmpls ...string) (tpl *template.
 			authorizeThing, _, _ := gs.sdk.AuthorizeThing(aReq, "")
 
 			return authorizeThing
+		},
+		"serviceUnavailable": func(service string) bool {
+			if _, err := gs.sdk.Health(service); err != nil {
+				return true
+			}
+			return false
 		},
 	})
 
