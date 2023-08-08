@@ -254,7 +254,7 @@ func (gs *uiService) parseTemplate(name string, tmpls ...string) (tpl *template.
 
 			return authorizeThing
 		},
-		"disableService": func(service string) bool {
+		"serviceUnavailable": func(service string) bool {
 			if _, err := gs.sdk.Health(service); err != nil {
 				return true
 			}
