@@ -123,7 +123,7 @@ github.com/mainflux/agent/pkg/terminal
 # github.com/mainflux/export v0.1.1-0.20230724124847-67d0bc7f38cb
 ## explicit; go 1.20
 github.com/mainflux/export/pkg/config
-# github.com/mainflux/mainflux v0.0.0-20230804132554-ca52a5a38d19
+# github.com/mainflux/mainflux v0.0.0-20230804132554-ca52a5a38d19 => /home/ian/Mainflux-Organization/MyMainflux/mainflux
 ## explicit; go 1.20
 github.com/mainflux/mainflux
 github.com/mainflux/mainflux/bootstrap
@@ -355,3 +355,4 @@ google.golang.org/protobuf/types/descriptorpb
 google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/timestamppb
+# github.com/mainflux/mainflux => /home/ian/Mainflux-Organization/MyMainflux/mainflux

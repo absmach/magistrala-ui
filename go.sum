@@ -92,8 +92,6 @@ github.com/mainflux/agent v0.11.1-0.20230724130550-0cd3f4c8c27c h1:qDlZcB6dQjRk/
 github.com/mainflux/agent v0.11.1-0.20230724130550-0cd3f4c8c27c/go.mod h1:P3Vcibeywrzbu4B72ZRX2AdZDUW1oJF2ll3qwr8hW+c=
 github.com/mainflux/export v0.1.1-0.20230724124847-67d0bc7f38cb h1:+Zz1+/lX3bmt2AWyJHG2yVsJ7vqa0Q2XIYagG1dHj5c=
 github.com/mainflux/export v0.1.1-0.20230724124847-67d0bc7f38cb/go.mod h1:speJE1lnq2emg5o4DqEoOe6nOgFRd0AEYSBBV2bCGKg=
-github.com/mainflux/mainflux v0.0.0-20230804132554-ca52a5a38d19 h1:efZ+8jD4S9v3jWEWl/M4RDJuu1mv/0eep6VKmg8p5io=
-github.com/mainflux/mainflux v0.0.0-20230804132554-ca52a5a38d19/go.mod h1:N1M7LhMt/mvgjn0Z5m2kRfJir6aTv0mDOJZPNKVcacI=
 github.com/mainflux/senml v1.5.0 h1:GAd1y1eMohfa6sVYcr2iQfVfkkh9l/q7B1TWF5L68xs=
 github.com/mainflux/senml v1.5.0/go.mod h1:SMX76mM5yenjLVjZOM27+njCGkP+AA64O46nRQiBRlE=
 github.com/matttproud/golang_protobuf_extensions v1.0.4 h1:mmDVorXM7PCGKw94cs5zkfA9PSy5pEvNWRP0ET0TIVo=

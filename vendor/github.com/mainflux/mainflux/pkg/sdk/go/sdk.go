@@ -807,9 +807,9 @@ type SDK interface {
 	// Health returns things service health check.
 	//
 	// example:
-	//  health, _ := sdk.Health()
+	//  health, _ := sdk.Health("service")
 	//  fmt.Println(health)
-	Health() (HealthInfo, errors.SDKError)
+	Health(service string) (HealthInfo, errors.SDKError)
 
 	// AddBootstrap add bootstrap configuration
 	//

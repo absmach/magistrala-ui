@@ -94,3 +94,8 @@ footer {
   .close-button:hover {
       color: black;
   }
+  .disabled-item {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  
