@@ -1,0 +1,34 @@
+# Copyright (c) Mainflux
+# SPDX-License-Identifier: Apache-2.0
+
+version: "3.7"
+
+networks:
+  mainflux-base-net:
+    driver: bridge
+
+services:
+  ui:
+    image: mainflux/ui:${MF_RELEASE_TAG}
+    container_name: mainflux-ui
+    restart: on-failure
+    ports:
+      - ${MF_GUI_PORT}:${MF_GUI_PORT}
+    networks:
+      - mainflux-base-net
+    environment:
+      MF_GUI_LOG_LEVEL: ${MF_GUI_LOG_LEVEL}
+      MF_GUI_CLIENT_TLS: ${MF_GUI_CLIENT_TLS}
+      MF_GUI_CA_CERTS: ${MF_GUI_CA_CERTS}
+      MF_GUI_PORT: ${MF_GUI_PORT}
+      MF_GUI_REDIRECT_URL: ${MF_GUI_REDIRECT_URL}
+      MF_JAEGER_URL: ${MF_JAEGER_URL}
+      MF_HTTP_ADAPTER_URL: ${MF_HTTP_ADAPTER_URL}
+      MF_READER_URL: ${MF_READER_URL}
+      MF_THINGS_URL: ${MF_THINGS_URL}
+      MF_USERS_URL: ${MF_USERS_URL}
+      MF_BOOTSTRAP_URL: ${MF_BOOTSTRAP_URL}
+      MF_VERIFICATION_TLS: ${MF_VERIFICATION_TLS}
+      MF_SDK_BASE_URL: ${MF_SDK_BASE_URL}
+      MF_UI_INSTANCE_ID: ${MF_UI_INSTANCE_ID}
+      MF_UI_HOST_URL: ${MF_UI_HOST_URL}

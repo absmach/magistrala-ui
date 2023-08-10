@@ -32,15 +32,14 @@ const (
 	defPort            = "9090"
 	defRedirectURL     = "http://localhost:9090/"
 	defJaegerURL       = ""
-	defHTTPAdapterPort = "8008"
-	defReaderPort      = ""
-	defThingsPort      = "9000"
-	defUsersPort       = "9002"
-	defBootstrapPort   = "9013"
 	defTLSVerification = "false"
-	defBaseURL         = "http://localhost"
 	defInstanceID      = ""
 	defHostURL         = "http://localhost:9090"
+	defHTTPAdapterURL  = "http://localhost:8008"
+	defReaderURL       = ""
+	defThingsURL       = "http://localhost:9000"
+	defUsersURL        = "http://localhost:9002"
+	defBootstrapURL    = "http://localhost:9013"
 
 	envLogLevel        = "MF_GUI_LOG_LEVEL"
 	envClientTLS       = "MF_GUI_CLIENT_TLS"
@@ -48,19 +47,17 @@ const (
 	envPort            = "MF_GUI_PORT"
 	envRedirectURL     = "MF_GUI_REDIRECT_URL"
 	envJaegerURL       = "MF_JAEGER_URL"
-	envHTTPAdapterPort = "MF_HTTP_ADAPTER_PORT"
-	envReaderPort      = "MF_READER_PORT"
-	envThingsPort      = "MF_THINGS_HTTP_PORT"
-	envUsersPort       = "MF_USERS_HTTP_PORT"
 	envTLSVerification = "MF_VERIFICATION_TLS"
-	envBaseURL         = "MF_SDK_BASE_URL"
 	envInstanceID      = "MF_UI_INSTANCE_ID"
 	envHostURL         = "MF_UI_HOST_URL"
-	envBootstrapPort   = "MF_BOOTSTRAP_PORT"
+	envHTTPAdapterURL  = "MF_HTTP_ADAPTER_URL"
+	envReaderURL       = "MF_READER_URL"
+	envThingsURL       = "MF_THINGS_URL"
+	envUsersURL        = "MF_USERS_URL"
+	envBootstrapURL    = "MF_BOOTSTRAP_URL"
 )
 
 type config struct {
-	baseURL     string
 	logLevel    string
 	port        string
 	redirectURL string
@@ -136,9 +133,7 @@ func loadConfig() config {
 	if err != nil {
 		log.Fatalf("Invalid value passed for %s\n", envTLSVerification)
 	}
-	baseURL := mainflux.Env(envBaseURL, defBaseURL)
 	return config{
-		baseURL:     baseURL,
 		logLevel:    mainflux.Env(envLogLevel, defLogLevel),
 		port:        mainflux.Env(envPort, defPort),
 		redirectURL: mainflux.Env(envRedirectURL, defRedirectURL),
@@ -147,14 +142,14 @@ func loadConfig() config {
 		jaegerURL:   mainflux.Env(envJaegerURL, defJaegerURL),
 		instanceID:  mainflux.Env(envInstanceID, defInstanceID),
 		sdkConfig: sdk.Config{
-			HTTPAdapterURL:  fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envHTTPAdapterPort, defHTTPAdapterPort)),
-			ReaderURL:       fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envReaderPort, defReaderPort)),
-			ThingsURL:       fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envThingsPort, defThingsPort)),
-			UsersURL:        fmt.Sprintf("%s:%s", baseURL, mainflux.Env(envUsersPort, defUsersPort)),
+			HTTPAdapterURL:  mainflux.Env(envHTTPAdapterURL, defHTTPAdapterURL),
+			ReaderURL:       mainflux.Env(envReaderURL, defReaderURL),
+			ThingsURL:       mainflux.Env(envThingsURL, defThingsURL),
+			UsersURL:        mainflux.Env(envUsersURL, defUsersURL),
 			HostURL:         mainflux.Env(envHostURL, defHostURL),
 			MsgContentType:  sdk.ContentType(string(sdk.CTJSONSenML)),
 			TLSVerification: mfTLS,
-			BootstrapURL:    fmt.Sprintf("%s:%s/things", baseURL, mainflux.Env(envBootstrapPort, defBootstrapPort)),
+			BootstrapURL:    mainflux.Env(envBootstrapURL, defBootstrapURL),
 		},
 	}
 }
