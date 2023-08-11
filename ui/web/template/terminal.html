@@ -1,93 +1,87 @@
 {{define "remoteTerminal"}}
-<!-- template.html -->
-<!DOCTYPE html>
-<html>
-    {{template "header"}}
-<head>
-  <title>Interactive Terminal</title>
-  <style>
-    .terminal {
-      color: #fff;
-      width: 100%;
-      height: 300px;
-      background-color: #272822;
-      padding: 10px;
-      overflow-y: scroll;
-    }
+<!doctype html>
+<html lang="en">
+{{template "header"}}
+<style>
+  .terminal {
+    color: #fff;
+    width: 100%;
+    height: 300px;
+    background-color: #272822;
+    padding: 10px;
+    overflow-y: scroll;
+  }
 
-    .input-line {
-      display: flex;
-      background-color: #272822;
-    }
+  .input-line {
+    display: flex;
+    background-color: #272822;
+  }
 
-    .input-prefix {
-      color: #f92672;
-      margin-right: 5px;
-    }
+  .input-prefix {
+    color: #f92672;
+    margin-right: 5px;
+  }
 
-    .input-field {
-        width: 90%;
-      flex: 1;
-      color: #fff;
-      background-color: #272822;
-      padding: 10px;
-      border: none;
-      outline: none;
-    }
-  </style>
-</head>
+  .input-field {
+      width: 90%;
+    flex: 1;
+    color: #fff;
+    background-color: #272822;
+    padding: 10px;
+    border: none;
+    outline: none;
+  }
+</style>
+
 <body>
-    <main role="main">
-        <div class="container-fluid">
-            <div class="row">
-                {{template "navbar" .}}
-                <!-- Partial goes here -->
-                <div class="col-md-9">
-                    <div class="terminal">
-                        <!-- Existing terminal content here -->
-                    </div>
-                    <div class="input-line">
-                        <form action="/bootstrap/1/terminal/input" method="POST">
-                            <span class="input-prefix">&gt;</span>
-                            <input class="input-field" name="command" autofocus />
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div> <!-- /container -->
+  {{template "navbar" .}}
+
+  <div class="main-content">
+    <main>
+      <div class="terminal">
+          <!-- Existing terminal content here -->
+      </div>
+      <div class="input-line">
+          <form action="/bootstrap/1/terminal/input" method="POST">
+              <span class="input-prefix">&gt;</span>
+              <input class="input-field" name="command" autofocus />
+          </form>
+      </div>
     </main>
-    {{template "footer"}}
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        var form = document.querySelector('form');
-    
-        form.addEventListener('submit', function(e) {
-          e.preventDefault();
-    
-          var formData = new FormData(form);
-    
-          var xhr = new XMLHttpRequest();
-          xhr.open('POST', '/bootstrap/{{.ThingID}}/terminal/input');
-          xhr.onload = function() {
-            if (xhr.status === 200) {
-              var response = JSON.parse(xhr.responseText);
-    
-              // Update the HTML dynamically with the response
-              var terminal = document.querySelector('.terminal');
-              var commandDiv = document.createElement('div');
-              commandDiv.textContent = response.command;
-              var resultDiv = document.createElement('div');
-              resultDiv.textContent = response.result;
-              terminal.appendChild(commandDiv);
-              terminal.appendChild(resultDiv);
-            } else {
-              // Handle error
-            }
-          };
-          xhr.send(formData);
-        });
+  </div>
+
+  {{template "footer"}}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var form = document.querySelector('form');
+  
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+  
+        var formData = new FormData(form);
+  
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/bootstrap/{{.ThingID}}/terminal/input');
+        xhr.onload = function() {
+          if (xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText);
+  
+            // Update the HTML dynamically with the response
+            var terminal = document.querySelector('.terminal');
+            var commandDiv = document.createElement('div');
+            commandDiv.textContent = response.command;
+            var resultDiv = document.createElement('div');
+            resultDiv.textContent = response.result;
+            terminal.appendChild(commandDiv);
+            terminal.appendChild(resultDiv);
+          } else {
+            // Handle error
+          }
+        };
+        xhr.send(formData);
       });
-    </script>
+    });
+  </script>
 </body>
 </html>
 {{end}}

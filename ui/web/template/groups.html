@@ -1,200 +1,191 @@
 {{define "groups"}}
+
 <!doctype html>
 <html lang="en">
-  <head>
-    {{template "header"}}
-  </head>
+{{template "header"}}
 
-  <body>
-    <main role="main">
-      <div class="container-fluid">
-        <div class="row">
+<body>
+  {{template "navbar" .}}
 
-          {{template "navbar" .}}
+  <div class="main-content">
+    <main>
+      {{ if ne .AlertMessage "" }}
+      <div id="alert-popup" class="alert alert-danger">
+        <span class="close-button" onclick="closeAlertPopup()">&times;</span>
+         <h5 class="alert-messsage">
+          {{ .AlertMessage }}
+         </h5>
+      </div>
+      {{ end }}
 
-          <!-- Partial goes here -->
-          <div class="col-md-9">
-            {{ if ne .AlertMessage "" }}
-            <div id="alert-popup" class="alert alert-danger">
-              <span class="close-button" onclick="closeAlertPopup()">&times;</span>
-               <h5 class="alert-messsage">
-                {{ .AlertMessage }}
-               </h5>
+      <!-- Button trigger modal -->
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGroupModal">
+        Add
+      </button>
+
+      <!-- Modal -->
+      <div class="modal fade" id="addGroupModal" tabindex="-1" role="dialog" aria-labelledby="addGroupModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addGroupModalLabel">Add Group</h5>
             </div>
-            {{ end }}
-
-            <!-- Button trigger modal -->
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGroupModal">
-              Add
-            </button>
-
-            <!-- Modal -->
-            <div class="modal fade" id="addGroupModal" tabindex="-1" role="dialog" aria-labelledby="addGroupModalLabel" aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="addGroupModalLabel">Add Group</h5>
-                  </div>
-                  <div class="modal-body">
-                    <form method="post" onsubmit="return validateForm()">
-                      <div class="mb-3">
-                        <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control" name="name" id="name" placeholder="Group Name" required>
-                      </div>
-                      <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <input type="text" class="form-control" name="description" id="description" placeholder="Group Description">
-                      </div>
-                      <div class="mb-3">
-                        <label for="parentID" class="form-label">Parent ID</label>
-                        <input type="text" name="parentFilter" id="parentFilter" placeholder="Filter by parent ID" oninput="filterItem(this.value,'parentID')">
-                        <select class="form-select" name="parentID" id="parentID">
-                          <option value="">...</option>
-                          {{range .Groups}}
-                            <option value="{{.ID}}">{{.Name}}</option>
-                          {{end}}
-                        </select>
-                      </div>
-                      <div class="mb-3">
-                        <label for="metadata" class="form-label">Metadata</label>
-                        <input type="text" class="form-control" name= "metadata" id="metadata" value="{}">
-                        <div id="metadataHelp" class="form-text">Enter groups metadata in JSON format.</div>
-                        <div id="metadataError" class="error-message"></div>
-                      </div>
-                      <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                  </div>
+            <div class="modal-body">
+              <form method="post" onsubmit="return validateForm()">
+                <div class="mb-3">
+                  <label for="name" class="form-label">Name</label>
+                  <input type="text" class="form-control" name="name" id="name" placeholder="Group Name" required>
                 </div>
-              </div>
-            </div>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGroupsModal">
-              Add Groups
-            </button>
-
-            <!-- Modal -->
-            <div class="modal fade" id="addGroupsModal" tabindex="-1" role="dialog" aria-labelledby="addGroupsModalLabel" aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="addGroupsModalLabel">Add Groups</h5>
-                  </div>
-                  <div class="modal-body">
-                    <form method="post" enctype="multipart/form-data" action="/groups/bulk">
-                      <div class="form-group">
-                        <label for="groupsFile">Add csv file containing groups names.</label>
-                        <input type="file" class="form-control-file" id="groupsFile" name="groupsFile" required>
-                        <button type="submit" value="upload" class="btn btn-primary">Submit</button>
-                      </div>
-                    </form>
-                  </div>
+                <div class="mb-3">
+                  <label for="description" class="form-label">Description</label>
+                  <input type="text" class="form-control" name="description" id="description" placeholder="Group Description">
                 </div>
-              </div>
+                <div class="mb-3">
+                  <label for="parentID" class="form-label">Parent ID</label>
+                  <input type="text" name="parentFilter" id="parentFilter" placeholder="Filter by parent ID" oninput="filterItem(this.value,'parentID')">
+                  <select class="form-select" name="parentID" id="parentID">
+                    <option value="">...</option>
+                    {{range .Groups}}
+                      <option value="{{.ID}}">{{.Name}}</option>
+                    {{end}}
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="metadata" class="form-label">Metadata</label>
+                  <input type="text" class="form-control" name= "metadata" id="metadata" value="{}">
+                  <div id="metadataHelp" class="form-text">Enter groups metadata in JSON format.</div>
+                  <div id="metadataError" class="error-message"></div>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
             </div>
-            <div class="table-container">
-              <table id="itemsTable" class="table table-striped">
-                <thead>
-                  <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">NAME</th>
-                    <th scope="col">ID</th>
-                    <th scope="col"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {{$userID := .User.ID}}
-                  {{range $i, $g := .Groups}}
-                    {{$disableButton := true}}
-                    <tr>
-                      <th scope="row">{{$i}}</th>
-                      <td>{{$g.Name}}</td>
-                      <td>
-                        <div class="copy-con-container">
-                          <a href={{printf "/groups/%s" $g.ID}}>{{$g.ID}}</a>
-                          <button class="copy-icon" onclick="copyToClipboard(this)">
-                            <i class="far fa-copy"></i>
-                          </button>
-                        </div>
-                      </td>
-                      <td>
-                        {{if (authorizeUser $userID $g.ID "g_delete" "group")}}
-                          {{$disableButton =false}}
-                        {{end}}
-                        <form action="/groups/disabled" method="post">
-                          <input type="hidden" name="groupID" id="groupID" value="{{$g.ID}}">
-                          <input type="hidden" name="status" id="status" value="disabled">
-                          <button type="submit" class="btn btn-sm" {{if $disableButton}}disabled{{end}}>
-                            <i class="fas fa-trash-alt"></i>
-                          </button>
-                        </form>
-                      </td>
-                    </tr>
-                  {{end}}
-                </tbody>
-              </table>
-            </div>
-          
           </div>
-          <!-- End of partial-->
-
         </div>
-      </div> <!-- /container -->
+      </div>
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGroupsModal">
+        Add Groups
+      </button>
+
+      <!-- Modal -->
+      <div class="modal fade" id="addGroupsModal" tabindex="-1" role="dialog" aria-labelledby="addGroupsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addGroupsModalLabel">Add Groups</h5>
+            </div>
+            <div class="modal-body">
+              <form method="post" enctype="multipart/form-data" action="/groups/bulk">
+                <div class="form-group">
+                  <label for="groupsFile">Add csv file containing groups names.</label>
+                  <input type="file" class="form-control-file" id="groupsFile" name="groupsFile" required>
+                  <button type="submit" value="upload" class="btn btn-primary">Submit</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="table-container">
+        <table id="itemsTable" class="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">NAME</th>
+              <th scope="col">ID</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {{$userID := .User.ID}}
+            {{range $i, $g := .Groups}}
+              {{$disableButton := true}}
+              <tr>
+                <th scope="row">{{$i}}</th>
+                <td>{{$g.Name}}</td>
+                <td>
+                  <div class="copy-con-container">
+                    <a href={{printf "/groups/%s" $g.ID}}>{{$g.ID}}</a>
+                    <button class="copy-icon" onclick="copyToClipboard(this)">
+                      <i class="far fa-copy"></i>
+                    </button>
+                  </div>
+                </td>
+                <td>
+                  {{if (authorizeUser $userID $g.ID "g_delete" "group")}}
+                    {{$disableButton =false}}
+                  {{end}}
+                  <form action="/groups/disabled" method="post">
+                    <input type="hidden" name="groupID" id="groupID" value="{{$g.ID}}">
+                    <input type="hidden" name="status" id="status" value="disabled">
+                    <button type="submit" class="btn btn-sm" {{if $disableButton}}disabled{{end}}>
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
     </main>
+  </div>
 
-    {{template "footer"}}
-
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        new simpleDatatables.DataTable('#itemsTable', {
-          searchable: true,
-          scrollY: "300px",
-          sortable: true,
-          pagination: true,
-        });
+  {{template "footer"}}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      new simpleDatatables.DataTable('#itemsTable', {
+        searchable: true,
+        scrollY: "300px",
+        sortable: true,
+        pagination: true,
       });
+    });
 
-      function validateForm() {
-        var name = document.getElementById("name").value;
-        var metadataInput = document.getElementById("metadata").value;
+    function validateForm() {
+      var name = document.getElementById("name").value;
+      var metadataInput = document.getElementById("metadata").value;
 
-        var nameError = document.getElementById("nameError");
-        var metadataError = document.getElementById("metadataError");
+      var nameError = document.getElementById("nameError");
+      var metadataError = document.getElementById("metadataError");
 
-        var metadata;
+      var metadata;
 
-        nameError.innerHTML = "";
-        metadataError.innerHTML = "";
+      nameError.innerHTML = "";
+      metadataError.innerHTML = "";
 
-        var isValid = true;
-        if (name==="") {
-          nameError.innerHTML= "Field Required!";
-          isValid = false
-        }
-        try {
-          metadata = JSON.parse(metadataInput);
-        }catch(error){
-          metadataError.innerHTML = "Please enter a valid metadaat in JSON  format!";
-          isValid = false;
-        }
-
-        return isValid;
+      var isValid = true;
+      if (name==="") {
+        nameError.innerHTML= "Field Required!";
+        isValid = false
       }
-      function filterItem(filterValue, selectId) {
-        const itemSelect = document.getElementById(selectId);
-        const options = itemSelect.getElementsByTagName("option");
-
-        for (let i = 0; i < options.length; i++) {
-          const option = options[i];
-          const itemId = option.value;
-          const itemName = option.innerHTML;
-          const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
-          option.style.display = shouldShow ? "" : "none";
-        }
+      try {
+        metadata = JSON.parse(metadataInput);
+      }catch(error){
+        metadataError.innerHTML = "Please enter a valid metadaat in JSON  format!";
+        isValid = false;
       }
-      function closeAlertPopup() {
-        document.getElementById("alert-popup").style.display = "none";
-      }
-    </script>
 
-  </body>
+      return isValid;
+    }
+    function filterItem(filterValue, selectId) {
+      const itemSelect = document.getElementById(selectId);
+      const options = itemSelect.getElementsByTagName("option");
+
+      for (let i = 0; i < options.length; i++) {
+        const option = options[i];
+        const itemId = option.value;
+        const itemName = option.innerHTML;
+        const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
+        option.style.display = shouldShow ? "" : "none";
+      }
+    }
+    function closeAlertPopup() {
+      document.getElementById("alert-popup").style.display = "none";
+    }
+  </script>
+
+</body>
+
 </html>
+
 {{end}}

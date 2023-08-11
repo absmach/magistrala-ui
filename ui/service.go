@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"reflect"
 	"sync"
 	"time"
 
@@ -28,7 +29,24 @@ import (
 
 const (
 	templateDir = "ui/web/template"
+	enabled     = "enabled"
+	disabled    = "disabled"
 )
+
+type dataSummary struct {
+	TotalUsers       int
+	TotalGroups      int
+	EnabledUsers     int
+	DisabledUsers    int
+	EnabledGroups    int
+	DisabledGroups   int
+	EnabledThings    int
+	DisabledThings   int
+	EnabledChannels  int
+	DisabledChannels int
+	TotalThings      int
+	TotalChannels    int
+}
 
 var (
 	// ErrUnauthorizedAccess indicates missing or invalid credentials provided
@@ -45,9 +63,17 @@ var (
 	// ErrConflict indicates that entity already exists.
 	ErrConflict = errors.New("entity already exists")
 
-	tmplFiles    = []string{"header.html", "footer.html", "navbar.html"}
-	userActions  = []string{"g_list", "g_update", "g_delete", "g_add", "c_list", "c_update", "c_delete"}
-	thingActions = []string{"m_read", "m_write"}
+	tmplFiles        = []string{"header.html", "footer.html", "navbar.html"}
+	userActions      = []string{"g_list", "g_update", "g_delete", "g_add", "c_list", "c_update", "c_delete"}
+	thingActions     = []string{"m_read", "m_write"}
+	enabledUsers     int
+	disabledUsers    int
+	enabledGroups    int
+	disabledGroups   int
+	enabledThings    int
+	disabledThings   int
+	enabledChannels  int
+	disabledChannels int
 )
 
 // Service specifies service API.
@@ -275,10 +301,99 @@ func (gs *uiService) parseTemplate(name string, tmpls ...string) (tpl *template.
 	return tpl, nil
 }
 
+func countStatus(slice interface{}) (int, int, error) {
+	sliceValue := reflect.ValueOf(slice)
+
+	if sliceValue.Kind() != reflect.Slice {
+		return 0, 0, fmt.Errorf("input is not a slice")
+	}
+
+	statusEnabled := 0
+	statusDisabled := 0
+	for i := 0; i < sliceValue.Len(); i++ {
+		itemValue := sliceValue.Index(i)
+		if itemValue.Kind() != reflect.Struct {
+			return 0, 0, fmt.Errorf("slice contains non-struct elements")
+		}
+
+		statusField := itemValue.FieldByName("Status")
+		if statusField.String() == enabled {
+			statusEnabled++
+		}
+		if statusField.String() == disabled {
+			statusDisabled++
+		}
+	}
+
+	return statusEnabled, statusDisabled, nil
+}
+
 func (gs *uiService) Index(ctx context.Context, token string) ([]byte, error) {
 	tpl, err := gs.parseTemplate("index", "index.html")
 	if err != nil {
 		return []byte{}, err
+	}
+
+	pgm := sdk.PageMetadata{
+		Offset:     uint64(0),
+		Limit:      100,
+		Visibility: "all",
+		Status:     "all",
+	}
+
+	users, err := gs.sdk.Users(pgm, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	things, err := gs.sdk.Things(pgm, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	groups, err := gs.sdk.Groups(pgm, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	channels, err := gs.sdk.Channels(pgm, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	enabledUsers, disabledUsers, err = countStatus(users.Users)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	enabledThings, disabledThings, err = countStatus(things.Things)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	enabledChannels, disabledChannels, err = countStatus(channels.Channels)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	enabledGroups, disabledGroups, err = countStatus(groups.Groups)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	var summary = dataSummary{
+		TotalUsers:       len(users.Users),
+		TotalGroups:      len(groups.Groups),
+		TotalThings:      len(things.Things),
+		TotalChannels:    len(channels.Channels),
+		EnabledUsers:     enabledUsers,
+		DisabledUsers:    disabledUsers,
+		EnabledGroups:    enabledGroups,
+		DisabledGroups:   disabledGroups,
+		EnabledThings:    enabledThings,
+		DisabledThings:   disabledThings,
+		EnabledChannels:  enabledChannels,
+		DisabledChannels: disabledChannels,
 	}
 
 	user, err := gs.UserProfile(ctx, token)
@@ -289,9 +404,11 @@ func (gs *uiService) Index(ctx context.Context, token string) ([]byte, error) {
 	data := struct {
 		NavbarActive string
 		User         sdk.User
+		Summary      dataSummary
 	}{
 		"dashboard",
 		user,
+		summary,
 	}
 
 	var btpl bytes.Buffer
@@ -488,7 +605,7 @@ func (gs *uiService) ViewUser(ctx context.Context, token, userID string) ([]byte
 		User         sdk.User
 		LoggedUser   sdk.User
 	}{
-		"user",
+		"users",
 		userID,
 		user,
 		loggedUser,

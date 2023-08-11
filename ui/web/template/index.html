@@ -1,40 +1,276 @@
 {{define "index"}}
 <!doctype html>
 <html lang="en">
-{{template "header"}}
+  {{template "header"}}
 
 <body>
-  <main role="main">
-    <div class="container-fluid">
-      <div class="row">
+  {{template "navbar" .}}
 
-        {{template "navbar" .}}
-
-        <!-- Partial goes here -->
-        <div class="col-md-9">
-          <h2>Dashboard</h2>
-          <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta
-            felis euismod semper.
-            Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet
-            risus.</p>
-          <p><a class="btn btn-secondary" href="#" role="button">View details &raquo;</a></p>
+  <div class="main-content">
+    <main>
+        <div class="cards">
+            <div class="card-single" data-card="users">
+                <div>
+                    <h1>{{.Summary.TotalUsers}}</h1>
+                    <span>Users</span>
+                </div>
+                <div>
+                    <span class="fas fa-users"></span>
+                </div>
+            </div>
+            <div class="card-single" data-card="things">
+                <div>
+                    <h1>{{.Summary.TotalThings}}</h1>
+                    <span>Things</span>
+                </div>
+                <div>
+                    <span class="fas fa-microchip"></span>
+                </div>
+            </div>
+            <div class="card-single" data-card="groups">
+                <div>
+                    <h1>{{.Summary.TotalGroups}}</h1>
+                    <span>Groups</span>
+                </div>
+                <div>
+                    <span class="fas fa-layer-group"></span>
+                </div>
+            </div>
+            <div class="card-single" data-card="channels">
+                <div>
+                    <h1>{{.Summary.TotalChannels}}</h1>
+                    <span>Channels</span>
+                </div>
+                <div>
+                    <span class="fas fa-microchip"></span>
+                </div>
+            </div>
         </div>
-        <!-- End of partial-->
+        <div class="selected-grid">
+            <div class="default-content">
 
-      </div>
-    </div> <!-- /container -->
-  </main>
+            </div>
+        </div>
+    </main>
+  </div>
 
   {{template "footer"}}
 
   <script>
     // Get the user's name from Go template's data
     var username = "{{.User.Name}}";
+    var enabledUsers = '{{.Summary.EnabledUsers}}';
+    var disabledUsers = '{{.Summary.DisabledUsers}}';
+    var enabledThings = '{{.Summary.EnabledThings}}';
+    var disabledThings = '{{.Summary.DisabledThings}}';
+    var enabledChannels = '{{.Summary.EnabledChannels}}';
+    var disabledChannels = '{{.Summary.DisabledChannels}}';
+    var enabledGroups = '{{.Summary.EnabledGroups}}';
+    var disabledGroups = '{{.Summary.DisabledGroups}}';
+
 
     // Store the user's name in local storage
     localStorage.setItem("username", username);
+
+    document.addEventListener("DOMContentLoaded", function(){
+        var cardDivs = document.querySelectorAll(".card-single");
+        var defaultContent = document.querySelector(".default-content")
+
+        cardDivs.forEach(function(cardDiv){
+            cardDiv.addEventListener("click", function(){
+                 // Remove "selected" class from all cards before adding to the clicked card
+                 cardDivs.forEach(function(card) {
+                    card.classList.remove("selected");
+                });
+
+                // Add "selected" class to the clicked card
+                cardDiv.classList.add("selected");
+
+                var selectedGrid = document.querySelector(".selected-grid");
+                var cardType = cardDiv.getAttribute("data-card");
+                var selectedContent = "";
+
+                // Customize the content based on the card type
+                if (cardType === "users"){
+                    selectedContent = `
+                        <div class="users">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h2>Users</h2>
+                                    <a href="/users" > 
+                                        <button>See all <span class="fa-solid fa-arrow-right"></span></button>
+                                    </a>
+                                    
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table width="100%">
+                                            <thead>
+                                                <tr>
+                                                    <td>Status</td>
+                                                    <td></td>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Enabled</td>
+                                                    <td>${enabledUsers}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Disabled</td>
+                                                    <td>${disabledUsers}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                 } else if (cardType === "things"){
+                    selectedContent = `
+                    <div class="Things">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Things</h2>
+                                <a href="/things" > 
+                                    <button>See all <span class="fa-solid fa-arrow-right"></span></button>
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table width="100%">
+                                        <thead>
+                                            <tr>
+                                                <td>Status</td>
+                                                <td></td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr>
+                                                    <td>Enabled</td>
+                                                    <td>${enabledThings}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Disabled</td>
+                                                    <td>${disabledThings}</td>
+                                                </tr>
+                                            </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div> `;
+                } else if (cardType === "channels"){
+                    selectedContent = `
+                    <div class="Channels">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Channels</h2>
+                                <a href="/channels" > 
+                                    <button>See all <span class="fa-solid fa-arrow-right"></span></button>
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table width="100%">
+                                        <thead>
+                                            <tr>
+                                                <td>Status</td>
+                                                <td></td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr>
+                                                    <td>Enabled</td>
+                                                    <td>${enabledChannels}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Disabled</td>
+                                                    <td>${disabledChannels}</td>
+                                                </tr>
+                                            </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div> `;
+                } else if (cardType === "groups") {
+                    selectedContent = `
+                    <div class="Groups">
+                        <div class="card">
+                            <div class="card-header">
+                                <h2>Groups</h2>
+                                <a href="/groups" > 
+                                    <button>See all <span class="fa-solid fa-arrow-right"></span></button>
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table width="100%">
+                                        <thead>
+                                            <tr>
+                                                <td>Status</td>
+                                                <td></td>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                                <tr>
+                                                    <td>Enabled</td>
+                                                    <td>${enabledGroups}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Disabled</td>
+                                                    <td>${disabledGroups}</td>
+                                                </tr>
+                                            </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div> `;
+                }
+                // Populate the selected grid with the selected content
+                selectedGrid.innerHTML = selectedContent;
+            });
+        });
+        // Show default content (users data) on page load
+        defaultContent.innerHTML = `
+            <div class="users">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Users</h2>
+                        <a href="/users" > 
+                            <button>See all <span class="fa-solid fa-arrow-right"></span></button>
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table width="100%">
+                                <thead>
+                                    <tr>
+                                        <td>Status</td>
+                                        <td></td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Enabled</td>
+                                        <td>${enabledUsers}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Disabled</td>
+                                        <td>${disabledUsers}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
   </script>
 </body>
-
 </html>
 {{end}}

@@ -1,157 +1,149 @@
 {{define "groupconn"}}
+
 <!doctype html>
 <html lang="en">
-  <head>
-    {{template "header"}}
-  </head>
+{{template "header"}}
 
-  <body>
-    <main role="main">
-      <div class="container-fluid">
-        <div class="row">
+<body>
+  {{template "navbar" .}}
 
-          {{template "navbar" .}}
-
-          <!-- Partial goes here -->
-          <div class="col-md-9">
-            {{$userID := .User.ID}}
-            {{$groupID := .Group.ID}}
-            {{$disableAssign := true}}
-            {{if (authorizeUser $userID .Group.ID "g_add" "group")}}
-              {{$disableAssign =false}}
-            {{end}}
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#connectModal" {{if $disableAssign}}disabled{{end}}>
-              Assign
-            </button>
-            <div class="modal fade" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="connectModal" aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="connectModal">Assign</h5>
-                  </div>
-                  <div class="modal-body">
-                    <form action="/groups/{{.Group.ID}}/members" method="post">
-                      <div class="mb-3">
-                        <label for="memberIDAssign" class="form-label">Member ID</label>
-                        <input type="text" name="memberFilter" id="memberFilterAssign" placeholder="Filter by member ID" oninput="filterItem(this.value, 'memberIDAssign')">
-                        <select class="form-select" name="memberID" id="memberIDAssign" required>
-                          <option value="">...</option>
-                          {{range .Users}}
-                            <option value="{{.ID}}">{{.Name}}</option>
-                          {{end}}
-                        </select>
-                      </div>
-                      <div class="mb-3">
-                        <label for="Type" class="form-label">Member Type</label>
-                        <select class="form-control" name="Type" id="Type" aria-describedby="TypeHelp" multiple required>
-                          {{range $i, $a := .Actions}}
-                          <option value="{{$a}}" {{if not (authorizeUser $userID $groupID $a "group")}}disabled{{end}}>{{$a}}</option>
-                          {{end}}
-                        </select>
-                        <div id="TypeHelp" class="form-text">Select member Type.</div>
-                      </div>
-                      <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                  </div>
-                </div>
-              </div>
+  <div class="main-content">
+    <main>
+      {{$userID := .User.ID}}
+      {{$groupID := .Group.ID}}
+      {{$disableAssign := true}}
+      {{if (authorizeUser $userID .Group.ID "g_add" "group")}}
+        {{$disableAssign =false}}
+      {{end}}
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#connectModal" {{if $disableAssign}}disabled{{end}}>
+        Assign
+      </button>
+      <div class="modal fade" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="connectModal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="connectModal">Assign</h5>
             </div>
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th scope="row">GROUP</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <tr>
-                    <th>Name</th>
-                    <td>{{.Group.Name}}</td>
-                  </tr>
-                  <th>ID</th>
-                  <td>{{.Group.ID}}</td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="table-container">
-              <h4 style="font-weight: bold; font-size: 22px; margin-top: 50px; margin-bottom: 20px;">GROUP MEMBERS</h4>
-              <table id="itemsTable" class="table table-striped">
-                <thead>
-                  <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">NAME</th>
-                    <th scope="col">ID</th>
-                    <th scope="col">ACTIONS</th>
-                    <th scope="col"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {{$policies := .Policies}}
-                  {{$disableButton := true}}
-                  {{if (eq .Group.OwnerID .User.ID)}}
-                    {{$disableButton =false}}
-                  {{end}}
-                  {{range $i, $m := .Members}}
-                    {{if authorizeUser $userID $m.ID "c_list" "client"}}
-                      <tr>
-                        <th scope="row">{{$i}}</th>
-                        <td>{{$m.Name}}</td>
-                        <td><a href={{printf "/users/%s" $m.ID}}>{{$m.ID}}</a></td>
-                          <td>
-                            {{range $p := $policies}}
-                              {{if (eq $m.ID $p.Subject)}}
-                                {{if (eq $groupID $p.Object)}}
-                                  {{toSlice $p.Actions}}
-                                {{end}}
-                              {{end}}
-                            {{end}}
-                          </td>
-                        <td>
-                          <form action="/groups/{{$groupID}}/unassign" method="post">
-                            <input type="hidden" name="memberID" id="memberID" value="{{$m.ID}}">
-                            <button type="submit" class="btn btn-sm" {{if $disableButton}}disabled{{end}}>
-                              <i class="fas fa-trash-alt"></i>
-                            </button>
-                          </form>
-                        </td>
-                      </tr>
+            <div class="modal-body">
+              <form action="/groups/{{.Group.ID}}/members" method="post">
+                <div class="mb-3">
+                  <label for="memberIDAssign" class="form-label">Member ID</label>
+                  <input type="text" name="memberFilter" id="memberFilterAssign" placeholder="Filter by member ID" oninput="filterItem(this.value, 'memberIDAssign')">
+                  <select class="form-select" name="memberID" id="memberIDAssign" required>
+                    <option value="">...</option>
+                    {{range .Users}}
+                      <option value="{{.ID}}">{{.Name}}</option>
                     {{end}}
-                  {{end}}
-                </tbody>
-              </table>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="Type" class="form-label">Member Type</label>
+                  <select class="form-control" name="Type" id="Type" aria-describedby="TypeHelp" multiple required>
+                    {{range $i, $a := .Actions}}
+                    <option value="{{$a}}" {{if not (authorizeUser $userID $groupID $a "group")}}disabled{{end}}>{{$a}}</option>
+                    {{end}}
+                  </select>
+                  <div id="TypeHelp" class="form-text">Select member Type.</div>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
             </div>
           </div>
-          <!-- End of partial-->
-
         </div>
-      </div> <!-- /container -->
+      </div>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="row">GROUP</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <tr>
+              <th>Name</th>
+              <td>{{.Group.Name}}</td>
+            </tr>
+            <th>ID</th>
+            <td>{{.Group.ID}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="table-container">
+        <h4 style="font-weight: bold; font-size: 22px; margin-top: 50px; margin-bottom: 20px;">GROUP MEMBERS</h4>
+        <table id="itemsTable" class="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">NAME</th>
+              <th scope="col">ID</th>
+              <th scope="col">ACTIONS</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {{$policies := .Policies}}
+            {{$disableButton := true}}
+            {{if (eq .Group.OwnerID .User.ID)}}
+              {{$disableButton =false}}
+            {{end}}
+            {{range $i, $m := .Members}}
+              {{if authorizeUser $userID $m.ID "c_list" "client"}}
+                <tr>
+                  <th scope="row">{{$i}}</th>
+                  <td>{{$m.Name}}</td>
+                  <td><a href={{printf "/users/%s" $m.ID}}>{{$m.ID}}</a></td>
+                    <td>
+                      {{range $p := $policies}}
+                        {{if (eq $m.ID $p.Subject)}}
+                          {{if (eq $groupID $p.Object)}}
+                            {{toSlice $p.Actions}}
+                          {{end}}
+                        {{end}}
+                      {{end}}
+                    </td>
+                  <td>
+                    <form action="/groups/{{$groupID}}/unassign" method="post">
+                      <input type="hidden" name="memberID" id="memberID" value="{{$m.ID}}">
+                      <button type="submit" class="btn btn-sm" {{if $disableButton}}disabled{{end}}>
+                        <i class="fas fa-trash-alt"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+              {{end}}
+            {{end}}
+          </tbody>
+        </table>
+      </div>
     </main>
+  </div>
 
-    {{template "footer"}}
-    
-    <script>
-     document.addEventListener('DOMContentLoaded', function() {
-        new simpleDatatables.DataTable('#itemsTable', {
-          searchable: true,
-          scrollY: "300px",
-          sortable: true,
-          pagination: true,
-        });
-      });
+  {{template "footer"}}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+       new simpleDatatables.DataTable('#itemsTable', {
+         searchable: true,
+         scrollY: "300px",
+         sortable: true,
+         pagination: true,
+       });
+     });
 
-      function filterItem(filterValue, selectId) {
-        const itemSelect = document.getElementById(selectId);
-        const options = itemSelect.getElementsByTagName("option");
+     function filterItem(filterValue, selectId) {
+       const itemSelect = document.getElementById(selectId);
+       const options = itemSelect.getElementsByTagName("option");
 
-        for (let i = 0; i < options.length; i++) {
-          const option = options[i];
-          const itemId = option.value;
-          const itemName = option.innerHTML;
-          const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
-          option.style.display = shouldShow ? "" : "none";
-        }
-      }
-    </script>
-  </body>
+       for (let i = 0; i < options.length; i++) {
+         const option = options[i];
+         const itemId = option.value;
+         const itemName = option.innerHTML;
+         const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
+         option.style.display = shouldShow ? "" : "none";
+       }
+     }
+   </script>
+
+</body>
+
 </html>
 {{end}}

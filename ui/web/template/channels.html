@@ -1,200 +1,189 @@
 {{define "channels"}}
 <!doctype html>
 <html lang="en">
-  <head>
-    {{template "header"}}
-  </head>
- 
-  <body>
-    <main role="main">
-      <div class="container-fluid">
-        <div class="row">
+{{template "header"}}
 
-          {{template "navbar" .}}
+<body>
+  {{template "navbar" .}}
 
-          <!-- Partial goes here -->
-          <div class="col-md-9">
-            {{ if ne .AlertMessage "" }}
-            <div id="alert-popup" class="alert alert-danger">
-              <span class="close-button" onclick="closeAlertPopup()">&times;</span>
-              <h5 class="alert-messsage">
-              {{ .AlertMessage }}
-              </h5>
-            </div>         
-            {{ end }}
+  <div class="main-content">
+    <main>
+      {{ if ne .AlertMessage "" }}
+      <div id="alert-popup" class="alert alert-danger">
+        <span class="close-button" onclick="closeAlertPopup()">&times;</span>
+        <h5 class="alert-messsage">
+        {{ .AlertMessage }}
+        </h5>
+      </div>         
+      {{ end }}
 
-            <!-- Button trigger modal -->
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addChannelModal">
-              Add
-            </button>
+      <!-- Button trigger modal -->
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addChannelModal">
+        Add
+      </button>
 
-            <!-- Modal -->
-            <div class="modal fade" id="addChannelModal" tabindex="-1" role="dialog" aria-labelledby="addChannelModalLabel" aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="addChannelModalLabel">Add Channel</h5>
-                  </div>
-                  <div class="modal-body">
-                    <form method="post" onsubmit="return validateForm()">
-                      <div class="mb-3">
-                        <label for="name" class="form-label">Name</label>
-                        <input type="text" class="form-control" name="name" id="name"  placeholder="Channel Name" required>
-                      </div>
-                      <div class="mb-3">
-                        <label for="parentID" class="form-label">Parent Name</label>
-                        <input type="text" name="parentFilter" id="parentFilter" placeholder="Filter by parent name" oninput="filterItem(this.value, 'parentID')">
-                        <select class="form-select" name="parentID" id="parentID">
-                          <option value="">...</option>
-                          {{range $i, $c := .Channels}}
-                            <option value="{{$c.ID}}">{{$c.Name}}</option>
-                          {{end}}
-                        </select>
-                      </div>                      
-                      <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <input type="text" class="form-control" name="description" id="description"  placeholder="Channel Description">
-                      </div>
-                      <div class="mb-3">
-                        <label for="metadata" class="form-label">Metadata</label>
-                        <input type="text" class="form-control" name= "metadata" id="metadata" value="{}">
-                        <div id="metadataHelp" class="form-text">Enter channel metadata in JSON format.</div>
-                        <div id="metadataError" class="error-message"></div>
-                      </div>
-                      <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                  </div>
-                </div>
-              </div>
+      <!-- Modal -->
+      <div class="modal fade" id="addChannelModal" tabindex="-1" role="dialog" aria-labelledby="addChannelModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addChannelModalLabel">Add Channel</h5>
             </div>
-
-                         <!-- Button trigger modal -->
-             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addChannelsModal">
-              Add Channels
-            </button>
-
-            <!-- Modal -->
-            <div class="modal fade" id="addChannelsModal" tabindex="-1" role="dialog" aria-labelledby="addChannelsModalLabel" aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="addChannelsModalLabel">Add Channels</h5>
-                  </div>
-                  <div class="modal-body">
-                    <form method="post" enctype="multipart/form-data" action="/channels/bulk">
-                      <div class="form-group">
-                        <label for="channelsFile">Add csv file containing channels names with metadata. The metadata field can be empty</label>
-                        <input type="file" class="form-control-file" id="channelsFile" name="channelsFile" required>
-                        <button type="submit" value="upload" class="btn btn-primary">Submit</button>
-                      </div>
-                    </form>
-                  </div>
+            <div class="modal-body">
+              <form method="post" onsubmit="return validateForm()">
+                <div class="mb-3">
+                  <label for="name" class="form-label">Name</label>
+                  <input type="text" class="form-control" name="name" id="name"  placeholder="Channel Name" required>
                 </div>
-              </div>
-            </div>
-            <div class="table-container">
-              <table id="itemsTable" class="table table-striped">
-                <thead>
-                  <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">NAME</th>
-                    <th scope="col">ID</th>
-                    <th scope="col"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {{$userID := .User.ID}}
-                  {{range $i, $c := .Channels}}
-                    {{$disableButton := true}}
-                    {{if (authorizeThing $userID $c.ID "g_delete" "group")}}
-                      {{$disableButton = false}}
+                <div class="mb-3">
+                  <label for="parentID" class="form-label">Parent Name</label>
+                  <input type="text" name="parentFilter" id="parentFilter" placeholder="Filter by parent name" oninput="filterItem(this.value, 'parentID')">
+                  <select class="form-select" name="parentID" id="parentID">
+                    <option value="">...</option>
+                    {{range $i, $c := .Channels}}
+                      <option value="{{$c.ID}}">{{$c.Name}}</option>
                     {{end}}
-                    <tr>
-                      <th scope="row">{{$i}}</th>
-                      <td>{{$c.Name}}</td>
-                      <td>
-                        <div class="copy-con-container">
-                          <a href={{printf "/channels/%s" $c.ID}}>{{$c.ID}}</a>
-                          <button class="copy-icon" onclick="copyToClipboard(this)">
-                            <i class="far fa-copy"></i>
-                          </button>
-                        </div>
-                      </td>
-                      <td>
-                        <form action="/channels/disabled" method="post">
-                          <input type="hidden" name="channelID" id="channelID" value="{{$c.ID}}">
-                          <button type="submit" class="btn btn-sm" {{if $disableButton}}disabled{{end}}>
-                            <i class="fas fa-trash-alt"></i>
-                          </button>
-                        </form>
-                      </td>
-                    </tr>
-                  {{end}}
-                </tbody>
-              </table>
+                  </select>
+                </div>                      
+                <div class="mb-3">
+                  <label for="description" class="form-label">Description</label>
+                  <input type="text" class="form-control" name="description" id="description"  placeholder="Channel Description">
+                </div>
+                <div class="mb-3">
+                  <label for="metadata" class="form-label">Metadata</label>
+                  <input type="text" class="form-control" name= "metadata" id="metadata" value="{}">
+                  <div id="metadataHelp" class="form-text">Enter channel metadata in JSON format.</div>
+                  <div id="metadataError" class="error-message"></div>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
             </div>
           </div>
-          <!-- End of partial-->
-
         </div>
-      </div> <!-- /container -->
+      </div>
+
+                   <!-- Button trigger modal -->
+       <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addChannelsModal">
+        Add Channels
+      </button>
+
+      <!-- Modal -->
+      <div class="modal fade" id="addChannelsModal" tabindex="-1" role="dialog" aria-labelledby="addChannelsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addChannelsModalLabel">Add Channels</h5>
+            </div>
+            <div class="modal-body">
+              <form method="post" enctype="multipart/form-data" action="/channels/bulk">
+                <div class="form-group">
+                  <label for="channelsFile">Add csv file containing channels names with metadata. The metadata field can be empty</label>
+                  <input type="file" class="form-control-file" id="channelsFile" name="channelsFile" required>
+                  <button type="submit" value="upload" class="btn btn-primary">Submit</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="table-container">
+        <table id="itemsTable" class="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">NAME</th>
+              <th scope="col">ID</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {{$userID := .User.ID}}
+            {{range $i, $c := .Channels}}
+              {{$disableButton := true}}
+              {{if (authorizeThing $userID $c.ID "g_delete" "group")}}
+                {{$disableButton = false}}
+              {{end}}
+              <tr>
+                <th scope="row">{{$i}}</th>
+                <td>{{$c.Name}}</td>
+                <td>
+                  <div class="copy-con-container">
+                    <a href={{printf "/channels/%s" $c.ID}}>{{$c.ID}}</a>
+                    <button class="copy-icon" onclick="copyToClipboard(this)">
+                      <i class="far fa-copy"></i>
+                    </button>
+                  </div>
+                </td>
+                <td>
+                  <form action="/channels/disabled" method="post">
+                    <input type="hidden" name="channelID" id="channelID" value="{{$c.ID}}">
+                    <button type="submit" class="btn btn-sm" {{if $disableButton}}disabled{{end}}>
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
     </main>
-    
-    {{template "footer"}}
+  </div>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        new simpleDatatables.DataTable('#itemsTable', {
-          searchable: true,
-          scrollY: "300px",
-          sortable: true,
-          pagination: true,
-        });
+  {{template "footer"}}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      new simpleDatatables.DataTable('#itemsTable', {
+        searchable: true,
+        scrollY: "300px",
+        sortable: true,
+        pagination: true,
       });
+    });
 
-      function filterItem(filterValue, selectId) {
-        const itemSelect = document.getElementById(selectId);
-        const options = itemSelect.getElementsByTagName("option");
+    function filterItem(filterValue, selectId) {
+      const itemSelect = document.getElementById(selectId);
+      const options = itemSelect.getElementsByTagName("option");
 
-        for (let i = 0; i < options.length; i++) {
-          const option = options[i];
-          const itemId = option.value;
-          const itemName = option.innerHTML;
-          const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
-          option.style.display = shouldShow ? "" : "none";
-        }
+      for (let i = 0; i < options.length; i++) {
+        const option = options[i];
+        const itemId = option.value;
+        const itemName = option.innerHTML;
+        const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
+        option.style.display = shouldShow ? "" : "none";
       }
-      function validateForm() {
-        var name = document.getElementById("name").value;
-        var metadataInput = document.getElementById("metadata").value;
+    }
+    function validateForm() {
+      var name = document.getElementById("name").value;
+      var metadataInput = document.getElementById("metadata").value;
 
-        var nameError = document.getElementById("nameError");
-        var metadataError = document.getElementById("metadataError");
+      var nameError = document.getElementById("nameError");
+      var metadataError = document.getElementById("metadataError");
 
-        var metadata;
+      var metadata;
 
-        nameError.innerHTML = "";
-        metadataError.innerHTML = "";
+      nameError.innerHTML = "";
+      metadataError.innerHTML = "";
 
-        var isValid = true;
-        if (name==="") {
-          nameError.innerHTML= "Field Required!";
-          isValid = false
-        }
-        try {
-        metadata = JSON.parse(metadataInput);
-      }catch(error){
-        metadataError.innerHTML = "Please enter a valid metadaat in JSON  format!";
-        isValid = false;
+      var isValid = true;
+      if (name==="") {
+        nameError.innerHTML= "Field Required!";
+        isValid = false
       }
+      try {
+      metadata = JSON.parse(metadataInput);
+    }catch(error){
+      metadataError.innerHTML = "Please enter a valid metadaat in JSON  format!";
+      isValid = false;
+    }
 
-        return isValid;
-      }
-      function closeAlertPopup() {
-        document.getElementById("alert-popup").style.display = "none";
-      }
-    </script>
+      return isValid;
+    }
+    function closeAlertPopup() {
+      document.getElementById("alert-popup").style.display = "none";
+    }
+  </script>
 
-  </body>
+</body>
 </html>
 {{end}}

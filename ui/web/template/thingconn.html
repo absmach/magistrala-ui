@@ -1,145 +1,135 @@
 {{define "thingconn"}}
 <!doctype html>
 <html lang="en">
-  <head>
-    {{template "header"}}
-  </head>
-  <body>
-    <main role="main">
-      <div class="container-fluid">
-        <div class="row">
+{{template "header"}}
 
-          {{template "navbar" .}}
+<body>
+  {{template "navbar" .}}
 
-          <!-- Partial goes here -->
-          <div class="col-md-9">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#connectModal">
-              Connect
-            </button>
-            <div class="modal fade" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="connectModal" aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="connectModal">Connect</h5>
-                  </div>
-                  <div class="modal-body">
-                    <form action="/things/{{.Thing.ID}}/connect" method="post">
-                      <div class="mb-3">
-                        <label for="channelID" class="form-label">Channel</label>
-                        <input type="text" name="channelFilter" id="channelFilter" placeholder="Filter by Channel ID" oninput="filterItem(this.value,'channelID')">
-                        <select class="form-select" name="channelID" id="channelID" required>
-                          <option value="">...</option>
-                          {{range .AllChannels}}
-                            <option value="{{.ID}}">{{.Name}}</option>
-                          {{end}}
-                        </select>
-                        <div id="channelIDHelp" class="form-text">Select a channel.</div>
-                      </div>
-                      <div class="mb-3">
-                        <label for="actions" class="form-label">Actions</label>
-                        <select class="form-select" name="actions" id="actions" aria-describedby="actionsHelp" multiple required>
-                          <option value="m_read">m_read</option>
-                          <option value="m_write">m_write</option>
-                        </select>
-                        <div id="actionsHelp" class="form-text">Select Actions (multiple selections allowed).</div>
-                      </div>
-                      <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                  </div>
-                </div>
-              </div>
+  <div class="main-content">
+    <main>
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#connectModal">
+        Connect
+      </button>
+      <div class="modal fade" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="connectModal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="connectModal">Connect</h5>
             </div>
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th scope="row">THING</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th>Name</th>
-                  <td>{{.Thing.Name}}</td>
-                </tr>
-                <tr>
-                  <th>ID</th>
-                  <td>{{.Thing.ID}}</td>
-                </tr>
-              </tbody>
-            </table>
-            {{$policies := .Policies}}
-            {{ $t := .Thing}}
-            <div class="table-container">
-              <h4 style="font-weight: bold; font-size: 22px; margin-top: 50px; margin-bottom: 20px;">CONNECTED CHANNELS</h4>
-              <table id="itemsTable" class="table table-striped">
-                <thead>
-                  <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">NAME</th>
-                    <th scope="col">ID</th>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {{$userID := .User.ID}}
-                  {{range $i, $c := .Channels}}
-                    <tr>
-                      <th scope="row">{{$i}}</th>
-                      <td>{{$c.Name}}</td>
-                      <td><a href={{printf "/channels/%s" $c.ID}}>{{$c.ID}}</a></td>
-                      <td>
-                        {{range $p :=$policies}}
-                          {{if (eq $c.ID $p.Object)}}
-                            {{if (eq $t.ID $p.Subject)}}
-                              {{toSlice $p.Actions}}
-                            {{end}}
-                          {{end}}
-                        {{end}}
-                      </td>
-                      <td>
-                        <form action="/disconnectChannel" method="post">
-                          <input type="hidden" name="thingID" id="thingID" value="{{$t.ID}}">
-                          <input type="hidden" name="channelID" id="channelID" value="{{$c.ID}}">
-                          <button type="submit" class="btn btn-danger btn-sm">Disconnect</button>
-                        </form>
-                      </td>
-                    </tr>
-                  {{end}}
-                </tbody>
-              </table>
+            <div class="modal-body">
+              <form action="/things/{{.Thing.ID}}/connect" method="post">
+                <div class="mb-3">
+                  <label for="channelID" class="form-label">Channel</label>
+                  <input type="text" name="channelFilter" id="channelFilter" placeholder="Filter by Channel ID" oninput="filterItem(this.value,'channelID')">
+                  <select class="form-select" name="channelID" id="channelID" required>
+                    <option value="">...</option>
+                    {{range .AllChannels}}
+                      <option value="{{.ID}}">{{.Name}}</option>
+                    {{end}}
+                  </select>
+                  <div id="channelIDHelp" class="form-text">Select a channel.</div>
+                </div>
+                <div class="mb-3">
+                  <label for="actions" class="form-label">Actions</label>
+                  <select class="form-select" name="actions" id="actions" aria-describedby="actionsHelp" multiple required>
+                    <option value="m_read">m_read</option>
+                    <option value="m_write">m_write</option>
+                  </select>
+                  <div id="actionsHelp" class="form-text">Select Actions (multiple selections allowed).</div>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
             </div>
           </div>
-          <!-- End of partial-->
-
         </div>
-      </div> <!-- /container -->
+      </div>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="row">THING</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>Name</th>
+            <td>{{.Thing.Name}}</td>
+          </tr>
+          <tr>
+            <th>ID</th>
+            <td>{{.Thing.ID}}</td>
+          </tr>
+        </tbody>
+      </table>
+      {{$policies := .Policies}}
+      {{ $t := .Thing}}
+      <div class="table-container">
+        <h4 style="font-weight: bold; font-size: 22px; margin-top: 50px; margin-bottom: 20px;">CONNECTED CHANNELS</h4>
+        <table id="itemsTable" class="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">NAME</th>
+              <th scope="col">ID</th>
+              <th scope="col"></th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {{$userID := .User.ID}}
+            {{range $i, $c := .Channels}}
+              <tr>
+                <th scope="row">{{$i}}</th>
+                <td>{{$c.Name}}</td>
+                <td><a href={{printf "/channels/%s" $c.ID}}>{{$c.ID}}</a></td>
+                <td>
+                  {{range $p :=$policies}}
+                    {{if (eq $c.ID $p.Object)}}
+                      {{if (eq $t.ID $p.Subject)}}
+                        {{toSlice $p.Actions}}
+                      {{end}}
+                    {{end}}
+                  {{end}}
+                </td>
+                <td>
+                  <form action="/disconnectChannel" method="post">
+                    <input type="hidden" name="thingID" id="thingID" value="{{$t.ID}}">
+                    <input type="hidden" name="channelID" id="channelID" value="{{$c.ID}}">
+                    <button type="submit" class="btn btn-danger btn-sm">Disconnect</button>
+                  </form>
+                </td>
+              </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
     </main>
+  </div>
 
-    {{template "footer"}}
-    
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        new simpleDatatables.DataTable('#itemsTable', {
-          searchable: true,
-          scrollY: "200px",
-          sortable: true,
-          pagination: true,
-        });
+  {{template "footer"}}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      new simpleDatatables.DataTable('#itemsTable', {
+        searchable: true,
+        scrollY: "200px",
+        sortable: true,
+        pagination: true,
       });
+    });
 
-      function filterItem(filterValue, selectId) {
-        const itemSelect = document.getElementById(selectId);
-        const options = itemSelect.getElementsByTagName("option");
+    function filterItem(filterValue, selectId) {
+      const itemSelect = document.getElementById(selectId);
+      const options = itemSelect.getElementsByTagName("option");
 
-        for (let i = 0; i < options.length; i++) {
-          const option = options[i];
-          const itemId = option.value;
-          const itemName = option.innerHTML;
-          const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
-          option.style.display = shouldShow ? "" : "none";
-        }
+      for (let i = 0; i < options.length; i++) {
+        const option = options[i];
+        const itemId = option.value;
+        const itemName = option.innerHTML;
+        const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
+        option.style.display = shouldShow ? "" : "none";
       }
-    </script>
-  </body>
+    }
+  </script>
+</body>
 </html>
 {{end}}

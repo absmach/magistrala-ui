@@ -6,63 +6,56 @@
   <meta name="author" content="">
 
   <title>Mainflux</title>
-
-  <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
-  <link rel="stylesheet" href="/fontawesome/css/all.min.css">
-  <link rel="stylesheet" type="text/css" href="/css/main.css">
-  <link href="/css/header.css" rel="stylesheet" type="text/css" >
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css">
   <script src="/js/clipboard.js"defer></script>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
 </head>
+  <header>
+    <h2>
+        <label for="nav-toggle">
+            <span class="fa-solid fa-bars"></span>
+        </label>
 
-<header>
-  <div class="hero">
-    <nav class="headerNav">
-      <img src="/images/logo.png" class= "logo">
-      <div class="organization-name"> 
-        <h>Mainflux</h>
+        <span>{{.User.name}}</span>
+    </h2>
+    <div class="user-wrapper">
+        <span class="fas fa-user-circle" style="font-size: 32px;" onclick="toggleMenu()"></span>
+        <div>
+            <h4 id="username"></h4>
         </div>
-      <div class="user-icon">
-        <i class="fas fa-user-circle" style= "font-size: 32px" onclick="toggleMenu()"></i>
-      </div>
-      <div class="sub-menu-wrap" id="subMenu">
-        <div class="sub-menu">
-          <div class= "user-info">
-            <i class="fas fa-user-circle" style= "font-size: 32px" class="user-pic"></i>
-            <p id="username"></p>
-          </div>
-            <hr>
-          <a class="sub-menu-link" href="/password">
-          <i class="fas fa-solid fa-lock"></i>
-            <p>Update Password</p>
+    </div>
+    <div class="sub-menu-wrap" id="subMenu">
+      <a class="sub-menu-link" href="/password">
+      <i class="fas fa-solid fa-lock"></i>
+        <p>Update Password</p>
+        <span>></span>
+      </a>
+          <a class="sub-menu-link" href="/logout">
+        <i class="fas fa-sign-out-alt"></i>
+            <p>Logout</p>
             <span>></span>
-          </a>
-             <a class="sub-menu-link" href="/logout">
-            <i class="fas fa-sign-out-alt"></i>
-               <p>Logout</p>
-               <span>></span>
-          </a>
-        </div>
-      </div>
-    </nav>
-  </div>
-  <script defer>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Retrieve the username from local storage
-      var savedUsername = localStorage.getItem('username');
-  
-      // Update the username in the header
-      if (savedUsername) {
-        var usernameElement = document.getElementById('username');
-        if (usernameElement) {
-          usernameElement.textContent = savedUsername;
+      </a>
+    </div>
+    <script defer>
+      document.addEventListener('DOMContentLoaded', function() {
+        // Retrieve the username from local storage
+        var savedUsername = localStorage.getItem('username');
+    
+        // Update the username in the header
+        if (savedUsername) {
+          var usernameElement = document.getElementById('username');
+          if (usernameElement) {
+            usernameElement.textContent = savedUsername;
+          }
         }
+      });
+      let subMenu= document.getElementById("subMenu");
+      function toggleMenu() {
+        subMenu.classList.toggle("open-menu");
       }
-    });
-    let subMenu= document.getElementById("subMenu");
-    function toggleMenu() {
-      subMenu.classList.toggle("open-menu");
-    }
-  </script>
-</header>
+
+    </script>
+  </header>
 {{end}}

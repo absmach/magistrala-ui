@@ -1,214 +1,204 @@
 {{define "channelconn"}}
 <!doctype html>
 <html lang="en">
-  {{template "header"}}
+{{template "header"}}
 
-  <body>
-    <main role="main">
-      <div class="container-fluid">
-        <div class="row">
+<body>
+  {{template "navbar" .}}
 
-          {{template "navbar" .}}
+  <div class="main-content">
+    <main>
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#connectModal">
+        Connect Thing
+      </button>
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shareThingModal">
+        Share Things
+      </button>
 
-          <!-- Partial goes here -->
-          <div class="col-md-9">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#connectModal">
-              Connect Thing
-            </button>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shareThingModal">
-              Share Things
-            </button>
-
-            <!--Modal-->
-            <div class="modal fade" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="connectModal" aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="connectModal">Connect</h5>
-                  </div>
-                  <div class="modal-body">
-                    <form action="/channels/{{.Channel.ID}}/connectThing" method="post">
-                      <div class="mb-3">
-                        <label for="thingID" class="form-label">Thing</label>
-                        <input type="text" name="thingFilter" id="thingFilter" placeholder="Filter by thing" oninput="filterItem(this.value,'thingID')">
-                        <select class="form-select" name="thingID" id="thingID" required>
-                          <option value="">...</option>
-                          {{range .AllThings}}
-                            <option value="{{.ID}}">{{.Name}}</option>
-                          {{end}}
-                        </select>
-                        <div id="thingIDHelp" class="form-text">Select a thing.</div>
-                      </div>
-                      <div class="mb-3">
-                        <label for="actions" class="form-label">Actions</label>
-                        <select class="form-select" name="actions" id="actions" aria-describedby="actionsHelp" multiple required>
-                          <option value="m_read">m_read</option>
-                          <option value="m_write">m_write</option>
-                        </select>
-                        <div id="actionsHelp" class="form-text">Select Actions (multiple selections allowed).</div>
-                      </div>
-                      <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                  </div>
+      <!--Modal-->
+      <div class="modal fade" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="connectModal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="connectModal">Connect</h5>
+            </div>
+            <div class="modal-body">
+              <form action="/channels/{{.Channel.ID}}/connectThing" method="post">
+                <div class="mb-3">
+                  <label for="thingID" class="form-label">Thing</label>
+                  <input type="text" name="thingFilter" id="thingFilter" placeholder="Filter by thing" oninput="filterItem(this.value,'thingID')">
+                  <select class="form-select" name="thingID" id="thingID" required>
+                    <option value="">...</option>
+                    {{range .AllThings}}
+                      <option value="{{.ID}}">{{.Name}}</option>
+                    {{end}}
+                  </select>
+                  <div id="thingIDHelp" class="form-text">Select a thing.</div>
                 </div>
-              </div>
-            </div>
-            <div class="modal fade" id="shareThingModal" tabindex="-1" role="dialog" aria-labelledby="shareThingModal" aria-hidden="true">
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="shareThingModal">Share Thing</h5>
-                  </div>
-                  <div class="modal-body">
-                    <form action="/channels/{{.Channel.ID}}/shareThing" method="post">
-                      <div class="mb-3">
-                        <label for="userID" class="form-label">USer</label>
-                        <input type="text" name="userFilter" id="userFilter" placeholder="Filter by User" oninput="filterItem(this.value,'userID')">
-                        <select class="form-select" name="userID" id="userID" required>
-                          <option value="">...</option>
-                          {{range .Users}}
-                            <option value="{{.ID}}">{{.Name}}</option>
-                          {{end}}
-                        </select>
-                      </div>
-                      <div class="mb-3">
-                        <label for="actions" class="form-label">Actions</label>
-                        <select class="form-select" name="actions" id="actions" aria-describedby="actionsHelp" multiple required>
-                          <option value="c_list">c_list</option>
-                          <option value="c_update">c_update</option>
-                          <option value="c_delete">c_delete</option>
-                        </select>
-                        <div id="actionsHelp" class="form-text">Select Actions (multiple selections allowed).</div>
-                      </div>
-                      <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                  </div>
+                <div class="mb-3">
+                  <label for="actions" class="form-label">Actions</label>
+                  <select class="form-select" name="actions" id="actions" aria-describedby="actionsHelp" multiple required>
+                    <option value="m_read">m_read</option>
+                    <option value="m_write">m_write</option>
+                  </select>
+                  <div id="actionsHelp" class="form-text">Select Actions (multiple selections allowed).</div>
                 </div>
-              </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
             </div>
-            <!--modal end-->
-            <table class="table">
-              <thead>
-                <tr>
-                  <th scope="row">Channel</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th>Name</th>
-                  <td>{{.Channel.Name}}</td>
-                </tr>
-                <tr>
-                  <th>ID</th>
-                  <td>{{.Channel.ID}}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            {{ $c := .Channel.ID }}
-            <div class="table-container">
-              <h4 style="font-weight: bold; font-size: 22px; margin-top: 50px; margin-bottom: 20px;">CONNECTED THINGS</h4>
-              <table id="itemsTable" class="table table-striped">
-                <thead>
-                  <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">NAME</th>
-                    <th scope="col">ID</th>
-                    <th scope="col">ACTIONS</th>
-                    <th scope="col"></th>
-                    <th scope="col"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {{$chanID := .Channel.ID}}
-                  {{$policies := .Policies}}
-                  {{$sendMessage:= false}}
-                  {{range $i, $t := .Things}}
-                    {{$sendMessage = authorizeThing $t.ID $chanID "m_write" "group"}}
-                    <tr>
-                      <th scope="row">{{$i}}</th>
-                      <td>{{$t.Name}}</td>
-                      <td><a href={{printf "/things/%s" $t.ID}}>{{$t.ID}}</a></td>
-                      <td>
-                        {{range $p :=$policies}}
-                          {{if (eq $t.ID $p.Subject)}}
-                            {{if (eq $c $p.Object)}}
-                              {{toSlice $p.Actions}}
-                            {{end}}
-                          {{end}}
-                        {{end}}
-                      </td>
-                      <td>
-                        <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#sendMessageModal{{$i}}" {{if not $sendMessage}}disabled{{end}}>
-                          Send Message
-                        </button>
-                        <div class="modal fade" id="sendMessageModal{{$i}}" tabindex="-1" role="dialog" aria-labelledby="sendMessageModalLabel{{$i}}" aria-hidden="true">
-                          <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                              <div class="modal-header">
-                                <h5 class="modal-title" id="sendMessageModalLabel{{$i}}">Send Message</h5>
-                              </div>
-                              <div class="modal-body">
-                                <form action="/messages" method="post">
-                                  <input type="hidden" name="channelID" id="channelID" value="{{$c}}">
-                                  <input type="hidden" name="thingKey" id="thingKey" value="{{$t.Credentials.Secret}}">
-                                  <div class="mb-3">
-                                    <label for="message" class="form-label">Message</label>
-                                    <textarea class="form-control" name="message" id="message" aria-describedby="messageHelp"></textarea>
-                                    <div id="messageHelp" class="form-text">Enter Message.</div>
-                                  </div>
-                                  <button type="submit" class="btn btn-primary">Submit</button>
-                                </form>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <form action="/disconnectThing" method="post">
-                          <input type="hidden" name="channelID" id="channelID" value="{{$c}}">
-                          <input type="hidden" name="thingID" id="thingID" value="{{$t.ID}}">
-                          <button type="submit" class="btn btn-danger btn-sm">Disconnect</button>
-                        </form>
-                      </td>
-                    </tr>
-                  {{end}}
-                </tbody>
-              </table>
-            </div>
-          
           </div>
-          <!-- End of partial-->
-
         </div>
-      </div> <!-- /container -->
+      </div>
+      <div class="modal fade" id="shareThingModal" tabindex="-1" role="dialog" aria-labelledby="shareThingModal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="shareThingModal">Share Thing</h5>
+            </div>
+            <div class="modal-body">
+              <form action="/channels/{{.Channel.ID}}/shareThing" method="post">
+                <div class="mb-3">
+                  <label for="userID" class="form-label">USer</label>
+                  <input type="text" name="userFilter" id="userFilter" placeholder="Filter by User" oninput="filterItem(this.value,'userID')">
+                  <select class="form-select" name="userID" id="userID" required>
+                    <option value="">...</option>
+                    {{range .Users}}
+                      <option value="{{.ID}}">{{.Name}}</option>
+                    {{end}}
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="actions" class="form-label">Actions</label>
+                  <select class="form-select" name="actions" id="actions" aria-describedby="actionsHelp" multiple required>
+                    <option value="c_list">c_list</option>
+                    <option value="c_update">c_update</option>
+                    <option value="c_delete">c_delete</option>
+                  </select>
+                  <div id="actionsHelp" class="form-text">Select Actions (multiple selections allowed).</div>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!--modal end-->
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="row">Channel</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>Name</th>
+            <td>{{.Channel.Name}}</td>
+          </tr>
+          <tr>
+            <th>ID</th>
+            <td>{{.Channel.ID}}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      {{ $c := .Channel.ID }}
+      <div class="table-container">
+        <h4 style="font-weight: bold; font-size: 22px; margin-top: 50px; margin-bottom: 20px;">CONNECTED THINGS</h4>
+        <table id="itemsTable" class="table table-striped">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">NAME</th>
+              <th scope="col">ID</th>
+              <th scope="col">ACTIONS</th>
+              <th scope="col"></th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {{$chanID := .Channel.ID}}
+            {{$policies := .Policies}}
+            {{$sendMessage:= false}}
+            {{range $i, $t := .Things}}
+              {{$sendMessage = authorizeThing $t.ID $chanID "m_write" "group"}}
+              <tr>
+                <th scope="row">{{$i}}</th>
+                <td>{{$t.Name}}</td>
+                <td><a href={{printf "/things/%s" $t.ID}}>{{$t.ID}}</a></td>
+                <td>
+                  {{range $p :=$policies}}
+                    {{if (eq $t.ID $p.Subject)}}
+                      {{if (eq $c $p.Object)}}
+                        {{toSlice $p.Actions}}
+                      {{end}}
+                    {{end}}
+                  {{end}}
+                </td>
+                <td>
+                  <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#sendMessageModal{{$i}}" {{if not $sendMessage}}disabled{{end}}>
+                    Send Message
+                  </button>
+                  <div class="modal fade" id="sendMessageModal{{$i}}" tabindex="-1" role="dialog" aria-labelledby="sendMessageModalLabel{{$i}}" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="sendMessageModalLabel{{$i}}">Send Message</h5>
+                        </div>
+                        <div class="modal-body">
+                          <form action="/messages" method="post">
+                            <input type="hidden" name="channelID" id="channelID" value="{{$c}}">
+                            <input type="hidden" name="thingKey" id="thingKey" value="{{$t.Credentials.Secret}}">
+                            <div class="mb-3">
+                              <label for="message" class="form-label">Message</label>
+                              <textarea class="form-control" name="message" id="message" aria-describedby="messageHelp"></textarea>
+                              <div id="messageHelp" class="form-text">Enter Message.</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <form action="/disconnectThing" method="post">
+                    <input type="hidden" name="channelID" id="channelID" value="{{$c}}">
+                    <input type="hidden" name="thingID" id="thingID" value="{{$t.ID}}">
+                    <button type="submit" class="btn btn-danger btn-sm">Disconnect</button>
+                  </form>
+                </td>
+              </tr>
+            {{end}}
+          </tbody>
+        </table>
+      </div>
     </main>
+  </div>
 
-    {{template "footer"}}
-    
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        new simpleDatatables.DataTable('#itemsTable', {
-          searchable: true,
-          scrollY: "300px",
-          sortable: true,
-          pagination: true,
-        });
+  {{template "footer"}}
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      new simpleDatatables.DataTable('#itemsTable', {
+        searchable: true,
+        scrollY: "300px",
+        sortable: true,
+        pagination: true,
       });
+    });
 
-      function filterItem(filterValue, selectId) {
-        const itemSelect = document.getElementById(selectId);
-        const options = itemSelect.getElementsByTagName("option");
+    function filterItem(filterValue, selectId) {
+      const itemSelect = document.getElementById(selectId);
+      const options = itemSelect.getElementsByTagName("option");
 
-        for (let i = 0; i < options.length; i++) {
-          const option = options[i];
-          const itemId = option.value;
-          const itemName = option.innerHTML;
-          const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
-          option.style.display = shouldShow ? "" : "none";
-        }
+      for (let i = 0; i < options.length; i++) {
+        const option = options[i];
+        const itemId = option.value;
+        const itemName = option.innerHTML;
+        const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
+        option.style.display = shouldShow ? "" : "none";
       }
-    </script>
-  </body>
+    }
+  </script>
+</body>
 </html>
 {{end}}
