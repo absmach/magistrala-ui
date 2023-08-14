@@ -37,7 +37,7 @@
                 </div>
                 <div class="mb-3">
                   <label for="parentID" class="form-label">Parent Name</label>
-                  <input type="text" name="parentFilter" id="parentFilter" placeholder="Filter by parent name" oninput="filterItem(this.value, 'parentID')">
+                  <input type="text" class="itemsFilter" name="parentFilter" id="parentFilter" placeholder="Filter by parent name" oninput="filterItem(this.value, 'parentID')">
                   <select class="form-select" name="parentID" id="parentID">
                     <option value="">...</option>
                     {{range $i, $c := .Channels}}

@@ -21,7 +21,7 @@
                         <form method="post">
                             <div class="mb-3">
                                 <label for="subject" class="form-label">Subject</label>
-                                <input type="text" name="subjectFilter" id="subjectFilter" placeholder="Filter by subject" oninput="filterItem(this.value, 'subject')"> 
+                                <input type="text" class="itemsFilter" name="subjectFilter" id="subjectFilter" placeholder="Filter by subject" oninput="filterItem(this.value, 'subject')"> 
                                 <select class="form-select" name="subject" id="subject" required>
                                     <option value="">...</option>
                                     {{range .Users}}
@@ -32,7 +32,7 @@
                             </div>
                             <div class="mb-3">
                                 <label for="object" class="form-label">Object</label>
-                                <input type="text" name="objectFilter" id="objectFilter" placeholder="Filter by object" oninput="filterItem(this.value, 'object')"> 
+                                <input type="text" class="itemsFilter" name="objectFilter" id="objectFilter" placeholder="Filter by object" oninput="filterItem(this.value, 'object')"> 
                                 <select class="form-select" name="object" id="object" required>
                                     <option value="">...</option>
                                     {{range .Groups}}

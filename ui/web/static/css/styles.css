@@ -2,6 +2,8 @@
     --main-color : #4051b5;
     --color-dark:#1D2231;
     --text-grey: #8390A2;
+    --sidebar-max: 300px;
+    --sidebar-min: 100px
 }
 
 * {
@@ -14,7 +16,7 @@
 }
 
 .sidebar {
-    width: 300px;
+    width: var(--sidebar-max);
     position:fixed;
     left: 0;
     top: 0;
@@ -62,7 +64,7 @@
 }
 
 .sidebar-menu a.active {
-    background: #fff;
+    background:#f0f0f0;
     padding-top: 1rem;
     padding-bottom: 1rem;
     color: var(--main-color);
@@ -80,7 +82,7 @@
   }
 
 #nav-toggle:checked + .sidebar{
-    width: 100px;
+    width: var(--sidebar-min);
 }
 
 #nav-toggle:checked + .sidebar .sidebar-brand,
@@ -95,17 +97,17 @@
 }
 
 #nav-toggle:checked ~ .main-content{
-    margin-left: 100px;
+    margin-left: var(--sidebar-min);
 }
 
 #nav-toggle:checked ~ header{
-   width: calc(100% - 100px);
-   left: 100px;
+   width: calc(100% - var(--sidebar-min));
+   left: var(--sidebar-min);
 }
 
 .main-content {
     transition: margin-left 300ms;
-    margin-left: 300px;
+    margin-left: var(--sidebar-max);
 }
 
 header {
@@ -115,8 +117,8 @@ header {
     padding: 1rem 1.5rem;
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
     position: fixed;
-    left: 300px;
-    width: calc(100% - 300px);
+    left: var(--sidebar-max);
+    width: calc(100% - var(--sidebar-max));
     top: 0;
     z-index: 100;
     
@@ -159,7 +161,6 @@ header label span{
 }
 
 .user-wrapper span{
-    /* border-radius: 50%; */
     color: var(--main-color);
     margin-right: 1rem;
     cursor: pointer;
@@ -281,11 +282,11 @@ td {
     overflow-x: auto;
 }
 
-footer {
+.footer {
     background:#fff;
     padding: 20px;
     height: 20px;
-    margin-left: 300px;
+    margin-left: var(--sidebar-max);
     text-align: center;
     font-size: 18px;
     color: #000;
@@ -371,7 +372,7 @@ footer {
     cursor: pointer;
   }
   .save-btn {
-    background-color: #4051b5;
+    background-color: var(--main-color);
     color: #fff;
   }
   .cancel-btn {
@@ -450,10 +451,127 @@ footer {
     color: #fff;
   }
 
+  /* Login page */
+.loginNav{
+    background: var(--main-color);
+    width: 100%;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+  
+  .logo {
+    width: 50px;
+  }
+
+  .organization-name{
+    margin-left: 10px;
+    font-size: 30px;
+    color: #fff;
+  }
+
+.login-container{
+    width: 100%;
+    height: 80vh;
+    position: relative;
+}
+
+.form-box{
+    width: 90%;
+    max-width: 450px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    background-color: #fff;
+    padding: 50px 60px 70px;
+    text-align: center;
+}
+
+.form-box h1{
+    font-size: 30px;
+    font-weight: 600;
+    margin-bottom: 60px;
+    color: var(--main-color);
+    position: relative;
+}
+
+.form-box h1::after {
+    content: '';
+    width: 30px;
+    height: 4px;
+    border-radius: 3px;
+    background: var(--main-color);
+    position: absolute;
+    bottom: -12px;
+    left: 50%;
+    transform: translate(-50%);
+}
+
+.input-field {
+    background: #eaeaea;
+    margin: 15px 0;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+
+}
+
+.login-input{
+    width: 100%;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    padding: 18px 40px;
+
+}
+
+.input-field i {
+    margin-left: 15px;
+    color: #999;
+}
+
+.btn-field{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.btn-field button {
+    flex-basis: 48%;
+    background: var(--main-color);
+    color: #fff;
+    height: 40px;
+    border-radius: 20px;
+    border: 0;
+    outline: 0;
+    cursor: pointer;
+    transition: background 1s;
+}
+
+.login-footer {
+    background:var(--main-color);
+    color: #fff;
+    padding: 20px;
+    height: 50px;
+    text-align: center;
+    font-size: 18px;
+    position: absolute;
+    right: 0;
+    left: 0;
+    bottom: 0;
+}
+
+.itemsFilter {
+  margin-left: 20px;
+  text-align: center;
+}
+
 @media only screen and (max-width: 1200px) {
 
     .sidebar{
-        width: 100px;
+        width: var(--sidebar-min);
     }
 
     .sidebar .sidebar-brand,
@@ -468,12 +586,12 @@ footer {
     }
 
     .main-content{
-        margin-left: 100px;
+        margin-left: var(--sidebar-min);
     }
 
     #nav-toggle + .main-content header{
-    width: calc(100% - 100px);
-    left: 100px;
+    width: calc(100% - var(--sidebar-min));
+    left: var(--sidebar-min);
     }
 
 }

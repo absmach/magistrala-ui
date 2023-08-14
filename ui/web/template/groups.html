@@ -41,8 +41,8 @@
                   <input type="text" class="form-control" name="description" id="description" placeholder="Group Description">
                 </div>
                 <div class="mb-3">
-                  <label for="parentID" class="form-label">Parent ID</label>
-                  <input type="text" name="parentFilter" id="parentFilter" placeholder="Filter by parent ID" oninput="filterItem(this.value,'parentID')">
+                  <label for="parentID" class="form-label">Parent Name</label>
+                  <input type="text" class="itemsFilter" name="parentFilter" id="parentFilter" placeholder="Filter by parent name" oninput="filterItem(this.value,'parentID')">
                   <select class="form-select" name="parentID" id="parentID">
                     <option value="">...</option>
                     {{range .Groups}}
