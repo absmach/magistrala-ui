@@ -6,6 +6,7 @@ package api
 import (
 	"context"
 	"net/http"
+	"strings"
 
 	"golang.org/x/sync/errgroup"
 
@@ -18,9 +19,9 @@ import (
 
 func getErrorMessage(err error) string {
 	switch {
-	case errors.Contains(err, errAuthentication):
+	case strings.Contains(err.Error(), errAuthentication.Error()):
 		return "wrong email"
-	case errors.Contains(err, errSecretError):
+	case strings.Contains(err.Error(), errSecretError.Error()):
 		return "wrong password"
 	}
 	return "internal server error"

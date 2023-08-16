@@ -13,6 +13,7 @@ import (
 	"html/template"
 	"log"
 	"reflect"
+	"strings"
 	"sync"
 	"time"
 
@@ -530,7 +531,7 @@ func (gs *uiService) CreateUsers(ctx context.Context, token string, users ...sdk
 	for i := range users {
 		_, err := gs.sdk.CreateUser(users[i], token)
 		if err != nil {
-			if errors.Contains(err, ErrConflict) {
+			if strings.Contains(err.Error(), ErrConflict.Error()) {
 				alertMessage = "User already Exists"
 				htmlPage, err := gs.ListUsers(ctx, token, alertMessage)
 				if err != nil {
@@ -671,7 +672,7 @@ func (gs *uiService) CreateThings(ctx context.Context, token string, things ...s
 	for _, thing := range things {
 		_, err := gs.sdk.CreateThing(thing, token)
 		if err != nil {
-			if errors.Contains(err, ErrConflict) {
+			if strings.Contains(err.Error(), ErrConflict.Error()) {
 				alertMessage = "Thing already Exists!"
 				htmlPage, err := gs.ListThings(ctx, token, alertMessage)
 				if err != nil {
@@ -812,7 +813,7 @@ func (gs *uiService) CreateChannels(ctx context.Context, token string, channels 
 	for _, channel := range channels {
 		_, err := gs.sdk.CreateChannel(channel, token)
 		if err != nil {
-			if errors.Contains(err, ErrConflict) {
+			if strings.Contains(err.Error(), ErrConflict.Error()) {
 				alertMessage = "Channel already Exists"
 				htmlPage, err := gs.ListChannels(ctx, token, alertMessage)
 				if err != nil {
@@ -1245,7 +1246,7 @@ func (gs *uiService) CreateGroups(ctx context.Context, token string, groups ...s
 	for _, group := range groups {
 		_, err := gs.sdk.CreateGroup(group, token)
 		if err != nil {
-			if errors.Contains(err, ErrConflict) {
+			if strings.Contains(err.Error(), ErrConflict.Error()) {
 				alertMessage = "Group already Exists"
 				htmlPage, err := gs.ListGroups(ctx, token, alertMessage)
 				if err != nil {

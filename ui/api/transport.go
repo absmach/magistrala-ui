@@ -913,16 +913,16 @@ func encodeJSONResponse(_ context.Context, w http.ResponseWriter, response inter
 
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	switch {
-	case errors.Contains(err, errNoCookie),
-		errors.Contains(err, errUnauthorized):
+	case strings.Contains(err.Error(), errNoCookie.Error()),
+		strings.Contains(err.Error(), errUnauthorized.Error()):
 		w.Header().Set("Location", "/login")
 		w.WriteHeader(http.StatusFound)
-	case errors.Contains(err, errMalformedData),
-		errors.Contains(err, errMalformedSubtopic):
+	case strings.Contains(err.Error(), errMalformedData.Error()),
+		strings.Contains(err.Error(), errMalformedSubtopic.Error()):
 		w.WriteHeader(http.StatusBadRequest)
-	case errors.Contains(err, ui.ErrUnauthorizedAccess):
+	case strings.Contains(err.Error(), ui.ErrUnauthorizedAccess.Error()):
 		w.WriteHeader(http.StatusForbidden)
-	case errors.Contains(err, errAuthentication):
+	case strings.Contains(err.Error(), errAuthentication.Error()):
 		w.Header().Set("Location", "/refresh_token")
 		w.WriteHeader(http.StatusSeeOther)
 

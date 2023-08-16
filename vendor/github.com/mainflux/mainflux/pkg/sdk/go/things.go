@@ -168,7 +168,7 @@ func (sdk mfSDK) UpdateThingTags(t Thing, token string) (Thing, errors.SDKError)
 }
 
 func (sdk mfSDK) UpdateThingSecret(id, secret, token string) (Thing, errors.SDKError) {
-	var ucsr = updateThingSecretReq{Secret: secret}
+	ucsr := updateThingSecretReq{Secret: secret}
 
 	data, err := json.Marshal(ucsr)
 	if err != nil {
@@ -252,11 +252,12 @@ func (sdk mfSDK) IdentifyThing(key string) (string, errors.SDKError) {
 }
 
 func (sdk mfSDK) ShareThing(groupID, userID string, actions []string, token string) errors.SDKError {
-	policy := ConnectionIDs{
-		ChannelIDs: []string{groupID},
-		ThingIDs:   []string{userID},
-		Actions:    actions,
+	policy := Policy{
+		Subject:  userID,
+		Object:   groupID,
+		Actions:  actions,
+		External: true,
 	}
 
-	return sdk.Connect(policy, token)
+	return sdk.CreateThingPolicy(policy, token)
 }
