@@ -8,92 +8,94 @@
 
   <div class="main-content">
     <main>
-      <a class="btn btn-primary" href="/channels/{{.Channel.ID}}/things" role="button" >Connections</a>
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th scope="row">CHANNEL</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{$disableButton := true}}
-          {{if (authorizeThing .User.ID .Channel.ID "g_update" "group")}}
-            {{$disableButton =false}}
-          {{end}}
-          <tr>
-            <th>NAME</th>
-            <td class="editable" contenteditable="false" data-field="name">
-              {{.Channel.Name}}
-            </td>
-            <td>
-              <button class="edit-btn" onclick="editRow('name')" {{if $disableButton}}disabled{{end}}>
-                <i class="fas fa-pencil-alt"></i>
-              </button>
-              <div class="save-cancel-buttons" style="display: none;">
-                <button class="save-btn" onclick="saveRow('name')">
-                  Save
+      <a class="btn body-button" href="/channels/{{.Channel.ID}}/things" role="button" >Connections</a>
+      <div class="table-container">
+        <table id="myTable" class="table">
+          <thead>
+            <tr>
+              <th scope="row">CHANNEL</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{$disableButton := true}}
+            {{if (authorizeThing .User.ID .Channel.ID "g_update" "group")}}
+              {{$disableButton =false}}
+            {{end}}
+            <tr>
+              <th>NAME</th>
+              <td class="editable" contenteditable="false" data-field="name">
+                {{.Channel.Name}}
+              </td>
+              <td>
+                <button class="edit-btn" onclick="editRow('name')" {{if $disableButton}}disabled{{end}}>
+                  <i class="fas fa-pencil-alt"></i>
                 </button>
-                <button class="cancel-btn" onclick="cancelEditRow('name')">
-                  Cancel
+                <div class="save-cancel-buttons" style="display: none;">
+                  <button class="save-btn" onclick="saveRow('name')">
+                    Save
+                  </button>
+                  <button class="cancel-btn" onclick="cancelEditRow('name')">
+                    Cancel
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>ID</th>
+              <td>
+                {{.Channel.ID}}
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <th>Owner</th>
+              <td>
+                {{.Channel.OwnerID}}
+              </td>
+              <td></td>
+            </tr>
+            <tr>
+              <th>Description</th>
+              <td class="editable" contenteditable="false" data-field="description">
+                {{.Channel.Description}}
+              </td>
+              <td>
+                <button class="edit-btn" onclick="editRow('description')" {{if $disableButton}}disabled{{end}}>
+                  <i class="fas fa-pencil-alt"></i>
                 </button>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <th>ID</th>
-            <td>
-              {{.Channel.ID}}
-            </td>
-            <td></td>
-          </tr>
-          <tr>
-            <th>Owner</th>
-            <td>
-              {{.Channel.OwnerID}}
-            </td>
-            <td></td>
-          </tr>
-          <tr>
-            <th>Description</th>
-            <td class="editable" contenteditable="false" data-field="description">
-              {{.Channel.Description}}
-            </td>
-            <td>
-              <button class="edit-btn" onclick="editRow('description')" {{if $disableButton}}disabled{{end}}>
-                <i class="fas fa-pencil-alt"></i>
-              </button>
-              <div class="save-cancel-buttons" style="display: none;">
-                <button class="save-btn" onclick="saveRow('description')">
-                  Save
+                <div class="save-cancel-buttons" style="display: none;">
+                  <button class="save-btn" onclick="saveRow('description')">
+                    Save
+                  </button>
+                  <button class="cancel-btn" onclick="cancelEditRow('description')">
+                    Cancel
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>Metadata</th>
+              <td class="editable" contenteditable="false" data-field="metadata">
+                {{toJSON .Channel.Metadata}}
+              </td>
+              <td>
+                <button class="edit-btn" onclick="editRow('metadata')" {{if $disableButton}}disabled{{end}}>
+                  <i class="fas fa-pencil-alt"></i>
                 </button>
-                <button class="cancel-btn" onclick="cancelEditRow('description')">
-                  Cancel
-                </button>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <th>Metadata</th>
-            <td class="editable" contenteditable="false" data-field="metadata">
-              {{toJSON .Channel.Metadata}}
-            </td>
-            <td>
-              <button class="edit-btn" onclick="editRow('metadata')" {{if $disableButton}}disabled{{end}}>
-                <i class="fas fa-pencil-alt"></i>
-              </button>
-              <div class="save-cancel-buttons" style="display: none;">
-                <button class="save-btn" onclick="saveRow('metadata')">
-                  Save
-                </button>
-                <button class="cancel-btn" onclick="cancelEditRow('metadata')">
-                  Cancel
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <div id="error-message" class="error-message"></div>
+                <div class="save-cancel-buttons" style="display: none;">
+                  <button class="save-btn" onclick="saveRow('metadata')">
+                    Save
+                  </button>
+                  <button class="cancel-btn" onclick="cancelEditRow('metadata')">
+                    Cancel
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div id="error-message" class="error-message"></div>
+      </div>
     </main>
   </div>
 

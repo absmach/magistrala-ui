@@ -30,148 +30,148 @@
         </ul>
         <div class="tab-content" id="myTabContent">
             <div class="tab-pane fade show active" id="Users-tab-pane" role="tabpanel" aria-labelledby="Users-tab" tabindex="0" style="padding-top: 20px;">
-                <table id="usersTable" class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">ID</th>
-                        <th scope="col"></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {{range $i, $u := .Users}}
+                <div class="table-container">
+                    <table id="usersTable" class="table">
+                        <thead>
                         <tr>
-                        <th scope="row">{{$i}}</th>
-                        <td>{{$u.Name}}</td>
-                        <td>
-                            <div class="copy-con-container">
-                            <a href={{printf "/users/%s" $u.ID}}>{{$u.ID}}</a>
-                            <button class="copy-icon" onclick="copyToClipboard(this)">
-                                <i class="far fa-copy"></i>
-                            </button>
-                            </div>
-                        </td>
-                        <td>
-                            <form action="/users/enabled" method="post">
-                            <input type="hidden" name="userID" id="userID" value="{{$u.ID}}">
-                            <button type="submit" class="btn btn-sm">
-                                <i class="fas fa-solid fa-trash-restore"></i>
-                            </button>
-                            </form>
-                        </td>
+                            <th scope="col">Name</th>
+                            <th scope="col">ID</th>
+                            <th scope="col"></th>
                         </tr>
-                    {{end}}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        {{range $i, $u := .Users}}
+                            <tr>
+                            <td>{{$u.Name}}</td>
+                            <td>
+                                <div class="copy-con-container">
+                                <a href={{printf "/users/%s" $u.ID}}>{{$u.ID}}</a>
+                                <button class="copy-icon" onclick="copyToClipboard(this)">
+                                    <i class="far fa-copy"></i>
+                                </button>
+                                </div>
+                            </td>
+                            <td>
+                                <form action="/users/enabled" method="post">
+                                <input type="hidden" name="userID" id="userID" value="{{$u.ID}}">
+                                <button type="submit" class="btn btn-sm">
+                                    <i class="fas fa-solid fa-trash-restore"></i>
+                                </button>
+                                </form>
+                            </td>
+                            </tr>
+                        {{end}}
+                        </tbody>
+                    </table>
+                </div>      
             </div>
             <div class="tab-pane fade" id="Groups-tab-pane" role="tabpanel" aria-labelledby="Groups-tab" tabindex="0" style="padding-top: 20px;">
-                <table id="groupsTable" class="table table-striped">
-                    <thead style="min-width: 100%;">
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">ID</th>
-                        <th scope="col"></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {{range $i, $g := .Groups}}
+                <div class="table-container">
+                    <table id="groupsTable" class="table">
+                        <thead style="min-width: 100%;">
                         <tr>
-                        <th scope="row">{{$i}}</th>
-                        <td>{{$g.Name}}</td>
-                        <td>
-                            <div class="copy-con-container">
-                            <a href={{printf "/groups/%s" $g.ID}}>{{$g.ID}}</a>
-                            <button class="copy-icon" onclick="copyToClipboard(this)">
-                                <i class="far fa-copy"></i>
-                            </button>
-                            </div>
-                        </td>
-                        <td>
-                            <form action="/groups/enabled" method="post">
-                            <input type="hidden" name="groupID" id="groupID" value="{{$g.ID}}">
-                            <button type="submit" class="btn btn-sm">
-                                <i class="fas fa-solid fa-trash-restore"></i>
-                            </button>
-                            </form>
-                        </td>
+                            <th scope="col">Name</th>
+                            <th scope="col">ID</th>
+                            <th scope="col"></th>
                         </tr>
-                    {{end}}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        {{range $i, $g := .Groups}}
+                            <tr>
+                            <td>{{$g.Name}}</td>
+                            <td>
+                                <div class="copy-con-container">
+                                <a href={{printf "/groups/%s" $g.ID}}>{{$g.ID}}</a>
+                                <button class="copy-icon" onclick="copyToClipboard(this)">
+                                    <i class="far fa-copy"></i>
+                                </button>
+                                </div>
+                            </td>
+                            <td>
+                                <form action="/groups/enabled" method="post">
+                                <input type="hidden" name="groupID" id="groupID" value="{{$g.ID}}">
+                                <button type="submit" class="btn btn-sm">
+                                    <i class="fas fa-solid fa-trash-restore"></i>
+                                </button>
+                                </form>
+                            </td>
+                            </tr>
+                        {{end}}
+                        </tbody>
+                    </table>
+                </div> 
             </div>
             <div class="tab-pane fade" id="Things-tab-pane" role="tabpanel" aria-labelledby="Things-tab" tabindex="0" style="padding-top: 20px;">
-                <table id="thingsTable" class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">ID</th>
-                        <th scope="col"></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {{range $i, $t := .Things}}
+                <div class="table-container">
+                    <table id="thingsTable" class="table">
+                        <thead>
                         <tr>
-                        <th scope="row">{{$i}}</th>
-                        <td>{{$t.Name}}</td>
-                        <td>
-                            <div class="copy-con-container">
-                            <a href={{printf "/things/%s" $t.ID}}>{{$t.ID}}</a>
-                            <button class="copy-icon" onclick="copyToClipboard(this)">
-                                <i class="far fa-copy"></i>
-                            </button>
-                            </div>
-                        </td>
-                        <td>
-                            <form action="/things/enabled" method="post">
-                            <input type="hidden" name="thingID" id="thingID" value="{{$t.ID}}">
-                            <button type="submit" class="btn btn-sm">
-                                <i class="fas fa-solid fa-trash-restore"></i>
-                            </button>
-                            </form>
-                        </td>
+                            <th scope="col">Name</th>
+                            <th scope="col">ID</th>
+                            <th scope="col"></th>
                         </tr>
-                    {{end}}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        {{range $i, $t := .Things}}
+                            <tr>
+                            <td>{{$t.Name}}</td>
+                            <td>
+                                <div class="copy-con-container">
+                                <a href={{printf "/things/%s" $t.ID}}>{{$t.ID}}</a>
+                                <button class="copy-icon" onclick="copyToClipboard(this)">
+                                    <i class="far fa-copy"></i>
+                                </button>
+                                </div>
+                            </td>
+                            <td>
+                                <form action="/things/enabled" method="post">
+                                <input type="hidden" name="thingID" id="thingID" value="{{$t.ID}}">
+                                <button type="submit" class="btn btn-sm">
+                                    <i class="fas fa-solid fa-trash-restore"></i>
+                                </button>
+                                </form>
+                            </td>
+                            </tr>
+                        {{end}}
+                        </tbody>
+                    </table>
+                </div>
             </div>
             <div class="tab-pane fade" id="Channels-tab-pane" role="tabpanel" aria-labelledby="Channels-tab" tabindex="0" style="padding-top: 20px;">
-                <table id="channelsTable" class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Name</th> 
-                        <th scope="col">ID</th>
-                        <th scope="col"></th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {{range $i, $c := .Channels}}
+                <div class="table-container">
+                    <table id="channelsTable" class="table">
+                        <thead>
                         <tr>
-                        <th scope="row">{{$i}}</th>
-                        <td>{{$c.Name}}</td>
-                        <td>
-                            <div class="copy-con-container">
-                            <a href={{printf "/channels/%s" $c.ID}}>{{$c.ID}}</a>
-                            <button class="copy-icon" onclick="copyToClipboard(this)">
-                                <i class="far fa-copy"></i>
-                            </button>
-                            </div>
-                        </td>
-                        <td>
-                            <form action="/channels/enabled" method="post">
-                            <input type="hidden" name="channelID" id="channelID" value="{{$c.ID}}">
-                            <button type="submit" class="btn btn-sm">
-                                <i class="fas fa-solid fa-trash-restore"></i>
-                            </button>
-                            </form>
-                        </td>
+                            <th scope="col">Name</th> 
+                            <th scope="col">ID</th>
+                            <th scope="col"></th>
                         </tr>
-                    {{end}}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                        {{range $i, $c := .Channels}}
+                            <tr>
+                            <td>{{$c.Name}}</td>
+                            <td>
+                                <div class="copy-con-container">
+                                <a href={{printf "/channels/%s" $c.ID}}>{{$c.ID}}</a>
+                                <button class="copy-icon" onclick="copyToClipboard(this)">
+                                    <i class="far fa-copy"></i>
+                                </button>
+                                </div>
+                            </td>
+                            <td>
+                                <form action="/channels/enabled" method="post">
+                                <input type="hidden" name="channelID" id="channelID" value="{{$c.ID}}">
+                                <button type="submit" class="btn btn-sm">
+                                    <i class="fas fa-solid fa-trash-restore"></i>
+                                </button>
+                                </form>
+                            </td>
+                            </tr>
+                        {{end}}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </main>
@@ -191,7 +191,7 @@
         tables.forEach(function(tableId) {
             var datatable=new simpleDatatables.DataTable(tableId, {
                 searchable: true,
-                scrollY: '300px',
+                scrollY: '430px',
                 sortable: true,
                 pagination: true
             });

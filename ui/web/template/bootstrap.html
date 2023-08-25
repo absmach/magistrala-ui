@@ -8,134 +8,136 @@
 
   <div class="main-content">
     <main>
-      <button type="button" class="btn btn-primary" onclick="location.href='/bootstrap/{{.Bootstrap.ThingID}}/terminal'">
+      <button type="button" class="btn body-button" onclick="location.href='/bootstrap/{{.Bootstrap.ThingID}}/terminal'">
         Remote Terminal
       </button>
 
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th scope="row">Bootstrap</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th>Name</th>
-            <td class="editable" contenteditable="false" data-field="name">
-              {{.Bootstrap.Name}}
+      <div class="table-container">
+        <table id="myTable" class="table">
+          <thead>
+            <tr>
+              <th scope="row">Bootstrap</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Name</th>
+              <td class="editable" contenteditable="false" data-field="name">
+                {{.Bootstrap.Name}}
+                </td>
+                <td>
+                  <button class="edit-btn" onclick="editRow('name')">
+                    <i class="fas fa-pencil-alt"></i>
+                  </button>
+                  <div class="save-cancel-buttons" style="display: none;">
+                    <button class="save-btn" onclick="saveRow('name')">
+                      Save
+                    </button>
+                    <button class="cancel-btn" onclick="cancelEditRow('name')">
+                      Cancel
+                    </button>
+                  </div>
+                </td>
+            </tr>
+            <tr>
+              <th>Content</th>
+              <td class="editable" contenteditable="false" data-field="content">
+                {{.Bootstrap.Content}}
               </td>
               <td>
-                <button class="edit-btn" onclick="editRow('name')">
+                <button class="edit-btn" onclick="editRow('content')">
                   <i class="fas fa-pencil-alt"></i>
                 </button>
                 <div class="save-cancel-buttons" style="display: none;">
-                  <button class="save-btn" onclick="saveRow('name')">
+                  <button class="save-btn" onclick="saveRow('content')">
                     Save
                   </button>
-                  <button class="cancel-btn" onclick="cancelEditRow('name')">
+                  <button class="cancel-btn" onclick="cancelEditRow('content')">
                     Cancel
                   </button>
                 </div>
               </td>
-          </tr>
-          <tr>
-            <th>Content</th>
-            <td class="editable" contenteditable="false" data-field="content">
-              {{.Bootstrap.Content}}
-            </td>
-            <td>
-              <button class="edit-btn" onclick="editRow('content')">
-                <i class="fas fa-pencil-alt"></i>
-              </button>
-              <div class="save-cancel-buttons" style="display: none;">
-                <button class="save-btn" onclick="saveRow('content')">
-                  Save
+            </tr>
+            <tr>
+              <th>Channels</th>
+              <td class="editable" contenteditable="false" data-field="channels">
+                {{toSlice .Bootstrap.Channels}}
+              </td>
+              <td>
+                <button class="edit-btn" onclick="editRow('channels')">
+                  <i class="fas fa-pencil-alt"></i>
                 </button>
-                <button class="cancel-btn" onclick="cancelEditRow('content')">
-                  Cancel
+                <div class="save-cancel-buttons" style="display: none;">
+                  <button class="save-btn" onclick="saveRow('channels')">
+                    Save
+                  </button>
+                  <button class="cancel-btn" onclick="cancelEditRow('channels')">
+                    Cancel
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>Client Cert</th>
+              <td class="editable" contenteditable="false" data-field="clientCert">
+                {{.Bootstrap.ClientCert}}
+              </td>
+              <td>
+                <button class="edit-btn" onclick="editRow('clientCert')">
+                  <i class="fas fa-pencil-alt"></i>
                 </button>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <th>Channels</th>
-            <td class="editable" contenteditable="false" data-field="channels">
-              {{toSlice .Bootstrap.Channels}}
-            </td>
-            <td>
-              <button class="edit-btn" onclick="editRow('channels')">
-                <i class="fas fa-pencil-alt"></i>
-              </button>
-              <div class="save-cancel-buttons" style="display: none;">
-                <button class="save-btn" onclick="saveRow('channels')">
-                  Save
+                <div class="save-cancel-buttons" style="display: none;">
+                  <button class="save-btn" onclick="saveRow('clientCert')">
+                    Save
+                  </button>
+                  <button class="cancel-btn" onclick="cancelEditRow('clientCert')">
+                    Cancel
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>Client Key</th>
+              <td class="editable" contenteditable="false" data-field="clientKey">
+                {{.Bootstrap.ClientKey}}
+              </td>
+              <td>
+                <button class="edit-btn" onclick="editRow('clientKey')">
+                  <i class="fas fa-pencil-alt"></i>
                 </button>
-                <button class="cancel-btn" onclick="cancelEditRow('channels')">
-                  Cancel
+                <div class="save-cancel-buttons" style="display: none;">
+                  <button class="save-btn" onclick="saveRow('clientKey')">
+                    Save
+                  </button>
+                  <button class="cancel-btn" onclick="cancelEditRow('clientKey')">
+                    Cancel
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>CA Cert</th>
+              <td class="editable" contenteditable="false" data-field="CACert">
+                {{.Bootstrap.CACert}}
+              </td>
+              <td>
+                <button class="edit-btn" onclick="editRow('CACert')">
+                  <i class="fas fa-pencil-alt"></i>
                 </button>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <th>Client Cert</th>
-            <td class="editable" contenteditable="false" data-field="clientCert">
-              {{.Bootstrap.ClientCert}}
-            </td>
-            <td>
-              <button class="edit-btn" onclick="editRow('clientCert')">
-                <i class="fas fa-pencil-alt"></i>
-              </button>
-              <div class="save-cancel-buttons" style="display: none;">
-                <button class="save-btn" onclick="saveRow('clientCert')">
-                  Save
-                </button>
-                <button class="cancel-btn" onclick="cancelEditRow('clientCert')">
-                  Cancel
-                </button>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <th>Client Key</th>
-            <td class="editable" contenteditable="false" data-field="clientKey">
-              {{.Bootstrap.ClientKey}}
-            </td>
-            <td>
-              <button class="edit-btn" onclick="editRow('clientKey')">
-                <i class="fas fa-pencil-alt"></i>
-              </button>
-              <div class="save-cancel-buttons" style="display: none;">
-                <button class="save-btn" onclick="saveRow('clientKey')">
-                  Save
-                </button>
-                <button class="cancel-btn" onclick="cancelEditRow('clientKey')">
-                  Cancel
-                </button>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <th>CA Cert</th>
-            <td class="editable" contenteditable="false" data-field="CACert">
-              {{.Bootstrap.CACert}}
-            </td>
-            <td>
-              <button class="edit-btn" onclick="editRow('CACert')">
-                <i class="fas fa-pencil-alt"></i>
-              </button>
-              <div class="save-cancel-buttons" style="display: none;">
-                <button class="save-btn" onclick="saveRow('CACert')">
-                  Save
-                </button>
-                <button class="cancel-btn" onclick="cancelEditRow('CACert')">
-                  Cancel
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <div id="error-message" class="error-message"></div>
+                <div class="save-cancel-buttons" style="display: none;">
+                  <button class="save-btn" onclick="saveRow('CACert')">
+                    Save
+                  </button>
+                  <button class="cancel-btn" onclick="cancelEditRow('CACert')">
+                    Cancel
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div id="error-message" class="error-message"></div>
+      </div>
     </main>
   </div>
 

@@ -15,7 +15,7 @@
       {{if (authorizeUser $userID .Group.ID "g_add" "group")}}
         {{$disableAssign =false}}
       {{end}}
-      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#connectModal" {{if $disableAssign}}disabled{{end}}>
+      <button type="button" class="btn body-button" data-bs-toggle="modal" data-bs-target="#connectModal" {{if $disableAssign}}disabled{{end}}>
         Assign
       </button>
       <div class="modal fade" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="connectModal" aria-hidden="true">
@@ -45,32 +45,35 @@
                   </select>
                   <div id="TypeHelp" class="form-text">Select member Type.</div>
                 </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn body-button">Submit</button>
               </form>
             </div>
           </div>
         </div>
       </div>
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th scope="row">GROUP</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
+      <div class="table-container">
+        <table id="myTable" class="table">
+          <thead>
             <tr>
-              <th>Name</th>
-              <td>{{.Group.Name}}</td>
+              <th scope="row">GROUP</th>
             </tr>
-            <th>ID</th>
-            <td>{{.Group.ID}}</td>
-          </tr>
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <tr>
+              <tr>
+                <th>Name</th>
+                <td>{{.Group.Name}}</td>
+              </tr>
+              <th>ID</th>
+              <td>{{.Group.ID}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       <div class="table-container">
         <h4 style="font-weight: bold; font-size: 22px; margin-top: 50px; margin-bottom: 20px;">GROUP MEMBERS</h4>
-        <table id="itemsTable" class="table table-striped">
+        <table id="itemsTable" class="table">
           <thead>
             <tr>
               <th scope="col">#</th>
@@ -96,7 +99,17 @@
                       {{range $p := $policies}}
                         {{if (eq $m.ID $p.Subject)}}
                           {{if (eq $groupID $p.Object)}}
-                            {{toSlice $p.Actions}}
+                          {{range $j, $a := $p.Actions}}
+                            {{$badgeClass := "badge text-dark "}}
+                            {{if hasPrefix $a "g_"}}
+                                {{$badgeClass = printf "%s%s" $badgeClass "group-action"}}
+                            {{else if hasPrefix $a "c_"}}
+                                {{$badgeClass = printf "%s%s" $badgeClass "client-action"}}
+                            {{else}}
+                                {{$badgeClass = printf "%s%s" $badgeClass "text-bg-info"}}
+                            {{end}}
+                            <span class="{{$badgeClass}}">{{$a}}</span>
+                          {{end}}
                           {{end}}
                         {{end}}
                       {{end}}

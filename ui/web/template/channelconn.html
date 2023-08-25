@@ -8,10 +8,10 @@
 
   <div class="main-content">
     <main>
-      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#connectModal">
+      <button type="button" class="btn body-button" data-bs-toggle="modal" data-bs-target="#connectModal">
         Connect Thing
       </button>
-      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#shareThingModal">
+      <button type="button" class="btn body-button" data-bs-toggle="modal" data-bs-target="#shareThingModal">
         Share Things
       </button>
 
@@ -43,7 +43,7 @@
                   </select>
                   <div id="actionsHelp" class="form-text">Select Actions (multiple selections allowed).</div>
                 </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn body-button">Submit</button>
               </form>
             </div>
           </div>
@@ -58,7 +58,7 @@
             <div class="modal-body">
               <form action="/channels/{{.Channel.ID}}/shareThing" method="post">
                 <div class="mb-3">
-                  <label for="userID" class="form-label">USer</label>
+                  <label for="userID" class="form-label">User</label>
                   <input type="text" name="userFilter" id="userFilter" placeholder="Filter by User" oninput="filterItem(this.value,'userID')">
                   <select class="form-select" name="userID" id="userID" required>
                     <option value="">...</option>
@@ -76,35 +76,37 @@
                   </select>
                   <div id="actionsHelp" class="form-text">Select Actions (multiple selections allowed).</div>
                 </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn body-button">Submit</button>
               </form>
             </div>
           </div>
         </div>
       </div>
       <!--modal end-->
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="row">Channel</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th>Name</th>
-            <td>{{.Channel.Name}}</td>
-          </tr>
-          <tr>
-            <th>ID</th>
-            <td>{{.Channel.ID}}</td>
-          </tr>
-        </tbody>
-      </table>
-
+      <div class="table-container">
+        <table id="myTable" class="table">
+          <thead>
+            <tr>
+              <th scope="row">Channel</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Name</th>
+              <td>{{.Channel.Name}}</td>
+            </tr>
+            <tr>
+              <th>ID</th>
+              <td>{{.Channel.ID}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
       {{ $c := .Channel.ID }}
       <div class="table-container">
         <h4 style="font-weight: bold; font-size: 22px; margin-top: 50px; margin-bottom: 20px;">CONNECTED THINGS</h4>
-        <table id="itemsTable" class="table table-striped">
+        <table id="itemsTable" class="table">
           <thead>
             <tr>
               <th scope="col">#</th>
@@ -129,13 +131,23 @@
                   {{range $p :=$policies}}
                     {{if (eq $t.ID $p.Subject)}}
                       {{if (eq $c $p.Object)}}
-                        {{toSlice $p.Actions}}
+                        {{range $j, $a := $p.Actions}}
+                          {{$badgeClass := "badge text-dark "}}
+                          {{if eq $a "m_read"}}
+                              {{$badgeClass = printf "%s%s" $badgeClass "read-action"}}
+                          {{else if eq $a "m_write"}}
+                              {{$badgeClass = printf "%s%s" $badgeClass "write-action"}}
+                          {{else}}
+                              {{$badgeClass = printf "%s%s" $badgeClass "text-bg-info"}}
+                          {{end}}
+                          <span class="{{$badgeClass}}">{{$a}}</span>
+                        {{end}}
                       {{end}}
                     {{end}}
                   {{end}}
                 </td>
                 <td>
-                  <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#sendMessageModal{{$i}}" {{if not $sendMessage}}disabled{{end}}>
+                  <button type="button" class="btn btn-sm sendMessage-button " data-bs-toggle="modal" data-bs-target="#sendMessageModal{{$i}}" {{if not $sendMessage}}disabled{{end}}>
                     Send Message
                   </button>
                   <div class="modal fade" id="sendMessageModal{{$i}}" tabindex="-1" role="dialog" aria-labelledby="sendMessageModalLabel{{$i}}" aria-hidden="true">
@@ -153,7 +165,7 @@
                               <textarea class="form-control" name="message" id="message" aria-describedby="messageHelp"></textarea>
                               <div id="messageHelp" class="form-text">Enter Message.</div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <button type="submit" class="btn body-button">Submit</button>
                           </form>
                         </div>
                       </div>

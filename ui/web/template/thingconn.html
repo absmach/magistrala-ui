@@ -8,7 +8,7 @@
 
   <div class="main-content">
     <main>
-      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#connectModal">
+      <button type="button" class="btn body-button" data-bs-toggle="modal" data-bs-target="#connectModal">
         Connect
       </button>
       <div class="modal fade" id="connectModal" tabindex="-1" role="dialog" aria-labelledby="connectModal" aria-hidden="true">
@@ -38,34 +38,36 @@
                   </select>
                   <div id="actionsHelp" class="form-text">Select Actions (multiple selections allowed).</div>
                 </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn body-button">Submit</button>
               </form>
             </div>
           </div>
         </div>
       </div>
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th scope="row">THING</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th>Name</th>
-            <td>{{.Thing.Name}}</td>
-          </tr>
-          <tr>
-            <th>ID</th>
-            <td>{{.Thing.ID}}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-container">
+        <table id="myTable" class="table">
+          <thead>
+            <tr>
+              <th scope="row">THING</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th>Name</th>
+              <td>{{.Thing.Name}}</td>
+            </tr>
+            <tr>
+              <th>ID</th>
+              <td>{{.Thing.ID}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       {{$policies := .Policies}}
       {{ $t := .Thing}}
       <div class="table-container">
         <h4 style="font-weight: bold; font-size: 22px; margin-top: 50px; margin-bottom: 20px;">CONNECTED CHANNELS</h4>
-        <table id="itemsTable" class="table table-striped">
+        <table id="itemsTable" class="table">
           <thead>
             <tr>
               <th scope="col">#</th>
@@ -86,7 +88,17 @@
                   {{range $p :=$policies}}
                     {{if (eq $c.ID $p.Object)}}
                       {{if (eq $t.ID $p.Subject)}}
-                        {{toSlice $p.Actions}}
+                        {{range $j, $a := $p.Actions}}
+                          {{$badgeClass := "badge text-dark "}}
+                          {{if eq $a "m_read"}}
+                              {{$badgeClass = printf "%s%s" $badgeClass "read-action"}}
+                          {{else if eq $a "m_write"}}
+                              {{$badgeClass = printf "%s%s" $badgeClass "write-action"}}
+                          {{else}}
+                              {{$badgeClass = printf "%s%s" $badgeClass "text-bg-info"}}
+                          {{end}}
+                          <span class="{{$badgeClass}}">{{$a}}</span>
+                        {{end}}
                       {{end}}
                     {{end}}
                   {{end}}

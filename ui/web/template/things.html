@@ -18,8 +18,8 @@
       {{ end }}
 
       <!-- Button trigger modal -->
-      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addThingModal">
-        Add
+      <button type="button" class="btn body-button" data-bs-toggle="modal" data-bs-target="#addThingModal">
+        Add Thing
       </button>
 
       <!-- Modal -->
@@ -60,7 +60,7 @@
                   <div id="metadataHelp" class="form-text">Enter device metadata in JSON format.</div>
                   <div id="metadataError" class="error-message"></div>
                 </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
+                <button type="submit" class="btn body-button">Submit</button>
               </form>
             </div>
           </div>
@@ -68,7 +68,7 @@
       </div>
 
        <!-- Button trigger modal -->
-       <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addThingsModal">
+       <button type="button" class="btn body-button" data-bs-toggle="modal" data-bs-target="#addThingsModal">
         Add Things
       </button>
 
@@ -84,7 +84,7 @@
                 <div class="form-group">
                   <label for="thingsFile">Add csv file containing thing names with metadata. The metadata field can be empty</label>
                   <input type="file" class="form-control-file" id="thingsFile" name="thingsFile" required>
-                  <button type="submit" value="upload" class="btn btn-primary">Submit</button>
+                  <button type="submit" value="upload" class="btn body-button">Submit</button>
                 </div>
               </form>
             </div>
@@ -93,10 +93,9 @@
       </div>
 
       <div class="table-container">
-        <table id="itemsTable" class="table table-striped">
+        <table id="itemsTable" class="table">
           <thead>
             <tr>
-              <th scope="col">#</th>
               <th scope="col">NAME</th>
               <th scope="col">ID</th>
               <th scope="col"></th>
@@ -110,7 +109,6 @@
                 {{$disableButton = false}}
               {{end}}
               <tr>
-                <th scope="row">{{$i}}</th>
                 <td>{{$t.Name}}</td>
                 <td>
                   <div class="copy-con-container">
@@ -141,7 +139,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       new simpleDatatables.DataTable('#itemsTable', {
         searchable: true,
-        scrollY: "300px",
+        scrollY: "430px",
         sortable: true,
         pagination: true,
       });

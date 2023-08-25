@@ -45,7 +45,7 @@
           <li>
             {{$active = "deleted"}}
               <a href="/deleted" class='{{if (serviceUnavailable "users")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'><span class="fas fa-solid fa-trash-restore"></span>
-                  <span>Deleted Clients</span></a>
+                  <span>Disabled Entities</span></a>
           </li>
           <li>
             {{$active = "bootstraps"}}

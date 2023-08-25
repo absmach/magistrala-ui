@@ -8,7 +8,7 @@
 
   <div class="main-content">
     <main>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addPolicyModal">
+        <button type="button" class="btn body-button" data-bs-toggle="modal" data-bs-target="#addPolicyModal">
             Add Policy
         </button>
         <div class="modal fade" id="addPolicyModal" tabindex="-1" role="dialog" aria-labelledby="addPolicyModalLabel" aria-hidden="true">
@@ -50,7 +50,7 @@
                                 </select>
                                 <div id="actionsHelp" class="form-text">Select Actions (multiple selections allowed).</div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <button type="submit" class="btn body-button">Submit</button>
                         </form>
                     </div>
                 </div>
@@ -58,29 +58,62 @@
         </div>
 
         <div class="table-container">
-            <table id="itemsTable" class="table table-striped">
+            <table id="itemsTable" class="table">
                 <thead>
                     <tr>
-                        <th scope="col">#</th>
                         <th scope="col">Subject</th>
                         <th scope="col">Object</th>
                         <th scope="col">Actions</th>
-                        <th scope="col"></th>
                         <th scope="col"></th>
                     </tr>
                 </thead>
                 <tbody>
                     {{$actions := .Actions}}
+                    {{$users := .Users}}
+                    {{$groups := .Groups}}
                     {{range $i, $p := .Policies}}
                         <tr>
-                            <th scope="row">{{$i}}</th>
-                            <td><a href={{printf "/users/%s" $p.Subject}}>{{$p.Subject}}</a></td>
-                            <td><a href={{printf "/groups/%s" $p.Object}}>{{$p.Object}}</a></td>
-                            <td class="editable" contenteditable="false" data-field="actions" >{{toSlice $p.Actions}}</td>
                             <td>
-                                <button type="button" class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#updatePolicyModal{{$i}}">
-                                    <i class="fas fa-pencil-alt"></i>
-                                </button>
+                                {{range $u := $users}}
+                                    {{if eq $u.ID $p.Subject}}
+                                        <a href={{printf "/users/%s" $p.Subject}}>{{$u.Name}}</a>
+                                    {{end}}
+                                {{end}}
+                            </td>
+                            <td>
+                                {{range $g := $groups}}
+                                    {{if eq $g.ID $p.Object}}
+                                        <a href={{printf "/groups/%s" $p.Object}}>{{$g.Name}}</a>
+                                    {{end}}
+                                {{end}}
+                            </td>
+                            <td data-field="actions" >
+                                {{range $j, $a := $p.Actions}}
+                                    {{$badgeClass := "badge text-dark "}}
+                                    {{if hasPrefix $a "g_"}}
+                                        {{$badgeClass = printf "%s%s" $badgeClass "group-action"}}
+                                    {{else if hasPrefix $a "c_"}}
+                                        {{$badgeClass = printf "%s%s" $badgeClass "client-action"}}
+                                    {{else}}
+                                        {{$badgeClass = printf "%s%s" $badgeClass "text-bg-info"}}
+                                    {{end}}
+                                    <span class="{{$badgeClass}}">{{$a}}</span>
+                                {{end}}
+                            </td>
+                            <td>
+                                <div class="icon-container">
+                                    <button type="button" class="btn btn-sm" data-bs-toggle="modal" data-bs-target="#updatePolicyModal{{$i}}">
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </button>
+                                    <form action="/users/policies/delete" method="post">
+                                        <input type="hidden" name="subject" id="subject" value="{{$p.Subject}}">
+                                        <input type="hidden" name="object" id="object" value="{{$p.Object}}">
+                                        <button type="submit" class="btn btn-sm">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </div>
+
                                 <div class="modal fade" id="updatePolicyModal{{$i}}" tabindex="-1" role="dialog" aria-labelledby="updatePolicyModalLabel{{$i}}" aria-hidden="true">
                                     <div class="modal-dialog" role="document">
                                         <div class="modal-content">
@@ -102,22 +135,12 @@
                                                         </select>
                                                         <div id="actionsHelp" class="form-text">Select Actions (multiple selections allowed).</div>
                                                     </div>
-                                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                                    <button type="submit" class="btn body-button">Submit</button>
                                                 </form>
-                                               
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </td>
-                            <td>
-                                <form action="/users/policies/delete" method="post">
-                                    <input type="hidden" name="subject" id="subject" value="{{$p.Subject}}">
-                                    <input type="hidden" name="object" id="object" value="{{$p.Object}}">
-                                    <button type="submit" class="btn btn-sm">
-                                        <i class="fas fa-trash-alt"></i>
-                                      </button>
-                                </form>
                             </td>
                         </tr>
                     {{end}}
@@ -132,7 +155,7 @@
     document.addEventListener('DOMContentLoaded', function() {
          new simpleDatatables.DataTable('#itemsTable', {
          searchable: true,
-         scrollY: "300px",
+         scrollY: "430px",
          sortable: true,
          pagination: true,
          });

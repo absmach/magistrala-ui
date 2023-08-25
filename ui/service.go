@@ -287,6 +287,9 @@ func (gs *uiService) parseTemplate(name string, tmpls ...string) (tpl *template.
 			}
 			return false
 		},
+		"hasPrefix": func(s, prefix string) bool {
+			return strings.HasPrefix(s, prefix)
+		},
 	})
 
 	a := append(tmplFiles, tmpls...)

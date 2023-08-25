@@ -8,86 +8,87 @@
 
   <div class="main-content">
     <main>
-      <a class="btn btn-primary" href="/groups/{{.Group.ID}}/members" role="button">Connections</a>
+      <a class="btn body-button" href="/groups/{{.Group.ID}}/members" role="button">Connections</a>
       
-
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th scope="row">GROUP</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{$disableButton := true}}
-          {{if (authorizeUser .User.ID .Group.ID "g_update" "group")}}
-            {{$disableButton =false}}
-          {{end}}
-          <tr>
-            <th>NAME</th>
-            <td class="editable" contenteditable="false" data-field="name">
-              {{.Group.Name}}
-            </td>
-            <td>
-              <button class="edit-btn" onclick="editRow('name')" {{if $disableButton}}disabled{{end}}>
-                <i class="fas fa-pencil-alt"></i>
-              </button>
-              <div class="save-cancel-buttons" style="display: none;">
-                <button class="save-btn" onclick="saveRow('name')">
-                  Save
+      <div class="table-container">
+        <table id="myTable" class="table">
+          <thead>
+            <tr>
+              <th scope="row">GROUP</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{$disableButton := true}}
+            {{if (authorizeUser .User.ID .Group.ID "g_update" "group")}}
+              {{$disableButton =false}}
+            {{end}}
+            <tr>
+              <th>NAME</th>
+              <td class="editable" contenteditable="false" data-field="name">
+                {{.Group.Name}}
+              </td>
+              <td>
+                <button class="edit-btn" onclick="editRow('name')" {{if $disableButton}}disabled{{end}}>
+                  <i class="fas fa-pencil-alt"></i>
                 </button>
-                <button class="cancel-btn" onclick="cancelEditRow('name')">
-                  Cancel
+                <div class="save-cancel-buttons" style="display: none;">
+                  <button class="save-btn" onclick="saveRow('name')">
+                    Save
+                  </button>
+                  <button class="cancel-btn" onclick="cancelEditRow('name')">
+                    Cancel
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>ID</th>
+              <td>
+                {{.Group.ID}}
+              </td>
+            </tr>
+            <tr>
+              <th>Description</th>
+              <td class="editable" contenteditable="false" data-field="description">
+                {{.Group.Description}}
+              </td>
+              <td>
+                <button class="edit-btn" onclick="editRow('description')" {{if $disableButton}}disabled{{end}}>
+                  <i class="fas fa-pencil-alt"></i>
                 </button>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <th>ID</th>
-            <td>
-              {{.Group.ID}}
-            </td>
-          </tr>
-          <tr>
-            <th>Description</th>
-            <td class="editable" contenteditable="false" data-field="description">
-              {{.Group.Description}}
-            </td>
-            <td>
-              <button class="edit-btn" onclick="editRow('description')" {{if $disableButton}}disabled{{end}}>
-                <i class="fas fa-pencil-alt"></i>
-              </button>
-              <div class="save-cancel-buttons" style="display: none;">
-                <button class="save-btn" onclick="saveRow('description')">
-                  Save
+                <div class="save-cancel-buttons" style="display: none;">
+                  <button class="save-btn" onclick="saveRow('description')">
+                    Save
+                  </button>
+                  <button class="cancel-btn" onclick="cancelEditRow('description')">
+                    Cancel
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>Metadata</th>
+              <td class="editable" contenteditable="false" data-field="metadata">
+                {{toJSON .Group.Metadata}}
+              </td>
+              <td>
+                <button class="edit-btn" onclick="editRow('metadata')" {{if $disableButton}}disabled{{end}}>
+                  <i class="fas fa-pencil-alt"></i>
                 </button>
-                <button class="cancel-btn" onclick="cancelEditRow('description')">
-                  Cancel
-                </button>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <th>Metadata</th>
-            <td class="editable" contenteditable="false" data-field="metadata">
-              {{toJSON .Group.Metadata}}
-            </td>
-            <td>
-              <button class="edit-btn" onclick="editRow('metadata')" {{if $disableButton}}disabled{{end}}>
-                <i class="fas fa-pencil-alt"></i>
-              </button>
-              <div class="save-cancel-buttons" style="display: none;">
-                <button class="save-btn" onclick="saveRow('metadata')">
-                  Save
-                </button>
-                <button class="cancel-btn" onclick="cancelEditRow('metadata')">
-                  Cancel
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <div id="error-message" class="error-message"></div>
+                <div class="save-cancel-buttons" style="display: none;">
+                  <button class="save-btn" onclick="saveRow('metadata')">
+                    Save
+                  </button>
+                  <button class="cancel-btn" onclick="cancelEditRow('metadata')">
+                    Cancel
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div id="error-message" class="error-message"></div>
+      </div>
     </main>
   </div>
 
