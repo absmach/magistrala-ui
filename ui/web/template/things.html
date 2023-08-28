@@ -8,17 +8,8 @@
 
   <div class="main-content">
     <main>
-      {{ if ne .AlertMessage "" }}
-      <div id="alert-popup" class="alert alert-danger">
-        <span class="close-button" onclick="closeAlertPopup()">&times;</span>
-         <h5 class="alert-messsage">
-          {{ .AlertMessage }}
-         </h5>
-      </div>
-      {{ end }}
-
       <!-- Button trigger modal -->
-      <button type="button" class="btn body-button" data-bs-toggle="modal" data-bs-target="#addThingModal">
+      <button type="button" class="btn body-button" onclick="openModal('single')">
         Add Thing
       </button>
 
@@ -30,7 +21,8 @@
               <h5 class="modal-title" id="addThingModalLabel">Add Thing</h5>
             </div>
             <div class="modal-body">
-              <form method="post" onsubmit="return validateForm()">
+              <div id="alertMessage"></div>
+              <form method="post" onsubmit="return submitThingForm()">
                 <div class="mb-3">
                   <label for="name" class="form-label">Name</label>
                   <input type="text" class="form-control" name="name" id="name"  placeholder="Device Name" required>
@@ -60,7 +52,7 @@
                   <div id="metadataHelp" class="form-text">Enter device metadata in JSON format.</div>
                   <div id="metadataError" class="error-message"></div>
                 </div>
-                <button type="submit" class="btn body-button">Submit</button>
+                <button type="submit" class="btn body-button" onclick="return validateForm()">Submit</button>
               </form>
             </div>
           </div>
@@ -68,7 +60,7 @@
       </div>
 
        <!-- Button trigger modal -->
-       <button type="button" class="btn body-button" data-bs-toggle="modal" data-bs-target="#addThingsModal">
+       <button type="button" class="btn body-button" onclick="openModal('bulk')">
         Add Things
       </button>
 
@@ -80,7 +72,8 @@
               <h5 class="modal-title" id="addThingsModalLabel">Add Things</h5>
             </div>
             <div class="modal-body">
-              <form method="post" enctype="multipart/form-data" action="/things/bulk">
+              <div id="alertBulkMessage"></div>
+              <form method="post" enctype="multipart/form-data" onsubmit="return submitBulkThingsForm()">
                 <div class="form-group">
                   <label for="thingsFile">Add csv file containing thing names with metadata. The metadata field can be empty</label>
                   <input type="file" class="form-control-file" id="thingsFile" name="thingsFile" required>
@@ -145,12 +138,10 @@
       });
     });
     function validateForm() {
-      var name = document.getElementById("name").value;
       var secret = document.getElementById("secret").value;
       var tagsInput = document.getElementById("tags").value;
       var metadataInput = document.getElementById("metadata").value;
 
-      var nameError = document.getElementById("nameError");
       var secretError = document.getElementById("secretError");
       var tagsError = document.getElementById("tagsError");
       var metadataError = document.getElementById("metadataError");
@@ -158,21 +149,18 @@
       var tags;
       var metadata;
 
-      nameError.innerHTML="";
       secretError.innerHTML = "";
       tagsError.innerHTML = "";
       metadataError.innerHTML = "";
 
       var isValid = true;
 
-      if (name==="") {
-        nameError.innerHTML= "Field Required!";
-        isValid = false
-      }
-      if (secret.length <8){
-        secretError.innerHTML = "Secret must have a minimum of 8 characters";
-        isValid = false;
-      }
+      if (secret.trim() !=""){
+        if (secret.length <8){
+          secretError.innerHTML = "Secret must have a minimum of 8 characters";
+          isValid = false;
+        }
+      }      
       try{
         tags = JSON.parse(tagsInput);
       }catch(error){
@@ -194,6 +182,88 @@
 
       return isValid;
     }
+
+    const thingModal = new bootstrap.Modal(document.getElementById('addThingModal'));
+    const thingsModal =new bootstrap.Modal(document.getElementById('addThingsModal'));
+
+    function openModal(modal) {
+      if (modal === "single") {
+        thingModal.show();
+      } else if (modal === "bulk") {
+        thingsModal.show();
+      }
+    
+    }
+
+    function submitThingForm() {
+      event.preventDefault();
+      var form = event.target;
+      fetch("/things",{
+        method: 'POST',
+        body: new FormData(form)
+      })
+        .then (response => {
+          if (response.status === 409) {
+            errorMessage= "thing already exists!";
+            showAlert(errorMessage,"single");
+            return false;
+          } else {
+            form.reset();
+            thingModal.hide();
+            window.location.reload();
+            return true;
+          }
+        })
+        .catch (error => {
+          console.error("error submitting thing form: ", error);
+          return false;
+        });
+
+    }
+
+    function submitBulkThingsForm() {
+      event.preventDefault();
+      var form = event.target;
+      fetch("/things/bulk",{
+        method: 'POST',
+        body: new FormData(form)
+      })
+        .then (response => {
+          if (response.status === 409) {
+            errorMessage= "things already exist!";
+            showAlert(errorMessage,"bulk");
+            return false;
+          } else {
+            form.reset();
+            thingsModal.hide();
+            window.location.reload();
+            return true;
+          }
+        })
+        .catch (error => {
+          console.error("Error submitting bulk things form: ", error);
+          return false;
+        });
+    }
+
+    function showAlert(errorMessage, modal) {
+      if (modal === "single") {
+        var alertMessage = document.getElementById("alertMessage");
+        alertMessage.innerHTML = `
+          <div id="alert-popup" class="alert alert-danger">
+            <span class="close-button" onclick="closeAlertPopup()">&times;</span>
+            <h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
+          </div> `;
+      } else if (modal === "bulk") {
+        var alertMessage = document.getElementById("alertBulkMessage");
+        alertMessage.innerHTML = `
+          <div id="alert-popup" class="alert alert-danger">
+            <span class="close-button" onclick="closeAlertPopup()">&times;</span>
+            <h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
+          </div> `;
+      }
+    }
+
     function closeAlertPopup() {
       document.getElementById("alert-popup").style.display = "none";
     }

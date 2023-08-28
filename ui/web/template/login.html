@@ -22,7 +22,7 @@
   <div class="login-container">
     <div class="form-box">
       <h1>LOGIN</h1>
-      <form id="form" method="post" onsubmit="return validateForm()">
+      <form id="form" method="post" onsubmit="return submitLoginForm()">
         <div class="input-group">
           <div class="input-field">
             <i class="fas fa-solid fa-envelope"></i>
@@ -33,12 +33,10 @@
             <input class="login-input" type="password" name="password" id="password" placeholder="Password" required>
             <div id="passwordError" class="error-message"></div>
           </div>
-          {{if ne .AlertMessage ""}}
-            <div id="loginError" class="error-message">{{.AlertMessage}}</div>
-          {{ end}}
+          <div id="loginError" class="error-message"></div>
         </div>
         <div class="btn-field">
-          <button type="submit">Login</button>
+          <button type="submit" onclick="return validateForm()">Login</button>
         </div>
       </form>
       <button type="button" id="fp-button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">
@@ -85,6 +83,35 @@
         isValid = false;
       }
       return isValid;
+    }
+
+    function submitLoginForm() {
+      event.preventDefault();
+      var form = event.target;
+      fetch("/login",{
+        method: 'POST',
+        body: new FormData(form)
+      })
+        .then (response => {
+          if (response.status === 401) {
+            errorMessage= "invalid email or password. Please try again!";
+            showAlert(errorMessage);
+            return false;
+          } else {
+            form.reset();
+            window.location.href="/";
+            return true;
+          }
+        })
+        .catch (error => {
+          console.error("error submitting login form: ", error);
+          return false;
+        });
+    }
+
+    function showAlert(errorMessage) {
+      var loginError = document.getElementById("loginError");
+      loginError.innerHTML = errorMessage;
     }
   </script>
 

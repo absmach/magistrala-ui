@@ -6,7 +6,6 @@ package api
 import (
 	"context"
 	"net/http"
-	"strings"
 
 	"golang.org/x/sync/errgroup"
 
@@ -16,16 +15,6 @@ import (
 	"github.com/go-kit/kit/endpoint"
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
 )
-
-func getErrorMessage(err error) string {
-	switch {
-	case strings.Contains(err.Error(), errAuthentication.Error()):
-		return "wrong email"
-	case strings.Contains(err.Error(), errSecretError.Error()):
-		return "wrong password"
-	}
-	return "internal server error"
-}
 
 func indexEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
@@ -40,7 +29,7 @@ func indexEndpoint(svc ui.Service) endpoint.Endpoint {
 
 func loginEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		res, err := svc.Login(ctx, "")
+		res, err := svc.Login(ctx)
 
 		return uiRes{
 			code: http.StatusOK,
@@ -51,7 +40,7 @@ func loginEndpoint(svc ui.Service) endpoint.Endpoint {
 
 func showUpdatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		res, err := svc.PasswordUpdate(ctx, "")
+		res, err := svc.PasswordUpdate(ctx)
 
 		return uiRes{
 			code: http.StatusOK,
@@ -70,13 +59,7 @@ func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		res, err := svc.UpdatePassword(ctx, req.token, req.OldPass, req.NewPass)
 		if err != nil {
-			errorMessage := getErrorMessage(err)
-			resp, err := svc.PasswordUpdate(ctx, errorMessage)
-			return uiRes{
-				code:    http.StatusBadRequest,
-				html:    resp,
-				headers: map[string]string{"Location": "/password"},
-			}, err
+			return nil, err
 		}
 
 		cookies := []*http.Cookie{
@@ -97,10 +80,9 @@ func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusFound,
+			code:    http.StatusOK,
 			html:    res,
 			cookies: cookies,
-			headers: map[string]string{"Location": "/login"},
 		}, nil
 	}
 }
@@ -118,13 +100,7 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		token, err := svc.Token(ctx, user)
 		if err != nil {
-			errorMessage := getErrorMessage(err)
-			resp, err := svc.Login(ctx, errorMessage)
-			return uiRes{
-				code:    http.StatusBadRequest,
-				html:    resp,
-				headers: map[string]string{"Location": "/login"},
-			}, err
+			return nil, errors.Wrap(errUnauthorized, err)
 		}
 
 		accessToken := token.AccessToken
@@ -282,13 +258,7 @@ func createUserEndpoint(svc ui.Service) endpoint.Endpoint {
 		user := req.user
 		res, err := svc.CreateUsers(ctx, req.token, user)
 		if err != nil {
-			if err == ui.ErrConflict {
-				return uiRes{
-					code: http.StatusConflict,
-					html: res,
-				}, nil
-			}
-			return nil, err
+			return nil, errors.Wrap(errUserConflict, err)
 		}
 
 		return uiRes{
@@ -318,20 +288,12 @@ func createUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 		res, err := svc.CreateUsers(ctx, req.token, users...)
 		if err != nil {
-			if err == ui.ErrConflict {
-				return uiRes{
-					code:    http.StatusConflict,
-					html:    res,
-					headers: map[string]string{"Location": "/users"},
-				}, nil
-			}
-			return nil, err
+			return nil, errors.Wrap(errUserConflict, err)
 		}
 
 		return uiRes{
-			code:    http.StatusFound,
-			html:    res,
-			headers: map[string]string{"Location": "/users"},
+			code: http.StatusCreated,
+			html: res,
 		}, nil
 	}
 }
@@ -343,7 +305,7 @@ func listUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.ListUsers(ctx, req.token, "")
+		res, err := svc.ListUsers(ctx, req.token)
 		if err != nil {
 			return nil, err
 		}
@@ -497,13 +459,7 @@ func createThingEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 		res, err := svc.CreateThings(ctx, req.token, req.thing)
 		if err != nil {
-			if err == ui.ErrConflict {
-				return uiRes{
-					code: http.StatusConflict,
-					html: res,
-				}, nil
-			}
-			return nil, err
+			return nil, errors.Wrap(errThingConflict, err)
 		}
 
 		return uiRes{
@@ -528,20 +484,12 @@ func createThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 		res, err := svc.CreateThings(ctx, req.token, things...)
 		if err != nil {
-			if err == ui.ErrConflict {
-				return uiRes{
-					code:    http.StatusConflict,
-					html:    res,
-					headers: map[string]string{"Location": "/things"},
-				}, nil
-			}
-			return nil, err
+			return nil, errors.Wrap(errThingConflict, err)
 		}
 
 		return uiRes{
-			code:    http.StatusFound,
-			html:    res,
-			headers: map[string]string{"Location": "/things"},
+			code: http.StatusCreated,
+			html: res,
 		}, nil
 	}
 }
@@ -553,7 +501,7 @@ func listThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.ListThings(ctx, req.token, "")
+		res, err := svc.ListThings(ctx, req.token)
 		if err != nil {
 			return nil, err
 		}
@@ -724,13 +672,7 @@ func createChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		res, err := svc.CreateChannels(ctx, req.token, req.Channel)
 		if err != nil {
-			if err == ui.ErrConflict {
-				return uiRes{
-					code: http.StatusConflict,
-					html: res,
-				}, nil
-			}
-			return nil, err
+			return nil, errors.Wrap(errChannelConflict, err)
 		}
 
 		return uiRes{
@@ -755,19 +697,11 @@ func createChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 		res, err := svc.CreateChannels(ctx, req.token, channels...)
 		if err != nil {
-			if err == ui.ErrConflict {
-				return uiRes{
-					code:    http.StatusConflict,
-					html:    res,
-					headers: map[string]string{"Location": "/channels"},
-				}, nil
-			}
-			return nil, err
+			return nil, errors.Wrap(errChannelConflict, err)
 		}
 		return uiRes{
-			code:    http.StatusFound,
-			html:    res,
-			headers: map[string]string{"Location": "/channels"},
+			code: http.StatusCreated,
+			html: res,
 		}, nil
 	}
 }
@@ -827,7 +761,7 @@ func listChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListChannels(ctx, req.token, "")
+		res, err := svc.ListChannels(ctx, req.token)
 		if err != nil {
 			return nil, err
 		}
@@ -1130,13 +1064,7 @@ func createGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		res, err := svc.CreateGroups(ctx, cgr.token, cgr.Group)
 		if err != nil {
-			if err == ui.ErrConflict {
-				return uiRes{
-					code: http.StatusConflict,
-					html: res,
-				}, nil
-			}
-			return nil, err
+			return nil, errors.Wrap(errGroupConflict, err)
 		}
 
 		return uiRes{
@@ -1161,20 +1089,12 @@ func createGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 		res, err := svc.CreateGroups(ctx, req.token, groups...)
 		if err != nil {
-			if err == ui.ErrConflict {
-				return uiRes{
-					code:    http.StatusConflict,
-					html:    res,
-					headers: map[string]string{"Location": "/groups"},
-				}, nil
-			}
-			return nil, err
+			return nil, errors.Wrap(errGroupConflict, err)
 		}
 
 		return uiRes{
-			code:    http.StatusFound,
-			html:    res,
-			headers: map[string]string{"Location": "/groups"},
+			code: http.StatusCreated,
+			html: res,
 		}, nil
 	}
 }
@@ -1187,7 +1107,7 @@ func listGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListGroups(ctx, req.token, "")
+		res, err := svc.ListGroups(ctx, req.token)
 		if err != nil {
 			return nil, err
 		}

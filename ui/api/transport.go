@@ -39,7 +39,10 @@ var (
 	errNoCookie          = errors.New("failed to read token cookie")
 	errUnauthorized      = errors.New("failed to login")
 	errAuthentication    = errors.New("failed to perform authentication over the entity")
-	errSecretError       = errors.New("wrong secret")
+	errUserConflict      = errors.New("invalid user")
+	errGroupConflict     = errors.New("invalid group")
+	errThingConflict     = errors.New("invalid thing")
+	errChannelConflict   = errors.New("invalid channel")
 	referer              = ""
 )
 
@@ -913,18 +916,27 @@ func encodeJSONResponse(_ context.Context, w http.ResponseWriter, response inter
 
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	switch {
-	case strings.Contains(err.Error(), errNoCookie.Error()),
-		strings.Contains(err.Error(), errUnauthorized.Error()):
-		w.Header().Set("Location", "/login")
-		w.WriteHeader(http.StatusFound)
-	case strings.Contains(err.Error(), errMalformedData.Error()),
-		strings.Contains(err.Error(), errMalformedSubtopic.Error()):
+	case errors.Contains(err, errNoCookie),
+		errors.Contains(err, errUnauthorized):
+		w.WriteHeader(http.StatusUnauthorized)
+	case errors.Contains(err, errMalformedData),
+		errors.Contains(err, errMalformedSubtopic):
 		w.WriteHeader(http.StatusBadRequest)
-	case strings.Contains(err.Error(), ui.ErrUnauthorizedAccess.Error()):
+	case errors.Contains(err, ui.ErrUnauthorizedAccess):
 		w.WriteHeader(http.StatusForbidden)
-	case strings.Contains(err.Error(), errAuthentication.Error()):
+	case errors.Contains(err, errAuthentication):
 		w.Header().Set("Location", "/refresh_token")
 		w.WriteHeader(http.StatusSeeOther)
+	case errors.Contains(err, errors.ErrLogin):
+		w.WriteHeader(http.StatusUnauthorized)
+	case errors.Contains(err, errUserConflict):
+		w.WriteHeader(http.StatusConflict)
+	case errors.Contains(err, errGroupConflict):
+		w.WriteHeader(http.StatusConflict)
+	case errors.Contains(err, errThingConflict):
+		w.WriteHeader(http.StatusConflict)
+	case errors.Contains(err, errChannelConflict):
+		w.WriteHeader(http.StatusConflict)
 
 	default:
 		if e, ok := status.FromError(err); ok {

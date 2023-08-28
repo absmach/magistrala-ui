@@ -7,18 +7,9 @@
   {{template "navbar" .}}
 
   <div class="main-content">
-    <main>
-      {{ if ne .AlertMessage "" }}
-      <div id="alert-popup" class="alert alert-danger">
-        <span class="close-button" onclick="closeAlertPopup()">&times;</span>
-        <h5 class="alert-messsage">
-        {{ .AlertMessage }}
-        </h5>
-      </div>         
-      {{ end }}
-
+    <main>    
       <!-- Button trigger modal -->
-      <button type="button" class="btn body-button" data-bs-toggle="modal" data-bs-target="#addChannelModal">
+      <button type="button" class="btn body-button" onclick="openModal('single')">
         Add Channel
       </button>
 
@@ -30,7 +21,8 @@
               <h5 class="modal-title" id="addChannelModalLabel">Add Channel</h5>
             </div>
             <div class="modal-body">
-              <form method="post" onsubmit="return validateForm()">
+              <div id="alertMessage"></div>
+              <form method="post" onsubmit="return submitChannelForm()">
                 <div class="mb-3">
                   <label for="name" class="form-label">Name</label>
                   <input type="text" class="form-control" name="name" id="name"  placeholder="Channel Name" required>
@@ -55,7 +47,7 @@
                   <div id="metadataHelp" class="form-text">Enter channel metadata in JSON format.</div>
                   <div id="metadataError" class="error-message"></div>
                 </div>
-                <button type="submit" class="btn body-button">Submit</button>
+                <button type="submit" class="btn body-button" onclick="return validateForm()">Submit</button>
               </form>
             </div>
           </div>
@@ -63,7 +55,7 @@
       </div>
 
                    <!-- Button trigger modal -->
-       <button type="button" class="btn body-button" data-bs-toggle="modal" data-bs-target="#addChannelsModal">
+       <button type="button" class="btn body-button" onclick="openModal('bulk')">
         Add Channels
       </button>
 
@@ -75,7 +67,8 @@
               <h5 class="modal-title" id="addChannelsModalLabel">Add Channels</h5>
             </div>
             <div class="modal-body">
-              <form method="post" enctype="multipart/form-data" action="/channels/bulk">
+              <div id="alertBulkMessage"></div>
+              <form method="post" enctype="multipart/form-data" onsubmit="return submitBulkChannelsForm()">
                 <div class="form-group">
                   <label for="channelsFile">Add csv file containing channels names with metadata. The metadata field can be empty</label>
                   <input type="file" class="form-control-file" id="channelsFile" name="channelsFile" required>
@@ -177,6 +170,88 @@
 
       return isValid;
     }
+    const channelModal = new bootstrap.Modal(document.getElementById('addChannelModal'));
+    const channelsModal =new bootstrap.Modal(document.getElementById('addChannelsModal'));
+
+    function openModal(modal) {
+      if (modal === "single") {
+        channelModal.show();
+      } else if (modal === "bulk") {
+        channelsModal.show();
+      }
+    
+    }
+
+    function submitChannelForm() {
+      event.preventDefault();
+      var form = event.target;
+      fetch("/channels",{
+        method: 'POST',
+        body: new FormData(form)
+      })
+        .then (response => {
+          if (response.status === 409) {
+            errorMessage= "channel already exists!";
+            showAlert(errorMessage,"single");
+            return false;
+          } else {
+            form.reset();
+            channelModal.hide();
+            window.location.reload();
+            return true;
+          }
+        })
+        .catch (error => {
+          console.error("error submitting channel form: ", error);
+          return false;
+        });
+
+    }
+
+    function submitBulkChannelsForm() {
+      event.preventDefault();
+      var form = event.target;
+      fetch("/channels/bulk",{
+        method: 'POST',
+        body: new FormData(form)
+      })
+        .then (response => {
+          if (response.status === 409) {
+            errorMessage= "channels already exist!";
+            showAlert(errorMessage,"bulk");
+            return false;
+          } else {
+            form.reset();
+            channelsModal.hide();
+            window.location.reload();
+            return true;
+          }
+        })
+        .catch (error => {
+          console.error("Error submitting bulk channels form: ", error);
+          return false;
+        });
+    }
+
+    function showAlert(errorMessage,modal) {
+      if (modal === "single") {
+        var alertMessage = document.getElementById("alertMessage");
+        alertMessage.innerHTML = `
+          <div id="alert-popup" class="alert alert-danger">
+            <span class="close-button" onclick="closeAlertPopup()">&times;</span>
+            <h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
+          </div> `;
+      } else if (modal === "bulk") {
+        var alertMessage = document.getElementById("alertBulkMessage");
+        alertMessage.innerHTML = `
+          <div id="alert-popup" class="alert alert-danger">
+            <span class="close-button" onclick="closeAlertPopup()">&times;</span>
+            <h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
+          </div> `;
+      }
+      
+    }
+
     function closeAlertPopup() {
       document.getElementById("alert-popup").style.display = "none";
     }
