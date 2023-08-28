@@ -3,6 +3,7 @@ module github.com/ultravioletrs/mainflux-ui
 go 1.21
 
 require (
+	github.com/caarlos0/env/v9 v9.0.0
 	github.com/go-kit/kit v0.12.0
 	github.com/go-zoo/bone v1.3.0
 	github.com/mainflux/agent v0.11.1-0.20230724130550-0cd3f4c8c27c

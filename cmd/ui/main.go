@@ -10,11 +10,10 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strconv"
 	"syscall"
 
+	"github.com/caarlos0/env/v9"
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
-	"github.com/mainflux/mainflux"
 	"github.com/mainflux/mainflux/logger"
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
 	"github.com/mainflux/mainflux/pkg/uuid"
@@ -25,67 +24,54 @@ import (
 	"github.com/ultravioletrs/mainflux-ui/ui/api"
 )
 
-const (
-	defLogLevel        = "info"
-	defClientTLS       = "false"
-	defCACerts         = ""
-	defPort            = "9090"
-	defRedirectURL     = "http://localhost:9090/"
-	defJaegerURL       = ""
-	defTLSVerification = "false"
-	defInstanceID      = ""
-	defHostURL         = "http://localhost:9090"
-	defHTTPAdapterURL  = "http://localhost:8008"
-	defReaderURL       = ""
-	defThingsURL       = "http://localhost:9000"
-	defUsersURL        = "http://localhost:9002"
-	defBootstrapURL    = "http://localhost:9013"
-
-	envLogLevel        = "MF_GUI_LOG_LEVEL"
-	envClientTLS       = "MF_GUI_CLIENT_TLS"
-	envCACerts         = "MF_GUI_CA_CERTS"
-	envPort            = "MF_GUI_PORT"
-	envRedirectURL     = "MF_GUI_REDIRECT_URL"
-	envJaegerURL       = "MF_JAEGER_URL"
-	envTLSVerification = "MF_VERIFICATION_TLS"
-	envInstanceID      = "MF_UI_INSTANCE_ID"
-	envHostURL         = "MF_UI_HOST_URL"
-	envHTTPAdapterURL  = "MF_HTTP_ADAPTER_URL"
-	envReaderURL       = "MF_READER_URL"
-	envThingsURL       = "MF_THINGS_URL"
-	envUsersURL        = "MF_USERS_URL"
-	envBootstrapURL    = "MF_BOOTSTRAP_URL"
-)
-
 type config struct {
-	logLevel    string
-	port        string
-	redirectURL string
-	clientTLS   bool
-	caCerts     string
-	jaegerURL   string
-	instanceID  string
-	sdkConfig   sdk.Config
+	LogLevel        string          `env:"MF_GUI_LOG_LEVEL"       envDefault:"info"`
+	Port            string          `env:"MF_GUI_PORT"            envDefault:"9090"`
+	RedirectURL     string          `env:"MF_GUI_REDIRECT_URL"    envDefault:"http://localhost:9090/"`
+	JaegerURL       string          `env:"MF_JAEGER_URL"          envDefault:""`
+	InstanceID      string          `env:"MF_UI_INSTANCE_ID"      envDefault:""`
+	HTTPAdapterURL  string          `env:"MF_HTTP_ADAPTER_URL" envDefault:"http://localhost:8008"`
+	ReaderURL       string          `env:"MF_READER_URL" envDefault:""`
+	ThingsURL       string          `env:"MF_THINGS_URL" envDefault:"http://localhost:9000"`
+	UsersURL        string          `env:"MF_USERS_URL" envDefault:"http://localhost:9002"`
+	HostURL         string          `env:"MF_UI_HOST_URL" envDefault:"http://localhost:9090"`
+	BootstrapURL    string          `env:"MF_BOOTSTRAP_URL" envDefault:"http://localhost:9013"`
+	MsgContentType  sdk.ContentType `env:"MF_CONTENT-TYPE" envDefault:"application/senml+json"`
+	TLSVerification bool            `env:"MF_VERIFICATION_TLS" envDefault:"false"`
 }
 
 func main() {
-	cfg := loadConfig()
+	cfg := config{}
+	if err := env.Parse(&cfg); err != nil {
+		log.Fatalf(err.Error())
+	}
 
-	logger, err := logger.New(os.Stdout, cfg.logLevel)
+	sdkConfig := sdk.Config{
+		HTTPAdapterURL:  cfg.HTTPAdapterURL,
+		ReaderURL:       cfg.ReaderURL,
+		ThingsURL:       cfg.ThingsURL,
+		UsersURL:        cfg.UsersURL,
+		HostURL:         cfg.HostURL,
+		MsgContentType:  cfg.MsgContentType,
+		TLSVerification: cfg.TLSVerification,
+		BootstrapURL:    cfg.BootstrapURL,
+	}
+
+	logger, err := logger.New(os.Stdout, cfg.LogLevel)
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
 
-	if cfg.instanceID == "" {
-		if cfg.instanceID, err = uuid.New().ID(); err != nil {
+	if cfg.InstanceID == "" {
+		if cfg.InstanceID, err = uuid.New().ID(); err != nil {
 			log.Fatalf("Failed to generate instanceID: %s", err)
 		}
 	}
 
-	tracer, closer := initJaeger("ui", cfg.jaegerURL, logger)
+	tracer, closer := initJaeger("ui", cfg.JaegerURL, logger)
 	defer closer.Close()
 
-	sdk := sdk.NewSDK(cfg.sdkConfig)
+	sdk := sdk.NewSDK(sdkConfig)
 
 	svc := ui.New(sdk)
 
@@ -109,9 +95,9 @@ func main() {
 	errs := make(chan error, 2)
 
 	go func() {
-		p := fmt.Sprintf(":%s", cfg.port)
-		logger.Info(fmt.Sprintf("GUI service started on port %s", cfg.port))
-		errs <- http.ListenAndServe(p, api.MakeHandler(svc, cfg.redirectURL, tracer, cfg.instanceID))
+		p := fmt.Sprintf(":%s", cfg.Port)
+		logger.Info(fmt.Sprintf("GUI service started on port %s", cfg.Port))
+		errs <- http.ListenAndServe(p, api.MakeHandler(svc, cfg.RedirectURL, tracer, cfg.InstanceID))
 	}()
 
 	go func() {
@@ -122,36 +108,6 @@ func main() {
 
 	err = <-errs
 	logger.Error(fmt.Sprintf("GUI service terminated: %s", err))
-}
-
-func loadConfig() config {
-	tls, err := strconv.ParseBool(mainflux.Env(envClientTLS, defClientTLS))
-	if err != nil {
-		log.Fatalf("Invalid value passed for %s\n", envClientTLS)
-	}
-	mfTLS, err := strconv.ParseBool(mainflux.Env(envTLSVerification, defTLSVerification))
-	if err != nil {
-		log.Fatalf("Invalid value passed for %s\n", envTLSVerification)
-	}
-	return config{
-		logLevel:    mainflux.Env(envLogLevel, defLogLevel),
-		port:        mainflux.Env(envPort, defPort),
-		redirectURL: mainflux.Env(envRedirectURL, defRedirectURL),
-		clientTLS:   tls,
-		caCerts:     mainflux.Env(envCACerts, defCACerts),
-		jaegerURL:   mainflux.Env(envJaegerURL, defJaegerURL),
-		instanceID:  mainflux.Env(envInstanceID, defInstanceID),
-		sdkConfig: sdk.Config{
-			HTTPAdapterURL:  mainflux.Env(envHTTPAdapterURL, defHTTPAdapterURL),
-			ReaderURL:       mainflux.Env(envReaderURL, defReaderURL),
-			ThingsURL:       mainflux.Env(envThingsURL, defThingsURL),
-			UsersURL:        mainflux.Env(envUsersURL, defUsersURL),
-			HostURL:         mainflux.Env(envHostURL, defHostURL),
-			MsgContentType:  sdk.ContentType(string(sdk.CTJSONSenML)),
-			TLSVerification: mfTLS,
-			BootstrapURL:    mainflux.Env(envBootstrapURL, defBootstrapURL),
-		},
-	}
 }
 
 func initJaeger(svcName, url string, logger logger.Logger) (opentracing.Tracer, io.Closer) {
