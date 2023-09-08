@@ -666,7 +666,7 @@ func decodeRefreshTokenRequest(ctx context.Context, r *http.Request) (interface{
 		return nil, err
 	}
 	req := refreshTokenReq{
-		RefreshToken: c.Value,
+		refreshToken: c.Value,
 		ref:          referer,
 	}
 
@@ -705,7 +705,7 @@ func decodeUserCreation(_ context.Context, r *http.Request) (interface{}, error)
 
 	req := createUserReq{
 		token: token,
-		user:  user,
+		User:  user,
 	}
 
 	return req, nil
@@ -978,7 +978,7 @@ func decodeThingCreation(_ context.Context, r *http.Request) (interface{}, error
 	}
 	req := createThingReq{
 		token: token,
-		thing: thing,
+		Thing: thing,
 	}
 
 	return req, nil

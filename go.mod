@@ -7,7 +7,7 @@ require (
 	github.com/go-kit/kit v0.12.0
 	github.com/go-zoo/bone v1.3.0
 	github.com/mainflux/agent v0.11.1-0.20230724130550-0cd3f4c8c27c
-	github.com/mainflux/mainflux v0.0.0-20230824130923-5fa2bf4229c5
+	github.com/mainflux/mainflux v0.0.0-20230825135111-320921a63e54
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/prometheus/client_golang v1.16.0
 	github.com/uber/jaeger-client-go v2.30.0+incompatible

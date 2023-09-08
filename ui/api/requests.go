@@ -15,6 +15,13 @@ type indexReq struct {
 	token string
 }
 
+func (req indexReq) validate() error {
+	if req.token == "" {
+		return ui.ErrUnauthorizedAccess
+	}
+	return nil
+}
+
 type loginReq struct {
 }
 
@@ -26,21 +33,41 @@ type tokenReq struct {
 	Secret   string `json:"secret"`
 }
 
+func (req tokenReq) validate() error {
+	if req.Identity == "" {
+		return ui.ErrMalformedEntity
+	}
+	if req.Secret == "" {
+		return ui.ErrMalformedEntity
+	}
+	return nil
+}
+
 type refreshTokenReq struct {
-	RefreshToken string
+	refreshToken string
 	ref          string
+}
+
+func (req refreshTokenReq) validate() error {
+	if req.refreshToken == "" {
+		return ui.ErrMalformedEntity
+	}
+	if req.ref == "" {
+		return ui.ErrMalformedEntity
+	}
+	return nil
 }
 
 type createUserReq struct {
 	token string
-	user  sdk.User
+	User  sdk.User `json:"user"`
 }
 
 func (req createUserReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
 	}
-	if req.user.Credentials.Secret == "" || req.user.Credentials.Identity == "" {
+	if req.User.Credentials.Secret == "" || req.User.Credentials.Identity == "" {
 		return ui.ErrMalformedEntity
 	}
 
@@ -49,10 +76,10 @@ func (req createUserReq) validate() error {
 
 type createUsersReq struct {
 	token     string
-	Names     []string
-	Emails    []string
-	Passwords []string
-	Metadata  map[string]interface{}
+	Names     []string               `json:"names"`
+	Emails    []string               `json:"emails"`
+	Passwords []string               `json:"passwords"`
+	Metadata  map[string]interface{} `json:"metadata,omitempty"`
 }
 
 func (req createUsersReq) validate() error {
@@ -121,7 +148,7 @@ func (req updateUserTagsReq) validate() error {
 type updateUserIdentityReq struct {
 	token    string
 	id       string
-	Identity string `json:"identity,omitempty"`
+	Identity string `json:"identity"`
 }
 
 func (req updateUserIdentityReq) validate() error {
@@ -144,14 +171,17 @@ func (req updateUserStatusReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
 	}
+	if req.UserID == "" {
+		return ui.ErrMalformedEntity
+	}
 
 	return nil
 }
 
 type updateUserPasswordReq struct {
 	token   string
-	OldPass string `json:"oldpass,omitempty"`
-	NewPass string `json:"newpass,omitempty"`
+	OldPass string `json:"oldpass"`
+	NewPass string `json:"newpass"`
 }
 
 func (req updateUserPasswordReq) validate() error {
@@ -165,7 +195,7 @@ func (req updateUserPasswordReq) validate() error {
 }
 
 type passwordResetRequestReq struct {
-	Email string `json:"email,omitempty"`
+	Email string `json:"email"`
 }
 
 func (req passwordResetRequestReq) validate() error {
@@ -177,8 +207,8 @@ func (req passwordResetRequestReq) validate() error {
 
 type passwordResetReq struct {
 	token           string
-	Password        string
-	ConfirmPassword string
+	Password        string `json:"password"`
+	ConfirmPassword string `json:"confirm_password"`
 }
 
 func (req passwordResetReq) validate() error {
@@ -202,12 +232,15 @@ type showPasswordResetReq struct {
 
 type createThingReq struct {
 	token string
-	thing sdk.Thing
+	Thing sdk.Thing `json:"thing"`
 }
 
 func (req createThingReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
+	}
+	if req.Thing.Name == "" {
+		return ui.ErrMalformedEntity
 	}
 
 	return nil
@@ -262,7 +295,7 @@ func (req updateThingTagsReq) validate() error {
 type updateThingSecretReq struct {
 	token  string
 	id     string
-	Secret string `json:"secret,omitempty"`
+	Secret string `json:"secret"`
 }
 
 func (req updateThingSecretReq) validate() error {
@@ -285,6 +318,9 @@ func (req updateThingStatusReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
 	}
+	if req.ThingID == "" {
+		return ui.ErrMalformedEntity
+	}
 
 	return nil
 }
@@ -305,7 +341,7 @@ func (req updateThingOwnerReq) validate() error {
 type createThingsReq struct {
 	token     string
 	Names     []string                 `json:"names,omitempty"`
-	Metadatas []map[string]interface{} `json:"metadata,omitempty"`
+	Metadatas []map[string]interface{} `json:"metadatas,omitempty"`
 }
 
 func (req createThingsReq) validate() error {
@@ -318,12 +354,15 @@ func (req createThingsReq) validate() error {
 
 type createChannelReq struct {
 	token   string
-	Channel sdk.Channel
+	Channel sdk.Channel `json:"channel"`
 }
 
 func (req createChannelReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
+	}
+	if req.Channel.Name == "" {
+		return ui.ErrMalformedEntity
 	}
 
 	return nil
@@ -331,9 +370,9 @@ func (req createChannelReq) validate() error {
 
 type createChannelsReq struct {
 	token     string
-	Names     []string                 `json:"name,omitempty"`
-	IDs       []string                 `json:"id,omitempty"`
-	Metadatas []map[string]interface{} `json:"metadata,omitempty"`
+	Names     []string                 `json:"names"`
+	IDs       []string                 `json:"ids,omitempty"`
+	Metadatas []map[string]interface{} `json:"metadatas,omitempty"`
 }
 
 func (req createChannelsReq) validate() error {
@@ -392,9 +431,9 @@ func (req connectThingReq) validate() error {
 
 type shareThingReq struct {
 	token   string
-	UserID  string
-	ChanID  string
-	Actions []string
+	UserID  string   `json:"user_id"`
+	ChanID  string   `json:"channel_id"`
+	Actions []string `json:"actions"`
 }
 
 func (req shareThingReq) validate() error {
@@ -410,7 +449,7 @@ func (req shareThingReq) validate() error {
 
 type connectChannelReq struct {
 	token   string
-	ConnIDs sdk.ConnectionIDs
+	ConnIDs sdk.ConnectionIDs `json:"connection_ids"`
 }
 
 func (req connectChannelReq) validate() error {
@@ -423,7 +462,7 @@ func (req connectChannelReq) validate() error {
 
 type connectReq struct {
 	token   string
-	ConnIDs sdk.ConnectionIDs
+	ConnIDs sdk.ConnectionIDs `json:"connection_ids"`
 }
 
 func (req connectReq) validate() error {
@@ -472,7 +511,7 @@ func (req disconnectChannelReq) validate() error {
 
 type disconnectReq struct {
 	token   string
-	ConnIDs sdk.ConnectionIDs
+	ConnIDs sdk.ConnectionIDs `json:"connection_ids"`
 }
 
 func (req disconnectReq) validate() error {
@@ -537,9 +576,9 @@ func (req createGroupReq) validate() error {
 
 type createGroupsReq struct {
 	token        string
-	Names        []string                 `json:"name,omitempty"`
-	Descriptions []string                 `json:"description,omitempty"`
-	Metadatas    []map[string]interface{} `json:"metadata,omitempty"`
+	Names        []string                 `json:"names,omitempty"`
+	Descriptions []string                 `json:"descriptions,omitempty"`
+	Metadatas    []map[string]interface{} `json:"metadatas,omitempty"`
 }
 
 func (req createGroupsReq) validate() error {
@@ -572,7 +611,7 @@ type updateGroupReq struct {
 
 func (req updateGroupReq) validate() error {
 	if req.token == "" {
-		return ui.ErrMalformedEntity
+		return ui.ErrUnauthorizedAccess
 	}
 
 	if len(req.Name) > maxNameSize {
@@ -638,7 +677,7 @@ type listPoliciesReq struct {
 
 func (req listPoliciesReq) validate() error {
 	if req.token == "" {
-		return ui.ErrMalformedEntity
+		return ui.ErrUnauthorizedAccess
 	}
 
 	return nil
@@ -651,7 +690,7 @@ type addPolicyReq struct {
 
 func (req addPolicyReq) validate() error {
 	if req.token == "" {
-		return ui.ErrMalformedEntity
+		return ui.ErrUnauthorizedAccess
 	}
 	return nil
 }
@@ -663,7 +702,7 @@ type updatePolicyReq struct {
 
 func (req updatePolicyReq) validate() error {
 	if req.token == "" {
-		return ui.ErrMalformedEntity
+		return ui.ErrUnauthorizedAccess
 	}
 	return nil
 }
@@ -675,7 +714,7 @@ type deletePolicyReq struct {
 
 func (req deletePolicyReq) validate() error {
 	if req.token == "" {
-		return ui.ErrMalformedEntity
+		return ui.ErrUnauthorizedAccess
 	}
 	return nil
 }
@@ -688,7 +727,7 @@ type publishReq struct {
 
 func (req publishReq) validate() error {
 	if req.token == "" {
-		return ui.ErrMalformedEntity
+		return ui.ErrUnauthorizedAccess
 	}
 
 	if req.thingKey == "" {
@@ -707,7 +746,7 @@ type readMessageReq struct {
 
 func (req readMessageReq) validate() error {
 	if req.token == "" {
-		return ui.ErrMalformedEntity
+		return ui.ErrUnauthorizedAccess
 	}
 
 	return nil
@@ -721,7 +760,7 @@ type wsConnectionReq struct {
 
 func (req wsConnectionReq) validate() error {
 	if req.token == "" {
-		return ui.ErrMalformedEntity
+		return ui.ErrUnauthorizedAccess
 	}
 
 	if req.ChanID == "" {

@@ -19,6 +19,9 @@ import (
 func indexEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(indexReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 		res, err := svc.Index(ctx, req.token)
 
 		return uiRes{
@@ -90,6 +93,9 @@ func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(tokenReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 		credentials := sdk.Credentials{
 			Identity: req.Identity,
 			Secret:   req.Secret,
@@ -134,8 +140,11 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(refreshTokenReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
-		token, err := svc.RefreshToken(ctx, req.RefreshToken)
+		token, err := svc.RefreshToken(ctx, req.refreshToken)
 		if err != nil {
 			return nil, errors.Wrap(errUnauthorized, err)
 		}
@@ -255,8 +264,7 @@ func createUserEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		user := req.user
-		res, err := svc.CreateUsers(ctx, req.token, user)
+		res, err := svc.CreateUsers(ctx, req.token, req.User)
 		if err != nil {
 			return nil, errors.Wrap(errUserConflict, err)
 		}
@@ -457,7 +465,7 @@ func createThingEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.CreateThings(ctx, req.token, req.thing)
+		res, err := svc.CreateThings(ctx, req.token, req.Thing)
 		if err != nil {
 			return nil, errors.Wrap(errThingConflict, err)
 		}
