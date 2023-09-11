@@ -25,9 +25,9 @@ import (
 )
 
 type config struct {
-	LogLevel        string          `env:"MF_GUI_LOG_LEVEL"       envDefault:"info"`
-	Port            string          `env:"MF_GUI_PORT"            envDefault:"9090"`
-	RedirectURL     string          `env:"MF_GUI_REDIRECT_URL"    envDefault:"http://localhost:9090/"`
+	LogLevel        string          `env:"MF_UI_LOG_LEVEL"       envDefault:"info"`
+	Port            string          `env:"MF_UI_PORT"            envDefault:"9090"`
+	RedirectURL     string          `env:"MF_UI_REDIRECT_URL"    envDefault:"http://localhost:9090/"`
 	JaegerURL       string          `env:"MF_JAEGER_URL"          envDefault:""`
 	InstanceID      string          `env:"MF_UI_INSTANCE_ID"      envDefault:""`
 	HTTPAdapterURL  string          `env:"MF_HTTP_ADAPTER_URL" envDefault:"http://localhost:8008"`
