@@ -417,7 +417,7 @@ func (gs *uiService) Index(ctx context.Context, token string) ([]byte, error) {
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "index", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 
 	return btpl.Bytes(), nil
@@ -437,7 +437,7 @@ func (gs *uiService) Login(ctx context.Context) ([]byte, error) {
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "login", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 
 	return btpl.Bytes(), nil
@@ -464,7 +464,7 @@ func (gs *uiService) ShowPasswordReset(ctx context.Context) ([]byte, error) {
 	}
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "resetPassword", ""); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 	return btpl.Bytes(), nil
 }
@@ -483,7 +483,7 @@ func (gs *uiService) PasswordUpdate(ctx context.Context) ([]byte, error) {
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "updatePassword", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 
 	return btpl.Bytes(), nil
@@ -568,7 +568,7 @@ func (gs *uiService) ListUsers(ctx context.Context, token string) ([]byte, error
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "users", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 
 	return btpl.Bytes(), nil
@@ -602,7 +602,7 @@ func (gs *uiService) ViewUser(ctx context.Context, token, userID string) ([]byte
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "user", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 
 	return btpl.Bytes(), nil
@@ -697,7 +697,7 @@ func (gs *uiService) ListThings(ctx context.Context, token string) ([]byte, erro
 	}
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "things", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 	return btpl.Bytes(), nil
 }
@@ -731,7 +731,7 @@ func (gs *uiService) ViewThing(ctx context.Context, token, id string) ([]byte, e
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "thing", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 
 	return btpl.Bytes(), nil
@@ -829,7 +829,7 @@ func (gs *uiService) ListChannels(ctx context.Context, token string) ([]byte, er
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "channels", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 
 	return btpl.Bytes(), nil
@@ -865,7 +865,7 @@ func (gs *uiService) ViewChannel(ctx context.Context, token, id string) ([]byte,
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "channel", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 	return btpl.Bytes(), nil
 }
@@ -989,7 +989,7 @@ func (gs *uiService) ListChannelsByThing(ctx context.Context, token, id string) 
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "thingconn", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 	return btpl.Bytes(), nil
 }
@@ -1066,7 +1066,7 @@ func (gs *uiService) ListThingsByChannel(ctx context.Context, token, id string) 
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "channelconn", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 	return btpl.Bytes(), nil
 }
@@ -1113,7 +1113,7 @@ func (gs *uiService) ListThingsPolicies(ctx context.Context, token string) ([]by
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "thingsPolicies", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 
 	return btpl.Bytes(), nil
@@ -1202,7 +1202,7 @@ func (gs *uiService) ListGroupMembers(ctx context.Context, token, id string) ([]
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "groupconn", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 	return btpl.Bytes(), nil
 }
@@ -1250,7 +1250,7 @@ func (gs *uiService) ListGroups(ctx context.Context, token string) ([]byte, erro
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "groups", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 
 	return btpl.Bytes(), nil
@@ -1286,7 +1286,7 @@ func (gs *uiService) ViewGroup(ctx context.Context, token, id string) ([]byte, e
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "group", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 	return btpl.Bytes(), nil
 }
@@ -1380,7 +1380,7 @@ func (gs *uiService) ListPolicies(ctx context.Context, token string) ([]byte, er
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "policies", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 
 	return btpl.Bytes(), nil
@@ -1425,7 +1425,7 @@ func (gs *uiService) ReadMessage(ctx context.Context, token string) ([]byte, err
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "messagesread", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 
 	return btpl.Bytes(), nil
@@ -1449,7 +1449,7 @@ func (gs *uiService) WsConnection(ctx context.Context, token, chID, thKey string
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "messagesread", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 
 	return btpl.Bytes(), nil
@@ -1499,7 +1499,7 @@ func (gs *uiService) ListDeletedClients(ctx context.Context, token string) ([]by
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "deletedClients", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 
 	return btpl.Bytes(), nil
@@ -1519,7 +1519,7 @@ func (us *uiService) GetRemoteTerminal(ctx context.Context, id string) ([]byte, 
 	}
 	var btpl bytes.Buffer
 	if err := tmpl.ExecuteTemplate(&btpl, "remoteTerminal", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 
 	return btpl.Bytes(), nil
@@ -1639,7 +1639,7 @@ func (us *uiService) ListBootstrap(ctx context.Context, token string) ([]byte, e
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "bootstraps", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 
 	return btpl.Bytes(), nil
@@ -1680,7 +1680,7 @@ func (us *uiService) ViewBootstrap(ctx context.Context, token, id string) ([]byt
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "bootstrap", data); err != nil {
-		println(err.Error())
+		return []byte{}, err
 	}
 
 	return btpl.Bytes(), nil

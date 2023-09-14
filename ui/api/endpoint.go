@@ -23,32 +23,42 @@ func indexEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 		res, err := svc.Index(ctx, req.token)
+		if err != nil {
+			return nil, err
+		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
 func loginEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		res, err := svc.Login(ctx)
+		if err != nil {
+			return nil, err
+		}
 
 		return uiRes{
 			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
 func showUpdatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		res, err := svc.PasswordUpdate(ctx)
+		if err != nil {
+			return nil, err
+		}
 
 		return uiRes{
 			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -109,19 +119,16 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, errors.Wrap(errUnauthorized, err)
 		}
 
-		accessToken := token.AccessToken
-		refreshToken := token.RefreshToken
-
 		cookies := []*http.Cookie{
 			{
 				Name:     "token",
-				Value:    accessToken,
+				Value:    token.AccessToken,
 				Path:     "/",
 				HttpOnly: true,
 			},
 			{
 				Name:     "refresh_token",
-				Value:    refreshToken,
+				Value:    token.RefreshToken,
 				Path:     "/",
 				HttpOnly: true,
 			},
@@ -149,19 +156,16 @@ func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, errors.Wrap(errUnauthorized, err)
 		}
 
-		newAccessToken := token.AccessToken
-		newRefreshToken := token.RefreshToken
-
 		cookies := []*http.Cookie{
 			{
 				Name:     "token",
-				Value:    newAccessToken,
+				Value:    token.AccessToken,
 				Path:     "/",
 				HttpOnly: true,
 			},
 			{
 				Name:     "refresh_token",
-				Value:    newRefreshToken,
+				Value:    token.RefreshToken,
 				Path:     "/",
 				HttpOnly: true,
 			},
@@ -180,6 +184,9 @@ func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		res, err := svc.Logout(ctx)
+		if err != nil {
+			return nil, err
+		}
 
 		cookies := []*http.Cookie{
 			{
@@ -202,7 +209,7 @@ func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
 			html:    res,
 			cookies: cookies,
 			headers: map[string]string{"Location": "/login"},
-		}, err
+		}, nil
 	}
 }
 
@@ -249,11 +256,14 @@ func passwordResetEndpoint(svc ui.Service) endpoint.Endpoint {
 func showPasswordResetEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		res, err := svc.ShowPasswordReset(ctx)
+		if err != nil {
+			return nil, err
+		}
 
 		return uiRes{
 			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -270,7 +280,6 @@ func createUserEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code: http.StatusCreated,
 			html: res,
 		}, nil
 	}
@@ -300,7 +309,6 @@ func createUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code: http.StatusCreated,
 			html: res,
 		}, nil
 	}
@@ -435,7 +443,7 @@ func enableUserEndpoint(svc ui.Service) endpoint.Endpoint {
 			code:    http.StatusFound,
 			html:    res,
 			headers: map[string]string{"Location": "/users"},
-		}, err
+		}, nil
 	}
 }
 
@@ -454,7 +462,7 @@ func disableUserEndpoint(svc ui.Service) endpoint.Endpoint {
 			code:    http.StatusFound,
 			html:    res,
 			headers: map[string]string{"Location": "/users"},
-		}, err
+		}, nil
 	}
 }
 
@@ -496,7 +504,6 @@ func createThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code: http.StatusCreated,
 			html: res,
 		}, nil
 	}
@@ -708,7 +715,6 @@ func createChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, errors.Wrap(errChannelConflict, err)
 		}
 		return uiRes{
-			code: http.StatusCreated,
 			html: res,
 		}, nil
 	}
@@ -814,6 +820,7 @@ func disconnectEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusNoContent,
 			html: res,
 		}, nil
 	}
@@ -890,6 +897,7 @@ func disconnectThingEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusNoContent,
 			html: res,
 		}, nil
 	}
@@ -909,6 +917,7 @@ func disconnectChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusNoContent,
 			html: res,
 		}, nil
 	}
@@ -1056,7 +1065,7 @@ func deleteThingsPolicyEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code: http.StatusOK,
+			code: http.StatusNoContent,
 			html: res,
 		}, nil
 	}
@@ -1101,7 +1110,6 @@ func createGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code: http.StatusCreated,
 			html: res,
 		}, nil
 	}
@@ -1223,7 +1231,7 @@ func unassignEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code: http.StatusOK,
+			code: http.StatusNoContent,
 			html: res,
 		}, nil
 	}
@@ -1471,8 +1479,9 @@ func viewBootstrap(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1488,8 +1497,9 @@ func listBootstrap(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1510,8 +1520,9 @@ func updateBootstrap(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1533,8 +1544,9 @@ func updateBootstrapCerts(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1554,8 +1566,9 @@ func updateBootstrapConnections(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
+			code: http.StatusOK,
 			html: res,
-		}, err
+		}, nil
 	}
 }
 
@@ -1583,6 +1596,6 @@ func createBootstrap(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			html: res,
-		}, err
+		}, nil
 	}
 }
