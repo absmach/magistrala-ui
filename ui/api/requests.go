@@ -129,6 +129,12 @@ func (req updateUserReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
 	}
+	if req.id == "" {
+		return ui.ErrMalformedEntity
+	}
+	if req.Name == "" && req.Metadata == nil {
+		return ui.ErrMalformedEntity
+	}
 	return nil
 }
 
@@ -142,6 +148,9 @@ func (req updateUserTagsReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
 	}
+	if req.id == "" {
+		return ui.ErrMalformedEntity
+	}
 	return nil
 }
 
@@ -154,6 +163,9 @@ type updateUserIdentityReq struct {
 func (req updateUserIdentityReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
+	}
+	if req.id == "" {
+		return ui.ErrMalformedEntity
 	}
 	if req.Identity == "" {
 		return ui.ErrMalformedEntity
@@ -188,7 +200,10 @@ func (req updateUserPasswordReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
 	}
-	if req.OldPass == "" || req.NewPass == "" {
+	if req.OldPass == "" {
+		return ui.ErrMalformedEntity
+	}
+	if req.NewPass == "" {
 		return ui.ErrMalformedEntity
 	}
 	return nil
@@ -271,7 +286,9 @@ func (req updateThingReq) validate() error {
 	if req.id == "" {
 		return ui.ErrMalformedEntity
 	}
-
+	if req.Name == "" && req.Metadata == nil {
+		return ui.ErrMalformedEntity
+	}
 	if len(req.Name) > maxNameSize {
 		return ui.ErrMalformedEntity
 	}
@@ -289,6 +306,9 @@ func (req updateThingTagsReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
 	}
+	if req.id == "" {
+		return ui.ErrMalformedEntity
+	}
 	return nil
 }
 
@@ -301,6 +321,9 @@ type updateThingSecretReq struct {
 func (req updateThingSecretReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
+	}
+	if req.id == "" {
+		return ui.ErrMalformedEntity
 	}
 	if req.Secret == "" {
 		return ui.ErrMalformedEntity
@@ -334,6 +357,12 @@ type updateThingOwnerReq struct {
 func (req updateThingOwnerReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
+	}
+	if req.id == "" {
+		return ui.ErrMalformedEntity
+	}
+	if req.Owner == "" {
+		return ui.ErrMalformedEntity
 	}
 	return nil
 }
@@ -398,7 +427,9 @@ func (req updateChannelReq) validate() error {
 	if req.id == "" {
 		return ui.ErrMalformedEntity
 	}
-
+	if req.Name == "" && req.Description == "" && req.Metadata == nil {
+		return ui.ErrMalformedEntity
+	}
 	if len(req.Name) > maxNameSize {
 		return ui.ErrMalformedEntity
 	}
@@ -426,6 +457,15 @@ func (req connectThingReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
 	}
+	if len(req.ConnIDs.ChannelIDs) == 0 {
+		return ui.ErrMalformedEntity
+	}
+	if len(req.ConnIDs.ThingIDs) == 0 {
+		return ui.ErrMalformedEntity
+	}
+	if len(req.ConnIDs.Actions) == 0 {
+		return ui.ErrMalformedEntity
+	}
 	return nil
 }
 
@@ -439,9 +479,14 @@ type shareThingReq struct {
 func (req shareThingReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
-	} else if req.UserID == "" {
+	}
+	if req.UserID == "" {
 		return ui.ErrMalformedEntity
-	} else if req.ChanID == "" {
+	}
+	if req.ChanID == "" {
+		return ui.ErrMalformedEntity
+	}
+	if len(req.Actions) == 0 {
 		return ui.ErrMalformedEntity
 	}
 	return nil
@@ -456,6 +501,15 @@ func (req connectChannelReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
 	}
+	if len(req.ConnIDs.ChannelIDs) == 0 {
+		return ui.ErrMalformedEntity
+	}
+	if len(req.ConnIDs.ThingIDs) == 0 {
+		return ui.ErrMalformedEntity
+	}
+	if len(req.ConnIDs.Actions) == 0 {
+		return ui.ErrMalformedEntity
+	}
 
 	return nil
 }
@@ -468,6 +522,15 @@ type connectReq struct {
 func (req connectReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
+	}
+	if len(req.ConnIDs.ChannelIDs) == 0 {
+		return ui.ErrMalformedEntity
+	}
+	if len(req.ConnIDs.ThingIDs) == 0 {
+		return ui.ErrMalformedEntity
+	}
+	if len(req.ConnIDs.Actions) == 0 {
+		return ui.ErrMalformedEntity
 	}
 
 	return nil
@@ -484,7 +547,10 @@ func (req disconnectThingReq) validate() error {
 		return ui.ErrUnauthorizedAccess
 	}
 
-	if req.ChanID == "" || req.ThingID == "" {
+	if req.ChanID == "" {
+		return ui.ErrMalformedEntity
+	}
+	if req.ThingID == "" {
 		return ui.ErrMalformedEntity
 	}
 
@@ -502,7 +568,10 @@ func (req disconnectChannelReq) validate() error {
 		return ui.ErrUnauthorizedAccess
 	}
 
-	if req.ChanID == "" || req.ThingID == "" {
+	if req.ChanID == "" {
+		return ui.ErrMalformedEntity
+	}
+	if req.ThingID == "" {
 		return ui.ErrMalformedEntity
 	}
 
@@ -518,6 +587,15 @@ func (req disconnectReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
 	}
+	if len(req.ConnIDs.ChannelIDs) == 0 {
+		return ui.ErrMalformedEntity
+	}
+	if len(req.ConnIDs.ThingIDs) == 0 {
+		return ui.ErrMalformedEntity
+	}
+	if len(req.ConnIDs.Actions) == 0 {
+		return ui.ErrMalformedEntity
+	}
 
 	return nil
 }
@@ -530,6 +608,9 @@ type updateChannelStatusReq struct {
 func (req updateChannelStatusReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
+	}
+	if req.ChannelID == "" {
+		return ui.ErrMalformedEntity
 	}
 
 	return nil
@@ -544,6 +625,15 @@ func (req addThingsPolicyReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
 	}
+	if req.Policy.Subject == "" {
+		return ui.ErrMalformedEntity
+	}
+	if req.Policy.Object == "" {
+		return ui.ErrMalformedEntity
+	}
+	if len(req.Policy.Actions) == 0 {
+		return ui.ErrMalformedEntity
+	}
 
 	return nil
 }
@@ -557,6 +647,15 @@ func (req deleteThingsPolicyReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
 	}
+	if req.Policy.Subject == "" {
+		return ui.ErrMalformedEntity
+	}
+	if req.Policy.Object == "" {
+		return ui.ErrMalformedEntity
+	}
+	if len(req.Policy.Actions) == 0 {
+		return ui.ErrMalformedEntity
+	}
 
 	return nil
 }
@@ -569,6 +668,9 @@ type createGroupReq struct {
 func (req createGroupReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
+	}
+	if req.Group.Name == "" {
+		return ui.ErrMalformedEntity
 	}
 
 	return nil
@@ -613,7 +715,12 @@ func (req updateGroupReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
 	}
-
+	if req.id == "" {
+		return ui.ErrMalformedEntity
+	}
+	if req.Name == "" && req.Description == "" && req.ParentID == "" && req.Metadata == nil {
+		return ui.ErrMalformedEntity
+	}
 	if len(req.Name) > maxNameSize {
 		return ui.ErrMalformedEntity
 	}
@@ -633,7 +740,13 @@ func (req assignReq) validate() error {
 		return ui.ErrUnauthorizedAccess
 	}
 
-	if req.groupID == "" || req.MemberID == "" {
+	if req.groupID == "" {
+		return ui.ErrMalformedEntity
+	}
+	if req.MemberID == "" {
+		return ui.ErrMalformedEntity
+	}
+	if len(req.Type) == 0 {
 		return ui.ErrMalformedEntity
 	}
 
@@ -651,7 +764,10 @@ func (req unassignReq) validate() error {
 		return ui.ErrUnauthorizedAccess
 	}
 
-	if req.groupID == "" || req.MemberID == "" {
+	if req.groupID == "" {
+		return ui.ErrMalformedEntity
+	}
+	if req.MemberID == "" {
 		return ui.ErrMalformedEntity
 	}
 
@@ -666,6 +782,9 @@ type updateGroupStatusReq struct {
 func (req updateGroupStatusReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
+	}
+	if req.GroupID == "" {
+		return ui.ErrMalformedEntity
 	}
 
 	return nil
@@ -692,6 +811,16 @@ func (req addPolicyReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
 	}
+	if req.Policy.Subject == "" {
+		return ui.ErrMalformedEntity
+	}
+	if req.Policy.Object == "" {
+		return ui.ErrMalformedEntity
+	}
+	if len(req.Policy.Actions) == 0 {
+		return ui.ErrMalformedEntity
+	}
+
 	return nil
 }
 
@@ -703,6 +832,15 @@ type updatePolicyReq struct {
 func (req updatePolicyReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
+	}
+	if req.Policy.Subject == "" {
+		return ui.ErrMalformedEntity
+	}
+	if req.Policy.Object == "" {
+		return ui.ErrMalformedEntity
+	}
+	if len(req.Policy.Actions) == 0 {
+		return ui.ErrMalformedEntity
 	}
 	return nil
 }
@@ -716,6 +854,16 @@ func (req deletePolicyReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
 	}
+	if req.Policy.Subject == "" {
+		return ui.ErrMalformedEntity
+	}
+	if req.Policy.Object == "" {
+		return ui.ErrMalformedEntity
+	}
+	if len(req.Policy.Actions) == 0 {
+		return ui.ErrMalformedEntity
+	}
+
 	return nil
 }
 
@@ -733,7 +881,12 @@ func (req publishReq) validate() error {
 	if req.thingKey == "" {
 		return ui.ErrMalformedEntity
 	}
-
+	if req.Msg.Channel == "" {
+		return ui.ErrMalformedEntity
+	}
+	if req.Msg.Payload == nil {
+		return ui.ErrMalformedEntity
+	}
 	return nil
 }
 
