@@ -39,10 +39,7 @@ var (
 	errNoCookie          = errors.New("failed to read token cookie")
 	errUnauthorized      = errors.New("failed to login")
 	errAuthentication    = errors.New("failed to perform authentication over the entity")
-	errUserConflict      = errors.New("invalid user")
-	errGroupConflict     = errors.New("invalid group")
-	errThingConflict     = errors.New("invalid thing")
-	errChannelConflict   = errors.New("invalid channel")
+	errConflict          = errors.New("entity already exists")
 	referer              = ""
 )
 
@@ -929,13 +926,7 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		w.WriteHeader(http.StatusSeeOther)
 	case errors.Contains(err, errors.ErrLogin):
 		w.WriteHeader(http.StatusUnauthorized)
-	case errors.Contains(err, errUserConflict):
-		w.WriteHeader(http.StatusConflict)
-	case errors.Contains(err, errGroupConflict):
-		w.WriteHeader(http.StatusConflict)
-	case errors.Contains(err, errThingConflict):
-		w.WriteHeader(http.StatusConflict)
-	case errors.Contains(err, errChannelConflict):
+	case errors.Contains(err, errConflict):
 		w.WriteHeader(http.StatusConflict)
 
 	default:

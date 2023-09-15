@@ -276,7 +276,7 @@ func createUserEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 		res, err := svc.CreateUsers(ctx, req.token, req.User)
 		if err != nil {
-			return nil, errors.Wrap(errUserConflict, err)
+			return nil, err
 		}
 
 		return uiRes{
@@ -305,7 +305,7 @@ func createUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 		res, err := svc.CreateUsers(ctx, req.token, users...)
 		if err != nil {
-			return nil, errors.Wrap(errUserConflict, err)
+			return nil, err
 		}
 
 		return uiRes{
@@ -475,7 +475,7 @@ func createThingEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 		res, err := svc.CreateThings(ctx, req.token, req.Thing)
 		if err != nil {
-			return nil, errors.Wrap(errThingConflict, err)
+			return nil, err
 		}
 
 		return uiRes{
@@ -500,7 +500,7 @@ func createThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 		res, err := svc.CreateThings(ctx, req.token, things...)
 		if err != nil {
-			return nil, errors.Wrap(errThingConflict, err)
+			return nil, err
 		}
 
 		return uiRes{
@@ -687,7 +687,7 @@ func createChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		res, err := svc.CreateChannels(ctx, req.token, req.Channel)
 		if err != nil {
-			return nil, errors.Wrap(errChannelConflict, err)
+			return nil, err
 		}
 
 		return uiRes{
@@ -712,7 +712,7 @@ func createChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 		res, err := svc.CreateChannels(ctx, req.token, channels...)
 		if err != nil {
-			return nil, errors.Wrap(errChannelConflict, err)
+			return nil, err
 		}
 		return uiRes{
 			html: res,
@@ -1081,7 +1081,7 @@ func createGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		res, err := svc.CreateGroups(ctx, cgr.token, cgr.Group)
 		if err != nil {
-			return nil, errors.Wrap(errGroupConflict, err)
+			return nil, err
 		}
 
 		return uiRes{
@@ -1106,7 +1106,7 @@ func createGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 		res, err := svc.CreateGroups(ctx, req.token, groups...)
 		if err != nil {
-			return nil, errors.Wrap(errGroupConflict, err)
+			return nil, err
 		}
 
 		return uiRes{
