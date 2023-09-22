@@ -1,5 +1,4 @@
-
-## Mainflux-ui
+# Mainflux-ui
 
 The Mainflux-ui functions as a Graphical User Interface (GUI) designed to interact with Mainflux services, encompassing both the creation and management aspects of users, things, channels, and groups. It streamlines tasks such as user and thing creation, channel establishment, policy configuration, and HTTP message transmission across various channels.
 
@@ -31,16 +30,18 @@ These commands will launch Mainflux-ui. To use the Mainflux-ui, ensure that the 
 To build the docker images for the ui service, run the following commands which will build the docker images in different configurations.
 
 This command will build the docker images for the ui service in default configuration.
+
 ```bash
 make docker
 ```
 
 This will build the development docker images for ui.
+
 ```bash
 make docker_dev
 ```
 
-You can also run ui via docker using the following command. 
+You can also run ui via docker using the following command.
 
 ```bash
 make run_docker
@@ -54,7 +55,7 @@ Once both Mainflux core and Mainflux-ui are running, you can access the Mainflux
 
 On the login page, use the provided credentials to log in to the interface:
 
-```
+```conf
 Email: admin@example.com
 Password: 12345678
 ```
@@ -98,4 +99,3 @@ Creating a thing policy involves selecting the subject and object and specifying
 To use bootstrap, ensure that the [bootstrap](http://docs.mainflux.io/bootstrap/) addon is active as part of the Mainflux core services.
 
 To configure bootstrap, provide the Name, Thing ID, External ID, External Key, Channel (as a string slice), Content (in JSON format), Client Cert, Client Key, and CA Cert.
-

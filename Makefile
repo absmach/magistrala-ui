@@ -44,7 +44,7 @@ endef
 
 all: ui
 
-.PHONY: ui dockers docker dockers_dev
+.PHONY: ui docker docker_dev
 
 clean:
 	rm -rf ${BUILD_DIR}

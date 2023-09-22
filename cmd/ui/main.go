@@ -28,16 +28,16 @@ type config struct {
 	LogLevel        string          `env:"MF_UI_LOG_LEVEL"       envDefault:"info"`
 	Port            string          `env:"MF_UI_PORT"            envDefault:"9090"`
 	RedirectURL     string          `env:"MF_UI_REDIRECT_URL"    envDefault:"http://localhost:9090/"`
-	JaegerURL       string          `env:"MF_JAEGER_URL"          envDefault:""`
-	InstanceID      string          `env:"MF_UI_INSTANCE_ID"      envDefault:""`
-	HTTPAdapterURL  string          `env:"MF_HTTP_ADAPTER_URL" envDefault:"http://localhost:8008"`
-	ReaderURL       string          `env:"MF_READER_URL" envDefault:""`
-	ThingsURL       string          `env:"MF_THINGS_URL" envDefault:"http://localhost:9000"`
-	UsersURL        string          `env:"MF_USERS_URL" envDefault:"http://localhost:9002"`
-	HostURL         string          `env:"MF_UI_HOST_URL" envDefault:"http://localhost:9090"`
-	BootstrapURL    string          `env:"MF_BOOTSTRAP_URL" envDefault:"http://localhost:9013"`
-	MsgContentType  sdk.ContentType `env:"MF_CONTENT-TYPE" envDefault:"application/senml+json"`
-	TLSVerification bool            `env:"MF_VERIFICATION_TLS" envDefault:"false"`
+	JaegerURL       string          `env:"MF_JAEGER_URL"         envDefault:""`
+	InstanceID      string          `env:"MF_UI_INSTANCE_ID"     envDefault:""`
+	HTTPAdapterURL  string          `env:"MF_HTTP_ADAPTER_URL"   envDefault:"http://localhost:8008"`
+	ReaderURL       string          `env:"MF_READER_URL"         envDefault:""`
+	ThingsURL       string          `env:"MF_THINGS_URL"         envDefault:"http://localhost:9000"`
+	UsersURL        string          `env:"MF_USERS_URL"          envDefault:"http://localhost:9002"`
+	HostURL         string          `env:"MF_UI_HOST_URL"        envDefault:"http://localhost:9090"`
+	BootstrapURL    string          `env:"MF_BOOTSTRAP_URL"      envDefault:"http://localhost:9013"`
+	MsgContentType  sdk.ContentType `env:"MF_CONTENT-TYPE"       envDefault:"application/senml+json"`
+	TLSVerification bool            `env:"MF_VERIFICATION_TLS"   envDefault:"false"`
 }
 
 func main() {
