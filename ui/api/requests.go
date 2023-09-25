@@ -22,12 +22,6 @@ func (req indexReq) validate() error {
 	return nil
 }
 
-type loginReq struct {
-}
-
-type showPasswordUpdateReq struct {
-}
-
 type tokenReq struct {
 	Identity string `json:"identity"`
 	Secret   string `json:"secret"`
@@ -240,9 +234,6 @@ func (req passwordResetReq) validate() error {
 		return ui.ErrInvalidResetPass
 	}
 	return nil
-}
-
-type showPasswordResetReq struct {
 }
 
 type createThingReq struct {
@@ -888,9 +879,6 @@ func (req publishReq) validate() error {
 		return ui.ErrMalformedEntity
 	}
 	return nil
-}
-
-type sendMessageReq struct {
 }
 
 type readMessageReq struct {

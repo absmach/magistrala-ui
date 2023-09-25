@@ -24,7 +24,6 @@ import (
 type config struct {
 	LogLevel        string          `env:"MF_UI_LOG_LEVEL"       envDefault:"info"`
 	Port            string          `env:"MF_UI_PORT"            envDefault:"9090"`
-	RedirectURL     string          `env:"MF_UI_REDIRECT_URL"    envDefault:"http://localhost:9090/"`
 	InstanceID      string          `env:"MF_UI_INSTANCE_ID"     envDefault:""`
 	HTTPAdapterURL  string          `env:"MF_HTTP_ADAPTER_URL"   envDefault:"http://localhost:8008"`
 	ReaderURL       string          `env:"MF_READER_URL"         envDefault:""`
@@ -90,7 +89,7 @@ func main() {
 	go func() {
 		p := fmt.Sprintf(":%s", cfg.Port)
 		logger.Info(fmt.Sprintf("GUI service started on port %s", cfg.Port))
-		errs <- http.ListenAndServe(p, api.MakeHandler(svc, cfg.RedirectURL, cfg.InstanceID))
+		errs <- http.ListenAndServe(p, api.MakeHandler(svc, cfg.InstanceID))
 	}()
 
 	go func() {
