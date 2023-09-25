@@ -5,7 +5,6 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -17,9 +16,7 @@ import (
 	"github.com/mainflux/mainflux/logger"
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
 	"github.com/mainflux/mainflux/pkg/uuid"
-	"github.com/opentracing/opentracing-go"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
-	jconfig "github.com/uber/jaeger-client-go/config"
 	"github.com/ultravioletrs/mainflux-ui/ui"
 	"github.com/ultravioletrs/mainflux-ui/ui/api"
 )
@@ -28,7 +25,6 @@ type config struct {
 	LogLevel        string          `env:"MF_UI_LOG_LEVEL"       envDefault:"info"`
 	Port            string          `env:"MF_UI_PORT"            envDefault:"9090"`
 	RedirectURL     string          `env:"MF_UI_REDIRECT_URL"    envDefault:"http://localhost:9090/"`
-	JaegerURL       string          `env:"MF_JAEGER_URL"         envDefault:""`
 	InstanceID      string          `env:"MF_UI_INSTANCE_ID"     envDefault:""`
 	HTTPAdapterURL  string          `env:"MF_HTTP_ADAPTER_URL"   envDefault:"http://localhost:8008"`
 	ReaderURL       string          `env:"MF_READER_URL"         envDefault:""`
@@ -68,9 +64,6 @@ func main() {
 		}
 	}
 
-	tracer, closer := initJaeger("ui", cfg.JaegerURL, logger)
-	defer closer.Close()
-
 	sdk := sdk.NewSDK(sdkConfig)
 
 	svc := ui.New(sdk)
@@ -97,7 +90,7 @@ func main() {
 	go func() {
 		p := fmt.Sprintf(":%s", cfg.Port)
 		logger.Info(fmt.Sprintf("GUI service started on port %s", cfg.Port))
-		errs <- http.ListenAndServe(p, api.MakeHandler(svc, cfg.RedirectURL, tracer, cfg.InstanceID))
+		errs <- http.ListenAndServe(p, api.MakeHandler(svc, cfg.RedirectURL, cfg.InstanceID))
 	}()
 
 	go func() {
@@ -108,28 +101,4 @@ func main() {
 
 	err = <-errs
 	logger.Error(fmt.Sprintf("GUI service terminated: %s", err))
-}
-
-func initJaeger(svcName, url string, logger logger.Logger) (opentracing.Tracer, io.Closer) {
-	if url == "" {
-		return opentracing.NoopTracer{}, io.NopCloser(nil)
-	}
-
-	tracer, closer, err := jconfig.Configuration{
-		ServiceName: svcName,
-		Sampler: &jconfig.SamplerConfig{
-			Type:  "const",
-			Param: 1,
-		},
-		Reporter: &jconfig.ReporterConfig{
-			LocalAgentHostPort: url,
-			LogSpans:           true,
-		},
-	}.NewTracer()
-	if err != nil {
-		logger.Error(fmt.Sprintf("Failed to init Jaeger client: %s", err))
-		os.Exit(1)
-	}
-
-	return tracer, closer
 }

@@ -13,7 +13,6 @@ default values.
 | MF_UI_LOG_LEVEL     | Log level for UI                      | info                   |
 | MF_UI_PORT          | Port where UI service is run          | 9090                   |
 | MF_UI_REDIRECT_URL  | Redirect URL for the UI               | http://localhost:9090/ |
-| MF_JAEGER_URL       | Jaeger server URL                     |                        |
 | MF_HTTP_ADAPTER_URL | HTTP adapter URL                      | http://localhost:8008  |
 | MF_READER_URL       | Reader URL                            | http://localhost:9007  |
 | MF_THINGS_URL       | Things URL                            | http://localhost:9000  |

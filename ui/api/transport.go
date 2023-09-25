@@ -14,14 +14,12 @@ import (
 
 	"github.com/ultravioletrs/mainflux-ui/ui"
 
-	kitot "github.com/go-kit/kit/tracing/opentracing"
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/go-zoo/bone"
 	"github.com/mainflux/mainflux"
 	"github.com/mainflux/mainflux/pkg/errors"
 	"github.com/mainflux/mainflux/pkg/messaging"
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
-	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -44,529 +42,529 @@ var (
 )
 
 // MakeHandler returns a HTTP handler for API endpoints.
-func MakeHandler(svc ui.Service, redirect string, tracer opentracing.Tracer, instanceID string) http.Handler {
+func MakeHandler(svc ui.Service, redirect, instanceID string) http.Handler {
 	opts := []kithttp.ServerOption{
 		kithttp.ServerErrorEncoder(encodeError),
 	}
 
 	r := bone.New()
 	r.Get("/", kithttp.NewServer(
-		kitot.TraceServer(tracer, "index")(indexEndpoint(svc)),
+		indexEndpoint(svc),
 		decodeIndexRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/login", kithttp.NewServer(
-		kitot.TraceServer(tracer, "login")(loginEndpoint(svc)),
+		loginEndpoint(svc),
 		decodeLoginRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/login", kithttp.NewServer(
-		kitot.TraceServer(tracer, "token")(tokenEndpoint(svc)),
+		tokenEndpoint(svc),
 		decodeTokenRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/refresh_token", kithttp.NewServer(
-		kitot.TraceServer(tracer, "refresh_token")(refreshTokenEndpoint(svc)),
+		refreshTokenEndpoint(svc),
 		decodeRefreshTokenRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/logout", kithttp.NewServer(
-		kitot.TraceServer(tracer, "logout")(logoutEndpoint(svc)),
+		logoutEndpoint(svc),
 		decodeLogoutRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/password", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_user_password")(updatePasswordEndpoint(svc)),
+		updatePasswordEndpoint(svc),
 		decodePasswordUpdate,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/password", kithttp.NewServer(
-		kitot.TraceServer(tracer, "show_update_password")(showUpdatePasswordEndpoint(svc)),
+		showUpdatePasswordEndpoint(svc),
 		decodeShowPasswordUpdate,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/password/reset", kithttp.NewServer(
-		kitot.TraceServer(tracer, "password_reset_req")(passwordResetRequestEndpoint(svc)),
+		passwordResetRequestEndpoint(svc),
 		decodePasswordResetRequest,
 		encodeResponse,
 		opts...,
 	))
 	r.Post("/reset-request", kithttp.NewServer(
-		kitot.TraceServer(tracer, "password_reset")(passwordResetEndpoint(svc)),
+		passwordResetEndpoint(svc),
 		decodePasswordReset,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/reset-request", kithttp.NewServer(
-		kitot.TraceServer(tracer, "show_password_reset")(showPasswordResetEndpoint(svc)),
+		showPasswordResetEndpoint(svc),
 		decodeShowPasswordReset,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/users", kithttp.NewServer(
-		kitot.TraceServer(tracer, "create_user")(createUserEndpoint(svc)),
+		createUserEndpoint(svc),
 		decodeUserCreation,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/users/bulk", kithttp.NewServer(
-		kitot.TraceServer(tracer, "create_users")(createUsersEndpoint(svc)),
+		createUsersEndpoint(svc),
 		decodeUsersCreation,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/users", kithttp.NewServer(
-		kitot.TraceServer(tracer, "list_users")(listUsersEndpoint(svc)),
+		listUsersEndpoint(svc),
 		decodeListUsersRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/users/enabled", kithttp.NewServer(
-		kitot.TraceServer(tracer, "enable_user")(enableUserEndpoint(svc)),
+		enableUserEndpoint(svc),
 		decodeUserStatusUpdate,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/users/disabled", kithttp.NewServer(
-		kitot.TraceServer(tracer, "disable_user")(disableUserEndpoint(svc)),
+		disableUserEndpoint(svc),
 		decodeUserStatusUpdate,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/users/policies", kithttp.NewServer(
-		kitot.TraceServer(tracer, "view_policies")(listPoliciesEndpoint(svc)),
+		listPoliciesEndpoint(svc),
 		decodeListPoliciesRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/users/policies", kithttp.NewServer(
-		kitot.TraceServer(tracer, "add_policy")(addPolicyEndpoint(svc)),
+		addPolicyEndpoint(svc),
 		decodeAddPolicyRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/users/policies/update", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_policy")(updatePolicyEndpoint(svc)),
+		updatePolicyEndpoint(svc),
 		decodeUpdatePolicyRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/users/policies/delete", kithttp.NewServer(
-		kitot.TraceServer(tracer, "delete_policy")(deletePolicyEndpoint(svc)),
+		deletePolicyEndpoint(svc),
 		decodeDeletePolicyRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/users/:id", kithttp.NewServer(
-		kitot.TraceServer(tracer, "view_user")(viewUserEndpoint(svc)),
+		viewUserEndpoint(svc),
 		decodeView,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/users/:id", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_user")(updateUserEndpoint(svc)),
+		updateUserEndpoint(svc),
 		decodeUserUpdate,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/users/:id/tags", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_user_tags")(updateUserTagsEndpoint(svc)),
+		updateUserTagsEndpoint(svc),
 		decodeUserTagsUpdate,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/users/:id/identity", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_user_identity")(updateUserIdentityEndpoint(svc)),
+		updateUserIdentityEndpoint(svc),
 		decodeUserIdentityUpdate,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/things", kithttp.NewServer(
-		kitot.TraceServer(tracer, "create_thing")(createThingEndpoint(svc)),
+		createThingEndpoint(svc),
 		decodeThingCreation,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/things/bulk", kithttp.NewServer(
-		kitot.TraceServer(tracer, "create_things")(createThingsEndpoint(svc)),
+		createThingsEndpoint(svc),
 		decodeThingsCreation,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/things", kithttp.NewServer(
-		kitot.TraceServer(tracer, "list_things")(listThingsEndpoint(svc)),
+		listThingsEndpoint(svc),
 		decodeListThingsRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/things/enabled", kithttp.NewServer(
-		kitot.TraceServer(tracer, "enable_thing")(enableThingEndpoint(svc)),
+		enableThingEndpoint(svc),
 		decodeThingStatusUpdate,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/things/disabled", kithttp.NewServer(
-		kitot.TraceServer(tracer, "disable_thing")(disableThingEndpoint(svc)),
+		disableThingEndpoint(svc),
 		decodeThingStatusUpdate,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/things/policies", kithttp.NewServer(
-		kitot.TraceServer(tracer, "view_things_policies")(listThingsPoliciesEndpoint(svc)),
+		listThingsPoliciesEndpoint(svc),
 		decodeListPoliciesRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/things/policies", kithttp.NewServer(
-		kitot.TraceServer(tracer, "add_things_policy")(addThingsPolicyEndpoint(svc)),
+		addThingsPolicyEndpoint(svc),
 		decodeAddThingsPolicyRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/things/policies/update", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_things_policy")(updateThingsPolicyEndpoint(svc)),
+		updateThingsPolicyEndpoint(svc),
 		decodeUpdatePolicyRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/things/policies/delete", kithttp.NewServer(
-		kitot.TraceServer(tracer, "delete_things_policy")(deleteThingsPolicyEndpoint(svc)),
+		deleteThingsPolicyEndpoint(svc),
 		decodeDeleteThingsPolicyRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/things/:id", kithttp.NewServer(
-		kitot.TraceServer(tracer, "view_thing")(viewThingEndpoint(svc)),
+		viewThingEndpoint(svc),
 		decodeView,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/things/:id", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_thing")(updateThingEndpoint(svc)),
+		updateThingEndpoint(svc),
 		decodeThingUpdate,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/things/:id/tags", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_thing_tags")(updateThingTagsEndpoint(svc)),
+		updateThingTagsEndpoint(svc),
 		decodeThingTagsUpdate,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/things/:id/secret", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_thing_secret")(updateThingSecretEndpoint(svc)),
+		updateThingSecretEndpoint(svc),
 		decodeThingSecretUpdate,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/things/:id/owner", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_thing_owner")(updateThingOwnerEndpoint(svc)),
+		updateThingOwnerEndpoint(svc),
 		decodeThingOwnerUpdate,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/things/:id/channels", kithttp.NewServer(
-		kitot.TraceServer(tracer, "list_channels_by_thing")(listChannelsByThingEndpoint(svc)),
+		listChannelsByThingEndpoint(svc),
 		decodeView,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/things/:id/connect", kithttp.NewServer(
-		kitot.TraceServer(tracer, "connect_Channel")(connectChannelEndpoint(svc)),
+		connectChannelEndpoint(svc),
 		decodeConnectChannel,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/disconnectChannel", kithttp.NewServer(
-		kitot.TraceServer(tracer, "disconnect_channel")(disconnectChannelEndpoint(svc)),
+		disconnectChannelEndpoint(svc),
 		decodeDisconnectChannel,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/channels", kithttp.NewServer(
-		kitot.TraceServer(tracer, "create_channel")(createChannelEndpoint(svc)),
+		createChannelEndpoint(svc),
 		decodeChannelCreation,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/channels/bulk", kithttp.NewServer(
-		kitot.TraceServer(tracer, "create_channels")(createChannelsEndpoint(svc)),
+		createChannelsEndpoint(svc),
 		decodeChannelsCreation,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/channels/enabled", kithttp.NewServer(
-		kitot.TraceServer(tracer, "enable_channel")(enableChannelEndpoint(svc)),
+		enableChannelEndpoint(svc),
 		decodeChannelStatusUpdate,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/channels/disabled", kithttp.NewServer(
-		kitot.TraceServer(tracer, "disable_channel")(disableChannelEndpoint(svc)),
+		disableChannelEndpoint(svc),
 		decodeChannelStatusUpdate,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/channels/:id", kithttp.NewServer(
-		kitot.TraceServer(tracer, "view_channel")(viewChannelEndpoint(svc)),
+		viewChannelEndpoint(svc),
 		decodeView,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/channels/:id", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_channel")(updateChannelEndpoint(svc)),
+		updateChannelEndpoint(svc),
 		decodeChannelUpdate,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/channels", kithttp.NewServer(
-		kitot.TraceServer(tracer, "list_channels")(listChannelsEndpoint(svc)),
+		listChannelsEndpoint(svc),
 		decodeListChannelsRequest,
 		encodeResponse,
 		opts...,
 	))
 	r.Post("/channels/:id/connectThing", kithttp.NewServer(
-		kitot.TraceServer(tracer, "connect_thing")(connectThingEndpoint(svc)),
+		connectThingEndpoint(svc),
 		decodeConnectThing,
 		encodeResponse,
 		opts...,
 	))
 	r.Post("/channels/:id/shareThing", kithttp.NewServer(
-		kitot.TraceServer(tracer, "share_thing")(shareThingEndpoint(svc)),
+		shareThingEndpoint(svc),
 		decodeShareThingRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/disconnectThing", kithttp.NewServer(
-		kitot.TraceServer(tracer, "disconnect_thing")(disconnectThingEndpoint(svc)),
+		disconnectThingEndpoint(svc),
 		decodeDisconnectThing,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/connect", kithttp.NewServer(
-		kitot.TraceServer(tracer, "connect_things")(connectEndpoint(svc)),
+		connectEndpoint(svc),
 		decodeConnect,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/disconnect", kithttp.NewServer(
-		kitot.TraceServer(tracer, "disconnect_things")(disconnectEndpoint(svc)),
+		disconnectEndpoint(svc),
 		decodeDisconnect,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/channels/:id/things", kithttp.NewServer(
-		kitot.TraceServer(tracer, "list_things_by_channel")(listThingsByChannelEndpoint(svc)),
+		listThingsByChannelEndpoint(svc),
 		decodeView,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/groups", kithttp.NewServer(
-		kitot.TraceServer(tracer, "create_group")(createGroupEndpoint(svc)),
+		createGroupEndpoint(svc),
 		decodeGroupCreation,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/groups", kithttp.NewServer(
-		kitot.TraceServer(tracer, "list_groups")(listGroupsEndpoint(svc)),
+		listGroupsEndpoint(svc),
 		decodeListGroupsRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/groups/bulk", kithttp.NewServer(
-		kitot.TraceServer(tracer, "create_groups")(createGroupsEndpoint(svc)),
+		createGroupsEndpoint(svc),
 		decodeGroupsCreation,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/groups/enabled", kithttp.NewServer(
-		kitot.TraceServer(tracer, "enable_group")(enableGroupEndpoint(svc)),
+		enableGroupEndpoint(svc),
 		decodeGroupStatusUpdate,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/groups/disabled", kithttp.NewServer(
-		kitot.TraceServer(tracer, "disable_group")(disableGroupEndpoint(svc)),
+		disableGroupEndpoint(svc),
 		decodeGroupStatusUpdate,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/groups/:id", kithttp.NewServer(
-		kitot.TraceServer(tracer, "view_group")(viewGroupEndpoint(svc)),
+		viewGroupEndpoint(svc),
 		decodeView,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/groups/:id/members", kithttp.NewServer(
-		kitot.TraceServer(tracer, "list_group_members")(listGroupMembersEndpoint(svc)),
+		listGroupMembersEndpoint(svc),
 		decodeView,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/groups/:id", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_group")(updateGroupEndpoint(svc)),
+		updateGroupEndpoint(svc),
 		decodeGroupUpdate,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/groups/:id/members", kithttp.NewServer(
-		kitot.TraceServer(tracer, "assign")(assignEndpoint(svc)),
+		assignEndpoint(svc),
 		decodeAssignRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/groups/:id/unassign", kithttp.NewServer(
-		kitot.TraceServer(tracer, "unassign")(unassignEndpoint(svc)),
+		unassignEndpoint(svc),
 		decodeUnassignRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/messages", kithttp.NewServer(
-		kitot.TraceServer(tracer, "publish")(publishMessageEndpoint(svc)),
+		publishMessageEndpoint(svc),
 		decodePublishRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/readmessages", kithttp.NewServer(
-		kitot.TraceServer(tracer, "read_messages")(readMessageEndpoint(svc)),
+		readMessageEndpoint(svc),
 		decodeReadMessageRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/readmessages", kithttp.NewServer(
-		kitot.TraceServer(tracer, "ws_connection")(wsConnectionEndpoint(svc)),
+		wsConnectionEndpoint(svc),
 		decodeWsConnectionRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/deleted", kithttp.NewServer(
-		kitot.TraceServer(tracer, "list_deleted_clients")(listDeletedClientsEndpoint(svc)),
+		listDeletedClientsEndpoint(svc),
 		decodeListDeletedClientsRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/bootstraps", kithttp.NewServer(
-		kitot.TraceServer(tracer, "list_bootstrap")(listBootstrap(svc)),
+		listBootstrap(svc),
 		decodeListBoostrapRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/bootstraps", kithttp.NewServer(
-		kitot.TraceServer(tracer, "create_bootstrap")(createBootstrap(svc)),
+		createBootstrap(svc),
 		decodeCreateBootstrapRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/bootstrap/:id", kithttp.NewServer(
-		kitot.TraceServer(tracer, "view_bootstrap")(viewBootstrap(svc)),
+		viewBootstrap(svc),
 		decodeView,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/bootstrap/:id", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_bootstrap")(updateBootstrap(svc)),
+		updateBootstrap(svc),
 		decodeUpdateBootstrap,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/bootstrap/:id/certs", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_bootstrap_certs")(updateBootstrapCerts(svc)),
+		updateBootstrapCerts(svc),
 		decodeUpdateBootstrapCerts,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/bootstrap/:id/connections", kithttp.NewServer(
-		kitot.TraceServer(tracer, "update_bootstrap_connections")(updateBootstrapConnections(svc)),
+		updateBootstrapConnections(svc),
 		decodeUpdateBootstrapConnections,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Get("/bootstrap/:id/terminal", kithttp.NewServer(
-		kitot.TraceServer(tracer, "edge_terminal")(getTerminalEndpoint(svc)),
+		getTerminalEndpoint(svc),
 		decodeView,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/bootstrap/:id/terminal/input", kithttp.NewServer(
-		kitot.TraceServer(tracer, "edge_terminal_input")(handleTerminalInputEndpoint(svc)),
+		handleTerminalInputEndpoint(svc),
 		decodeTerminalCommandRequest,
 		encodeJSONResponse,
 		opts...,
