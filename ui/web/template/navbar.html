@@ -1,58 +1,87 @@
 {{define "navbar"}}
 
-<input type="checkbox" id="nav-toggle">
+<input type="checkbox" id="nav-toggle" />
 <div class="sidebar">
   <div class="sidebar-brand">
-      <h2><img src="/images/logo.png" class= "logo"> <span>Mainflux</span></h2>
+    <h2><img src="/images/logo.png" class="logo" /> <span>Mainflux</span></h2>
   </div>
   <div class="sidebar-menu">
-      <ul>
-          <li>
-            {{$active := "dashboard"}}
-              <a href="/" class='{{if eq .NavbarActive $active}}active{{end}}'><span class="fas fa-home"></span>
-                  <span>Dashboard</span></a>
-          </li>
-          <li>
-            {{$active = "users"}}
-              <a href="/users" class='{{if (serviceUnavailable "users")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'><span class="fas fa-users"></span>
-                  <span>Users</span></a>
-          </li>
-          <li>
-            {{$active = "groups"}}
-              <a href="/groups" class='{{if (serviceUnavailable "users")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'><span class="fas fa-layer-group"></span>
-                  <span>Groups</span></a>
-          </li>
-          <li>
-            {{$active = "policies"}}
-              <a href="/users/policies" class='{{if (serviceUnavailable "users")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'><span class="fas fa-solid fa-shield-alt"></span>
-                  <span>Users Policies</span></a>
-          </li>
-          <li>
-            {{$active = "things"}}
-              <a href="/things" class='{{if (serviceUnavailable "things")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'><span class="fas fa-microchip"></span>
-                  <span>Things</span></a>
-          </li>
-          <li>
-            {{$active = "channels"}}
-              <a href="/channels" class='{{if (serviceUnavailable "things")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'><span class="fas fa-exchange-alt"></span>
-                  <span>Channels</span></a>
-          </li>
-          <li>
-            {{$active = "thingsPolicies"}}
-              <a href="/things/policies" class='{{if (serviceUnavailable "things")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'><span class="fas fa-solid fa-shield-alt"></span>
-                  <span>Things Policies</span></a>
-          </li>
-          <li>
-            {{$active = "deleted"}}
-              <a href="/deleted" class='{{if (serviceUnavailable "users")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'><span class="fas fa-solid fa-trash-restore"></span>
-                  <span>Disabled Entities</span></a>
-          </li>
-          <li>
-            {{$active = "bootstraps"}}
-              <a href="/bootstraps" class='{{if (serviceUnavailable "bootstrap")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'><span class="fas fa-solid fa-broadcast-tower"></span>
-                  <span>Bootstrap</span></a>
-          </li>
-      </ul>
+    <ul>
+      <li>
+        {{$active := "dashboard"}}
+        <a href="/" class="{{if eq .NavbarActive $active}}active{{end}}"
+          ><span class="fas fa-home"></span> <span>Dashboard</span></a
+        >
+      </li>
+      <li>
+        {{$active = "users"}}
+        <a
+          href="/users"
+          class='{{if (serviceUnavailable "users")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'
+          ><span class="fas fa-users"></span> <span>Users</span></a
+        >
+      </li>
+      <li>
+        {{$active = "groups"}}
+        <a
+          href="/groups"
+          class='{{if (serviceUnavailable "users")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'
+          ><span class="fas fa-layer-group"></span> <span>Groups</span></a
+        >
+      </li>
+      <li>
+        {{$active = "policies"}}
+        <a
+          href="/users/policies"
+          class='{{if (serviceUnavailable "users")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'
+          ><span class="fas fa-solid fa-shield-alt"></span>
+          <span>Users Policies</span></a
+        >
+      </li>
+      <li>
+        {{$active = "things"}}
+        <a
+          href="/things"
+          class='{{if (serviceUnavailable "things")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'
+          ><span class="fas fa-microchip"></span> <span>Things</span></a
+        >
+      </li>
+      <li>
+        {{$active = "channels"}}
+        <a
+          href="/channels"
+          class='{{if (serviceUnavailable "things")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'
+          ><span class="fas fa-exchange-alt"></span> <span>Channels</span></a
+        >
+      </li>
+      <li>
+        {{$active = "thingsPolicies"}}
+        <a
+          href="/things/policies"
+          class='{{if (serviceUnavailable "things")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'
+          ><span class="fas fa-solid fa-shield-alt"></span>
+          <span>Things Policies</span></a
+        >
+      </li>
+      <li>
+        {{$active = "deleted"}}
+        <a
+          href="/deleted"
+          class='{{if (serviceUnavailable "users")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'
+          ><span class="fas fa-solid fa-trash-restore"></span>
+          <span>Disabled Entities</span></a
+        >
+      </li>
+      <li>
+        {{$active = "bootstraps"}}
+        <a
+          href="/bootstraps"
+          class='{{if (serviceUnavailable "bootstrap")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'
+          ><span class="fas fa-solid fa-broadcast-tower"></span>
+          <span>Bootstrap</span></a
+        >
+      </li>
+    </ul>
   </div>
 </div>
 <script>
@@ -73,18 +102,15 @@
 
   // Initialize header styles on page load
   setHeaderStyles();
- 
 
   // Only add event listener if the screen width is greater than or equal to 1200px
   if (window.innerWidth >= 1200) {
-      navToggle.addEventListener("change", function() {
-        setHeaderStyles();
-      });
+    navToggle.addEventListener("change", function () {
+      setHeaderStyles();
+    });
   } else {
-      header.style.width = "calc(100% - 100px)";
-      header.style.left = "100px";
+    header.style.width = "calc(100% - 100px)";
+    header.style.left = "100px";
   }
-
-
 </script>
 {{end}}

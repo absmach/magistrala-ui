@@ -1,105 +1,186 @@
 {{define "users"}}
 <!doctype html>
 <html lang="en">
-{{template "header"}}
+  {{template "header"}}
 
-<body>
-  {{template "navbar" .}}
+  <body>
+    {{template "navbar" .}}
 
-  <div class="main-content">
-    <main>
-      <!-- Button trigger modal -->
-      <button type="button" class="btn body-button" onclick="openModal('single')">
-        Add User
-      </button>
+    <div class="main-content">
+      <main>
+        <!-- Button trigger modal -->
+        <button
+          type="button"
+          class="btn body-button"
+          onclick="openModal('single')"
+        >
+          Add User
+        </button>
 
-      <!-- Modal -->
-      <div class="modal fade" id="addUserModal" tabindex="-1" role="dialog" aria-labelledby="addUserModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="addUserModalLabel">Add User</h5>
-            </div>
-            <div class="modal-body">
-              <div id="alertMessage"></div>
-              <form method="post" onsubmit="return submitUserForm()">
-                <div class="mb-3">
-                  <label for="name" class="form-label">Name</label>
-                  <input type="text" class="form-control" name="name" id="name" placeholder="User Name" required>
-                </div>
-                <div class="mb-3">
-                  <label for="identity" class="form-label">Identity</label>
-                  <input type="email" class="form-control" name="identity" id="identity" placeholder="User Identity" required>
-                </div>
-                <div class="mb-3">
-                  <label for="secret" class="form-label">Secret</label>
-                  <input type="text" class="form-control" name="secret" id="secret" placeholder="User Secret" required>
-                  <div id="secretError" class="error-message"></div>
-                </div>
-                <div class="mb-3">
-                  <label for="tags" class="form-label">Tags</label>
-                  <input type="text" class="form-control" name="tags" id="tags" aria-describedby="tagHelp" value="[]">
-                  <div id="tagHelp" class="form-text">Enter user tags as a string slice.</div>
-                  <div id="tagsError" class="error-message"></div>
-                </div>
-                <div class="mb-3">
-                  <label for="metadata" class="form-label">Metadata</label>
-                  <input type="text" class="form-control" name= "metadata" id="metadata"  value="{}">
-                  <div id="metadataHelp" class="form-text">Enter user metadata in JSON format.</div>
-                  <div id="metadataError" class="error-message"></div>
-                </div>
-                <button type="submit" class="btn body-button" onclick="return validateForm()">Submit</button>
-              </form>
+        <!-- Modal -->
+        <div
+          class="modal fade"
+          id="addUserModal"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby="addUserModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="addUserModalLabel">Add User</h5>
+              </div>
+              <div class="modal-body">
+                <div id="alertMessage"></div>
+                <form method="post" onsubmit="return submitUserForm()">
+                  <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="name"
+                      id="name"
+                      placeholder="User Name"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="identity" class="form-label">Identity</label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      name="identity"
+                      id="identity"
+                      placeholder="User Identity"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="secret" class="form-label">Secret</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="secret"
+                      id="secret"
+                      placeholder="User Secret"
+                      required
+                    />
+                    <div id="secretError" class="error-message"></div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="tags" class="form-label">Tags</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="tags"
+                      id="tags"
+                      aria-describedby="tagHelp"
+                      value="[]"
+                    />
+                    <div id="tagHelp" class="form-text">
+                      Enter user tags as a string slice.
+                    </div>
+                    <div id="tagsError" class="error-message"></div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="metadata" class="form-label">Metadata</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="metadata"
+                      id="metadata"
+                      value="{}"
+                    />
+                    <div id="metadataHelp" class="form-text">
+                      Enter user metadata in JSON format.
+                    </div>
+                    <div id="metadataError" class="error-message"></div>
+                  </div>
+                  <button
+                    type="submit"
+                    class="btn body-button"
+                    onclick="return validateForm()"
+                  >
+                    Submit
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <button type="button" class="btn body-button" onclick="openModal('bulk')">
-        Add Users
-      </button>
+        <button
+          type="button"
+          class="btn body-button"
+          onclick="openModal('bulk')"
+        >
+          Add Users
+        </button>
 
-      <!-- Modal -->
-      <div class="modal fade" id="addUsersModal" tabindex="-1" role="dialog" aria-labelledby="addUsersModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="addUsersModalLabel">Add Users</h5>
-            </div>
-            <div class="modal-body">
-              <div id="alertBulkMessage"></div>
-              <form method="post" enctype="multipart/form-data" onsubmit="return submitBulkUsersForm()">
-                <div class="form-group">
-                  <label for="usersFile">Add csv file containing users names and passwords </label>
-                  <input type="file" class="form-control-file" id="usersFile" name="usersFile" required>
-                  <button type="submit" value="upload" class="btn body-button">Submit</button>
-                </div>
-              </form>
+        <!-- Modal -->
+        <div
+          class="modal fade"
+          id="addUsersModal"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby="addUsersModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="addUsersModalLabel">Add Users</h5>
+              </div>
+              <div class="modal-body">
+                <div id="alertBulkMessage"></div>
+                <form
+                  method="post"
+                  enctype="multipart/form-data"
+                  onsubmit="return submitBulkUsersForm()"
+                >
+                  <div class="form-group">
+                    <label for="usersFile"
+                      >Add csv file containing users names and passwords
+                    </label>
+                    <input
+                      type="file"
+                      class="form-control-file"
+                      id="usersFile"
+                      name="usersFile"
+                      required
+                    />
+                    <button
+                      type="submit"
+                      value="upload"
+                      class="btn body-button"
+                    >
+                      Submit
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="table-container">
-        <table id="itemsTable" class="table">
-          <thead>
-            <tr>
-              <th scope="col">Name</th>
-              <th scope="col">ID</th>
-              <th scope="col"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {{$userID := .User.ID}}
-            {{range $i, $u := .Users}}
-              {{$disableButton := true}}
-              {{if (authorizeUser $userID $u.ID "c_delete" "client")}}
-                {{$disableButton = false}}
-              {{end}}
+        <div class="table-container">
+          <table id="itemsTable" class="table">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">ID</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {{$userID := .User.ID}} {{range $i, $u := .Users}}
+              {{$disableButton := true}} {{if (authorizeUser $userID $u.ID
+              "c_delete" "client")}} {{$disableButton = false}} {{end}}
               <tr>
                 <td>{{$u.Name}}</td>
                 <td>
                   <div class="copy-con-container">
-                    <a href={{printf "/users/%s" $u.ID}}>{{$u.ID}}</a>
+                    <a href='{{printf "/users/%s" $u.ID}}'>{{$u.ID}}</a>
                     <button class="copy-icon" onclick="copyToClipboard(this)">
                       <i class="far fa-copy"></i>
                     </button>
@@ -107,164 +188,178 @@
                 </td>
                 <td>
                   <form action="/users/disabled" method="post">
-                    <input type="hidden" name="userID" id="userID" value="{{$u.ID}}">
-                    <button type="submit" class="btn btn-sm" {{if $disableButton}}disabled{{end}}>
+                    <input
+                      type="hidden"
+                      name="userID"
+                      id="userID"
+                      value="{{$u.ID}}"
+                    />
+                    <button
+                      type="submit"
+                      class="btn btn-sm"
+                      {{if
+                      $disableButton}}disabled{{end}}
+                    >
                       <i class="fas fa-trash-alt"></i>
                     </button>
                   </form>
                 </td>
               </tr>
-            {{end}}
-          </tbody>
-        </table>
-      </div>
-    </main>
-  </div>
+              {{end}}
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
 
-  {{template "footer"}}
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      new simpleDatatables.DataTable('#itemsTable', {
-        searchable: true,
-        scrollY: "430px",
-        sortable: true,
-        pagination: true,
+    {{template "footer"}}
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        new simpleDatatables.DataTable("#itemsTable", {
+          searchable: true,
+          scrollY: "430px",
+          sortable: true,
+          pagination: true,
+        });
       });
-    });
 
-    function validateForm() {
-      var secret = document.getElementById("secret").value;
-      var tagsInput = document.getElementById("tags").value;
-      var metadataInput = document.getElementById("metadata").value;
-      var secretError = document.getElementById("secretError");
-      var tagsError = document.getElementById("tagsError");
-      var metadataError = document.getElementById("metadataError");
-      var submit = document.getElementById('submit');
+      function validateForm() {
+        var secret = document.getElementById("secret").value;
+        var tagsInput = document.getElementById("tags").value;
+        var metadataInput = document.getElementById("metadata").value;
+        var secretError = document.getElementById("secretError");
+        var tagsError = document.getElementById("tagsError");
+        var metadataError = document.getElementById("metadataError");
+        var submit = document.getElementById("submit");
 
-      var tags;
-      var metadata;
+        var tags;
+        var metadata;
 
-      secretError.innerHTML = "";
-      tagsError.innerHTML = "";
-      metadataError.innerHTML = "";
+        secretError.innerHTML = "";
+        tagsError.innerHTML = "";
+        metadataError.innerHTML = "";
 
+        var isValid = true;
 
-      var isValid = true;
+        if (secret.length < 8) {
+          secretError.innerHTML = "secret must have a minimum of 8 characters";
+          isValid = false;
+        }
+        try {
+          tags = JSON.parse(tagsInput);
+        } catch (error) {
+          tagsError.innerHTML = "please enter valid tags as a string array!";
+          isValid = false;
+        }
 
-      if (secret.length <8){
-        secretError.innerHTML = "secret must have a minimum of 8 characters";
-        isValid = false;
+        if (
+          !Array.isArray(tags) ||
+          !tags.every(function (tag) {
+            return typeof tag === "string";
+          })
+        ) {
+          tagsError.innerHTML = "tags must be a string array!";
+          isValid = false;
+        }
+
+        try {
+          metadata = JSON.parse(metadataInput);
+        } catch (error) {
+          metadataError.innerHTML =
+            "please enter valid metadata in JSON format!";
+          isValid = false;
+        }
+
+        return isValid;
       }
-      try{
-        tags = JSON.parse(tagsInput);
-      }catch(error){
-        tagsError.innerHTML = "please enter valid tags as a string array!";
-        isValid = false;
+
+      const userModal = new bootstrap.Modal(
+        document.getElementById("addUserModal"),
+      );
+      const usersModal = new bootstrap.Modal(
+        document.getElementById("addUsersModal"),
+      );
+
+      function openModal(modal) {
+        if (modal === "single") {
+          userModal.show();
+        } else if (modal === "bulk") {
+          usersModal.show();
+        }
       }
 
-      if (!Array.isArray(tags) || !tags.every(function(tag) {return typeof tag === "string";})){
-        tagsError.innerHTML = "tags must be a string array!";
-        isValid = false;
-      }
-
-      try{
-        metadata = JSON.parse(metadataInput);
-      }catch(error){
-        metadataError.innerHTML = "please enter valid metadata in JSON format!";
-        isValid = false;
-      }
-
-      return isValid;
-    }
-
-    const userModal = new bootstrap.Modal(document.getElementById('addUserModal'));
-    const usersModal =new bootstrap.Modal(document.getElementById('addUsersModal'));
-
-    function openModal(modal) {
-      if (modal === "single") {
-        userModal.show();
-      } else if (modal === "bulk") {
-        usersModal.show();
-      }
-    
-    }
-
-    function submitUserForm() {
-      event.preventDefault();
-      var form = event.target;
-      fetch("/users",{
-        method: 'POST',
-        body: new FormData(form)
-      })
-        .then (response => {
-          if (response.status === 409) {
-            errorMessage= "user already exists!";
-            showAlert(errorMessage,"single");
-            return false;
-          } else {
-            form.reset();
-            userModal.hide();
-            window.location.reload();
-            return true;
-          }
+      function submitUserForm() {
+        event.preventDefault();
+        var form = event.target;
+        fetch("/users", {
+          method: "POST",
+          body: new FormData(form),
         })
-        .catch (error => {
-          console.error("error submitting user form: ", error);
-          return false;
-        });
-
-    }
-
-    function submitBulkUsersForm() {
-      event.preventDefault();
-      var form = event.target;
-      fetch("/users/bulk",{
-        method: 'POST',
-        body: new FormData(form)
-      })
-        .then (response => {
-          if (response.status === 409) {
-            errorMessage= "users already exist!";
-            showAlert(errorMessage,"bulk");
+          .then((response) => {
+            if (response.status === 409) {
+              errorMessage = "user already exists!";
+              showAlert(errorMessage, "single");
+              return false;
+            } else {
+              form.reset();
+              userModal.hide();
+              window.location.reload();
+              return true;
+            }
+          })
+          .catch((error) => {
+            console.error("error submitting user form: ", error);
             return false;
-          } else {
-            form.reset();
-            usersModal.hide();
-            window.location.reload();
-            return true;
-          }
-        })
-        .catch (error => {
-          console.error("Error submitting bulk users form: ", error);
-          return false;
-        });
-    }
+          });
+      }
 
-    function showAlert(errorMessage,modal) {
-      if (modal === "single") {
-        var alertMessage = document.getElementById("alertMessage");
-        alertMessage.innerHTML = `
+      function submitBulkUsersForm() {
+        event.preventDefault();
+        var form = event.target;
+        fetch("/users/bulk", {
+          method: "POST",
+          body: new FormData(form),
+        })
+          .then((response) => {
+            if (response.status === 409) {
+              errorMessage = "users already exist!";
+              showAlert(errorMessage, "bulk");
+              return false;
+            } else {
+              form.reset();
+              usersModal.hide();
+              window.location.reload();
+              return true;
+            }
+          })
+          .catch((error) => {
+            console.error("Error submitting bulk users form: ", error);
+            return false;
+          });
+      }
+
+      function showAlert(errorMessage, modal) {
+        if (modal === "single") {
+          var alertMessage = document.getElementById("alertMessage");
+          alertMessage.innerHTML = `
           <div id="alert-popup" class="alert alert-danger">
             <span class="close-button" onclick="closeAlertPopup()">&times;</span>
             <h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
           </div> `;
-      } else if (modal === "bulk") {
-        var alertMessage = document.getElementById("alertBulkMessage");
-        alertMessage.innerHTML = `
+        } else if (modal === "bulk") {
+          var alertMessage = document.getElementById("alertBulkMessage");
+          alertMessage.innerHTML = `
           <div id="alert-popup" class="alert alert-danger">
             <span class="close-button" onclick="closeAlertPopup()">&times;</span>
             <h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
           </div> `;
+        }
       }
-      
-    }
 
-    function closeAlertPopup() {
-      document.getElementById("alert-popup").style.display = "none";
-    }
-  </script>
-
-</body>
-
+      function closeAlertPopup() {
+        document.getElementById("alert-popup").style.display = "none";
+      }
+    </script>
+  </body>
 </html>
 {{end}}

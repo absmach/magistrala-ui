@@ -18,6 +18,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - uses: actionsx/prettier@v3
+        name: Run prettier
+        with:
+          args: --check ui
+
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:

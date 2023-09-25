@@ -1,174 +1,271 @@
 {{define "bootstraps"}}
 <!doctype html>
 <html lang="en">
-{{template "header"}}
+  {{template "header"}}
 
-<body>
-  {{template "navbar" .}}
+  <body>
+    {{template "navbar" .}}
 
-  <div class="main-content">
-    <main>
-      <!-- Button trigger modal -->
-      <button type="button" class="btn body-button" data-bs-toggle="modal" data-bs-target="#addBootstrapModal">
-        Add
-      </button>
+    <div class="main-content">
+      <main>
+        <!-- Button trigger modal -->
+        <button
+          type="button"
+          class="btn body-button"
+          data-bs-toggle="modal"
+          data-bs-target="#addBootstrapModal"
+        >
+          Add
+        </button>
 
-      <!-- Modal -->
-      <div class="modal fade" id="addBootstrapModal" tabindex="-1" role="dialog" aria-labelledby="addBootstrapModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="addBootstrapModalLabel">Add Bootstrap Config</h5>
-            </div>
-            <div class="modal-body">
-              <form method="post" onsubmit="return validateForm()">
-                <div class="mb-3">
-                  <label for="name" class="form-label">Bootstrap Name</label>
-                  <input type="text" class="form-control" name="name" id="name" aria-describedby="tagHelp" placeholder="Name">
-                </div>
-                <div class="mb-3">
-                  <label for="thingID" class="form-label">Thing</label>
-                  <input type="text" name="thingFilter" id="thingFilter"  placeholder="Filter by Thing name" oninput="filterItem(this.value,'thingID')">
-                  <select class="form-select" name="thingID" id="thingID" required>
-                    <option value="">...</option>
-                    {{range .Things}}
+        <!-- Modal -->
+        <div
+          class="modal fade"
+          id="addBootstrapModal"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby="addBootstrapModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="addBootstrapModalLabel">
+                  Add Bootstrap Config
+                </h5>
+              </div>
+              <div class="modal-body">
+                <form method="post" onsubmit="return validateForm()">
+                  <div class="mb-3">
+                    <label for="name" class="form-label">Bootstrap Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="name"
+                      id="name"
+                      aria-describedby="tagHelp"
+                      placeholder="Name"
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="thingID" class="form-label">Thing</label>
+                    <input
+                      type="text"
+                      name="thingFilter"
+                      id="thingFilter"
+                      placeholder="Filter by Thing name"
+                      oninput="filterItem(this.value,'thingID')"
+                    />
+                    <select
+                      class="form-select"
+                      name="thingID"
+                      id="thingID"
+                      required
+                    >
+                      <option value="">...</option>
+                      {{range .Things}}
                       <option value="{{.ID}}">{{.Name}}</option>
-                    {{end}}
-                  </select>
-                </div>
-                <div class="mb-3">
-                  <label for="externalID" class="form-label">External ID</label>
-                  <input type="text" class="form-control" name="externalID" id="externalID"  placeholder="External ID" required>
-                </div>
-                <div class="mb-3">
-                  <label for="externalKey" class="form-label">External Key</label>
-                  <input type="text" class="form-control" name="externalKey" id="externalKey"  placeholder="External Key" required>
-                </div>
-                <div class="mb-3">
-                  <label for="channels" class="form-label">Channels</label>
-                  <input type="text" class="form-control" name="channels" id="channels"  value="[]" required>
-                  <div id="channelsHelp" class="form-text">Enter channels as a string slice.</div>
-                  <div id="channelsError" class="error-message"></div>
-                </div>
-                
-                <div class="mb-3">
-                  <label for="content" class="form-label">Content</label>
-                  <input type="text" class="form-control" name= "content" id="content" value="{}">
-                  <div id="contentHelp" class="form-text">Enter content in JSON format.</div>
-                  <div id="contentError" class="error-message"></div>
-                </div>
-                <div class="mb-3">
-                  <label for="clientCert" class="form-label">Client Cert</label>
-                  <input type="text" class="form-control" name="clientCert" id="clientCert" aria-describedby="tagHelp" value="clientCert">
-                </div>
-                <div class="mb-3">
-                  <label for="clientKey" class="form-label">Client Key</label>
-                  <input type="text" class="form-control" name="clientKey" id="clientKey" aria-describedby="tagHelp" value="clientKey">
-                </div>
-                <div class="mb-3">
-                  <label for="CACert" class="form-label">CA Cert</label>
-                  <input type="text" class="form-control" name="CACert" id="CACert" aria-describedby="tagHelp" value="CACert">
-                </div>
-                <button type="submit" class="btn body-button">Submit</button>
-              </form>
+                      {{end}}
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="externalID" class="form-label"
+                      >External ID</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="externalID"
+                      id="externalID"
+                      placeholder="External ID"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="externalKey" class="form-label"
+                      >External Key</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="externalKey"
+                      id="externalKey"
+                      placeholder="External Key"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="channels" class="form-label">Channels</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="channels"
+                      id="channels"
+                      value="[]"
+                      required
+                    />
+                    <div id="channelsHelp" class="form-text">
+                      Enter channels as a string slice.
+                    </div>
+                    <div id="channelsError" class="error-message"></div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="content" class="form-label">Content</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="content"
+                      id="content"
+                      value="{}"
+                    />
+                    <div id="contentHelp" class="form-text">
+                      Enter content in JSON format.
+                    </div>
+                    <div id="contentError" class="error-message"></div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="clientCert" class="form-label"
+                      >Client Cert</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="clientCert"
+                      id="clientCert"
+                      aria-describedby="tagHelp"
+                      value="clientCert"
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="clientKey" class="form-label">Client Key</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="clientKey"
+                      id="clientKey"
+                      aria-describedby="tagHelp"
+                      value="clientKey"
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="CACert" class="form-label">CA Cert</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="CACert"
+                      id="CACert"
+                      aria-describedby="tagHelp"
+                      value="CACert"
+                    />
+                  </div>
+                  <button type="submit" class="btn body-button">Submit</button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div class="table-container">
-        <table id="itemsTable" class="table">
-          <thead>
-            <tr>
-              <th scope="col">NAME</th>
-              <th scope="col">Thing ID</th>
-              <th scope="col">External ID</th>
-            </tr>
-          </thead>
-          <tbody>
-            {{range $i, $t := .Bootstraps}}
+        <div class="table-container">
+          <table id="itemsTable" class="table">
+            <thead>
+              <tr>
+                <th scope="col">NAME</th>
+                <th scope="col">Thing ID</th>
+                <th scope="col">External ID</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{range $i, $t := .Bootstraps}}
               <tr>
                 <td>{{$t.Name}}</td>
                 <td>
                   <div class="copy-con-container">
-                    <a href={{printf "/bootstrap/%s" $t.ThingID}}>{{$t.ThingID}}</a>
+                    <a href='{{printf "/bootstrap/%s" $t.ThingID}}'
+                      >{{$t.ThingID}}</a
+                    >
                     <button class="copy-icon" onclick="copyToClipboard(this)">
                       <i class="far fa-copy"></i>
                     </button>
                   </div>
                 </td>
-                <td>
-                  {{$t.ExternalID}}
-                </td>
+                <td>{{$t.ExternalID}}</td>
               </tr>
-            {{end}}
-          </tbody>
-        </table>
-      </div>
-    </main>
-  </div>
+              {{end}}
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
 
-  {{template "footer"}}
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      new simpleDatatables.DataTable('#itemsTable', {
-        searchable: true,
-        scrollY: "430px",
-        sortable: true,
-        pagination: true,
+    {{template "footer"}}
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        new simpleDatatables.DataTable("#itemsTable", {
+          searchable: true,
+          scrollY: "430px",
+          sortable: true,
+          pagination: true,
+        });
       });
-    });
-    function validateForm() {
-      var channelsInput = document.getElementById("channels").value;
-      var contentInput = document.getElementById("content").value;
-      
-      var channelsError = document.getElementById("channelsError");
-      var contentError = document.getElementById("contentError");
-      
-      channelsError.innerHTML="";
-      contentError.innerHTML = "";
-      
-      var content;
-      var channels;
+      function validateForm() {
+        var channelsInput = document.getElementById("channels").value;
+        var contentInput = document.getElementById("content").value;
 
-      var isValid = true;
+        var channelsError = document.getElementById("channelsError");
+        var contentError = document.getElementById("contentError");
 
-      try{
-         channels = JSON.parse(channelsInput);
-      }catch(error){
-        channelsError.innerHTML = "Please enter valid channels as a string array!";
-        isValid = false;
+        channelsError.innerHTML = "";
+        contentError.innerHTML = "";
+
+        var content;
+        var channels;
+
+        var isValid = true;
+
+        try {
+          channels = JSON.parse(channelsInput);
+        } catch (error) {
+          channelsError.innerHTML =
+            "Please enter valid channels as a string array!";
+          isValid = false;
+        }
+
+        if (
+          !Array.isArray(channels) ||
+          !channels.every(function (channels) {
+            return typeof channels === "string";
+          })
+        ) {
+          channelsError.innerHTML = "Channels must be a string array!";
+          isValid = false;
+        }
+
+        try {
+          content = JSON.parse(contentInput);
+          content = contentInput;
+        } catch (error) {
+          contentError.innerHTML = "Please enter valid content in JSON format!";
+          isValid = false;
+        }
+
+        return isValid;
       }
+      function filterItem(filterValue, selectId) {
+        const itemSelect = document.getElementById(selectId);
+        const options = itemSelect.getElementsByTagName("option");
 
-      if (!Array.isArray(channels) || !channels.every(function(channels) {return typeof channels === "string";})){
-        channelsError.innerHTML = "Channels must be a string array!";
-        isValid = false;
+        for (let i = 0; i < options.length; i++) {
+          const option = options[i];
+          const itemId = option.value;
+          const itemName = option.innerHTML;
+          const shouldShow =
+            itemId.includes(filterValue) ||
+            itemName.toLowerCase().includes(filterValue.toLowerCase());
+          option.style.display = shouldShow ? "" : "none";
+        }
       }
-
-      try{
-        content = JSON.parse(contentInput);
-        content = contentInput
-      }catch(error){
-        contentError.innerHTML = "Please enter valid content in JSON format!";
-        isValid = false;
-      }
-
-      return isValid;
-    }
-    function filterItem(filterValue, selectId) {
-      const itemSelect = document.getElementById(selectId);
-      const options = itemSelect.getElementsByTagName("option");
-
-      for (let i = 0; i < options.length; i++) {
-        const option = options[i];
-        const itemId = option.value;
-        const itemName = option.innerHTML;
-        const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
-        option.style.display = shouldShow ? "" : "none";
-      }
-    }
-  </script>
-
-</body>
+    </script>
+  </body>
 </html>
 {{end}}

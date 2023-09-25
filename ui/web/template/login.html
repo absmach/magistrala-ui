@@ -1,121 +1,170 @@
 {{define "login"}}
 <!doctype html>
 <html lang="en">
+  <head>
+    <link rel="stylesheet" href="/css/styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9"
+      crossorigin="anonymous"
+    />
 
-<head>
-  <link rel="stylesheet" href="/css/styles.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"/>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">
- 
-  <div class="hero">
-    <nav class="loginNav">
-      <img src="/images/logo.png" class="logo">
-      <div class="organization-name">
-        <h>Mainflux</h>
-      </div>
-    </nav>
-  </div>
-
-</head>
-
-<body>
-  <div class="login-container">
-    <div class="form-box">
-      <h1>LOGIN</h1>
-      <form id="form" method="post" onsubmit="return submitLoginForm()">
-        <div class="input-group">
-          <div class="input-field">
-            <i class="fas fa-solid fa-envelope"></i>
-            <input class="login-input" type="email" name="username" id="username" placeholder="Email Address" required>
-          </div>
-          <div class="input-field">
-            <i class="fas fa-solid fa-lock"></i>
-            <input class="login-input" type="password" name="password" id="password" placeholder="Password" required>
-            <div id="passwordError" class="error-message"></div>
-          </div>
-          <div id="loginError" class="error-message"></div>
+    <div class="hero">
+      <nav class="loginNav">
+        <img src="/images/logo.png" class="logo" />
+        <div class="organization-name">
+          <h>Mainflux</h>
         </div>
-        <div class="btn-field">
-          <button type="submit" onclick="return validateForm()">Login</button>
-        </div>
-      </form>
-      <button type="button" id="fp-button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#forgotPasswordModal">
-        Forgot Password?
-      </button>
+      </nav>
     </div>
-    <div>
-      <div class="modal fade" id="forgotPasswordModal" tabindex="-1" role="dialog" aria-labelledby="forgotPasswordModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="forgotPasswordModalLabel">Enter email</h5>
+  </head>
+
+  <body>
+    <div class="login-container">
+      <div class="form-box">
+        <h1>LOGIN</h1>
+        <form id="form" method="post" onsubmit="return submitLoginForm()">
+          <div class="input-group">
+            <div class="input-field">
+              <i class="fas fa-solid fa-envelope"></i>
+              <input
+                class="login-input"
+                type="email"
+                name="username"
+                id="username"
+                placeholder="Email Address"
+                required
+              />
             </div>
-            <div class="modal-body">
-              <form method="post" action="/password/reset">
-                <div class="mb-3">
-                  <label for="email" class="form-label">Email</label>
-                  <input type="email" class="form-control" name="email" id="email" placeholder="Email" required>
-                </div>
-                <button type="submit" class="btn body-button">Submit</button>
-              </form>
+            <div class="input-field">
+              <i class="fas fa-solid fa-lock"></i>
+              <input
+                class="login-input"
+                type="password"
+                name="password"
+                id="password"
+                placeholder="Password"
+                required
+              />
+              <div id="passwordError" class="error-message"></div>
+            </div>
+            <div id="loginError" class="error-message"></div>
+          </div>
+          <div class="btn-field">
+            <button type="submit" onclick="return validateForm()">Login</button>
+          </div>
+        </form>
+        <button
+          type="button"
+          id="fp-button"
+          class="btn btn-link"
+          data-bs-toggle="modal"
+          data-bs-target="#forgotPasswordModal"
+        >
+          Forgot Password?
+        </button>
+      </div>
+      <div>
+        <div
+          class="modal fade"
+          id="forgotPasswordModal"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby="forgotPasswordModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="forgotPasswordModalLabel">
+                  Enter email
+                </h5>
+              </div>
+              <div class="modal-body">
+                <form method="post" action="/password/reset">
+                  <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      name="email"
+                      id="email"
+                      placeholder="Email"
+                      required
+                    />
+                  </div>
+                  <button type="submit" class="btn body-button">Submit</button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <!-- /container -->
 
-  </div> <!-- /container -->
-
-  <footer class="login-footer">
+    <footer class="login-footer">
       <p>Copyright &copy; Mainflux</p>
-  </footer>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.min.js" integrity="sha384-Rx+T1VzGupg4BHQYs2gCW9It+akI2MM/mndMCy36UVfodzcJcF0GGLxZIzObiEfa" crossorigin="anonymous"></script>
-  <script>
-    function validateForm() {
-      var password = document.getElementById("password").value;
+    </footer>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+      integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.min.js"
+      integrity="sha384-Rx+T1VzGupg4BHQYs2gCW9It+akI2MM/mndMCy36UVfodzcJcF0GGLxZIzObiEfa"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      function validateForm() {
+        var password = document.getElementById("password").value;
 
-      passwordError.innerHTML = "";
-      var isValid =true;
+        passwordError.innerHTML = "";
+        var isValid = true;
 
-      if (password.length <8) {
-        passwordError.innerHTML= "Password must have a minimum of 8 characters!"
-        isValid = false;
+        if (password.length < 8) {
+          passwordError.innerHTML =
+            "Password must have a minimum of 8 characters!";
+          isValid = false;
+        }
+        return isValid;
       }
-      return isValid;
-    }
 
-    function submitLoginForm() {
-      event.preventDefault();
-      var form = event.target;
-      fetch("/login",{
-        method: 'POST',
-        body: new FormData(form)
-      })
-        .then (response => {
-          if (response.status === 401) {
-            errorMessage= "invalid email or password. Please try again!";
-            showAlert(errorMessage);
-            return false;
-          } else {
-            form.reset();
-            window.location.href="/";
-            return true;
-          }
+      function submitLoginForm() {
+        event.preventDefault();
+        var form = event.target;
+        fetch("/login", {
+          method: "POST",
+          body: new FormData(form),
         })
-        .catch (error => {
-          console.error("error submitting login form: ", error);
-          return false;
-        });
-    }
+          .then((response) => {
+            if (response.status === 401) {
+              errorMessage = "invalid email or password. Please try again!";
+              showAlert(errorMessage);
+              return false;
+            } else {
+              form.reset();
+              window.location.href = "/";
+              return true;
+            }
+          })
+          .catch((error) => {
+            console.error("error submitting login form: ", error);
+            return false;
+          });
+      }
 
-    function showAlert(errorMessage) {
-      var loginError = document.getElementById("loginError");
-      loginError.innerHTML = errorMessage;
-    }
-  </script>
-
-</body>
-
+      function showAlert(errorMessage) {
+        var loginError = document.getElementById("loginError");
+        loginError.innerHTML = errorMessage;
+      }
+    </script>
+  </body>
 </html>
 {{end}}

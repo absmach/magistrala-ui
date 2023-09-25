@@ -3,144 +3,141 @@
 <html lang="en">
   {{template "header"}}
 
-<body>
-  {{template "navbar" .}}
+  <body>
+    {{template "navbar" .}}
 
-  <div class="main-content">
-        <main>
-            <div class="cards">
-                <div class="card-single" data-card="users">
-                    <div>
-                        <h1>{{.Summary.TotalUsers}}</h1>
-                        <span>Users</span>
-                    </div>
-                    <div>
-                        <span class="fas fa-users"></span>
-                    </div>
-                </div>
-                <div class="card-single" data-card="things">
-                    <div>
-                        <h1>{{.Summary.TotalThings}}</h1>
-                        <span>Things</span>
-                    </div>
-                    <div>
-                        <span class="fas fa-microchip"></span>
-                    </div>
-                </div>
-                <div class="card-single" data-card="groups">
-                    <div>
-                        <h1>{{.Summary.TotalGroups}}</h1>
-                        <span>Groups</span>
-                    </div>
-                    <div>
-                        <span class="fas fa-layer-group"></span>
-                    </div>
-                </div>
-                <div class="card-single" data-card="channels">
-                    <div>
-                        <h1>{{.Summary.TotalChannels}}</h1>
-                        <span>Channels</span>
-                    </div>
-                    <div>
-                        <span class="fas fa-microchip"></span>
-                    </div>
-                </div>
+    <div class="main-content">
+      <main>
+        <div class="cards">
+          <div class="card-single" data-card="users">
+            <div>
+              <h1>{{.Summary.TotalUsers}}</h1>
+              <span>Users</span>
             </div>
-            <div class="selected-grid">
-                <div class="default-content">
-
-                </div>
+            <div>
+              <span class="fas fa-users"></span>
             </div>
-        </main>
-  </div>
+          </div>
+          <div class="card-single" data-card="things">
+            <div>
+              <h1>{{.Summary.TotalThings}}</h1>
+              <span>Things</span>
+            </div>
+            <div>
+              <span class="fas fa-microchip"></span>
+            </div>
+          </div>
+          <div class="card-single" data-card="groups">
+            <div>
+              <h1>{{.Summary.TotalGroups}}</h1>
+              <span>Groups</span>
+            </div>
+            <div>
+              <span class="fas fa-layer-group"></span>
+            </div>
+          </div>
+          <div class="card-single" data-card="channels">
+            <div>
+              <h1>{{.Summary.TotalChannels}}</h1>
+              <span>Channels</span>
+            </div>
+            <div>
+              <span class="fas fa-microchip"></span>
+            </div>
+          </div>
+        </div>
+        <div class="selected-grid">
+          <div class="default-content"></div>
+        </div>
+      </main>
+    </div>
 
-  {{template "footer"}}
+    {{template "footer"}}
 
-  <script>
-    // Get the user's name from Go template's data
-    var username = "{{.User.Name}}";
-    var enabledUsers =parseInt('{{.Summary.EnabledUsers}}');
-    var disabledUsers =parseInt('{{.Summary.DisabledUsers}}');
-    var enabledThings =parseInt('{{.Summary.EnabledThings}}');
-    var disabledThings =parseInt('{{.Summary.DisabledThings}}');
-    var enabledChannels =parseInt('{{.Summary.EnabledChannels}}');
-    var disabledChannels =parseInt('{{.Summary.DisabledChannels}}');
-    var enabledGroups =parseInt('{{.Summary.EnabledGroups}}');
-    var disabledGroups =parseInt('{{.Summary.DisabledGroups}}');
+    <script>
+      // Get the user's name from Go template's data
+      var username = "{{.User.Name}}";
+      var enabledUsers = parseInt("{{.Summary.EnabledUsers}}");
+      var disabledUsers = parseInt("{{.Summary.DisabledUsers}}");
+      var enabledThings = parseInt("{{.Summary.EnabledThings}}");
+      var disabledThings = parseInt("{{.Summary.DisabledThings}}");
+      var enabledChannels = parseInt("{{.Summary.EnabledChannels}}");
+      var disabledChannels = parseInt("{{.Summary.DisabledChannels}}");
+      var enabledGroups = parseInt("{{.Summary.EnabledGroups}}");
+      var disabledGroups = parseInt("{{.Summary.DisabledGroups}}");
 
+      // Store the user's name in local storage
+      localStorage.setItem("username", username);
 
-    // Store the user's name in local storage
-    localStorage.setItem("username", username);
-
-    document.addEventListener("DOMContentLoaded", function(){
-        google.charts.load('current', {packages: ['corechart', 'bar']});
+      document.addEventListener("DOMContentLoaded", function () {
+        google.charts.load("current", { packages: ["corechart", "bar"] });
         var cardDivs = document.querySelectorAll(".card-single");
-        var defaultContent = document.querySelector(".default-content")
+        var defaultContent = document.querySelector(".default-content");
         var dataCategories = {
-        users: [
-            ['Status', 'Count'],
-            ['Enabled Users', enabledUsers],
-            ['Disabled Users', disabledUsers],
-        ],
-        things: [
-            ['Status', 'Count'],
-            ['Enabled Things', enabledThings],
-            ['Disabled Things', disabledThings],
-        ],
-        channels: [
-            ['Status', 'Count'],
-            ['Enabled Channels', enabledChannels],
-            ['Disabled Channels', disabledChannels],
-        ],
-        groups: [
-            ['Status', 'Count'],
-            ['Enabled Groups', enabledGroups],
-            ['Disabled Groups', disabledGroups],
-        ],
-    };
+          users: [
+            ["Status", "Count"],
+            ["Enabled Users", enabledUsers],
+            ["Disabled Users", disabledUsers],
+          ],
+          things: [
+            ["Status", "Count"],
+            ["Enabled Things", enabledThings],
+            ["Disabled Things", disabledThings],
+          ],
+          channels: [
+            ["Status", "Count"],
+            ["Enabled Channels", enabledChannels],
+            ["Disabled Channels", disabledChannels],
+          ],
+          groups: [
+            ["Status", "Count"],
+            ["Enabled Groups", enabledGroups],
+            ["Disabled Groups", disabledGroups],
+          ],
+        };
 
-        cardDivs.forEach(function(cardDiv){
-            cardDiv.addEventListener("click", function(){
-                 // Remove "selected" class from all cards before adding to the clicked card
-                 cardDivs.forEach(function(card) {
-                    card.classList.remove("selected");
-                });
+        cardDivs.forEach(function (cardDiv) {
+          cardDiv.addEventListener("click", function () {
+            // Remove "selected" class from all cards before adding to the clicked card
+            cardDivs.forEach(function (card) {
+              card.classList.remove("selected");
+            });
 
-                // Add "selected" class to the clicked card
-                cardDiv.classList.add("selected");
+            // Add "selected" class to the clicked card
+            cardDiv.classList.add("selected");
 
-                var selectedGrid = document.querySelector(".selected-grid");
-                var cardType = cardDiv.getAttribute("data-card");
-                var selectedContent = "";
-                var chartData = dataCategories[cardType];
+            var selectedGrid = document.querySelector(".selected-grid");
+            var cardType = cardDiv.getAttribute("data-card");
+            var selectedContent = "";
+            var chartData = dataCategories[cardType];
 
-                // Customize the content based on the card type
-                if (cardType === "users"){
-                    selectedContent = `
+            // Customize the content based on the card type
+            if (cardType === "users") {
+              selectedContent = `
                         <div class="piechart-div users">
                             <div id="piechart" class="piechart"></div>
                         </div>
                     `;
-                 } else if (cardType === "things"){
-                    selectedContent = `
+            } else if (cardType === "things") {
+              selectedContent = `
                     <div class="piechart-div Things">
                         <div id="piechart" class="piechart"></div>
                     </div> `;
-                } else if (cardType === "channels"){
-                    selectedContent = `
+            } else if (cardType === "channels") {
+              selectedContent = `
                     <div class="piechart-div Channels">
                         <div id="piechart" class="piechart"></div>
                     </div> `;
-                } else if (cardType === "groups") {
-                    selectedContent = `
+            } else if (cardType === "groups") {
+              selectedContent = `
                     <div class="piechart-div Groups">
                         <div id="piechart" class="piechart"></div>
                     </div> `;
-                }
-                // Populate the selected grid with the selected content
-                selectedGrid.innerHTML = selectedContent;
-                google.charts.setOnLoadCallback(drawChart(chartData));
-            });
+            }
+            // Populate the selected grid with the selected content
+            selectedGrid.innerHTML = selectedContent;
+            google.charts.setOnLoadCallback(drawChart(chartData));
+          });
         });
         // Show default content (users data) on page load
         defaultContent.innerHTML = `
@@ -149,62 +146,65 @@
             </div>
         `;
         google.charts.setOnLoadCallback(drawStacked);
-    });
+      });
 
-    function drawStacked() {
+      function drawStacked() {
         var data = new google.visualization.DataTable();
-        data.addColumn('string', 'Item');
-        data.addColumn('number', 'Enabled');
-        data.addColumn('number', 'Disabled');
+        data.addColumn("string", "Item");
+        data.addColumn("number", "Enabled");
+        data.addColumn("number", "Disabled");
 
         // Add rows based on the data variables
         data.addRows([
-            ['Users',  enabledUsers, disabledUsers],
-            ['Things', enabledThings, disabledThings],
-            ['Channels', enabledChannels, disabledChannels],
-            ['Groups', enabledGroups, disabledGroups]
+          ["Users", enabledUsers, disabledUsers],
+          ["Things", enabledThings, disabledThings],
+          ["Channels", enabledChannels, disabledChannels],
+          ["Groups", enabledGroups, disabledGroups],
         ]);
 
         var options = {
-            title: 'Enabled and Disabled Items',
-            isStacked: true,
-            vAxis: {
-                title: 'Count'
-            },
-            hAxis: {
-                title: 'Entity'
-            },
-            series: {
-                0: { color: '#003366' }, // Color for Enabled
-                1: { color: '#d95f02' },  // Color for Disabled
-            },
+          title: "Enabled and Disabled Items",
+          isStacked: true,
+          vAxis: {
+            title: "Count",
+          },
+          hAxis: {
+            title: "Entity",
+          },
+          series: {
+            0: { color: "#003366" }, // Color for Enabled
+            1: { color: "#d95f02" }, // Color for Disabled
+          },
         };
 
-        var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+        var chart = new google.visualization.ColumnChart(
+          document.getElementById("chart_div"),
+        );
         chart.draw(data, options);
-    }
+      }
 
-    function drawChart(data) {
+      function drawChart(data) {
         console.log(data);
         var chartData = google.visualization.arrayToDataTable(data);
 
         var options = {
-            title: 'Status',
-            slices: {
-                0 : {color: '#003366'},
-                1: { color: '#d95f02' },
-            },
-            fontName: 'Poppins',
-            fontSize: 16,
-            pieHole: 0.4,
-
+          title: "Status",
+          slices: {
+            0: { color: "#003366" },
+            1: { color: "#d95f02" },
+          },
+          fontName: "Poppins",
+          fontSize: 16,
+          pieHole: 0.4,
         };
 
-        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+        var chart = new google.visualization.PieChart(
+          document.getElementById("piechart"),
+        );
 
         chart.draw(chartData, options);
-    }
-  </script>
-</body>
+      }
+    </script>
+  </body>
 </html>
 {{end}}

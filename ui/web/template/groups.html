@@ -2,100 +2,175 @@
 
 <!doctype html>
 <html lang="en">
-{{template "header"}}
+  {{template "header"}}
 
-<body>
-  {{template "navbar" .}}
+  <body>
+    {{template "navbar" .}}
 
-  <div class="main-content">
-    <main>
-      <!-- Button trigger modal -->
-      <button type="button" class="btn body-button" onclick="openModal('single')" >
-        Add Group
-      </button>
+    <div class="main-content">
+      <main>
+        <!-- Button trigger modal -->
+        <button
+          type="button"
+          class="btn body-button"
+          onclick="openModal('single')"
+        >
+          Add Group
+        </button>
 
-      <!-- Modal -->
-      <div class="modal fade" id="addGroupModal" tabindex="-1" role="dialog" aria-labelledby="addGroupModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="addGroupModalLabel">Add Group</h5>
-            </div>
-            <div class="modal-body">
-              <div id="alertMessage"></div>
-              <form method="post" onsubmit="return submitGroupForm()">
-                <div class="mb-3">
-                  <label for="name" class="form-label">Name</label>
-                  <input type="text" class="form-control" name="name" id="name" placeholder="Group Name" required>
-                </div>
-                <div class="mb-3">
-                  <label for="description" class="form-label">Description</label>
-                  <input type="text" class="form-control" name="description" id="description" placeholder="Group Description">
-                </div>
-                <div class="mb-3">
-                  <label for="parentID" class="form-label">Parent Name</label>
-                  <input type="text" class="itemsFilter" name="parentFilter" id="parentFilter" placeholder="Filter by parent name" oninput="filterItem(this.value,'parentID')">
-                  <select class="form-select" name="parentID" id="parentID">
-                    <option value="">...</option>
-                    {{range .Groups}}
+        <!-- Modal -->
+        <div
+          class="modal fade"
+          id="addGroupModal"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby="addGroupModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="addGroupModalLabel">Add Group</h5>
+              </div>
+              <div class="modal-body">
+                <div id="alertMessage"></div>
+                <form method="post" onsubmit="return submitGroupForm()">
+                  <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="name"
+                      id="name"
+                      placeholder="Group Name"
+                      required
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="description" class="form-label"
+                      >Description</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="description"
+                      id="description"
+                      placeholder="Group Description"
+                    />
+                  </div>
+                  <div class="mb-3">
+                    <label for="parentID" class="form-label">Parent Name</label>
+                    <input
+                      type="text"
+                      class="itemsFilter"
+                      name="parentFilter"
+                      id="parentFilter"
+                      placeholder="Filter by parent name"
+                      oninput="filterItem(this.value,'parentID')"
+                    />
+                    <select class="form-select" name="parentID" id="parentID">
+                      <option value="">...</option>
+                      {{range .Groups}}
                       <option value="{{.ID}}">{{.Name}}</option>
-                    {{end}}
-                  </select>
-                </div>
-                <div class="mb-3">
-                  <label for="metadata" class="form-label">Metadata</label>
-                  <input type="text" class="form-control" name= "metadata" id="metadata" value="{}">
-                  <div id="metadataHelp" class="form-text">Enter groups metadata in JSON format.</div>
-                  <div id="metadataError" class="error-message"></div>
-                </div>
-                <button type="submit" class="btn body-button" onclick="return validateForm()">Submit</button>
-              </form>
+                      {{end}}
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="metadata" class="form-label">Metadata</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      name="metadata"
+                      id="metadata"
+                      value="{}"
+                    />
+                    <div id="metadataHelp" class="form-text">
+                      Enter groups metadata in JSON format.
+                    </div>
+                    <div id="metadataError" class="error-message"></div>
+                  </div>
+                  <button
+                    type="submit"
+                    class="btn body-button"
+                    onclick="return validateForm()"
+                  >
+                    Submit
+                  </button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <button type="button" class="btn body-button" onclick="openModal('bulk')">
-        Add Groups
-      </button>
+        <button
+          type="button"
+          class="btn body-button"
+          onclick="openModal('bulk')"
+        >
+          Add Groups
+        </button>
 
-      <!-- Modal -->
-      <div class="modal fade" id="addGroupsModal" tabindex="-1" role="dialog" aria-labelledby="addGroupsModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="addGroupsModalLabel">Add Groups</h5>
-            </div>
-            <div class="modal-body">
-              <div id="alertBulkMessage"></div>
-              <form method="post" enctype="multipart/form-data" onsubmit="return submitBulkGroupForm()">
-                <div class="form-group">
-                  <label for="groupsFile">Add csv file containing groups names.</label>
-                  <input type="file" class="form-control-file" id="groupsFile" name="groupsFile" required>
-                  <button type="submit" value="upload" class="btn body-button">Submit</button>
-                </div>
-              </form>
+        <!-- Modal -->
+        <div
+          class="modal fade"
+          id="addGroupsModal"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby="addGroupsModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="addGroupsModalLabel">Add Groups</h5>
+              </div>
+              <div class="modal-body">
+                <div id="alertBulkMessage"></div>
+                <form
+                  method="post"
+                  enctype="multipart/form-data"
+                  onsubmit="return submitBulkGroupForm()"
+                >
+                  <div class="form-group">
+                    <label for="groupsFile"
+                      >Add csv file containing groups names.</label
+                    >
+                    <input
+                      type="file"
+                      class="form-control-file"
+                      id="groupsFile"
+                      name="groupsFile"
+                      required
+                    />
+                    <button
+                      type="submit"
+                      value="upload"
+                      class="btn body-button"
+                    >
+                      Submit
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="table-container">
-        <table id="itemsTable" class="table">
-          <thead>
-            <tr>
-              <th scope="col">NAME</th>
-              <th scope="col">ID</th>
-              <th scope="col"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {{$userID := .User.ID}}
-            {{range $i, $g := .Groups}}
+        <div class="table-container">
+          <table id="itemsTable" class="table">
+            <thead>
+              <tr>
+                <th scope="col">NAME</th>
+                <th scope="col">ID</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {{$userID := .User.ID}} {{range $i, $g := .Groups}}
               {{$disableButton := true}}
               <tr>
                 <td>{{$g.Name}}</td>
                 <td>
                   <div class="copy-con-container">
-                    <a href={{printf "/groups/%s" $g.ID}}>{{$g.ID}}</a>
+                    <a href='{{printf "/groups/%s" $g.ID}}'>{{$g.ID}}</a>
                     <button class="copy-icon" onclick="copyToClipboard(this)">
                       <i class="far fa-copy"></i>
                     </button>
@@ -103,154 +178,170 @@
                 </td>
                 <td>
                   {{if (authorizeUser $userID $g.ID "g_delete" "group")}}
-                    {{$disableButton =false}}
-                  {{end}}
+                  {{$disableButton =false}} {{end}}
                   <form action="/groups/disabled" method="post">
-                    <input type="hidden" name="groupID" id="groupID" value="{{$g.ID}}">
-                    <input type="hidden" name="status" id="status" value="disabled">
-                    <button type="submit" class="btn btn-sm" {{if $disableButton}}disabled{{end}}>
+                    <input
+                      type="hidden"
+                      name="groupID"
+                      id="groupID"
+                      value="{{$g.ID}}"
+                    />
+                    <input
+                      type="hidden"
+                      name="status"
+                      id="status"
+                      value="disabled"
+                    />
+                    <button
+                      type="submit"
+                      class="btn btn-sm"
+                      {{if
+                      $disableButton}}disabled{{end}}
+                    >
                       <i class="fas fa-trash-alt"></i>
                     </button>
                   </form>
                 </td>
               </tr>
-            {{end}}
-          </tbody>
-        </table>
-      </div>
-    </main>
-  </div>
+              {{end}}
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
 
-  {{template "footer"}}
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      new simpleDatatables.DataTable('#itemsTable', {
-        searchable: true,
-        scrollY: "430px",
-        sortable: true,
-        pagination: true,
+    {{template "footer"}}
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        new simpleDatatables.DataTable("#itemsTable", {
+          searchable: true,
+          scrollY: "430px",
+          sortable: true,
+          pagination: true,
+        });
       });
-    });
 
-    function validateForm() {
-      var metadataInput = document.getElementById("metadata").value;
-      var metadataError = document.getElementById("metadataError");
-      var metadata;
+      function validateForm() {
+        var metadataInput = document.getElementById("metadata").value;
+        var metadataError = document.getElementById("metadataError");
+        var metadata;
 
-      metadataError.innerHTML = "";
+        metadataError.innerHTML = "";
 
-      var isValid = true;
-      try {
-        metadata = JSON.parse(metadataInput);
-      }catch(error){
-        metadataError.innerHTML = "Please enter a valid metadata in JSON  format!";
-        isValid = false;
+        var isValid = true;
+        try {
+          metadata = JSON.parse(metadataInput);
+        } catch (error) {
+          metadataError.innerHTML =
+            "Please enter a valid metadata in JSON  format!";
+          isValid = false;
+        }
+
+        return isValid;
+      }
+      function filterItem(filterValue, selectId) {
+        const itemSelect = document.getElementById(selectId);
+        const options = itemSelect.getElementsByTagName("option");
+
+        for (let i = 0; i < options.length; i++) {
+          const option = options[i];
+          const itemId = option.value;
+          const itemName = option.innerHTML;
+          const shouldShow =
+            itemId.includes(filterValue) ||
+            itemName.toLowerCase().includes(filterValue.toLowerCase());
+          option.style.display = shouldShow ? "" : "none";
+        }
       }
 
-      return isValid;
-    }
-    function filterItem(filterValue, selectId) {
-      const itemSelect = document.getElementById(selectId);
-      const options = itemSelect.getElementsByTagName("option");
+      const groupModal = new bootstrap.Modal(
+        document.getElementById("addGroupModal"),
+      );
+      const groupsModal = new bootstrap.Modal(
+        document.getElementById("addGroupsModal"),
+      );
 
-      for (let i = 0; i < options.length; i++) {
-        const option = options[i];
-        const itemId = option.value;
-        const itemName = option.innerHTML;
-        const shouldShow = itemId.includes(filterValue) || itemName.toLowerCase().includes(filterValue.toLowerCase());
-        option.style.display = shouldShow ? "" : "none";
+      function openModal(modal) {
+        if (modal === "single") {
+          groupModal.show();
+        } else if (modal === "bulk") {
+          groupsModal.show();
+        }
       }
-    }
 
-    const groupModal = new bootstrap.Modal(document.getElementById('addGroupModal'));
-    const groupsModal =new bootstrap.Modal(document.getElementById('addGroupsModal'));
-
-    function openModal(modal) {
-      if (modal === "single") {
-        groupModal.show();
-      } else if (modal === "bulk") {
-        groupsModal.show();
-      }
-    
-    }
-
-    function submitGroupForm() {
-      event.preventDefault();
-      var form = event.target;
-      fetch("/groups",{
-        method: 'POST',
-        body: new FormData(form)
-      })
-        .then (response => {
-          if (response.status === 409) {
-            errorMessage= "group already exists!";
-            showAlert(errorMessage,"single");
-            return false;
-          } else {
-            form.reset();
-            groupModal.hide();
-            window.location.reload();
-            return true;
-          }
+      function submitGroupForm() {
+        event.preventDefault();
+        var form = event.target;
+        fetch("/groups", {
+          method: "POST",
+          body: new FormData(form),
         })
-        .catch (error => {
-          console.error("error submitting group form: ", error);
-          return false;
-        });
-
-    }
-
-    function submitBulkGroupForm() {
-      event.preventDefault();
-      var form = event.target;
-      fetch("/groups/bulk",{
-        method: 'POST',
-        body: new FormData(form)
-      })
-        .then (response => {
-          if (response.status === 409) {
-            errorMessage= "groups already exist!";
-            showAlert(errorMessage,"bulk");
+          .then((response) => {
+            if (response.status === 409) {
+              errorMessage = "group already exists!";
+              showAlert(errorMessage, "single");
+              return false;
+            } else {
+              form.reset();
+              groupModal.hide();
+              window.location.reload();
+              return true;
+            }
+          })
+          .catch((error) => {
+            console.error("error submitting group form: ", error);
             return false;
-          } else {
-            form.reset();
-            groupsModal.hide();
-            window.location.reload();
-            return true;
-          }
-        })
-        .catch (error => {
-          console.error("Error submitting bulk groups form: ", error);
-          return false;
-        });
-    }
+          });
+      }
 
-    function showAlert(errorMessage, modal) {
-      if (modal === "single") {
-        var alertMessage = document.getElementById("alertMessage");
-        alertMessage.innerHTML = `
+      function submitBulkGroupForm() {
+        event.preventDefault();
+        var form = event.target;
+        fetch("/groups/bulk", {
+          method: "POST",
+          body: new FormData(form),
+        })
+          .then((response) => {
+            if (response.status === 409) {
+              errorMessage = "groups already exist!";
+              showAlert(errorMessage, "bulk");
+              return false;
+            } else {
+              form.reset();
+              groupsModal.hide();
+              window.location.reload();
+              return true;
+            }
+          })
+          .catch((error) => {
+            console.error("Error submitting bulk groups form: ", error);
+            return false;
+          });
+      }
+
+      function showAlert(errorMessage, modal) {
+        if (modal === "single") {
+          var alertMessage = document.getElementById("alertMessage");
+          alertMessage.innerHTML = `
           <div id="alert-popup" class="alert alert-danger">
             <span class="close-button" onclick="closeAlertPopup()">&times;</span>
             <h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
           </div> `;
-      } else if (modal === "bulk") {
-        var alertMessage = document.getElementById("alertBulkMessage");
-        alertMessage.innerHTML = `
+        } else if (modal === "bulk") {
+          var alertMessage = document.getElementById("alertBulkMessage");
+          alertMessage.innerHTML = `
           <div id="alert-popup" class="alert alert-danger">
             <span class="close-button" onclick="closeAlertPopup()">&times;</span>
             <h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
           </div> `;
+        }
       }
-    }
 
-    function closeAlertPopup() {
-      document.getElementById("alert-popup").style.display = "none";
-    }
-
-  </script>
-
-</body>
-
+      function closeAlertPopup() {
+        document.getElementById("alert-popup").style.display = "none";
+      }
+    </script>
+  </body>
 </html>
 
 {{end}}
