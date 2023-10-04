@@ -9,6 +9,7 @@ package api
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/ultravioletrs/mainflux-ui/ui"
@@ -74,7 +75,7 @@ func (lm *loggingMiddleware) PasswordResetRequest(email string) (b []byte, err e
 // PasswordReset adds logging middleware to password reset method.
 func (lm *loggingMiddleware) PasswordReset(token, password, confPassword string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method password_reset for token %s took %s to complete", token, time.Since(begin))
+		message := fmt.Sprintf("Method password_reset took %s to complete", time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 		}
@@ -170,7 +171,7 @@ func (lm *loggingMiddleware) UserProfile(token string) (user sdk.User, err error
 // UpdatePassword adds logging middleware to update password method.
 func (lm *loggingMiddleware) UpdatePassword(token, oldPass, newPass string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method update_password for token %s took %s to complete", token, time.Since(begin))
+		message := fmt.Sprintf("Method update_password took %s to complete", time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -212,7 +213,7 @@ func (lm *loggingMiddleware) ListUsers(token string) (b []byte, err error) {
 // ViewUser adds logging middleware to view user method.
 func (lm *loggingMiddleware) ViewUser(token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method view_user for token %s and user %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method view_user for user %s took %s to complete", id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -226,7 +227,7 @@ func (lm *loggingMiddleware) ViewUser(token, id string) (b []byte, err error) {
 // UpdateUser adds logging middleware to update user method.
 func (lm *loggingMiddleware) UpdateUser(token, id string, user sdk.User) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method update_user for token %s and user %s took %s to complete", token, user.ID, time.Since(begin))
+		message := fmt.Sprintf("Method update_user for user %s took %s to complete", user.ID, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -240,7 +241,7 @@ func (lm *loggingMiddleware) UpdateUser(token, id string, user sdk.User) (b []by
 // UpdateUserTags adds logging middleware to update user tags method.
 func (lm *loggingMiddleware) UpdateUserTags(token, id string, user sdk.User) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method update_user_tags for token %s and user %s took %s to complete", token, user.ID, time.Since(begin))
+		message := fmt.Sprintf("Method update_user_tags for user %s took %s to complete", user.ID, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -254,7 +255,7 @@ func (lm *loggingMiddleware) UpdateUserTags(token, id string, user sdk.User) (b 
 // UpdateUserIdentity adds logging middleware to update user identity method.
 func (lm *loggingMiddleware) UpdateUserIdentity(token, id string, user sdk.User) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method update_user_identity for token %s and user %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method update_user_identity for user %s took %s to complete", id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -268,7 +269,7 @@ func (lm *loggingMiddleware) UpdateUserIdentity(token, id string, user sdk.User)
 // UpdateUserOwner adds logging middleware to update user owner method.
 func (lm *loggingMiddleware) UpdateUserOwner(token, id string, user sdk.User) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method update_user_owner for token %s and user %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method update_user_owner for user %s took %s to complete", id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -282,7 +283,7 @@ func (lm *loggingMiddleware) UpdateUserOwner(token, id string, user sdk.User) (b
 // EnableUser adds logging middleware to enable user method.
 func (lm *loggingMiddleware) EnableUser(token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method enable_user for token %s and user %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method enable_user for user %s took %s to complete", id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -296,7 +297,7 @@ func (lm *loggingMiddleware) EnableUser(token, id string) (b []byte, err error) 
 // DisableUser adds logging middleware to disable user method.
 func (lm *loggingMiddleware) DisableUser(token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method disable_user for token %s and user %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method disable_user for user %s took %s to complete", id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -338,7 +339,7 @@ func (lm *loggingMiddleware) ListThings(token string) (b []byte, err error) {
 // ViewThing adds logging middleware to view thing method.
 func (lm *loggingMiddleware) ViewThing(token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method view_thing for token %s and thing %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method view_thing for thing %s took %s to complete", id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -352,7 +353,7 @@ func (lm *loggingMiddleware) ViewThing(token, id string) (b []byte, err error) {
 // UpdateThing adds logging middleware to update thing method.
 func (lm *loggingMiddleware) UpdateThing(token, id string, thing sdk.Thing) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method update_thing for token %s and thing %s took %s to complete", token, thing.ID, time.Since(begin))
+		message := fmt.Sprintf("Method update_thing for thing %s took %s to complete", thing.ID, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -366,7 +367,7 @@ func (lm *loggingMiddleware) UpdateThing(token, id string, thing sdk.Thing) (b [
 // UpdateThingTags adds logging middleware to update thing tags method.
 func (lm *loggingMiddleware) UpdateThingTags(token, id string, thing sdk.Thing) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method update_thing_tags for token %s and thing %s took %s to complete", token, thing.ID, time.Since(begin))
+		message := fmt.Sprintf("Method update_thing_tags for thing %s took %s to complete", thing.ID, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -380,7 +381,7 @@ func (lm *loggingMiddleware) UpdateThingTags(token, id string, thing sdk.Thing) 
 // UpdateThingSecret adds logging middleware to update thing secret method.
 func (lm *loggingMiddleware) UpdateThingSecret(token, id, secret string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method update_thing_secret for token %s and thing %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method update_thing_secret for thing %s took %s to complete", id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -394,7 +395,7 @@ func (lm *loggingMiddleware) UpdateThingSecret(token, id, secret string) (b []by
 // EnableThing adds logging middleware to enable thing method.
 func (lm *loggingMiddleware) EnableThing(token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method enable_thing for token %s and thing %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method enable_thing for thing %s took %s to complete", id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -408,7 +409,7 @@ func (lm *loggingMiddleware) EnableThing(token, id string) (b []byte, err error)
 // DisableThing adds logging middleware to disable thing method.
 func (lm *loggingMiddleware) DisableThing(token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method disable_thing for token %s and thing %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method disable_thing for thing %s took %s to complete", id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -422,7 +423,7 @@ func (lm *loggingMiddleware) DisableThing(token, id string) (b []byte, err error
 // UpdateThingOwner adds logging middleware to update thing owner method.
 func (lm *loggingMiddleware) UpdateThingOwner(token, id string, thing sdk.Thing) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method update_thing_owner for token %s and thing %s took %s to complete", token, thing.ID, time.Since(begin))
+		message := fmt.Sprintf("Method update_thing_owner for thing %s took %s to complete", thing.ID, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -450,7 +451,7 @@ func (lm *loggingMiddleware) CreateChannels(token string, channels ...sdk.Channe
 // ViewChannel adds logging middleware to view channel method.
 func (lm *loggingMiddleware) ViewChannel(token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method view_channel for token %s and channel %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method view_channel for channel %s took %s to complete", id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -464,7 +465,7 @@ func (lm *loggingMiddleware) ViewChannel(token, id string) (b []byte, err error)
 // UpdateChannel adds logging middleware to update channel method.
 func (lm *loggingMiddleware) UpdateChannel(token, id string, channel sdk.Channel) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method update_channel for token %s and channel %s took %s to complete", token, channel.ID, time.Since(begin))
+		message := fmt.Sprintf("Method update_channel for channel %s took %s to complete", channel.ID, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -492,7 +493,7 @@ func (lm *loggingMiddleware) ListChannels(token string) (b []byte, err error) {
 // EnableChannel adds logging middleware to enable channel method.
 func (lm *loggingMiddleware) EnableChannel(token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method enable_channel for token %s and channel %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method enable_channel for channel %s took %s to complete", id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -506,7 +507,7 @@ func (lm *loggingMiddleware) EnableChannel(token, id string) (b []byte, err erro
 // DisableChannel adds logging middleware to disable channel method.
 func (lm *loggingMiddleware) DisableChannel(token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method disable_channel for token %s and channel %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method disable_channel for channel %s took %s to complete", id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -520,7 +521,7 @@ func (lm *loggingMiddleware) DisableChannel(token, id string) (b []byte, err err
 // Connect adds logging middleware to connect method.
 func (lm *loggingMiddleware) Connect(token string, connIDs sdk.ConnectionIDs) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method connect for token %s took %s to complete", token, time.Since(begin))
+		message := fmt.Sprintf("Method connect for things %s to channels %s took %s to complete", strings.Join(connIDs.ThingIDs, ","), strings.Join(connIDs.ChannelIDs, ","), time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -534,7 +535,7 @@ func (lm *loggingMiddleware) Connect(token string, connIDs sdk.ConnectionIDs) (b
 // Disconnect adds logging middleware to disconnect method.
 func (lm *loggingMiddleware) Disconnect(token string, connIDs sdk.ConnectionIDs) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method disconnect for token %s took %s to complete", token, time.Since(begin))
+		message := fmt.Sprintf("Method disconnect for things %s to channels %s took %s to complete", strings.Join(connIDs.ThingIDs, ","), strings.Join(connIDs.ChannelIDs, ","), time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -548,7 +549,7 @@ func (lm *loggingMiddleware) Disconnect(token string, connIDs sdk.ConnectionIDs)
 // ListThingsByChannel adds logging middleware to list things by channel method.
 func (lm *loggingMiddleware) ListThingsByChannel(token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method list_things_by_channel for token %s and channel %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method list_things_by_channel for channel %s took %s to complete", id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -562,7 +563,7 @@ func (lm *loggingMiddleware) ListThingsByChannel(token, id string) (b []byte, er
 // ListChannelsByThing adds logging middleware to list channels by thing method.
 func (lm *loggingMiddleware) ListChannelsByThing(token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method list_channels_by_thing for token %s and thing %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method list_channels_by_thing for thing %s took %s to complete", id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -576,7 +577,7 @@ func (lm *loggingMiddleware) ListChannelsByThing(token, id string) (b []byte, er
 // ConnectThing adds logging middleware to connect thing method.
 func (lm *loggingMiddleware) ConnectThing(token string, connIDs sdk.ConnectionIDs) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method connect_thing for token %s, channel %v and thing %v took %s to complete", token, connIDs.ChannelIDs[0], connIDs.ThingIDs[0], time.Since(begin))
+		message := fmt.Sprintf("Method connect_thing for things %s to channels %s took %s to complete", strings.Join(connIDs.ThingIDs, ","), strings.Join(connIDs.ChannelIDs, ","), time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -590,7 +591,7 @@ func (lm *loggingMiddleware) ConnectThing(token string, connIDs sdk.ConnectionID
 // ShareThing adds logging middleware to share thing method.
 func (lm *loggingMiddleware) ShareThing(token, chanID, userID string, actions []string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method share_thing for token %s, channel %v and user %v took %s to complete", token, chanID, userID, time.Since(begin))
+		message := fmt.Sprintf("Method share_thing for channel %s to user %s took %s to complete", chanID, userID, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -604,7 +605,7 @@ func (lm *loggingMiddleware) ShareThing(token, chanID, userID string, actions []
 // DisconnectThing adds logging middleware to disconnect thing method.
 func (lm *loggingMiddleware) DisconnectThing(thID, chID, token string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method disconnect_thing for token %s, channel %v and thing %v took %s to complete", token, chID, thID, time.Since(begin))
+		message := fmt.Sprintf("Method disconnect_thing for thing %s to channel %s took %s to complete", thID, chID, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -618,7 +619,7 @@ func (lm *loggingMiddleware) DisconnectThing(thID, chID, token string) (b []byte
 // ConnectChannel adds logging middleware to connect channel method.
 func (lm *loggingMiddleware) ConnectChannel(token string, connIDs sdk.ConnectionIDs) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method connect_channel for token %s, channel %v and thing %v took %s to complete", token, connIDs.ChannelIDs[0], connIDs.ThingIDs[0], time.Since(begin))
+		message := fmt.Sprintf("Method connect_channel for channels %s to things %s took %s to complete", strings.Join(connIDs.ChannelIDs, ","), strings.Join(connIDs.ThingIDs, ","), time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -632,7 +633,7 @@ func (lm *loggingMiddleware) ConnectChannel(token string, connIDs sdk.Connection
 // DisconnectChannel adds logging middleware to disconnect channel method.
 func (lm *loggingMiddleware) DisconnectChannel(thID, chID, token string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method disconnect_channel for token %s, channel %v and thing %v took %s to complete", token, chID, thID, time.Since(begin))
+		message := fmt.Sprintf("Method disconnect_channel for channel %s to thing %s took %s to complete", chID, thID, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -646,7 +647,7 @@ func (lm *loggingMiddleware) DisconnectChannel(thID, chID, token string) (b []by
 // ListThingsPolicies adds logging middleware to list things polices method.
 func (lm *loggingMiddleware) ListThingsPolicies(token string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method list_things_policies for token %s took %s to complete", token, time.Since(begin))
+		message := fmt.Sprintf("Method list_things_policies took %s to complete", time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -660,7 +661,7 @@ func (lm *loggingMiddleware) ListThingsPolicies(token string) (b []byte, err err
 // AddThingsPolicy adds logging middleware to add things policy method.
 func (lm *loggingMiddleware) AddThingsPolicy(token string, policy sdk.Policy) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method add_things_policy for token %s took %s to complete", token, time.Since(begin))
+		message := fmt.Sprintf("Method add_things_policy for subject %s and object %s took %s to complete", policy.Subject, policy.Object, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -674,7 +675,7 @@ func (lm *loggingMiddleware) AddThingsPolicy(token string, policy sdk.Policy) (b
 // DeleteThingsPolicy adds logging middleware to delete things policy method.
 func (lm *loggingMiddleware) DeleteThingsPolicy(token string, policy sdk.Policy) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method delete_things_policy for token %s took %s to complete", token, time.Since(begin))
+		message := fmt.Sprintf("Method delete_things_policy for subject %s and object %s took %s to complete", policy.Subject, policy.Object, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -688,7 +689,7 @@ func (lm *loggingMiddleware) DeleteThingsPolicy(token string, policy sdk.Policy)
 // UpdateThingsPolicy adds logging middleware to update things policy method.
 func (lm *loggingMiddleware) UpdateThingsPolicy(token string, policy sdk.Policy) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method update_things_policy for token %s took %s to complete", token, time.Since(begin))
+		message := fmt.Sprintf("Method update_things_policy for subject %s and object %s took %s to complete", policy.Subject, policy.Object, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -730,7 +731,7 @@ func (lm *loggingMiddleware) ListGroups(token string) (b []byte, err error) {
 // ViewGroup adds logging middleware to view group method.
 func (lm *loggingMiddleware) ViewGroup(token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method view_group for token %s and group %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method view_group for group %s took %s to complete", id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -744,7 +745,7 @@ func (lm *loggingMiddleware) ViewGroup(token, id string) (b []byte, err error) {
 // Assign adds logging middleware to assign method.
 func (lm *loggingMiddleware) Assign(token, groupID, memberID string, memberType []string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method assign for token %s and member %s group id %s took %s to complete", token, memberID, groupID, time.Since(begin))
+		message := fmt.Sprintf("Method assign for user %s to group  %s took %s to complete", memberID, groupID, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -758,7 +759,7 @@ func (lm *loggingMiddleware) Assign(token, groupID, memberID string, memberType 
 // Unassign adds logging middleware to unassign method.
 func (lm *loggingMiddleware) Unassign(token, groupID, memberID string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method unassign for token %s and member %s group id %s took %s to complete", token, memberID, groupID, time.Since(begin))
+		message := fmt.Sprintf("Method unassign for user %s to group %s took %s to complete", memberID, groupID, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -772,7 +773,7 @@ func (lm *loggingMiddleware) Unassign(token, groupID, memberID string) (b []byte
 // UpdateGroup adds logging middleware to update group method.
 func (lm *loggingMiddleware) UpdateGroup(token, id string, group sdk.Group) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method update_group for token %s and group %s took %s to complete", token, group.ID, time.Since(begin))
+		message := fmt.Sprintf("Method update_group for group %s took %s to complete", group.ID, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -786,7 +787,7 @@ func (lm *loggingMiddleware) UpdateGroup(token, id string, group sdk.Group) (b [
 // ListGroupMembers adds logging middleware to list group members method.
 func (lm *loggingMiddleware) ListGroupMembers(token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method list_group_members for token %s and connections %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method list_group_members for group %s took %s to complete", id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -800,7 +801,7 @@ func (lm *loggingMiddleware) ListGroupMembers(token, id string) (b []byte, err e
 // EnableGroup adds logging middleware to enable group method.
 func (lm *loggingMiddleware) EnableGroup(token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method enable_group for token %s and group %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method enable_group for group %s took %s to complete", id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -814,7 +815,7 @@ func (lm *loggingMiddleware) EnableGroup(token, id string) (b []byte, err error)
 // DisableGroup adds logging middleware to disable group method.
 func (lm *loggingMiddleware) DisableGroup(token, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method disable_group for token %s and group %s took %s to complete", token, id, time.Since(begin))
+		message := fmt.Sprintf("Method disable_group for group %s took %s to complete", id, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -828,7 +829,7 @@ func (lm *loggingMiddleware) DisableGroup(token, id string) (b []byte, err error
 // AddPolicy adds logging middleware to add policy method.
 func (lm *loggingMiddleware) AddPolicy(token string, policy sdk.Policy) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method add_policy for token %s took %s to complete", token, time.Since(begin))
+		message := fmt.Sprintf("Method add_policy for subject %s and object %s took %s to complete", policy.Subject, policy.Object, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -842,7 +843,7 @@ func (lm *loggingMiddleware) AddPolicy(token string, policy sdk.Policy) (b []byt
 // ListPolicies adds logging middleware to list policies method.
 func (lm *loggingMiddleware) ListPolicies(token string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method list_policies for token %s took %s to complete", token, time.Since(begin))
+		message := fmt.Sprintf("Method list_policies took %s to complete", time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -856,7 +857,7 @@ func (lm *loggingMiddleware) ListPolicies(token string) (b []byte, err error) {
 // UpdatePolicy adds logging middleware to update policy method.
 func (lm *loggingMiddleware) UpdatePolicy(token string, policy sdk.Policy) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method update_policy for token %s took %s to complete", token, time.Since(begin))
+		message := fmt.Sprintf("Method update_policy for subject %s and object %s took %s to complete", policy.Subject, policy.Object, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -870,7 +871,7 @@ func (lm *loggingMiddleware) UpdatePolicy(token string, policy sdk.Policy) (b []
 // DeletePolicy adds logging middleware to delete policy method.
 func (lm *loggingMiddleware) DeletePolicy(token string, policy sdk.Policy) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method delete_policy for token %s took %s to complete", token, time.Since(begin))
+		message := fmt.Sprintf("Method delete_policy for subject %s and object %s took %s to complete", policy.Subject, policy.Object, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
