@@ -904,7 +904,8 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	switch {
 	case errors.Contains(err, errNoCookie),
 		errors.Contains(err, errUnauthorized):
-		w.WriteHeader(http.StatusUnauthorized)
+		w.Header().Set("Location", "/login")
+		w.WriteHeader(http.StatusSeeOther)
 	case errors.Contains(err, errMalformedData),
 		errors.Contains(err, errMalformedSubtopic):
 		w.WriteHeader(http.StatusBadRequest)
