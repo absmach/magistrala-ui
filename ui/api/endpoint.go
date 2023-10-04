@@ -820,7 +820,7 @@ func disconnectEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code: http.StatusNoContent,
+			code: http.StatusOK,
 			html: res,
 		}, nil
 	}
@@ -897,7 +897,7 @@ func disconnectThingEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code: http.StatusNoContent,
+			code: http.StatusOK,
 			html: res,
 		}, nil
 	}
@@ -917,7 +917,7 @@ func disconnectChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code: http.StatusNoContent,
+			code: http.StatusOK,
 			html: res,
 		}, nil
 	}
@@ -1065,7 +1065,7 @@ func deleteThingsPolicyEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code: http.StatusNoContent,
+			code: http.StatusOK,
 			html: res,
 		}, nil
 	}
@@ -1231,7 +1231,7 @@ func unassignEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code: http.StatusNoContent,
+			code: http.StatusOK,
 			html: res,
 		}, nil
 	}
