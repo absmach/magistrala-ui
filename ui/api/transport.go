@@ -32,8 +32,12 @@ const (
 	protocol    = "http"
 	pageKey     = "page"
 	limitKey    = "limit"
+	itemKey     = "item"
+	nameKey     = "name"
 	defPage     = 1
 	defLimit    = 10
+	defName     = ""
+	defItem     = ""
 )
 
 var (
@@ -570,6 +574,13 @@ func MakeHandler(svc ui.Service, instanceID string) http.Handler {
 		handleTerminalInputEndpoint(svc),
 		decodeTerminalCommandRequest,
 		encodeJSONResponse,
+		opts...,
+	))
+
+	r.Get("/entities", kithttp.NewServer(
+		getEntitiesEndpoint(svc),
+		decodeGetEntitiesRequest,
+		encodeResponse,
 		opts...,
 	))
 
@@ -1839,6 +1850,55 @@ func decodeUpdateBootstrapConnections(_ context.Context, r *http.Request) (inter
 	data.token = token
 
 	return data, nil
+}
+
+func decodeGetEntitiesRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+
+	item, err := readStringQuery(r, itemKey, defItem)
+	if err != nil {
+		return nil, err
+	}
+	name, err := readStringQuery(r, nameKey, defName)
+	if err != nil {
+		return nil, err
+	}
+	page, err := readNumQuery[uint64](r, pageKey, defPage)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	req := getEntitiesReq{
+		token: token,
+		Item:  item,
+		Page:  page,
+		Name:  name,
+		Limit: limit,
+	}
+
+	return req, nil
+
+}
+
+func readStringQuery(r *http.Request, key string, def string) (string, error) {
+	vals := bone.GetQuery(r, key)
+	if len(vals) > 1 {
+		return "", errInvalidQueryParams
+	}
+
+	if len(vals) == 0 {
+		return def, nil
+	}
+
+	return vals[0], nil
 }
 
 func readNumQuery[N number](r *http.Request, key string, def N) (N, error) {

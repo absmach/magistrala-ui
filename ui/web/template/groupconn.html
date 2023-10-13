@@ -15,8 +15,7 @@
         <button
           type="button"
           class="btn body-button"
-          data-bs-toggle="modal"
-          data-bs-target="#connectModal"
+          onclick="openModal()"
           {{if
           $disableAssign}}disabled{{end}}
         >
@@ -38,7 +37,7 @@
               <div class="modal-body">
                 <form action="/groups/{{.Group.ID}}/members" method="post">
                   <div class="mb-3">
-                    <label for="memberIDAssign" class="form-label"
+                    <label for="infiniteScroll" class="form-label"
                       >Member ID</label
                     >
                     <input
@@ -46,18 +45,16 @@
                       name="memberFilter"
                       id="memberFilterAssign"
                       placeholder="Filter by member ID"
-                      oninput="filterItem(this.value, 'memberIDAssign')"
+                      oninput="fetchIndividualEntity(this.value,'infiniteScroll')"
                     />
                     <select
                       class="form-select"
                       name="memberID"
-                      id="memberIDAssign"
+                      id="infiniteScroll"
+                      size="5"
                       required
                     >
-                      <option value="">...</option>
-                      {{range .Users}}
-                      <option value="{{.ID}}">{{.Name}}</option>
-                      {{end}}
+                      <option disabled>select a member</option>
                     </select>
                   </div>
                   <div class="mb-3">
@@ -174,19 +171,82 @@
 
     {{template "footer"}}
     <script>
-      function filterItem(filterValue, selectId) {
-        const itemSelect = document.getElementById(selectId);
-        const options = itemSelect.getElementsByTagName("option");
+      const connectModal = new bootstrap.Modal(
+        document.getElementById("connectModal"),
+      );
 
-        for (let i = 0; i < options.length; i++) {
-          const option = options[i];
-          const itemId = option.value;
-          const itemName = option.innerHTML;
-          const shouldShow =
-            itemId.includes(filterValue) ||
-            itemName.toLowerCase().includes(filterValue.toLowerCase());
-          option.style.display = shouldShow ? "" : "none";
+      function openModal() {
+        connectModal.show();
+        getMembers("");
+        getAdditionalMembers();
+      }
+
+      function fetchIndividualEntity(filterValue, selectId) {
+        const itemSelect = document.getElementById(selectId);
+        if (filterValue === "") {
+          itemSelect.innerHTML = "<option disabled>select a member</option>";
+          getMembers("");
+          getAdditionalMembers();
+        } else {
+          itemSelect.innerHTML = "";
+          getMembers(filterValue);
         }
+      }
+
+      let limit = 5;
+
+      function getMembers(name) {
+        fetchData(name, 1);
+      }
+
+      function getAdditionalMembers() {
+        var selectElement = document.getElementById("infiniteScroll");
+        var singleOptionHeight =
+          selectElement.querySelector("option").offsetHeight;
+        var selectBoxHeight = selectElement.offsetHeight;
+        var numOptionsBeforeLoad = 2;
+        var lastScrollTop = 0;
+        var currentPageNo = 1;
+        var currentScroll = 0;
+
+        selectElement.addEventListener("scroll", onselectScroll);
+
+        function onselectScroll(event) {
+          var st = selectElement.scrollTop;
+          var totalHeight =
+            selectElement.querySelectorAll("option").length *
+            singleOptionHeight;
+
+          if (st > lastScrollTop) {
+            currentScroll = st + selectBoxHeight;
+            if (
+              currentScroll + numOptionsBeforeLoad * singleOptionHeight >=
+              totalHeight
+            ) {
+              currentPageNo++;
+              fetchData("", currentPageNo);
+            }
+          }
+
+          lastScrollTop = st;
+        }
+      }
+
+      function fetchData(name, page) {
+        fetch(`/entities?item=users&limit=${limit}&name=${name}&page=${page}`, {
+          method: "GET",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            const selectElement = document.getElementById("infiniteScroll");
+            data.data.forEach((group) => {
+              const option = document.createElement("option");
+              option.value = group.id;
+              option.text = group.name;
+              selectElement.appendChild(option);
+            });
+          })
+          .catch((error) => console.error("Error:", error));
       }
     </script>
   </body>

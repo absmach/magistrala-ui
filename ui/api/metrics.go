@@ -763,3 +763,12 @@ func (mm *metricsMiddleware) ViewBootstrap(token string, id string) ([]byte, err
 
 	return mm.svc.ViewBootstrap(token, id)
 }
+
+func (mm *metricsMiddleware) GetEntities(token, item, name string, page, limit uint64) ([]byte, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "get_entities").Add(1)
+		mm.latency.With("method", "get_entities").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.GetEntities(token, item, name, page, limit)
+}

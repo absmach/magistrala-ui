@@ -58,21 +58,18 @@
                     />
                   </div>
                   <div class="mb-3">
-                    <label for="parentID" class="form-label">Parent Name</label>
+                    <label for="infiniteScroll" class="form-label">Parent Name</label>
                     <input
                       type="text"
                       class="itemsFilter"
                       name="parentFilter"
                       id="parentFilter"
                       placeholder="Filter by parent name"
-                      oninput="filterItem(this.value,'parentID')"
+                      oninput="fetchIndividualEntity(this.value, 'infiniteScroll')"
                     />
-                    <select class="form-select" name="parentID" id="parentID">
-                      <option value="">...</option>
-                      {{range .Groups}}
-                      <option value="{{.ID}}">{{.Name}}</option>
-                      {{end}}
-                    </select>
+                    <select class="form-select" name="parentID" id="infiniteScroll" size="5">
+                      <option disabled>select a group</option>
+                    </select>                    
                   </div>
                   <div class="mb-3">
                     <label for="metadata" class="form-label">Metadata</label>
@@ -257,6 +254,8 @@
       function openModal(modal) {
         if (modal === "single") {
           groupModal.show();
+          getGroups("");
+          getAdditionalGroups();
         } else if (modal === "bulk") {
           groupsModal.show();
         }
@@ -332,6 +331,68 @@
 
       function closeAlertPopup() {
         document.getElementById("alert-popup").style.display = "none";
+      }
+
+      function fetchIndividualEntity(filterValue, selectId){
+        const itemSelect = document.getElementById(selectId);
+        if(filterValue === ""){
+          itemSelect.innerHTML = "<option disabled>select a group</option>";
+          getGroups("");
+          getAdditionalGroups();
+        }else{
+          itemSelect.innerHTML = "";
+          getGroups(filterValue);
+        }
+      }
+
+      let limit = 5;
+
+      function getGroups(name){
+        fetchData(name, 1)
+      }
+
+      function getAdditionalGroups(){
+        var selectElement = document.getElementById('infiniteScroll');
+        var singleOptionHeight = selectElement.querySelector('option').offsetHeight;
+        var selectBoxHeight = selectElement.offsetHeight;
+        var numOptionsBeforeLoad = 2;
+        var lastScrollTop = 0;
+        var currentPageNo = 1;
+        var currentScroll = 0;
+
+        selectElement.addEventListener('scroll', onselectScroll);
+
+        function onselectScroll(event) {
+          var st = selectElement.scrollTop;
+          var totalHeight = selectElement.querySelectorAll('option').length*singleOptionHeight;
+
+          if (st > lastScrollTop) {
+            currentScroll = st + selectBoxHeight;
+            if ((currentScroll + (numOptionsBeforeLoad * singleOptionHeight)) >= totalHeight){
+              currentPageNo++;
+              fetchData("", currentPageNo)
+            }
+          }
+
+          lastScrollTop = st;
+        }
+      }
+
+      function fetchData(name, page){
+        fetch(`/entities?item=groups&limit=${limit}&name=${name}&page=${page}`,{
+          method:"GET",
+        })
+        .then(response => response.json())
+        .then(data =>{
+          const selectElement = document.getElementById('infiniteScroll');
+          data.data.forEach(group =>{
+            const option = document.createElement('option');
+            option.value = group.id;
+            option.text = group.name;
+            selectElement.appendChild(option);
+          });
+        })
+        .catch(error => console.error("Error:", error));
       }
     </script>
   </body>

@@ -11,16 +11,14 @@
         <button
           type="button"
           class="btn body-button"
-          data-bs-toggle="modal"
-          data-bs-target="#connectModal"
+          onclick="openModal('connect')"
         >
           Connect Thing
         </button>
         <button
           type="button"
           class="btn body-button"
-          data-bs-toggle="modal"
-          data-bs-target="#shareThingModal"
+          onclick="openModal('share')"
         >
           Share Things
         </button>
@@ -45,24 +43,22 @@
                   method="post"
                 >
                   <div class="mb-3">
-                    <label for="thingID" class="form-label">Thing</label>
+                    <label for="infiniteScroll" class="form-label">Thing</label>
                     <input
                       type="text"
                       name="thingFilter"
                       id="thingFilter"
                       placeholder="Filter by thing"
-                      oninput="filterItem(this.value,'thingID')"
+                      oninput="fetchIndividualThing(this.value,'infiniteScroll')"
                     />
                     <select
                       class="form-select"
                       name="thingID"
-                      id="thingID"
+                      id="infiniteScroll"
+                      size="5"
                       required
                     >
-                      <option value="">...</option>
-                      {{range .AllThings}}
-                      <option value="{{.ID}}">{{.Name}}</option>
-                      {{end}}
+                      <option disabled>select a thing</option>
                     </select>
                     <div id="thingIDHelp" class="form-text">
                       Select a thing.
@@ -110,24 +106,22 @@
                   method="post"
                 >
                   <div class="mb-3">
-                    <label for="userID" class="form-label">User</label>
+                    <label for="UserID" class="form-label">User</label>
                     <input
                       type="text"
                       name="userFilter"
                       id="userFilter"
                       placeholder="Filter by User"
-                      oninput="filterItem(this.value,'userID')"
+                      oninput="fetchIndividualUser(this.value,'UserID')"
                     />
                     <select
                       class="form-select"
                       name="userID"
-                      id="userID"
+                      id="UserID"
+                      size="5"
                       required
                     >
-                      <option value="">...</option>
-                      {{range .Users}}
-                      <option value="{{.ID}}">{{.Name}}</option>
-                      {{end}}
+                      <option disabled>select a User</option>
                     </select>
                   </div>
                   <div class="mb-3">
@@ -310,19 +304,160 @@
 
     {{template "footer"}}
     <script>
-      function filterItem(filterValue, selectId) {
-        const itemSelect = document.getElementById(selectId);
-        const options = itemSelect.getElementsByTagName("option");
+      const connectModal = new bootstrap.Modal(
+        document.getElementById("connectModal"),
+      );
+      const shareThingModal = new bootstrap.Modal(
+        document.getElementById("shareThingModal"),
+      );
 
-        for (let i = 0; i < options.length; i++) {
-          const option = options[i];
-          const itemId = option.value;
-          const itemName = option.innerHTML;
-          const shouldShow =
-            itemId.includes(filterValue) ||
-            itemName.toLowerCase().includes(filterValue.toLowerCase());
-          option.style.display = shouldShow ? "" : "none";
+      function openModal(modal) {
+        if (modal === "connect") {
+          connectModal.show();
+          getThings("");
+          getAdditionalThings();
+        } else if (modal === "share") {
+          shareThingModal.show();
+          getUsers("");
+          getAdditionalUsers();
         }
+      }
+
+      function fetchIndividualThing(filterValue, selectId) {
+        const itemSelect = document.getElementById(selectId);
+        if (filterValue === "") {
+          itemSelect.innerHTML = "<option disabled>select a thing</option>";
+          getThings("");
+          getAdditionalThings();
+        } else {
+          itemSelect.innerHTML = "";
+          getThings(filterValue);
+        }
+      }
+
+      let limit = 5;
+
+      function getThings(name) {
+        fetchThingsData(name, 1);
+      }
+
+      function getAdditionalThings() {
+        var selectElement = document.getElementById("infiniteScroll");
+        var singleOptionHeight =
+          selectElement.querySelector("option").offsetHeight;
+        var selectBoxHeight = selectElement.offsetHeight;
+        var numOptionsBeforeLoad = 2;
+        var lastScrollTop = 0;
+        var currentPageNo = 1;
+        var currentScroll = 0;
+
+        selectElement.addEventListener("scroll", onselectScroll);
+
+        function onselectScroll(event) {
+          var st = selectElement.scrollTop;
+          var totalHeight =
+            selectElement.querySelectorAll("option").length *
+            singleOptionHeight;
+
+          if (st > lastScrollTop) {
+            currentScroll = st + selectBoxHeight;
+            if (
+              currentScroll + numOptionsBeforeLoad * singleOptionHeight >=
+              totalHeight
+            ) {
+              currentPageNo++;
+              fetchThingsData("", currentPageNo);
+            }
+          }
+
+          lastScrollTop = st;
+        }
+      }
+
+      function fetchThingsData(name, page) {
+        fetch(
+          `/entities?item=things&limit=${limit}&name=${name}&page=${page}`,
+          {
+            method: "GET",
+          },
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            const selectElement = document.getElementById("infiniteScroll");
+            data.data.forEach((thing) => {
+              const option = document.createElement("option");
+              option.value = thing.id;
+              option.text = thing.name;
+              selectElement.appendChild(option);
+            });
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      function fetchIndividualUser(filterValue, selectId) {
+        const itemSelect = document.getElementById(selectId);
+        if (filterValue === "") {
+          itemSelect.innerHTML = "<option disabled>select a user</option>";
+          getUsers("");
+          getAdditionalUsers();
+        } else {
+          itemSelect.innerHTML = "";
+          getUsers(filterValue);
+        }
+      }
+
+      function getUsers(name) {
+        fetchUsersData(name, 1);
+      }
+
+      function getAdditionalUsers() {
+        var selectElement = document.getElementById("UserID");
+        var singleOptionHeight =
+          selectElement.querySelector("option").offsetHeight;
+        var selectBoxHeight = selectElement.offsetHeight;
+        var numOptionsBeforeLoad = 2;
+        var lastScrollTop = 0;
+        var currentPageNo = 1;
+        var currentScroll = 0;
+
+        selectElement.addEventListener("scroll", onselectScroll);
+
+        function onselectScroll(event) {
+          var st = selectElement.scrollTop;
+          var totalHeight =
+            selectElement.querySelectorAll("option").length *
+            singleOptionHeight;
+
+          if (st > lastScrollTop) {
+            currentScroll = st + selectBoxHeight;
+            if (
+              currentScroll + numOptionsBeforeLoad * singleOptionHeight >=
+              totalHeight
+            ) {
+              currentPageNo++;
+              fetchUsersData("", currentPageNo);
+            }
+          }
+
+          lastScrollTop = st;
+        }
+      }
+
+      function fetchUsersData(name, page) {
+        fetch(`/entities?item=users&limit=${limit}&name=${name}&page=${page}`, {
+          method: "GET",
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            const selectElement = document.getElementById("UserID");
+            data.data.forEach((user) => {
+              const option = document.createElement("option");
+              option.value = user.id;
+              option.text = user.name;
+              selectElement.appendChild(option);
+            });
+          })
+          .catch((error) => console.error("Error:", error));
       }
     </script>
   </body>

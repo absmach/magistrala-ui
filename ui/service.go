@@ -13,7 +13,6 @@ import (
 	"html/template"
 	"log"
 	"math"
-	"reflect"
 	"strings"
 	"sync"
 	"time"
@@ -33,6 +32,7 @@ const (
 	templateDir = "ui/web/template"
 	enabled     = "enabled"
 	disabled    = "disabled"
+	statusAll   = "all"
 )
 
 type dataSummary struct {
@@ -65,17 +65,9 @@ var (
 	// ErrConflict indicates that entity already exists.
 	ErrConflict = errors.New("entity already exists")
 
-	tmplFiles        = []string{"header.html", "footer.html", "navbar.html", "tableheader.html", "tablefooter.html"}
-	userActions      = []string{"g_list", "g_update", "g_delete", "g_add", "c_list", "c_update", "c_delete"}
-	thingActions     = []string{"m_read", "m_write"}
-	enabledUsers     int
-	disabledUsers    int
-	enabledGroups    int
-	disabledGroups   int
-	enabledThings    int
-	disabledThings   int
-	enabledChannels  int
-	disabledChannels int
+	tmplFiles    = []string{"header.html", "footer.html", "navbar.html", "tableheader.html", "tablefooter.html"}
+	userActions  = []string{"g_list", "g_update", "g_delete", "g_add", "c_list", "c_update", "c_delete"}
+	thingActions = []string{"m_read", "m_write"}
 )
 
 // Service specifies service API.
@@ -226,6 +218,7 @@ type Service interface {
 	GetRemoteTerminal(id string) ([]byte, error)
 	// ProcessTerminalCommand sends mqtt command to agent and retrieves a response asynchronously.
 	ProcessTerminalCommand(ctx context.Context, id, token, command string, res chan string) error
+	GetEntities(token, item, name string, page, limit uint64) ([]byte, error)
 }
 
 var _ Service = (*uiService)(nil)
@@ -349,9 +342,14 @@ func (gs *uiService) Index(token string) ([]byte, error) {
 
 	pgm := sdk.PageMetadata{
 		Offset:     uint64(0),
-		Limit:      100,
-		Visibility: "all",
-		Status:     "all",
+		Visibility: statusAll,
+		Status:     statusAll,
+	}
+
+	enabledPgm := sdk.PageMetadata{
+		Offset:     uint64(0),
+		Visibility: statusAll,
+		Status:     enabled,
 	}
 
 	users, err := gs.sdk.Users(pgm, token)
@@ -374,39 +372,39 @@ func (gs *uiService) Index(token string) ([]byte, error) {
 		return []byte{}, err
 	}
 
-	enabledUsers, disabledUsers, err = countStatus(users.Users)
+	enabledUsers, err := gs.sdk.Users(enabledPgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	enabledThings, disabledThings, err = countStatus(things.Things)
+	enabledThings, err := gs.sdk.Things(enabledPgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	enabledChannels, disabledChannels, err = countStatus(channels.Channels)
+	enabledGroups, err := gs.sdk.Groups(enabledPgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	enabledGroups, disabledGroups, err = countStatus(groups.Groups)
+	enabledChannels, err := gs.sdk.Channels(enabledPgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
 	var summary = dataSummary{
-		TotalUsers:       len(users.Users),
-		TotalGroups:      len(groups.Groups),
-		TotalThings:      len(things.Things),
-		TotalChannels:    len(channels.Channels),
-		EnabledUsers:     enabledUsers,
-		DisabledUsers:    disabledUsers,
-		EnabledGroups:    enabledGroups,
-		DisabledGroups:   disabledGroups,
-		EnabledThings:    enabledThings,
-		DisabledThings:   disabledThings,
-		EnabledChannels:  enabledChannels,
-		DisabledChannels: disabledChannels,
+		TotalUsers:       int(users.Total),
+		TotalGroups:      int(groups.Total),
+		TotalThings:      int(things.Total),
+		TotalChannels:    int(channels.Total),
+		EnabledUsers:     int(enabledUsers.Total),
+		DisabledUsers:    int(users.Total - enabledUsers.Total),
+		EnabledGroups:    int(enabledGroups.Total),
+		DisabledGroups:   int(groups.Total - enabledGroups.Total),
+		EnabledThings:    int(enabledThings.Total),
+		DisabledThings:   int(things.Total - enabledThings.Total),
+		EnabledChannels:  int(enabledChannels.Total),
+		DisabledChannels: int(channels.Total - enabledChannels.Total),
 	}
 
 	user, err := gs.UserProfile(token)
@@ -547,7 +545,7 @@ func (gs *uiService) ListUsers(token string, page, limit uint64) ([]byte, error)
 	pgm := sdk.PageMetadata{
 		Offset:     offset,
 		Limit:      limit,
-		Visibility: "all",
+		Visibility: statusAll,
 	}
 	users, err := gs.sdk.Users(pgm, token)
 	if err != nil {
@@ -674,7 +672,7 @@ func (gs *uiService) ListThings(token string, page, limit uint64) ([]byte, error
 	pgm := sdk.PageMetadata{
 		Offset:     offset,
 		Limit:      limit,
-		Visibility: "all",
+		Visibility: statusAll,
 	}
 
 	things, err := gs.sdk.Things(pgm, token)
@@ -802,7 +800,7 @@ func (gs *uiService) ListChannels(token string, page, limit uint64) ([]byte, err
 	pgm := sdk.PageMetadata{
 		Offset:     offset,
 		Limit:      limit,
-		Visibility: "all",
+		Visibility: statusAll,
 	}
 	chsPage, err := gs.sdk.Channels(pgm, token)
 	if err != nil {
@@ -936,7 +934,7 @@ func (gs *uiService) ListChannelsByThing(token, id string, page, limit uint64) (
 	pgm := sdk.PageMetadata{
 		Offset:     offset,
 		Limit:      limit,
-		Visibility: "all",
+		Visibility: statusAll,
 	}
 
 	chsPage, err := gs.sdk.ChannelsByThing(id, pgm, token)
@@ -1023,7 +1021,7 @@ func (gs *uiService) ListThingsByChannel(token, id string, page, limit uint64) (
 	pgm := sdk.PageMetadata{
 		Offset:     offset,
 		Limit:      limit,
-		Visibility: "all",
+		Visibility: statusAll,
 	}
 
 	thsPage, err := gs.sdk.ThingsByChannel(id, pgm, token)
@@ -1093,7 +1091,7 @@ func (gs *uiService) ListThingsPolicies(token string, page, limit uint64) ([]byt
 	pgm := sdk.PageMetadata{
 		Offset:     offset,
 		Limit:      limit,
-		Visibility: "all",
+		Visibility: statusAll,
 	}
 	plcPage, err := gs.sdk.ListThingPolicies(pgm, token)
 	if err != nil {
@@ -1178,7 +1176,7 @@ func (gs *uiService) ListGroupMembers(token, id string, page, limit uint64) ([]b
 	pgm := sdk.PageMetadata{
 		Offset:     offset,
 		Limit:      limit,
-		Visibility: "all",
+		Visibility: statusAll,
 	}
 	members, err := gs.sdk.Members(id, pgm, token)
 	if err != nil {
@@ -1260,7 +1258,7 @@ func (gs *uiService) ListGroups(token string, page, limit uint64) ([]byte, error
 	pgm := sdk.PageMetadata{
 		Offset:     offset,
 		Limit:      limit,
-		Visibility: "all",
+		Visibility: statusAll,
 	}
 	grpPage, err := gs.sdk.Groups(pgm, token)
 	if err != nil {
@@ -1378,7 +1376,7 @@ func (gs *uiService) ListPolicies(token string, page, limit uint64) ([]byte, err
 	pgm := sdk.PageMetadata{
 		Offset:     offset,
 		Limit:      limit,
-		Visibility: "all",
+		Visibility: statusAll,
 	}
 	plcPage, err := gs.sdk.ListUserPolicies(pgm, token)
 	if err != nil {
@@ -1604,7 +1602,7 @@ func (us *uiService) ListBootstrap(token string, page, limit uint64) ([]byte, er
 	pgm := sdk.PageMetadata{
 		Offset:     offset,
 		Limit:      limit,
-		Visibility: "all",
+		Visibility: statusAll,
 	}
 
 	bootstraps, err := us.sdk.Bootstraps(pgm, token)
@@ -1727,29 +1725,45 @@ func (us *uiService) UpdateBootstrapConnections(token string, config sdk.Bootstr
 
 }
 
-func countStatus(slice interface{}) (int, int, error) {
-	sliceValue := reflect.ValueOf(slice)
-
-	if sliceValue.Kind() != reflect.Slice {
-		return 0, 0, fmt.Errorf("input is not a slice")
+func (gs *uiService) GetEntities(token, item, name string, page, limit uint64) ([]byte, error) {
+	offset := (page - 1) * limit
+	pgm := sdk.PageMetadata{
+		Offset:     offset,
+		Limit:      limit,
+		Name:       name,
+		Visibility: statusAll,
+	}
+	var items = make(map[string]interface{})
+	switch item {
+	case "groups":
+		groups, err := gs.sdk.Groups(pgm, token)
+		if err != nil {
+			return []byte{}, err
+		}
+		items["data"] = groups.Groups
+	case "users":
+		users, err := gs.sdk.Users(pgm, token)
+		if err != nil {
+			return []byte{}, err
+		}
+		items["data"] = users.Users
+	case "things":
+		things, err := gs.sdk.Things(pgm, token)
+		if err != nil {
+			return []byte{}, err
+		}
+		items["data"] = things.Things
+	case "channels":
+		channels, err := gs.sdk.Channels(pgm, token)
+		if err != nil {
+			return []byte{}, err
+		}
+		items["data"] = channels.Channels
 	}
 
-	statusEnabled := 0
-	statusDisabled := 0
-	for i := 0; i < sliceValue.Len(); i++ {
-		itemValue := sliceValue.Index(i)
-		if itemValue.Kind() != reflect.Struct {
-			return 0, 0, fmt.Errorf("slice contains non-struct elements")
-		}
-
-		statusField := itemValue.FieldByName("Status")
-		if statusField.String() == enabled {
-			statusEnabled++
-		}
-		if statusField.String() == disabled {
-			statusDisabled++
-		}
+	jsonData, err := json.Marshal(items)
+	if err != nil {
+		return []byte{}, err
 	}
-
-	return statusEnabled, statusDisabled, nil
+	return jsonData, nil
 }

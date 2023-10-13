@@ -1003,3 +1003,29 @@ func (req createBootstrapReq) validate() error {
 
 	return nil
 }
+
+type getEntitiesReq struct {
+	token string
+	Page  uint64
+	Limit uint64
+	Item  string
+	Name  string
+}
+
+func (req getEntitiesReq) validate() error {
+	if req.token == "" {
+		return ui.ErrUnauthorizedAccess
+	}
+
+	if req.Page == 0 {
+		return ui.ErrMalformedEntity
+	}
+	if req.Item == "" {
+		return ui.ErrMalformedEntity
+	}
+
+	if req.Limit == 0 {
+		return ui.ErrMalformedEntity
+	}
+	return nil
+}

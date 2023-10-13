@@ -1052,3 +1052,16 @@ func (lm *loggingMiddleware) ViewBootstrap(token string, id string) (b []byte, e
 
 	return lm.svc.ViewBootstrap(token, id)
 }
+
+func (lm *loggingMiddleware) GetEntities(token, item, name string, page, limit uint64) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method get_entities took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.GetEntities(token, item, name, page, limit)
+}

@@ -8,12 +8,7 @@
 
     <div class="main-content">
       <main>
-        <button
-          type="button"
-          class="btn body-button"
-          data-bs-toggle="modal"
-          data-bs-target="#connectModal"
-        >
+        <button type="button" class="btn body-button" onclick="openModal()">
           Connect
         </button>
         <div
@@ -32,24 +27,24 @@
               <div class="modal-body">
                 <form action="/things/{{.Thing.ID}}/connect" method="post">
                   <div class="mb-3">
-                    <label for="channelID" class="form-label">Channel</label>
+                    <label for="infiniteScroll" class="form-label"
+                      >Channel</label
+                    >
                     <input
                       type="text"
                       name="channelFilter"
                       id="channelFilter"
-                      placeholder="Filter by Channel ID"
-                      oninput="filterItem(this.value,'channelID')"
+                      placeholder="Filter by Channel"
+                      oninput="fetchIndividualEntity(this.value,'infiniteScroll')"
                     />
                     <select
                       class="form-select"
                       name="channelID"
-                      id="channelID"
+                      id="infiniteScroll"
+                      size="5"
                       required
                     >
-                      <option value="">...</option>
-                      {{range .AllChannels}}
-                      <option value="{{.ID}}">{{.Name}}</option>
-                      {{end}}
+                      <option disabled>select a Channel</option>
                     </select>
                     <div id="channelIDHelp" class="form-text">
                       Select a channel.
@@ -170,19 +165,85 @@
 
     {{template "footer"}}
     <script>
-      function filterItem(filterValue, selectId) {
-        const itemSelect = document.getElementById(selectId);
-        const options = itemSelect.getElementsByTagName("option");
+      const connectModal = new bootstrap.Modal(
+        document.getElementById("connectModal"),
+      );
 
-        for (let i = 0; i < options.length; i++) {
-          const option = options[i];
-          const itemId = option.value;
-          const itemName = option.innerHTML;
-          const shouldShow =
-            itemId.includes(filterValue) ||
-            itemName.toLowerCase().includes(filterValue.toLowerCase());
-          option.style.display = shouldShow ? "" : "none";
+      function openModal() {
+        connectModal.show();
+        getChannels("");
+        getAdditionalChannels();
+      }
+
+      function fetchIndividualEntity(filterValue, selectId) {
+        const itemSelect = document.getElementById(selectId);
+        if (filterValue === "") {
+          itemSelect.innerHTML = "<option disabled>select a channel</option>";
+          getChannels("");
+          getAdditionalChannels();
+        } else {
+          itemSelect.innerHTML = "";
+          getChannels(filterValue);
         }
+      }
+
+      let limit = 5;
+
+      function getChannels(name) {
+        fetchData(name, 1);
+      }
+
+      function getAdditionalChannels() {
+        var selectElement = document.getElementById("infiniteScroll");
+        var singleOptionHeight =
+          selectElement.querySelector("option").offsetHeight;
+        var selectBoxHeight = selectElement.offsetHeight;
+        var numOptionsBeforeLoad = 2;
+        var lastScrollTop = 0;
+        var currentPageNo = 1;
+        var currentScroll = 0;
+
+        selectElement.addEventListener("scroll", onselectScroll);
+
+        function onselectScroll(event) {
+          var st = selectElement.scrollTop;
+          var totalHeight =
+            selectElement.querySelectorAll("option").length *
+            singleOptionHeight;
+
+          if (st > lastScrollTop) {
+            currentScroll = st + selectBoxHeight;
+            if (
+              currentScroll + numOptionsBeforeLoad * singleOptionHeight >=
+              totalHeight
+            ) {
+              currentPageNo++;
+              fetchData("", currentPageNo);
+            }
+          }
+
+          lastScrollTop = st;
+        }
+      }
+
+      function fetchData(name, page) {
+        fetch(
+          `/entities?item=channels&limit=${limit}&name=${name}&page=${page}`,
+          {
+            method: "GET",
+          },
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            const selectElement = document.getElementById("infiniteScroll");
+            data.data.forEach((group) => {
+              const option = document.createElement("option");
+              option.value = group.id;
+              option.text = group.name;
+              selectElement.appendChild(option);
+            });
+          })
+          .catch((error) => console.error("Error:", error));
       }
     </script>
   </body>

@@ -1541,3 +1541,22 @@ func createBootstrap(svc ui.Service) endpoint.Endpoint {
 		}, nil
 	}
 }
+
+func getEntitiesEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(getEntitiesReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.GetEntities(req.token, req.Item, req.Name, req.Page, req.Limit)
+		if err != nil {
+			return nil, err
+		}
+		return uiRes{
+			html:    res,
+			code:    http.StatusOK,
+			headers: map[string]string{"Content-Type": "application/json"},
+		}, nil
+	}
+}
