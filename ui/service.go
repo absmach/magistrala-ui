@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"math"
 	"reflect"
 	"strings"
 	"sync"
@@ -64,7 +65,7 @@ var (
 	// ErrConflict indicates that entity already exists.
 	ErrConflict = errors.New("entity already exists")
 
-	tmplFiles        = []string{"header.html", "footer.html", "navbar.html"}
+	tmplFiles        = []string{"header.html", "footer.html", "navbar.html", "tableheader.html", "tablefooter.html"}
 	userActions      = []string{"g_list", "g_update", "g_delete", "g_add", "c_list", "c_update", "c_delete"}
 	thingActions     = []string{"m_read", "m_write"}
 	enabledUsers     int
@@ -84,17 +85,17 @@ type Service interface {
 	// Login displays the login page.
 	Login() ([]byte, error)
 	// Logout deletes the access token and refresh token from the cookies and logs the user out of the UI.
-	Logout() ([]byte, error)
+	Logout() error
 	// PasswordResetRequest sends an email with a link to the password reset page with a valid request token.
-	PasswordResetRequest(email string) ([]byte, error)
+	PasswordResetRequest(email string) error
 	// PasswordReset resets the user's password.
-	PasswordReset(token, password, confirmPass string) ([]byte, error)
+	PasswordReset(token, password, confirmPass string) error
 	// ShowPasswordReset displays the password reset page.
 	ShowPasswordReset() ([]byte, error)
 	// PasswordUpdate displays the password update page.
 	PasswordUpdate() ([]byte, error)
 	// UpdatePassword updates the user's old password to the new password.
-	UpdatePassword(token, oldPass, newPass string) ([]byte, error)
+	UpdatePassword(token, oldPass, newPass string) error
 	// UserProfile retrieves information about the logged in user.
 	UserProfile(token string) (sdk.User, error)
 	// Token provides a user with an access token and a refresh token.
@@ -102,125 +103,123 @@ type Service interface {
 	// RefreshToken retrieves a new access token and refresh token from the provided refresh token.
 	RefreshToken(refreshToken string) (sdk.Token, error)
 	// CreateUsers creates new users.
-	CreateUsers(token string, user ...sdk.User) ([]byte, error)
+	CreateUsers(token string, users ...sdk.User) error
 	// ListUsers retrieves users owned/shared by a user.
-	ListUsers(token string) ([]byte, error)
+	ListUsers(token string, page, limit uint64) ([]byte, error)
 	// ViewUser retrieves information about the user with the given ID.
 	ViewUser(token, userID string) ([]byte, error)
 	// UpdateUser updates the user with the given ID.
-	UpdateUser(token, userID string, user sdk.User) ([]byte, error)
+	UpdateUser(token, userID string, user sdk.User) error
 	// UpdateUserTags updates the tags of the user with the given ID.
-	UpdateUserTags(token, userID string, user sdk.User) ([]byte, error)
+	UpdateUserTags(token, userID string, user sdk.User) error
 	// UpdateUserIdentity updates the identity of the user with the given ID.
-	UpdateUserIdentity(token, userID string, user sdk.User) ([]byte, error)
+	UpdateUserIdentity(token, userID string, user sdk.User) error
 	// UpdateUserOwner updates the owner of the user with the given ID.
-	UpdateUserOwner(token, userID string, user sdk.User) ([]byte, error)
+	UpdateUserOwner(token, userID string, user sdk.User) error
 	// EnableUser updates the status of a user with the given ID to enabled.
-	EnableUser(token, userID string) ([]byte, error)
+	EnableUser(token, userID string) error
 	// DisableUser updates the status of a user with the given ID to disabled.
-	DisableUser(token, userID string) ([]byte, error)
+	DisableUser(token, userID string) error
 	// CreateThings creates new things.
-	CreateThings(token string, things ...sdk.Thing) ([]byte, error)
+	CreateThings(token string, things ...sdk.Thing) error
 	// ListThings retrieves things owned/shared by a user.
-	ListThings(token string) ([]byte, error)
+	ListThings(token string, page, limit uint64) ([]byte, error)
 	// ViewThing retrieves information about the thing with the given ID.
 	ViewThing(token, id string) ([]byte, error)
 	// UpdateThing updates the thing with the given ID.
-	UpdateThing(token, id string, thing sdk.Thing) ([]byte, error)
+	UpdateThing(token, id string, thing sdk.Thing) error
 	// UpdateThingTags updates the tags of the thing with the given ID.
-	UpdateThingTags(token, id string, thing sdk.Thing) ([]byte, error)
+	UpdateThingTags(token, id string, thing sdk.Thing) error
 	// UpdateThingSecret updates the secret of the thing with the given ID.
-	UpdateThingSecret(token, id, secret string) ([]byte, error)
+	UpdateThingSecret(token, id, secret string) error
 	// UpdateThingOwner updates the owner of the thing with the given ID
-	UpdateThingOwner(token, id string, thing sdk.Thing) ([]byte, error)
+	UpdateThingOwner(token string, thing sdk.Thing) error
 	// EnableThing updates the status of the thing with the given ID to enabled.
-	EnableThing(token, id string) ([]byte, error)
+	EnableThing(token, id string) error
 	// DisableThing updates the status of the thing with the given ID to disabled
-	DisableThing(token, id string) ([]byte, error)
+	DisableThing(token, id string) error
 	// CreateChannels creates new channels.
-	CreateChannels(token string, channels ...sdk.Channel) ([]byte, error)
+	CreateChannels(token string, channels ...sdk.Channel) error
 	// ListChannels retrieves channels owned/shared by a user.
-	ListChannels(token string) ([]byte, error)
+	ListChannels(token string, page, limit uint64) ([]byte, error)
 	// ViewChannel retrievs information about the channel with the given ID.
 	ViewChannel(token, id string) ([]byte, error)
 	// UpdateChannel updates the channel with the given ID.
-	UpdateChannel(token, id string, channel sdk.Channel) ([]byte, error)
+	UpdateChannel(token, id string, channel sdk.Channel) error
 	// ListChannelsByThing retrieves a list of channels based on the given thing ID.
-	ListChannelsByThing(token, id string) ([]byte, error)
+	ListChannelsByThing(token, id string, page, limit uint64) ([]byte, error)
 	// ListThingsByChannel retrieves a list of things based on the given channel ID.
-	ListThingsByChannel(token, id string) ([]byte, error)
+	ListThingsByChannel(token, id string, page, limit uint64) ([]byte, error)
 	// EnableChannel updates the status of the channel with the given ID to enabled.
-	EnableChannel(token, id string) ([]byte, error)
+	EnableChannel(token, id string) error
 	// DisableChannel updates the status of the channel with the given ID to disabled.
-	DisableChannel(token, id string) ([]byte, error)
+	DisableChannel(token, id string) error
 	// Connect bulk connects things to channel(s) specified by ID.
-	Connect(token string, connIDs sdk.ConnectionIDs) ([]byte, error)
+	Connect(token string, connIDs sdk.ConnectionIDs) error
 	// Disconnect bulk disconnects thinfs to channel(s) specified by ID.
-	Disconnect(token string, connIDs sdk.ConnectionIDs) ([]byte, error)
+	Disconnect(token string, connIDs sdk.ConnectionIDs) error
 	// ConnectThing connects a thing to a channel specified by ID.
-	ConnectThing(token string, connIDs sdk.ConnectionIDs) ([]byte, error)
+	ConnectThing(token string, connIDs sdk.ConnectionIDs) error
 	// ShareThing shares things connected to a channel with a user
-	ShareThing(token, chanID, userID string, actions []string) ([]byte, error)
+	ShareThing(token, chanID, userID string, actions []string) error
 	// DisconnectThing disconnects a thing from a channel specified by ID.
-	DisconnectThing(thID, chID, token string) ([]byte, error)
+	DisconnectThing(thID, chID, token string) error
 	// Connect Channel connects a channel to a thing specified by ID.
-	ConnectChannel(token string, connIDs sdk.ConnectionIDs) ([]byte, error)
+	ConnectChannel(token string, connIDs sdk.ConnectionIDs) error
 	// DisconnectChannel disconnects a channel from a thing specified by ID.
-	DisconnectChannel(thID, chID, token string) ([]byte, error)
+	DisconnectChannel(thID, chID, token string) error
 	// AddThingsPolicy adds a thing's policy on a channel.
-	AddThingsPolicy(token string, Policy sdk.Policy) ([]byte, error)
+	AddThingsPolicy(token string, Policy sdk.Policy) error
 	// DeleteThingsPolicy removes a thing's policy on a channel
-	DeleteThingsPolicy(token string, policy sdk.Policy) ([]byte, error)
+	DeleteThingsPolicy(token string, policy sdk.Policy) error
 	// ListThingsPolicies retrieves the policies of things.
-	ListThingsPolicies(token string) ([]byte, error)
+	ListThingsPolicies(token string, page, limit uint64) ([]byte, error)
 	// UpdateThingsPolicy updates the policy that a thing has over a channel.
-	UpdateThingsPolicy(token string, policy sdk.Policy) ([]byte, error)
+	UpdateThingsPolicy(token string, policy sdk.Policy) error
 	// CreateGroups creates new groups.
-	CreateGroups(token string, groups ...sdk.Group) ([]byte, error)
+	CreateGroups(token string, groups ...sdk.Group) error
 	// ListGroupMembers retrieves the members of a group with a given ID.
-	ListGroupMembers(token, id string) ([]byte, error)
+	ListGroupMembers(token, id string, page, limit uint64) ([]byte, error)
 	// Assign adds a user to a group.
-	Assign(token, groupID, memberID string, memberType []string) ([]byte, error)
+	Assign(token, groupID, memberID string, memberType []string) error
 	// Unassign removes a user from a group.
-	Unassign(token, groupID, memberID string) ([]byte, error)
+	Unassign(token, groupID, memberID string) error
 	// ViewGroup retrieves information about a group with a given ID.
 	ViewGroup(token, id string) ([]byte, error)
 	// UpdateGroup updates the group with the given ID.
-	UpdateGroup(token, id string, group sdk.Group) ([]byte, error)
+	UpdateGroup(token, id string, group sdk.Group) error
 	// ListGroups retrieves the groups owned/shared by a user.
-	ListGroups(token string) ([]byte, error)
+	ListGroups(token string, page, limit uint64) ([]byte, error)
 	// EnableGroup updates the status of the group to enabled.
-	EnableGroup(token, id string) ([]byte, error)
+	EnableGroup(token, id string) error
 	// DisableGroup updates the status of the group to disabled.
-	DisableGroup(token, id string) ([]byte, error)
+	DisableGroup(token, id string) error
 	// AddPolicy adds a user's policy on a group effectively adding the user to the group.
-	AddPolicy(token string, policy sdk.Policy) ([]byte, error)
+	AddPolicy(token string, policy sdk.Policy) error
 	// UpdatePolicy updates the policy a user has over a group.
-	UpdatePolicy(token string, policy sdk.Policy) ([]byte, error)
+	UpdatePolicy(token string, policy sdk.Policy) error
 	// ListPolicies retrieves the policies of the users.
-	ListPolicies(token string) ([]byte, error)
+	ListPolicies(token string, page, limit uint64) ([]byte, error)
 	// DeletePolicy removes a user's policies on a group effectively removing the user from the group.
-	DeletePolicy(token string, policy sdk.Policy) ([]byte, error)
+	DeletePolicy(token string, policy sdk.Policy) error
 	// Publish facilitates a thing publishin messages to a channel.
-	Publish(token, thKey string, msg *messaging.Message) ([]byte, error)
+	Publish(token, thKey string, msg *messaging.Message) error
 	// ReadMessage facilitates a thing reading messages published in a channel.
 	ReadMessage(token string) ([]byte, error)
 	// WsConnection creates a web socket connection that allows continuous reading of messages published in a channel.
 	WsConnection(token, chID, thKey string) ([]byte, error)
-	// ListDeletedClients retrieves a list of clients that have been deleted.
-	ListDeletedClients(token string) ([]byte, error)
 	// CreateBootstrap creates a new bootstrap config.
-	CreateBootstrap(token string, config ...sdk.BootstrapConfig) ([]byte, error)
+	CreateBootstrap(token string, config ...sdk.BootstrapConfig) error
 	// ListBootstrap retrieves all bootstrap configs.
-	ListBootstrap(token string) ([]byte, error)
+	ListBootstrap(token string, page, limit uint64) ([]byte, error)
 	// UpdateBootstrap allows update of bootstrap name and content.
-	UpdateBootstrap(token string, config sdk.BootstrapConfig) ([]byte, error)
+	UpdateBootstrap(token string, config sdk.BootstrapConfig) error
 	// UpdateBootstrapConnections updates connected channels on bootstrap configs.
-	UpdateBootstrapConnections(token string, config sdk.BootstrapConfig) ([]byte, error)
+	UpdateBootstrapConnections(token string, config sdk.BootstrapConfig) error
 	// UpdateBootstrapCerts updates bootstrap certs.
-	UpdateBootstrapCerts(token string, config sdk.BootstrapConfig) ([]byte, error)
+	UpdateBootstrapCerts(token string, config sdk.BootstrapConfig) error
 	// DeleteBootstrap deletes bootstrap config given an id.
-	DeleteBootstrap(token, id string) ([]byte, error)
+	DeleteBootstrap(token, id string) error
 	// ViewBootstrap retrieves a bootstrap config by thing id.
 	ViewBootstrap(token, id string) ([]byte, error)
 	// GetRemoteTerminal returns remote terminal for a bootstrap config with mainflux agent installed.
@@ -246,11 +245,23 @@ func (gs *uiService) parseTemplate(name string, tmpls ...string) (tpl *template.
 	tpl = template.New(name)
 	tpl = tpl.Funcs(template.FuncMap{
 		"toJSON": func(data map[string]interface{}) string {
-			ret, _ := json.Marshal(data)
+			if data == nil {
+				return "{}"
+			}
+			ret, err := json.Marshal(data)
+			if err != nil {
+				return "{}"
+			}
 			return string(ret)
 		},
 		"toSlice": func(data []string) string {
-			ret, _ := json.Marshal(data)
+			if len(data) == 0 {
+				return "[]"
+			}
+			ret, err := json.Marshal(data)
+			if err != nil {
+				return "[]"
+			}
 			return string(ret)
 		},
 		"contains": func(data []string, substring string) bool {
@@ -290,6 +301,31 @@ func (gs *uiService) parseTemplate(name string, tmpls ...string) (tpl *template.
 		"hasPrefix": func(s, prefix string) bool {
 			return strings.HasPrefix(s, prefix)
 		},
+		"sub": func(num1, num2 int) int {
+			return num1 - num2
+		},
+		"add": func(num1, num2 int) int {
+			return num1 + num2
+		},
+		"max": func(a, b int) int {
+			if a > b {
+				return a
+			}
+			return b
+		},
+		"min": func(a, b int) int {
+			if a < b {
+				return a
+			}
+			return b
+		},
+		"fromTo": func(start, end int) []int {
+			var result []int
+			for i := start; i <= end; i++ {
+				result = append(result, i)
+			}
+			return result
+		},
 	})
 
 	a := append(tmplFiles, tmpls...)
@@ -303,33 +339,6 @@ func (gs *uiService) parseTemplate(name string, tmpls ...string) (tpl *template.
 	}
 
 	return tpl, nil
-}
-
-func countStatus(slice interface{}) (int, int, error) {
-	sliceValue := reflect.ValueOf(slice)
-
-	if sliceValue.Kind() != reflect.Slice {
-		return 0, 0, fmt.Errorf("input is not a slice")
-	}
-
-	statusEnabled := 0
-	statusDisabled := 0
-	for i := 0; i < sliceValue.Len(); i++ {
-		itemValue := sliceValue.Index(i)
-		if itemValue.Kind() != reflect.Struct {
-			return 0, 0, fmt.Errorf("slice contains non-struct elements")
-		}
-
-		statusField := itemValue.FieldByName("Status")
-		if statusField.String() == enabled {
-			statusEnabled++
-		}
-		if statusField.String() == disabled {
-			statusDisabled++
-		}
-	}
-
-	return statusEnabled, statusDisabled, nil
 }
 
 func (gs *uiService) Index(token string) ([]byte, error) {
@@ -443,18 +452,13 @@ func (gs *uiService) Login() ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) PasswordResetRequest(email string) ([]byte, error) {
-	if err := gs.sdk.ResetPasswordRequest(email); err != nil {
-		return []byte{}, err
-	}
-	return gs.Login()
+func (gs *uiService) PasswordResetRequest(email string) error {
+
+	return gs.sdk.ResetPasswordRequest(email)
 }
 
-func (gs *uiService) PasswordReset(token, password, confirmPass string) ([]byte, error) {
-	if err := gs.sdk.ResetPassword(token, password, confirmPass); err != nil {
-		return []byte{}, err
-	}
-	return gs.Login()
+func (gs *uiService) PasswordReset(token, password, confirmPass string) error {
+	return gs.sdk.ResetPassword(token, password, confirmPass)
 }
 
 func (gs *uiService) ShowPasswordReset() ([]byte, error) {
@@ -505,8 +509,8 @@ func (gs *uiService) RefreshToken(refreshToken string) (sdk.Token, error) {
 	return token, nil
 }
 
-func (gs *uiService) Logout() ([]byte, error) {
-	return nil, nil
+func (gs *uiService) Logout() error {
+	return nil
 }
 
 func (gs *uiService) UserProfile(token string) (sdk.User, error) {
@@ -518,32 +522,31 @@ func (gs *uiService) UserProfile(token string) (sdk.User, error) {
 	return user, nil
 }
 
-func (gs *uiService) UpdatePassword(token, oldPass, newPass string) ([]byte, error) {
-	if _, err := gs.sdk.UpdatePassword(oldPass, newPass, token); err != nil {
-		return []byte{}, err
-	}
-	return nil, nil
+func (gs *uiService) UpdatePassword(token, oldPass, newPass string) error {
+	_, err := gs.sdk.UpdatePassword(oldPass, newPass, token)
+	return err
 }
 
-func (gs *uiService) CreateUsers(token string, users ...sdk.User) ([]byte, error) {
+func (gs *uiService) CreateUsers(token string, users ...sdk.User) error {
 	for i := range users {
 		_, err := gs.sdk.CreateUser(users[i], token)
 		if err != nil {
-			return []byte{}, err
+			return err
 		}
 	}
-	return gs.ListUsers(token)
+	return nil
 }
 
-func (gs *uiService) ListUsers(token string) ([]byte, error) {
+func (gs *uiService) ListUsers(token string, page, limit uint64) ([]byte, error) {
 	tpl, err := gs.parseTemplate("users", "users.html")
 	if err != nil {
 		return []byte{}, err
 	}
+	offset := (page - 1) * limit
+
 	pgm := sdk.PageMetadata{
-		Offset:     uint64(0),
-		Total:      uint64(100),
-		Limit:      uint64(100),
+		Offset:     offset,
+		Limit:      limit,
 		Visibility: "all",
 	}
 	users, err := gs.sdk.Users(pgm, token)
@@ -555,15 +558,22 @@ func (gs *uiService) ListUsers(token string) ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
+	noOfPages := int(math.Ceil(float64(users.Total) / float64(limit)))
 
 	data := struct {
 		NavbarActive string
 		Users        []sdk.User
 		User         sdk.User
+		CurrentPage  int
+		Pages        int
+		Limit        int
 	}{
 		"users",
 		users.Users,
 		user,
+		int(page),
+		noOfPages,
+		int(limit),
 	}
 
 	var btpl bytes.Buffer
@@ -608,74 +618,65 @@ func (gs *uiService) ViewUser(token, userID string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) UpdateUser(token, userID string, user sdk.User) ([]byte, error) {
-	if _, err := gs.sdk.UpdateUser(user, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) UpdateUser(token, userID string, user sdk.User) error {
+	_, err := gs.sdk.UpdateUser(user, token)
 
-	return gs.ViewUser(token, userID)
+	return err
 }
 
-func (gs *uiService) UpdateUserTags(token, userID string, user sdk.User) ([]byte, error) {
-	if _, err := gs.sdk.UpdateUserTags(user, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) UpdateUserTags(token, userID string, user sdk.User) error {
+	_, err := gs.sdk.UpdateUserTags(user, token)
 
-	return gs.ViewUser(token, userID)
+	return err
 }
 
-func (gs *uiService) UpdateUserIdentity(token, userID string, user sdk.User) ([]byte, error) {
-	if _, err := gs.sdk.UpdateUserIdentity(user, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) UpdateUserIdentity(token, userID string, user sdk.User) error {
+	_, err := gs.sdk.UpdateUserIdentity(user, token)
 
-	return gs.ViewUser(token, userID)
+	return err
 }
 
-func (gs *uiService) UpdateUserOwner(token, userID string, user sdk.User) ([]byte, error) {
-	if _, err := gs.sdk.UpdateUserIdentity(user, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) UpdateUserOwner(token, userID string, user sdk.User) error {
+	_, err := gs.sdk.UpdateUserIdentity(user, token)
 
-	return gs.ViewUser(token, userID)
+	return err
 }
 
-func (gs *uiService) EnableUser(token, userID string) ([]byte, error) {
-	if _, err := gs.sdk.EnableUser(userID, token); err != nil {
-		return []byte{}, err
-	}
-	return gs.ListUsers(token)
+func (gs *uiService) EnableUser(token, userID string) error {
+	_, err := gs.sdk.EnableUser(userID, token)
+
+	return err
 }
 
-func (gs *uiService) DisableUser(token, userID string) ([]byte, error) {
-	if _, err := gs.sdk.DisableUser(userID, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) DisableUser(token, userID string) error {
+	_, err := gs.sdk.DisableUser(userID, token)
 
-	return gs.ListUsers(token)
+	return err
 }
 
-func (gs *uiService) CreateThings(token string, things ...sdk.Thing) ([]byte, error) {
+func (gs *uiService) CreateThings(token string, things ...sdk.Thing) error {
 	for _, thing := range things {
 		_, err := gs.sdk.CreateThing(thing, token)
 		if err != nil {
-			return []byte{}, err
+			return err
 		}
 	}
-	return gs.ListThings(token)
+	return nil
 }
 
-func (gs *uiService) ListThings(token string) ([]byte, error) {
+func (gs *uiService) ListThings(token string, page, limit uint64) ([]byte, error) {
 	tpl, err := gs.parseTemplate("things", "things.html")
 	if err != nil {
 		return []byte{}, err
 	}
+	offset := (page - 1) * limit
+
 	pgm := sdk.PageMetadata{
-		Offset:     uint64(0),
-		Total:      uint64(100),
-		Limit:      uint64(100),
+		Offset:     offset,
+		Limit:      limit,
 		Visibility: "all",
 	}
+
 	things, err := gs.sdk.Things(pgm, token)
 	if err != nil {
 		return []byte{}, err
@@ -685,15 +686,22 @@ func (gs *uiService) ListThings(token string) ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
+	noOfPages := int(math.Ceil(float64(things.Total) / float64(limit)))
 
 	data := struct {
 		NavbarActive string
 		Things       []sdk.Thing
 		User         sdk.User
+		CurrentPage  int
+		Pages        int
+		Limit        int
 	}{
 		"things",
 		things.Things,
 		user,
+		int(page),
+		noOfPages,
+		int(limit),
 	}
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "things", data); err != nil {
@@ -737,77 +745,66 @@ func (gs *uiService) ViewThing(token, id string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) UpdateThing(token, id string, thing sdk.Thing) ([]byte, error) {
-	if _, err := gs.sdk.UpdateThing(thing, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) UpdateThing(token, id string, thing sdk.Thing) error {
+	_, err := gs.sdk.UpdateThing(thing, token)
 
-	return gs.ViewThing(token, id)
+	return err
 }
 
-func (gs *uiService) UpdateThingTags(token, id string, thing sdk.Thing) ([]byte, error) {
-	if _, err := gs.sdk.UpdateThingTags(thing, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) UpdateThingTags(token, id string, thing sdk.Thing) error {
+	_, err := gs.sdk.UpdateThingTags(thing, token)
 
-	return gs.ViewThing(token, id)
+	return err
 }
 
-func (gs *uiService) UpdateThingSecret(token, id, secret string) ([]byte, error) {
-	if _, err := gs.sdk.UpdateThingSecret(id, secret, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) UpdateThingSecret(token, id, secret string) error {
+	_, err := gs.sdk.UpdateThingSecret(id, secret, token)
 
-	return gs.ViewThing(token, id)
+	return err
 }
 
-func (gs *uiService) UpdateThingOwner(token, _ string, thing sdk.Thing) ([]byte, error) {
-	if _, err := gs.sdk.UpdateThingOwner(thing, token); err != nil {
-		return []byte{}, nil
-	}
+func (gs *uiService) UpdateThingOwner(token string, thing sdk.Thing) error {
+	_, err := gs.sdk.UpdateThingOwner(thing, token)
 
-	return gs.ListThings(token)
+	return err
 }
 
-func (gs *uiService) EnableThing(token, id string) ([]byte, error) {
-	if _, err := gs.sdk.EnableThing(id, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) EnableThing(token, id string) error {
+	_, err := gs.sdk.EnableThing(id, token)
 
-	return gs.ListThings(token)
+	return err
 }
 
-func (gs *uiService) DisableThing(token, id string) ([]byte, error) {
-	if _, err := gs.sdk.DisableThing(id, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) DisableThing(token, id string) error {
+	_, err := gs.sdk.DisableThing(id, token)
 
-	return gs.ListThings(token)
+	return err
 }
 
-func (gs *uiService) CreateChannels(token string, channels ...sdk.Channel) ([]byte, error) {
+func (gs *uiService) CreateChannels(token string, channels ...sdk.Channel) error {
 	for _, channel := range channels {
 		_, err := gs.sdk.CreateChannel(channel, token)
 		if err != nil {
-			return []byte{}, err
+			return err
 		}
 	}
-	return gs.ListChannels(token)
+	return nil
 }
 
-func (gs *uiService) ListChannels(token string) ([]byte, error) {
+func (gs *uiService) ListChannels(token string, page, limit uint64) ([]byte, error) {
 	tpl, err := gs.parseTemplate("channels", "channels.html")
 	if err != nil {
 		return []byte{}, err
 	}
 
-	filter := sdk.PageMetadata{
-		Offset:     uint64(0),
-		Total:      uint64(100),
-		Limit:      uint64(100),
+	offset := (page - 1) * limit
+
+	pgm := sdk.PageMetadata{
+		Offset:     offset,
+		Limit:      limit,
 		Visibility: "all",
 	}
-	chsPage, err := gs.sdk.Channels(filter, token)
+	chsPage, err := gs.sdk.Channels(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -816,15 +813,22 @@ func (gs *uiService) ListChannels(token string) ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
+	noOfPages := int(math.Ceil(float64(chsPage.Total) / float64(limit)))
 
 	data := struct {
 		NavbarActive string
 		Channels     []sdk.Channel
 		User         sdk.User
+		CurrentPage  int
+		Pages        int
+		Limit        int
 	}{
 		"channels",
 		chsPage.Channels,
 		user,
+		int(page),
+		noOfPages,
+		int(limit),
 	}
 
 	var btpl bytes.Buffer
@@ -870,70 +874,54 @@ func (gs *uiService) ViewChannel(token, id string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) UpdateChannel(token, id string, channel sdk.Channel) ([]byte, error) {
-	if _, err := gs.sdk.UpdateChannel(channel, token); err != nil {
-		return []byte{}, err
-	}
-	return gs.ViewChannel(token, id)
+func (gs *uiService) UpdateChannel(token, id string, channel sdk.Channel) error {
+	_, err := gs.sdk.UpdateChannel(channel, token)
+
+	return err
 }
 
-func (gs *uiService) EnableChannel(token, id string) ([]byte, error) {
-	if _, err := gs.sdk.EnableChannel(id, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) EnableChannel(token, id string) error {
+	_, err := gs.sdk.EnableChannel(id, token)
 
-	return gs.ListChannels(token)
+	return err
 }
 
-func (gs *uiService) DisableChannel(token, id string) ([]byte, error) {
-	if _, err := gs.sdk.DisableChannel(id, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) DisableChannel(token, id string) error {
+	_, err := gs.sdk.DisableChannel(id, token)
 
-	return gs.ListChannels(token)
+	return err
 }
 
-func (gs *uiService) ConnectThing(token string, connIDs sdk.ConnectionIDs) ([]byte, error) {
-	if err := gs.sdk.Connect(connIDs, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) ConnectThing(token string, connIDs sdk.ConnectionIDs) error {
 
-	return gs.ListThingsByChannel(token, connIDs.ChannelIDs[0])
+	return gs.sdk.Connect(connIDs, token)
 }
 
-func (gs *uiService) ShareThing(token, chanID, userID string, actions []string) ([]byte, error) {
-	if err := gs.sdk.ShareThing(chanID, userID, actions, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) ShareThing(token, chanID, userID string, actions []string) error {
 
-	return gs.ListThingsByChannel(token, chanID)
+	return gs.sdk.ShareThing(chanID, userID, actions, token)
+
 }
 
-func (gs *uiService) DisconnectThing(thID, chID, token string) ([]byte, error) {
-	if err := gs.sdk.DisconnectThing(thID, chID, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) DisconnectThing(thID, chID, token string) error {
 
-	return gs.ListThingsByChannel(token, chID)
+	return gs.sdk.DisconnectThing(thID, chID, token)
+
 }
 
-func (gs *uiService) ConnectChannel(token string, connIDs sdk.ConnectionIDs) ([]byte, error) {
-	if err := gs.sdk.Connect(connIDs, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) ConnectChannel(token string, connIDs sdk.ConnectionIDs) error {
 
-	return gs.ListChannelsByThing(token, connIDs.ThingIDs[0])
+	return gs.sdk.Connect(connIDs, token)
+
 }
 
-func (gs *uiService) DisconnectChannel(thID, chID, token string) ([]byte, error) {
-	if err := gs.sdk.DisconnectThing(thID, chID, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) DisconnectChannel(thID, chID, token string) error {
 
-	return gs.ListChannelsByThing(token, thID)
+	return gs.sdk.DisconnectThing(thID, chID, token)
+
 }
 
-func (gs *uiService) ListChannelsByThing(token, id string) ([]byte, error) {
+func (gs *uiService) ListChannelsByThing(token, id string, page, limit uint64) ([]byte, error) {
 	tpl, err := gs.parseTemplate("thingconn", "thingconn.html")
 	if err != nil {
 		return []byte{}, err
@@ -943,10 +931,12 @@ func (gs *uiService) ListChannelsByThing(token, id string) ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
+	offset := (page - 1) * limit
+
 	pgm := sdk.PageMetadata{
-		Offset: uint64(0),
-		Total:  uint64(100),
-		Limit:  uint64(100),
+		Offset:     offset,
+		Limit:      limit,
+		Visibility: "all",
 	}
 
 	chsPage, err := gs.sdk.ChannelsByThing(id, pgm, token)
@@ -954,12 +944,18 @@ func (gs *uiService) ListChannelsByThing(token, id string) ([]byte, error) {
 		return []byte{}, err
 	}
 
-	allchsPage, err := gs.sdk.Channels(pgm, token)
+	filter := sdk.PageMetadata{
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
+	}
+
+	allchsPage, err := gs.sdk.Channels(filter, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	plcPage, err := gs.sdk.ListThingPolicies(pgm, token)
+	plcPage, err := gs.sdk.ListThingPolicies(filter, token)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -968,6 +964,7 @@ func (gs *uiService) ListChannelsByThing(token, id string) ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
+	noOfPages := int(math.Ceil(float64(chsPage.Total) / float64(limit)))
 
 	data := struct {
 		NavbarActive string
@@ -977,6 +974,9 @@ func (gs *uiService) ListChannelsByThing(token, id string) ([]byte, error) {
 		AllChannels  []sdk.Channel
 		Policies     []sdk.Policy
 		User         sdk.User
+		CurrentPage  int
+		Pages        int
+		Limit        int
 	}{
 		"things",
 		id,
@@ -985,6 +985,9 @@ func (gs *uiService) ListChannelsByThing(token, id string) ([]byte, error) {
 		allchsPage.Channels,
 		plcPage.Policies,
 		user,
+		int(page),
+		noOfPages,
+		int(limit),
 	}
 
 	var btpl bytes.Buffer
@@ -994,23 +997,18 @@ func (gs *uiService) ListChannelsByThing(token, id string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) Connect(token string, connIDs sdk.ConnectionIDs) ([]byte, error) {
-	if err := gs.sdk.Connect(connIDs, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) Connect(token string, connIDs sdk.ConnectionIDs) error {
 
-	return gs.ListThingsByChannel(token, connIDs.ChannelIDs[0])
+	return gs.sdk.Connect(connIDs, token)
+
 }
 
-func (gs *uiService) Disconnect(token string, connIDs sdk.ConnectionIDs) ([]byte, error) {
-	if err := gs.sdk.Disconnect(connIDs, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) Disconnect(token string, connIDs sdk.ConnectionIDs) error {
 
-	return gs.ListThingsByChannel(token, connIDs.ChannelIDs[0])
+	return gs.sdk.Disconnect(connIDs, token)
 }
 
-func (gs *uiService) ListThingsByChannel(token, id string) ([]byte, error) {
+func (gs *uiService) ListThingsByChannel(token, id string, page, limit uint64) ([]byte, error) {
 	tpl, err := gs.parseTemplate("channelconn", "channelconn.html")
 	if err != nil {
 		return []byte{}, err
@@ -1020,11 +1018,12 @@ func (gs *uiService) ListThingsByChannel(token, id string) ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
+	offset := (page - 1) * limit
 
 	pgm := sdk.PageMetadata{
-		Offset: uint64(0),
-		Total:  uint64(100),
-		Limit:  uint64(100),
+		Offset:     offset,
+		Limit:      limit,
+		Visibility: "all",
 	}
 
 	thsPage, err := gs.sdk.ThingsByChannel(id, pgm, token)
@@ -1032,19 +1031,26 @@ func (gs *uiService) ListThingsByChannel(token, id string) ([]byte, error) {
 		return []byte{}, err
 	}
 
-	allthsPage, err := gs.sdk.Things(pgm, token)
+	filter := sdk.PageMetadata{
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
+	}
+
+	allthsPage, err := gs.sdk.Things(filter, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	plcPage, err := gs.sdk.ListThingPolicies(pgm, token)
+	plcPage, err := gs.sdk.ListThingPolicies(filter, token)
 	if err != nil {
 		return []byte{}, err
 	}
-	users, err := gs.sdk.Users(pgm, token)
+	users, err := gs.sdk.Users(filter, token)
 	if err != nil {
 		return []byte{}, err
 	}
+	noOfPages := int(math.Ceil(float64(thsPage.Total) / float64(limit)))
 
 	data := struct {
 		NavbarActive string
@@ -1054,6 +1060,9 @@ func (gs *uiService) ListThingsByChannel(token, id string) ([]byte, error) {
 		AllThings    []sdk.Thing
 		Policies     []sdk.Policy
 		Users        []sdk.User
+		CurrentPage  int
+		Pages        int
+		Limit        int
 	}{
 		"channels",
 		id,
@@ -1062,6 +1071,9 @@ func (gs *uiService) ListThingsByChannel(token, id string) ([]byte, error) {
 		allthsPage.Things,
 		plcPage.Policies,
 		users.Users,
+		int(page),
+		noOfPages,
+		int(limit),
 	}
 
 	var btpl bytes.Buffer
@@ -1071,31 +1083,39 @@ func (gs *uiService) ListThingsByChannel(token, id string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) ListThingsPolicies(token string) ([]byte, error) {
+func (gs *uiService) ListThingsPolicies(token string, page, limit uint64) ([]byte, error) {
 	tpl, err := gs.parseTemplate("thingsPolicies", "thingsPolicies.html")
 	if err != nil {
 		return []byte{}, err
 	}
+	offset := (page - 1) * limit
 
 	pgm := sdk.PageMetadata{
-		Offset: uint64(0),
-		Total:  uint64(100),
-		Limit:  uint64(100),
+		Offset:     offset,
+		Limit:      limit,
+		Visibility: "all",
 	}
 	plcPage, err := gs.sdk.ListThingPolicies(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	chsPage, err := gs.sdk.Channels(pgm, token)
+	filter := sdk.PageMetadata{
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
+	}
+
+	chsPage, err := gs.sdk.Channels(filter, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	thsPage, err := gs.sdk.Things(pgm, token)
+	thsPage, err := gs.sdk.Things(filter, token)
 	if err != nil {
 		return []byte{}, err
 	}
+	noOfPages := int(math.Ceil(float64(plcPage.Total) / float64(limit)))
 
 	data := struct {
 		NavbarActive string
@@ -1103,12 +1123,18 @@ func (gs *uiService) ListThingsPolicies(token string) ([]byte, error) {
 		Channels     []sdk.Channel
 		Things       []sdk.Thing
 		Actions      []string
+		CurrentPage  int
+		Pages        int
+		Limit        int
 	}{
 		"thingsPolicies",
 		plcPage.Policies,
 		chsPage.Channels,
 		thsPage.Things,
 		thingActions,
+		int(page),
+		noOfPages,
+		int(limit),
 	}
 
 	var btpl bytes.Buffer
@@ -1119,31 +1145,25 @@ func (gs *uiService) ListThingsPolicies(token string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) AddThingsPolicy(token string, policy sdk.Policy) ([]byte, error) {
-	if err := gs.sdk.CreateThingPolicy(policy, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) AddThingsPolicy(token string, policy sdk.Policy) error {
 
-	return gs.ListThingsPolicies(token)
+	return gs.sdk.CreateThingPolicy(policy, token)
+
 }
 
-func (gs *uiService) DeleteThingsPolicy(token string, policy sdk.Policy) ([]byte, error) {
-	if err := gs.sdk.DeleteThingPolicy(policy, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) DeleteThingsPolicy(token string, policy sdk.Policy) error {
 
-	return gs.ListThingsPolicies(token)
+	return gs.sdk.DeleteThingPolicy(policy, token)
+
 }
 
-func (gs *uiService) UpdateThingsPolicy(token string, policy sdk.Policy) ([]byte, error) {
-	if err := gs.sdk.UpdateThingPolicy(policy, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) UpdateThingsPolicy(token string, policy sdk.Policy) error {
 
-	return gs.ListThingsPolicies(token)
+	return gs.sdk.UpdateThingPolicy(policy, token)
+
 }
 
-func (gs *uiService) ListGroupMembers(token, id string) ([]byte, error) {
+func (gs *uiService) ListGroupMembers(token, id string, page, limit uint64) ([]byte, error) {
 	tpl, err := gs.parseTemplate("groupconn", "groupconn.html")
 	if err != nil {
 		return []byte{}, err
@@ -1153,16 +1173,22 @@ func (gs *uiService) ListGroupMembers(token, id string) ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
+	offset := (page - 1) * limit
 
 	pgm := sdk.PageMetadata{
-		Offset: uint64(0),
-		Total:  uint64(100),
-		Limit:  uint64(100),
+		Offset:     offset,
+		Limit:      limit,
+		Visibility: "all",
 	}
-
 	members, err := gs.sdk.Members(id, pgm, token)
 	if err != nil {
 		return []byte{}, err
+	}
+
+	filter := sdk.PageMetadata{
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
 	}
 
 	user, err := gs.UserProfile(token)
@@ -1170,15 +1196,16 @@ func (gs *uiService) ListGroupMembers(token, id string) ([]byte, error) {
 		return []byte{}, err
 	}
 
-	users, err := gs.sdk.Users(pgm, token)
+	users, err := gs.sdk.Users(filter, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	plcPage, err := gs.sdk.ListUserPolicies(pgm, token)
+	plcPage, err := gs.sdk.ListUserPolicies(filter, token)
 	if err != nil {
 		return []byte{}, err
 	}
+	noOfPages := int(math.Ceil(float64(members.Total) / float64(limit)))
 
 	data := struct {
 		NavbarActive string
@@ -1189,6 +1216,9 @@ func (gs *uiService) ListGroupMembers(token, id string) ([]byte, error) {
 		Policies     []sdk.Policy
 		User         sdk.User
 		Actions      []string
+		CurrentPage  int
+		Pages        int
+		Limit        int
 	}{
 		"groups",
 		id,
@@ -1198,6 +1228,9 @@ func (gs *uiService) ListGroupMembers(token, id string) ([]byte, error) {
 		plcPage.Policies,
 		user,
 		userActions,
+		int(page),
+		noOfPages,
+		int(limit),
 	}
 
 	var btpl bytes.Buffer
@@ -1207,26 +1240,27 @@ func (gs *uiService) ListGroupMembers(token, id string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) CreateGroups(token string, groups ...sdk.Group) ([]byte, error) {
+func (gs *uiService) CreateGroups(token string, groups ...sdk.Group) error {
 	for _, group := range groups {
 		_, err := gs.sdk.CreateGroup(group, token)
 		if err != nil {
-			return []byte{}, err
+			return err
 		}
 	}
-	return gs.ListGroups(token)
+	return nil
 }
 
-func (gs *uiService) ListGroups(token string) ([]byte, error) {
+func (gs *uiService) ListGroups(token string, page, limit uint64) ([]byte, error) {
 	tpl, err := gs.parseTemplate("groups", "groups.html")
 	if err != nil {
 		return []byte{}, err
 	}
+	offset := (page - 1) * limit
 
 	pgm := sdk.PageMetadata{
-		Offset: uint64(0),
-		Total:  uint64(100),
-		Limit:  uint64(100),
+		Offset:     offset,
+		Limit:      limit,
+		Visibility: "all",
 	}
 	grpPage, err := gs.sdk.Groups(pgm, token)
 	if err != nil {
@@ -1237,15 +1271,22 @@ func (gs *uiService) ListGroups(token string) ([]byte, error) {
 	if err != nil {
 		return []byte{}, err
 	}
+	noOfPages := int(math.Ceil(float64(grpPage.Total) / float64(limit)))
 
 	data := struct {
 		NavbarActive string
 		Groups       []sdk.Group
 		User         sdk.User
+		CurrentPage  int
+		Pages        int
+		Limit        int
 	}{
 		"groups",
 		grpPage.Groups,
 		user,
+		int(page),
+		noOfPages,
+		int(limit),
 	}
 
 	var btpl bytes.Buffer
@@ -1291,78 +1332,75 @@ func (gs *uiService) ViewGroup(token, id string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) Assign(token, groupID, memberID string, memberType []string) ([]byte, error) {
-	if err := gs.sdk.Assign(memberType, memberID, groupID, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) Assign(token, groupID, memberID string, memberType []string) error {
 
-	return gs.ListGroupMembers(token, groupID)
+	return gs.sdk.Assign(memberType, memberID, groupID, token)
+
 }
 
-func (gs *uiService) Unassign(token, groupID, memberID string) ([]byte, error) {
-	if err := gs.sdk.Unassign(memberID, groupID, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) Unassign(token, groupID, memberID string) error {
 
-	return gs.ListGroupMembers(token, groupID)
+	return gs.sdk.Unassign(memberID, groupID, token)
+
 }
 
-func (gs *uiService) UpdateGroup(token, id string, group sdk.Group) ([]byte, error) {
-	if _, err := gs.sdk.UpdateGroup(group, token); err != nil {
-		return []byte{}, err
-	}
-	return gs.ViewGroup(token, id)
+func (gs *uiService) UpdateGroup(token, id string, group sdk.Group) error {
+	_, err := gs.sdk.UpdateGroup(group, token)
+
+	return err
 }
 
-func (gs *uiService) EnableGroup(token, id string) ([]byte, error) {
-	if _, err := gs.sdk.EnableGroup(id, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) EnableGroup(token, id string) error {
+	_, err := gs.sdk.EnableGroup(id, token)
 
-	return gs.ListGroups(token)
+	return err
 }
 
-func (gs *uiService) DisableGroup(token, id string) ([]byte, error) {
-	if _, err := gs.sdk.DisableGroup(id, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) DisableGroup(token, id string) error {
+	_, err := gs.sdk.DisableGroup(id, token)
 
-	return gs.ListGroups(token)
+	return err
 }
 
-func (gs *uiService) AddPolicy(token string, policy sdk.Policy) ([]byte, error) {
-	if err := gs.sdk.CreateUserPolicy(policy, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) AddPolicy(token string, policy sdk.Policy) error {
 
-	return gs.ListPolicies(token)
+	return gs.sdk.CreateUserPolicy(policy, token)
+
 }
 
-func (gs *uiService) ListPolicies(token string) ([]byte, error) {
+func (gs *uiService) ListPolicies(token string, page, limit uint64) ([]byte, error) {
 	tpl, err := gs.parseTemplate("policies", "usersPolicies.html")
 	if err != nil {
 		return []byte{}, err
 	}
+	offset := (page - 1) * limit
 
 	pgm := sdk.PageMetadata{
-		Offset: uint64(0),
-		Total:  uint64(100),
-		Limit:  uint64(100),
+		Offset:     offset,
+		Limit:      limit,
+		Visibility: "all",
 	}
 	plcPage, err := gs.sdk.ListUserPolicies(pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	grpPage, err := gs.sdk.Groups(pgm, token)
+	filter := sdk.PageMetadata{
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
+	}
+
+	grpPage, err := gs.sdk.Groups(filter, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	users, err := gs.sdk.Users(pgm, token)
+	users, err := gs.sdk.Users(filter, token)
 	if err != nil {
 		return []byte{}, err
 	}
+	noOfPages := int(math.Ceil(float64(plcPage.Total) / float64(limit)))
 
 	data := struct {
 		NavbarActive string
@@ -1370,12 +1408,18 @@ func (gs *uiService) ListPolicies(token string) ([]byte, error) {
 		Groups       []sdk.Group
 		Users        []sdk.User
 		Actions      []string
+		CurrentPage  int
+		Pages        int
+		Limit        int
 	}{
 		"policies",
 		plcPage.Policies,
 		grpPage.Groups,
 		users.Users,
 		userActions,
+		int(page),
+		noOfPages,
+		int(limit),
 	}
 
 	var btpl bytes.Buffer
@@ -1386,29 +1430,22 @@ func (gs *uiService) ListPolicies(token string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) UpdatePolicy(token string, policy sdk.Policy) ([]byte, error) {
-	if err := gs.sdk.UpdateUserPolicy(policy, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) UpdatePolicy(token string, policy sdk.Policy) error {
 
-	return gs.ListPolicies(token)
+	return gs.sdk.UpdateUserPolicy(policy, token)
+
 }
 
-func (gs *uiService) DeletePolicy(token string, policy sdk.Policy) ([]byte, error) {
-	if err := gs.sdk.DeleteUserPolicy(policy, token); err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) DeletePolicy(token string, policy sdk.Policy) error {
 
-	return gs.ListPolicies(token)
+	return gs.sdk.DeleteUserPolicy(policy, token)
+
 }
 
-func (gs *uiService) Publish(token, thKey string, msg *messaging.Message) ([]byte, error) {
-	err := gs.sdk.SendMessage(msg.Channel, string(msg.Payload), thKey)
-	if err != nil {
-		return []byte{}, err
-	}
+func (gs *uiService) Publish(token, thKey string, msg *messaging.Message) error {
 
-	return gs.ListThingsByChannel(token, msg.Channel)
+	return gs.sdk.SendMessage(msg.Channel, string(msg.Payload), thKey)
+
 }
 
 func (gs *uiService) ReadMessage(_ string) ([]byte, error) {
@@ -1449,56 +1486,6 @@ func (gs *uiService) WsConnection(_, chID, thKey string) ([]byte, error) {
 
 	var btpl bytes.Buffer
 	if err := tpl.ExecuteTemplate(&btpl, "messagesread", data); err != nil {
-		return []byte{}, err
-	}
-
-	return btpl.Bytes(), nil
-}
-
-func (gs *uiService) ListDeletedClients(token string) ([]byte, error) {
-	tpl, err := gs.parseTemplate("deletedClients", "deletedClients.html")
-	if err != nil {
-		return []byte{}, err
-	}
-	pgm := sdk.PageMetadata{
-		Offset: uint64(0),
-		Total:  uint64(100),
-		Limit:  uint64(100),
-		Status: "disabled",
-	}
-	users, err := gs.sdk.Users(pgm, token)
-	if err != nil {
-		return []byte{}, err
-	}
-	groups, err := gs.sdk.Groups(pgm, token)
-	if err != nil {
-		return []byte{}, err
-	}
-	things, err := gs.sdk.Things(pgm, token)
-	if err != nil {
-		return []byte{}, err
-	}
-	channels, err := gs.sdk.Channels(pgm, token)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	data := struct {
-		NavbarActive string
-		Users        []sdk.User
-		Groups       []sdk.Group
-		Things       []sdk.Thing
-		Channels     []sdk.Channel
-	}{
-		"deleted",
-		users.Users,
-		groups.Groups,
-		things.Things,
-		channels.Channels,
-	}
-
-	var btpl bytes.Buffer
-	if err := tpl.ExecuteTemplate(&btpl, "deletedClients", data); err != nil {
 		return []byte{}, err
 	}
 
@@ -1607,19 +1594,28 @@ func (us *uiService) ProcessTerminalCommand(ctx context.Context, id, tkn, comman
 	return nil
 }
 
-func (us *uiService) ListBootstrap(token string) ([]byte, error) {
+func (us *uiService) ListBootstrap(token string, page, limit uint64) ([]byte, error) {
 	tpl, err := us.parseTemplate("bootstraps", "bootstraps.html")
 	if err != nil {
 		return []byte{}, err
 	}
+	offset := (page - 1) * limit
+
+	pgm := sdk.PageMetadata{
+		Offset:     offset,
+		Limit:      limit,
+		Visibility: "all",
+	}
+
+	bootstraps, err := us.sdk.Bootstraps(pgm, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	filter := sdk.PageMetadata{
 		Offset: uint64(0),
 		Total:  uint64(100),
 		Limit:  uint64(100),
-	}
-	bootstraps, err := us.sdk.Bootstraps(filter, token)
-	if err != nil {
-		return []byte{}, err
 	}
 
 	things, err := us.sdk.Things(filter, token)
@@ -1627,14 +1623,22 @@ func (us *uiService) ListBootstrap(token string) ([]byte, error) {
 		return []byte{}, err
 	}
 
+	noOfPages := int(math.Ceil(float64(bootstraps.Total) / float64(limit)))
+
 	data := struct {
 		NavbarActive string
 		Bootstraps   []sdk.BootstrapConfig
 		Things       []sdk.Thing
+		CurrentPage  int
+		Pages        int
+		Limit        int
 	}{
 		"bootstraps",
 		bootstraps.Configs,
 		things.Things,
+		int(page),
+		noOfPages,
+		int(limit),
 	}
 
 	var btpl bytes.Buffer
@@ -1686,48 +1690,66 @@ func (us *uiService) ViewBootstrap(token, id string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) CreateBootstrap(token string, configs ...sdk.BootstrapConfig) ([]byte, error) {
+func (us *uiService) CreateBootstrap(token string, configs ...sdk.BootstrapConfig) error {
 	for _, cfg := range configs {
 		_, err := us.sdk.AddBootstrap(cfg, token)
 		if err != nil {
-			return []byte{}, err
+			return err
 		}
 	}
-	return us.ListBootstrap(token)
+	return nil
 }
 
-func (us *uiService) DeleteBootstrap(token, id string) ([]byte, error) {
-	if err := us.sdk.RemoveBootstrap(id, token); err != nil {
-		return []byte{}, err
-	}
+func (us *uiService) DeleteBootstrap(token, id string) error {
 
-	return us.ListBootstrap(token)
+	return us.sdk.RemoveBootstrap(id, token)
+
 }
 
-func (us *uiService) UpdateBootstrap(token string, config sdk.BootstrapConfig) ([]byte, error) {
-	if err := us.sdk.UpdateBootstrap(config, token); err != nil {
-		return []byte{}, err
-	}
+func (us *uiService) UpdateBootstrap(token string, config sdk.BootstrapConfig) error {
 
-	return us.ViewBootstrap(token, config.ThingID)
+	return us.sdk.UpdateBootstrap(config, token)
+
 }
 
-func (us *uiService) UpdateBootstrapCerts(token string, config sdk.BootstrapConfig) ([]byte, error) {
-	if _, err := us.sdk.UpdateBootstrapCerts(config.ThingID, config.ClientCert, config.ClientKey, config.CACert, token); err != nil {
-		return []byte{}, err
-	}
+func (us *uiService) UpdateBootstrapCerts(token string, config sdk.BootstrapConfig) error {
+	_, err := us.sdk.UpdateBootstrapCerts(config.ThingID, config.ClientCert, config.ClientKey, config.CACert, token)
 
-	return us.ViewBootstrap(token, config.ThingID)
+	return err
 }
 
-func (us *uiService) UpdateBootstrapConnections(token string, config sdk.BootstrapConfig) ([]byte, error) {
+func (us *uiService) UpdateBootstrapConnections(token string, config sdk.BootstrapConfig) error {
 	channels, ok := config.Channels.([]string)
 	if !ok {
-		return nil, errors.New("invalid channel")
+		return errors.New("invalid channel")
 	}
-	if err := us.sdk.UpdateBootstrapConnection(config.ThingID, channels, token); err != nil {
-		return []byte{}, err
+	return us.sdk.UpdateBootstrapConnection(config.ThingID, channels, token)
+
+}
+
+func countStatus(slice interface{}) (int, int, error) {
+	sliceValue := reflect.ValueOf(slice)
+
+	if sliceValue.Kind() != reflect.Slice {
+		return 0, 0, fmt.Errorf("input is not a slice")
 	}
 
-	return us.ViewBootstrap(token, config.ThingID)
+	statusEnabled := 0
+	statusDisabled := 0
+	for i := 0; i < sliceValue.Len(); i++ {
+		itemValue := sliceValue.Index(i)
+		if itemValue.Kind() != reflect.Struct {
+			return 0, 0, fmt.Errorf("slice contains non-struct elements")
+		}
+
+		statusField := itemValue.FieldByName("Status")
+		if statusField.String() == enabled {
+			statusEnabled++
+		}
+		if statusField.String() == disabled {
+			statusDisabled++
+		}
+	}
+
+	return statusEnabled, statusDisabled, nil
 }

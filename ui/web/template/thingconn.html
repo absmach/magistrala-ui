@@ -109,71 +109,67 @@
           >
             CONNECTED CHANNELS
           </h4>
-          <table id="itemsTable" class="table">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">NAME</th>
-                <th scope="col">ID</th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {{$userID := .User.ID}} {{range $i, $c := .Channels}}
-              <tr>
-                <th scope="row">{{$i}}</th>
-                <td>{{$c.Name}}</td>
-                <td><a href='{{printf "/channels/%s" $c.ID}}'>{{$c.ID}}</a></td>
-                <td>
-                  {{range $p :=$policies}} {{if (eq $c.ID $p.Object)}} {{if (eq
-                  $t.ID $p.Subject)}} {{range $j, $a := $p.Actions}}
-                  {{$badgeClass := "badge text-dark "}} {{if eq $a "m_read"}}
-                  {{$badgeClass = printf "%s%s" $badgeClass "read-action"}}
-                  {{else if eq $a "m_write"}} {{$badgeClass = printf "%s%s"
-                  $badgeClass "write-action"}} {{else}} {{$badgeClass = printf
-                  "%s%s" $badgeClass "text-bg-info"}} {{end}}
-                  <span class="{{$badgeClass}}">{{$a}}</span>
-                  {{end}} {{end}} {{end}} {{end}}
-                </td>
-                <td>
-                  <form action="/disconnectChannel" method="post">
-                    <input
-                      type="hidden"
-                      name="thingID"
-                      id="thingID"
-                      value="{{$t.ID}}"
-                    />
-                    <input
-                      type="hidden"
-                      name="channelID"
-                      id="channelID"
-                      value="{{$c.ID}}"
-                    />
-                    <button type="submit" class="btn btn-danger btn-sm">
-                      Disconnect
-                    </button>
-                  </form>
-                </td>
-              </tr>
-              {{end}}
-            </tbody>
-          </table>
+
+          {{template "tableheader" .}}
+          <div class="itemsTable">
+            <table id="itemsTable" class="table">
+              <thead>
+                <tr>
+                  <th scope="col">NAME</th>
+                  <th scope="col">ID</th>
+                  <th scope="col">ACTIONS</th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {{$userID := .User.ID}} {{range $i, $c := .Channels}}
+                <tr>
+                  <td>{{$c.Name}}</td>
+                  <td>
+                    <a href='{{printf "/channels/%s" $c.ID}}'>{{$c.ID}}</a>
+                  </td>
+                  <td>
+                    {{range $p :=$policies}} {{if (eq $c.ID $p.Object)}} {{if
+                    (eq $t.ID $p.Subject)}} {{range $j, $a := $p.Actions}}
+                    {{$badgeClass := "badge text-dark "}} {{if eq $a "m_read"}}
+                    {{$badgeClass = printf "%s%s" $badgeClass "read-action"}}
+                    {{else if eq $a "m_write"}} {{$badgeClass = printf "%s%s"
+                    $badgeClass "write-action"}} {{else}} {{$badgeClass = printf
+                    "%s%s" $badgeClass "text-bg-info"}} {{end}}
+                    <span class="{{$badgeClass}}">{{$a}}</span>
+                    {{end}} {{end}} {{end}} {{end}}
+                  </td>
+                  <td>
+                    <form action="/disconnectChannel" method="post">
+                      <input
+                        type="hidden"
+                        name="thingID"
+                        id="thingID"
+                        value="{{$t.ID}}"
+                      />
+                      <input
+                        type="hidden"
+                        name="channelID"
+                        id="channelID"
+                        value="{{$c.ID}}"
+                      />
+                      <button type="submit" class="btn btn-danger btn-sm">
+                        Disconnect
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {{end}}
+              </tbody>
+            </table>
+          </div>
+          {{template "tablefooter" .}}
         </div>
       </main>
     </div>
 
     {{template "footer"}}
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        new simpleDatatables.DataTable("#itemsTable", {
-          searchable: true,
-          scrollY: "200px",
-          sortable: true,
-          pagination: true,
-        });
-      });
-
       function filterItem(filterValue, selectId) {
         const itemSelect = document.getElementById(selectId);
         const options = itemSelect.getElementsByTagName("option");

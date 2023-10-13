@@ -70,8 +70,7 @@ func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.UpdatePassword(req.token, req.OldPass, req.NewPass)
-		if err != nil {
+		if err := svc.UpdatePassword(req.token, req.OldPass, req.NewPass); err != nil {
 			return nil, err
 		}
 
@@ -93,9 +92,9 @@ func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusOK,
-			html:    res,
+			code:    http.StatusFound,
 			cookies: cookies,
+			headers: map[string]string{"Location": "/login"},
 		}, nil
 	}
 }
@@ -183,8 +182,7 @@ func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 
 func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, _ interface{}) (interface{}, error) {
-		res, err := svc.Logout()
-		if err != nil {
+		if err := svc.Logout(); err != nil {
 			return nil, err
 		}
 
@@ -206,7 +204,6 @@ func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 		return uiRes{
 			code:    http.StatusFound,
-			html:    res,
 			cookies: cookies,
 			headers: map[string]string{"Location": "/login"},
 		}, nil
@@ -216,18 +213,16 @@ func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
 func passwordResetRequestEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(passwordResetRequestReq)
-
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.PasswordResetRequest(req.Email)
-		if err != nil {
+
+		if err := svc.PasswordResetRequest(req.Email); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
 			code:    http.StatusFound,
-			html:    res,
 			headers: map[string]string{"Location": "/login"},
 		}, nil
 	}
@@ -240,14 +235,12 @@ func passwordResetEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.PasswordReset(req.token, req.Password, req.ConfirmPassword)
-		if err != nil {
+		if err := svc.PasswordReset(req.token, req.Password, req.ConfirmPassword); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
 			code:    http.StatusFound,
-			html:    res,
 			headers: map[string]string{"Location": "/login"},
 		}, nil
 	}
@@ -274,13 +267,13 @@ func createUserEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.CreateUsers(req.token, req.User)
-		if err != nil {
+		if err := svc.CreateUsers(req.token, req.User); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			html: res,
+			code:    http.StatusOK,
+			headers: map[string]string{"Location": "/users"},
 		}, nil
 	}
 }
@@ -291,6 +284,7 @@ func createUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
+
 		users := []sdk.User{}
 		for i := range req.Emails {
 			credential := sdk.Credentials{
@@ -303,25 +297,25 @@ func createUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 			}
 			users = append(users, user)
 		}
-		res, err := svc.CreateUsers(req.token, users...)
-		if err != nil {
+		if err := svc.CreateUsers(req.token, users...); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			html: res,
+			code:    http.StatusOK,
+			headers: map[string]string{"Location": "/users"},
 		}, nil
 	}
 }
 
 func listUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(listUsersReq)
-
+		req := request.(listEntityReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.ListUsers(req.token)
+
+		res, err := svc.ListUsers(req.token, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -336,7 +330,6 @@ func listUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 func viewUserEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(viewResourceReq)
-
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
@@ -356,7 +349,6 @@ func viewUserEndpoint(svc ui.Service) endpoint.Endpoint {
 func updateUserEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateUserReq)
-
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
@@ -367,14 +359,13 @@ func updateUserEndpoint(svc ui.Service) endpoint.Endpoint {
 			Metadata: req.Metadata,
 		}
 
-		res, err := svc.UpdateUser(req.token, req.id, user)
-		if err != nil {
+		if err := svc.UpdateUser(req.token, req.id, user); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/users/" + req.id},
 		}, nil
 	}
 }
@@ -382,22 +373,21 @@ func updateUserEndpoint(svc ui.Service) endpoint.Endpoint {
 func updateUserTagsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateUserTagsReq)
-
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
+
 		user := sdk.User{
 			ID:   req.id,
 			Tags: req.Tags,
 		}
-		res, err := svc.UpdateUserTags(req.token, req.id, user)
-		if err != nil {
+		if err := svc.UpdateUserTags(req.token, req.id, user); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/users/" + req.id},
 		}, nil
 	}
 }
@@ -405,10 +395,10 @@ func updateUserTagsEndpoint(svc ui.Service) endpoint.Endpoint {
 func updateUserIdentityEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateUserIdentityReq)
-
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
+
 		credential := sdk.Credentials{
 			Identity: req.Identity,
 		}
@@ -416,14 +406,13 @@ func updateUserIdentityEndpoint(svc ui.Service) endpoint.Endpoint {
 			ID:          req.id,
 			Credentials: credential,
 		}
-		res, err := svc.UpdateUserIdentity(req.token, req.id, user)
-		if err != nil {
+		if err := svc.UpdateUserIdentity(req.token, req.id, user); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/users/" + req.id},
 		}, nil
 	}
 }
@@ -434,14 +423,13 @@ func enableUserEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.EnableUser(req.token, req.UserID)
-		if err != nil {
+
+		if err := svc.EnableUser(req.token, req.UserID); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
 			code:    http.StatusFound,
-			html:    res,
 			headers: map[string]string{"Location": "/users"},
 		}, nil
 	}
@@ -453,14 +441,13 @@ func disableUserEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.DisableUser(req.token, req.UserID)
-		if err != nil {
+
+		if err := svc.DisableUser(req.token, req.UserID); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
 			code:    http.StatusFound,
-			html:    res,
 			headers: map[string]string{"Location": "/users"},
 		}, nil
 	}
@@ -469,17 +456,17 @@ func disableUserEndpoint(svc ui.Service) endpoint.Endpoint {
 func createThingEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(createThingReq)
-
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.CreateThings(req.token, req.Thing)
-		if err != nil {
+
+		if err := svc.CreateThings(req.token, req.Thing); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/things"},
 		}, nil
 	}
 }
@@ -487,10 +474,10 @@ func createThingEndpoint(svc ui.Service) endpoint.Endpoint {
 func createThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(createThingsReq)
-
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
+
 		things := []sdk.Thing{}
 		for i := range req.Names {
 			th := sdk.Thing{
@@ -498,25 +485,25 @@ func createThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 			}
 			things = append(things, th)
 		}
-		res, err := svc.CreateThings(req.token, things...)
-		if err != nil {
+		if err := svc.CreateThings(req.token, things...); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/things"},
 		}, nil
 	}
 }
 
 func listThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(listThingsReq)
-
+		req := request.(listEntityReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.ListThings(req.token)
+
+		res, err := svc.ListThings(req.token, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -531,7 +518,6 @@ func listThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 func viewThingEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(viewResourceReq)
-
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
@@ -551,7 +537,6 @@ func viewThingEndpoint(svc ui.Service) endpoint.Endpoint {
 func updateThingEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateThingReq)
-
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
@@ -562,14 +547,13 @@ func updateThingEndpoint(svc ui.Service) endpoint.Endpoint {
 			Metadata: req.Metadata,
 		}
 
-		res, err := svc.UpdateThing(req.token, req.id, uth)
-		if err != nil {
+		if err := svc.UpdateThing(req.token, req.id, uth); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/things/" + req.id},
 		}, nil
 	}
 }
@@ -577,22 +561,21 @@ func updateThingEndpoint(svc ui.Service) endpoint.Endpoint {
 func updateThingTagsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateThingTagsReq)
-
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
+
 		thing := sdk.Thing{
 			ID:   req.id,
 			Tags: req.Tags,
 		}
-		res, err := svc.UpdateThingTags(req.token, req.id, thing)
-		if err != nil {
+		if err := svc.UpdateThingTags(req.token, req.id, thing); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/things/" + req.id},
 		}, nil
 	}
 }
@@ -604,14 +587,13 @@ func updateThingSecretEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.UpdateThingSecret(req.token, req.id, req.Secret)
-		if err != nil {
+		if err := svc.UpdateThingSecret(req.token, req.id, req.Secret); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/things/" + req.id},
 		}, nil
 	}
 }
@@ -622,14 +604,13 @@ func enableThingEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.EnableThing(req.token, req.ThingID)
-		if err != nil {
+
+		if err := svc.EnableThing(req.token, req.ThingID); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
 			code:    http.StatusFound,
-			html:    res,
 			headers: map[string]string{"Location": "/things"},
 		}, nil
 	}
@@ -641,14 +622,13 @@ func disableThingEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.DisableThing(req.token, req.ThingID)
-		if err != nil {
+
+		if err := svc.DisableThing(req.token, req.ThingID); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
 			code:    http.StatusFound,
-			html:    res,
 			headers: map[string]string{"Location": "/things"},
 		}, nil
 	}
@@ -657,22 +637,21 @@ func disableThingEndpoint(svc ui.Service) endpoint.Endpoint {
 func updateThingOwnerEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateThingOwnerReq)
-
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
+
 		thing := sdk.Thing{
 			ID:    req.id,
 			Owner: req.Owner,
 		}
-		res, err := svc.UpdateThingOwner(req.token, req.id, thing)
-		if err != nil {
+		if err := svc.UpdateThingOwner(req.token, thing); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/things/" + req.id},
 		}, nil
 	}
 }
@@ -680,18 +659,17 @@ func updateThingOwnerEndpoint(svc ui.Service) endpoint.Endpoint {
 func createChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(createChannelReq)
-
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.CreateChannels(req.token, req.Channel)
-		if err != nil {
+		if err := svc.CreateChannels(req.token, req.Channel); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/channels"},
 		}, nil
 	}
 }
@@ -699,10 +677,10 @@ func createChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 func createChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(createChannelsReq)
-
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
+
 		channels := []sdk.Channel{}
 		for i := range req.Names {
 			ch := sdk.Channel{
@@ -710,12 +688,13 @@ func createChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 			}
 			channels = append(channels, ch)
 		}
-		res, err := svc.CreateChannels(req.token, channels...)
-		if err != nil {
+		if err := svc.CreateChannels(req.token, channels...); err != nil {
 			return nil, err
 		}
+
 		return uiRes{
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/channels"},
 		}, nil
 	}
 }
@@ -723,7 +702,6 @@ func createChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 func viewChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(viewResourceReq)
-
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
@@ -743,7 +721,6 @@ func viewChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 func updateChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateChannelReq)
-
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
@@ -755,27 +732,25 @@ func updateChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 			Description: req.Description,
 		}
 
-		res, err := svc.UpdateChannel(req.token, req.id, uch)
-		if err != nil {
+		if err := svc.UpdateChannel(req.token, req.id, uch); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/channels/" + req.id},
 		}, nil
 	}
 }
 
 func listChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(listChannelsReq)
-
+		req := request.(listEntityReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.ListChannels(req.token)
+		res, err := svc.ListChannels(req.token, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -790,18 +765,17 @@ func listChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 func connectEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		cr := request.(connectReq)
-
 		if err := cr.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.Connect(cr.token, cr.ConnIDs)
-		if err != nil {
+		if err := svc.Connect(cr.token, cr.ConnIDs); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/channels/" + cr.ConnIDs.ChannelIDs[0] + "/things"},
 		}, nil
 	}
 }
@@ -809,19 +783,17 @@ func connectEndpoint(svc ui.Service) endpoint.Endpoint {
 func disconnectEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		dcr := request.(disconnectReq)
-
 		if err := dcr.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.Disconnect(dcr.token, dcr.ConnIDs)
-		if err != nil {
+		if err := svc.Disconnect(dcr.token, dcr.ConnIDs); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/channels/" + dcr.ConnIDs.ChannelIDs[0] + "/things"},
 		}, nil
 	}
 }
@@ -829,18 +801,17 @@ func disconnectEndpoint(svc ui.Service) endpoint.Endpoint {
 func connectThingEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		cr := request.(connectThingReq)
-
 		if err := cr.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.ConnectThing(cr.token, cr.ConnIDs)
-		if err != nil {
+		if err := svc.ConnectThing(cr.token, cr.ConnIDs); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/channels/" + cr.ConnIDs.ChannelIDs[0] + "/things"},
 		}, nil
 	}
 }
@@ -848,37 +819,35 @@ func connectThingEndpoint(svc ui.Service) endpoint.Endpoint {
 func shareThingEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		sr := request.(shareThingReq)
-
 		if err := sr.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.ShareThing(sr.token, sr.ChanID, sr.UserID, sr.Actions)
-		if err != nil {
+		if err := svc.ShareThing(sr.token, sr.ChanID, sr.UserID, sr.Actions); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			html: res,
-		}, err
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/channels/" + sr.ChanID + "/things"},
+		}, nil
 	}
 }
 
 func connectChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		cr := request.(connectChannelReq)
-
 		if err := cr.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.ConnectChannel(cr.token, cr.ConnIDs)
-		if err != nil {
+		if err := svc.ConnectChannel(cr.token, cr.ConnIDs); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/things/" + cr.ConnIDs.ThingIDs[0] + "/channels"},
 		}, nil
 	}
 }
@@ -886,19 +855,17 @@ func connectChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 func disconnectThingEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		dcr := request.(disconnectThingReq)
-
 		if err := dcr.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.DisconnectThing(dcr.ThingID, dcr.ChanID, dcr.token)
-		if err != nil {
+		if err := svc.DisconnectThing(dcr.ThingID, dcr.ChanID, dcr.token); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/channels/" + dcr.ChanID + "/things"},
 		}, nil
 	}
 }
@@ -906,32 +873,29 @@ func disconnectThingEndpoint(svc ui.Service) endpoint.Endpoint {
 func disconnectChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		dcr := request.(disconnectChannelReq)
-
 		if err := dcr.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.DisconnectChannel(dcr.ThingID, dcr.ChanID, dcr.token)
-		if err != nil {
+		if err := svc.DisconnectChannel(dcr.ThingID, dcr.ChanID, dcr.token); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/things/" + dcr.ThingID + "/channels"},
 		}, nil
 	}
 }
 
 func listThingsByChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(viewResourceReq)
-
+		req := request.(listEntityByIDReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.ListThingsByChannel(req.token, req.id)
+		res, err := svc.ListThingsByChannel(req.token, req.id, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -945,13 +909,12 @@ func listThingsByChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 
 func listChannelsByThingEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(viewResourceReq)
-
+		req := request.(listEntityByIDReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.ListChannelsByThing(req.token, req.id)
+		res, err := svc.ListChannelsByThing(req.token, req.id, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -969,16 +932,15 @@ func enableChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.EnableChannel(req.token, req.ChannelID)
-		if err != nil {
+
+		if err := svc.EnableChannel(req.token, req.ChannelID); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
 			code:    http.StatusFound,
-			html:    res,
 			headers: map[string]string{"Location": "/channels"},
-		}, err
+		}, nil
 	}
 }
 
@@ -988,26 +950,25 @@ func disableChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.DisableChannel(req.token, req.ChannelID)
-		if err != nil {
+
+		if err := svc.DisableChannel(req.token, req.ChannelID); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
 			code:    http.StatusFound,
-			html:    res,
 			headers: map[string]string{"Location": "/channels"},
-		}, err
+		}, nil
 	}
 }
 
 func listThingsPoliciesEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(listPoliciesReq)
+		req := request.(listEntityReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.ListThingsPolicies(req.token)
+		res, err := svc.ListThingsPolicies(req.token, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1025,13 +986,14 @@ func addThingsPolicyEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.AddThingsPolicy(req.token, req.Policy)
-		if err != nil {
+
+		if err := svc.AddThingsPolicy(req.token, req.Policy); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/things/policies"},
 		}, nil
 	}
 }
@@ -1042,13 +1004,14 @@ func updateThingsPolicyEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.UpdateThingsPolicy(req.token, req.Policy)
-		if err != nil {
+
+		if err := svc.UpdateThingsPolicy(req.token, req.Policy); err != nil {
 			return nil, err
 		}
+
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/things/policies"},
 		}, nil
 	}
 }
@@ -1059,14 +1022,14 @@ func deleteThingsPolicyEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.DeleteThingsPolicy(req.token, req.Policy)
-		if err != nil {
+
+		if err := svc.DeleteThingsPolicy(req.token, req.Policy); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/things/policies"},
 		}, nil
 	}
 }
@@ -1074,18 +1037,17 @@ func deleteThingsPolicyEndpoint(svc ui.Service) endpoint.Endpoint {
 func createGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		cgr := request.(createGroupReq)
-
 		if err := cgr.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.CreateGroups(cgr.token, cgr.Group)
-		if err != nil {
+		if err := svc.CreateGroups(cgr.token, cgr.Group); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/groups"},
 		}, nil
 	}
 }
@@ -1093,10 +1055,10 @@ func createGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 func createGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(createGroupsReq)
-
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
+
 		groups := []sdk.Group{}
 		for i := range req.Names {
 			gr := sdk.Group{
@@ -1104,26 +1066,25 @@ func createGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 			}
 			groups = append(groups, gr)
 		}
-		res, err := svc.CreateGroups(req.token, groups...)
-		if err != nil {
+		if err := svc.CreateGroups(req.token, groups...); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/groups"},
 		}, nil
 	}
 }
 
 func listGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(listGroupsReq)
-
+		req := request.(listEntityReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.ListGroups(req.token)
+		res, err := svc.ListGroups(req.token, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1136,13 +1097,12 @@ func listGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 
 func listGroupMembersEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(viewResourceReq)
-
+		req := request.(listEntityByIDReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.ListGroupMembers(req.token, req.id)
+		res, err := svc.ListGroupMembers(req.token, req.id, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1157,7 +1117,6 @@ func listGroupMembersEndpoint(svc ui.Service) endpoint.Endpoint {
 func viewGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(viewResourceReq)
-
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
@@ -1177,7 +1136,6 @@ func viewGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 func updateGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateGroupReq)
-
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
@@ -1189,14 +1147,13 @@ func updateGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 			Description: req.Description,
 		}
 
-		res, err := svc.UpdateGroup(req.token, req.id, ugr)
-		if err != nil {
+		if err := svc.UpdateGroup(req.token, req.id, ugr); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/groups/" + req.id},
 		}, nil
 	}
 }
@@ -1207,13 +1164,14 @@ func assignEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.Assign(req.token, req.groupID, req.MemberID, req.Type)
-		if err != nil {
+
+		if err := svc.Assign(req.token, req.groupID, req.MemberID, req.Type); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/groups/" + req.groupID + "/members"},
 		}, nil
 	}
 }
@@ -1225,14 +1183,13 @@ func unassignEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.Unassign(req.token, req.groupID, req.MemberID)
-		if err != nil {
+		if err := svc.Unassign(req.token, req.groupID, req.MemberID); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/groups/" + req.groupID + "/members"},
 		}, nil
 	}
 }
@@ -1243,14 +1200,13 @@ func enableGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.EnableGroup(req.token, req.GroupID)
-		if err != nil {
+
+		if err := svc.EnableGroup(req.token, req.GroupID); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
 			code:    http.StatusFound,
-			html:    res,
 			headers: map[string]string{"Location": "/groups"},
 		}, nil
 	}
@@ -1262,14 +1218,13 @@ func disableGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.DisableGroup(req.token, req.GroupID)
-		if err != nil {
+
+		if err := svc.DisableGroup(req.token, req.GroupID); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
 			code:    http.StatusFound,
-			html:    res,
 			headers: map[string]string{"Location": "/groups"},
 		}, nil
 	}
@@ -1277,11 +1232,12 @@ func disableGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 
 func listPoliciesEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(listPoliciesReq)
+		req := request.(listEntityReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.ListPolicies(req.token)
+
+		res, err := svc.ListPolicies(req.token, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1299,13 +1255,14 @@ func addPolicyEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.AddPolicy(req.token, req.Policy)
-		if err != nil {
+
+		if err := svc.AddPolicy(req.token, req.Policy); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/users/policies"},
 		}, nil
 	}
 }
@@ -1316,13 +1273,13 @@ func updatePolicyEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.UpdatePolicy(req.token, req.Policy)
-		if err != nil {
+
+		if err := svc.UpdatePolicy(req.token, req.Policy); err != nil {
 			return nil, err
 		}
+
 		return uiRes{
 			code:    http.StatusFound,
-			html:    res,
 			headers: map[string]string{"Location": "/users/policies"},
 		}, nil
 	}
@@ -1334,14 +1291,13 @@ func deletePolicyEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.DeletePolicy(req.token, req.Policy)
-		if err != nil {
+
+		if err := svc.DeletePolicy(req.token, req.Policy); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
 			code:    http.StatusFound,
-			html:    res,
 			headers: map[string]string{"Location": "/users/policies"},
 		}, nil
 	}
@@ -1353,14 +1309,14 @@ func publishMessageEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.Publish(req.token, req.thingKey, req.Msg)
-		if err != nil {
+
+		if err := svc.Publish(req.token, req.thingKey, req.Msg); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/channels/" + req.Msg.Channel + "/things"},
 		}, nil
 	}
 }
@@ -1371,6 +1327,7 @@ func readMessageEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
+
 		res, err := svc.ReadMessage(req.token)
 		if err != nil {
 			return nil, err
@@ -1389,6 +1346,7 @@ func wsConnectionEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
+
 		res, err := svc.WsConnection(req.token, req.ChanID, req.ThingKey)
 		if err != nil {
 			return nil, err
@@ -1400,31 +1358,13 @@ func wsConnectionEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func listDeletedClientsEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(listDeletedClientsReq)
-
-		if err := req.validate(); err != nil {
-			return nil, err
-		}
-		res, err := svc.ListDeletedClients(req.token)
-		if err != nil {
-			return nil, err
-		}
-
-		return uiRes{
-			code: http.StatusOK,
-			html: res,
-		}, nil
-	}
-}
-
 func getTerminalEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(viewResourceReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
+
 		res, err := svc.GetRemoteTerminal(req.id)
 		if err != nil {
 			return nil, err
@@ -1438,7 +1378,6 @@ func getTerminalEndpoint(svc ui.Service) endpoint.Endpoint {
 func handleTerminalInputEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(bootstrapCommandReq)
-
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
@@ -1473,6 +1412,7 @@ func viewBootstrap(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
+
 		res, err := svc.ViewBootstrap(req.token, req.id)
 		if err != nil {
 			return nil, err
@@ -1487,11 +1427,12 @@ func viewBootstrap(svc ui.Service) endpoint.Endpoint {
 
 func listBootstrap(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
-		req := request.(listBootstrapReq)
+		req := request.(listEntityReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.ListBootstrap(req.token)
+
+		res, err := svc.ListBootstrap(req.token, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1509,19 +1450,19 @@ func updateBootstrap(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
+
 		cfg := sdk.BootstrapConfig{
 			ThingID: req.id,
 			Name:    req.Name,
 			Content: req.Content,
 		}
-		res, err := svc.UpdateBootstrap(req.token, cfg)
-		if err != nil {
+		if err := svc.UpdateBootstrap(req.token, cfg); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/bootstrap/" + req.id},
 		}, nil
 	}
 }
@@ -1532,20 +1473,20 @@ func updateBootstrapCerts(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
+
 		cfg := sdk.BootstrapConfig{
 			ThingID:    req.thingID,
 			ClientCert: req.ClientCert,
 			ClientKey:  req.ClientKey,
 			CACert:     req.CACert,
 		}
-		res, err := svc.UpdateBootstrapCerts(req.token, cfg)
-		if err != nil {
+		if err := svc.UpdateBootstrapCerts(req.token, cfg); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/bootstrap/" + req.thingID},
 		}, nil
 	}
 }
@@ -1556,18 +1497,18 @@ func updateBootstrapConnections(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
+
 		cfg := sdk.BootstrapConfig{
 			ThingID:  req.id,
 			Channels: req.Channels,
 		}
-		res, err := svc.UpdateBootstrapConnections(req.token, cfg)
-		if err != nil {
+		if err := svc.UpdateBootstrapConnections(req.token, cfg); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/bootstrap/" + req.id},
 		}, nil
 	}
 }
@@ -1578,6 +1519,7 @@ func createBootstrap(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
+
 		cfg := sdk.BootstrapConfig{
 			ThingID:     req.ThingID,
 			Channels:    req.Channels,
@@ -1589,13 +1531,13 @@ func createBootstrap(svc ui.Service) endpoint.Endpoint {
 			CACert:      req.CACert,
 			Content:     req.Content,
 		}
-		res, err := svc.CreateBootstrap(req.token, cfg)
-		if err != nil {
+		if err := svc.CreateBootstrap(req.token, cfg); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			html: res,
+			code:    http.StatusFound,
+			headers: map[string]string{"Location": "/bootstraps"},
 		}, nil
 	}
 }

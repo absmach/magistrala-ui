@@ -175,64 +175,66 @@
         </div>
 
         <div class="table-container">
-          <table id="itemsTable" class="table">
-            <thead>
-              <tr>
-                <th scope="col">NAME</th>
-                <th scope="col">ID</th>
-                <th scope="col"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {{$userID := .User.ID}} {{range $i, $t := .Things}}
-              {{$disableButton := true}} {{if (authorizeThing $userID $t.ID
-              "c_delete" "client")}} {{$disableButton = false}} {{end}}
-              <tr>
-                <td>{{$t.Name}}</td>
-                <td>
-                  <div class="copy-con-container">
-                    <a href='{{printf "/things/%s" $t.ID}}'>{{$t.ID}}</a>
-                    <button class="copy-icon" onclick="copyToClipboard(this)">
-                      <i class="far fa-copy"></i>
-                    </button>
-                  </div>
-                </td>
-                <td>
-                  <form action="/things/disabled" method="post">
-                    <input
-                      type="hidden"
-                      name="thingID"
-                      id="thingID"
-                      value="{{$t.ID}}"
-                    />
-                    <button
-                      type="submit"
-                      class="btn btn-sm"
-                      {{if
-                      $disableButton}}disabled{{end}}
-                    >
-                      <i class="fas fa-trash-alt"></i>
-                    </button>
-                  </form>
-                </td>
-              </tr>
-              {{end}}
-            </tbody>
-          </table>
+          {{template "tableheader" .}}
+          <div class="itemsTable">
+            <table id="itemsTable" class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Name</th>
+                  <th scope="col">ID</th>
+                  <th scope="col">Tags</th>
+                  <th scope="col">Metadata</th>
+                  <th scope="col">Created At</th>
+                  <th class="text-center" scope="col"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {{$userID := .User.ID}} {{range $i, $t := .Things}}
+                {{$disableButton := true}} {{if (authorizeThing $userID $t.ID
+                "c_delete" "client")}} {{$disableButton = false}} {{end}}
+                <tr>
+                  <td>{{$t.Name}}</td>
+                  <td>
+                    <div class="copy-con-container">
+                      <a href='{{printf "/things/%s" $t.ID}}'>{{$t.ID}}</a>
+                      <button class="copy-icon" onclick="copyToClipboard(this)">
+                        <i class="far fa-copy"></i>
+                      </button>
+                    </div>
+                  </td>
+                  <td>{{toSlice $t.Tags}}</td>
+                  <td>{{toJSON $t.Metadata}}</td>
+                  <td>{{$t.CreatedAt}}</td>
+                  <td class="text-center">
+                    <form action="/things/disabled" method="post">
+                      <input
+                        type="hidden"
+                        name="thingID"
+                        id="thingID"
+                        value="{{$t.ID}}"
+                      />
+                      <button
+                        type="submit"
+                        class="btn btn-sm"
+                        {{if
+                        $disableButton}}disabled{{end}}
+                      >
+                        <i class="fas fa-trash-alt"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {{end}}
+              </tbody>
+            </table>
+          </div>
+          {{template "tablefooter" .}}
         </div>
       </main>
     </div>
 
     {{template "footer"}}
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        new simpleDatatables.DataTable("#itemsTable", {
-          searchable: true,
-          scrollY: "430px",
-          sortable: true,
-          pagination: true,
-        });
-      });
       function validateForm() {
         var secret = document.getElementById("secret").value;
         var tagsInput = document.getElementById("tags").value;

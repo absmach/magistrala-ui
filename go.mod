@@ -8,9 +8,7 @@ require (
 	github.com/go-zoo/bone v1.3.0
 	github.com/mainflux/agent v0.11.1-0.20230724130550-0cd3f4c8c27c
 	github.com/mainflux/mainflux v0.0.0-20230825135111-320921a63e54
-	github.com/opentracing/opentracing-go v1.2.0
 	github.com/prometheus/client_golang v1.16.0
-	github.com/uber/jaeger-client-go v2.30.0+incompatible
 	golang.org/x/exp v0.0.0-20230713183714-613f0c0eb8a1
 	golang.org/x/sync v0.3.0
 	google.golang.org/grpc v1.56.1
@@ -52,14 +50,11 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/mainflux/senml v1.5.0
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_model v0.4.0 // indirect
 	github.com/prometheus/common v0.44.0 // indirect
 	github.com/prometheus/procfs v0.11.0 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
-	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	github.com/x448/float16 v0.8.4 // indirect
-	go.uber.org/atomic v1.11.0 // indirect
 	golang.org/x/sys v0.10.0 // indirect
 	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect

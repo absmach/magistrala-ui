@@ -107,155 +107,156 @@
         </div>
 
         <div class="table-container">
-          <table id="itemsTable" class="table">
-            <thead>
-              <tr>
-                <th scope="col">Subject</th>
-                <th scope="col">Object</th>
-                <th scope="col">Actions</th>
-                <th scope="col"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {{$actions := .Actions}} {{$users := .Users}} {{$groups :=
-              .Groups}} {{range $i, $p := .Policies}}
-              <tr>
-                <td>
-                  {{range $u := $users}} {{if eq $u.ID $p.Subject}}
-                  <a href='{{printf "/users/%s" $p.Subject}}'>{{$u.Name}}</a>
-                  {{end}} {{end}}
-                </td>
-                <td>
-                  {{range $g := $groups}} {{if eq $g.ID $p.Object}}
-                  <a href='{{printf "/groups/%s" $p.Object}}'>{{$g.Name}}</a>
-                  {{end}} {{end}}
-                </td>
-                <td data-field="actions">
-                  {{range $j, $a := $p.Actions}} {{$badgeClass := "badge
-                  text-dark "}} {{if hasPrefix $a "g_"}} {{$badgeClass = printf
-                  "%s%s" $badgeClass "group-action"}} {{else if hasPrefix $a
-                  "c_"}} {{$badgeClass = printf "%s%s" $badgeClass
-                  "client-action"}} {{else}} {{$badgeClass = printf "%s%s"
-                  $badgeClass "text-bg-info"}} {{end}}
-                  <span class="{{$badgeClass}}">{{$a}}</span>
-                  {{end}}
-                </td>
-                <td>
-                  <div class="icon-container">
-                    <button
-                      type="button"
-                      class="btn btn-sm"
-                      data-bs-toggle="modal"
-                      data-bs-target="#updatePolicyModal{{$i}}"
-                    >
-                      <i class="fas fa-pencil-alt"></i>
-                    </button>
-                    <form action="/users/policies/delete" method="post">
-                      <input
-                        type="hidden"
-                        name="subject"
-                        id="subject"
-                        value="{{$p.Subject}}"
-                      />
-                      <input
-                        type="hidden"
-                        name="object"
-                        id="object"
-                        value="{{$p.Object}}"
-                      />
-                      <button type="submit" class="btn btn-sm">
-                        <i class="fas fa-trash-alt"></i>
+          {{template "tableheader" .}}
+          <div class="itemsTable">
+            <table id="itemsTable" class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Subject</th>
+                  <th scope="col" >Object</th>
+                  <th scope="col">Actions</th>
+                  <th scope="col">Created At</th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {{$actions := .Actions}} {{$users := .Users}} {{$groups :=
+                .Groups}} {{range $i, $p := .Policies}}
+                <tr>
+                  <td >
+                    {{range $u := $users}} {{if eq $u.ID $p.Subject}}
+                    <a href='{{printf "/users/%s" $p.Subject}}'>{{$u.Name}}</a>
+                    {{end}} {{end}}
+                  </td>
+                  <td >
+                    {{range $g := $groups}} {{if eq $g.ID $p.Object}}
+                    <a href='{{printf "/groups/%s" $p.Object}}'>{{$g.Name}}</a>
+                    {{end}} {{end}}
+                  </td>
+                  <td data-field="actions" >
+                    {{range $j, $a := $p.Actions}} 
+                      {{$badgeClass := "badge text-dark "}} 
+                      {{if hasPrefix $a "g_"}} 
+                        {{$badgeClass = printf "%s%s" $badgeClass "group-action"}} 
+                      {{else if hasPrefix $a "c_"}} 
+                        {{$badgeClass = printf "%s%s" $badgeClass "client-action"}} 
+                      {{else}}
+                        {{$badgeClass = printf "%s%s" $badgeClass "text-bg-info"}}
+                      {{end}}
+                      <span class="{{$badgeClass}}">{{$a}}</span>
+                    {{end}}
+                  </td>
+                  <td>{{$p.CreatedAt}}</td>
+                  <td>
+                    <div class="icon-container">
+                      <button
+                        type="button"
+                        class="btn btn-sm"
+                        data-bs-toggle="modal"
+                        data-bs-target="#updatePolicyModal{{$i}}"
+                      >
+                        <i class="fas fa-pencil-alt"></i>
                       </button>
-                    </form>
-                  </div>
-
-                  <div
-                    class="modal fade"
-                    id="updatePolicyModal{{$i}}"
-                    tabindex="-1"
-                    role="dialog"
-                    aria-labelledby="updatePolicyModalLabel{{$i}}"
-                    aria-hidden="true"
-                  >
-                    <div class="modal-dialog" role="document">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h5
-                            class="modal-title"
-                            id="updatePolicyModalLabel{{$i}}"
-                          >
-                            Update Policy
-                          </h5>
-                        </div>
-                        <div class="modal-body">
-                          <form action="/users/policies/update" method="post">
-                            <div class="mb-3">
-                              <label for="actions" class="form-label"
-                                >Actions</label
-                              >
-                              <input
-                                type="hidden"
-                                name="subject"
-                                id="subject"
-                                value="{{$p.Subject}}"
-                              />
-                              <input
-                                type="hidden"
-                                name="object"
-                                id="object"
-                                value="{{$p.Object}}"
-                              />
-                              <select
-                                class="form-select"
-                                name="actions"
-                                id="actions"
-                                aria-describedby="actionsHelp"
-                                multiple
-                                required
-                              >
-                                {{$policyActions := $p.Actions}} {{range $i, $a
-                                := $actions}} {{$selected := contains
-                                $policyActions $a}}
-                                <option
-                                  value="{{$a}}"
-                                  {{if
-                                  $selected}}selected{{end}}
+                      <form action="/users/policies/delete" method="post">
+                        <input
+                          type="hidden"
+                          name="subject"
+                          id="subject"
+                          value="{{$p.Subject}}"
+                        />
+                        <input
+                          type="hidden"
+                          name="object"
+                          id="object"
+                          value="{{$p.Object}}"
+                        />
+                        <button type="submit" class="btn btn-sm">
+                          <i class="fas fa-trash-alt"></i>
+                        </button>
+                      </form>
+                    </div>
+  
+                    <div
+                      class="modal fade"
+                      id="updatePolicyModal{{$i}}"
+                      tabindex="-1"
+                      role="dialog"
+                      aria-labelledby="updatePolicyModalLabel{{$i}}"
+                      aria-hidden="true"
+                    >
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5
+                              class="modal-title"
+                              id="updatePolicyModalLabel{{$i}}"
+                            >
+                              Update Policy
+                            </h5>
+                          </div>
+                          <div class="modal-body">
+                            <form action="/users/policies/update" method="post">
+                              <div class="mb-3">
+                                <label for="actions" class="form-label"
+                                  >Actions</label
                                 >
-                                  {{$a}}
-                                </option>
-                                {{end}}
-                              </select>
-                              <div id="actionsHelp" class="form-text">
-                                Select Actions (multiple selections allowed).
+                                <input
+                                  type="hidden"
+                                  name="subject"
+                                  id="subject"
+                                  value="{{$p.Subject}}"
+                                />
+                                <input
+                                  type="hidden"
+                                  name="object"
+                                  id="object"
+                                  value="{{$p.Object}}"
+                                />
+                                <select
+                                  class="form-select"
+                                  name="actions"
+                                  id="actions"
+                                  aria-describedby="actionsHelp"
+                                  multiple
+                                  required
+                                >
+                                  {{$policyActions := $p.Actions}} {{range $i, $a
+                                  := $actions}} {{$selected := contains
+                                  $policyActions $a}}
+                                  <option
+                                    value="{{$a}}"
+                                    {{if
+                                    $selected}}selected{{end}}
+                                  >
+                                    {{$a}}
+                                  </option>
+                                  {{end}}
+                                </select>
+                                <div id="actionsHelp" class="form-text">
+                                  Select Actions (multiple selections allowed).
+                                </div>
                               </div>
-                            </div>
-                            <button type="submit" class="btn body-button">
-                              Submit
-                            </button>
-                          </form>
+                              <button type="submit" class="btn body-button">
+                                Submit
+                              </button>
+                            </form>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </td>
-              </tr>
-              {{end}}
-            </tbody>
-          </table>
+                  </td>
+                </tr>
+                {{end}}
+              </tbody>
+            </table>
+          </div>
+          {{template "tablefooter" .}}
         </div>
       </main>
     </div>
 
     {{template "footer"}}
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        new simpleDatatables.DataTable("#itemsTable", {
-          searchable: true,
-          scrollY: "430px",
-          sortable: true,
-          pagination: true,
-        });
-      });
       function filterItem(filterValue, selectId) {
         const itemSelect = document.getElementById(selectId);
         const options = itemSelect.getElementsByTagName("option");

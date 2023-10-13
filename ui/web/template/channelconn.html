@@ -177,151 +177,139 @@
 
         {{ $c := .Channel.ID }}
         <div class="table-container">
-          <h4
-            style="
-              font-weight: bold;
-              font-size: 22px;
-              margin-top: 50px;
-              margin-bottom: 20px;
-            "
-          >
-            CONNECTED THINGS
-          </h4>
-          <table id="itemsTable" class="table">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">NAME</th>
-                <th scope="col">ID</th>
-                <th scope="col">ACTIONS</th>
-                <th scope="col"></th>
-                <th scope="col"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {{$chanID := .Channel.ID}} {{$policies := .Policies}}
-              {{$sendMessage:= false}} {{range $i, $t := .Things}}
-              {{$sendMessage = authorizeThing $t.ID $chanID "m_write" "group"}}
-              <tr>
-                <th scope="row">{{$i}}</th>
-                <td>{{$t.Name}}</td>
-                <td><a href='{{printf "/things/%s" $t.ID}}'>{{$t.ID}}</a></td>
-                <td>
-                  {{range $p :=$policies}} {{if (eq $t.ID $p.Subject)}} {{if (eq
-                  $c $p.Object)}} {{range $j, $a := $p.Actions}} {{$badgeClass
-                  := "badge text-dark "}} {{if eq $a "m_read"}} {{$badgeClass =
-                  printf "%s%s" $badgeClass "read-action"}} {{else if eq $a
-                  "m_write"}} {{$badgeClass = printf "%s%s" $badgeClass
-                  "write-action"}} {{else}} {{$badgeClass = printf "%s%s"
-                  $badgeClass "text-bg-info"}} {{end}}
-                  <span class="{{$badgeClass}}">{{$a}}</span>
-                  {{end}} {{end}} {{end}} {{end}}
-                </td>
-                <td>
-                  <button
-                    type="button"
-                    class="btn btn-sm sendMessage-button"
-                    data-bs-toggle="modal"
-                    data-bs-target="#sendMessageModal{{$i}}"
-                    {{if
-                    not
-                    $sendMessage}}disabled{{end}}
-                  >
-                    Send Message
-                  </button>
-                  <div
-                    class="modal fade"
-                    id="sendMessageModal{{$i}}"
-                    tabindex="-1"
-                    role="dialog"
-                    aria-labelledby="sendMessageModalLabel{{$i}}"
-                    aria-hidden="true"
-                  >
-                    <div class="modal-dialog" role="document">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h5
-                            class="modal-title"
-                            id="sendMessageModalLabel{{$i}}"
-                          >
-                            Send Message
-                          </h5>
-                        </div>
-                        <div class="modal-body">
-                          <form action="/messages" method="post">
-                            <input
-                              type="hidden"
-                              name="channelID"
-                              id="channelID"
-                              value="{{$c}}"
-                            />
-                            <input
-                              type="hidden"
-                              name="thingKey"
-                              id="thingKey"
-                              value="{{$t.Credentials.Secret}}"
-                            />
-                            <div class="mb-3">
-                              <label for="message" class="form-label"
-                                >Message</label
-                              >
-                              <textarea
-                                class="form-control"
-                                name="message"
-                                id="message"
-                                aria-describedby="messageHelp"
-                              ></textarea>
-                              <div id="messageHelp" class="form-text">
-                                Enter Message.
+          <h4>CONNECTED THINGS</h4>
+
+          {{template "tableheader" .}}
+          <div class="itemsTable">
+            <table id="itemsTable" class="table">
+              <thead>
+                <tr>
+                  <th scope="col">NAME</th>
+                  <th scope="col">ID</th>
+                  <th scope="col">ACTIONS</th>
+                  <th scope="col"></th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {{$chanID := .Channel.ID}} {{$policies := .Policies}}
+                {{$sendMessage:= false}} {{range $i, $t := .Things}}
+                {{$sendMessage = authorizeThing $t.ID $chanID "m_write"
+                "group"}}
+                <tr>
+                  <td>{{$t.Name}}</td>
+                  <td>
+                    <a href='{{printf "/things/%s" $t.ID}}'>{{$t.ID}}</a>
+                  </td>
+                  <td>
+                    {{range $p :=$policies}} {{if (eq $t.ID $p.Subject)}} {{if
+                    (eq $c $p.Object)}} {{range $j, $a := $p.Actions}}
+                    {{$badgeClass := "badge text-dark "}} {{if eq $a "m_read"}}
+                    {{$badgeClass = printf "%s%s" $badgeClass "read-action"}}
+                    {{else if eq $a "m_write"}} {{$badgeClass = printf "%s%s"
+                    $badgeClass "write-action"}} {{else}} {{$badgeClass = printf
+                    "%s%s" $badgeClass "text-bg-info"}} {{end}}
+                    <span class="{{$badgeClass}}">{{$a}}</span>
+                    {{end}} {{end}} {{end}} {{end}}
+                  </td>
+                  <td>
+                    <button
+                      type="button"
+                      class="btn btn-sm sendMessage-button"
+                      data-bs-toggle="modal"
+                      data-bs-target="#sendMessageModal{{$i}}"
+                      {{if
+                      not
+                      $sendMessage}}disabled{{end}}
+                    >
+                      Send Message
+                    </button>
+                    <div
+                      class="modal fade"
+                      id="sendMessageModal{{$i}}"
+                      tabindex="-1"
+                      role="dialog"
+                      aria-labelledby="sendMessageModalLabel{{$i}}"
+                      aria-hidden="true"
+                    >
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5
+                              class="modal-title"
+                              id="sendMessageModalLabel{{$i}}"
+                            >
+                              Send Message
+                            </h5>
+                          </div>
+                          <div class="modal-body">
+                            <form action="/messages" method="post">
+                              <input
+                                type="hidden"
+                                name="channelID"
+                                id="channelID"
+                                value="{{$c}}"
+                              />
+                              <input
+                                type="hidden"
+                                name="thingKey"
+                                id="thingKey"
+                                value="{{$t.Credentials.Secret}}"
+                              />
+                              <div class="mb-3">
+                                <label for="message" class="form-label"
+                                  >Message</label
+                                >
+                                <textarea
+                                  class="form-control"
+                                  name="message"
+                                  id="message"
+                                  aria-describedby="messageHelp"
+                                ></textarea>
+                                <div id="messageHelp" class="form-text">
+                                  Enter Message.
+                                </div>
                               </div>
-                            </div>
-                            <button type="submit" class="btn body-button">
-                              Submit
-                            </button>
-                          </form>
+                              <button type="submit" class="btn body-button">
+                                Submit
+                              </button>
+                            </form>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </td>
-                <td>
-                  <form action="/disconnectThing" method="post">
-                    <input
-                      type="hidden"
-                      name="channelID"
-                      id="channelID"
-                      value="{{$c}}"
-                    />
-                    <input
-                      type="hidden"
-                      name="thingID"
-                      id="thingID"
-                      value="{{$t.ID}}"
-                    />
-                    <button type="submit" class="btn btn-danger btn-sm">
-                      Disconnect
-                    </button>
-                  </form>
-                </td>
-              </tr>
-              {{end}}
-            </tbody>
-          </table>
+                  </td>
+                  <td>
+                    <form action="/disconnectThing" method="post">
+                      <input
+                        type="hidden"
+                        name="channelID"
+                        id="channelID"
+                        value="{{$c}}"
+                      />
+                      <input
+                        type="hidden"
+                        name="thingID"
+                        id="thingID"
+                        value="{{$t.ID}}"
+                      />
+                      <button type="submit" class="btn btn-danger btn-sm">
+                        Disconnect
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {{end}}
+              </tbody>
+            </table>
+          </div>
+          {{template "tablefooter" .}}
         </div>
       </main>
     </div>
 
     {{template "footer"}}
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        new simpleDatatables.DataTable("#itemsTable", {
-          searchable: true,
-          scrollY: "300px",
-          sortable: true,
-          pagination: true,
-        });
-      });
-
       function filterItem(filterValue, selectId) {
         const itemSelect = document.getElementById(selectId);
         const options = itemSelect.getElementsByTagName("option");

@@ -1,5 +1,4 @@
 {{define "navbar"}}
-
 <input type="checkbox" id="nav-toggle" />
 <div class="sidebar">
   <div class="sidebar-brand">
@@ -61,15 +60,6 @@
           class='{{if (serviceUnavailable "things")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'
           ><span class="fas fa-solid fa-shield-alt"></span>
           <span>Things Policies</span></a
-        >
-      </li>
-      <li>
-        {{$active = "deleted"}}
-        <a
-          href="/deleted"
-          class='{{if (serviceUnavailable "users")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'
-          ><span class="fas fa-solid fa-trash-restore"></span>
-          <span>Disabled Entities</span></a
         >
       </li>
       <li>

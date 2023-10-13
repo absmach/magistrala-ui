@@ -383,12 +383,6 @@ td {
   display: block;
 }
 
-#itemsTable.dataTable tbody td,
-#itemsTable.dataTable tbody th {
-  border-top: none;
-  border-bottom: none;
-}
-
 .table td a {
   text-decoration: none;
   color: var(--main-color);
@@ -412,9 +406,25 @@ td {
   justify-content: space-between;
 }
 
-#myTable thead tr {
-  border-bottom: 1px solid var(--text-grey);
+.table-container h4{
+  font-weight: bold;
+  font-size: 22px;
+  margin-top: 50px;
+  margin-bottom: 20px;
+}
+
+#itemsTable thead tr {
+  border-bottom: 1px solid #afafaf;
   border-top: 0;
+}
+
+.page-item a {
+  color: var(--main-color);
+}
+
+.active .page-link {
+  background: var(--main-color) !important;
+  color: #fff !important;
 }
 
 #alert-popup {
@@ -454,6 +464,10 @@ button.edit-btn {
   border: none;
   background: none;
   padding: 0;
+}
+
+.save-cancel-buttons{
+  display: none;
 }
 
 .save-cancel-buttons button {

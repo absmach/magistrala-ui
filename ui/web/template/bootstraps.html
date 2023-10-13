@@ -167,47 +167,43 @@
         </div>
 
         <div class="table-container">
-          <table id="itemsTable" class="table">
-            <thead>
-              <tr>
-                <th scope="col">NAME</th>
-                <th scope="col">Thing ID</th>
-                <th scope="col">External ID</th>
-              </tr>
-            </thead>
-            <tbody>
-              {{range $i, $t := .Bootstraps}}
-              <tr>
-                <td>{{$t.Name}}</td>
-                <td>
-                  <div class="copy-con-container">
-                    <a href='{{printf "/bootstrap/%s" $t.ThingID}}'
-                      >{{$t.ThingID}}</a
-                    >
-                    <button class="copy-icon" onclick="copyToClipboard(this)">
-                      <i class="far fa-copy"></i>
-                    </button>
-                  </div>
-                </td>
-                <td>{{$t.ExternalID}}</td>
-              </tr>
-              {{end}}
-            </tbody>
-          </table>
+          {{template "tableheader" .}}
+          <div class="itemsTable">
+            <table id="itemsTable" class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Name</th>
+                  <th scope="col">Thing ID</th>
+                  <th scope="col">External ID</th>
+                </tr>
+              </thead>
+              <tbody>
+                {{range $i, $t := .Bootstraps}}
+                <tr>
+                  <td>{{$t.Name}}</td>
+                  <td>
+                    <div class="copy-con-container">
+                      <a href='{{printf "/bootstrap/%s" $t.ThingID}}'
+                        >{{$t.ThingID}}</a
+                      >
+                      <button class="copy-icon" onclick="copyToClipboard(this)">
+                        <i class="far fa-copy"></i>
+                      </button>
+                    </div>
+                  </td>
+                  <td>{{$t.ExternalID}}</td>
+                </tr>
+                {{end}}
+              </tbody>
+            </table>
+          </div>
+          {{template "tablefooter" .}}
         </div>
       </main>
     </div>
 
     {{template "footer"}}
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        new simpleDatatables.DataTable("#itemsTable", {
-          searchable: true,
-          scrollY: "430px",
-          sortable: true,
-          pagination: true,
-        });
-      });
       function validateForm() {
         var channelsInput = document.getElementById("channels").value;
         var contentInput = document.getElementById("content").value;

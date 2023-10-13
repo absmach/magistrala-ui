@@ -84,13 +84,44 @@ func (req createUsersReq) validate() error {
 	return nil
 }
 
-type listUsersReq struct {
+type listEntityReq struct {
 	token string
+	page  uint64
+	limit uint64
 }
 
-func (req listUsersReq) validate() error {
+func (req listEntityReq) validate() error {
 	if req.token == "" {
 		return ui.ErrUnauthorizedAccess
+	}
+	if req.page == 0 {
+		return ui.ErrMalformedEntity
+	}
+	if req.limit == 0 {
+		return ui.ErrMalformedEntity
+	}
+	return nil
+}
+
+type listEntityByIDReq struct {
+	token string
+	id    string
+	page  uint64
+	limit uint64
+}
+
+func (req listEntityByIDReq) validate() error {
+	if req.token == "" {
+		return ui.ErrUnauthorizedAccess
+	}
+	if req.id == "" {
+		return ui.ErrMalformedEntity
+	}
+	if req.page == 0 {
+		return ui.ErrMalformedEntity
+	}
+	if req.limit == 0 {
+		return ui.ErrMalformedEntity
 	}
 	return nil
 }
@@ -249,17 +280,6 @@ func (req createThingReq) validate() error {
 		return ui.ErrMalformedEntity
 	}
 
-	return nil
-}
-
-type listThingsReq struct {
-	token string
-}
-
-func (req listThingsReq) validate() error {
-	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
-	}
 	return nil
 }
 
@@ -425,17 +445,6 @@ func (req updateChannelReq) validate() error {
 		return ui.ErrMalformedEntity
 	}
 
-	return nil
-}
-
-type listChannelsReq struct {
-	token string
-}
-
-func (req listChannelsReq) validate() error {
-	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
-	}
 	return nil
 }
 
@@ -682,17 +691,6 @@ func (req createGroupsReq) validate() error {
 	return nil
 }
 
-type listGroupsReq struct {
-	token string
-}
-
-func (req listGroupsReq) validate() error {
-	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
-	}
-	return nil
-}
-
 type updateGroupReq struct {
 	token       string
 	id          string
@@ -776,18 +774,6 @@ func (req updateGroupStatusReq) validate() error {
 	}
 	if req.GroupID == "" {
 		return ui.ErrMalformedEntity
-	}
-
-	return nil
-}
-
-type listPoliciesReq struct {
-	token string
-}
-
-func (req listPoliciesReq) validate() error {
-	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
 	}
 
 	return nil
@@ -914,17 +900,6 @@ func (req wsConnectionReq) validate() error {
 	return nil
 }
 
-type listDeletedClientsReq struct {
-	token string
-}
-
-func (req listDeletedClientsReq) validate() error {
-	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
-	}
-	return nil
-}
-
 type bootstrapCommandReq struct {
 	token   string
 	command string
@@ -938,18 +913,6 @@ func (req bootstrapCommandReq) validate() error {
 
 	if req.id == "" {
 		return ui.ErrMalformedEntity
-	}
-
-	return nil
-}
-
-type listBootstrapReq struct {
-	token string
-}
-
-func (req listBootstrapReq) validate() error {
-	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
 	}
 
 	return nil

@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -29,17 +30,26 @@ const (
 	contentType = "text/html"
 	staticDir   = "ui/web/static"
 	protocol    = "http"
+	pageKey     = "page"
+	limitKey    = "limit"
+	defPage     = 1
+	defLimit    = 10
 )
 
 var (
-	errMalformedData     = errors.New("malformed request data")
-	errMalformedSubtopic = errors.New("malformed subtopic")
-	errNoCookie          = errors.New("failed to read token cookie")
-	errUnauthorized      = errors.New("failed to login")
-	errAuthentication    = errors.New("failed to perform authentication over the entity")
-	errConflict          = errors.New("entity already exists")
-	referer              = ""
+	errMalformedData      = errors.New("malformed request data")
+	errMalformedSubtopic  = errors.New("malformed subtopic")
+	errNoCookie           = errors.New("failed to read token cookie")
+	errUnauthorized       = errors.New("failed to login")
+	errAuthentication     = errors.New("failed to perform authentication over the entity")
+	errConflict           = errors.New("entity already exists")
+	errInvalidQueryParams = errors.New("invalid query parameters")
+	referer               = ""
 )
+
+type number interface {
+	int64 | float64 | uint16 | uint64
+}
 
 // MakeHandler returns a HTTP handler for API endpoints.
 func MakeHandler(svc ui.Service, instanceID string) http.Handler {
@@ -308,7 +318,7 @@ func MakeHandler(svc ui.Service, instanceID string) http.Handler {
 
 	r.Get("/things/:id/channels", kithttp.NewServer(
 		listChannelsByThingEndpoint(svc),
-		decodeView,
+		decodeListEntityByIDRequest,
 		encodeResponse,
 		opts...,
 	))
@@ -411,7 +421,7 @@ func MakeHandler(svc ui.Service, instanceID string) http.Handler {
 
 	r.Get("/channels/:id/things", kithttp.NewServer(
 		listThingsByChannelEndpoint(svc),
-		decodeView,
+		decodeListEntityByIDRequest,
 		encodeResponse,
 		opts...,
 	))
@@ -460,7 +470,7 @@ func MakeHandler(svc ui.Service, instanceID string) http.Handler {
 
 	r.Get("/groups/:id/members", kithttp.NewServer(
 		listGroupMembersEndpoint(svc),
-		decodeView,
+		decodeListEntityByIDRequest,
 		encodeResponse,
 		opts...,
 	))
@@ -503,13 +513,6 @@ func MakeHandler(svc ui.Service, instanceID string) http.Handler {
 	r.Post("/readmessages", kithttp.NewServer(
 		wsConnectionEndpoint(svc),
 		decodeWsConnectionRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/deleted", kithttp.NewServer(
-		listDeletedClientsEndpoint(svc),
-		decodeListDeletedClientsRequest,
 		encodeResponse,
 		opts...,
 	))
@@ -744,8 +747,20 @@ func decodeListUsersRequest(_ context.Context, r *http.Request) (interface{}, er
 	if err != nil {
 		return nil, err
 	}
-	req := listUsersReq{
+	page, err := readNumQuery[uint64](r, pageKey, defPage)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	req := listEntityReq{
 		token: token,
+		page:  page,
+		limit: limit,
 	}
 
 	return req, nil
@@ -846,93 +861,6 @@ func decodeUserStatusUpdate(_ context.Context, r *http.Request) (interface{}, er
 	return req, nil
 }
 
-func getAuthorization(r *http.Request) (string, error) {
-	referer = r.URL.String()
-	c, err := r.Cookie("token")
-	if err != nil {
-		if err == http.ErrNoCookie {
-			return "", errors.Wrap(errNoCookie, err)
-		}
-		return "", err
-	}
-
-	return c.Value, nil
-}
-
-func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
-	w.Header().Set("Content-Type", contentType)
-	ar, _ := response.(uiRes)
-	for k, v := range ar.Headers() {
-		w.Header().Set(k, v)
-	}
-
-	// Add cookies to the response header
-	for _, cookie := range ar.Cookies() {
-		http.SetCookie(w, cookie)
-	}
-
-	w.WriteHeader(ar.Code())
-
-	if ar.Empty() {
-		return nil
-	}
-	_, err := w.Write(ar.html)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func encodeJSONResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
-	if ar, ok := response.(mainflux.Response); ok {
-		for k, v := range ar.Headers() {
-			w.Header().Set(k, v)
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(ar.Code())
-
-		if ar.Empty() {
-			return nil
-		}
-	}
-
-	return json.NewEncoder(w).Encode(response)
-}
-
-func encodeError(_ context.Context, err error, w http.ResponseWriter) {
-	switch {
-	case errors.Contains(err, errNoCookie),
-		errors.Contains(err, errUnauthorized):
-		w.Header().Set("Location", "/login")
-		w.WriteHeader(http.StatusSeeOther)
-	case errors.Contains(err, errMalformedData),
-		errors.Contains(err, errMalformedSubtopic):
-		w.WriteHeader(http.StatusBadRequest)
-	case errors.Contains(err, ui.ErrUnauthorizedAccess):
-		w.WriteHeader(http.StatusForbidden)
-	case errors.Contains(err, errAuthentication):
-		w.Header().Set("Location", "/refresh_token")
-		w.WriteHeader(http.StatusSeeOther)
-	case errors.Contains(err, errors.ErrLogin):
-		w.WriteHeader(http.StatusUnauthorized)
-	case errors.Contains(err, errConflict):
-		w.WriteHeader(http.StatusConflict)
-
-	default:
-		if e, ok := status.FromError(err); ok {
-			switch e.Code() {
-			case codes.PermissionDenied:
-				w.WriteHeader(http.StatusForbidden)
-			default:
-				w.WriteHeader(http.StatusServiceUnavailable)
-			}
-			return
-		}
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-}
-
 func decodeThingCreation(_ context.Context, r *http.Request) (interface{}, error) {
 	var meta map[string]interface{}
 	if err := json.Unmarshal([]byte(r.PostFormValue("metadata")), &meta); err != nil {
@@ -970,8 +898,20 @@ func decodeListThingsRequest(_ context.Context, r *http.Request) (interface{}, e
 	if err != nil {
 		return nil, err
 	}
-	req := listThingsReq{
+	page, err := readNumQuery[uint64](r, pageKey, defPage)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	req := listEntityReq{
 		token: token,
+		page:  page,
+		limit: limit,
 	}
 
 	return req, nil
@@ -1071,6 +1011,31 @@ func decodeThingOwnerUpdate(_ context.Context, r *http.Request) (interface{}, er
 		token: token,
 		id:    bone.GetValue(r, "id"),
 		Owner: data.Owner,
+	}
+
+	return req, nil
+}
+
+func decodeListEntityByIDRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+	page, err := readNumQuery[uint64](r, pageKey, defPage)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	req := listEntityByIDReq{
+		token: token,
+		id:    bone.GetValue(r, "id"),
+		page:  page,
+		limit: limit,
 	}
 
 	return req, nil
@@ -1196,8 +1161,20 @@ func decodeListChannelsRequest(_ context.Context, r *http.Request) (interface{},
 	if err != nil {
 		return nil, err
 	}
-	req := listChannelsReq{
+	page, err := readNumQuery[uint64](r, pageKey, defPage)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	req := listEntityReq{
 		token: token,
+		page:  page,
+		limit: limit,
 	}
 
 	return req, nil
@@ -1506,8 +1483,20 @@ func decodeListGroupsRequest(_ context.Context, r *http.Request) (interface{}, e
 	if err != nil {
 		return nil, err
 	}
-	req := listGroupsReq{
+	page, err := readNumQuery[uint64](r, pageKey, defPage)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	req := listEntityReq{
 		token: token,
+		page:  page,
+		limit: limit,
 	}
 
 	return req, nil
@@ -1589,8 +1578,20 @@ func decodeListPoliciesRequest(_ context.Context, r *http.Request) (interface{},
 	if err != nil {
 		return nil, err
 	}
-	req := listPoliciesReq{
+	page, err := readNumQuery[uint64](r, pageKey, defPage)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	req := listEntityReq{
 		token: token,
+		page:  page,
+		limit: limit,
 	}
 
 	return req, nil
@@ -1725,18 +1726,6 @@ func decodeWsConnectionRequest(_ context.Context, r *http.Request) (interface{},
 	return req, nil
 }
 
-func decodeListDeletedClientsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
-	if err != nil {
-		return nil, err
-	}
-	req := listDeletedClientsReq{
-		token: token,
-	}
-
-	return req, nil
-}
-
 func decodeTerminalCommandRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	token, err := getAuthorization(r)
 	if err != nil {
@@ -1755,8 +1744,19 @@ func decodeListBoostrapRequest(_ context.Context, r *http.Request) (interface{},
 	if err != nil {
 		return nil, err
 	}
-	req := listBootstrapReq{
+	page, err := readNumQuery[uint64](r, pageKey, defPage)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	if err != nil {
+		return nil, err
+	}
+	req := listEntityReq{
 		token: token,
+		page:  page,
+		limit: limit,
 	}
 
 	return req, nil
@@ -1839,4 +1839,118 @@ func decodeUpdateBootstrapConnections(_ context.Context, r *http.Request) (inter
 	data.token = token
 
 	return data, nil
+}
+
+func readNumQuery[N number](r *http.Request, key string, def N) (N, error) {
+	vals := bone.GetQuery(r, key)
+	if len(vals) > 1 {
+		return 0, errInvalidQueryParams
+	}
+	if len(vals) == 0 {
+		return def, nil
+	}
+	val := vals[0]
+
+	switch any(def).(type) {
+	case int64:
+		v, err := strconv.ParseInt(val, 10, 64)
+		return N(v), err
+	case uint64:
+		v, err := strconv.ParseUint(val, 10, 64)
+		return N(v), err
+	case uint16:
+		v, err := strconv.ParseUint(val, 10, 16)
+		return N(v), err
+	case float64:
+		v, err := strconv.ParseFloat(val, 64)
+		return N(v), err
+	default:
+		return def, nil
+	}
+}
+
+func getAuthorization(r *http.Request) (string, error) {
+	referer = r.URL.String()
+	c, err := r.Cookie("token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			return "", errors.Wrap(errNoCookie, err)
+		}
+		return "", err
+	}
+
+	return c.Value, nil
+}
+
+func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+	w.Header().Set("Content-Type", contentType)
+	ar, _ := response.(uiRes)
+	for k, v := range ar.Headers() {
+		w.Header().Set(k, v)
+	}
+
+	// Add cookies to the response header
+	for _, cookie := range ar.Cookies() {
+		http.SetCookie(w, cookie)
+	}
+
+	w.WriteHeader(ar.Code())
+
+	if ar.Empty() {
+		return nil
+	}
+	_, err := w.Write(ar.html)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func encodeJSONResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+	if ar, ok := response.(mainflux.Response); ok {
+		for k, v := range ar.Headers() {
+			w.Header().Set(k, v)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(ar.Code())
+
+		if ar.Empty() {
+			return nil
+		}
+	}
+
+	return json.NewEncoder(w).Encode(response)
+}
+
+func encodeError(_ context.Context, err error, w http.ResponseWriter) {
+	switch {
+	case errors.Contains(err, errNoCookie),
+		errors.Contains(err, errUnauthorized):
+		w.WriteHeader(http.StatusUnauthorized)
+	case errors.Contains(err, errMalformedData),
+		errors.Contains(err, errMalformedSubtopic):
+		w.WriteHeader(http.StatusBadRequest)
+	case errors.Contains(err, ui.ErrUnauthorizedAccess):
+		w.WriteHeader(http.StatusForbidden)
+	case errors.Contains(err, errAuthentication):
+		w.Header().Set("Location", "/refresh_token")
+		w.WriteHeader(http.StatusSeeOther)
+	case errors.Contains(err, errors.ErrLogin):
+		w.WriteHeader(http.StatusUnauthorized)
+	case errors.Contains(err, errConflict):
+		w.WriteHeader(http.StatusConflict)
+
+	default:
+		if e, ok := status.FromError(err); ok {
+			switch e.Code() {
+			case codes.PermissionDenied:
+				w.WriteHeader(http.StatusForbidden)
+			default:
+				w.WriteHeader(http.StatusServiceUnavailable)
+			}
+			return
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }

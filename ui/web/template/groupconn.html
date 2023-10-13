@@ -109,83 +109,71 @@
         </div>
 
         <div class="table-container">
-          <h4
-            style="
-              font-weight: bold;
-              font-size: 22px;
-              margin-top: 50px;
-              margin-bottom: 20px;
-            "
-          >
-            GROUP MEMBERS
-          </h4>
-          <table id="itemsTable" class="table">
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th scope="col">NAME</th>
-                <th scope="col">ID</th>
-                <th scope="col">ACTIONS</th>
-                <th scope="col"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {{$policies := .Policies}} {{$disableButton := true}} {{if (eq
-              .Group.OwnerID .User.ID)}} {{$disableButton =false}} {{end}}
-              {{range $i, $m := .Members}} {{if authorizeUser $userID $m.ID
-              "c_list" "client"}}
-              <tr>
-                <th scope="row">{{$i}}</th>
-                <td>{{$m.Name}}</td>
-                <td><a href='{{printf "/users/%s" $m.ID}}'>{{$m.ID}}</a></td>
-                <td>
-                  {{range $p := $policies}} {{if (eq $m.ID $p.Subject)}} {{if
-                  (eq $groupID $p.Object)}} {{range $j, $a := $p.Actions}}
-                  {{$badgeClass := "badge text-dark "}} {{if hasPrefix $a "g_"}}
-                  {{$badgeClass = printf "%s%s" $badgeClass "group-action"}}
-                  {{else if hasPrefix $a "c_"}} {{$badgeClass = printf "%s%s"
-                  $badgeClass "client-action"}} {{else}} {{$badgeClass = printf
-                  "%s%s" $badgeClass "text-bg-info"}} {{end}}
-                  <span class="{{$badgeClass}}">{{$a}}</span>
-                  {{end}} {{end}} {{end}} {{end}}
-                </td>
-                <td>
-                  <form action="/groups/{{$groupID}}/unassign" method="post">
-                    <input
-                      type="hidden"
-                      name="memberID"
-                      id="memberID"
-                      value="{{$m.ID}}"
-                    />
-                    <button
-                      type="submit"
-                      class="btn btn-sm"
-                      {{if
-                      $disableButton}}disabled{{end}}
-                    >
-                      <i class="fas fa-trash-alt"></i>
-                    </button>
-                  </form>
-                </td>
-              </tr>
-              {{end}} {{end}}
-            </tbody>
-          </table>
+          <h4>GROUP MEMBERS</h4>
+
+          {{template "tableheader" .}}
+          <div class="itemsTable">
+            <table id="itemsTable" class="table">
+              <thead>
+                <tr>
+                  <th scope="col">NAME</th>
+                  <th scope="col">ID</th>
+                  <th scope="col">ACTIONS</th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {{$policies := .Policies}} {{$disableButton := true}} {{if (eq
+                .Group.OwnerID .User.ID)}} {{$disableButton =false}} {{end}}
+                {{range $i, $m := .Members}} {{if authorizeUser $userID $m.ID
+                "c_list" "client"}}
+                <tr>
+                  <td>{{$m.Name}}</td>
+                  <td>
+                    <a href='{{printf "/users/%s" $m.ID}}'>{{$m.ID}}</a>
+                  </td>
+                  <td>
+                    {{range $p := $policies}} {{if (eq $m.ID $p.Subject)}} {{if
+                    (eq $groupID $p.Object)}} {{range $j, $a := $p.Actions}}
+                    {{$badgeClass := "badge text-dark "}} {{if hasPrefix $a
+                    "g_"}} {{$badgeClass = printf "%s%s" $badgeClass
+                    "group-action"}} {{else if hasPrefix $a "c_"}} {{$badgeClass
+                    = printf "%s%s" $badgeClass "client-action"}} {{else}}
+                    {{$badgeClass = printf "%s%s" $badgeClass "text-bg-info"}}
+                    {{end}}
+                    <span class="{{$badgeClass}}">{{$a}}</span>
+                    {{end}} {{end}} {{end}} {{end}}
+                  </td>
+                  <td>
+                    <form action="/groups/{{$groupID}}/unassign" method="post">
+                      <input
+                        type="hidden"
+                        name="memberID"
+                        id="memberID"
+                        value="{{$m.ID}}"
+                      />
+                      <button
+                        type="submit"
+                        class="btn btn-sm"
+                        {{if
+                        $disableButton}}disabled{{end}}
+                      >
+                        <i class="fas fa-trash-alt"></i>
+                      </button>
+                    </form>
+                  </td>
+                </tr>
+                {{end}} {{end}}
+              </tbody>
+            </table>
+          </div>
+          {{template "tablefooter" .}}
         </div>
       </main>
     </div>
 
     {{template "footer"}}
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        new simpleDatatables.DataTable("#itemsTable", {
-          searchable: true,
-          scrollY: "300px",
-          sortable: true,
-          pagination: true,
-        });
-      });
-
       function filterItem(filterValue, selectId) {
         const itemSelect = document.getElementById(selectId);
         const options = itemSelect.getElementsByTagName("option");

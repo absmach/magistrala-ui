@@ -10,7 +10,7 @@
     <div class="main-content">
       <main>
         <div class="table-container">
-          <table id="myTable" class="table">
+          <table id="itemsTable" class="table">
             <thead>
               <tr>
                 <th scope="row">USER</th>
@@ -33,7 +33,7 @@
                   >
                     <i class="fas fa-pencil-alt"></i>
                   </button>
-                  <div class="save-cancel-buttons" style="display: none">
+                  <div class="save-cancel-buttons">
                     <button class="save-btn" onclick="saveRow('name')">
                       Save
                     </button>
@@ -65,20 +65,17 @@
                 <td>
                   <button
                     class="edit-btn"
-                    onclick="editRow('identity')"
+                    onclick="editRow('name')"
                     {{if
                     $disableButton}}disabled{{end}}
                   >
                     <i class="fas fa-pencil-alt"></i>
                   </button>
-                  <div class="save-cancel-buttons" style="display: none">
-                    <button class="save-btn" onclick="saveRow('identity')">
+                  <div class="save-cancel-buttons">
+                    <button class="save-btn" onclick="saveRow('name')">
                       Save
                     </button>
-                    <button
-                      class="cancel-btn"
-                      onclick="cancelEditRow('identity')"
-                    >
+                    <button class="cancel-btn" onclick="cancelEditRow('name')">
                       Cancel
                     </button>
                   </div>
@@ -98,7 +95,7 @@
                   >
                     <i class="fas fa-pencil-alt"></i>
                   </button>
-                  <div class="save-cancel-buttons" style="display: none">
+                  <div class="save-cancel-buttons">
                     <button class="save-btn" onclick="saveRow('tags')">
                       Save
                     </button>
@@ -126,7 +123,7 @@
                   >
                     <i class="fas fa-pencil-alt"></i>
                   </button>
-                  <div class="save-cancel-buttons" style="display: none">
+                  <div class="save-cancel-buttons">
                     <button class="save-btn" onclick="saveRow('metadata')">
                       Save
                     </button>
