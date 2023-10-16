@@ -1,441 +1,457 @@
-{{define "channels"}}
-<!doctype html>
-<html lang="en">
-  {{template "header"}}
-  <body>
-    {{template "navbar" .}}
-    <div class="main-content pt-3">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-12 mx-auto py-3">
-            <div class="row">
-              <div class="buttons mb-3">
-                <!-- Button trigger modal -->
-                <button
-                  type="button"
-                  class="btn body-button"
-                  onclick="openModal('single')"
-                >
-                  Add Channel
-                </button>
+{{ define "channels" }}
+	<!doctype html>
+	<html lang="en">
+		{{ template "header" }}
+		<body>
+			{{ template "navbar" . }}
+			<div class="main-content pt-3">
+				<div class="container">
+					<div class="row">
+						<div class="col-lg-12 mx-auto py-3">
+							<div class="row">
+								<div class="buttons mb-3">
+									<!-- Button trigger modal -->
+									<button
+										type="button"
+										class="btn body-button"
+										onclick="openModal('single')"
+									>
+										Add Channel
+									</button>
 
-                <!-- Modal -->
-                <div
-                  class="modal fade"
-                  id="addChannelModal"
-                  tabindex="-1"
-                  role="dialog"
-                  aria-labelledby="addChannelModalLabel"
-                  aria-hidden="true"
-                >
-                  <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="addChannelModalLabel">
-                          Add Channel
-                        </h5>
-                      </div>
-                      <div class="modal-body">
-                        <div id="alertMessage"></div>
-                        <form
-                          method="post"
-                          onsubmit="return submitChannelForm()"
-                        >
-                          <div class="mb-3">
-                            <label for="name" class="form-label">Name</label>
-                            <input
-                              type="text"
-                              class="form-control"
-                              name="name"
-                              id="name"
-                              placeholder="Channel Name"
-                              required
-                            />
-                          </div>
-                          <div class="mb-3">
-                            <label for="infiniteScroll" class="form-label"
-                              >Parent Name</label
-                            >
-                            <input
-                              type="text"
-                              class="itemsFilter"
-                              name="parentFilter"
-                              id="parentFilter"
-                              placeholder="Filter by parent name"
-                              oninput="fetchIndividualEntity(this.value, 'infiniteScroll')"
-                            />
-                            <select
-                              class="form-select"
-                              name="parentID"
-                              id="infiniteScroll"
-                              size="5"
-                            >
-                              <option disabled>select a channel</option>
-                            </select>
-                          </div>
-                          <div class="mb-3">
-                            <label for="description" class="form-label"
-                              >Description</label
-                            >
-                            <input
-                              type="text"
-                              class="form-control"
-                              name="description"
-                              id="description"
-                              placeholder="Channel Description"
-                            />
-                          </div>
-                          <div class="mb-3">
-                            <label for="metadata" class="form-label"
-                              >Metadata</label
-                            >
-                            <input
-                              type="text"
-                              class="form-control"
-                              name="metadata"
-                              id="metadata"
-                              value="{}"
-                            />
-                            <div id="metadataHelp" class="form-text">
-                              Enter channel metadata in JSON format.
-                            </div>
-                            <div id="metadataError" class="error-message"></div>
-                          </div>
-                          <button
-                            type="submit"
-                            class="btn body-button"
-                            onclick="return validateForm()"
-                          >
-                            Submit
-                          </button>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+									<!-- Modal -->
+									<div
+										class="modal fade"
+										id="addChannelModal"
+										tabindex="-1"
+										role="dialog"
+										aria-labelledby="addChannelModalLabel"
+										aria-hidden="true"
+									>
+										<div class="modal-dialog" role="document">
+											<div class="modal-content">
+												<div class="modal-header">
+													<h5 class="modal-title" id="addChannelModalLabel">
+														Add Channel
+													</h5>
+												</div>
+												<div class="modal-body">
+													<div id="alertMessage"></div>
+													<form
+														method="post"
+														onsubmit="return submitChannelForm()"
+													>
+														<div class="mb-3">
+															<label for="name" class="form-label">Name</label>
+															<input
+																type="text"
+																class="form-control"
+																name="name"
+																id="name"
+																placeholder="Channel Name"
+																required
+															/>
+														</div>
+														<div class="mb-3">
+															<label for="infiniteScroll" class="form-label">
+																Parent Name
+															</label>
+															<input
+																type="text"
+																class="itemsFilter"
+																name="parentFilter"
+																id="parentFilter"
+																placeholder="Filter by parent name"
+																oninput="fetchIndividualEntity(this.value, 'infiniteScroll')"
+															/>
+															<select
+																class="form-select"
+																name="parentID"
+																id="infiniteScroll"
+																size="5"
+															>
+																<option disabled>select a channel</option>
+															</select>
+														</div>
+														<div class="mb-3">
+															<label for="description" class="form-label">
+																Description
+															</label>
+															<input
+																type="text"
+																class="form-control"
+																name="description"
+																id="description"
+																placeholder="Channel Description"
+															/>
+														</div>
+														<div class="mb-3">
+															<label for="metadata" class="form-label">
+																Metadata
+															</label>
+															<input
+																type="text"
+																class="form-control"
+																name="metadata"
+																id="metadata"
+																value="{}"
+															/>
+															<div id="metadataHelp" class="form-text">
+																Enter channel metadata in JSON format.
+															</div>
+															<div
+																id="metadataError"
+																class="error-message"
+															></div>
+														</div>
+														<button
+															type="submit"
+															class="btn body-button"
+															onclick="return validateForm()"
+														>
+															Submit
+														</button>
+													</form>
+												</div>
+											</div>
+										</div>
+									</div>
 
-                <!-- Button trigger modal -->
-                <button
-                  type="button"
-                  class="btn body-button"
-                  onclick="openModal('bulk')"
-                >
-                  Add Channels
-                </button>
+									<!-- Button trigger modal -->
+									<button
+										type="button"
+										class="btn body-button"
+										onclick="openModal('bulk')"
+									>
+										Add Channels
+									</button>
 
-                <!-- Modal -->
-                <div
-                  class="modal fade"
-                  id="addChannelsModal"
-                  tabindex="-1"
-                  role="dialog"
-                  aria-labelledby="addChannelsModalLabel"
-                  aria-hidden="true"
-                >
-                  <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="addChannelsModalLabel">
-                          Add Channels
-                        </h5>
-                      </div>
-                      <div class="modal-body">
-                        <div id="alertBulkMessage"></div>
-                        <form
-                          method="post"
-                          enctype="multipart/form-data"
-                          onsubmit="return submitBulkChannelsForm()"
-                        >
-                          <div class="form-group">
-                            <label for="channelsFile"
-                              >Add csv file containing channels names with
-                              metadata. The metadata field can be empty</label
-                            >
-                            <input
-                              type="file"
-                              class="form-control-file"
-                              id="channelsFile"
-                              name="channelsFile"
-                              required
-                            />
-                            <button
-                              type="submit"
-                              value="upload"
-                              class="btn body-button"
-                            >
-                              Submit
-                            </button>
-                          </div>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="table-responsive table-container">
-                {{template "tableheader" .}}
-                <div class="itemsTable">
-                  <table id="itemsTable" class="table">
-                    <thead>
-                      <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">ID</th>
-                        <th class="desc-col" scope="col">Description</th>
-                        <th class="meta-col" scope="col">Metadata</th>
-                        <th class="created-col" scope="col">Created At</th>
-                        <th class="text-center" scope="col"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {{$userID := .User.ID}} {{range $i, $c := .Channels}}
-                      {{$disableButton := true}} {{if (authorizeThing $userID $c.ID
-                      "g_delete" "group")}} {{$disableButton = false}} {{end}}
-                      <tr>
-                        <td>{{$c.Name}}</td>
-                        <td>
-                          <div class="copy-con-container">
-                            <a href='{{printf "/channels/%s" $c.ID}}'>{{$c.ID}}</a>
-                            <button class="copy-icon" onclick="copyToClipboard(this)">
-                              <i class="far fa-copy"></i>
-                            </button>
-                          </div>
-                        </td>
-                        <td class="desc-col">{{$c.Description}}</td>
-                        <td class="meta-col">{{toJSON $c.Metadata}}</td>
-                        <td class="created-col">{{$c.CreatedAt}}</td>
-                        <td class="text-center">
-                          <form action="/channels/disabled" method="post">
-                            <input
-                              type="hidden"
-                              name="channelID"
-                              id="channelID"
-                              value="{{$c.ID}}"
-                            />
-                            <button
-                              type="submit"
-                              class="btn btn-sm"
-                              {{if
-                              $disableButton}}disabled{{end}}
-                            >
-                              <i class="fas fa-trash-alt"></i>
-                            </button>
-                          </form>
-                        </td>
-                      </tr>
-                      {{end}}
-                    </tbody>
-                  </table>
-                </div>
-                {{template "tablefooter" .}}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    {{template "footer"}}
-    <script>
-      function filterItem(filterValue, selectId) {
-        const itemSelect = document.getElementById(selectId);
-        const options = itemSelect.getElementsByTagName("option");
+									<!-- Modal -->
+									<div
+										class="modal fade"
+										id="addChannelsModal"
+										tabindex="-1"
+										role="dialog"
+										aria-labelledby="addChannelsModalLabel"
+										aria-hidden="true"
+									>
+										<div class="modal-dialog" role="document">
+											<div class="modal-content">
+												<div class="modal-header">
+													<h5 class="modal-title" id="addChannelsModalLabel">
+														Add Channels
+													</h5>
+												</div>
+												<div class="modal-body">
+													<div id="alertBulkMessage"></div>
+													<form
+														method="post"
+														enctype="multipart/form-data"
+														onsubmit="return submitBulkChannelsForm()"
+													>
+														<div class="form-group">
+															<label for="channelsFile">
+																Add csv file containing channels names with
+																metadata. The metadata field can be empty
+															</label>
+															<input
+																type="file"
+																class="form-control-file"
+																id="channelsFile"
+																name="channelsFile"
+																required
+															/>
+															<button
+																type="submit"
+																value="upload"
+																class="btn body-button"
+															>
+																Submit
+															</button>
+														</div>
+													</form>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="table-responsive table-container">
+									{{ template "tableheader" . }}
+									<div class="itemsTable">
+										<table id="itemsTable" class="table">
+											<thead>
+												<tr>
+													<th scope="col">Name</th>
+													<th scope="col">ID</th>
+													<th class="desc-col" scope="col">Description</th>
+													<th class="meta-col" scope="col">Metadata</th>
+													<th class="created-col" scope="col">Created At</th>
+													<th class="text-center" scope="col"></th>
+												</tr>
+											</thead>
+											<tbody>
+												{{ $userID := .User.ID }}
+												{{ range $i, $c := .Channels }}
+													{{ $disableButton := true }}
+													{{ if (authorizeThing $userID $c.ID
+														"g_delete" "group")
+													}}
+														{{ $disableButton = false }}
+													{{ end }}
+													<tr>
+														<td>{{ $c.Name }}</td>
+														<td>
+															<div class="copy-con-container">
+																<a href="{{ printf "/channels/%s" $c.ID }}">
+																	{{ $c.ID }}
+																</a>
+																<button
+																	class="copy-icon"
+																	onclick="copyToClipboard(this)"
+																>
+																	<i class="far fa-copy"></i>
+																</button>
+															</div>
+														</td>
+														<td class="desc-col">{{ $c.Description }}</td>
+														<td class="meta-col">{{ toJSON $c.Metadata }}</td>
+														<td class="created-col">{{ $c.CreatedAt }}</td>
+														<td class="text-center">
+															<form action="/channels/disabled" method="post">
+																<input
+																	type="hidden"
+																	name="channelID"
+																	id="channelID"
+																	value="{{ $c.ID }}"
+																/>
+																<button
+																	type="submit"
+																	class="btn btn-sm"
+																	{{ if
+																		$disableButton
+																	}}
+																		disabled
+																	{{ end }}
+																>
+																	<i class="fas fa-trash-alt"></i>
+																</button>
+															</form>
+														</td>
+													</tr>
+												{{ end }}
+											</tbody>
+										</table>
+									</div>
+									{{ template "tablefooter" . }}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			{{ template "footer" }}
+			<script>
+				function filterItem(filterValue, selectId) {
+					const itemSelect = document.getElementById(selectId);
+					const options = itemSelect.getElementsByTagName("option");
 
-        for (let i = 0; i < options.length; i++) {
-          const option = options[i];
-          const itemId = option.value;
-          const itemName = option.innerHTML;
-          const shouldShow =
-            itemId.includes(filterValue) ||
-            itemName.toLowerCase().includes(filterValue.toLowerCase());
-          option.style.display = shouldShow ? "" : "none";
-        }
-      }
-      function validateForm() {
-        var name = document.getElementById("name").value;
-        var metadataInput = document.getElementById("metadata").value;
+					for (let i = 0; i < options.length; i++) {
+						const option = options[i];
+						const itemId = option.value;
+						const itemName = option.innerHTML;
+						const shouldShow =
+							itemId.includes(filterValue) ||
+							itemName.toLowerCase().includes(filterValue.toLowerCase());
+						option.style.display = shouldShow ? "" : "none";
+					}
+				}
+				function validateForm() {
+					var name = document.getElementById("name").value;
+					var metadataInput = document.getElementById("metadata").value;
 
-        var nameError = document.getElementById("nameError");
-        var metadataError = document.getElementById("metadataError");
+					var nameError = document.getElementById("nameError");
+					var metadataError = document.getElementById("metadataError");
 
-        var metadata;
+					var metadata;
 
-        nameError.innerHTML = "";
-        metadataError.innerHTML = "";
+					nameError.innerHTML = "";
+					metadataError.innerHTML = "";
 
-        var isValid = true;
-        if (name === "") {
-          nameError.innerHTML = "Field Required!";
-          isValid = false;
-        }
-        try {
-          metadata = JSON.parse(metadataInput);
-        } catch (error) {
-          metadataError.innerHTML =
-            "Please enter a valid metadaat in JSON  format!";
-          isValid = false;
-        }
+					var isValid = true;
+					if (name === "") {
+						nameError.innerHTML = "Field Required!";
+						isValid = false;
+					}
+					try {
+						metadata = JSON.parse(metadataInput);
+					} catch (error) {
+						metadataError.innerHTML =
+							"Please enter a valid metadaat in JSON  format!";
+						isValid = false;
+					}
 
-        return isValid;
-      }
-      const channelModal = new bootstrap.Modal(
-        document.getElementById("addChannelModal"),
-      );
-      const channelsModal = new bootstrap.Modal(
-        document.getElementById("addChannelsModal"),
-      );
+					return isValid;
+				}
+				const channelModal = new bootstrap.Modal(
+					document.getElementById("addChannelModal"),
+				);
+				const channelsModal = new bootstrap.Modal(
+					document.getElementById("addChannelsModal"),
+				);
 
-      function openModal(modal) {
-        if (modal === "single") {
-          channelModal.show();
-          getChannels("");
-          getAdditionalChannels();
-        } else if (modal === "bulk") {
-          channelsModal.show();
-        }
-      }
+				function openModal(modal) {
+					if (modal === "single") {
+						channelModal.show();
+						getChannels("");
+						getAdditionalChannels();
+					} else if (modal === "bulk") {
+						channelsModal.show();
+					}
+				}
 
-      function submitChannelForm() {
-        event.preventDefault();
-        var form = event.target;
-        fetch("/channels", {
-          method: "POST",
-          body: new FormData(form),
-        })
-          .then((response) => {
-            if (response.status === 409) {
-              errorMessage = "channel already exists!";
-              showAlert(errorMessage, "single");
-              return false;
-            } else {
-              form.reset();
-              channelModal.hide();
-              window.location.reload();
-              return true;
-            }
-          })
-          .catch((error) => {
-            console.error("error submitting channel form: ", error);
-            return false;
-          });
-      }
+				function submitChannelForm() {
+					event.preventDefault();
+					var form = event.target;
+					fetch("/channels", {
+						method: "POST",
+						body: new FormData(form),
+					})
+						.then((response) => {
+							if (response.status === 409) {
+								errorMessage = "channel already exists!";
+								showAlert(errorMessage, "single");
+								return false;
+							} else {
+								form.reset();
+								channelModal.hide();
+								window.location.reload();
+								return true;
+							}
+						})
+						.catch((error) => {
+							console.error("error submitting channel form: ", error);
+							return false;
+						});
+				}
 
-      function submitBulkChannelsForm() {
-        event.preventDefault();
-        var form = event.target;
-        fetch("/channels/bulk", {
-          method: "POST",
-          body: new FormData(form),
-        })
-          .then((response) => {
-            if (response.status === 409) {
-              errorMessage = "channels already exist!";
-              showAlert(errorMessage, "bulk");
-              return false;
-            } else {
-              form.reset();
-              channelsModal.hide();
-              window.location.reload();
-              return true;
-            }
-          })
-          .catch((error) => {
-            console.error("Error submitting bulk channels form: ", error);
-            return false;
-          });
-      }
+				function submitBulkChannelsForm() {
+					event.preventDefault();
+					var form = event.target;
+					fetch("/channels/bulk", {
+						method: "POST",
+						body: new FormData(form),
+					})
+						.then((response) => {
+							if (response.status === 409) {
+								errorMessage = "channels already exist!";
+								showAlert(errorMessage, "bulk");
+								return false;
+							} else {
+								form.reset();
+								channelsModal.hide();
+								window.location.reload();
+								return true;
+							}
+						})
+						.catch((error) => {
+							console.error("Error submitting bulk channels form: ", error);
+							return false;
+						});
+				}
 
-      function showAlert(errorMessage, modal) {
-        if (modal === "single") {
-          var alertMessage = document.getElementById("alertMessage");
-          alertMessage.innerHTML = `
+				function showAlert(errorMessage, modal) {
+					if (modal === "single") {
+						var alertMessage = document.getElementById("alertMessage");
+						alertMessage.innerHTML = `
           <div id="alert-popup" class="alert alert-danger">
             <span class="close-button" onclick="closeAlertPopup()">&times;</span>
             <h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
           </div> `;
-        } else if (modal === "bulk") {
-          var alertMessage = document.getElementById("alertBulkMessage");
-          alertMessage.innerHTML = `
+					} else if (modal === "bulk") {
+						var alertMessage = document.getElementById("alertBulkMessage");
+						alertMessage.innerHTML = `
           <div id="alert-popup" class="alert alert-danger">
             <span class="close-button" onclick="closeAlertPopup()">&times;</span>
             <h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
           </div> `;
-        }
-      }
+					}
+				}
 
-      function closeAlertPopup() {
-        document.getElementById("alert-popup").style.display = "none";
-      }
+				function closeAlertPopup() {
+					document.getElementById("alert-popup").style.display = "none";
+				}
 
-      function fetchIndividualEntity(filterValue, selectId) {
-        const itemSelect = document.getElementById(selectId);
-        if (filterValue === "") {
-          itemSelect.innerHTML = "<option disabled>select a channel</option>";
-          getChannels("");
-          getAdditionalChannels();
-        } else {
-          itemSelect.innerHTML = "";
-          getChannels(filterValue);
-        }
-      }
+				function fetchIndividualEntity(filterValue, selectId) {
+					const itemSelect = document.getElementById(selectId);
+					if (filterValue === "") {
+						itemSelect.innerHTML = "<option disabled>select a channel</option>";
+						getChannels("");
+						getAdditionalChannels();
+					} else {
+						itemSelect.innerHTML = "";
+						getChannels(filterValue);
+					}
+				}
 
-      let limit = 5;
+				let limit = 5;
 
-      function getChannels(name) {
-        fetchData(name, 1);
-      }
+				function getChannels(name) {
+					fetchData(name, 1);
+				}
 
-      function getAdditionalChannels() {
-        var selectElement = document.getElementById("infiniteScroll");
-        var singleOptionHeight =
-          selectElement.querySelector("option").offsetHeight;
-        var selectBoxHeight = selectElement.offsetHeight;
-        var numOptionsBeforeLoad = 2;
-        var lastScrollTop = 0;
-        var currentPageNo = 1;
-        var currentScroll = 0;
+				function getAdditionalChannels() {
+					var selectElement = document.getElementById("infiniteScroll");
+					var singleOptionHeight =
+						selectElement.querySelector("option").offsetHeight;
+					var selectBoxHeight = selectElement.offsetHeight;
+					var numOptionsBeforeLoad = 2;
+					var lastScrollTop = 0;
+					var currentPageNo = 1;
+					var currentScroll = 0;
 
-        selectElement.addEventListener("scroll", onselectScroll);
+					selectElement.addEventListener("scroll", onselectScroll);
 
-        function onselectScroll(event) {
-          var st = selectElement.scrollTop;
-          var totalHeight =
-            selectElement.querySelectorAll("option").length *
-            singleOptionHeight;
+					function onselectScroll(event) {
+						var st = selectElement.scrollTop;
+						var totalHeight =
+							selectElement.querySelectorAll("option").length *
+							singleOptionHeight;
 
-          if (st > lastScrollTop) {
-            currentScroll = st + selectBoxHeight;
-            if (
-              currentScroll + numOptionsBeforeLoad * singleOptionHeight >=
-              totalHeight
-            ) {
-              currentPageNo++;
-              fetchData("", currentPageNo);
-            }
-          }
+						if (st > lastScrollTop) {
+							currentScroll = st + selectBoxHeight;
+							if (
+								currentScroll + numOptionsBeforeLoad * singleOptionHeight >=
+								totalHeight
+							) {
+								currentPageNo++;
+								fetchData("", currentPageNo);
+							}
+						}
 
-          lastScrollTop = st;
-        }
-      }
+						lastScrollTop = st;
+					}
+				}
 
-      function fetchData(name, page) {
-        fetch(
-          `/entities?item=channels&limit=${limit}&name=${name}&page=${page}`,
-          {
-            method: "GET",
-          },
-        )
-          .then((response) => response.json())
-          .then((data) => {
-            const selectElement = document.getElementById("infiniteScroll");
-            data.data.forEach((group) => {
-              const option = document.createElement("option");
-              option.value = group.id;
-              option.text = group.name;
-              selectElement.appendChild(option);
-            });
-          })
-          .catch((error) => console.error("Error:", error));
-      }
-    </script>
-  </body>
-</html>
-{{end}}
+				function fetchData(name, page) {
+					fetch(
+						`/entities?item=channels&limit=${limit}&name=${name}&page=${page}`,
+						{
+							method: "GET",
+						},
+					)
+						.then((response) => response.json())
+						.then((data) => {
+							const selectElement = document.getElementById("infiniteScroll");
+							data.data.forEach((group) => {
+								const option = document.createElement("option");
+								option.value = group.id;
+								option.text = group.name;
+								selectElement.appendChild(option);
+							});
+						})
+						.catch((error) => console.error("Error:", error));
+				}
+			</script>
+		</body>
+	</html>
+{{ end }}

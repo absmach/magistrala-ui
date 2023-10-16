@@ -1,402 +1,415 @@
-{{define "things"}}
-<!doctype html>
-<html lang="en">
-  {{template "header"}}
-  <body>
-    {{template "navbar" .}}
-    <div class="main-content pt-3">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-12 mx-auto py-3">
-            <div class="row">
-              <div class="buttons mb-3">
-                <!-- Button trigger modal -->
-                <button
-                  type="button"
-                  class="btn body-button"
-                  onclick="openModal('single')"
-                >
-                  Add Thing
-                </button>
+{{ define "things" }}
+	<!doctype html>
+	<html lang="en">
+		{{ template "header" }}
+		<body>
+			{{ template "navbar" . }}
+			<div class="main-content pt-3">
+				<div class="container">
+					<div class="row">
+						<div class="col-lg-12 mx-auto py-3">
+							<div class="row">
+								<div class="buttons mb-3">
+									<!-- Button trigger modal -->
+									<button
+										type="button"
+										class="btn body-button"
+										onclick="openModal('single')"
+									>
+										Add Thing
+									</button>
 
-                <!-- Modal -->
-                <div
-                  class="modal fade"
-                  id="addThingModal"
-                  tabindex="-1"
-                  role="dialog"
-                  aria-labelledby="addThingModalLabel"
-                  aria-hidden="true"
-                >
-                  <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="addThingModalLabel">
-                          Add Thing
-                        </h5>
-                      </div>
-                      <div class="modal-body">
-                        <div id="alertMessage"></div>
-                        <form method="post" onsubmit="return submitThingForm()">
-                          <div class="mb-3">
-                            <label for="name" class="form-label">Name</label>
-                            <input
-                              type="text"
-                              class="form-control"
-                              name="name"
-                              id="name"
-                              placeholder="Device Name"
-                              required
-                            />
-                          </div>
-                          <div class="mb-3">
-                            <label for="thingID" class="form-label"
-                              >Thing ID</label
-                            >
-                            <input
-                              type="text"
-                              class="form-control"
-                              name="thingID"
-                              id="thingID"
-                              placeholder="Thing ID"
-                            />
-                          </div>
-                          <div class="mb-3">
-                            <label for="identity" class="form-label"
-                              >Identity</label
-                            >
-                            <input
-                              type="text"
-                              class="form-control"
-                              name="identity"
-                              id="identity"
-                              placeholder="Thing Identity"
-                            />
-                          </div>
-                          <div class="mb-3">
-                            <label for="secret" class="form-label"
-                              >Secret</label
-                            >
-                            <input
-                              type="text"
-                              class="form-control"
-                              name="secret"
-                              id="secret"
-                              placeholder="Thing Secret"
-                            />
-                            <div id="secretError" class="error-message"></div>
-                          </div>
-                          <div class="mb-3">
-                            <label for="tags" class="form-label">Tags</label>
-                            <input
-                              type="text"
-                              class="form-control"
-                              name="tags"
-                              id="tags"
-                              aria-describedby="tagHelp"
-                              value="[]"
-                            />
-                            <div id="tagHelp" class="form-text">
-                              Enter device tags as a string slice.
-                            </div>
-                            <div id="tagsError" class="error-message"></div>
-                          </div>
-                          <div class="mb-3">
-                            <label for="metadata" class="form-label"
-                              >Metadata</label
-                            >
-                            <input
-                              type="text"
-                              class="form-control"
-                              name="metadata"
-                              id="metadata"
-                              value="{}"
-                            />
-                            <div id="metadataHelp" class="form-text">
-                              Enter device metadata in JSON format.
-                            </div>
-                            <div id="metadataError" class="error-message"></div>
-                          </div>
-                          <button
-                            type="submit"
-                            class="btn body-button"
-                            onclick="return validateForm()"
-                          >
-                            Submit
-                          </button>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+									<!-- Modal -->
+									<div
+										class="modal fade"
+										id="addThingModal"
+										tabindex="-1"
+										role="dialog"
+										aria-labelledby="addThingModalLabel"
+										aria-hidden="true"
+									>
+										<div class="modal-dialog" role="document">
+											<div class="modal-content">
+												<div class="modal-header">
+													<h5 class="modal-title" id="addThingModalLabel">
+														Add Thing
+													</h5>
+												</div>
+												<div class="modal-body">
+													<div id="alertMessage"></div>
+													<form
+														method="post"
+														onsubmit="return submitThingForm()"
+													>
+														<div class="mb-3">
+															<label for="name" class="form-label">Name</label>
+															<input
+																type="text"
+																class="form-control"
+																name="name"
+																id="name"
+																placeholder="Device Name"
+																required
+															/>
+														</div>
+														<div class="mb-3">
+															<label for="thingID" class="form-label">
+																Thing ID
+															</label>
+															<input
+																type="text"
+																class="form-control"
+																name="thingID"
+																id="thingID"
+																placeholder="Thing ID"
+															/>
+														</div>
+														<div class="mb-3">
+															<label for="identity" class="form-label">
+																Identity
+															</label>
+															<input
+																type="text"
+																class="form-control"
+																name="identity"
+																id="identity"
+																placeholder="Thing Identity"
+															/>
+														</div>
+														<div class="mb-3">
+															<label for="secret" class="form-label">
+																Secret
+															</label>
+															<input
+																type="text"
+																class="form-control"
+																name="secret"
+																id="secret"
+																placeholder="Thing Secret"
+															/>
+															<div id="secretError" class="error-message"></div>
+														</div>
+														<div class="mb-3">
+															<label for="tags" class="form-label">Tags</label>
+															<input
+																type="text"
+																class="form-control"
+																name="tags"
+																id="tags"
+																aria-describedby="tagHelp"
+																value="[]"
+															/>
+															<div id="tagHelp" class="form-text">
+																Enter device tags as a string slice.
+															</div>
+															<div id="tagsError" class="error-message"></div>
+														</div>
+														<div class="mb-3">
+															<label for="metadata" class="form-label">
+																Metadata
+															</label>
+															<input
+																type="text"
+																class="form-control"
+																name="metadata"
+																id="metadata"
+																value="{}"
+															/>
+															<div id="metadataHelp" class="form-text">
+																Enter device metadata in JSON format.
+															</div>
+															<div
+																id="metadataError"
+																class="error-message"
+															></div>
+														</div>
+														<button
+															type="submit"
+															class="btn body-button"
+															onclick="return validateForm()"
+														>
+															Submit
+														</button>
+													</form>
+												</div>
+											</div>
+										</div>
+									</div>
 
-                <!-- Button trigger modal -->
-                <button
-                  type="button"
-                  class="btn body-button"
-                  onclick="openModal('bulk')"
-                >
-                  Add Things
-                </button>
+									<!-- Button trigger modal -->
+									<button
+										type="button"
+										class="btn body-button"
+										onclick="openModal('bulk')"
+									>
+										Add Things
+									</button>
 
-                <!-- Modal -->
-                <div
-                  class="modal fade"
-                  id="addThingsModal"
-                  tabindex="-1"
-                  role="dialog"
-                  aria-labelledby="addThingsModalLabel"
-                  aria-hidden="true"
-                >
-                  <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="addThingsModalLabel">
-                          Add Things
-                        </h5>
-                      </div>
-                      <div class="modal-body">
-                        <div id="alertBulkMessage"></div>
-                        <form
-                          method="post"
-                          enctype="multipart/form-data"
-                          onsubmit="return submitBulkThingsForm()"
-                        >
-                          <div class="form-group">
-                            <label for="thingsFile"
-                              >Add csv file containing thing names with
-                              metadata. The metadata field can be empty</label
-                            >
-                            <input
-                              type="file"
-                              class="form-control-file"
-                              id="thingsFile"
-                              name="thingsFile"
-                              required
-                            />
-                            <button
-                              type="submit"
-                              value="upload"
-                              class="btn body-button"
-                            >
-                              Submit
-                            </button>
-                          </div>
-                        </form>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="table-responsive table-container">
-                {{template "tableheader" .}}
-                <div class="itemsTable">
-                  <table id="itemsTable" class="table">
-                    <thead>
-                      <tr>
-                        <th scope="col">Name</th>
-                        <th scope="col">ID</th>
-                        <th class="tags-col" scope="col">Tags</th>
-                        <th class="meta-col" scope="col">Metadata</th>
-                        <th class="created-col" scope="col">Created At</th>
-                        <th class="text-center" scope="col"></th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {{$userID := .User.ID}} {{range $i, $t := .Things}}
-                      {{$disableButton := true}} {{if (authorizeThing $userID
-                      $t.ID "c_delete" "client")}} {{$disableButton = false}}
-                      {{end}}
-                      <tr>
-                        <td>{{$t.Name}}</td>
-                        <td>
-                          <div class="copy-con-container">
-                            <a href='{{printf "/things/%s" $t.ID}}'
-                              >{{$t.ID}}</a
-                            >
-                            <button
-                              class="copy-icon"
-                              onclick="copyToClipboard(this)"
-                            >
-                              <i class="far fa-copy"></i>
-                            </button>
-                          </div>
-                        </td>
-                        <td class="tags-col">{{toSlice $t.Tags}}</td>
-                        <td class="meta-col">{{toJSON $t.Metadata}}</td>
-                        <td class="created-col">{{$t.CreatedAt}}</td>
-                        <td class="text-center">
-                          <form action="/things/disabled" method="post">
-                            <input
-                              type="hidden"
-                              name="thingID"
-                              id="thingID"
-                              value="{{$t.ID}}"
-                            />
-                            <button
-                              type="submit"
-                              class="btn btn-sm"
-                              {{if
-                              $disableButton}}disabled{{end}}
-                            >
-                              <i class="fas fa-trash-alt"></i>
-                            </button>
-                          </form>
-                        </td>
-                      </tr>
-                      {{end}}
-                    </tbody>
-                  </table>
-                </div>
-                {{template "tablefooter" .}}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    {{template "footer"}}
-    <script>
-      function validateForm() {
-        var secret = document.getElementById("secret").value;
-        var tagsInput = document.getElementById("tags").value;
-        var metadataInput = document.getElementById("metadata").value;
+									<!-- Modal -->
+									<div
+										class="modal fade"
+										id="addThingsModal"
+										tabindex="-1"
+										role="dialog"
+										aria-labelledby="addThingsModalLabel"
+										aria-hidden="true"
+									>
+										<div class="modal-dialog" role="document">
+											<div class="modal-content">
+												<div class="modal-header">
+													<h5 class="modal-title" id="addThingsModalLabel">
+														Add Things
+													</h5>
+												</div>
+												<div class="modal-body">
+													<div id="alertBulkMessage"></div>
+													<form
+														method="post"
+														enctype="multipart/form-data"
+														onsubmit="return submitBulkThingsForm()"
+													>
+														<div class="form-group">
+															<label for="thingsFile">
+																Add csv file containing thing names with
+																metadata. The metadata field can be empty
+															</label>
+															<input
+																type="file"
+																class="form-control-file"
+																id="thingsFile"
+																name="thingsFile"
+																required
+															/>
+															<button
+																type="submit"
+																value="upload"
+																class="btn body-button"
+															>
+																Submit
+															</button>
+														</div>
+													</form>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="table-responsive table-container">
+									{{ template "tableheader" . }}
+									<div class="itemsTable">
+										<table id="itemsTable" class="table">
+											<thead>
+												<tr>
+													<th scope="col">Name</th>
+													<th scope="col">ID</th>
+													<th class="tags-col" scope="col">Tags</th>
+													<th class="meta-col" scope="col">Metadata</th>
+													<th class="created-col" scope="col">Created At</th>
+													<th class="text-center" scope="col"></th>
+												</tr>
+											</thead>
+											<tbody>
+												{{ $userID := .User.ID }}
+												{{ range $i, $t := .Things }}
+													{{ $disableButton := true }}
+													{{ if (authorizeThing $userID
+														$t.ID "c_delete" "client")
+													}}
+														{{ $disableButton = false }}
+													{{ end }}
+													<tr>
+														<td>{{ $t.Name }}</td>
+														<td>
+															<div class="copy-con-container">
+																<a href="{{ printf "/things/%s" $t.ID }}">
+																	{{ $t.ID }}
+																</a>
+																<button
+																	class="copy-icon"
+																	onclick="copyToClipboard(this)"
+																>
+																	<i class="far fa-copy"></i>
+																</button>
+															</div>
+														</td>
+														<td class="tags-col">{{ toSlice $t.Tags }}</td>
+														<td class="meta-col">{{ toJSON $t.Metadata }}</td>
+														<td class="created-col">{{ $t.CreatedAt }}</td>
+														<td class="text-center">
+															<form action="/things/disabled" method="post">
+																<input
+																	type="hidden"
+																	name="thingID"
+																	id="thingID"
+																	value="{{ $t.ID }}"
+																/>
+																<button
+																	type="submit"
+																	class="btn btn-sm"
+																	{{ if
+																		$disableButton
+																	}}
+																		disabled
+																	{{ end }}
+																>
+																	<i class="fas fa-trash-alt"></i>
+																</button>
+															</form>
+														</td>
+													</tr>
+												{{ end }}
+											</tbody>
+										</table>
+									</div>
+									{{ template "tablefooter" . }}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			{{ template "footer" }}
+			<script>
+				function validateForm() {
+					var secret = document.getElementById("secret").value;
+					var tagsInput = document.getElementById("tags").value;
+					var metadataInput = document.getElementById("metadata").value;
 
-        var secretError = document.getElementById("secretError");
-        var tagsError = document.getElementById("tagsError");
-        var metadataError = document.getElementById("metadataError");
+					var secretError = document.getElementById("secretError");
+					var tagsError = document.getElementById("tagsError");
+					var metadataError = document.getElementById("metadataError");
 
-        var tags;
-        var metadata;
+					var tags;
+					var metadata;
 
-        secretError.innerHTML = "";
-        tagsError.innerHTML = "";
-        metadataError.innerHTML = "";
+					secretError.innerHTML = "";
+					tagsError.innerHTML = "";
+					metadataError.innerHTML = "";
 
-        var isValid = true;
+					var isValid = true;
 
-        if (secret.trim() != "") {
-          if (secret.length < 8) {
-            secretError.innerHTML =
-              "Secret must have a minimum of 8 characters";
-            isValid = false;
-          }
-        }
-        try {
-          tags = JSON.parse(tagsInput);
-        } catch (error) {
-          tagsError.innerHTML = "Please enter valid tags as a string array!";
-          isValid = false;
-        }
+					if (secret.trim() != "") {
+						if (secret.length < 8) {
+							secretError.innerHTML =
+								"Secret must have a minimum of 8 characters";
+							isValid = false;
+						}
+					}
+					try {
+						tags = JSON.parse(tagsInput);
+					} catch (error) {
+						tagsError.innerHTML = "Please enter valid tags as a string array!";
+						isValid = false;
+					}
 
-        if (
-          !Array.isArray(tags) ||
-          !tags.every(function (tag) {
-            return typeof tag === "string";
-          })
-        ) {
-          tagsError.innerHTML = "Tags must be a string array!";
-          isValid = false;
-        }
+					if (
+						!Array.isArray(tags) ||
+						!tags.every(function (tag) {
+							return typeof tag === "string";
+						})
+					) {
+						tagsError.innerHTML = "Tags must be a string array!";
+						isValid = false;
+					}
 
-        try {
-          metadata = JSON.parse(metadataInput);
-        } catch (error) {
-          metadataError.innerHTML =
-            "Please enter valid metadata in JSON format!";
-          isValid = false;
-        }
+					try {
+						metadata = JSON.parse(metadataInput);
+					} catch (error) {
+						metadataError.innerHTML =
+							"Please enter valid metadata in JSON format!";
+						isValid = false;
+					}
 
-        return isValid;
-      }
+					return isValid;
+				}
 
-      const thingModal = new bootstrap.Modal(
-        document.getElementById("addThingModal"),
-      );
-      const thingsModal = new bootstrap.Modal(
-        document.getElementById("addThingsModal"),
-      );
+				const thingModal = new bootstrap.Modal(
+					document.getElementById("addThingModal"),
+				);
+				const thingsModal = new bootstrap.Modal(
+					document.getElementById("addThingsModal"),
+				);
 
-      function openModal(modal) {
-        if (modal === "single") {
-          thingModal.show();
-        } else if (modal === "bulk") {
-          thingsModal.show();
-        }
-      }
+				function openModal(modal) {
+					if (modal === "single") {
+						thingModal.show();
+					} else if (modal === "bulk") {
+						thingsModal.show();
+					}
+				}
 
-      function submitThingForm() {
-        event.preventDefault();
-        var form = event.target;
-        fetch("/things", {
-          method: "POST",
-          body: new FormData(form),
-        })
-          .then((response) => {
-            if (response.status === 409) {
-              errorMessage = "thing already exists!";
-              showAlert(errorMessage, "single");
-              return false;
-            } else {
-              form.reset();
-              thingModal.hide();
-              window.location.reload();
-              return true;
-            }
-          })
-          .catch((error) => {
-            console.error("error submitting thing form: ", error);
-            return false;
-          });
-      }
+				function submitThingForm() {
+					event.preventDefault();
+					var form = event.target;
+					fetch("/things", {
+						method: "POST",
+						body: new FormData(form),
+					})
+						.then((response) => {
+							if (response.status === 409) {
+								errorMessage = "thing already exists!";
+								showAlert(errorMessage, "single");
+								return false;
+							} else {
+								form.reset();
+								thingModal.hide();
+								window.location.reload();
+								return true;
+							}
+						})
+						.catch((error) => {
+							console.error("error submitting thing form: ", error);
+							return false;
+						});
+				}
 
-      function submitBulkThingsForm() {
-        event.preventDefault();
-        var form = event.target;
-        fetch("/things/bulk", {
-          method: "POST",
-          body: new FormData(form),
-        })
-          .then((response) => {
-            if (response.status === 409) {
-              errorMessage = "things already exist!";
-              showAlert(errorMessage, "bulk");
-              return false;
-            } else {
-              form.reset();
-              thingsModal.hide();
-              window.location.reload();
-              return true;
-            }
-          })
-          .catch((error) => {
-            console.error("Error submitting bulk things form: ", error);
-            return false;
-          });
-      }
+				function submitBulkThingsForm() {
+					event.preventDefault();
+					var form = event.target;
+					fetch("/things/bulk", {
+						method: "POST",
+						body: new FormData(form),
+					})
+						.then((response) => {
+							if (response.status === 409) {
+								errorMessage = "things already exist!";
+								showAlert(errorMessage, "bulk");
+								return false;
+							} else {
+								form.reset();
+								thingsModal.hide();
+								window.location.reload();
+								return true;
+							}
+						})
+						.catch((error) => {
+							console.error("Error submitting bulk things form: ", error);
+							return false;
+						});
+				}
 
-      function showAlert(errorMessage, modal) {
-        if (modal === "single") {
-          var alertMessage = document.getElementById("alertMessage");
-          alertMessage.innerHTML = `
+				function showAlert(errorMessage, modal) {
+					if (modal === "single") {
+						var alertMessage = document.getElementById("alertMessage");
+						alertMessage.innerHTML = `
           <div id="alert-popup" class="alert alert-danger">
             <span class="close-button" onclick="closeAlertPopup()">&times;</span>
             <h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
           </div> `;
-        } else if (modal === "bulk") {
-          var alertMessage = document.getElementById("alertBulkMessage");
-          alertMessage.innerHTML = `
+					} else if (modal === "bulk") {
+						var alertMessage = document.getElementById("alertBulkMessage");
+						alertMessage.innerHTML = `
           <div id="alert-popup" class="alert alert-danger">
             <span class="close-button" onclick="closeAlertPopup()">&times;</span>
             <h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
           </div> `;
-        }
-      }
+					}
+				}
 
-      function closeAlertPopup() {
-        document.getElementById("alert-popup").style.display = "none";
-      }
-    </script>
-  </body>
-</html>
-{{end}}
+				function closeAlertPopup() {
+					document.getElementById("alert-popup").style.display = "none";
+				}
+			</script>
+		</body>
+	</html>
+{{ end }}

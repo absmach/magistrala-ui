@@ -1,150 +1,204 @@
-{{define "navbar"}}
-<!-- Sidebbar -->
-<ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark" id="accordionSidebar">
-  <!-- Sidebar Brand -->
-  <a class="sidebar-brand d-flex justify-content-center ms-3 pt-2 mb-3" href="/">
-    <div class="sidebar-brand">
-      <img src="/images/logo.png" class="logo" />
-    </div>
-    <h1 class="mx-3">Mainflux</h1>
-  </a>
+{{ define "navbar" }}
+	<!-- Sidebbar -->
+	<ul
+		class="navbar-nav bg-gradient-primary sidebar sidebar-dark"
+		id="accordionSidebar"
+	>
+		<!-- Sidebar Brand -->
+		<a
+			class="sidebar-brand d-flex justify-content-center ms-3 pt-2 mb-3"
+			href="/"
+		>
+			<div class="sidebar-brand">
+				<img src="/images/logo.png" class="logo" />
+			</div>
+			<h1 class="mx-3">Mainflux</h1>
+		</a>
 
-  <!-- Divider -->
-  <hr class="sidebar-divider my-0 text-light mb-3">
+		<!-- Divider -->
+		<hr class="sidebar-divider my-0 text-light mb-3" />
 
+		<li class="nav-item mb-2 mx-2">
+			{{ $active := "dashboard" }}
+			<a
+				href="/"
+				class="nav-link {{ if eq .NavbarActive $active }}active{{ end }}"
+			>
+				<i class="fas fa-home"></i>
+				<span>Dashboard</span>
+			</a>
+		</li>
+		<li class="nav-item mb-2 mx-2">
+			{{ $active = "users" }}
+			<a
+				href="/users"
+				class=" nav-link {{ if (serviceUnavailable "users") }}
+					disabled-item
+				{{ end }} {{ if eq .NavbarActive $active }}active{{ end }}"
+			>
+				<i class="fas fa-users"></i>
+				<span>Users</span>
+			</a>
+		</li>
+		<li class="nav-item mb-2 mx-2">
+			{{ $active = "groups" }}
+			<a
+				href="/groups"
+				class="nav-link {{ if (serviceUnavailable "users") }}
+					disabled-item
+				{{ end }} {{ if eq .NavbarActive $active }}active{{ end }}"
+			>
+				<i class="fas fa-layer-group"></i>
+				<span>Groups</span>
+			</a>
+		</li>
+		<li class="nav-item mb-2 mx-2">
+			{{ $active = "policies" }}
+			<a
+				href="/users/policies"
+				class="nav-link {{ if (serviceUnavailable "users") }}
+					disabled-item
+				{{ end }} {{ if eq .NavbarActive $active }}active{{ end }}"
+			>
+				<i class="fas fa-solid fa-shield-alt"></i>
+				<span>Users Policies</span>
+			</a>
+		</li>
+		<li class="nav-item mb-2 mx-2">
+			{{ $active = "things" }}
+			<a
+				href="/things"
+				class="nav-link {{ if (serviceUnavailable "things") }}
+					disabled-item
+				{{ end }} {{ if eq .NavbarActive $active }}active{{ end }}"
+			>
+				<i class="fas fa-microchip"></i>
+				<span>Things</span>
+			</a>
+		</li>
+		<li class="nav-item mb-2 mx-2">
+			{{ $active = "channels" }}
+			<a
+				href="/channels"
+				class="nav-link {{ if (serviceUnavailable "things") }}
+					disabled-item
+				{{ end }} {{ if eq .NavbarActive $active }}active{{ end }}"
+			>
+				<i class="fas fa-exchange-alt"></i>
+				<span>Channels</span>
+			</a>
+		</li>
+		<li class="nav-item mb-2 mx-2">
+			{{ $active = "thingsPolicies" }}
+			<a
+				href="/things/policies"
+				class="nav-link {{ if (serviceUnavailable "things") }}
+					disabled-item
+				{{ end }} {{ if eq .NavbarActive $active }}active{{ end }}"
+			>
+				<i class="fas fa-solid fa-shield-alt"></i>
+				<span>Things Policies</span>
+			</a>
+		</li>
+		<li class="nav-item mb-2 mx-2">
+			{{ $active = "bootstraps" }}
+			<a
+				href="/bootstraps"
+				class="nav-link {{ if (serviceUnavailable "bootstrap") }}
+					disabled-item
+				{{ end }} {{ if eq .NavbarActive $active }}active{{ end }}"
+			>
+				<i class="fas fa-solid fa-broadcast-tower"></i>
+				<span>Bootstrap</span>
+			</a>
+		</li>
 
-  <li class="nav-item mb-2 mx-2">
-    {{$active := "dashboard"}}
-    <a href="/" class="nav-link {{if eq .NavbarActive $active}}active{{end}}">
-        <i class="fas fa-home"></i><span>Dashboard</span>
-    </a>
-  </li>
-  <li class="nav-item mb-2 mx-2">
-    {{$active = "users"}}
-    <a
-      href="/users"
-      class=' nav-link {{if (serviceUnavailable "users")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'
-      ><i class="fas fa-users"></i> <span>Users</span></a
-    >
-  </li>
-  <li class="nav-item mb-2 mx-2">
-    {{$active = "groups"}}
-    <a
-      href="/groups"
-      class='nav-link {{if (serviceUnavailable "users")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'
-      ><i class="fas fa-layer-group"></i> <span>Groups</span></a
-    >
-  </li>
-  <li class="nav-item mb-2 mx-2">
-    {{$active = "policies"}}
-    <a
-      href="/users/policies"
-      class='nav-link {{if (serviceUnavailable "users")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'
-      ><i class="fas fa-solid fa-shield-alt"></i>
-      <span>Users Policies</span></a
-    >
-  </li>
-  <li class="nav-item mb-2 mx-2">
-    {{$active = "things"}}
-    <a
-      href="/things"
-      class='nav-link {{if (serviceUnavailable "things")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'
-      ><i class="fas fa-microchip"></i> <span>Things</span></a
-    >
-  </li>
-  <li class="nav-item mb-2 mx-2">
-    {{$active = "channels"}}
-    <a
-      href="/channels"
-      class='nav-link {{if (serviceUnavailable "things")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'
-      ><i class="fas fa-exchange-alt"></i> <span>Channels</span></a
-    >
-  </li>
-  <li class="nav-item mb-2 mx-2">
-    {{$active = "thingsPolicies"}}
-    <a
-      href="/things/policies"
-      class='nav-link {{if (serviceUnavailable "things")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'
-      ><i class="fas fa-solid fa-shield-alt"></i>
-      <span>Things Policies</span></a
-    >
-  </li>
-  <li class="nav-item mb-2 mx-2">
-    {{$active = "bootstraps"}}
-    <a
-      href="/bootstraps"
-      class='nav-link {{if (serviceUnavailable "bootstrap")}}disabled-item{{end}} {{if eq .NavbarActive $active}}active{{end}}'
-      ><i class="fas fa-solid fa-broadcast-tower"></i>
-      <span>Bootstrap</span></a
-    >
-  </li>
+		<!-- Sidebar Toggler (Sidebar) -->
+		<div class="d-flex justify-content-center">
+			<button class="rounded-circle border-0" id="sidebarToggle"></button>
+		</div>
+	</ul>
 
-  <!-- Sidebar Toggler (Sidebar) -->
-  <div class="d-flex justify-content-center">
-    <button class="rounded-circle border-0" id="sidebarToggle"></button>
-  </div>
+	<!-- End of sidebar -->
 
-</ul>
+	<!-- Header navbar -->
+	<nav class="navbar navbar-expand topbar fixed-top">
+		<div class="container-fluid">
+			<!-- Sidebar Toggle (Topbar) -->
+			<button
+				id="sidebarToggleTop"
+				class="btn btn-link d-md-none rounded-circle mr-3 user-item"
+			>
+				<i class="fa fa-bars"></i>
+			</button>
+		</div>
+		<div class="navbarSupportedContent">
+			<ul class="navbar-nav ml-auto">
+				<li class="nav-item dropstart me-3">
+					<a
+						class="user-item nav-link d-flex flex-row"
+						href="#"
+						role="button"
+						data-bs-toggle="dropdown"
+						aria-expanded="false"
+					>
+						<span class="me-2 d-none d-lg-inline text-muted-600 small">
+							{{ .User.Name }}
+						</span>
+						<i class="fa-solid fa-user"></i>
+					</a>
+					<ul class="dropdown-menu mt-5 position-absolute end-0 p-3">
+						<li class="d-flex justify-content-start mb-2">
+							<div class="align-self-center">
+								<i class="fa-regular fa-user fs-2"></i>
+							</div>
+							<div>
+								<span class="dropdown-item">{{ .User.Name }}</span>
+								<span class="dropdown-item text-muted">
+									{{ .User.Credentials.Identity }}
+								</span>
+							</div>
+						</li>
+						<li class="mb-2"><hr class="dropdown-divider" /></li>
+						<li class="mb-2">
+							<a
+								href="/password"
+								class="dropdown-item user-item-button p-2 mb-2"
+							>
+								<i class="fas fa-solid fa-lock me-2"></i>
+								<span>Update password</span>
+							</a>
+							<a href="/logout" class="dropdown-item user-item-button p-2 mb-2">
+								<i class="fa-solid fa-right-from-bracket me-2"></i>
+								<span>Log out</span>
+							</a>
+						</li>
+					</ul>
+				</li>
+			</ul>
+		</div>
+	</nav>
+	<script defer>
+		// Toggle the side navigation
+		document
+			.querySelectorAll("#sidebarToggle, #sidebarToggleTop")
+			.forEach(function (element) {
+				element.addEventListener("click", function (e) {
+					document.body.classList.toggle("sidebar-toggled");
+					document.querySelector(".sidebar").classList.toggle("toggled");
+				});
+			});
 
-<!-- End of sidebar -->
-
-<!-- Header navbar -->
-<nav class="navbar navbar-expand topbar fixed-top">
-  <div class="container-fluid">
-    <!-- Sidebar Toggle (Topbar) -->
-    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3 user-item">
-      <i class="fa fa-bars"></i>
-    </button>
-  </div>
-  <div class="navbarSupportedContent">
-    <ul class="navbar-nav ml-auto">
-      <li class="nav-item dropstart me-3">
-          <a class="user-item nav-link d-flex flex-row" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <span class="me-2 d-none d-lg-inline text-muted-600 small">{{.User.Name}}</span>
-              <i class="fa-solid fa-user"></i>
-          </a>
-          <ul class="dropdown-menu mt-5 position-absolute end-0 p-3">
-              <li class="d-flex justify-content-start mb-2">
-                  <div class="align-self-center">
-                      <i class="fa-regular fa-user fs-2"></i>
-                  </div>
-                  <div>
-                      <span class="dropdown-item">{{.User.Name}}</span>
-                      <span class="dropdown-item text-muted">{{.User.Credentials.Identity}}</span>
-                  </div>
-              </li>
-              <li class="mb-2"><hr class="dropdown-divider"></li>
-              <li class="mb-2">
-                  <a href="/password" class="dropdown-item user-item-button p-2 mb-2">
-                      <i class="fas fa-solid fa-lock me-2"></i>
-                      <span>Update password</span>
-                  </a>
-                  <a href="/logout" class="dropdown-item user-item-button p-2 mb-2">
-                      <i class="fa-solid fa-right-from-bracket me-2"></i>
-                      <span>Log out</span>
-                  </a>
-              </li>
-          </ul>
-      </li>
-    </ul>
-  </div>
-</nav>
-<script defer>
-  // Toggle the side navigation
-  document.querySelectorAll("#sidebarToggle, #sidebarToggleTop").forEach(function(element) {
-    element.addEventListener('click', function(e) {
-      document.body.classList.toggle("sidebar-toggled");
-      document.querySelector(".sidebar").classList.toggle("toggled");
-    });
-  });
-
-  // Close any open menu accordions when window is resized below 768px
-  window.addEventListener('resize', function() {
-      // Toggle the side navigation when window is resized below 480px
-      if (window.innerWidth < 480 && !document.querySelector(".sidebar").classList.contains("toggled")) {
-          document.body.classList.add("sidebar-toggled");
-          document.querySelector(".sidebar").classList.add("toggled");
-      }
-  });
-</script>
-{{end}}
+		// Close any open menu accordions when window is resized below 768px
+		window.addEventListener("resize", function () {
+			// Toggle the side navigation when window is resized below 480px
+			if (
+				window.innerWidth < 480 &&
+				!document.querySelector(".sidebar").classList.contains("toggled")
+			) {
+				document.body.classList.add("sidebar-toggled");
+				document.querySelector(".sidebar").classList.add("toggled");
+			}
+		});
+	</script>
+{{ end }}

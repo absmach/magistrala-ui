@@ -99,3 +99,7 @@ Creating a thing policy involves selecting the subject and object and specifying
 To use bootstrap, ensure that the [bootstrap](http://docs.mainflux.io/bootstrap/) addon is active as part of the Mainflux core services.
 
 To configure bootstrap, provide the Name, Thing ID, External ID, External Key, Channel (as a string slice), Content (in JSON format), Client Cert, Client Key, and CA Cert.
+
+## Dev Guide
+
+UI code is formatted using [prettier](https://prettier.io/). To install prettier, check the [installation guide](https://github.com/NiklasPor/prettier-plugin-go-template).

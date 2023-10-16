@@ -1,102 +1,104 @@
-{{define "messagesread"}}
-<!doctype html>
-<html lang="en">
-  {{template "header"}}
+{{ define "messagesread" }}
+	<!doctype html>
+	<html lang="en">
+		{{ template "header" }}
 
-  <body>
-    <main role="main">
-      <div class="container-fluid">
-        <div class="row">
-          {{template "navbar" .}}
 
-          <!-- Partial goes here -->
-          <div class="col-md-9">
-            <button
-              type="button"
-              class="btn btn-primary"
-              data-bs-toggle="modal"
-              data-bs-target="#readMessageModal"
-            >
-              Read Message
-            </button>
-            <div
-              class="modal fade"
-              id="readMessageModal"
-              tabindex="-1"
-              role="dialog"
-              aria-labelledby="readMessageModalLabel"
-              aria-hidden="true"
-            >
-              <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="readMessageModalLabel">
-                      Read Message
-                    </h5>
-                  </div>
-                  <div class="modal-body">
-                    <form method="post">
-                      <div class="mb-3">
-                        <label for="chanID" class="form-label"
-                          >Channel ID</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          name="chanID"
-                          id="chanID"
-                          aria-describedby="chanIDHelp"
-                        />
-                        <div id="chanIDHelp" class="form-text">
-                          Enter Channel ID.
-                        </div>
-                      </div>
-                      <div class="mb-3">
-                        <label for="thingKey" class="form-label"
-                          >Thing Key</label
-                        >
-                        <input
-                          type="text"
-                          class="form-control"
-                          name="thingKey"
-                          id="thingKey"
-                          aria-describedby="thingKeyHelp"
-                        />
-                        <div id="thingKeyHelp" class="form-text">
-                          Enter thing key.
-                        </div>
-                      </div>
-                      <button type="submit" class="btn btn-primary">
-                        Submit
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
+		<body>
+			<main role="main">
+				<div class="container-fluid">
+					<div class="row">
+						{{ template "navbar" . }}
 
-            <table class="table">
-              <thead>
-                <tr>
-                  <th scope="row">Message</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>
-                    <pre id="messageText"></pre>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <!-- End of partial-->
-        </div>
-      </div>
-      <!-- /container -->
-    </main>
 
-    {{template "footer"}}
+						<!-- Partial goes here -->
+						<div class="col-md-9">
+							<button
+								type="button"
+								class="btn btn-primary"
+								data-bs-toggle="modal"
+								data-bs-target="#readMessageModal"
+							>
+								Read Message
+							</button>
+							<div
+								class="modal fade"
+								id="readMessageModal"
+								tabindex="-1"
+								role="dialog"
+								aria-labelledby="readMessageModalLabel"
+								aria-hidden="true"
+							>
+								<div class="modal-dialog" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h5 class="modal-title" id="readMessageModalLabel">
+												Read Message
+											</h5>
+										</div>
+										<div class="modal-body">
+											<form method="post">
+												<div class="mb-3">
+													<label for="chanID" class="form-label">
+														Channel ID
+													</label>
+													<input
+														type="text"
+														class="form-control"
+														name="chanID"
+														id="chanID"
+														aria-describedby="chanIDHelp"
+													/>
+													<div id="chanIDHelp" class="form-text">
+														Enter Channel ID.
+													</div>
+												</div>
+												<div class="mb-3">
+													<label for="thingKey" class="form-label">
+														Thing Key
+													</label>
+													<input
+														type="text"
+														class="form-control"
+														name="thingKey"
+														id="thingKey"
+														aria-describedby="thingKeyHelp"
+													/>
+													<div id="thingKeyHelp" class="form-text">
+														Enter thing key.
+													</div>
+												</div>
+												<button type="submit" class="btn btn-primary">
+													Submit
+												</button>
+											</form>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<table class="table">
+								<thead>
+									<tr>
+										<th scope="row">Message</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>
+											<pre id="messageText"></pre>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<!-- End of partial-->
+					</div>
+				</div>
+				<!-- /container -->
+			</main>
+
+			{{ template "footer" }}
 
     <script>
       var chanID = "{{.ChanID}}";
@@ -116,6 +118,6 @@
         messageText.innerText = event.data;
       };
     </script>
-  </body>
-</html>
-{{end}}
+		</body>
+	</html>
+{{ end }}

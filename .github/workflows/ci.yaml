@@ -18,10 +18,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - uses: actionsx/prettier@v3
-        name: Run prettier
+      - name: Install dependencies
+        uses: actions/setup-node@v2
         with:
-          args: --check ui
+          node-version: lts/*
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Prettier
+        id: prettier-run
+        uses: rutajdash/prettier-cli-action@v1.0.0
+        with:
+          config_path: ./.prettierrc
+
+      - name: Prettier Output
+        if: ${{ failure() }}
+        shell: bash
+        run: |
+          echo "The following files are not formatted:"
+          echo "${{steps.prettier-run.outputs.prettier_output}}"
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3

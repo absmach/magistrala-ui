@@ -1,49 +1,57 @@
-{{define "tableheader"}} {{ $currentPage := .CurrentPage }}
-<div class="d-flex flex-row justify-content-start mb-2">
-  <div class="dropdown border">
-    <button
-      class="btn btn-light dropdown-toggle"
-      type="button"
-      id="itemsPerPageDropdown"
-      data-bs-toggle="dropdown"
-      aria-expanded="false"
-    >
-      {{.Limit}}
-    </button>
-    <ul class="dropdown-menu" aria-labelledby="itemsPerPageDropdown">
-      <li>
-        <a class="dropdown-item" href="?page={{$currentPage}}&limit=5" id="limit5"
-          >5</a
-        >
-      </li>
-      <li>
-        <a
-          class="dropdown-item"
-          href="?page={{$currentPage}}&limit=10"
-          id="limit10"
-          >10</a
-        >
-      </li>
-      <li>
-        <a
-          class="dropdown-item"
-          href="?page={{$currentPage}}&limit=20"
-          id="limit20"
-          >20</a
-        >
-      </li>
-      <li>
-        <a
-          class="dropdown-item"
-          href="?page={{$currentPage}}&limit=50"
-          id="limit50"
-          >50</a
-        >
-      </li>
-    </ul>
-  </div>
-  <span class="align-self-center mx-2">Items per page</span>
-</div>
+{{ define "tableheader" }}
+	{{ $currentPage := .CurrentPage }}
+	<div class="d-flex flex-row justify-content-start mb-2">
+		<div class="dropdown border">
+			<button
+				class="btn btn-light dropdown-toggle"
+				type="button"
+				id="itemsPerPageDropdown"
+				data-bs-toggle="dropdown"
+				aria-expanded="false"
+			>
+				{{ .Limit }}
+			</button>
+			<ul class="dropdown-menu" aria-labelledby="itemsPerPageDropdown">
+				<li>
+					<a
+						class="dropdown-item"
+						href="?page={{ $currentPage }}&limit=5"
+						id="limit5"
+					>
+						5
+					</a>
+				</li>
+				<li>
+					<a
+						class="dropdown-item"
+						href="?page={{ $currentPage }}&limit=10"
+						id="limit10"
+					>
+						10
+					</a>
+				</li>
+				<li>
+					<a
+						class="dropdown-item"
+						href="?page={{ $currentPage }}&limit=20"
+						id="limit20"
+					>
+						20
+					</a>
+				</li>
+				<li>
+					<a
+						class="dropdown-item"
+						href="?page={{ $currentPage }}&limit=50"
+						id="limit50"
+					>
+						50
+					</a>
+				</li>
+			</ul>
+		</div>
+		<span class="align-self-center mx-2">Items per page</span>
+	</div>
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     // Get the dropdown items
@@ -71,4 +79,4 @@
     });
   });
 </script>
-{{end}}
+{{ end }}
