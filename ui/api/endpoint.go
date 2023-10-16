@@ -49,8 +49,13 @@ func loginEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func showUpdatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(_ context.Context, _ interface{}) (interface{}, error) {
-		res, err := svc.PasswordUpdate()
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(showUpdatePasswordReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.PasswordUpdate(req.token)
 		if err != nil {
 			return nil, err
 		}
@@ -1364,8 +1369,7 @@ func getTerminalEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-
-		res, err := svc.GetRemoteTerminal(req.id)
+		res, err := svc.GetRemoteTerminal(req.id, req.token)
 		if err != nil {
 			return nil, err
 		}

@@ -215,6 +215,17 @@ func (req updateUserStatusReq) validate() error {
 	return nil
 }
 
+type showUpdatePasswordReq struct {
+	token string
+}
+
+func (req showUpdatePasswordReq) validate() error {
+	if req.token == "" {
+		return ui.ErrUnauthorizedAccess
+	}
+	return nil
+}
+
 type updateUserPasswordReq struct {
 	token   string
 	OldPass string `json:"oldpass"`
@@ -653,9 +664,6 @@ func (req deleteThingsPolicyReq) validate() error {
 	if req.Policy.Object == "" {
 		return ui.ErrMalformedEntity
 	}
-	if len(req.Policy.Actions) == 0 {
-		return ui.ErrMalformedEntity
-	}
 
 	return nil
 }
@@ -835,9 +843,6 @@ func (req deletePolicyReq) validate() error {
 		return ui.ErrMalformedEntity
 	}
 	if req.Policy.Object == "" {
-		return ui.ErrMalformedEntity
-	}
-	if len(req.Policy.Actions) == 0 {
 		return ui.ErrMalformedEntity
 	}
 

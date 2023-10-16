@@ -2,226 +2,244 @@
 <!doctype html>
 <html lang="en">
   {{template "header"}}
-
   <body>
-    {{template "navbar" .}}
-
-    <div class="main-content">
-      <main>
-        <!-- Button trigger modal -->
-        <button
-          type="button"
-          class="btn body-button"
-          onclick="openModal('single')"
-        >
-          Add User
-        </button>
-
-        <!-- Modal -->
-        <div
-          class="modal fade"
-          id="addUserModal"
-          tabindex="-1"
-          role="dialog"
-          aria-labelledby="addUserModalLabel"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="addUserModalLabel">Add User</h5>
-              </div>
-              <div class="modal-body">
-                <div id="alertMessage"></div>
-                <form method="post" onsubmit="return submitUserForm()">
-                  <div class="mb-3">
-                    <label for="name" class="form-label">Name</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      name="name"
-                      id="name"
-                      placeholder="User Name"
-                      required
-                    />
-                  </div>
-                  <div class="mb-3">
-                    <label for="identity" class="form-label">Identity</label>
-                    <input
-                      type="email"
-                      class="form-control"
-                      name="identity"
-                      id="identity"
-                      placeholder="User Identity"
-                      required
-                    />
-                  </div>
-                  <div class="mb-3">
-                    <label for="secret" class="form-label">Secret</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      name="secret"
-                      id="secret"
-                      placeholder="User Secret"
-                      required
-                    />
-                    <div id="secretError" class="error-message"></div>
-                  </div>
-                  <div class="mb-3">
-                    <label for="tags" class="form-label">Tags</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      name="tags"
-                      id="tags"
-                      aria-describedby="tagHelp"
-                      value="[]"
-                    />
-                    <div id="tagHelp" class="form-text">
-                      Enter user tags as a string slice.
-                    </div>
-                    <div id="tagsError" class="error-message"></div>
-                  </div>
-                  <div class="mb-3">
-                    <label for="metadata" class="form-label">Metadata</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      name="metadata"
-                      id="metadata"
-                      value="{}"
-                    />
-                    <div id="metadataHelp" class="form-text">
-                      Enter user metadata in JSON format.
-                    </div>
-                    <div id="metadataError" class="error-message"></div>
-                  </div>
-                  <button
-                    type="submit"
-                    class="btn body-button"
-                    onclick="return validateForm()"
-                  >
-                    Submit
-                  </button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          class="btn body-button"
-          onclick="openModal('bulk')"
-        >
-          Add Users
-        </button>
-
-        <!-- Modal -->
-        <div
-          class="modal fade"
-          id="addUsersModal"
-          tabindex="-1"
-          role="dialog"
-          aria-labelledby="addUsersModalLabel"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="addUsersModalLabel">Add Users</h5>
-              </div>
-              <div class="modal-body">
-                <div id="alertBulkMessage"></div>
-                <form
-                  method="post"
-                  enctype="multipart/form-data"
-                  onsubmit="return submitBulkUsersForm()"
+    {{template "navbar" . }}
+    <div class="main-content pt-3">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12 mx-auto py-3">
+            <div class="row">
+              <div class="buttons mb-3">
+                <button
+                  class="btn body-button"
+                  type="button"
+                  onclick="openModal('single')"
                 >
-                  <div class="form-group">
-                    <label for="usersFile"
-                      >Add csv file containing users names and passwords
-                    </label>
-                    <input
-                      type="file"
-                      class="form-control-file"
-                      id="usersFile"
-                      name="usersFile"
-                      required
-                    />
-                    <button
-                      type="submit"
-                      value="upload"
-                      class="btn body-button"
-                    >
-                      Submit
-                    </button>
+                  Add User
+                </button>
+                <button
+                  class="btn body-button"
+                  type="button"
+                  onclick="openModal('bulk')"
+                >
+                  Add Users
+                </button>
+                <!-- modals -->
+                <!-- add user modal -->
+                <div
+                  class="modal fade"
+                  id="addUserModal"
+                  tabindex="-1"
+                  role="dialog"
+                  aria-labelledby="addUserModalLabel"
+                  aria-hidden="true"
+                >
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="addUserModalLabel">
+                          Add User
+                        </h5>
+                      </div>
+                      <div class="modal-body">
+                        <div id="alertMessage"></div>
+                        <form method="post" onsubmit="return submitUserForm()">
+                          <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input
+                              type="text"
+                              class="form-control"
+                              name="name"
+                              id="name"
+                              placeholder="User Name"
+                              required
+                            />
+                          </div>
+                          <div class="mb-3">
+                            <label for="identity" class="form-label"
+                              >Identity</label
+                            >
+                            <input
+                              type="email"
+                              class="form-control"
+                              name="identity"
+                              id="identity"
+                              placeholder="User Identity"
+                              required
+                            />
+                          </div>
+                          <div class="mb-3">
+                            <label for="secret" class="form-label"
+                              >Secret</label
+                            >
+                            <input
+                              type="text"
+                              class="form-control"
+                              name="secret"
+                              id="secret"
+                              placeholder="User Secret"
+                              required
+                            />
+                            <div id="secretError" class="text-danger"></div>
+                          </div>
+                          <div class="mb-3">
+                            <label for="tags" class="form-label">Tags</label>
+                            <input
+                              type="text"
+                              class="form-control"
+                              name="tags"
+                              id="tags"
+                              aria-describedby="tagHelp"
+                              value="[]"
+                            />
+                            <div id="tagHelp" class="form-text">
+                              Enter user tags as a string slice.
+                            </div>
+                            <div id="tagsError" class="text-danger"></div>
+                          </div>
+                          <div class="mb-3">
+                            <label for="metadata" class="form-label"
+                              >Metadata</label
+                            >
+                            <input
+                              type="text"
+                              class="form-control"
+                              name="metadata"
+                              id="metadata"
+                              value="{}"
+                            />
+                            <div id="metadataHelp" class="form-text">
+                              Enter user metadata in JSON format.
+                            </div>
+                            <div id="metadataError" class="text-danger"></div>
+                          </div>
+                          <button
+                            type="submit"
+                            class="btn body-button"
+                            onclick="return validateForm()"
+                          >
+                            Submit
+                          </button>
+                        </form>
+                      </div>
+                    </div>
                   </div>
-                </form>
+                </div>
+
+                <!-- add users modal -->
+                <div
+                  class="modal fade"
+                  id="addUsersModal"
+                  tabindex="-1"
+                  role="dialog"
+                  aria-labelledby="addUsersModalLabel"
+                  aria-hidden="true"
+                >
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="addUsersModalLabel">
+                          Add Users
+                        </h5>
+                      </div>
+                      <div class="modal-body">
+                        <div id="alertBulkMessage"></div>
+                        <form
+                          method="post"
+                          enctype="multipart/form-data"
+                          onsubmit="return submitBulkUsersForm()"
+                        >
+                          <div class="form-group">
+                            <label for="usersFile"
+                              >Add csv file containing users names and passwords
+                            </label>
+                            <input
+                              type="file"
+                              class="form-control-file"
+                              id="usersFile"
+                              name="usersFile"
+                              required
+                            />
+                            <button
+                              type="submit"
+                              value="upload"
+                              class="btn body-button"
+                            >
+                              Submit
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- modals end -->
+              </div>
+              <div class="table-responsive table-container">
+                {{template "tableheader" .}}
+                <div class="itemsTable">
+                  <table id="itemsTable" class="table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">ID</th>
+                        <th class="tags-col" scope="col">Tags</th>
+                        <th class="meta-col" scope="col">Metadata</th>
+                        <th class="created-col" scope="col">Created At</th>
+                        <th class="text-center" scope="col"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {{$userID := .User.ID}} {{range $i, $u := .Users}}
+                      {{$disableButton := true}} {{if (authorizeUser $userID
+                      $u.ID "c_delete" "client")}} {{$disableButton = false}}
+                      {{end}}
+                      <tr>
+                        <td>{{$u.Name}}</td>
+                        <td>
+                          <div class="copy-con-container">
+                            <a href='{{printf "/users/%s" $u.ID}}'>{{$u.ID}}</a>
+                            <button
+                              class="copy-icon"
+                              onclick="copyToClipboard(this)"
+                            >
+                              <i class="far fa-copy"></i>
+                            </button>
+                          </div>
+                        </td>
+                        <td class="tags-col">{{toSlice $u.Tags}}</td>
+                        <td class="meta-col">{{toJSON $u.Metadata}}</td>
+                        <td class="created-col">{{$u.CreatedAt}}</td>
+                        <td class="text-center">
+                          <form action="/users/disabled" method="post">
+                            <input
+                              type="hidden"
+                              name="userID"
+                              id="userID"
+                              value="{{$u.ID}}"
+                            />
+                            <button
+                              type="submit"
+                              class="btn btn-sm"
+                              {{if
+                              $disableButton}}disabled{{end}}
+                            >
+                              <i class="fas fa-trash-alt"></i>
+                            </button>
+                          </form>
+                        </td>
+                      </tr>
+                      {{end}}
+                    </tbody>
+                  </table>
+                </div>
+                {{template "tablefooter" .}}
               </div>
             </div>
           </div>
         </div>
-        <div class="table-container">
-          {{template "tableheader" .}}
-          <div class="itemsTable">
-            <table id="itemsTable" class="table">
-              <thead>
-                <tr>
-                  <th scope="col">Name</th>
-                  <th scope="col">ID</th>
-                  <th scope="col">Tags</th>
-                  <th scope="col">Metadata</th>
-                  <th scope="col">Created At</th>
-                  <th class="text-center" scope="col"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {{$userID := .User.ID}} {{range $i, $u := .Users}}
-                {{$disableButton := true}} {{if (authorizeUser $userID $u.ID
-                "c_delete" "client")}} {{$disableButton = false}} {{end}}
-                <tr>
-                  <td>{{$u.Name}}</td>
-                  <td>
-                    <div class="copy-con-container">
-                      <a href='{{printf "/users/%s" $u.ID}}'>{{$u.ID}}</a>
-                      <button class="copy-icon" onclick="copyToClipboard(this)">
-                        <i class="far fa-copy"></i>
-                      </button>
-                    </div>
-                  </td>
-                  <td>{{toSlice $u.Tags}}</td>
-                  <td>{{toJSON $u.Metadata}}</td>
-                  <td>{{$u.CreatedAt}}</td>
-                  <td class="text-center">
-                    <form action="/users/disabled" method="post">
-                      <input
-                        type="hidden"
-                        name="userID"
-                        id="userID"
-                        value="{{$u.ID}}"
-                      />
-                      <button
-                        type="submit"
-                        class="btn btn-sm"
-                        {{if
-                        $disableButton}}disabled{{end}}
-                      >
-                        <i class="fas fa-trash-alt"></i>
-                      </button>
-                    </form>
-                  </td>
-                </tr>
-                {{end}}
-              </tbody>
-            </table>
-          </div>
-          {{template "tablefooter" .}}
-        </div>
-      </main>
+      </div>
     </div>
-
     {{template "footer"}}
     <script>
       function validateForm() {

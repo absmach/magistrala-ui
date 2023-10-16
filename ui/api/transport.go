@@ -610,8 +610,17 @@ func decodeLoginRequest(_ context.Context, _ *http.Request) (interface{}, error)
 	return nil, nil
 }
 
-func decodeShowPasswordUpdate(_ context.Context, _ *http.Request) (interface{}, error) {
-	return nil, nil
+func decodeShowPasswordUpdate(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := getAuthorization(r)
+	if err != nil {
+		return nil, err
+	}
+
+	req := showUpdatePasswordReq{
+		token: token,
+	}
+
+	return req, nil
 }
 
 func decodePasswordUpdate(_ context.Context, r *http.Request) (interface{}, error) {

@@ -99,7 +99,7 @@ func (lm *loggingMiddleware) ShowPasswordReset() (b []byte, err error) {
 }
 
 // PasswordUpdate adds logging middleware to password update method.
-func (lm *loggingMiddleware) PasswordUpdate() (b []byte, err error) {
+func (lm *loggingMiddleware) PasswordUpdate(token string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method password_update took %s to complete", time.Since(begin))
 		if err != nil {
@@ -109,7 +109,7 @@ func (lm *loggingMiddleware) PasswordUpdate() (b []byte, err error) {
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.PasswordUpdate()
+	return lm.svc.PasswordUpdate(token)
 }
 
 // Toke adds logging middleware to token method.
@@ -929,7 +929,7 @@ func (lm *loggingMiddleware) WsConnection(token, chID, thKey string) (b []byte, 
 }
 
 // GetRemoteTerminal adds logging middleware to remote terminal.
-func (lm *loggingMiddleware) GetRemoteTerminal(id string) (res []byte, err error) {
+func (lm *loggingMiddleware) GetRemoteTerminal(id, token string) (res []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method remote_terminal with id %s took %s to complete", id, time.Since(begin))
 		if err != nil {
@@ -939,7 +939,7 @@ func (lm *loggingMiddleware) GetRemoteTerminal(id string) (res []byte, err error
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.GetRemoteTerminal(id)
+	return lm.svc.GetRemoteTerminal(id, token)
 }
 
 // ProcessTerminalCommand adds logging middleware to async function ProcessTerminalCommand.

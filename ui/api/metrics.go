@@ -85,13 +85,13 @@ func (mm *metricsMiddleware) ShowPasswordReset() (b []byte, err error) {
 }
 
 // PasswordUpdate adds metrics middleware to password update method.
-func (mm *metricsMiddleware) PasswordUpdate() (b []byte, err error) {
+func (mm *metricsMiddleware) PasswordUpdate(token string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "password_update").Add(1)
 		mm.latency.With("method", "password_update").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.PasswordUpdate()
+	return mm.svc.PasswordUpdate(token)
 }
 
 // Token adds metrics middleware to token method.
@@ -675,13 +675,13 @@ func (mm *metricsMiddleware) WsConnection(token, chID, thKey string) (b []byte, 
 }
 
 // GetRemoteTerminal adds metrics middleware to get remote terminal method.
-func (mm *metricsMiddleware) GetRemoteTerminal(id string) ([]byte, error) {
+func (mm *metricsMiddleware) GetRemoteTerminal(id, token string) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "remote_terminal").Add(1)
 		mm.latency.With("method", "remote_terminal").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.GetRemoteTerminal(id)
+	return mm.svc.GetRemoteTerminal(id, token)
 }
 
 // ProcessTerminalCommand adds metrics middleware to process terminal command method.

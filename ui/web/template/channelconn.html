@@ -2,304 +2,261 @@
 <!doctype html>
 <html lang="en">
   {{template "header"}}
-
   <body>
     {{template "navbar" .}}
-
-    <div class="main-content">
-      <main>
-        <button
-          type="button"
-          class="btn body-button"
-          onclick="openModal('connect')"
-        >
-          Connect Thing
-        </button>
-        <button
-          type="button"
-          class="btn body-button"
-          onclick="openModal('share')"
-        >
-          Share Things
-        </button>
-
-        <!--Modal-->
-        <div
-          class="modal fade"
-          id="connectModal"
-          tabindex="-1"
-          role="dialog"
-          aria-labelledby="connectModal"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="connectModal">Connect</h5>
-              </div>
-              <div class="modal-body">
-                <form
-                  action="/channels/{{.Channel.ID}}/connectThing"
-                  method="post"
+    <div class="main-content pt-3">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12 mx-auto py-3">
+            <div class="row">
+              <div class="buttons mb-3">
+                <button
+                  type="button"
+                  class="btn body-button"
+                  onclick="openModal('connect')"
                 >
-                  <div class="mb-3">
-                    <label for="infiniteScroll" class="form-label">Thing</label>
-                    <input
-                      type="text"
-                      name="thingFilter"
-                      id="thingFilter"
-                      placeholder="Filter by thing"
-                      oninput="fetchIndividualThing(this.value,'infiniteScroll')"
-                    />
-                    <select
-                      class="form-select"
-                      name="thingID"
-                      id="infiniteScroll"
-                      size="5"
-                      required
-                    >
-                      <option disabled>select a thing</option>
-                    </select>
-                    <div id="thingIDHelp" class="form-text">
-                      Select a thing.
-                    </div>
-                  </div>
-                  <div class="mb-3">
-                    <label for="actions" class="form-label">Actions</label>
-                    <select
-                      class="form-select"
-                      name="actions"
-                      id="actions"
-                      aria-describedby="actionsHelp"
-                      multiple
-                      required
-                    >
-                      <option value="m_read">m_read</option>
-                      <option value="m_write">m_write</option>
-                    </select>
-                    <div id="actionsHelp" class="form-text">
-                      Select Actions (multiple selections allowed).
-                    </div>
-                  </div>
-                  <button type="submit" class="btn body-button">Submit</button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          class="modal fade"
-          id="shareThingModal"
-          tabindex="-1"
-          role="dialog"
-          aria-labelledby="shareThingModal"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="shareThingModal">Share Thing</h5>
-              </div>
-              <div class="modal-body">
-                <form
-                  action="/channels/{{.Channel.ID}}/shareThing"
-                  method="post"
+                  Connect Thing
+                </button>
+                <button
+                  type="button"
+                  class="btn body-button"
+                  onclick="openModal('share')"
                 >
-                  <div class="mb-3">
-                    <label for="UserID" class="form-label">User</label>
-                    <input
-                      type="text"
-                      name="userFilter"
-                      id="userFilter"
-                      placeholder="Filter by User"
-                      oninput="fetchIndividualUser(this.value,'UserID')"
-                    />
-                    <select
-                      class="form-select"
-                      name="userID"
-                      id="UserID"
-                      size="5"
-                      required
-                    >
-                      <option disabled>select a User</option>
-                    </select>
-                  </div>
-                  <div class="mb-3">
-                    <label for="actions" class="form-label">Actions</label>
-                    <select
-                      class="form-select"
-                      name="actions"
-                      id="actions"
-                      aria-describedby="actionsHelp"
-                      multiple
-                      required
-                    >
-                      <option value="c_list">c_list</option>
-                      <option value="c_update">c_update</option>
-                      <option value="c_delete">c_delete</option>
-                    </select>
-                    <div id="actionsHelp" class="form-text">
-                      Select Actions (multiple selections allowed).
-                    </div>
-                  </div>
-                  <button type="submit" class="btn body-button">Submit</button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-        <!--modal end-->
-        <div class="table-container">
-          <table id="myTable" class="table">
-            <thead>
-              <tr>
-                <th scope="row">Channel</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th>Name</th>
-                <td>{{.Channel.Name}}</td>
-              </tr>
-              <tr>
-                <th>ID</th>
-                <td>{{.Channel.ID}}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                  Share Things
+                </button>
 
-        {{ $c := .Channel.ID }}
-        <div class="table-container">
-          <h4>CONNECTED THINGS</h4>
-
-          {{template "tableheader" .}}
-          <div class="itemsTable">
-            <table id="itemsTable" class="table">
-              <thead>
-                <tr>
-                  <th scope="col">NAME</th>
-                  <th scope="col">ID</th>
-                  <th scope="col">ACTIONS</th>
-                  <th scope="col"></th>
-                  <th scope="col"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {{$chanID := .Channel.ID}} {{$policies := .Policies}}
-                {{$sendMessage:= false}} {{range $i, $t := .Things}}
-                {{$sendMessage = authorizeThing $t.ID $chanID "m_write"
-                "group"}}
-                <tr>
-                  <td>{{$t.Name}}</td>
-                  <td>
-                    <a href='{{printf "/things/%s" $t.ID}}'>{{$t.ID}}</a>
-                  </td>
-                  <td>
-                    {{range $p :=$policies}} {{if (eq $t.ID $p.Subject)}} {{if
-                    (eq $c $p.Object)}} {{range $j, $a := $p.Actions}}
-                    {{$badgeClass := "badge text-dark "}} {{if eq $a "m_read"}}
-                    {{$badgeClass = printf "%s%s" $badgeClass "read-action"}}
-                    {{else if eq $a "m_write"}} {{$badgeClass = printf "%s%s"
-                    $badgeClass "write-action"}} {{else}} {{$badgeClass = printf
-                    "%s%s" $badgeClass "text-bg-info"}} {{end}}
-                    <span class="{{$badgeClass}}">{{$a}}</span>
-                    {{end}} {{end}} {{end}} {{end}}
-                  </td>
-                  <td>
-                    <button
-                      type="button"
-                      class="btn btn-sm sendMessage-button"
-                      data-bs-toggle="modal"
-                      data-bs-target="#sendMessageModal{{$i}}"
-                      {{if
-                      not
-                      $sendMessage}}disabled{{end}}
-                    >
-                      Send Message
-                    </button>
-                    <div
-                      class="modal fade"
-                      id="sendMessageModal{{$i}}"
-                      tabindex="-1"
-                      role="dialog"
-                      aria-labelledby="sendMessageModalLabel{{$i}}"
-                      aria-hidden="true"
-                    >
-                      <div class="modal-dialog" role="document">
-                        <div class="modal-content">
-                          <div class="modal-header">
-                            <h5
-                              class="modal-title"
-                              id="sendMessageModalLabel{{$i}}"
+                <!--Modal-->
+                <div
+                  class="modal fade"
+                  id="connectModal"
+                  tabindex="-1"
+                  role="dialog"
+                  aria-labelledby="connectModal"
+                  aria-hidden="true"
+                >
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="connectModal">Connect</h5>
+                      </div>
+                      <div class="modal-body">
+                        <form
+                          action="/channels/{{.Channel.ID}}/connectThing"
+                          method="post"
+                        >
+                          <div class="mb-3">
+                            <label for="infiniteScroll" class="form-label"
+                              >Thing</label
                             >
-                              Send Message
-                            </h5>
+                            <input
+                              type="text"
+                              name="thingFilter"
+                              id="thingFilter"
+                              placeholder="Filter by thing"
+                              oninput="fetchIndividualThing(this.value,'infiniteScroll')"
+                            />
+                            <select
+                              class="form-select"
+                              name="thingID"
+                              id="infiniteScroll"
+                              size="5"
+                              required
+                            >
+                              <option disabled>select a thing</option>
+                            </select>
+                            <div id="thingIDHelp" class="form-text">
+                              Select a thing.
+                            </div>
                           </div>
-                          <div class="modal-body">
-                            <form action="/messages" method="post">
-                              <input
-                                type="hidden"
-                                name="channelID"
-                                id="channelID"
-                                value="{{$c}}"
-                              />
-                              <input
-                                type="hidden"
-                                name="thingKey"
-                                id="thingKey"
-                                value="{{$t.Credentials.Secret}}"
-                              />
-                              <div class="mb-3">
-                                <label for="message" class="form-label"
-                                  >Message</label
-                                >
-                                <textarea
-                                  class="form-control"
-                                  name="message"
-                                  id="message"
-                                  aria-describedby="messageHelp"
-                                ></textarea>
-                                <div id="messageHelp" class="form-text">
-                                  Enter Message.
-                                </div>
-                              </div>
-                              <button type="submit" class="btn body-button">
-                                Submit
-                              </button>
-                            </form>
+                          <div class="mb-3">
+                            <label for="actions" class="form-label"
+                              >Actions</label
+                            >
+                            <select
+                              class="form-select"
+                              name="actions"
+                              id="actions"
+                              aria-describedby="actionsHelp"
+                              multiple
+                              required
+                            >
+                              <option value="m_read">m_read</option>
+                              <option value="m_write">m_write</option>
+                            </select>
+                            <div id="actionsHelp" class="form-text">
+                              Select Actions (multiple selections allowed).
+                            </div>
                           </div>
-                        </div>
+                          <button type="submit" class="btn body-button">
+                            Submit
+                          </button>
+                        </form>
                       </div>
                     </div>
-                  </td>
-                  <td>
-                    <form action="/disconnectThing" method="post">
-                      <input
-                        type="hidden"
-                        name="channelID"
-                        id="channelID"
-                        value="{{$c}}"
-                      />
-                      <input
-                        type="hidden"
-                        name="thingID"
-                        id="thingID"
-                        value="{{$t.ID}}"
-                      />
-                      <button type="submit" class="btn btn-danger btn-sm">
-                        Disconnect
-                      </button>
-                    </form>
-                  </td>
-                </tr>
-                {{end}}
-              </tbody>
-            </table>
+                  </div>
+                </div>
+                <div
+                  class="modal fade"
+                  id="shareThingModal"
+                  tabindex="-1"
+                  role="dialog"
+                  aria-labelledby="shareThingModal"
+                  aria-hidden="true"
+                >
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="shareThingModal">
+                          Share Thing
+                        </h5>
+                      </div>
+                      <div class="modal-body">
+                        <form
+                          action="/channels/{{.Channel.ID}}/shareThing"
+                          method="post"
+                        >
+                          <div class="mb-3">
+                            <label for="UserID" class="form-label">User</label>
+                            <input
+                              type="text"
+                              name="userFilter"
+                              id="userFilter"
+                              placeholder="Filter by User"
+                              oninput="fetchIndividualUser(this.value,'UserID')"
+                            />
+                            <select
+                              class="form-select"
+                              name="userID"
+                              id="UserID"
+                              size="5"
+                              required
+                            >
+                              <option disabled>select a User</option>
+                            </select>
+                          </div>
+                          <div class="mb-3">
+                            <label for="actions" class="form-label"
+                              >Actions</label
+                            >
+                            <select
+                              class="form-select"
+                              name="actions"
+                              id="actions"
+                              aria-describedby="actionsHelp"
+                              multiple
+                              required
+                            >
+                              <option value="c_list">c_list</option>
+                              <option value="c_update">c_update</option>
+                              <option value="c_delete">c_delete</option>
+                            </select>
+                            <div id="actionsHelp" class="form-text">
+                              Select Actions (multiple selections allowed).
+                            </div>
+                          </div>
+                          <button type="submit" class="btn body-button">
+                            Submit
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!--modal end-->
+              </div>
+              <div class="table-responsive table-container">
+                <table id="myTable" class="table">
+                  <thead>
+                    <tr>
+                      <th scope="row">Channel</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th>Name</th>
+                      <td>{{.Channel.Name}}</td>
+                    </tr>
+                    <tr>
+                      <th>ID</th>
+                      <td>{{.Channel.ID}}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="table-responsive table-container">
+                <h4
+                  style="
+                    font-weight: bold;
+                    font-size: 22px;
+                    margin-top: 50px;
+                    margin-bottom: 20px;
+                  "
+                >
+                  CONNECTED THINGS
+                </h4>
+
+                {{template "tableheader" .}}
+                <div class="itemsTable">
+                  <table id="itemsTable" class="table">
+                    <thead>
+                      <tr>
+                        <th scope="col" style="width: 25%">NAME</th>
+                        <th scope="col" style="width: 30%">ID</th>
+                        <th scope="col" style="width: 25%">ACTIONS</th>
+                        <th scope="col" style="width: 20%"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {{$chanID := .Channel.ID}} {{$policies := .Policies}}
+                      {{range $i, $t := .Things}}
+                      <tr>
+                        <td style="width: 25%">{{$t.Name}}</td>
+                        <td style="width: 30%">
+                          <a href='{{printf "/things/%s" $t.ID}}'>{{$t.ID}}</a>
+                        </td>
+                        <td style="width: 25%">
+                          {{range $p :=$policies}} {{if (eq $t.ID $p.Subject)}}
+                          {{if (eq $chanID $p.Object)}} {{range $j, $a :=
+                          $p.Actions}} {{$badgeClass := "badge text-dark "}}
+                          {{if eq $a "m_read"}} {{$badgeClass = printf "%s%s"
+                          $badgeClass "read-action"}} {{else if eq $a
+                          "m_write"}} {{$badgeClass = printf "%s%s" $badgeClass
+                          "write-action"}} {{else}} {{$badgeClass = printf
+                          "%s%s" $badgeClass "text-bg-info"}} {{end}}
+                          <span class="{{$badgeClass}}">{{$a}}</span>
+                          {{end}} {{end}} {{end}} {{end}}
+                        </td>
+                        <td style="width: 20%">
+                          <form action="/disconnectThing" method="post">
+                            <input
+                              type="hidden"
+                              name="channelID"
+                              id="channelID"
+                              value="{{$chanID}}"
+                            />
+                            <input
+                              type="hidden"
+                              name="thingID"
+                              id="thingID"
+                              value="{{$t.ID}}"
+                            />
+                            <button type="submit" class="btn btn-danger btn-sm">
+                              Disconnect
+                            </button>
+                          </form>
+                        </td>
+                      </tr>
+                      {{end}}
+                    </tbody>
+                  </table>
+                </div>
+                {{template "tablefooter" .}}
+              </div>
+            </div>
           </div>
-          {{template "tablefooter" .}}
         </div>
-      </main>
+      </div>
     </div>
 
     {{template "footer"}}
@@ -322,7 +279,6 @@
           getAdditionalUsers();
         }
       }
-
       function fetchIndividualThing(filterValue, selectId) {
         const itemSelect = document.getElementById(selectId);
         if (filterValue === "") {

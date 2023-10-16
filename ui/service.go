@@ -85,7 +85,7 @@ type Service interface {
 	// ShowPasswordReset displays the password reset page.
 	ShowPasswordReset() ([]byte, error)
 	// PasswordUpdate displays the password update page.
-	PasswordUpdate() ([]byte, error)
+	PasswordUpdate(token string) ([]byte, error)
 	// UpdatePassword updates the user's old password to the new password.
 	UpdatePassword(token, oldPass, newPass string) error
 	// UserProfile retrieves information about the logged in user.
@@ -215,7 +215,7 @@ type Service interface {
 	// ViewBootstrap retrieves a bootstrap config by thing id.
 	ViewBootstrap(token, id string) ([]byte, error)
 	// GetRemoteTerminal returns remote terminal for a bootstrap config with mainflux agent installed.
-	GetRemoteTerminal(id string) ([]byte, error)
+	GetRemoteTerminal(id, token string) ([]byte, error)
 	// ProcessTerminalCommand sends mqtt command to agent and retrieves a response asynchronously.
 	ProcessTerminalCommand(ctx context.Context, id, token, command string, res chan string) error
 	GetEntities(token, item, name string, page, limit uint64) ([]byte, error)
@@ -471,16 +471,23 @@ func (gs *uiService) ShowPasswordReset() ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) PasswordUpdate() ([]byte, error) {
+func (gs *uiService) PasswordUpdate(token string) ([]byte, error) {
 	tpl, err := gs.parseTemplate("updatePassword", "updatePassword.html")
+	if err != nil {
+		return []byte{}, err
+	}
+
+	user, err := gs.UserProfile(token)
 	if err != nil {
 		return []byte{}, err
 	}
 
 	data := struct {
 		NavbarActive string
+		User         sdk.User
 	}{
 		"password",
+		user,
 	}
 
 	var btpl bytes.Buffer
@@ -1048,6 +1055,12 @@ func (gs *uiService) ListThingsByChannel(token, id string, page, limit uint64) (
 	if err != nil {
 		return []byte{}, err
 	}
+
+	user, err := gs.UserProfile(token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	noOfPages := int(math.Ceil(float64(thsPage.Total) / float64(limit)))
 
 	data := struct {
@@ -1058,6 +1071,7 @@ func (gs *uiService) ListThingsByChannel(token, id string, page, limit uint64) (
 		AllThings    []sdk.Thing
 		Policies     []sdk.Policy
 		Users        []sdk.User
+		User         sdk.User
 		CurrentPage  int
 		Pages        int
 		Limit        int
@@ -1069,6 +1083,7 @@ func (gs *uiService) ListThingsByChannel(token, id string, page, limit uint64) (
 		allthsPage.Things,
 		plcPage.Policies,
 		users.Users,
+		user,
 		int(page),
 		noOfPages,
 		int(limit),
@@ -1113,6 +1128,12 @@ func (gs *uiService) ListThingsPolicies(token string, page, limit uint64) ([]byt
 	if err != nil {
 		return []byte{}, err
 	}
+
+	user, err := gs.UserProfile(token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	noOfPages := int(math.Ceil(float64(plcPage.Total) / float64(limit)))
 
 	data := struct {
@@ -1120,6 +1141,7 @@ func (gs *uiService) ListThingsPolicies(token string, page, limit uint64) ([]byt
 		Policies     []sdk.Policy
 		Channels     []sdk.Channel
 		Things       []sdk.Thing
+		User         sdk.User
 		Actions      []string
 		CurrentPage  int
 		Pages        int
@@ -1129,6 +1151,7 @@ func (gs *uiService) ListThingsPolicies(token string, page, limit uint64) ([]byt
 		plcPage.Policies,
 		chsPage.Channels,
 		thsPage.Things,
+		user,
 		thingActions,
 		int(page),
 		noOfPages,
@@ -1398,6 +1421,12 @@ func (gs *uiService) ListPolicies(token string, page, limit uint64) ([]byte, err
 	if err != nil {
 		return []byte{}, err
 	}
+
+	user, err := gs.UserProfile(token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	noOfPages := int(math.Ceil(float64(plcPage.Total) / float64(limit)))
 
 	data := struct {
@@ -1405,6 +1434,7 @@ func (gs *uiService) ListPolicies(token string, page, limit uint64) ([]byte, err
 		Policies     []sdk.Policy
 		Groups       []sdk.Group
 		Users        []sdk.User
+		User         sdk.User
 		Actions      []string
 		CurrentPage  int
 		Pages        int
@@ -1414,6 +1444,7 @@ func (gs *uiService) ListPolicies(token string, page, limit uint64) ([]byte, err
 		plcPage.Policies,
 		grpPage.Groups,
 		users.Users,
+		user,
 		userActions,
 		int(page),
 		noOfPages,
@@ -1490,17 +1521,25 @@ func (gs *uiService) WsConnection(_, chID, thKey string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) GetRemoteTerminal(id string) ([]byte, error) {
+func (us *uiService) GetRemoteTerminal(id, token string) ([]byte, error) {
 	tmpl, err := us.parseTemplate("remoteTerminal", "terminal.html")
 	if err != nil {
 		return []byte{}, err
 	}
+
+	user, err := us.UserProfile(token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	data := struct {
 		NavbarActive string
 		ThingID      string
+		User         sdk.User
 	}{
 		NavbarActive: "bootstraps",
 		ThingID:      id,
+		User:         user,
 	}
 	var btpl bytes.Buffer
 	if err := tmpl.ExecuteTemplate(&btpl, "remoteTerminal", data); err != nil {
@@ -1621,12 +1660,18 @@ func (us *uiService) ListBootstrap(token string, page, limit uint64) ([]byte, er
 		return []byte{}, err
 	}
 
+	user, err := us.UserProfile(token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	noOfPages := int(math.Ceil(float64(bootstraps.Total) / float64(limit)))
 
 	data := struct {
 		NavbarActive string
 		Bootstraps   []sdk.BootstrapConfig
 		Things       []sdk.Thing
+		User         sdk.User
 		CurrentPage  int
 		Pages        int
 		Limit        int
@@ -1634,6 +1679,7 @@ func (us *uiService) ListBootstrap(token string, page, limit uint64) ([]byte, er
 		"bootstraps",
 		bootstraps.Configs,
 		things.Things,
+		user,
 		int(page),
 		noOfPages,
 		int(limit),
@@ -1657,6 +1703,11 @@ func (us *uiService) ViewBootstrap(token, id string) ([]byte, error) {
 		return []byte{}, err
 	}
 
+	user, err := us.UserProfile(token)
+	if err != nil {
+		return []byte{}, err
+	}
+
 	switch channels := bootstrap.Channels.(type) {
 	case []sdk.Channel:
 		var strChannels []string
@@ -1675,9 +1726,11 @@ func (us *uiService) ViewBootstrap(token, id string) ([]byte, error) {
 	data := struct {
 		NavbarActive string
 		Bootstrap    sdk.BootstrapConfig
+		User         sdk.User
 	}{
 		"bootstraps",
 		bootstrap,
+		user,
 	}
 
 	var btpl bytes.Buffer

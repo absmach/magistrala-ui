@@ -32,24 +32,27 @@
       outline: none;
     }
   </style>
-
   <body>
     {{template "navbar" .}}
-
-    <div class="main-content">
-      <main>
-        <div class="terminal">
-          <!-- Existing terminal content here -->
+    <div class="main-content pt-3">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-12 mx-auto py-3">
+            <div class="row">
+              <div class="terminal">
+                <!-- Existing terminal content here -->
+              </div>
+              <div class="input-line">
+                <form action="/bootstrap/1/terminal/input" method="POST">
+                  <span class="input-prefix">&gt;</span>
+                  <input class="input-field" name="command" autofocus />
+                </form>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="input-line">
-          <form action="/bootstrap/1/terminal/input" method="POST">
-            <span class="input-prefix">&gt;</span>
-            <input class="input-field" name="command" autofocus />
-          </form>
-        </div>
-      </main>
+      </div>
     </div>
-
     {{template "footer"}}
     <script>
       document.addEventListener("DOMContentLoaded", function () {
