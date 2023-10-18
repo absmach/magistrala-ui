@@ -65,7 +65,10 @@ func main() {
 
 	sdk := sdk.NewSDK(sdkConfig)
 
-	svc := ui.New(sdk)
+	svc, err := ui.New(sdk)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
 
 	svc = api.LoggingMiddleware(svc, logger)
 	svc = api.MetricsMiddleware(

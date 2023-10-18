@@ -1,4 +1,4 @@
-{{ define "policies" }}
+{{ define "thingspolicies" }}
 	<!doctype html>
 	<html lang="en">
 		{{ template "header" }}
@@ -19,16 +19,16 @@
 									</button>
 									<div
 										class="modal fade"
-										id="addPolicyModal"
+										id="addThingPolicyModal"
 										tabindex="-1"
 										role="dialog"
-										aria-labelledby="addPolicyModalLabel"
+										aria-labelledby="addThingPolicyModalLabel"
 										aria-hidden="true"
 									>
 										<div class="modal-dialog" role="document">
 											<div class="modal-content">
 												<div class="modal-header">
-													<h5 class="modal-title" id="addPolicyModalLabel">
+													<h5 class="modal-title" id="addThingPolicyModalLabel">
 														Add Policy
 													</h5>
 												</div>
@@ -44,7 +44,7 @@
 																name="subjectFilter"
 																id="subjectFilter"
 																placeholder="Filter by subject"
-																oninput="fetchIndividualSubject(this.value,'subject')"
+																oninput="fetchIndividualObject(this.value,'subject')"
 															/>
 															<select
 																class="form-select"
@@ -96,9 +96,8 @@
 																multiple
 																required
 															>
-																{{ range $i, $a := .Actions }}
-																	<option value="{{ $a }}">{{ $a }}</option>
-																{{ end }}
+																<option value="m_read">m_read</option>
+																<option value="m_write">m_write</option>
 															</select>
 															<div id="actionsHelp" class="form-text">
 																Select Actions (multiple selections allowed).
@@ -128,46 +127,44 @@
 											</thead>
 											<tbody>
 												{{ $actions := .Actions }}
-												{{ $users := .Users }}
-												{{ $groups :=
-													.Groups
+												{{ $things := .Things }}
+												{{ $channels :=
+													.Channels
 												}}
 												{{ range $i, $p := .Policies }}
 													<tr>
 														<td>
-															{{ range $u := $users }}
-																{{ if eq $u.ID $p.Subject }}
-																	<a href="{{ printf "/users/%s" $p.Subject }}">
-																		{{ $u.Name }}
-																	</a>
-																{{ end }}
-															{{ end }}
+															<a href="{{ printf "/things/%s" $p.Subject }}">
+																{{ $p.Subject }}
+															</a>
 														</td>
 														<td>
-															{{ range $g := $groups }}
-																{{ if eq $g.ID $p.Object }}
-																	<a href="{{ printf "/groups/%s" $p.Object }}">
-																		{{ $g.Name }}
-																	</a>
-																{{ end }}
-															{{ end }}
+															<a href="{{ printf "/channels/%s" $p.Object }}">
+																{{ $p.Object }}
+															</a>
 														</td>
-														<td data-field="actions">
+														<td data-field="actions" style="width: 40%">
 															{{ range $j, $a := $p.Actions }}
 																{{ $badgeClass := "badge text-dark " }}
-																{{ if hasPrefix $a "g_" }}
+																{{ if eq $a "m_read" }}
 																	{{ $badgeClass =
-																		printf "%s%s" $badgeClass "group-action"
+																		printf "%s%s" $badgeClass "read-action"
 																	}}
-																{{ else if
-																	hasPrefix $a "c_"
+																{{ else if eq
+																	$a "m_write"
 																}}
 																	{{ $badgeClass = printf "%s%s"
-																		$badgeClass "client-action"
+																		$badgeClass "write-action"
+																	}}
+																{{ else if hasPrefix $a
+																	"c_"
+																}}
+																	{{ $badgeClass = printf "%s%s" $badgeClass
+																		"client-action"
 																	}}
 																{{ else }}
-																	{{ $badgeClass =
-																		printf "%s%s" $badgeClass "text-bg-info"
+																	{{ $badgeClass = printf
+																		"%s%s" $badgeClass "text-bg-info"
 																	}}
 																{{ end }}
 																<span class="{{ $badgeClass }}">{{ $a }}</span>
@@ -185,7 +182,7 @@
 																	<i class="fas fa-pencil-alt"></i>
 																</button>
 																<form
-																	action="/users/policies/delete"
+																	action="/things/policies/delete"
 																	method="post"
 																>
 																	<input
@@ -205,7 +202,6 @@
 																	</button>
 																</form>
 															</div>
-
 															<div
 																class="modal fade"
 																id="updatePolicyModal{{ $i }}"
@@ -226,7 +222,7 @@
 																		</div>
 																		<div class="modal-body">
 																			<form
-																				action="/users/policies/update"
+																				action="/things/policies/update"
 																				method="post"
 																			>
 																				<div class="mb-3">
@@ -257,11 +253,11 @@
 																						required
 																					>
 																						{{ $policyActions := $p.Actions }}
-																						{{ range
-																							$i, $a := $actions
+																						{{ range $i,
+																							$a := $actions
 																						}}
-																							{{ $selected :=
-																								contains $policyActions $a
+																							{{ $selected := contains
+																								$policyActions $a
 																							}}
 																							<option
 																								value="{{ $a }}"
@@ -307,10 +303,11 @@
 					</div>
 				</div>
 			</div>
+
 			{{ template "footer" }}
 			<script>
 				const policyModal = new bootstrap.Modal(
-					document.getElementById("addPolicyModal"),
+					document.getElementById("addThingPolicyModal"),
 				);
 
 				function openModal() {
@@ -423,7 +420,7 @@
 
 				function fetchSubjectsData(name, page) {
 					fetch(
-						`/entities?item=users&limit=${limit}&name=${name}&page=${page}`,
+						`/entities?item=things&limit=${limit}&name=${name}&page=${page}`,
 						{
 							method: "GET",
 						},
@@ -431,10 +428,10 @@
 						.then((response) => response.json())
 						.then((data) => {
 							const selectElement = document.getElementById("subject");
-							data.data.forEach((user) => {
+							data.data.forEach((thing) => {
 								const option = document.createElement("option");
-								option.value = user.id;
-								option.text = user.name;
+								option.value = thing.id;
+								option.text = thing.name;
 								selectElement.appendChild(option);
 							});
 						})
@@ -443,7 +440,7 @@
 
 				function fetchObjectsData(name, page) {
 					fetch(
-						`/entities?item=groups&limit=${limit}&name=${name}&page=${page}`,
+						`/entities?item=channels&limit=${limit}&name=${name}&page=${page}`,
 						{
 							method: "GET",
 						},
@@ -451,10 +448,10 @@
 						.then((response) => response.json())
 						.then((data) => {
 							const selectElement = document.getElementById("object");
-							data.data.forEach((group) => {
+							data.data.forEach((channel) => {
 								const option = document.createElement("option");
-								option.value = group.id;
-								option.text = group.name;
+								option.value = channel.id;
+								option.text = channel.name;
 								selectElement.appendChild(option);
 							});
 						})

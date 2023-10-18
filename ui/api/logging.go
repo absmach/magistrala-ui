@@ -154,20 +154,6 @@ func (lm *loggingMiddleware) Logout() (err error) {
 	return lm.svc.Logout()
 }
 
-// UserProfile adds logging middleware to user profile method.
-func (lm *loggingMiddleware) UserProfile(token string) (user sdk.User, err error) {
-	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method user_profile took %s to complete", time.Since(begin))
-		if err != nil {
-			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
-			return
-		}
-		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
-	}(time.Now())
-
-	return lm.svc.UserProfile(token)
-}
-
 // UpdatePassword adds logging middleware to update password method.
 func (lm *loggingMiddleware) UpdatePassword(token, oldPass, newPass string) (err error) {
 	defer func(begin time.Time) {

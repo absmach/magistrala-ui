@@ -124,16 +124,6 @@ func (mm *metricsMiddleware) Logout() (err error) {
 	return mm.svc.Logout()
 }
 
-// UserProfile adds metrics middleware to user profile method.
-func (mm *metricsMiddleware) UserProfile(token string) (user sdk.User, err error) {
-	defer func(begin time.Time) {
-		mm.counter.With("method", "user_profile").Add(1)
-		mm.latency.With("method", "user_profile").Observe(time.Since(begin).Seconds())
-	}(time.Now())
-
-	return mm.svc.UserProfile(token)
-}
-
 // UpdatePassword adds metrics middleware to update password method.
 func (mm *metricsMiddleware) UpdatePassword(token, oldPass, newPass string) (err error) {
 	defer func(begin time.Time) {
