@@ -128,29 +128,17 @@
 											</thead>
 											<tbody>
 												{{ $actions := .Actions }}
-												{{ $users := .Users }}
-												{{ $groups :=
-													.Groups
-												}}
 												{{ range $i, $p := .Policies }}
 													<tr>
 														<td>
-															{{ range $u := $users }}
-																{{ if eq $u.ID $p.Subject }}
-																	<a href="{{ printf "/users/%s" $p.Subject }}">
-																		{{ $u.Name }}
-																	</a>
-																{{ end }}
-															{{ end }}
+															<a href="{{ printf "/users/%s" $p.Subject }}">
+																{{ $p.Subject }}
+															</a>
 														</td>
 														<td>
-															{{ range $g := $groups }}
-																{{ if eq $g.ID $p.Object }}
-																	<a href="{{ printf "/groups/%s" $p.Object }}">
-																		{{ $g.Name }}
-																	</a>
-																{{ end }}
-															{{ end }}
+															<a href="{{ printf "/groups/%s" $p.Object }}">
+																{{ $p.Object }}
+															</a>
 														</td>
 														<td data-field="actions">
 															{{ range $j, $a := $p.Actions }}

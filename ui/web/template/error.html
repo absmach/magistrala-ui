@@ -1,0 +1,24 @@
+{{define "error"}}
+<!DOCTYPE html>
+<html lang="en">
+{{template "header"}}
+<body>
+    {{template "navbar"}}
+    <div class="main-content">
+        <div class="main">
+            <div class="row">
+                <div class="col-lg-8 mx-auto py-5">
+                    <div class="row">
+                        <div class="error-header py-5">
+                            <h1>Error :/</h1>
+                        </div>
+                        <div class="alert alert-danger aler-dismissible">{{.Error}}</div>
+                        <a type="button" href="javascript:window. history. back();" class="btn body-button">Back</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+{{end}}

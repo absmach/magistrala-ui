@@ -26,7 +26,7 @@
 							>
 								<div class="col-md-12">
 									<div class="row mb-3">
-										<div class="col-md-12 input-field">
+										<div class="col-md-12 input-field email-field">
 											<i class="fas fa-solid fa-envelope"></i>
 											<input
 												class="p-3 w-100"
@@ -34,12 +34,12 @@
 												name="username"
 												id="username"
 												placeholder="Email Address"
-												required
 											/>
 										</div>
+										<div id="emailError" class="text-danger"></div>
 									</div>
 									<div class="row mb-3">
-										<div class="col-md-12 input-field">
+										<div class="col-md-12 input-field password-field">
 											<i class="fas fa-solid fa-lock"></i>
 											<input
 												class="p-3 w-100"
@@ -47,10 +47,10 @@
 												name="password"
 												id="password"
 												placeholder="Password"
-												required
 											/>
-											<div id="passwordError" class="text-danger"></div>
+											
 										</div>
+										<div id="passwordError" class="text-danger"></div>
 									</div>
 									<div id="loginError" class="text-danger"></div>
 								</div>
@@ -121,16 +121,33 @@
 			</div>
 			{{ template "footer" }}
 			<script>
+				const passwordField = document.querySelector(".password-field");
+				const emailField = document.querySelector(".email-field");
+				const loginError = document.getElementById("loginError");
+				const passwordError = document.getElementById("passwordError");
+				const emailError = document.getElementById("emailError");
+
 				function validateForm() {
 					var password = document.getElementById("password").value;
+					var email = document.getElementById("username").value;
 
+					loginError.innerHTML="";
 					passwordError.innerHTML = "";
+					emailError.innerHTML = "";
+					passwordField.classList.remove("border-red");
+					emailField.classList.remove("border-red");
 					var isValid = true;
 
+					if (email === "") {
+					emailError.innerHTML = "email is required!";
+					emailField.classList.add("border-red");
+					isValid=false;
+					}
 					if (password.length < 8) {
-						passwordError.innerHTML =
-							"Password must have a minimum of 8 characters!";
-						isValid = false;
+					passwordError.innerHTML =
+						"Password must have a minimum of 8 characters!";
+					passwordField.classList.add("border-red");
+					isValid = false;
 					}
 					return isValid;
 				}
@@ -139,28 +156,29 @@
 					event.preventDefault();
 					var form = event.target;
 					fetch("/login", {
-						method: "POST",
-						body: new FormData(form),
+					method: "POST",
+					body: new FormData(form),
 					})
-						.then((response) => {
-							if (response.status === 401) {
-								errorMessage = "invalid email or password. Please try again!";
-								showAlert(errorMessage);
-								return false;
-							} else {
-								form.reset();
-								window.location.href = "/";
-								return true;
-							}
-						})
-						.catch((error) => {
-							console.error("error submitting login form: ", error);
-							return false;
-						});
+					.then((response) => {
+						if (response.status === 401) {
+						passwordField.classList.add("border-red");
+						emailField.classList.add("border-red");
+						errorMessage = "invalid email or password. Please try again!";
+						showAlert(errorMessage);
+						return false;
+						} else {
+						form.reset();
+						window.location.href = "/";
+						return true;
+						}
+					})
+					.catch((error) => {
+						console.error("error submitting login form: ", error);
+						return false;
+					});
 				}
 
 				function showAlert(errorMessage) {
-					var loginError = document.getElementById("loginError");
 					loginError.innerHTML = errorMessage;
 				}
 			</script>

@@ -121,16 +121,14 @@
 
 									{{ template "tableheader" . }}
 									<div class="itemsTable">
-										{{ $policies := .Policies }}
 										{{ $t := .Thing }}
 										<table id="itemsTable" class="table">
 											<thead>
 												<tr>
-													<th scope="col" style="width: 25%">NAME</th>
-													<th scope="col" style="width: 30%">ID</th>
-													<th scope="col" style="width: 25%">ACTIONS</th>
-													<th scope="col" style="width: 10%"></th>
-													<th scope="col" style="width: 10%"></th>
+													<th scope="col">NAME</th>
+													<th scope="col">ID</th>
+													<th scope="col"></th>
+													<th scope="col"></th>
 												</tr>
 											</thead>
 											<tbody>
@@ -143,44 +141,13 @@
 														$t.ID $c.ID "m_write" "group"
 													}}
 													<tr>
-														<td style="width: 25%">{{ $c.Name }}</td>
-														<td style="width: 30%">
+														<td>{{ $c.Name }}</td>
+														<td>
 															<a href="{{ printf "/channels/%s" $c.ID }}">
 																{{ $c.ID }}
 															</a>
 														</td>
-														<td style="width: 25%">
-															{{ range $p :=$policies }}
-																{{ if (eq $c.ID $p.Object) }}
-																	{{ if (eq $t.ID $p.Subject) }}
-																		{{ range $j, $a :=
-																			$p.Actions
-																		}}
-																			{{ $badgeClass := "badge text-dark " }}
-																			{{ if eq $a "m_read" }}
-																				{{ $badgeClass = printf "%s%s"
-																					$badgeClass "read-action"
-																				}}
-																			{{ else if eq $a
-																				"m_write"
-																			}}
-																				{{ $badgeClass = printf "%s%s" $badgeClass
-																					"write-action"
-																				}}
-																			{{ else }}
-																				{{ $badgeClass = printf
-																					"%s%s" $badgeClass "text-bg-info"
-																				}}
-																			{{ end }}
-																			<span class="{{ $badgeClass }}">
-																				{{ $a }}
-																			</span>
-																		{{ end }}
-																	{{ end }}
-																{{ end }}
-															{{ end }}
-														</td>
-														<td style="width: 10%">
+														<td>
 															<button
 																type="button"
 																class="btn btn-sm sendMessage-button"
@@ -259,7 +226,7 @@
 																</div>
 															</div>
 														</td>
-														<td style="width: 10%">
+														<td>
 															<form action="/disconnectChannel" method="post">
 																<input
 																	type="hidden"

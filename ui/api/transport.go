@@ -7,8 +7,11 @@ import (
 	"context"
 	"encoding/csv"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -41,11 +44,9 @@ const (
 )
 
 var (
-	errMalformedData      = errors.New("malformed request data")
-	errMalformedSubtopic  = errors.New("malformed subtopic")
-	errNoCookie           = errors.New("failed to read token cookie")
-	errUnauthorized       = errors.New("failed to login")
+	errAuthorization      = errors.New("missing or invalid credentials provided")
 	errAuthentication     = errors.New("failed to perform authentication over the entity")
+	errMalformedEntity    = errors.New("malformed entity specification")
 	errConflict           = errors.New("entity already exists")
 	errInvalidQueryParams = errors.New("invalid query parameters")
 	referer               = ""
@@ -584,18 +585,30 @@ func MakeHandler(svc ui.Service, instanceID string) http.Handler {
 		opts...,
 	))
 
+	r.Get("/error", kithttp.NewServer(
+		errorPageEndpoint(svc),
+		decodeError,
+		encodeResponse,
+		opts...,
+	))
+
 	r.GetFunc("/health", mainflux.Health("ui", instanceID))
 	r.Handle("/metrics", promhttp.Handler())
 
-	// Static file handler
-	fs := http.FileServer(http.Dir(staticDir))
-	r.Handle("/*", fs)
+	r.NotFound(kithttp.NewServer(
+		errorPageEndpoint(svc),
+		decodePageNotFound,
+		encodeResponse,
+		opts...,
+	))
+
+	handleStaticFiles(r)
 
 	return r
 }
 
 func decodeIndexRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -611,7 +624,7 @@ func decodeLoginRequest(_ context.Context, _ *http.Request) (interface{}, error)
 }
 
 func decodeShowPasswordUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -624,7 +637,7 @@ func decodeShowPasswordUpdate(_ context.Context, r *http.Request) (interface{}, 
 }
 
 func decodePasswordUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -670,15 +683,13 @@ func decodeTokenRequest(_ context.Context, r *http.Request) (interface{}, error)
 }
 
 func decodeRefreshTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	c, err := r.Cookie("refresh_token")
+	token, err := tokenFromCookie(r, "refresh_token")
 	if err != nil {
-		if err == http.ErrNoCookie {
-			return nil, errors.Wrap(errNoCookie, err)
-		}
 		return nil, err
 	}
+
 	req := refreshTokenReq{
-		refreshToken: c.Value,
+		refreshToken: token,
 		ref:          referer,
 	}
 
@@ -698,7 +709,7 @@ func decodeUserCreation(_ context.Context, r *http.Request) (interface{}, error)
 	if err := json.Unmarshal([]byte(r.PostFormValue("tags")), &tags); err != nil {
 		return nil, err
 	}
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -722,7 +733,7 @@ func decodeUserCreation(_ context.Context, r *http.Request) (interface{}, error)
 }
 
 func decodeUsersCreation(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -763,7 +774,7 @@ func decodeUsersCreation(_ context.Context, r *http.Request) (interface{}, error
 }
 
 func decodeListUsersRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -787,7 +798,7 @@ func decodeListUsersRequest(_ context.Context, r *http.Request) (interface{}, er
 }
 
 func decodeView(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -800,7 +811,7 @@ func decodeView(_ context.Context, r *http.Request) (interface{}, error) {
 }
 
 func decodeUserUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -822,7 +833,7 @@ func decodeUserUpdate(_ context.Context, r *http.Request) (interface{}, error) {
 }
 
 func decodeUserTagsUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -845,7 +856,7 @@ func decodeUserTagsUpdate(_ context.Context, r *http.Request) (interface{}, erro
 }
 
 func decodeUserIdentityUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -868,7 +879,7 @@ func decodeUserIdentityUpdate(_ context.Context, r *http.Request) (interface{}, 
 }
 
 func decodeUserStatusUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -890,7 +901,7 @@ func decodeThingCreation(_ context.Context, r *http.Request) (interface{}, error
 	if err := json.Unmarshal([]byte(r.PostFormValue("tags")), &tags); err != nil {
 		return nil, err
 	}
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -914,7 +925,7 @@ func decodeThingCreation(_ context.Context, r *http.Request) (interface{}, error
 }
 
 func decodeListThingsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -938,7 +949,7 @@ func decodeListThingsRequest(_ context.Context, r *http.Request) (interface{}, e
 }
 
 func decodeThingUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -960,7 +971,7 @@ func decodeThingUpdate(_ context.Context, r *http.Request) (interface{}, error) 
 }
 
 func decodeThingTagsUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -981,7 +992,7 @@ func decodeThingTagsUpdate(_ context.Context, r *http.Request) (interface{}, err
 }
 
 func decodeThingSecretUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1002,7 +1013,7 @@ func decodeThingSecretUpdate(_ context.Context, r *http.Request) (interface{}, e
 }
 
 func decodeThingStatusUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1016,7 +1027,7 @@ func decodeThingStatusUpdate(_ context.Context, r *http.Request) (interface{}, e
 }
 
 func decodeThingOwnerUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1037,7 +1048,7 @@ func decodeThingOwnerUpdate(_ context.Context, r *http.Request) (interface{}, er
 }
 
 func decodeListEntityByIDRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1062,7 +1073,7 @@ func decodeListEntityByIDRequest(_ context.Context, r *http.Request) (interface{
 }
 
 func decodeThingsCreation(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1100,7 +1111,7 @@ func decodeChannelCreation(_ context.Context, r *http.Request) (interface{}, err
 		return nil, err
 	}
 
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1121,7 +1132,7 @@ func decodeChannelCreation(_ context.Context, r *http.Request) (interface{}, err
 }
 
 func decodeChannelsCreation(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1154,7 +1165,7 @@ func decodeChannelsCreation(_ context.Context, r *http.Request) (interface{}, er
 }
 
 func decodeChannelUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1177,7 +1188,7 @@ func decodeChannelUpdate(_ context.Context, r *http.Request) (interface{}, error
 }
 
 func decodeListChannelsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1206,7 +1217,7 @@ func decodeConnectThing(_ context.Context, r *http.Request) (interface{}, error)
 	}
 	chanID := bone.GetValue(r, "id")
 	thingID := r.Form.Get("thingID")
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1230,7 +1241,7 @@ func decodeShareThingRequest(_ context.Context, r *http.Request) (interface{}, e
 	chanID := bone.GetValue(r, "id")
 	userID := r.Form.Get("userID")
 	actions := r.PostForm["actions"]
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1249,7 +1260,7 @@ func decodeConnectChannel(_ context.Context, r *http.Request) (interface{}, erro
 	}
 	chanID := r.Form.Get("channelID")
 	thingID := bone.GetValue(r, "id")
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1267,7 +1278,7 @@ func decodeConnectChannel(_ context.Context, r *http.Request) (interface{}, erro
 }
 
 func decodeConnect(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1314,7 +1325,7 @@ func decodeDisconnectThing(_ context.Context, r *http.Request) (interface{}, err
 	}
 	chanID := r.Form.Get("channelID")
 	thingID := r.Form.Get("thingID")
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1333,7 +1344,7 @@ func decodeDisconnectChannel(_ context.Context, r *http.Request) (interface{}, e
 	}
 	chanID := r.Form.Get("channelID")
 	thingID := r.Form.Get("thingID")
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1347,7 +1358,7 @@ func decodeDisconnectChannel(_ context.Context, r *http.Request) (interface{}, e
 }
 
 func decodeDisconnect(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1389,7 +1400,7 @@ func decodeDisconnect(_ context.Context, r *http.Request) (interface{}, error) {
 }
 
 func decodeChannelStatusUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1403,7 +1414,7 @@ func decodeChannelStatusUpdate(_ context.Context, r *http.Request) (interface{},
 }
 
 func decodeAddThingsPolicyRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1423,7 +1434,7 @@ func decodeAddThingsPolicyRequest(_ context.Context, r *http.Request) (interface
 }
 
 func decodeDeleteThingsPolicyRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1447,7 +1458,7 @@ func decodeGroupCreation(_ context.Context, r *http.Request) (interface{}, error
 	if err := json.Unmarshal([]byte(r.PostFormValue("metadata")), &meta); err != nil {
 		return nil, err
 	}
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1466,7 +1477,7 @@ func decodeGroupCreation(_ context.Context, r *http.Request) (interface{}, error
 }
 
 func decodeGroupsCreation(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1499,7 +1510,7 @@ func decodeGroupsCreation(_ context.Context, r *http.Request) (interface{}, erro
 }
 
 func decodeListGroupsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1523,7 +1534,7 @@ func decodeListGroupsRequest(_ context.Context, r *http.Request) (interface{}, e
 }
 
 func decodeGroupUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1545,7 +1556,7 @@ func decodeGroupUpdate(_ context.Context, r *http.Request) (interface{}, error) 
 }
 
 func decodeAssignRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1564,7 +1575,7 @@ func decodeAssignRequest(_ context.Context, r *http.Request) (interface{}, error
 }
 
 func decodeUnassignRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1580,7 +1591,7 @@ func decodeUnassignRequest(_ context.Context, r *http.Request) (interface{}, err
 }
 
 func decodeGroupStatusUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1594,7 +1605,7 @@ func decodeGroupStatusUpdate(_ context.Context, r *http.Request) (interface{}, e
 }
 
 func decodeListPoliciesRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1618,7 +1629,7 @@ func decodeListPoliciesRequest(_ context.Context, r *http.Request) (interface{},
 }
 
 func decodeAddPolicyRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1641,7 +1652,7 @@ func decodeUpdatePolicyRequest(_ context.Context, r *http.Request) (interface{},
 	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1664,7 +1675,7 @@ func decodeDeletePolicyRequest(_ context.Context, r *http.Request) (interface{},
 	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1695,7 +1706,7 @@ func decodePublishRequest(_ context.Context, r *http.Request) (interface{}, erro
 		Created:  time.Now().UnixNano(),
 	}
 
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1713,7 +1724,7 @@ func decodeReadMessageRequest(_ context.Context, r *http.Request) (interface{}, 
 	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1729,7 +1740,7 @@ func decodeWsConnectionRequest(_ context.Context, r *http.Request) (interface{},
 	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1747,7 +1758,7 @@ func decodeWsConnectionRequest(_ context.Context, r *http.Request) (interface{},
 }
 
 func decodeTerminalCommandRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1760,7 +1771,7 @@ func decodeTerminalCommandRequest(_ context.Context, r *http.Request) (interface
 }
 
 func decodeListBoostrapRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1783,7 +1794,7 @@ func decodeListBoostrapRequest(_ context.Context, r *http.Request) (interface{},
 }
 
 func decodeCreateBootstrapRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1810,7 +1821,7 @@ func decodeCreateBootstrapRequest(_ context.Context, r *http.Request) (interface
 }
 
 func decodeUpdateBootstrap(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1827,7 +1838,7 @@ func decodeUpdateBootstrap(_ context.Context, r *http.Request) (interface{}, err
 }
 
 func decodeUpdateBootstrapCerts(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1844,7 +1855,7 @@ func decodeUpdateBootstrapCerts(_ context.Context, r *http.Request) (interface{}
 }
 
 func decodeUpdateBootstrapConnections(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1862,7 +1873,7 @@ func decodeUpdateBootstrapConnections(_ context.Context, r *http.Request) (inter
 }
 
 func decodeGetEntitiesRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := getAuthorization(r)
+	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
@@ -1895,6 +1906,22 @@ func decodeGetEntitiesRequest(_ context.Context, r *http.Request) (interface{}, 
 
 	return req, nil
 
+}
+
+func decodeError(_ context.Context, r *http.Request) (interface{}, error) {
+	errValue, err := readStringQuery(r, "error", "")
+	if err != nil {
+		return nil, err
+	}
+	return errorReq{
+		err: errValue,
+	}, nil
+}
+
+func decodePageNotFound(_ context.Context, r *http.Request) (interface{}, error) {
+	return errorReq{
+		err: "Whoops! Page not found",
+	}, nil
 }
 
 func readStringQuery(r *http.Request, key string, def string) (string, error) {
@@ -1938,17 +1965,32 @@ func readNumQuery[N number](r *http.Request, key string, def N) (N, error) {
 	}
 }
 
-func getAuthorization(r *http.Request) (string, error) {
-	referer = r.URL.String()
-	c, err := r.Cookie("token")
+func tokenFromCookie(r *http.Request, cookie string) (string, error) {
+	c, err := r.Cookie(cookie)
 	if err != nil {
-		if err == http.ErrNoCookie {
-			return "", errors.Wrap(errNoCookie, err)
-		}
-		return "", err
+		return "", errors.Wrap(err, errAuthorization)
 	}
 
 	return c.Value, nil
+}
+
+func handleStaticFiles(m *bone.Mux) {
+	file, err := os.Open(staticDir)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	infos, err := file.ReadDir(0)
+	if err != nil {
+		panic(err)
+	}
+	fs := http.FileServer(http.Dir(staticDir))
+	for _, info := range infos {
+		if info.IsDir() {
+			m.Handle(fmt.Sprintf("/%s/*", info.Name()), fs)
+		}
+	}
 }
 
 func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
@@ -1993,22 +2035,39 @@ func encodeJSONResponse(_ context.Context, w http.ResponseWriter, response inter
 }
 
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
+	_, displayError := errors.Unwrap(err)
+
 	switch {
-	case errors.Contains(err, errNoCookie),
-		errors.Contains(err, errUnauthorized):
-		w.WriteHeader(http.StatusUnauthorized)
-	case errors.Contains(err, errMalformedData),
-		errors.Contains(err, errMalformedSubtopic):
-		w.WriteHeader(http.StatusBadRequest)
-	case errors.Contains(err, ui.ErrUnauthorizedAccess):
-		w.WriteHeader(http.StatusForbidden)
-	case errors.Contains(err, errAuthentication):
-		w.Header().Set("Location", "/refresh_token")
+	case errors.Contains(err, errAuthorization),
+		errors.Contains(err, errAuthentication),
+		errors.Contains(err, ui.ErrTokenRefresh):
+		w.Header().Set("Location", "/login")
 		w.WriteHeader(http.StatusSeeOther)
-	case errors.Contains(err, errors.ErrLogin):
+	case errors.Contains(err, ui.ErrToken):
 		w.WriteHeader(http.StatusUnauthorized)
 	case errors.Contains(err, errConflict):
 		w.WriteHeader(http.StatusConflict)
+	case errors.Contains(err, errMalformedEntity),
+		errors.Contains(err, ui.ErrFailedCreate),
+		errors.Contains(err, ui.ErrFailedRetreive),
+		errors.Contains(err, ui.ErrFailedUpdate),
+		errors.Contains(err, ui.ErrFailedEnable),
+		errors.Contains(err, ui.ErrFailedDisable),
+		errors.Contains(err, ui.ErrFailedAssign),
+		errors.Contains(err, ui.ErrFailedUnassign),
+		errors.Contains(err, ui.ErrFailedConnect),
+		errors.Contains(err, ui.ErrFailedDisconnect),
+		errors.Contains(err, ui.ErrFailedCreatePolicy),
+		errors.Contains(err, ui.ErrFailedUpdatePolicy),
+		errors.Contains(err, ui.ErrFailedDeletePolicy),
+		errors.Contains(err, ui.ErrFailedReset),
+		errors.Contains(err, ui.ErrFailedResetRequest),
+		errors.Contains(err, ui.ErrFailedPublish),
+		errors.Contains(err, ui.ErrFailedDelete),
+		errors.Contains(err, ui.ErrExecTemplate),
+		errors.Contains(err, ui.ErrFailedDelete):
+		w.Header().Set("Location", "/error?error="+url.QueryEscape(displayError.Error()))
+		w.WriteHeader(http.StatusSeeOther)
 
 	default:
 		if e, ok := status.FromError(err); ok {

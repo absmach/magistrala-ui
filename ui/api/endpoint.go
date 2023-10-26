@@ -9,7 +9,6 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/mainflux/mainflux/pkg/errors"
 	"github.com/ultravioletrs/mainflux-ui/ui"
 
 	"github.com/go-kit/kit/endpoint"
@@ -120,7 +119,7 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		token, err := svc.Token(user)
 		if err != nil {
-			return nil, errors.Wrap(errUnauthorized, err)
+			return nil, err
 		}
 
 		cookies := []*http.Cookie{
@@ -157,7 +156,7 @@ func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		token, err := svc.RefreshToken(req.refreshToken)
 		if err != nil {
-			return nil, errors.Wrap(errUnauthorized, err)
+			return nil, err
 		}
 
 		cookies := []*http.Cookie{
@@ -1561,6 +1560,25 @@ func getEntitiesEndpoint(svc ui.Service) endpoint.Endpoint {
 			html:    res,
 			code:    http.StatusOK,
 			headers: map[string]string{"Content-Type": "application/json"},
+		}, nil
+	}
+}
+
+func errorPageEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(errorReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.ErrorPage(req.err)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code: http.StatusOK,
+			html: res,
 		}, nil
 	}
 }

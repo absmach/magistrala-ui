@@ -434,6 +434,10 @@ button.edit-btn {
 	background: #b2dcef;
 }
 
+.border-red{
+	border: 1px solid #eb2f2f;
+}
+
 @media (max-width: 768px) {
 	.sidebar {
 		width: var(--sidebar-min);

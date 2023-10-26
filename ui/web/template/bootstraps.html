@@ -13,8 +13,7 @@
 									<button
 										type="button"
 										class="btn body-button"
-										data-bs-toggle="modal"
-										data-bs-target="#addBootstrapModal"
+										onclick="openModal()"
 									>
 										Add
 									</button>
@@ -51,26 +50,24 @@
 															/>
 														</div>
 														<div class="mb-3">
-															<label for="thingID" class="form-label">
+															<label for="infiniteScroll" class="form-label">
 																Thing
 															</label>
 															<input
 																type="text"
+																class="itemsFilter"
 																name="thingFilter"
 																id="thingFilter"
 																placeholder="Filter by Thing name"
-																oninput="filterItem(this.value,'thingID')"
+																oninput="fetchIndividualEntity(this.value,'infiniteScroll')"
 															/>
 															<select
 																class="form-select"
 																name="thingID"
-																id="thingID"
+																id="infiniteScroll"
 																required
 															>
-																<option value="">...</option>
-																{{ range .Things }}
-																	<option value="{{ .ID }}">{{ .Name }}</option>
-																{{ end }}
+																<option disabled>select a group</option>
 															</select>
 														</div>
 														<div class="mb-3">
@@ -290,6 +287,88 @@
 						option.style.display = shouldShow ? "" : "none";
 					}
 				}
+
+				const bootstrapsModal = new bootstrap.Modal(
+					document.getElementById("addBootstrapModal"),
+				);
+
+				function openModal(){
+					bootstrapsModal.show();
+					getThings("");
+					getAdditionalThings();
+				}
+
+				function fetchIndividualEntity(filterValue, selectId) {
+					const itemSelect = document.getElementById(selectId);
+					if (filterValue === "") {
+						itemSelect.innerHTML = "<option disabled>select a group</option>";
+						getThings("");
+						getAdditionalThings();
+					} else {
+						itemSelect.innerHTML = "";
+						getThings(filterValue);
+					}
+				}
+
+				let limit = 5;
+
+				function getThings(name) {
+					fetchData(name, 1);
+				}
+
+				function getAdditionalThings() {
+					var selectElement = document.getElementById("infiniteScroll");
+					var singleOptionHeight =
+						selectElement.querySelector("option").offsetHeight;
+					var selectBoxHeight = selectElement.offsetHeight;
+					var numOptionsBeforeLoad = 2;
+					var lastScrollTop = 0;
+					var currentPageNo = 1;
+					var currentScroll = 0;
+
+					selectElement.addEventListener("scroll", onselectScroll);
+
+					function onselectScroll(event) {
+						var st = selectElement.scrollTop;
+						var totalHeight =
+							selectElement.querySelectorAll("option").length *
+							singleOptionHeight;
+
+						if (st > lastScrollTop) {
+							currentScroll = st + selectBoxHeight;
+							if (
+								currentScroll + numOptionsBeforeLoad * singleOptionHeight >=
+								totalHeight
+							) {
+								currentPageNo++;
+								fetchData("", currentPageNo);
+							}
+						}
+
+						lastScrollTop = st;
+					}
+				}
+
+				function fetchData(name, page) {
+					fetch(
+						`/entities?item=things&limit=${limit}&name=${name}&page=${page}`,
+						{
+							method: "GET",
+						},
+					)
+						.then((response) => response.json())
+						.then((data) => {
+							const selectElement = document.getElementById("infiniteScroll");
+							data.data.forEach((group) => {
+								const option = document.createElement("option");
+								option.value = group.id;
+								option.text = group.name;
+								selectElement.appendChild(option);
+							});
+						})
+						.catch((error) => console.error("Error:", error));
+				}
+
 			</script>
 		</body>
 	</html>

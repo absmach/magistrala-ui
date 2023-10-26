@@ -203,55 +203,22 @@
 										<table id="itemsTable" class="table">
 											<thead>
 												<tr>
-													<th scope="col" style="width: 25%">NAME</th>
-													<th scope="col" style="width: 30%">ID</th>
-													<th scope="col" style="width: 25%">ACTIONS</th>
-													<th scope="col" style="width: 20%"></th>
+													<th scope="col">NAME</th>
+													<th scope="col">ID</th>
+													<th scope="col"></th>
 												</tr>
 											</thead>
 											<tbody>
 												{{ $chanID := .Channel.ID }}
-												{{ $policies := .Policies }}
 												{{ range $i, $t := .Things }}
 													<tr>
-														<td style="width: 25%">{{ $t.Name }}</td>
-														<td style="width: 30%">
+														<td>{{ $t.Name }}</td>
+														<td>
 															<a href="{{ printf "/things/%s" $t.ID }}">
 																{{ $t.ID }}
 															</a>
 														</td>
-														<td style="width: 25%">
-															{{ range $p :=$policies }}
-																{{ if (eq $t.ID $p.Subject) }}
-																	{{ if (eq $chanID $p.Object) }}
-																		{{ range $j, $a :=
-																			$p.Actions
-																		}}
-																			{{ $badgeClass := "badge text-dark " }}
-																			{{ if eq $a "m_read" }}
-																				{{ $badgeClass = printf "%s%s"
-																					$badgeClass "read-action"
-																				}}
-																			{{ else if eq $a
-																				"m_write"
-																			}}
-																				{{ $badgeClass = printf "%s%s" $badgeClass
-																					"write-action"
-																				}}
-																			{{ else }}
-																				{{ $badgeClass = printf
-																					"%s%s" $badgeClass "text-bg-info"
-																				}}
-																			{{ end }}
-																			<span class="{{ $badgeClass }}">
-																				{{ $a }}
-																			</span>
-																		{{ end }}
-																	{{ end }}
-																{{ end }}
-															{{ end }}
-														</td>
-														<td style="width: 20%">
+														<td>
 															<form action="/disconnectThing" method="post">
 																<input
 																	type="hidden"

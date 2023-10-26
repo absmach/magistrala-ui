@@ -141,14 +141,12 @@
 										<table id="itemsTable" class="table">
 											<thead>
 												<tr>
-													<th scope="col" style="width: 25%">NAME</th>
-													<th scope="col" style="width: 25%">ID</th>
-													<th scope="col" style="width: 40%">ACTIONS</th>
-													<th scope="col" style="width: 10%"></th>
+													<th scope="col">NAME</th>
+													<th scope="col">ID</th>
+													<th scope="col"></th>
 												</tr>
 											</thead>
 											<tbody>
-												{{ $policies := .Policies }}
 												{{ $disableButton := true }}
 												{{ if
 													(eq .Group.OwnerID .User.ID)
@@ -160,44 +158,13 @@
 														$userID $m.ID "c_list" "client"
 													}}
 														<tr>
-															<td style="width: 25%">{{ $m.Name }}</td>
-															<td style="width: 25%">
+															<td>{{ $m.Name }}</td>
+															<td>
 																<a href="{{ printf "/users/%s" $m.ID }}">
 																	{{ $m.ID }}
 																</a>
 															</td>
-															<td style="width: 40%">
-																{{ range $p := $policies }}
-																	{{ if (eq $m.ID $p.Subject) }}
-																		{{ if (eq $groupID $p.Object) }}
-																			{{ range $j, $a :=
-																				$p.Actions
-																			}}
-																				{{ $badgeClass := "badge text-dark " }}
-																				{{ if hasPrefix $a "g_" }}
-																					{{ $badgeClass = printf "%s%s"
-																						$badgeClass "group-action"
-																					}}
-																				{{ else if hasPrefix $a
-																					"c_"
-																				}}
-																					{{ $badgeClass = printf "%s%s" $badgeClass
-																						"client-action"
-																					}}
-																				{{ else }}
-																					{{ $badgeClass = printf
-																						"%s%s" $badgeClass "text-bg-info"
-																					}}
-																				{{ end }}
-																				<span class="{{ $badgeClass }}">
-																					{{ $a }}
-																				</span>
-																			{{ end }}
-																		{{ end }}
-																	{{ end }}
-																{{ end }}
-															</td>
-															<td style="width: 10%">
+															<td>
 																<form
 																	action="/groups/{{ $groupID }}/unassign"
 																	method="post"

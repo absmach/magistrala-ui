@@ -762,3 +762,12 @@ func (mm *metricsMiddleware) GetEntities(token, item, name string, page, limit u
 
 	return mm.svc.GetEntities(token, item, name, page, limit)
 }
+
+func (mm *metricsMiddleware) ErrorPage(errMsg string) ([]byte, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "errorpage").Add(1)
+		mm.latency.With("method", "errorpage").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.ErrorPage(errMsg)
+}

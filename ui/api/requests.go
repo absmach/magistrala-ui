@@ -6,7 +6,6 @@ package api
 import (
 	"github.com/mainflux/mainflux/pkg/messaging"
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
-	"github.com/ultravioletrs/mainflux-ui/ui"
 )
 
 const maxNameSize = 1024
@@ -17,7 +16,7 @@ type indexReq struct {
 
 func (req indexReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	return nil
 }
@@ -29,10 +28,10 @@ type tokenReq struct {
 
 func (req tokenReq) validate() error {
 	if req.Identity == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.Secret == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	return nil
 }
@@ -44,10 +43,10 @@ type refreshTokenReq struct {
 
 func (req refreshTokenReq) validate() error {
 	if req.refreshToken == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.ref == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	return nil
 }
@@ -59,10 +58,10 @@ type createUserReq struct {
 
 func (req createUserReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.User.Credentials.Secret == "" || req.User.Credentials.Identity == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -78,7 +77,7 @@ type createUsersReq struct {
 
 func (req createUsersReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 
 	return nil
@@ -92,13 +91,13 @@ type listEntityReq struct {
 
 func (req listEntityReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.page == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.limit == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	return nil
 }
@@ -112,16 +111,16 @@ type listEntityByIDReq struct {
 
 func (req listEntityByIDReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.id == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.page == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.limit == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	return nil
 }
@@ -133,11 +132,11 @@ type viewResourceReq struct {
 
 func (req viewResourceReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 
 	if req.id == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -152,13 +151,13 @@ type updateUserReq struct {
 
 func (req updateUserReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.id == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.Name == "" && req.Metadata == nil {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	return nil
 }
@@ -171,10 +170,10 @@ type updateUserTagsReq struct {
 
 func (req updateUserTagsReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.id == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	return nil
 }
@@ -187,13 +186,13 @@ type updateUserIdentityReq struct {
 
 func (req updateUserIdentityReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.id == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.Identity == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -206,10 +205,10 @@ type updateUserStatusReq struct {
 
 func (req updateUserStatusReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.UserID == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -221,7 +220,7 @@ type showUpdatePasswordReq struct {
 
 func (req showUpdatePasswordReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	return nil
 }
@@ -234,13 +233,13 @@ type updateUserPasswordReq struct {
 
 func (req updateUserPasswordReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.OldPass == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.NewPass == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	return nil
 }
@@ -251,7 +250,7 @@ type passwordResetRequestReq struct {
 
 func (req passwordResetRequestReq) validate() error {
 	if req.Email == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	return nil
 }
@@ -264,16 +263,16 @@ type passwordResetReq struct {
 
 func (req passwordResetReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.Password == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.ConfirmPassword == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.Password != req.ConfirmPassword {
-		return ui.ErrInvalidResetPass
+		return errMalformedEntity
 	}
 	return nil
 }
@@ -285,10 +284,10 @@ type createThingReq struct {
 
 func (req createThingReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.Thing.Name == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -303,16 +302,16 @@ type updateThingReq struct {
 
 func (req updateThingReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.id == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.Name == "" && req.Metadata == nil {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if len(req.Name) > maxNameSize {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -326,10 +325,10 @@ type updateThingTagsReq struct {
 
 func (req updateThingTagsReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.id == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	return nil
 }
@@ -342,13 +341,13 @@ type updateThingSecretReq struct {
 
 func (req updateThingSecretReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.id == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.Secret == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -361,10 +360,10 @@ type updateThingStatusReq struct {
 
 func (req updateThingStatusReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.ThingID == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -378,13 +377,13 @@ type updateThingOwnerReq struct {
 
 func (req updateThingOwnerReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.id == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.Owner == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	return nil
 }
@@ -397,7 +396,7 @@ type createThingsReq struct {
 
 func (req createThingsReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 
 	return nil
@@ -410,10 +409,10 @@ type createChannelReq struct {
 
 func (req createChannelReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.Channel.Name == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -428,7 +427,7 @@ type createChannelsReq struct {
 
 func (req createChannelsReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 
 	return nil
@@ -444,16 +443,16 @@ type updateChannelReq struct {
 
 func (req updateChannelReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.id == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.Name == "" && req.Description == "" && req.Metadata == nil {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if len(req.Name) > maxNameSize {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -466,16 +465,16 @@ type connectThingReq struct {
 
 func (req connectThingReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if len(req.ConnIDs.ChannelIDs) == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if len(req.ConnIDs.ThingIDs) == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if len(req.ConnIDs.Actions) == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	return nil
 }
@@ -489,16 +488,16 @@ type shareThingReq struct {
 
 func (req shareThingReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.UserID == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.ChanID == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if len(req.Actions) == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	return nil
 }
@@ -510,16 +509,16 @@ type connectChannelReq struct {
 
 func (req connectChannelReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if len(req.ConnIDs.ChannelIDs) == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if len(req.ConnIDs.ThingIDs) == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if len(req.ConnIDs.Actions) == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -532,16 +531,16 @@ type connectReq struct {
 
 func (req connectReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if len(req.ConnIDs.ChannelIDs) == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if len(req.ConnIDs.ThingIDs) == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if len(req.ConnIDs.Actions) == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -555,14 +554,14 @@ type disconnectThingReq struct {
 
 func (req disconnectThingReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 
 	if req.ChanID == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.ThingID == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -576,14 +575,14 @@ type disconnectChannelReq struct {
 
 func (req disconnectChannelReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 
 	if req.ChanID == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.ThingID == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -596,16 +595,16 @@ type disconnectReq struct {
 
 func (req disconnectReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if len(req.ConnIDs.ChannelIDs) == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if len(req.ConnIDs.ThingIDs) == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if len(req.ConnIDs.Actions) == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -618,10 +617,10 @@ type updateChannelStatusReq struct {
 
 func (req updateChannelStatusReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.ChannelID == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -634,16 +633,16 @@ type addThingsPolicyReq struct {
 
 func (req addThingsPolicyReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.Policy.Subject == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.Policy.Object == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if len(req.Policy.Actions) == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -656,13 +655,16 @@ type deleteThingsPolicyReq struct {
 
 func (req deleteThingsPolicyReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.Policy.Subject == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.Policy.Object == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
+	}
+	if len(req.Policy.Actions) == 0 {
+		return errMalformedEntity
 	}
 
 	return nil
@@ -675,10 +677,10 @@ type createGroupReq struct {
 
 func (req createGroupReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.Group.Name == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -693,7 +695,7 @@ type createGroupsReq struct {
 
 func (req createGroupsReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 
 	return nil
@@ -710,16 +712,16 @@ type updateGroupReq struct {
 
 func (req updateGroupReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.id == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.Name == "" && req.Description == "" && req.ParentID == "" && req.Metadata == nil {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if len(req.Name) > maxNameSize {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -734,17 +736,17 @@ type assignReq struct {
 
 func (req assignReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 
 	if req.groupID == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.MemberID == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if len(req.Type) == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -758,14 +760,14 @@ type unassignReq struct {
 
 func (req unassignReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 
 	if req.groupID == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.MemberID == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -778,10 +780,10 @@ type updateGroupStatusReq struct {
 
 func (req updateGroupStatusReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.GroupID == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -794,16 +796,16 @@ type addPolicyReq struct {
 
 func (req addPolicyReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.Policy.Subject == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.Policy.Object == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if len(req.Policy.Actions) == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -816,16 +818,16 @@ type updatePolicyReq struct {
 
 func (req updatePolicyReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.Policy.Subject == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.Policy.Object == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if len(req.Policy.Actions) == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	return nil
 }
@@ -837,13 +839,16 @@ type deletePolicyReq struct {
 
 func (req deletePolicyReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 	if req.Policy.Subject == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.Policy.Object == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
+	}
+	if len(req.Policy.Actions) == 0 {
+		return errMalformedEntity
 	}
 
 	return nil
@@ -857,17 +862,17 @@ type publishReq struct {
 
 func (req publishReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 
 	if req.thingKey == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.Msg.Channel == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.Msg.Payload == nil {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	return nil
 }
@@ -878,7 +883,7 @@ type readMessageReq struct {
 
 func (req readMessageReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 
 	return nil
@@ -892,14 +897,14 @@ type wsConnectionReq struct {
 
 func (req wsConnectionReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 
 	if req.ChanID == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.ThingKey == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -913,11 +918,11 @@ type bootstrapCommandReq struct {
 
 func (req bootstrapCommandReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 
 	if req.id == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -932,11 +937,11 @@ type updateBootstrapReq struct {
 
 func (req updateBootstrapReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 
 	if req.id == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -952,11 +957,11 @@ type updateBootstrapCertReq struct {
 
 func (req updateBootstrapCertReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 
 	if req.thingID == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -970,11 +975,11 @@ type updateBootstrapConnReq struct {
 
 func (req updateBootstrapConnReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 
 	if req.id == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -995,15 +1000,15 @@ type createBootstrapReq struct {
 
 func (req createBootstrapReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 
 	if req.ExternalID == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	if req.ExternalKey == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	return nil
@@ -1019,18 +1024,29 @@ type getEntitiesReq struct {
 
 func (req getEntitiesReq) validate() error {
 	if req.token == "" {
-		return ui.ErrUnauthorizedAccess
+		return errAuthorization
 	}
 
 	if req.Page == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 	if req.Item == "" {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
 	}
 
 	if req.Limit == 0 {
-		return ui.ErrMalformedEntity
+		return errMalformedEntity
+	}
+	return nil
+}
+
+type errorReq struct {
+	err string
+}
+
+func (req errorReq) validate() error {
+	if req.err == "" {
+		return errMalformedEntity
 	}
 	return nil
 }
