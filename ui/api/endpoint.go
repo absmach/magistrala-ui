@@ -15,6 +15,14 @@ import (
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
 )
 
+const (
+	usersEndpoint     = "/users"
+	thingsEndpoint    = "/things"
+	channelsEndpoint  = "/channels"
+	groupsEndpoint    = "/groups"
+	bootstrapEndpoint = "/bootstrap"
+)
+
 func indexEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(indexReq)
@@ -277,7 +285,7 @@ func createUserEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusOK,
-			headers: map[string]string{"Location": "/users"},
+			headers: map[string]string{"Location": usersEndpoint},
 		}, nil
 	}
 }
@@ -307,7 +315,7 @@ func createUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusOK,
-			headers: map[string]string{"Location": "/users"},
+			headers: map[string]string{"Location": usersEndpoint},
 		}, nil
 	}
 }
@@ -369,7 +377,7 @@ func updateUserEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/users/" + req.id},
+			headers: map[string]string{"Location": usersEndpoint + "/" + req.id},
 		}, nil
 	}
 }
@@ -391,7 +399,7 @@ func updateUserTagsEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/users/" + req.id},
+			headers: map[string]string{"Location": usersEndpoint + "/" + req.id},
 		}, nil
 	}
 }
@@ -416,7 +424,7 @@ func updateUserIdentityEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/users/" + req.id},
+			headers: map[string]string{"Location": usersEndpoint + "/" + req.id},
 		}, nil
 	}
 }
@@ -434,7 +442,7 @@ func enableUserEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/users"},
+			headers: map[string]string{"Location": usersEndpoint},
 		}, nil
 	}
 }
@@ -452,7 +460,7 @@ func disableUserEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/users"},
+			headers: map[string]string{"Location": usersEndpoint},
 		}, nil
 	}
 }
@@ -470,7 +478,7 @@ func createThingEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/things"},
+			headers: map[string]string{"Location": thingsEndpoint},
 		}, nil
 	}
 }
@@ -495,7 +503,7 @@ func createThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/things"},
+			headers: map[string]string{"Location": thingsEndpoint},
 		}, nil
 	}
 }
@@ -557,7 +565,7 @@ func updateThingEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/things/" + req.id},
+			headers: map[string]string{"Location": thingsEndpoint + "/" + req.id},
 		}, nil
 	}
 }
@@ -579,7 +587,7 @@ func updateThingTagsEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/things/" + req.id},
+			headers: map[string]string{"Location": thingsEndpoint + "/" + req.id},
 		}, nil
 	}
 }
@@ -597,7 +605,7 @@ func updateThingSecretEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/things/" + req.id},
+			headers: map[string]string{"Location": thingsEndpoint + "/" + req.id},
 		}, nil
 	}
 }
@@ -615,7 +623,7 @@ func enableThingEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/things"},
+			headers: map[string]string{"Location": thingsEndpoint},
 		}, nil
 	}
 }
@@ -633,7 +641,7 @@ func disableThingEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/things"},
+			headers: map[string]string{"Location": thingsEndpoint},
 		}, nil
 	}
 }
@@ -655,7 +663,7 @@ func updateThingOwnerEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/things/" + req.id},
+			headers: map[string]string{"Location": thingsEndpoint + "/" + req.id},
 		}, nil
 	}
 }
@@ -673,7 +681,7 @@ func createChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/channels"},
+			headers: map[string]string{"Location": channelsEndpoint},
 		}, nil
 	}
 }
@@ -698,7 +706,7 @@ func createChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/channels"},
+			headers: map[string]string{"Location": channelsEndpoint},
 		}, nil
 	}
 }
@@ -742,7 +750,7 @@ func updateChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/channels/" + req.id},
+			headers: map[string]string{"Location": channelsEndpoint + "/" + req.id},
 		}, nil
 	}
 }
@@ -779,7 +787,7 @@ func connectEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/channels/" + cr.ConnIDs.ChannelIDs[0] + "/things"},
+			headers: map[string]string{"Location": channelsEndpoint + "/" + cr.ConnIDs.ChannelIDs[0] + thingsEndpoint},
 		}, nil
 	}
 }
@@ -797,7 +805,7 @@ func disconnectEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/channels/" + dcr.ConnIDs.ChannelIDs[0] + "/things"},
+			headers: map[string]string{"Location": channelsEndpoint + "/" + dcr.ConnIDs.ChannelIDs[0] + thingsEndpoint},
 		}, nil
 	}
 }
@@ -815,7 +823,7 @@ func connectThingEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/channels/" + cr.ConnIDs.ChannelIDs[0] + "/things"},
+			headers: map[string]string{"Location": channelsEndpoint + "/" + cr.ConnIDs.ChannelIDs[0] + thingsEndpoint},
 		}, nil
 	}
 }
@@ -833,7 +841,7 @@ func shareThingEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/channels/" + sr.ChanID + "/things"},
+			headers: map[string]string{"Location": channelsEndpoint + "/" + sr.ChanID + thingsEndpoint},
 		}, nil
 	}
 }
@@ -851,7 +859,7 @@ func connectChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/things/" + cr.ConnIDs.ThingIDs[0] + "/channels"},
+			headers: map[string]string{"Location": thingsEndpoint + "/" + cr.ConnIDs.ThingIDs[0] + channelsEndpoint},
 		}, nil
 	}
 }
@@ -869,7 +877,7 @@ func disconnectThingEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/channels/" + dcr.ChanID + "/things"},
+			headers: map[string]string{"Location": channelsEndpoint + "/" + dcr.ChanID + thingsEndpoint},
 		}, nil
 	}
 }
@@ -887,7 +895,7 @@ func disconnectChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/things/" + dcr.ThingID + "/channels"},
+			headers: map[string]string{"Location": thingsEndpoint + "/" + dcr.ThingID + channelsEndpoint},
 		}, nil
 	}
 }
@@ -943,7 +951,7 @@ func enableChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/channels"},
+			headers: map[string]string{"Location": channelsEndpoint},
 		}, nil
 	}
 }
@@ -961,7 +969,7 @@ func disableChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/channels"},
+			headers: map[string]string{"Location": channelsEndpoint},
 		}, nil
 	}
 }
@@ -1051,7 +1059,7 @@ func createGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/groups"},
+			headers: map[string]string{"Location": groupsEndpoint},
 		}, nil
 	}
 }
@@ -1076,7 +1084,7 @@ func createGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/groups"},
+			headers: map[string]string{"Location": groupsEndpoint},
 		}, nil
 	}
 }
@@ -1157,7 +1165,7 @@ func updateGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/groups/" + req.id},
+			headers: map[string]string{"Location": groupsEndpoint + "/" + req.id},
 		}, nil
 	}
 }
@@ -1175,7 +1183,7 @@ func assignEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/groups/" + req.groupID + "/members"},
+			headers: map[string]string{"Location": groupsEndpoint + "/" + req.groupID + "/members"},
 		}, nil
 	}
 }
@@ -1193,7 +1201,7 @@ func unassignEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/groups/" + req.groupID + "/members"},
+			headers: map[string]string{"Location": groupsEndpoint + "/" + req.groupID + "/members"},
 		}, nil
 	}
 }
@@ -1211,7 +1219,7 @@ func enableGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/groups"},
+			headers: map[string]string{"Location": groupsEndpoint},
 		}, nil
 	}
 }
@@ -1229,7 +1237,7 @@ func disableGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/groups"},
+			headers: map[string]string{"Location": groupsEndpoint},
 		}, nil
 	}
 }
@@ -1320,7 +1328,7 @@ func publishMessageEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/channels/" + req.Msg.Channel + "/things"},
+			headers: map[string]string{"Location": channelsEndpoint + "/" + req.Msg.Channel + thingsEndpoint},
 		}, nil
 	}
 }
@@ -1465,7 +1473,7 @@ func updateBootstrap(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/bootstrap/" + req.id},
+			headers: map[string]string{"Location": bootstrapEndpoint + "/" + req.id},
 		}, nil
 	}
 }
@@ -1489,7 +1497,7 @@ func updateBootstrapCerts(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/bootstrap/" + req.thingID},
+			headers: map[string]string{"Location": bootstrapEndpoint + "/" + req.thingID},
 		}, nil
 	}
 }
@@ -1511,7 +1519,7 @@ func updateBootstrapConnections(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusFound,
-			headers: map[string]string{"Location": "/bootstrap/" + req.id},
+			headers: map[string]string{"Location": bootstrapEndpoint + "/" + req.id},
 		}, nil
 	}
 }

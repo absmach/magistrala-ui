@@ -72,7 +72,6 @@ body {
 
 .user-item {
 	font-size: 1.5rem !important;
-	margin-bottom: 1rem;
 }
 
 .user-item-button {
@@ -198,6 +197,18 @@ body.sidebar-toggled .main-content {
 	background: var(--main-color);
 	transform: scale(1.03);
 	font-weight: 700;
+}
+
+.doc-button {
+	border: 1px solid var(--main-color) !important;
+	border-radius: var(--border-radius) !important;
+}
+
+.doc-button:hover{
+	border: 1px solid var(--main-color) !important;
+	border-radius: var(--border-radius) !important;
+	color: #fff !important;
+	background-color: var(--main-color) !important;
 }
 
 .table-container {

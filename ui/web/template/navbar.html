@@ -123,59 +123,75 @@
 
 	<!-- Header navbar -->
 	<nav class="navbar navbar-expand topbar fixed-top">
-		<div class="container-fluid">
-			<!-- Sidebar Toggle (Topbar) -->
-			<button
-				id="sidebarToggleTop"
-				class="btn btn-link d-md-none rounded-circle mr-3 user-item"
-			>
-				<i class="fa fa-bars"></i>
-			</button>
-		</div>
-		<div class="navbarSupportedContent">
-			<ul class="navbar-nav ml-auto">
-				<li class="nav-item dropstart me-3">
-					<a
-						class="user-item nav-link d-flex flex-row"
-						href="#"
-						role="button"
-						data-bs-toggle="dropdown"
-						aria-expanded="false"
-					>
-						<span class="me-2 d-none d-lg-inline text-muted-600 small">
-							{{ .User.Name }}
-						</span>
-						<i class="fa-solid fa-user"></i>
-					</a>
-					<ul class="dropdown-menu mt-5 position-absolute end-0 p-3">
-						<li class="d-flex justify-content-start mb-2">
-							<div class="align-self-center">
-								<i class="fa-regular fa-user fs-2"></i>
-							</div>
-							<div>
-								<span class="dropdown-item">{{ .User.Name }}</span>
-								<span class="dropdown-item text-muted">
-									{{ .User.Credentials.Identity }}
-								</span>
-							</div>
-						</li>
-						<li class="mb-2"><hr class="dropdown-divider" /></li>
-						<li class="mb-2">
-							<a
-								href="/password"
-								class="dropdown-item user-item-button p-2 mb-2"
-							>
-								<i class="fas fa-solid fa-lock me-2"></i>
-								<span>Update password</span>
-							</a>
-							<a href="/logout" class="dropdown-item user-item-button p-2 mb-2">
-								<i class="fa-solid fa-right-from-bracket me-2"></i>
-								<span>Log out</span>
-							</a>
-						</li>
-					</ul>
-				</li>
-			</ul>
+		<div class="container-fluid mb-3">
+			<div class="">
+				<!-- Sidebar Toggle (Topbar) -->
+				<button
+					id="sidebarToggleTop"
+					class="btn btn-link d-md-none rounded-circle mr-3 user-item"
+				>
+					<i class="fa fa-bars"></i>
+				</button>
+			</div>
+
+			<div class="navbarSupportedContent">
+				<ul class="navbar-nav ms-auto d-flex align-items-center">
+					<li class="nav-item me-2">
+						<a
+							href="https://docs.mainflux.io/"
+							target="_blank"
+							class="doc-button btn"
+							role="button"
+						>
+							<span>Documentation</span>
+						</a>
+					</li>
+					<li class="nav-item dropstart me-3">
+						<a
+							class="user-item nav-link d-flex flex-row"
+							href="#"
+							role="button"
+							data-bs-toggle="dropdown"
+							aria-expanded="false"
+						>
+							<span class="me-2 d-none d-lg-inline text-muted-600 small">
+								{{ .User.Name }}
+							</span>
+							<i class="fa-solid fa-user"></i>
+						</a>
+						<ul class="dropdown-menu mt-5 position-absolute end-0 p-3">
+							<li class="d-flex justify-content-start mb-2">
+								<div class="align-self-center">
+									<i class="fa-regular fa-user fs-2"></i>
+								</div>
+								<div>
+									<span class="dropdown-item">{{ .User.Name }}</span>
+									<span class="dropdown-item text-muted">
+										{{ .User.Credentials.Identity }}
+									</span>
+								</div>
+							</li>
+							<li class="mb-2"><hr class="dropdown-divider" /></li>
+							<li class="mb-2">
+								<a
+									href="/password"
+									class="dropdown-item user-item-button p-2 mb-2"
+								>
+									<i class="fas fa-solid fa-lock me-2"></i>
+									<span>Update password</span>
+								</a>
+								<a
+									href="/logout"
+									class="dropdown-item user-item-button p-2 mb-2"
+								>
+									<i class="fa-solid fa-right-from-bracket me-2"></i>
+									<span>Log out</span>
+								</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</div>
 		</div>
 	</nav>
 	<script defer>
