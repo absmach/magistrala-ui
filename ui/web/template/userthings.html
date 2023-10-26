@@ -1,0 +1,106 @@
+{{ define "userthings" }}
+	<!doctype html>
+	<html lang="en">
+		{{ template "header" }}
+		<body>
+			{{ template "navbar" . }}
+			<div class="main-content pt-3">
+				<div class="container">
+					<div class="row">
+						<div class="col-lg-12 mx-auto py-3">
+							<div class="row">
+								<div class="buttons mb-3">
+									<a
+										href="/users/{{ .UserID }}"
+										type="button"
+										class="btn body-button"
+									>
+										User
+									</a>
+									<a
+										href="/users/{{ .UserID }}/things"
+										type="button"
+										class="btn body-button"
+									>
+										User Groups
+									</a>
+									<a
+										href="/users/{{ .UserID }}/channels"
+										type="button"
+										class="btn body-button"
+									>
+										User Channels
+									</a>
+								</div>
+								<div class="table-responsive table-container">
+									{{ template "tableheader" . }}
+									<div class="itemsTable">
+										<table id="itemsTable" class="table">
+											<thead>
+												<tr>
+													<th scope="col">Name</th>
+													<th scope="col">ID</th>
+													<th class="tags-col" scope="col">Tags</th>
+													<th class="meta-col" scope="col">Metadata</th>
+													<th class="created-col" scope="col">Created At</th>
+													<th class="text-center" scope="col"></th>
+												</tr>
+											</thead>
+											<tbody>
+												{{ range $i, $t := .Things }}
+													{{ $disableButton := false }}
+													<tr>
+														<td>{{ $t.Name }}</td>
+														<td>
+															<div class="copy-con-container">
+																<a href="{{ printf "/things/%s" $t.ID }}">
+																	{{ $t.ID }}
+																</a>
+																<button
+																	class="copy-icon"
+																	onclick="copyToClipboard(this)"
+																>
+																	<i class="far fa-copy"></i>
+																</button>
+															</div>
+														</td>
+														<td class="tags-col">{{ toSlice $t.Tags }}</td>
+														<td class="meta-col">{{ toJSON $t.Metadata }}</td>
+														<td class="created-col">{{ $t.CreatedAt }}</td>
+														<td class="text-center">
+															<form action="#" method="post">
+																<input
+																	type="hidden"
+																	name="thingID"
+																	id="thingID"
+																	value="{{ $t.ID }}"
+																/>
+																<button
+																	type="submit"
+																	class="btn btn-sm"
+																	{{ if
+																		$disableButton
+																	}}
+																		disabled
+																	{{ end }}
+																>
+																	<i class="fas fa-trash-alt"></i>
+																</button>
+															</form>
+														</td>
+													</tr>
+												{{ end }}
+											</tbody>
+										</table>
+									</div>
+									{{ template "tablefooter" . }}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			{{ template "footer" }}
+		</body>
+	</html>
+{{ end }}

@@ -460,30 +460,28 @@ func (req updateChannelReq) validate() error {
 
 type connectThingReq struct {
 	token   string
-	ConnIDs sdk.ConnectionIDs
+	ThingID string `json:"thingID,omitempty"`
+	ChanID  string `json:"chanID,omitempty"`
 }
 
 func (req connectThingReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if len(req.ConnIDs.ChannelIDs) == 0 {
+	if req.ChanID == "" {
 		return errMalformedEntity
 	}
-	if len(req.ConnIDs.ThingIDs) == 0 {
-		return errMalformedEntity
-	}
-	if len(req.ConnIDs.Actions) == 0 {
+	if req.ThingID == "" {
 		return errMalformedEntity
 	}
 	return nil
 }
 
 type shareThingReq struct {
-	token   string
-	UserID  string   `json:"user_id"`
-	ChanID  string   `json:"channel_id"`
-	Actions []string `json:"actions"`
+	token    string
+	ThingID  string `json:"thingID,omitempty"`
+	UserID   string `json:"userID,omitempty"`
+	Relation string `json:"relation,omitempty"`
 }
 
 func (req shareThingReq) validate() error {
@@ -493,120 +491,12 @@ func (req shareThingReq) validate() error {
 	if req.UserID == "" {
 		return errMalformedEntity
 	}
-	if req.ChanID == "" {
-		return errMalformedEntity
-	}
-	if len(req.Actions) == 0 {
-		return errMalformedEntity
-	}
-	return nil
-}
-
-type connectChannelReq struct {
-	token   string
-	ConnIDs sdk.ConnectionIDs `json:"connection_ids"`
-}
-
-func (req connectChannelReq) validate() error {
-	if req.token == "" {
-		return errAuthorization
-	}
-	if len(req.ConnIDs.ChannelIDs) == 0 {
-		return errMalformedEntity
-	}
-	if len(req.ConnIDs.ThingIDs) == 0 {
-		return errMalformedEntity
-	}
-	if len(req.ConnIDs.Actions) == 0 {
-		return errMalformedEntity
-	}
-
-	return nil
-}
-
-type connectReq struct {
-	token   string
-	ConnIDs sdk.ConnectionIDs `json:"connection_ids"`
-}
-
-func (req connectReq) validate() error {
-	if req.token == "" {
-		return errAuthorization
-	}
-	if len(req.ConnIDs.ChannelIDs) == 0 {
-		return errMalformedEntity
-	}
-	if len(req.ConnIDs.ThingIDs) == 0 {
-		return errMalformedEntity
-	}
-	if len(req.ConnIDs.Actions) == 0 {
-		return errMalformedEntity
-	}
-
-	return nil
-}
-
-type disconnectThingReq struct {
-	token   string
-	ChanID  string `json:"chan_id,omitempty"`
-	ThingID string `json:"thing_id,omitempty"`
-}
-
-func (req disconnectThingReq) validate() error {
-	if req.token == "" {
-		return errAuthorization
-	}
-
-	if req.ChanID == "" {
-		return errMalformedEntity
-	}
 	if req.ThingID == "" {
 		return errMalformedEntity
 	}
-
-	return nil
-}
-
-type disconnectChannelReq struct {
-	token   string
-	ChanID  string `json:"chan_id,omitempty"`
-	ThingID string `json:"thing_id,omitempty"`
-}
-
-func (req disconnectChannelReq) validate() error {
-	if req.token == "" {
-		return errAuthorization
-	}
-
-	if req.ChanID == "" {
+	if req.Relation == "" {
 		return errMalformedEntity
 	}
-	if req.ThingID == "" {
-		return errMalformedEntity
-	}
-
-	return nil
-}
-
-type disconnectReq struct {
-	token   string
-	ConnIDs sdk.ConnectionIDs `json:"connection_ids"`
-}
-
-func (req disconnectReq) validate() error {
-	if req.token == "" {
-		return errAuthorization
-	}
-	if len(req.ConnIDs.ChannelIDs) == 0 {
-		return errMalformedEntity
-	}
-	if len(req.ConnIDs.ThingIDs) == 0 {
-		return errMalformedEntity
-	}
-	if len(req.ConnIDs.Actions) == 0 {
-		return errMalformedEntity
-	}
-
 	return nil
 }
 
@@ -620,50 +510,6 @@ func (req updateChannelStatusReq) validate() error {
 		return errAuthorization
 	}
 	if req.ChannelID == "" {
-		return errMalformedEntity
-	}
-
-	return nil
-}
-
-type addThingsPolicyReq struct {
-	token  string
-	Policy sdk.Policy `json:"policy,omitempty"`
-}
-
-func (req addThingsPolicyReq) validate() error {
-	if req.token == "" {
-		return errAuthorization
-	}
-	if req.Policy.Subject == "" {
-		return errMalformedEntity
-	}
-	if req.Policy.Object == "" {
-		return errMalformedEntity
-	}
-	if len(req.Policy.Actions) == 0 {
-		return errMalformedEntity
-	}
-
-	return nil
-}
-
-type deleteThingsPolicyReq struct {
-	token  string
-	Policy sdk.Policy `json:"policy,omitempty"`
-}
-
-func (req deleteThingsPolicyReq) validate() error {
-	if req.token == "" {
-		return errAuthorization
-	}
-	if req.Policy.Subject == "" {
-		return errMalformedEntity
-	}
-	if req.Policy.Object == "" {
-		return errMalformedEntity
-	}
-	if len(req.Policy.Actions) == 0 {
 		return errMalformedEntity
 	}
 
@@ -729,9 +575,9 @@ func (req updateGroupReq) validate() error {
 
 type assignReq struct {
 	token    string
-	groupID  string
-	Type     []string `json:"Type,omitempty"`
-	MemberID string   `json:"memberID,omitempty"`
+	GroupID  string `json:"groupID"`
+	UserID   string `json:"userID"`
+	Relation string `json:"relation"`
 }
 
 func (req assignReq) validate() error {
@@ -739,34 +585,13 @@ func (req assignReq) validate() error {
 		return errAuthorization
 	}
 
-	if req.groupID == "" {
+	if req.GroupID == "" {
 		return errMalformedEntity
 	}
-	if req.MemberID == "" {
+	if req.UserID == "" {
 		return errMalformedEntity
 	}
-	if len(req.Type) == 0 {
-		return errMalformedEntity
-	}
-
-	return nil
-}
-
-type unassignReq struct {
-	token    string
-	groupID  string
-	MemberID string `json:"memberId,omitempty"`
-}
-
-func (req unassignReq) validate() error {
-	if req.token == "" {
-		return errAuthorization
-	}
-
-	if req.groupID == "" {
-		return errMalformedEntity
-	}
-	if req.MemberID == "" {
+	if req.Relation == "" {
 		return errMalformedEntity
 	}
 
@@ -775,7 +600,7 @@ func (req unassignReq) validate() error {
 
 type updateGroupStatusReq struct {
 	token   string
-	GroupID string `json:"groupId,omitempty"`
+	GroupID string `json:"groupId"`
 }
 
 func (req updateGroupStatusReq) validate() error {
@@ -783,71 +608,6 @@ func (req updateGroupStatusReq) validate() error {
 		return errAuthorization
 	}
 	if req.GroupID == "" {
-		return errMalformedEntity
-	}
-
-	return nil
-}
-
-type addPolicyReq struct {
-	token  string
-	Policy sdk.Policy `json:"policy,omitempty"`
-}
-
-func (req addPolicyReq) validate() error {
-	if req.token == "" {
-		return errAuthorization
-	}
-	if req.Policy.Subject == "" {
-		return errMalformedEntity
-	}
-	if req.Policy.Object == "" {
-		return errMalformedEntity
-	}
-	if len(req.Policy.Actions) == 0 {
-		return errMalformedEntity
-	}
-
-	return nil
-}
-
-type updatePolicyReq struct {
-	token  string
-	Policy sdk.Policy `json:"policy,omitempty"`
-}
-
-func (req updatePolicyReq) validate() error {
-	if req.token == "" {
-		return errAuthorization
-	}
-	if req.Policy.Subject == "" {
-		return errMalformedEntity
-	}
-	if req.Policy.Object == "" {
-		return errMalformedEntity
-	}
-	if len(req.Policy.Actions) == 0 {
-		return errMalformedEntity
-	}
-	return nil
-}
-
-type deletePolicyReq struct {
-	token  string
-	Policy sdk.Policy `json:"policy,omitempty"`
-}
-
-func (req deletePolicyReq) validate() error {
-	if req.token == "" {
-		return errAuthorization
-	}
-	if req.Policy.Subject == "" {
-		return errMalformedEntity
-	}
-	if req.Policy.Object == "" {
-		return errMalformedEntity
-	}
-	if len(req.Policy.Actions) == 0 {
 		return errMalformedEntity
 	}
 
@@ -1016,10 +776,10 @@ func (req createBootstrapReq) validate() error {
 
 type getEntitiesReq struct {
 	token string
-	Page  uint64
-	Limit uint64
-	Item  string
-	Name  string
+	Page  uint64 `json:"page"`
+	Limit uint64 `json:"limit"`
+	Item  string `json:"item"`
+	Name  string `json:"name"`
 }
 
 func (req getEntitiesReq) validate() error {
@@ -1046,6 +806,48 @@ type errorReq struct {
 
 func (req errorReq) validate() error {
 	if req.err == "" {
+		return errMalformedEntity
+	}
+	return nil
+}
+
+type addUserToChannelReq struct {
+	token     string
+	ChannelID string `json:"channelID"`
+	UserID    string `json:"userID"`
+	Relation  string `json:"relation"`
+}
+
+func (req addUserToChannelReq) validate() error {
+	if req.token == "" {
+		return errAuthorization
+	}
+	if req.ChannelID == "" {
+		return errMalformedEntity
+	}
+	if req.UserID == "" {
+		return errMalformedEntity
+	}
+	if req.Relation == "" {
+		return errMalformedEntity
+	}
+	return nil
+}
+
+type addUserGroupToChannelReq struct {
+	token     string
+	GroupID   string `json:"groupID"`
+	ChannelID string `json:"channelID"`
+}
+
+func (req addUserGroupToChannelReq) validate() error {
+	if req.token == "" {
+		return errAuthorization
+	}
+	if req.ChannelID == "" {
+		return errMalformedEntity
+	}
+	if req.GroupID == "" {
 		return errMalformedEntity
 	}
 	return nil

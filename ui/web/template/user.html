@@ -9,6 +9,17 @@
 					<div class="row">
 						<div class="col-lg-12 mx-auto py-3">
 							<div class="row">
+								<div class="buttons mb-3">
+									<a href="/users/{{.UserID}}/groups" type="button" class="btn body-button">
+										User Groups
+									</a>
+									<!-- <a href="/users/{{.UserID}}/things" type="button" class="btn body-button">
+										User Things
+									</a> -->
+									<a href="/users/{{.UserID}}/channels" type="button" class="btn body-button">
+										User Channels
+									</a>
+								</div>
 								<div class="table-responsive table-container">
 									<table id="itemsTable" class="table">
 										<thead>
@@ -17,12 +28,8 @@
 											</tr>
 										</thead>
 										<tbody>
-											{{ $disableButton := true }}
-											{{ if (authorizeUser
-												.LoggedUser.ID .User.ID "c_update" "client")
-											}}
-												{{ $disableButton =false }}
-											{{ end }}
+											{{ $disableButton := false }}
+											
 											<tr>
 												<th>Name</th>
 												<td
@@ -30,7 +37,7 @@
 													contenteditable="false"
 													data-field="name"
 												>
-													{{ .User.Name }}
+													{{ .ViewedUser.Name }}
 												</td>
 												<td>
 													<button
@@ -62,12 +69,12 @@
 											</tr>
 											<tr>
 												<th>ID</th>
-												<td>{{ .User.ID }}</td>
+												<td>{{ .ViewedUser.ID }}</td>
 												<td></td>
 											</tr>
 											<tr>
 												<th>Owner</th>
-												<td>{{ .User.Owner }}</td>
+												<td>{{ .ViewedUser.Owner }}</td>
 												<td></td>
 											</tr>
 											<tr>
@@ -77,7 +84,7 @@
 													contenteditable="false"
 													data-field="identity"
 												>
-													{{ .User.Credentials.Identity }}
+													{{ .ViewedUser.Credentials.Identity }}
 												</td>
 												<td>
 													<button
@@ -117,7 +124,7 @@
 													contenteditable="false"
 													data-field="tags"
 												>
-													{{ toSlice .User.Tags }}
+													{{ toSlice .ViewedUser.Tags }}
 												</td>
 												<td>
 													<button
@@ -154,7 +161,7 @@
 													contenteditable="false"
 													data-field="metadata"
 												>
-													{{ toJSON .User.Metadata }}
+													{{ toJSON .ViewedUser.Metadata }}
 												</td>
 												<td>
 													<button
@@ -189,7 +196,7 @@
 											</tr>
 										</tbody>
 									</table>
-									<div id="error-message" class="error-message"></div>
+									<div id="error-message" class="text-danger"></div>
 								</div>
 							</div>
 						</div>
@@ -251,12 +258,12 @@
         let url;
         let data;
         if (field === "name") {
-          url = "/users/{{.User.ID}}";
+          url = "/users/{{.UserID}}";
           data = { [field]: updatedValue };
         } else if (field == "metadata") {
           try {
             const metadata = JSON.parse(updatedValue);
-            url = "/users/{{.User.ID}}";
+            url = "/users/{{.UserID}}";
             data = { [field]: metadata };
           } catch (error) {
             errorMessage.textContent = "Metadata must be a valid JSON object!";
@@ -267,7 +274,7 @@
             errorMessage.textContent = "Identity should be in email format!";
             return;
           }
-          url = "/users/{{.User.ID}}/identity";
+          url = "/users/{{.UserID}}/identity";
           data = { [field]: updatedValue };
         } else if (field === "tags") {
           try {
@@ -281,7 +288,7 @@
               errorMessage.textContent = "Tags must be a string array";
               return;
             }
-            url = "/users/{{.User.ID}}/tags";
+            url = "/users/{{.UserID}}/tags";
             data = { [field]: tags };
           } catch (error) {
             errorMessage.textContent = "Tags must be a valid string array";
@@ -292,15 +299,14 @@
         errorMessage.textContent = "";
 
         if (url) {
-          // const data = { [field]: updatedValue };
-
-          fetch(url, {
-            method: "POST",
-            body: JSON.stringify(data),
-            headers: {
-              "Content-Type": "application/json",
-            },
-          })
+			errorMessage.textContent="";
+			fetch(url, {
+				method: "POST",
+				body: JSON.stringify(data),
+				headers: {
+				"Content-Type": "application/json",
+				},
+			})
             .then((response) => {
               if (response.ok) {
                 // Make the row uneditable

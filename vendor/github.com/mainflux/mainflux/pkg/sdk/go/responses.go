@@ -31,7 +31,7 @@ type ThingsPage struct {
 
 // ChannelsPage contains list of channels in a page with proper metadata.
 type ChannelsPage struct {
-	Channels []Channel `json:"channels"`
+	Channels []Channel `json:"groups"`
 	pageRes
 }
 
@@ -63,13 +63,6 @@ type MembershipsPage struct {
 	Memberships []Group `json:"memberships"`
 }
 
-// PolicyPage contains page related metadata as well as list
-// of Policies that belong to the page.
-type PolicyPage struct {
-	PageMetadata
-	Policies []Policy `json:"policies"`
-}
-
 type revokeCertsRes struct {
 	RevocationTime time.Time `json:"revocation_time"`
 }
@@ -81,7 +74,7 @@ type BootstrapPage struct {
 }
 
 type CertSerials struct {
-	Serials []string `json:"serials"`
+	Certs []Cert `json:"certs"`
 	pageRes
 }
 
@@ -92,9 +85,4 @@ type SubscriptionPage struct {
 
 type identifyThingResp struct {
 	ID string `json:"id,omitempty"`
-}
-
-type canAccessRes struct {
-	ThingID    string `json:"thing_id"`
-	Authorized bool   `json:"authorized"`
 }

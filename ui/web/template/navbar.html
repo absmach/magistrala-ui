@@ -53,18 +53,6 @@
 			</a>
 		</li>
 		<li class="nav-item mb-2 mx-2">
-			{{ $active = "usersPolicies" }}
-			<a
-				href="/users/policies"
-				class="nav-link {{ if (serviceUnavailable "users") }}
-					disabled-item
-				{{ end }} {{ if eq .NavbarActive $active }}active{{ end }}"
-			>
-				<i class="fas fa-solid fa-shield-alt"></i>
-				<span>Users Policies</span>
-			</a>
-		</li>
-		<li class="nav-item mb-2 mx-2">
 			{{ $active = "things" }}
 			<a
 				href="/things"
@@ -86,18 +74,6 @@
 			>
 				<i class="fas fa-exchange-alt"></i>
 				<span>Channels</span>
-			</a>
-		</li>
-		<li class="nav-item mb-2 mx-2">
-			{{ $active = "thingsPolicies" }}
-			<a
-				href="/things/policies"
-				class="nav-link {{ if (serviceUnavailable "things") }}
-					disabled-item
-				{{ end }} {{ if eq .NavbarActive $active }}active{{ end }}"
-			>
-				<i class="fas fa-solid fa-shield-alt"></i>
-				<span>Things Policies</span>
 			</a>
 		</li>
 		<li class="nav-item mb-2 mx-2">

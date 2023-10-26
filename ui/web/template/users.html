@@ -194,14 +194,8 @@
 												</tr>
 											</thead>
 											<tbody>
-												{{ $userID := .User.ID }}
 												{{ range $i, $u := .Users }}
-													{{ $disableButton := true }}
-													{{ if (authorizeUser $userID
-														$u.ID "c_delete" "client")
-													}}
-														{{ $disableButton = false }}
-													{{ end }}
+													{{ $disableButton := false }}
 													<tr>
 														<td>{{ $u.Name }}</td>
 														<td>

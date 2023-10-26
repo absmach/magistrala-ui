@@ -29,20 +29,16 @@ import (
 )
 
 const (
-	templateDir            = "ui/web/template"
-	enabled                = "enabled"
-	disabled               = "disabled"
-	statusAll              = "all"
-	dashboardActive        = "dashboard"
-	usersActive            = "users"
-	thingsActive           = "things"
-	usersPoliciesActive    = "usersPolicies"
-	groupsActive           = "groups"
-	channelsActive         = "channels"
-	thingsPoliciesActive   = "thingsPolicies"
-	disabledEntitiesActive = "disabled"
-	readMessagesActive     = "readmessages"
-	bootstrapsActive       = "bootstraps"
+	templateDir        = "ui/web/template"
+	enabled            = "enabled"
+	statusAll          = "all"
+	dashboardActive    = "dashboard"
+	usersActive        = "users"
+	thingsActive       = "things"
+	groupsActive       = "groups"
+	channelsActive     = "channels"
+	readMessagesActive = "readmessages"
+	bootstrapsActive   = "bootstraps"
 )
 
 type dataSummary struct {
@@ -74,12 +70,17 @@ var (
 		"terminal",
 
 		"channel",
-		"channelconn",
+		"channelthings",
 		"channels",
+		"channelusers",
+		"channelgroups",
 
 		"group",
-		"groupconn",
+		"groupusers",
 		"groups",
+		"groupchannels",
+		// "parents",
+		// "children",
 
 		"index",
 
@@ -90,37 +91,41 @@ var (
 		"messagesread",
 
 		"thing",
-		"thingconn",
+		"thingchannels",
 		"things",
-		"thingspolicies",
+		"thingusers",
 
 		"user",
 		"users",
-		"userspolicies",
+		"usergroups",
+		"userchannels",
+		"userthings",
 	}
-	emptyData             = struct{}{}
-	ErrToken              = errors.New("failed to create token")
-	ErrTokenRefresh       = errors.New("failed to refresh token")
-	ErrFailedCreate       = errors.New("failed to create entity")
-	ErrFailedRetreive     = errors.New("failed to retrieve entity")
-	ErrFailedUpdate       = errors.New("failed to update entity")
-	ErrFailedEnable       = errors.New("failed to enable entity")
-	ErrFailedDisable      = errors.New("failed to disable entity")
-	ErrFailedAssign       = errors.New("failed to assign entity")
-	ErrFailedUnassign     = errors.New("failed to unassign entity")
-	ErrFailedConnect      = errors.New("failed to connect entity")
-	ErrFailedDisconnect   = errors.New("failed to disconnect entity")
-	ErrFailedCreatePolicy = errors.New("failed to create policy")
-	ErrFailedUpdatePolicy = errors.New("failed to update policy")
-	ErrFailedDeletePolicy = errors.New("failed to delete policy")
-	ErrExecTemplate       = errors.New("failed to execute template")
-	ErrFailedReset        = errors.New("failed to reset password")
-	ErrFailedResetRequest = errors.New("failed to send reset request email")
-	ErrFailedPublish      = errors.New("failed to publish message")
-	ErrFailedDelete       = errors.New("failed to delete entity")
-
-	userActions  = []string{"g_list", "g_update", "g_delete", "g_add", "c_list", "c_update", "c_delete"}
-	thingActions = []string{"m_read", "m_write"}
+	ErrToken                = errors.New("failed to create token")
+	ErrTokenRefresh         = errors.New("failed to refresh token")
+	ErrFailedCreate         = errors.New("failed to create entity")
+	ErrFailedRetreive       = errors.New("failed to retrieve entity")
+	ErrFailedUpdate         = errors.New("failed to update entity")
+	ErrFailedEnable         = errors.New("failed to enable entity")
+	ErrFailedDisable        = errors.New("failed to disable entity")
+	ErrFailedAssign         = errors.New("failed to assign entity")
+	ErrFailedUnassign       = errors.New("failed to unassign entity")
+	ErrFailedConnect        = errors.New("failed to connect entity")
+	ErrFailedDisconnect     = errors.New("failed to disconnect entity")
+	ErrFailedCreatePolicy   = errors.New("failed to create policy")
+	ErrFailedUpdatePolicy   = errors.New("failed to update policy")
+	ErrFailedDeletePolicy   = errors.New("failed to delete policy")
+	ErrExecTemplate         = errors.New("failed to execute template")
+	ErrFailedReset          = errors.New("failed to reset password")
+	ErrFailedUpdatePassword = errors.New("failed to update password")
+	ErrFailedResetRequest   = errors.New("failed to send reset request email")
+	ErrFailedPublish        = errors.New("failed to publish message")
+	ErrFailedDelete         = errors.New("failed to delete entity")
+	ErrFailedShare          = errors.New("failed to share entity")
+	ErrFailedUnshare        = errors.New("failed to unshare entity")
+	emptyData               = struct{}{}
+	groupRelations          = []string{"owner", "admin", "editor", "viewer"}
+	thingRelations          = []string{"owner"}
 )
 
 // Service specifies service API.
@@ -145,6 +150,7 @@ type Service interface {
 	Token(user sdk.User) (sdk.Token, error)
 	// RefreshToken retrieves a new access token and refresh token from the provided refresh token.
 	RefreshToken(refreshToken string) (sdk.Token, error)
+
 	// CreateUsers creates new users.
 	CreateUsers(token string, users ...sdk.User) error
 	// ListUsers retrieves users owned/shared by a user.
@@ -163,6 +169,15 @@ type Service interface {
 	EnableUser(token, userID string) error
 	// DisableUser updates the status of a user with the given ID to disabled.
 	DisableUser(token, userID string) error
+	// ListUserGroups retrieves the groups a user belongs to.
+	ListUserGroups(token, userID string, page, limit uint64) (b []byte, err error)
+	// ListUserThings retrieves the things shared to a user.
+	ListUserThings(token, userID string, page, limit uint64) (b []byte, err error)
+	// ListUserChannels retrievs a list of channels that a user is connected to.
+	ListUserChannels(token, userID string, page, limit uint64) (b []byte, err error)
+
+	// CreateThing creates a new thing.
+	CreateThing(thing sdk.Thing, token string) error
 	// CreateThings creates new things.
 	CreateThings(token string, things ...sdk.Thing) error
 	// ListThings retrieves things owned/shared by a user.
@@ -175,12 +190,23 @@ type Service interface {
 	UpdateThingTags(token, id string, thing sdk.Thing) error
 	// UpdateThingSecret updates the secret of the thing with the given ID.
 	UpdateThingSecret(token, id, secret string) error
-	// UpdateThingOwner updates the owner of the thing with the given ID
+	// UpdateThingOwner updates the owner of the thing with the given ID.
 	UpdateThingOwner(token string, thing sdk.Thing) error
 	// EnableThing updates the status of the thing with the given ID to enabled.
 	EnableThing(token, id string) error
-	// DisableThing updates the status of the thing with the given ID to disabled
+	// DisableThing updates the status of the thing with the given ID to disabled.
 	DisableThing(token, id string) error
+	// ShareThing shares a thing with a user.
+	ShareThing(token, thingID string, req sdk.UsersRelationRequest) error
+	// UnshareThing unshares a thing with a user.
+	UnshareThing(token, thingID string, req sdk.UsersRelationRequest) error
+	// ListThingUsers retrieves users that share a thing.
+	ListThingUsers(token, thingID string, page, limit uint64) (b []byte, err error)
+	// ListChannelsByThing retrieves a list of channels based on the given thing ID.
+	ListChannelsByThing(token, thingID string, page, limit uint64) ([]byte, error)
+
+	// CreateChannel creates a new channel.
+	CreateChannel(channel sdk.Channel, token string) error
 	// CreateChannels creates new channels.
 	CreateChannels(token string, channels ...sdk.Channel) error
 	// ListChannels retrieves channels owned/shared by a user.
@@ -189,44 +215,41 @@ type Service interface {
 	ViewChannel(token, id string) ([]byte, error)
 	// UpdateChannel updates the channel with the given ID.
 	UpdateChannel(token, id string, channel sdk.Channel) error
-	// ListChannelsByThing retrieves a list of channels based on the given thing ID.
-	ListChannelsByThing(token, id string, page, limit uint64) ([]byte, error)
 	// ListThingsByChannel retrieves a list of things based on the given channel ID.
-	ListThingsByChannel(token, id string, page, limit uint64) ([]byte, error)
+	ListThingsByChannel(token, channelID string, page, limit uint64) ([]byte, error)
 	// EnableChannel updates the status of the channel with the given ID to enabled.
 	EnableChannel(token, id string) error
 	// DisableChannel updates the status of the channel with the given ID to disabled.
 	DisableChannel(token, id string) error
 	// Connect bulk connects things to channel(s) specified by ID.
-	Connect(token string, connIDs sdk.ConnectionIDs) error
+	Connect(token string, connIDs sdk.Connection) error
 	// Disconnect bulk disconnects thinfs to channel(s) specified by ID.
-	Disconnect(token string, connIDs sdk.ConnectionIDs) error
+	Disconnect(token string, connIDs sdk.Connection) error
 	// ConnectThing connects a thing to a channel specified by ID.
-	ConnectThing(token string, connIDs sdk.ConnectionIDs) error
-	// ShareThing shares things connected to a channel with a user
-	ShareThing(token, chanID, userID string, actions []string) error
+	ConnectThing(thingID, chanID, token string) error
 	// DisconnectThing disconnects a thing from a channel specified by ID.
 	DisconnectThing(thID, chID, token string) error
-	// Connect Channel connects a channel to a thing specified by ID.
-	ConnectChannel(token string, connIDs sdk.ConnectionIDs) error
-	// DisconnectChannel disconnects a channel from a thing specified by ID.
-	DisconnectChannel(thID, chID, token string) error
-	// AddThingsPolicy adds a thing's policy on a channel.
-	AddThingsPolicy(token string, Policy sdk.Policy) error
-	// DeleteThingsPolicy removes a thing's policy on a channel
-	DeleteThingsPolicy(token string, policy sdk.Policy) error
-	// ListThingsPolicies retrieves the policies of things.
-	ListThingsPolicies(token string, page, limit uint64) ([]byte, error)
-	// UpdateThingsPolicy updates the policy that a thing has over a channel.
-	UpdateThingsPolicy(token string, policy sdk.Policy) error
+	// AddUserToChannel adds a user to a channel.
+	AddUserToChannel(token, channelID string, req sdk.UsersRelationRequest) error
+	// RemoveUserFromChannel removes a user from a channel.
+	RemoveUserFromChannel(token, channelID string, req sdk.UsersRelationRequest) error
+	// ListChannelUsers retrieves a list of users that are connected to a channel.
+	ListChannelUsers(token, channelID string, page, limit uint64) (b []byte, err error)
+	// AddUserGroupToChannel adds a userGroup to a channel.
+	AddUserGroupToChannel(token, channelID string, req sdk.UserGroupsRequest) error
+	// RemoveUserGroupFromChannel removes a userGroup from a channel.
+	RemoveUserGroupFromChannel(token, channelID string, req sdk.UserGroupsRequest) error
+	// ListChannelUserGroups retrieves a list of userGroups connected to a channel.
+	ListChannelUserGroups(token, channelID string, page, limit uint64) (b []byte, err error)
+
 	// CreateGroups creates new groups.
 	CreateGroups(token string, groups ...sdk.Group) error
-	// ListGroupMembers retrieves the members of a group with a given ID.
-	ListGroupMembers(token, id string, page, limit uint64) ([]byte, error)
+	// ListGroupUsers retrieves the members of a group with a given ID.
+	ListGroupUsers(token, id string, page, limit uint64) ([]byte, error)
 	// Assign adds a user to a group.
-	Assign(token, groupID, memberID string, memberType []string) error
+	Assign(token, groupID string, userRelation sdk.UsersRelationRequest) error
 	// Unassign removes a user from a group.
-	Unassign(token, groupID, memberID string) error
+	Unassign(token, groupID string, userRelation sdk.UsersRelationRequest) error
 	// ViewGroup retrieves information about a group with a given ID.
 	ViewGroup(token, id string) ([]byte, error)
 	// UpdateGroup updates the group with the given ID.
@@ -237,20 +260,20 @@ type Service interface {
 	EnableGroup(token, id string) error
 	// DisableGroup updates the status of the group to disabled.
 	DisableGroup(token, id string) error
-	// AddPolicy adds a user's policy on a group effectively adding the user to the group.
-	AddPolicy(token string, policy sdk.Policy) error
-	// UpdatePolicy updates the policy a user has over a group.
-	UpdatePolicy(token string, policy sdk.Policy) error
-	// ListPolicies retrieves the policies of the users.
-	ListPolicies(token string, page, limit uint64) ([]byte, error)
-	// DeletePolicy removes a user's policies on a group effectively removing the user from the group.
-	DeletePolicy(token string, policy sdk.Policy) error
+	// ListParents retrieves the parents of a group.
+	ListParents(token, groupID string, page, limit uint64) (b []byte, err error)
+	// ListChildren retrieves the children of a group.
+	ListChildren(token, groupID string, page, limit uint64) (b []byte, err error)
+	// ListUserGroupChannels retrieves a list of channels that a userGroup is connected to.
+	ListUserGroupChannels(token, groupID string, page, limit uint64) (b []byte, err error)
+
 	// Publish facilitates a thing publishin messages to a channel.
 	Publish(token, thKey string, msg *messaging.Message) error
 	// ReadMessage facilitates a thing reading messages published in a channel.
 	ReadMessage(token string) ([]byte, error)
 	// WsConnection creates a web socket connection that allows continuous reading of messages published in a channel.
 	WsConnection(token, chID, thKey string) ([]byte, error)
+
 	// CreateBootstrap creates a new bootstrap config.
 	CreateBootstrap(token string, config ...sdk.BootstrapConfig) error
 	// ListBootstrap retrieves all bootstrap configs.
@@ -269,6 +292,7 @@ type Service interface {
 	GetRemoteTerminal(id, token string) ([]byte, error)
 	// ProcessTerminalCommand sends mqtt command to agent and retrieves a response asynchronously.
 	ProcessTerminalCommand(ctx context.Context, id, token, command string, res chan string) error
+
 	// GetEntities retrieves all entities.
 	GetEntities(token, item, name string, page, limit uint64) ([]byte, error)
 	// ErrorPage displays an error page.
@@ -292,105 +316,6 @@ func New(sdk sdk.SDK) (Service, error) {
 		sdk:  sdk,
 		tpls: tpl,
 	}, nil
-}
-
-func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, err error) {
-	tpl = template.New("mainflux")
-	tpl = tpl.Funcs(template.FuncMap{
-		"toJSON": func(data map[string]interface{}) string {
-			if data == nil {
-				return "{}"
-			}
-			ret, err := json.Marshal(data)
-			if err != nil {
-				return "{}"
-			}
-			return string(ret)
-		},
-		"toSlice": func(data []string) string {
-			if len(data) == 0 {
-				return "[]"
-			}
-			ret, err := json.Marshal(data)
-			if err != nil {
-				return "[]"
-			}
-			return string(ret)
-		},
-		"contains": func(data []string, substring string) bool {
-
-			return slices.Contains(data, substring)
-		},
-		"authorizeUser": func(subject, object, action, entityType string) bool {
-			aReq := sdk.AccessRequest{
-				Subject:    subject,
-				Object:     object,
-				Action:     action,
-				EntityType: entityType,
-			}
-
-			authorized, _ := mfsdk.AuthorizeUser(aReq, "")
-
-			return authorized
-		},
-		"authorizeThing": func(subject, object, action, entityType string) bool {
-			var aReq = sdk.AccessRequest{
-				Subject:    subject,
-				Object:     object,
-				Action:     action,
-				EntityType: entityType,
-			}
-
-			authorizeThing, _, _ := mfsdk.AuthorizeThing(aReq, "")
-
-			return authorizeThing
-		},
-		"serviceUnavailable": func(service string) bool {
-			if _, err := mfsdk.Health(service); err != nil {
-				return true
-			}
-			return false
-		},
-		"hasPrefix": func(s, prefix string) bool {
-			return strings.HasPrefix(s, prefix)
-		},
-		"sub": func(num1, num2 int) int {
-			return num1 - num2
-		},
-		"add": func(num1, num2 int) int {
-			return num1 + num2
-		},
-		"max": func(a, b int) int {
-			if a > b {
-				return a
-			}
-			return b
-		},
-		"min": func(a, b int) int {
-			if a < b {
-				return a
-			}
-			return b
-		},
-		"fromTo": func(start, end int) []int {
-			var result []int
-			for i := start; i <= end; i++ {
-				result = append(result, i)
-			}
-			return result
-		},
-	})
-
-	var tmplFiles []string
-	for _, value := range templates {
-		tmplFiles = append(tmplFiles, templateDir+"/"+value+".html")
-	}
-	tpl, err = tpl.ParseFiles(tmplFiles...)
-	if err != nil {
-		return nil, err
-	}
-
-	return tpl, nil
 }
 
 func (us *uiService) Index(token string) (b []byte, err error) {
@@ -493,6 +418,10 @@ func (us *uiService) Login() ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
+func (us *uiService) Logout() error {
+	return nil
+}
+
 func (us *uiService) PasswordResetRequest(email string) error {
 	if err := us.sdk.ResetPasswordRequest(email); err != nil {
 		return errors.Wrap(err, ErrFailedResetRequest)
@@ -539,6 +468,14 @@ func (us *uiService) PasswordUpdate(token string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
+func (us *uiService) UpdatePassword(token, oldPass, newPass string) error {
+	_, err := us.sdk.UpdatePassword(oldPass, newPass, token)
+	if err != nil {
+		return errors.Wrap(err, ErrFailedUpdatePassword)
+	}
+	return nil
+}
+
 func (us *uiService) Token(user sdk.User) (sdk.Token, error) {
 	token, err := us.sdk.CreateToken(user)
 	if err != nil {
@@ -554,17 +491,6 @@ func (us *uiService) RefreshToken(refreshToken string) (sdk.Token, error) {
 	}
 
 	return token, nil
-}
-
-func (us *uiService) Logout() error {
-
-	return nil
-}
-
-func (us *uiService) UpdatePassword(token, oldPass, newPass string) error {
-	_, err := us.sdk.UpdatePassword(oldPass, newPass, token)
-
-	return err
 }
 
 func (us *uiService) CreateUsers(token string, users ...sdk.User) error {
@@ -593,7 +519,7 @@ func (us *uiService) ListUsers(token string, page, limit uint64) ([]byte, error)
 
 	user, err := us.sdk.UserProfile(token)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 	noOfPages := int(math.Ceil(float64(users.Total) / float64(limit)))
 
@@ -628,19 +554,19 @@ func (us *uiService) ViewUser(token, userID string) (b []byte, err error) {
 	}
 	loggedUser, err := us.sdk.UserProfile(token)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
 	data := struct {
 		NavbarActive string
-		ID           string
+		UserID       string
 		User         sdk.User
-		LoggedUser   sdk.User
+		ViewedUser   sdk.User
 	}{
 		usersActive,
 		userID,
-		user,
 		loggedUser,
+		user,
 	}
 
 	var btpl bytes.Buffer
@@ -699,6 +625,152 @@ func (us *uiService) DisableUser(token, userID string) error {
 	return nil
 }
 
+func (us *uiService) ListUserGroups(token, userID string, page, limit uint64) (b []byte, err error) {
+	offset := (page - 1) * limit
+	pgm := sdk.PageMetadata{
+		Offset:     offset,
+		Limit:      limit,
+		Visibility: statusAll,
+	}
+	groupsPage, err := us.sdk.ListUserGroups(userID, pgm, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+	user, err := us.sdk.UserProfile(token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	noOfPages := int(math.Ceil(float64(groupsPage.Total) / float64(limit)))
+
+	data := struct {
+		NavbarActive string
+		Groups       []sdk.Group
+		User         sdk.User
+		UserID       string
+		Relations    []string
+		CurrentPage  int
+		Pages        int
+		Limit        int
+	}{
+		usersActive,
+		groupsPage.Groups,
+		user,
+		userID,
+		groupRelations,
+		int(page),
+		noOfPages,
+		int(limit),
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "usergroups", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+
+	return btpl.Bytes(), nil
+}
+
+func (us *uiService) ListUserThings(token, userID string, page, limit uint64) (b []byte, err error) {
+	offset := (page - 1) * limit
+	pgm := sdk.PageMetadata{
+		Offset: offset,
+		Limit:  limit,
+	}
+	thingsPage, err := us.sdk.ListUserThings(userID, pgm, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+	user, err := us.sdk.UserProfile(token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	noOfPages := int(math.Ceil(float64(thingsPage.Total) / float64(limit)))
+
+	data := struct {
+		NavbarActive string
+		Things       []sdk.Thing
+		User         sdk.User
+		UserID       string
+		Relations    []string
+		CurrentPage  int
+		Pages        int
+		Limit        int
+	}{
+		usersActive,
+		thingsPage.Things,
+		user,
+		userID,
+		thingRelations,
+		int(page),
+		noOfPages,
+		int(limit),
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "userthings", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+
+	return btpl.Bytes(), nil
+
+}
+
+func (us *uiService) ListUserChannels(token, userID string, page, limit uint64) (b []byte, err error) {
+	offset := (page - 1) * limit
+	pgm := sdk.PageMetadata{
+		Offset: offset,
+		Limit:  limit,
+	}
+	channelsPage, err := us.sdk.ListUserChannels(userID, pgm, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+	user, err := us.sdk.UserProfile(token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	noOfPages := int(math.Ceil(float64(channelsPage.Total) / float64(limit)))
+
+	data := struct {
+		NavbarActive string
+		Channels     []sdk.Channel
+		User         sdk.User
+		UserID       string
+		Relations    []string
+		CurrentPage  int
+		Pages        int
+		Limit        int
+	}{
+		usersActive,
+		channelsPage.Channels,
+		user,
+		userID,
+		groupRelations,
+		int(page),
+		noOfPages,
+		int(limit),
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "userchannels", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+
+	return btpl.Bytes(), nil
+}
+
+func (us *uiService) CreateThing(thing sdk.Thing, token string) error {
+	_, err := us.sdk.CreateThing(thing, token)
+	if err != nil {
+		return errors.Wrap(err, ErrFailedCreate)
+	}
+
+	return nil
+}
+
 func (us *uiService) CreateThings(token string, things ...sdk.Thing) error {
 	for _, thing := range things {
 		_, err := us.sdk.CreateThing(thing, token)
@@ -725,7 +797,7 @@ func (us *uiService) ListThings(token string, page, limit uint64) ([]byte, error
 
 	user, err := us.sdk.UserProfile(token)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 	noOfPages := int(math.Ceil(float64(things.Total) / float64(limit)))
 
@@ -759,7 +831,7 @@ func (us *uiService) ViewThing(token, id string) (b []byte, err error) {
 
 	user, err := us.sdk.UserProfile(token)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
 	data := struct {
@@ -830,6 +902,121 @@ func (us *uiService) DisableThing(token, id string) error {
 	return nil
 }
 
+func (us *uiService) ShareThing(token, thingID string, req sdk.UsersRelationRequest) error {
+	if err := us.sdk.ShareThing(thingID, req, token); err != nil {
+		return errors.Wrap(err, ErrFailedShare)
+	}
+
+	return nil
+}
+
+func (us *uiService) UnshareThing(token, thingID string, req sdk.UsersRelationRequest) error {
+	if err := us.sdk.UnshareThing(thingID, req, token); err != nil {
+		return errors.Wrap(err, ErrFailedUnshare)
+	}
+
+	return nil
+}
+
+func (us *uiService) ListThingUsers(token, thingID string, page, limit uint64) (b []byte, err error) {
+	offset := (page - 1) * limit
+	pgm := sdk.PageMetadata{
+		Offset: offset,
+		Limit:  limit,
+	}
+	usersPage, err := us.sdk.ListThingUsers(thingID, pgm, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+	user, err := us.sdk.UserProfile(token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
+
+	data := struct {
+		NavbarActive string
+		ThingID      string
+		Users        []sdk.User
+		User         sdk.User
+		Relations    []string
+		CurrentPage  int
+		Pages        int
+		Limit        int
+	}{
+		thingsActive,
+		thingID,
+		usersPage.Users,
+		user,
+		thingRelations,
+		int(page),
+		noOfPages,
+		int(limit),
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "thingusers", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+	return btpl.Bytes(), nil
+
+}
+
+func (us *uiService) ListChannelsByThing(token, thingID string, page, limit uint64) ([]byte, error) {
+	offset := (page - 1) * limit
+
+	pgm := sdk.PageMetadata{
+		Offset:     offset,
+		Limit:      limit,
+		Visibility: statusAll,
+	}
+
+	chsPage, err := us.sdk.ChannelsByThing(thingID, pgm, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	user, err := us.sdk.UserProfile(token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+	noOfPages := int(math.Ceil(float64(chsPage.Total) / float64(limit)))
+
+	data := struct {
+		NavbarActive string
+		ThingID      string
+		Channels     []sdk.Channel
+		User         sdk.User
+		CurrentPage  int
+		Pages        int
+		Limit        int
+	}{
+		thingsActive,
+		thingID,
+		chsPage.Channels,
+		user,
+		int(page),
+		noOfPages,
+		int(limit),
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "thingchannels", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+	return btpl.Bytes(), nil
+}
+
+func (us *uiService) CreateChannel(channel sdk.Channel, token string) error {
+	_, err := us.sdk.CreateChannel(channel, token)
+	if err != nil {
+		return errors.Wrap(err, ErrFailedCreate)
+	}
+
+	return nil
+}
+
 func (us *uiService) CreateChannels(token string, channels ...sdk.Channel) error {
 	for _, channel := range channels {
 		_, err := us.sdk.CreateChannel(channel, token)
@@ -837,7 +1024,6 @@ func (us *uiService) CreateChannels(token string, channels ...sdk.Channel) error
 			return errors.Wrap(err, ErrFailedCreate)
 		}
 	}
-
 	return nil
 }
 
@@ -856,7 +1042,7 @@ func (us *uiService) ListChannels(token string, page, limit uint64) ([]byte, err
 
 	user, err := us.sdk.UserProfile(token)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 	noOfPages := int(math.Ceil(float64(chsPage.Total) / float64(limit)))
 
@@ -892,7 +1078,7 @@ func (us *uiService) ViewChannel(token, id string) (b []byte, err error) {
 
 	user, err := us.sdk.UserProfile(token)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
 	data := struct {
@@ -922,8 +1108,55 @@ func (us *uiService) UpdateChannel(token, id string, channel sdk.Channel) error 
 	return nil
 }
 
+func (us *uiService) ListThingsByChannel(token, channelID string, page, limit uint64) ([]byte, error) {
+	offset := (page - 1) * limit
+
+	pgm := sdk.PageMetadata{
+		Offset:     offset,
+		Limit:      limit,
+		Visibility: statusAll,
+	}
+
+	thsPage, err := us.sdk.ThingsByChannel(channelID, pgm, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	user, err := us.sdk.UserProfile(token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	noOfPages := int(math.Ceil(float64(thsPage.Total) / float64(limit)))
+
+	data := struct {
+		NavbarActive string
+		ChannelID    string
+		Things       []sdk.Thing
+		User         sdk.User
+		CurrentPage  int
+		Pages        int
+		Limit        int
+	}{
+		channelsActive,
+		channelID,
+		thsPage.Things,
+		user,
+		int(page),
+		noOfPages,
+		int(limit),
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "channelthings", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+	return btpl.Bytes(), nil
+}
+
 func (us *uiService) EnableChannel(token, id string) error {
-	if _, err := us.sdk.EnableChannel(id, token); err != nil {
+	_, err := us.sdk.EnableChannel(id, token)
+	if err != nil {
 		return errors.Wrap(err, ErrFailedEnable)
 	}
 
@@ -931,14 +1164,15 @@ func (us *uiService) EnableChannel(token, id string) error {
 }
 
 func (us *uiService) DisableChannel(token, id string) error {
-	if _, err := us.sdk.DisableChannel(id, token); err != nil {
+	_, err := us.sdk.DisableChannel(id, token)
+	if err != nil {
 		return errors.Wrap(err, ErrFailedDisable)
 	}
 
 	return nil
 }
 
-func (us *uiService) ConnectThing(token string, connIDs sdk.ConnectionIDs) error {
+func (us *uiService) Connect(token string, connIDs sdk.Connection) error {
 	if err := us.sdk.Connect(connIDs, token); err != nil {
 		return errors.Wrap(err, ErrFailedConnect)
 	}
@@ -946,8 +1180,16 @@ func (us *uiService) ConnectThing(token string, connIDs sdk.ConnectionIDs) error
 	return nil
 }
 
-func (us *uiService) ShareThing(token, chanID, userID string, actions []string) error {
-	if err := us.sdk.ShareThing(chanID, userID, actions, token); err != nil {
+func (us *uiService) Disconnect(token string, connIDs sdk.Connection) error {
+	if err := us.sdk.Disconnect(connIDs, token); err != nil {
+		return errors.Wrap(err, ErrFailedDisconnect)
+	}
+
+	return nil
+}
+
+func (us *uiService) ConnectThing(thingID, chanID, token string) error {
+	if err := us.sdk.ConnectThing(thingID, chanID, token); err != nil {
 		return errors.Wrap(err, ErrFailedConnect)
 	}
 
@@ -960,265 +1202,133 @@ func (us *uiService) DisconnectThing(thID, chID, token string) error {
 	}
 
 	return nil
+
 }
 
-func (us *uiService) ConnectChannel(token string, connIDs sdk.ConnectionIDs) error {
-	if err := us.sdk.Connect(connIDs, token); err != nil {
-		return errors.Wrap(err, ErrFailedConnect)
+func (gs *uiService) AddUserToChannel(token, channelID string, req sdk.UsersRelationRequest) error {
+	if err := gs.sdk.AddUserToChannel(channelID, req, token); err != nil {
+		return errors.Wrap(err, ErrFailedAssign)
 	}
 
 	return nil
+
 }
 
-func (us *uiService) DisconnectChannel(thID, chID, token string) error {
-	if err := us.sdk.DisconnectThing(thID, chID, token); err != nil {
-		return errors.Wrap(err, ErrFailedDisconnect)
+func (gs *uiService) RemoveUserFromChannel(token, channelID string, req sdk.UsersRelationRequest) error {
+	if err := gs.sdk.RemoveUserFromChannel(channelID, req, token); err != nil {
+		return errors.Wrap(err, ErrFailedUnassign)
 	}
 
 	return nil
+
 }
 
-func (us *uiService) ListChannelsByThing(token, id string, page, limit uint64) ([]byte, error) {
-	thing, err := us.sdk.Thing(id, token)
-	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
-	}
+func (us *uiService) ListChannelUsers(token, channelID string, page, limit uint64) (b []byte, err error) {
 	offset := (page - 1) * limit
-
 	pgm := sdk.PageMetadata{
-		Offset:     offset,
-		Limit:      limit,
-		Visibility: statusAll,
+		Offset: offset,
+		Limit:  limit,
 	}
-
-	chsPage, err := us.sdk.ChannelsByThing(id, pgm, token)
+	usersPage, err := us.sdk.ListChannelUsers(channelID, pgm, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
-
 	user, err := us.sdk.UserProfile(token)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
-	noOfPages := int(math.Ceil(float64(chsPage.Total) / float64(limit)))
+
+	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
 
 	data := struct {
 		NavbarActive string
-		ID           string
-		Thing        sdk.Thing
-		Channels     []sdk.Channel
+		ChannelID    string
+		Users        []sdk.User
 		User         sdk.User
-		CurrentPage  int
-		Pages        int
-		Limit        int
-	}{
-		thingsActive,
-		id,
-		thing,
-		chsPage.Channels,
-		user,
-		int(page),
-		noOfPages,
-		int(limit),
-	}
-
-	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "thingconn", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
-	}
-	return btpl.Bytes(), nil
-}
-
-func (us *uiService) Connect(token string, connIDs sdk.ConnectionIDs) error {
-	if err := us.sdk.Connect(connIDs, token); err != nil {
-		return errors.Wrap(err, ErrFailedConnect)
-	}
-
-	return nil
-}
-
-func (us *uiService) Disconnect(token string, connIDs sdk.ConnectionIDs) error {
-	if err := us.sdk.Disconnect(connIDs, token); err != nil {
-		return errors.Wrap(err, ErrFailedDisconnect)
-	}
-
-	return nil
-}
-
-func (us *uiService) ListThingsByChannel(token, id string, page, limit uint64) ([]byte, error) {
-	channel, err := us.sdk.Channel(id, token)
-	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
-	}
-	offset := (page - 1) * limit
-
-	pgm := sdk.PageMetadata{
-		Offset:     offset,
-		Limit:      limit,
-		Visibility: statusAll,
-	}
-
-	thsPage, err := us.sdk.ThingsByChannel(id, pgm, token)
-	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
-	}
-
-	user, err := us.sdk.UserProfile(token)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	noOfPages := int(math.Ceil(float64(thsPage.Total) / float64(limit)))
-
-	data := struct {
-		NavbarActive string
-		ID           string
-		Channel      sdk.Channel
-		Things       []sdk.Thing
-		User         sdk.User
+		Relations    []string
 		CurrentPage  int
 		Pages        int
 		Limit        int
 	}{
 		channelsActive,
-		id,
-		channel,
-		thsPage.Things,
+		channelID,
+		usersPage.Users,
 		user,
+		groupRelations,
 		int(page),
 		noOfPages,
 		int(limit),
 	}
 
 	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "channelconn", data); err != nil {
+	if err := us.tpls.ExecuteTemplate(&btpl, "channelusers", data); err != nil {
 		return []byte{}, errors.Wrap(err, ErrExecTemplate)
 	}
 	return btpl.Bytes(), nil
+
 }
 
-func (us *uiService) ListThingsPolicies(token string, page, limit uint64) ([]byte, error) {
-	offset := (page - 1) * limit
-
-	pgm := sdk.PageMetadata{
-		Offset:     offset,
-		Limit:      limit,
-		Visibility: statusAll,
+func (gs *uiService) AddUserGroupToChannel(token, channelID string, req sdk.UserGroupsRequest) error {
+	if err := gs.sdk.AddUserGroupToChannel(channelID, req, token); err != nil {
+		return errors.Wrap(err, ErrFailedAssign)
 	}
-	plcPage, err := us.sdk.ListThingPolicies(pgm, token)
+
+	return nil
+}
+
+func (gs *uiService) RemoveUserGroupFromChannel(token, channelID string, req sdk.UserGroupsRequest) error {
+	if err := gs.sdk.RemoveUserGroupFromChannel(channelID, req, token); err != nil {
+		return errors.Wrap(err, ErrFailedUnassign)
+	}
+
+	return nil
+}
+
+func (us *uiService) ListChannelUserGroups(token, channelID string, page, limit uint64) (b []byte, err error) {
+	offset := (page - 1) * limit
+	pgm := sdk.PageMetadata{
+		Offset: offset,
+		Limit:  limit,
+	}
+	groupsPage, err := us.sdk.ListChannelUserGroups(channelID, pgm, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
 	user, err := us.sdk.UserProfile(token)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	noOfPages := int(math.Ceil(float64(plcPage.Total) / float64(limit)))
+	noOfPages := int(math.Ceil(float64(groupsPage.Total) / float64(limit)))
 
 	data := struct {
 		NavbarActive string
-		Policies     []sdk.Policy
+		Groups       []sdk.Group
 		User         sdk.User
-		Actions      []string
+		ChannelID    string
+		Relations    []string
 		CurrentPage  int
 		Pages        int
 		Limit        int
 	}{
-		thingsPoliciesActive,
-		plcPage.Policies,
+		channelsActive,
+		groupsPage.Groups,
 		user,
-		thingActions,
+		channelID,
+		groupRelations,
 		int(page),
 		noOfPages,
 		int(limit),
 	}
 
 	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "thingsPolicies", data); err != nil {
+	if err := us.tpls.ExecuteTemplate(&btpl, "channelgroups", data); err != nil {
 		return []byte{}, errors.Wrap(err, ErrExecTemplate)
 	}
 
 	return btpl.Bytes(), nil
-}
 
-func (us *uiService) AddThingsPolicy(token string, policy sdk.Policy) error {
-	if err := us.sdk.CreateThingPolicy(policy, token); err != nil {
-		return errors.Wrap(err, ErrFailedCreatePolicy)
-	}
-
-	return nil
-}
-
-func (us *uiService) DeleteThingsPolicy(token string, policy sdk.Policy) error {
-	if err := us.sdk.DeleteThingPolicy(policy, token); err != nil {
-		return errors.Wrap(err, ErrFailedDeletePolicy)
-	}
-
-	return nil
-}
-
-func (us *uiService) UpdateThingsPolicy(token string, policy sdk.Policy) error {
-	if err := us.sdk.UpdateThingPolicy(policy, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdatePolicy)
-	}
-
-	return nil
-}
-
-func (us *uiService) ListGroupMembers(token, id string, page, limit uint64) ([]byte, error) {
-	group, err := us.sdk.Group(id, token)
-	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
-	}
-	offset := (page - 1) * limit
-
-	pgm := sdk.PageMetadata{
-		Offset:     offset,
-		Limit:      limit,
-		Visibility: statusAll,
-	}
-
-	members, err := us.sdk.Members(id, pgm, token)
-	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
-	}
-
-	user, err := us.sdk.UserProfile(token)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	noOfPages := int(math.Ceil(float64(members.Total) / float64(limit)))
-
-	data := struct {
-		NavbarActive string
-		ID           string
-		Group        sdk.Group
-		Members      []sdk.User
-		User         sdk.User
-		Actions      []string
-		CurrentPage  int
-		Pages        int
-		Limit        int
-	}{
-		groupsActive,
-		id,
-		group,
-		members.Members,
-		user,
-		userActions,
-		int(page),
-		noOfPages,
-		int(limit),
-	}
-
-	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "groupconn", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
-	}
-	return btpl.Bytes(), nil
 }
 
 func (us *uiService) CreateGroups(token string, groups ...sdk.Group) error {
@@ -1227,6 +1337,109 @@ func (us *uiService) CreateGroups(token string, groups ...sdk.Group) error {
 		if err != nil {
 			return errors.Wrap(err, ErrFailedCreate)
 		}
+	}
+
+	return nil
+}
+
+func (us *uiService) ListGroupUsers(token, id string, page, limit uint64) ([]byte, error) {
+	offset := (page - 1) * limit
+
+	pgm := sdk.PageMetadata{
+		Offset:     offset,
+		Limit:      limit,
+		Visibility: statusAll,
+	}
+
+	usersPage, err := us.sdk.ListGroupUsers(id, pgm, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	user, err := us.sdk.UserProfile(token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
+
+	data := struct {
+		NavbarActive string
+		GroupID      string
+		Users        []sdk.User
+		User         sdk.User
+		Relations    []string
+		CurrentPage  int
+		Pages        int
+		Limit        int
+	}{
+		groupsActive,
+		id,
+		usersPage.Users,
+		user,
+		groupRelations,
+		int(page),
+		noOfPages,
+		int(limit),
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "groupusers", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+	return btpl.Bytes(), nil
+}
+
+func (gs *uiService) Assign(token, groupID string, userRelation sdk.UsersRelationRequest) error {
+	if err := gs.sdk.AddUserToGroup(groupID, userRelation, token); err != nil {
+		return errors.Wrap(err, ErrFailedAssign)
+	}
+
+	return nil
+}
+
+func (gs *uiService) Unassign(token, groupID string, userRelation sdk.UsersRelationRequest) error {
+	if err := gs.sdk.RemoveUserFromGroup(groupID, userRelation, token); err != nil {
+		return errors.Wrap(err, ErrFailedUnassign)
+	}
+
+	return nil
+}
+
+func (us *uiService) ViewGroup(token, id string) (b []byte, err error) {
+	group, err := us.sdk.Group(id, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	user, err := us.sdk.UserProfile(token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	data := struct {
+		NavbarActive string
+		ID           string
+		Group        sdk.Group
+		User         sdk.User
+	}{
+		groupsActive,
+		id,
+		group,
+		user,
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "group", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+	return btpl.Bytes(), nil
+}
+
+func (us *uiService) UpdateGroup(token, id string, group sdk.Group) error {
+	_, err := us.sdk.UpdateGroup(group, token)
+	if err != nil {
+		return errors.Wrap(err, ErrFailedUpdate)
 	}
 
 	return nil
@@ -1247,7 +1460,7 @@ func (us *uiService) ListGroups(token string, page, limit uint64) ([]byte, error
 
 	user, err := us.sdk.UserProfile(token)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 	noOfPages := int(math.Ceil(float64(grpPage.Total) / float64(limit)))
 
@@ -1275,60 +1488,6 @@ func (us *uiService) ListGroups(token string, page, limit uint64) ([]byte, error
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) ViewGroup(token, id string) (b []byte, err error) {
-	group, err := us.sdk.Group(id, token)
-	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
-	}
-
-	user, err := us.sdk.UserProfile(token)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	data := struct {
-		NavbarActive string
-		ID           string
-		Group        sdk.Group
-		User         sdk.User
-	}{
-		groupsActive,
-		id,
-		group,
-		user,
-	}
-
-	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "group", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
-	}
-	return btpl.Bytes(), nil
-}
-
-func (us *uiService) Assign(token, groupID, memberID string, memberType []string) error {
-	if err := us.sdk.Assign(memberType, memberID, groupID, token); err != nil {
-		return errors.Wrap(err, ErrFailedAssign)
-	}
-
-	return nil
-}
-
-func (us *uiService) Unassign(token, groupID, memberID string) error {
-	if err := us.sdk.Unassign(memberID, groupID, token); err != nil {
-		return errors.Wrap(err, ErrFailedUnassign)
-	}
-
-	return nil
-}
-
-func (us *uiService) UpdateGroup(token, id string, group sdk.Group) error {
-	if _, err := us.sdk.UpdateGroup(group, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdate)
-	}
-
-	return nil
-}
-
 func (us *uiService) EnableGroup(token, id string) error {
 	if _, err := us.sdk.EnableGroup(id, token); err != nil {
 		return errors.Wrap(err, ErrFailedEnable)
@@ -1345,78 +1504,142 @@ func (us *uiService) DisableGroup(token, id string) error {
 	return nil
 }
 
-func (us *uiService) AddPolicy(token string, policy sdk.Policy) error {
-	if err := us.sdk.CreateUserPolicy(policy, token); err != nil {
-		return errors.Wrap(err, ErrFailedCreatePolicy)
-	}
-
-	return nil
-}
-
-func (us *uiService) ListPolicies(token string, page, limit uint64) ([]byte, error) {
+func (us *uiService) ListParents(token, groupID string, page, limit uint64) (b []byte, err error) {
 	offset := (page - 1) * limit
-
 	pgm := sdk.PageMetadata{
-		Offset:     offset,
-		Limit:      limit,
-		Visibility: statusAll,
+		Offset: offset,
+		Limit:  limit,
 	}
-	plcPage, err := us.sdk.ListUserPolicies(pgm, token)
+	groupsPage, err := us.sdk.Parents(groupID, pgm, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
-
 	user, err := us.sdk.UserProfile(token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	noOfPages := int(math.Ceil(float64(plcPage.Total) / float64(limit)))
+	noOfPages := int(math.Ceil(float64(groupsPage.Total) / float64(limit)))
 
 	data := struct {
 		NavbarActive string
-		Policies     []sdk.Policy
+		Groups       []sdk.Group
 		User         sdk.User
-		Actions      []string
+		GroupID      string
 		CurrentPage  int
 		Pages        int
 		Limit        int
 	}{
-		usersPoliciesActive,
-		plcPage.Policies,
+		groupsActive,
+		groupsPage.Groups,
 		user,
-		userActions,
+		groupID,
 		int(page),
 		noOfPages,
 		int(limit),
 	}
 
 	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "policies", data); err != nil {
+	if err := us.tpls.ExecuteTemplate(&btpl, "parents", data); err != nil {
 		return []byte{}, errors.Wrap(err, ErrExecTemplate)
 	}
 
 	return btpl.Bytes(), nil
+
 }
 
-func (us *uiService) UpdatePolicy(token string, policy sdk.Policy) error {
-	if err := us.sdk.UpdateUserPolicy(policy, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdatePolicy)
+func (us *uiService) ListChildren(token, groupID string, page, limit uint64) (b []byte, err error) {
+	offset := (page - 1) * limit
+	pgm := sdk.PageMetadata{
+		Offset: offset,
+		Limit:  limit,
+	}
+	groupsPage, err := us.sdk.Children(groupID, pgm, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+	user, err := us.sdk.UserProfile(token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	return nil
-}
+	noOfPages := int(math.Ceil(float64(groupsPage.Total) / float64(limit)))
 
-func (us *uiService) DeletePolicy(token string, policy sdk.Policy) error {
-	if err := us.sdk.DeleteUserPolicy(policy, token); err != nil {
-		return errors.Wrap(err, ErrFailedDeletePolicy)
+	data := struct {
+		NavbarActive string
+		Groups       []sdk.Group
+		User         sdk.User
+		GroupID      string
+		CurrentPage  int
+		Pages        int
+		Limit        int
+	}{
+		groupsActive,
+		groupsPage.Groups,
+		user,
+		groupID,
+		int(page),
+		noOfPages,
+		int(limit),
 	}
 
-	return nil
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "children", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+
+	return btpl.Bytes(), nil
+
 }
 
-func (us *uiService) Publish(token, thKey string, msg *messaging.Message) error {
-	if err := us.sdk.SendMessage(msg.Channel, string(msg.Payload), thKey); err != nil {
+func (us *uiService) ListUserGroupChannels(token, groupID string, page, limit uint64) (b []byte, err error) {
+	offset := (page - 1) * limit
+	pgm := sdk.PageMetadata{
+		Offset: offset,
+		Limit:  limit,
+	}
+	channelsPage, err := us.sdk.ListGroupChannels(groupID, pgm, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+	user, err := us.sdk.UserProfile(token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	noOfPages := int(math.Ceil(float64(channelsPage.Total) / float64(limit)))
+
+	data := struct {
+		NavbarActive string
+		Channels     []sdk.Group
+		User         sdk.User
+		GroupID      string
+		Relations    []string
+		CurrentPage  int
+		Pages        int
+		Limit        int
+	}{
+		groupsActive,
+		channelsPage.Groups,
+		user,
+		groupID,
+		groupRelations,
+		int(page),
+		noOfPages,
+		int(limit),
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "groupchannels", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+
+	return btpl.Bytes(), nil
+
+}
+
+func (gs *uiService) Publish(token, thKey string, msg *messaging.Message) error {
+	if err := gs.sdk.SendMessage(msg.Channel, string(msg.Payload), thKey); err != nil {
 		return errors.Wrap(err, ErrFailedPublish)
 	}
 
@@ -1457,10 +1680,157 @@ func (us *uiService) WsConnection(_, chID, thKey string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
+func (us *uiService) CreateBootstrap(token string, configs ...sdk.BootstrapConfig) error {
+	for _, cfg := range configs {
+		_, err := us.sdk.AddBootstrap(cfg, token)
+		if err != nil {
+			return errors.Wrap(err, ErrFailedCreate)
+		}
+	}
+	return nil
+}
+
+func (us *uiService) ListBootstrap(token string, page, limit uint64) ([]byte, error) {
+	offset := (page - 1) * limit
+
+	pgm := sdk.PageMetadata{
+		Offset:     offset,
+		Limit:      limit,
+		Visibility: statusAll,
+	}
+
+	bootstraps, err := us.sdk.Bootstraps(pgm, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	filter := sdk.PageMetadata{
+		Offset: uint64(0),
+		Total:  uint64(100),
+		Limit:  uint64(100),
+	}
+
+	things, err := us.sdk.Things(filter, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	user, err := us.sdk.UserProfile(token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	noOfPages := int(math.Ceil(float64(bootstraps.Total) / float64(limit)))
+
+	data := struct {
+		NavbarActive string
+		Bootstraps   []sdk.BootstrapConfig
+		Things       []sdk.Thing
+		User         sdk.User
+		CurrentPage  int
+		Pages        int
+		Limit        int
+	}{
+		bootstrapsActive,
+		bootstraps.Configs,
+		things.Things,
+		user,
+		int(page),
+		noOfPages,
+		int(limit),
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "bootstraps", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+
+	return btpl.Bytes(), nil
+}
+
+func (us *uiService) UpdateBootstrap(token string, config sdk.BootstrapConfig) error {
+	if err := us.sdk.UpdateBootstrap(config, token); err != nil {
+		return errors.Wrap(err, ErrFailedUpdate)
+	}
+
+	return nil
+}
+
+func (us *uiService) UpdateBootstrapConnections(token string, config sdk.BootstrapConfig) error {
+	channels, ok := config.Channels.([]string)
+	if !ok {
+		return errors.Wrap(errors.New("invalid channel"), ErrFailedUpdate)
+	}
+	return us.sdk.UpdateBootstrapConnection(config.ThingID, channels, token)
+
+}
+
+func (us *uiService) UpdateBootstrapCerts(token string, config sdk.BootstrapConfig) error {
+	_, err := us.sdk.UpdateBootstrapCerts(config.ThingID, config.ClientCert, config.ClientKey, config.CACert, token)
+
+	if err != nil {
+		return errors.Wrap(err, ErrFailedUpdate)
+	}
+
+	return nil
+}
+
+func (us *uiService) DeleteBootstrap(token, id string) error {
+	if err := us.sdk.RemoveBootstrap(id, token); err != nil {
+		return errors.Wrap(err, ErrFailedDelete)
+	}
+
+	return nil
+}
+
+func (us *uiService) ViewBootstrap(token, id string) ([]byte, error) {
+	bootstrap, err := us.sdk.ViewBootstrap(id, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	user, err := us.sdk.UserProfile(token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	switch channels := bootstrap.Channels.(type) {
+	case []sdk.Channel:
+		var strChannels []string
+		for _, chann := range channels {
+			strChannels = append(strChannels, chann.ID)
+		}
+		bootstrap.Channels = strChannels
+	case []string:
+		bootstrap.Channels = channels
+	case nil:
+		bootstrap.Channels = []string{}
+	default:
+		return nil, errors.Wrap(errors.New("invalid channels"), ErrFailedRetreive)
+	}
+
+	data := struct {
+		NavbarActive string
+		Bootstrap    sdk.BootstrapConfig
+		User         sdk.User
+	}{
+		bootstrapsActive,
+		bootstrap,
+		user,
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "bootstrap", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+
+	return btpl.Bytes(), nil
+}
+
 func (us *uiService) GetRemoteTerminal(id, token string) ([]byte, error) {
 	user, err := us.sdk.UserProfile(token)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
 	data := struct {
@@ -1474,7 +1844,7 @@ func (us *uiService) GetRemoteTerminal(id, token string) ([]byte, error) {
 	}
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "remoteTerminal", data); err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
 	}
 
 	return btpl.Bytes(), nil
@@ -1483,7 +1853,7 @@ func (us *uiService) GetRemoteTerminal(id, token string) ([]byte, error) {
 func (us *uiService) ProcessTerminalCommand(ctx context.Context, id, tkn, command string, res chan string) error {
 	cfg, err := us.sdk.ViewBootstrap(id, tkn)
 	if err != nil {
-		return err
+		return errors.Wrap(err, ErrFailedRetreive)
 	}
 
 	var content bootstrap.ServicesConfig
@@ -1562,138 +1932,6 @@ func (us *uiService) ProcessTerminalCommand(ctx context.Context, id, tkn, comman
 	return nil
 }
 
-func (us *uiService) ListBootstrap(token string, page, limit uint64) ([]byte, error) {
-	offset := (page - 1) * limit
-
-	pgm := sdk.PageMetadata{
-		Offset:     offset,
-		Limit:      limit,
-		Visibility: statusAll,
-	}
-
-	bootstraps, err := us.sdk.Bootstraps(pgm, token)
-	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
-	}
-
-	user, err := us.sdk.UserProfile(token)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	noOfPages := int(math.Ceil(float64(bootstraps.Total) / float64(limit)))
-
-	data := struct {
-		NavbarActive string
-		Bootstraps   []sdk.BootstrapConfig
-		User         sdk.User
-		CurrentPage  int
-		Pages        int
-		Limit        int
-	}{
-		bootstrapsActive,
-		bootstraps.Configs,
-		user,
-		int(page),
-		noOfPages,
-		int(limit),
-	}
-
-	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "bootstraps", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
-	}
-
-	return btpl.Bytes(), nil
-}
-func (us *uiService) ViewBootstrap(token, id string) ([]byte, error) {
-	bootstrap, err := us.sdk.ViewBootstrap(id, token)
-	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
-	}
-
-	user, err := us.sdk.UserProfile(token)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	switch channels := bootstrap.Channels.(type) {
-	case []sdk.Channel:
-		var strChannels []string
-		for _, chann := range channels {
-			strChannels = append(strChannels, chann.ID)
-		}
-		bootstrap.Channels = strChannels
-	case []string:
-		bootstrap.Channels = channels
-	case nil:
-		bootstrap.Channels = []string{}
-	default:
-		return nil, errors.New("invalid channels")
-	}
-
-	data := struct {
-		NavbarActive string
-		Bootstrap    sdk.BootstrapConfig
-		User         sdk.User
-	}{
-		bootstrapsActive,
-		bootstrap,
-		user,
-	}
-
-	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "bootstrap", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
-	}
-
-	return btpl.Bytes(), nil
-}
-
-func (us *uiService) CreateBootstrap(token string, configs ...sdk.BootstrapConfig) error {
-	for _, cfg := range configs {
-		_, err := us.sdk.AddBootstrap(cfg, token)
-		if err != nil {
-			return errors.Wrap(err, ErrFailedCreate)
-		}
-	}
-
-	return nil
-}
-
-func (us *uiService) DeleteBootstrap(token, id string) error {
-	if err := us.sdk.RemoveBootstrap(id, token); err != nil {
-		return errors.Wrap(err, ErrFailedDelete)
-	}
-
-	return nil
-}
-
-func (us *uiService) UpdateBootstrap(token string, config sdk.BootstrapConfig) error {
-	if err := us.sdk.UpdateBootstrap(config, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdate)
-	}
-
-	return nil
-}
-
-func (us *uiService) UpdateBootstrapCerts(token string, config sdk.BootstrapConfig) error {
-	if _, err := us.sdk.UpdateBootstrapCerts(config.ThingID, config.ClientCert, config.ClientKey, config.CACert, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdate)
-	}
-
-	return nil
-}
-
-func (us *uiService) UpdateBootstrapConnections(token string, config sdk.BootstrapConfig) error {
-	channels, ok := config.Channels.([]string)
-	if !ok {
-		return errors.New("invalid channel")
-	}
-	return us.sdk.UpdateBootstrapConnection(config.ThingID, channels, token)
-
-}
-
 func (us *uiService) GetEntities(token, item, name string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 	pgm := sdk.PageMetadata{
@@ -1750,4 +1988,79 @@ func (us *uiService) ErrorPage(errMsg string) ([]byte, error) {
 	}
 
 	return btpl.Bytes(), nil
+}
+
+func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, err error) {
+	tpl = template.New("mainflux")
+	tpl = tpl.Funcs(template.FuncMap{
+		"toJSON": func(data map[string]interface{}) string {
+			if data == nil {
+				return "{}"
+			}
+			ret, err := json.Marshal(data)
+			if err != nil {
+				return "{}"
+			}
+			return string(ret)
+		},
+		"toSlice": func(data []string) string {
+			if len(data) == 0 {
+				return "[]"
+			}
+			ret, err := json.Marshal(data)
+			if err != nil {
+				return "[]"
+			}
+			return string(ret)
+		},
+		"contains": func(data []string, substring string) bool {
+
+			return slices.Contains(data, substring)
+		},
+		"serviceUnavailable": func(service string) bool {
+			if _, err := mfsdk.Health(service); err != nil {
+				return true
+			}
+			return false
+		},
+		"hasPrefix": func(s, prefix string) bool {
+			return strings.HasPrefix(s, prefix)
+		},
+		"sub": func(num1, num2 int) int {
+			return num1 - num2
+		},
+		"add": func(num1, num2 int) int {
+			return num1 + num2
+		},
+		"max": func(a, b int) int {
+			if a > b {
+				return a
+			}
+			return b
+		},
+		"min": func(a, b int) int {
+			if a < b {
+				return a
+			}
+			return b
+		},
+		"fromTo": func(start, end int) []int {
+			var result []int
+			for i := start; i <= end; i++ {
+				result = append(result, i)
+			}
+			return result
+		},
+	})
+
+	var tmplFiles []string
+	for _, value := range templates {
+		tmplFiles = append(tmplFiles, templateDir+"/"+value+".html")
+	}
+	tpl, err = tpl.ParseFiles(tmplFiles...)
+	if err != nil {
+		return nil, err
+	}
+
+	return tpl, nil
 }

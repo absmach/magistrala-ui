@@ -226,7 +226,7 @@
 											</tr>
 										</tbody>
 									</table>
-									<div id="error-message" class="error-message"></div>
+									<div id="error-message" class="text-danger"></div>
 								</div>
 							</div>
 						</div>
@@ -326,15 +326,14 @@
         errorMessage.textContent = "";
 
         if (url) {
-          // const data = { [field]: updatedValue };
-
-          fetch(url, {
-            method: "POST",
-            body: JSON.stringify(data),
-            headers: {
-              "Content-Type": "application/json",
-            },
-          })
+			errorMessage.textContent="";
+			fetch(url, {
+				method: "POST",
+				body: JSON.stringify(data),
+				headers: {
+				"Content-Type": "application/json",
+				},
+			})
             .then((response) => {
               if (response.ok) {
                 // Make the row uneditable

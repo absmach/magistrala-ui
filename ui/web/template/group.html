@@ -12,10 +12,17 @@
 								<div class="buttons mb-3">
 									<a
 										class="btn body-button"
-										href="/groups/{{ .Group.ID }}/members"
+										href="/groups/{{ .Group.ID }}/users"
 										role="button"
 									>
-										Connections
+										Group Users
+									</a>
+									<a
+										class="btn body-button"
+										href="/groups/{{ .Group.ID }}/channels"
+										role="button"
+									>
+										Group Channels
 									</a>
 								</div>
 								<div class="table-responsive table-container">
@@ -26,12 +33,7 @@
 											</tr>
 										</thead>
 										<tbody>
-											{{ $disableButton := true }}
-											{{ if (authorizeUser .User.ID
-												.Group.ID "g_update" "group")
-											}}
-												{{ $disableButton =false }}
-											{{ end }}
+											{{ $disableButton := false }}
 											<tr>
 												<th>NAME</th>
 												<td
@@ -156,7 +158,7 @@
 											</tr>
 										</tbody>
 									</table>
-									<div id="error-message" class="error-message"></div>
+									<div id="error-message" class="text-danger"></div>
 								</div>
 							</div>
 						</div>
@@ -245,13 +247,14 @@
         }
 
         if (url) {
-          fetch(url, {
-            method: "POST",
-            body: JSON.stringify(data),
-            headers: {
-              "Content-Type": "application/json",
-            },
-          })
+			errorMessage.textContent="";
+			fetch(url, {
+				method: "POST",
+				body: JSON.stringify(data),
+				headers: {
+				"Content-Type": "application/json",
+				},
+			})
             .then((response) => {
               if (response.ok) {
                 //make the row uneditable

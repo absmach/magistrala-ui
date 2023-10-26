@@ -190,14 +190,8 @@
 												</tr>
 											</thead>
 											<tbody>
-												{{ $userID := .User.ID }}
 												{{ range $i, $c := .Channels }}
-													{{ $disableButton := true }}
-													{{ if (authorizeThing $userID $c.ID
-														"g_delete" "group")
-													}}
-														{{ $disableButton = false }}
-													{{ end }}
+													{{ $disableButton := false }}
 													<tr>
 														<td>{{ $c.Name }}</td>
 														<td>
