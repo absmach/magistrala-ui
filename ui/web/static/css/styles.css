@@ -450,6 +450,27 @@ button.edit-btn {
 	border: 1px solid #eb2f2f;
 }
 
+.error-header {
+	margin: 0 auto;
+	text-align: center;
+	padding: 10px;
+	border-radius: 5px;
+	color: #d76868;
+	font-size: 23px;
+	font-weight: 500;
+	font-family: "Montserrat";
+}
+
+.alert-dismissible {
+	margin: 10;
+	text-align: center;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	border-radius: var(--border-radius);
+	padding: 10px;
+	z-index: 10;
+	position: relative;
+}
+
 @media (max-width: 768px) {
 	.sidebar {
 		width: var(--sidebar-min);
