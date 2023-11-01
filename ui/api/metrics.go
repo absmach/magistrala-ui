@@ -705,23 +705,13 @@ func (mm *metricsMiddleware) Publish(token, thingKey string, msg *messaging.Mess
 }
 
 // ReadMessage adds metrics middleware to read message method.
-func (mm *metricsMiddleware) ReadMessage(token string) (b []byte, err error) {
+func (mm *metricsMiddleware) ReadMessage(token, chID, thKey string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "read_message").Add(1)
 		mm.latency.With("method", "read_message").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ReadMessage(token)
-}
-
-// WsConnection adds metrics middleware to ws connection method.
-func (mm *metricsMiddleware) WsConnection(token, chID, thKey string) (b []byte, err error) {
-	defer func(begin time.Time) {
-		mm.counter.With("method", "ws_connection").Add(1)
-		mm.latency.With("method", "ws_connection").Observe(time.Since(begin).Seconds())
-	}(time.Now())
-
-	return mm.svc.WsConnection(token, chID, thKey)
+	return mm.svc.ReadMessage(token, chID, thKey, page, limit)
 }
 
 // CreateBootstrap adds metrics middleware to create bootstrap method.

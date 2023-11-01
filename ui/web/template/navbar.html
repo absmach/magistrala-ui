@@ -77,6 +77,18 @@
 			</a>
 		</li>
 		<li class="nav-item mb-2 mx-2">
+			{{ $active = "messagesread" }}
+			<a
+				href="/readmessages"
+				class="nav-link {{ if (serviceUnavailable "things") }}
+					disabled-item
+				{{ end }} {{ if eq .NavbarActive $active }}active{{ end }}"
+			>
+				<i class="fas fa-envelope-open"></i>
+				<span>Messages</span>
+			</a>
+		</li>
+		<li class="nav-item mb-2 mx-2">
 			{{ $active = "bootstraps" }}
 			<a
 				href="/bootstraps"

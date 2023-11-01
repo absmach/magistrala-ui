@@ -21,6 +21,7 @@ const (
 	channelsEndpoint  = "/channels"
 	groupsEndpoint    = "/groups"
 	bootstrapEndpoint = "/bootstrap"
+	membersEndpoint   = "/members"
 )
 
 func indexEndpoint(svc ui.Service) endpoint.Endpoint {
@@ -1565,32 +1566,13 @@ func readMessageEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-
-		res, err := svc.ReadMessage(req.token)
+		res, err := svc.ReadMessage(req.token, req.ChanID, req.ThingKey, req.Page, req.Limit)
 		if err != nil {
 			return nil, err
 		}
 
 		return uiRes{
 			code: http.StatusOK,
-			html: res,
-		}, nil
-	}
-}
-
-func wsConnectionEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (response interface{}, err error) {
-		req := request.(wsConnectionReq)
-		if err := req.validate(); err != nil {
-			return nil, err
-		}
-
-		res, err := svc.WsConnection(req.token, req.ChanID, req.ThingKey)
-		if err != nil {
-			return nil, err
-		}
-
-		return uiRes{
 			html: res,
 		}, nil
 	}

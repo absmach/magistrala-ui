@@ -970,7 +970,7 @@ func (lm *loggingMiddleware) Publish(token, thKey string, msg *messaging.Message
 }
 
 // ReadMessage adds logging middleware to read message method.
-func (lm *loggingMiddleware) ReadMessage(token string) (b []byte, err error) {
+func (lm *loggingMiddleware) ReadMessage(token, chID, thKey string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method read_message took %s to complete", time.Since(begin))
 		if err != nil {
@@ -980,21 +980,7 @@ func (lm *loggingMiddleware) ReadMessage(token string) (b []byte, err error) {
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.ReadMessage(token)
-}
-
-// WsConnection adds logging middleware to ws_connection method.
-func (lm *loggingMiddleware) WsConnection(token, chID, thKey string) (b []byte, err error) {
-	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method ws_connection took %s to complete", time.Since(begin))
-		if err != nil {
-			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
-			return
-		}
-		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
-	}(time.Now())
-
-	return lm.svc.WsConnection(token, chID, thKey)
+	return lm.svc.ReadMessage(token, chID, thKey, page, limit)
 }
 
 // CreateBootstrap adds logging middleware to create bootstrap method.

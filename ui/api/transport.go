@@ -17,6 +17,8 @@ import (
 	"time"
 
 	"github.com/ultravioletrs/mainflux-ui/ui"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/go-zoo/bone"
@@ -25,8 +27,6 @@ import (
 	"github.com/mainflux/mainflux/pkg/messaging"
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 const (
@@ -583,13 +583,6 @@ func MakeHandler(svc ui.Service, instanceID string) http.Handler {
 		opts...,
 	))
 
-	r.Post("/readmessages", kithttp.NewServer(
-		wsConnectionEndpoint(svc),
-		decodeWsConnectionRequest,
-		encodeResponse,
-		opts...,
-	))
-
 	r.Get("/bootstraps", kithttp.NewServer(
 		listBootstrap(svc),
 		decodeListBoostrapRequest,
@@ -805,6 +798,7 @@ func decodeUsersCreation(_ context.Context, r *http.Request) (interface{}, error
 	if err != nil {
 		return nil, err
 	}
+
 	file, handler, err := r.FormFile("usersFile")
 	if err != nil {
 		return nil, err
@@ -829,7 +823,6 @@ func decodeUsersCreation(_ context.Context, r *http.Request) (interface{}, error
 					Emails:    emails,
 					Passwords: passwords,
 				}
-
 				return req, nil
 			}
 
@@ -1295,6 +1288,7 @@ func decodeThingsCreation(_ context.Context, r *http.Request) (interface{}, erro
 	if err != nil {
 		return nil, err
 	}
+
 	file, handler, err := r.FormFile("thingsFile")
 	if err != nil {
 		return nil, err
@@ -1307,6 +1301,7 @@ func decodeThingsCreation(_ context.Context, r *http.Request) (interface{}, erro
 	csvr := csv.NewReader(file)
 
 	names := []string{}
+
 	for {
 		row, err := csvr.Read()
 		if err != nil {
@@ -1397,6 +1392,7 @@ func decodeChannelsCreation(_ context.Context, r *http.Request) (interface{}, er
 	if err != nil {
 		return nil, err
 	}
+
 	file, handler, err := r.FormFile("channelsFile")
 	if err != nil {
 		return nil, err
@@ -1409,6 +1405,7 @@ func decodeChannelsCreation(_ context.Context, r *http.Request) (interface{}, er
 	csvr := csv.NewReader(file)
 
 	names := []string{}
+
 	for {
 		row, err := csvr.Read()
 		if err != nil {
@@ -1711,6 +1708,7 @@ func decodeGroupsCreation(_ context.Context, r *http.Request) (interface{}, erro
 	if err != nil {
 		return nil, err
 	}
+
 	file, handler, err := r.FormFile("groupsFile")
 	if err != nil {
 		return nil, err
@@ -1722,7 +1720,8 @@ func decodeGroupsCreation(_ context.Context, r *http.Request) (interface{}, erro
 	}
 	csvr := csv.NewReader(file)
 
-	names := []string{}
+	var names []string
+
 	for {
 		row, err := csvr.Read()
 		if err != nil {
@@ -1983,29 +1982,28 @@ func decodeReadMessageRequest(_ context.Context, r *http.Request) (interface{}, 
 		return nil, err
 	}
 
-	req := readMessageReq{
-		token: token,
+	thKey := r.Form.Get("thingKey")
+
+	if !strings.Contains(thKey, "Thing") {
+		thKey = "Thing " + thKey
 	}
 
-	return req, nil
-}
-
-func decodeWsConnectionRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	if err := r.ParseForm(); err != nil {
-		return nil, err
-	}
-	token, err := tokenFromCookie(r, "token")
+	page, err := readNumQuery[uint64](r, pageKey, defPage)
 	if err != nil {
 		return nil, err
 	}
 
-	chanID := r.Form.Get("chanID")
-	thingKey := r.Form.Get("thingKey")
+	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	if err != nil {
+		return nil, err
+	}
 
-	req := wsConnectionReq{
+	req := readMessageReq{
 		token:    token,
-		ChanID:   chanID,
-		ThingKey: thingKey,
+		ChanID:   r.Form.Get("chanID"),
+		ThingKey: thKey,
+		Page:     page,
+		Limit:    limit,
 	}
 
 	return req, nil

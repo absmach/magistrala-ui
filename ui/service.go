@@ -23,7 +23,8 @@ import (
 	"github.com/mainflux/agent/pkg/bootstrap"
 	"github.com/mainflux/mainflux/pkg/errors"
 	"github.com/mainflux/mainflux/pkg/messaging"
-	"github.com/mainflux/senml"
+	"github.com/mainflux/mainflux/pkg/transformers/senml"
+	mfsenml "github.com/mainflux/senml"
 
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
 )
@@ -270,10 +271,7 @@ type Service interface {
 	// Publish facilitates a thing publishin messages to a channel.
 	Publish(token, thKey string, msg *messaging.Message) error
 	// ReadMessage facilitates a thing reading messages published in a channel.
-	ReadMessage(token string) ([]byte, error)
-	// WsConnection creates a web socket connection that allows continuous reading of messages published in a channel.
-	WsConnection(token, chID, thKey string) ([]byte, error)
-
+	ReadMessage(token, chID, thKey string, page, limit uint64) ([]byte, error)
 	// CreateBootstrap creates a new bootstrap config.
 	CreateBootstrap(token string, config ...sdk.BootstrapConfig) error
 	// ListBootstrap retrieves all bootstrap configs.
@@ -1646,30 +1644,39 @@ func (gs *uiService) Publish(token, thKey string, msg *messaging.Message) error 
 	return nil
 }
 
-func (us *uiService) ReadMessage(_ string) ([]byte, error) {
-	data := struct {
-		NavbarActive string
-	}{
-		readMessagesActive,
+func (us *uiService) ReadMessage(token, chID, thKey string, page, limit uint64) ([]byte, error) {
+	var msg sdk.MessagesPage
+
+	user, err := us.sdk.UserProfile(token)
+	if err != nil {
+		return []byte{}, err
 	}
 
-	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "messagesread", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	if chID != "" {
+		msg, err = us.sdk.ReadMessages(chID, thKey)
+		if err != nil {
+			return []byte{}, err
+		}
 	}
 
-	return btpl.Bytes(), nil
-}
+	noOfPages := int(math.Ceil(float64(msg.Total) / float64(limit)))
 
-func (us *uiService) WsConnection(_, chID, thKey string) ([]byte, error) {
 	data := struct {
 		NavbarActive string
 		ChanID       string
-		ThingKey     string
+		Msg          []senml.Message
+		User         sdk.User
+		CurrentPage  int
+		Pages        int
+		Limit        int
 	}{
 		readMessagesActive,
 		chID,
-		thKey,
+		msg.Messages,
+		user,
+		int(page),
+		noOfPages,
+		int(limit),
 	}
 
 	var btpl bytes.Buffer
@@ -1888,7 +1895,7 @@ func (us *uiService) ProcessTerminalCommand(ctx context.Context, id, tkn, comman
 		return token.Error()
 	}
 
-	req := []senml.Record{
+	req := []mfsenml.Record{
 		{BaseName: "1", Name: "exec", StringValue: &command},
 	}
 	reqByte, err1 := json.Marshal(req)
@@ -1908,7 +1915,7 @@ func (us *uiService) ProcessTerminalCommand(ctx context.Context, id, tkn, comman
 	errChan := make(chan error)
 
 	client.Subscribe(subTopic, 0, func(_ mqtt.Client, m mqtt.Message) {
-		var data []senml.Record
+		var data []mfsenml.Record
 		if err := json.Unmarshal(m.Payload(), &data); err != nil {
 			errChan <- err
 		}

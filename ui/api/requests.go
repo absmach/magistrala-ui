@@ -638,33 +638,16 @@ func (req publishReq) validate() error {
 }
 
 type readMessageReq struct {
-	token string
+	token    string
+	ChanID   string `json:"chan_id,omitempty"`
+	ThingKey string `json:"thing_key,omitempty"`
+	Page  uint64
+	Limit uint64
 }
 
 func (req readMessageReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
-	}
-
-	return nil
-}
-
-type wsConnectionReq struct {
-	token    string
-	ChanID   string `json:"chan_id,omitempty"`
-	ThingKey string `json:"thing_key,omitempty"`
-}
-
-func (req wsConnectionReq) validate() error {
-	if req.token == "" {
-		return errAuthorization
-	}
-
-	if req.ChanID == "" {
-		return errMalformedEntity
-	}
-	if req.ThingKey == "" {
-		return errMalformedEntity
 	}
 
 	return nil
