@@ -2058,6 +2058,12 @@ func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, 
 			}
 			return result
 		},
+		"unixTimeToHumanTime": func(t float64) string {
+			if t == 0 {
+				return ""
+			}
+			return time.Unix(int64(t), 0).String()
+		},
 	})
 
 	var tmplFiles []string
