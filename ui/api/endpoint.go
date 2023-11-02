@@ -298,19 +298,7 @@ func createUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		users := []sdk.User{}
-		for i := range req.Emails {
-			credential := sdk.Credentials{
-				Identity: req.Emails[i],
-				Secret:   req.Passwords[i],
-			}
-			user := sdk.User{
-				Name:        req.Names[i],
-				Credentials: credential,
-			}
-			users = append(users, user)
-		}
-		if err := svc.CreateUsers(req.token, users...); err != nil {
+		if err := svc.CreateUsers(req.token, req.users...); err != nil {
 			return nil, err
 		}
 
@@ -631,14 +619,7 @@ func createThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		things := []sdk.Thing{}
-		for i := range req.Names {
-			th := sdk.Thing{
-				Name: req.Names[i],
-			}
-			things = append(things, th)
-		}
-		if err := svc.CreateThings(req.token, things...); err != nil {
+		if err := svc.CreateThings(req.token, req.things...); err != nil {
 			return nil, err
 		}
 
@@ -951,14 +932,7 @@ func createChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		channels := []sdk.Channel{}
-		for i := range req.Names {
-			ch := sdk.Channel{
-				Name: req.Names[i],
-			}
-			channels = append(channels, ch)
-		}
-		if err := svc.CreateChannels(req.token, channels...); err != nil {
+		if err := svc.CreateChannels(req.token, req.Channels...); err != nil {
 			return nil, err
 		}
 
@@ -1269,14 +1243,7 @@ func createGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		groups := []sdk.Group{}
-		for i := range req.Names {
-			gr := sdk.Group{
-				Name: req.Names[i],
-			}
-			groups = append(groups, gr)
-		}
-		if err := svc.CreateGroups(req.token, groups...); err != nil {
+		if err := svc.CreateGroups(req.token, req.Groups...); err != nil {
 			return nil, err
 		}
 

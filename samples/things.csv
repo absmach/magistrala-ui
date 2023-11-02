@@ -1,0 +1,13 @@
+Name,Identity,Secret,Tags,Metadata
+Thing1,80:07:f7:ae:a0:f4,6b459ed5-2734-47ec-98d3-de05fbcf25e7,"[""tag1"",""tag2"",""tag3""]","{""key1"":""value1"",""key2"":""value2""}"
+Thing2,3b:38:1b:77:47:53,5848925c-a872-43ad-b0f9-cf047dbe26c0,"[""tag1"",""tag2"",""tag3""]",
+Thing3,fc:c7:31:9a:75:77,1e635d49-fe2c-48e6-9718-65dd2b1e56a0,,"{""key1"":""value1"",""key2"":""value2""}"
+Thing4,4d:2a:01:df:c3:1c,,"[""tag1"",""tag2"",""tag3""]","{""key1"":""value1"",""key2"":""value2""}"
+Thing5,,186dfa51-eeb8-4a9a-abea-972f93f9ad5d,"[""tag1"",""tag2"",""tag3""]","{""key1"":""value1"",""key2"":""value2""}"
+Thing6,,,,
+,1c:a8:87:de:bc:ed,,,
+,,c3d1eadf-c244-4492-a347-454447b89545,,
+Thing7,e8:6c:93:9d:f3:1f,,,
+Thing8,,cbf5facd-ba2e-4692-a5fb-15e49b86c52a,,
+Thing9,,,"[""tag1"",""tag2"",""tag3""]",
+Thing10,,,,"{""key1"":""value1"",""key2"":""value2""}"

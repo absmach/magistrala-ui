@@ -168,7 +168,7 @@ func (lm *loggingMiddleware) RefreshToken(refreshToken string) (token sdk.Token,
 }
 
 // CreateUsers adds logging middleware to create users method.
-func (lm *loggingMiddleware) CreateUsers(token string, user ...sdk.User) (err error) {
+func (lm *loggingMiddleware) CreateUsers(token string, users ...sdk.User) (err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method create_users took %s to complete", time.Since(begin))
 		if err != nil {
@@ -178,7 +178,7 @@ func (lm *loggingMiddleware) CreateUsers(token string, user ...sdk.User) (err er
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.CreateUsers(token, user...)
+	return lm.svc.CreateUsers(token, users...)
 }
 
 // ListUsers adds logging middleware to list users method.

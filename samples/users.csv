@@ -1,0 +1,5 @@
+Name,ID,Secret,Metadata,Tags
+User1,user1@email.com,rAmD7MZKc6,"{""key1"":""value1"",""key2"":""value2""}","[""tag1"",""tag2"",""tag3""]"
+User2,user2@email.com,bTeXJqxV8T,"{""key1"":""value1"",""key2"":""value2""}",
+User3,user3@email.com,ZSLGV8xpTI,"","[""tag1"",""tag2"",""tag3""]"
+,user4@email.com,au8oFOWL6x,"",""

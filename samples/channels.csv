@@ -1,0 +1,5 @@
+Name,Metadata,Description
+Channel1,"{""key1"":""value1"",""key2"":""value2""}",Description1
+Channel2,,Description2
+Channel3,"{""key1"":""value1"",""key2"":""value2""}",
+Channel4,,

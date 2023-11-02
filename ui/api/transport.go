@@ -8,17 +8,12 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/ultravioletrs/mainflux-ui/ui"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/go-zoo/bone"
@@ -27,6 +22,9 @@ import (
 	"github.com/mainflux/mainflux/pkg/messaging"
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/ultravioletrs/mainflux-ui/ui"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const (
@@ -49,7 +47,13 @@ var (
 	errMalformedEntity    = errors.New("malformed entity specification")
 	errConflict           = errors.New("entity already exists")
 	errInvalidQueryParams = errors.New("invalid query parameters")
+	errFileFormat         = errors.New("invalid file format")
+	errInvalidFile        = errors.New("unsupported file type")
 	referer               = ""
+
+	clientsHeaderLen = 5
+	groupsHeaderLen  = 3
+	minRows          = 2
 )
 
 type number interface {
@@ -806,32 +810,58 @@ func decodeUsersCreation(_ context.Context, r *http.Request) (interface{}, error
 	defer file.Close()
 
 	if !strings.HasSuffix(handler.Filename, ".csv") {
-		return nil, errors.New("unsupported file type")
+		return nil, errInvalidFile
 	}
-	csvr := csv.NewReader(file)
+	reader := csv.NewReader(file)
 
-	names := []string{}
-	emails := []string{}
-	passwords := []string{}
-	for {
-		row, err := csvr.Read()
-		if err != nil {
-			if err == io.EOF {
-				req := createUsersReq{
-					token:     token,
-					Names:     names,
-					Emails:    emails,
-					Passwords: passwords,
-				}
-				return req, nil
-			}
+	rows, err := reader.ReadAll()
+	if err != nil {
+		return nil, errFileFormat
+	}
 
-			return nil, err
+	if len(rows) < minRows {
+		return nil, errFileFormat
+	}
+
+	if len(rows[0]) != clientsHeaderLen {
+		return nil, errFileFormat
+	}
+
+	users := []sdk.User{}
+
+	for _, row := range rows[1:] {
+		var user sdk.User
+
+		if row[1] == "" && row[2] == "" {
+			return nil, errFileFormat
 		}
-		names = append(names, string(row[0]))
-		emails = append(emails, string(row[1]))
-		passwords = append(passwords, string(row[2]))
+		user.Credentials.Identity = row[1]
+		user.Credentials.Secret = row[2]
+
+		if row[0] != "" {
+			user.Name = row[0]
+		}
+
+		if row[3] != "" {
+			if err := json.Unmarshal([]byte(row[3]), &user.Metadata); err != nil {
+				return nil, errFileFormat
+			}
+		}
+
+		if row[4] != "" {
+			if err := json.Unmarshal([]byte(row[4]), &user.Tags); err != nil {
+				return nil, errFileFormat
+			}
+		}
+
+		users = append(users, user)
 	}
+	req := createUsersReq{
+		token: token,
+		users: users,
+	}
+
+	return req, nil
 }
 
 func decodeListUsersRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -1296,26 +1326,62 @@ func decodeThingsCreation(_ context.Context, r *http.Request) (interface{}, erro
 	defer file.Close()
 
 	if !strings.HasSuffix(handler.Filename, ".csv") {
-		return nil, errors.New("unsupported file type")
+		return nil, errInvalidFile
 	}
-	csvr := csv.NewReader(file)
+	reader := csv.NewReader(file)
 
-	names := []string{}
+	rows, err := reader.ReadAll()
+	if err != nil {
+		return nil, errFileFormat
+	}
 
-	for {
-		row, err := csvr.Read()
-		if err != nil {
-			if err == io.EOF {
-				req := createThingsReq{
-					token: token,
-					Names: names,
-				}
-				return req, nil
-			}
-			return nil, err
+	if len(rows) < minRows {
+		return nil, errFileFormat
+	}
+
+	if len(rows[0]) != clientsHeaderLen {
+		return nil, errFileFormat
+	}
+
+	things := []sdk.Thing{}
+
+	for _, row := range rows[1:] {
+		if row[0] == "" && row[1] == "" && row[2] == "" && row[3] == "" && row[4] == "" {
+			continue
 		}
-		names = append(names, string(row[0]))
+		var thing sdk.Thing
+		if row[0] != "" {
+			thing.Name = row[0]
+		}
+
+		if row[1] != "" {
+			thing.Credentials.Identity = row[1]
+		}
+
+		if row[2] != "" {
+			thing.Credentials.Secret = row[2]
+		}
+
+		if row[3] != "" {
+			if err := json.Unmarshal([]byte(row[3]), &thing.Tags); err != nil {
+				return nil, errFileFormat
+			}
+		}
+
+		if row[4] != "" {
+			if err := json.Unmarshal([]byte(row[4]), &thing.Metadata); err != nil {
+				return nil, errFileFormat
+			}
+		}
+
+		things = append(things, thing)
 	}
+	req := createThingsReq{
+		token:  token,
+		things: things,
+	}
+
+	return req, nil
 }
 
 func decodeShareThingRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -1400,26 +1466,50 @@ func decodeChannelsCreation(_ context.Context, r *http.Request) (interface{}, er
 	defer file.Close()
 
 	if !strings.HasSuffix(handler.Filename, ".csv") {
-		return nil, errors.New("unsupported file type")
+		return nil, errInvalidFile
 	}
-	csvr := csv.NewReader(file)
+	reader := csv.NewReader(file)
 
-	names := []string{}
+	rows, err := reader.ReadAll()
+	if err != nil {
+		return nil, errInvalidFile
+	}
 
-	for {
-		row, err := csvr.Read()
-		if err != nil {
-			if err == io.EOF {
-				req := createChannelsReq{
-					token: token,
-					Names: names,
-				}
-				return req, nil
-			}
-			return nil, err
+	if len(rows) < minRows {
+		return nil, errFileFormat
+	}
+
+	if len(rows[0]) != groupsHeaderLen {
+		return nil, errFileFormat
+	}
+
+	channels := []sdk.Channel{}
+
+	for _, row := range rows[1:] {
+		var channel sdk.Channel
+		if row[0] == "" {
+			return nil, errFileFormat
 		}
-		names = append(names, string(row[0]))
+		channel.Name = row[0]
+
+		if row[1] != "" {
+			if err := json.Unmarshal([]byte(row[1]), &channel.Metadata); err != nil {
+				return nil, errFileFormat
+			}
+		}
+
+		if row[2] != "" {
+			channel.Description = row[2]
+		}
+
+		channels = append(channels, channel)
 	}
+	req := createChannelsReq{
+		token:    token,
+		Channels: channels,
+	}
+
+	return req, nil
 }
 
 func decodeChannelUpdate(_ context.Context, r *http.Request) (interface{}, error) {
@@ -1716,26 +1806,50 @@ func decodeGroupsCreation(_ context.Context, r *http.Request) (interface{}, erro
 	defer file.Close()
 
 	if !strings.HasSuffix(handler.Filename, ".csv") {
-		return nil, errors.New("unsupported file type")
+		return nil, errInvalidFile
 	}
-	csvr := csv.NewReader(file)
+	reader := csv.NewReader(file)
 
-	var names []string
+	rows, err := reader.ReadAll()
+	if err != nil {
+		return nil, errInvalidFile
+	}
 
-	for {
-		row, err := csvr.Read()
-		if err != nil {
-			if err == io.EOF {
-				req := createGroupsReq{
-					token: token,
-					Names: names,
-				}
-				return req, nil
-			}
-			return nil, err
+	if len(rows) < minRows {
+		return nil, errFileFormat
+	}
+
+	if len(rows[0]) != groupsHeaderLen {
+		return nil, errFileFormat
+	}
+
+	groups := []sdk.Group{}
+
+	for _, row := range rows[1:] {
+		var group sdk.Group
+		if row[0] == "" {
+			return nil, errFileFormat
 		}
-		names = append(names, string(row[0]))
+		group.Name = row[0]
+
+		if row[1] != "" {
+			if err := json.Unmarshal([]byte(row[1]), &group.Metadata); err != nil {
+				return nil, errFileFormat
+			}
+		}
+
+		if row[2] != "" {
+			group.Description = row[2]
+		}
+
+		groups = append(groups, group)
 	}
+	req := createGroupsReq{
+		token:  token,
+		Groups: groups,
+	}
+
+	return req, nil
 }
 
 func decodeListGroupsRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -2322,6 +2436,10 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		errors.Contains(err, ui.ErrFailedUnshare):
 		w.Header().Set("Location", "/error?error="+url.QueryEscape(displayError.Error()))
 		w.WriteHeader(http.StatusSeeOther)
+	case errors.Contains(err, errInvalidFile):
+		w.WriteHeader(http.StatusUnsupportedMediaType)
+	case errors.Contains(err, errFileFormat):
+		w.WriteHeader(http.StatusBadRequest)
 
 	default:
 		if e, ok := status.FromError(err); ok {

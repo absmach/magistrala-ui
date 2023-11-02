@@ -155,7 +155,8 @@
 														<div class="form-group">
 															<label for="usersFile">
 																Add csv file containing users names and
-																passwords
+																passwords. Find a sample csv file 
+																<a href="https://github.com/ultravioletrs/mainflux-ui/tree/main/samples/users.csv".>here</a>
 															</label>
 															<input
 																type="file"
@@ -348,17 +349,26 @@
 						body: new FormData(form),
 					})
 						.then((response) => {
-							if (response.status === 409) {
-								errorMessage = "users already exist!";
-								showAlert(errorMessage, "bulk");
+							switch (response.status) {
+							case 409:
+								errorMessage= "users already exist!";
+								showAlert(errorMessage,"bulk");
 								return false;
-							} else {
+							case 400:
+								errorMessage= "invalid file contents!";
+								showAlert(errorMessage,"bulk");
+								return false;
+							case 415:
+								errorMessage= "file must be csv!";
+								showAlert(errorMessage,"bulk");
+								return false;
+							default:
 								form.reset();
 								usersModal.hide();
 								window.location.reload();
 								return true;
 							}
-						})
+							})
 						.catch((error) => {
 							console.error("Error submitting bulk users form: ", error);
 							return false;
@@ -386,7 +396,8 @@
 				function closeAlertPopup() {
 					document.getElementById("alert-popup").style.display = "none";
 				}
-			</script>
+
+  			</script>
 		</body>
 	</html>
-{{ end }}
+{{end}}

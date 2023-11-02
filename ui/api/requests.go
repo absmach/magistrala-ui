@@ -68,16 +68,18 @@ func (req createUserReq) validate() error {
 }
 
 type createUsersReq struct {
-	token     string
-	Names     []string               `json:"names"`
-	Emails    []string               `json:"emails"`
-	Passwords []string               `json:"passwords"`
-	Metadata  map[string]interface{} `json:"metadata,omitempty"`
+	token string
+	users []sdk.User
 }
 
 func (req createUsersReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
+	}
+	for _, user := range req.users {
+		if user.Credentials.Secret == "" || user.Credentials.Identity == "" {
+			return errMalformedEntity
+		}
 	}
 
 	return nil
@@ -389,9 +391,8 @@ func (req updateThingOwnerReq) validate() error {
 }
 
 type createThingsReq struct {
-	token     string
-	Names     []string                 `json:"names,omitempty"`
-	Metadatas []map[string]interface{} `json:"metadatas,omitempty"`
+	token  string
+	things []sdk.Thing
 }
 
 func (req createThingsReq) validate() error {
@@ -419,15 +420,18 @@ func (req createChannelReq) validate() error {
 }
 
 type createChannelsReq struct {
-	token     string
-	Names     []string                 `json:"names"`
-	IDs       []string                 `json:"ids,omitempty"`
-	Metadatas []map[string]interface{} `json:"metadatas,omitempty"`
+	token    string
+	Channels []sdk.Channel
 }
 
 func (req createChannelsReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
+	}
+	for _, channel := range req.Channels {
+		if channel.Name == "" {
+			return errMalformedEntity
+		}
 	}
 
 	return nil
@@ -533,15 +537,18 @@ func (req createGroupReq) validate() error {
 }
 
 type createGroupsReq struct {
-	token        string
-	Names        []string                 `json:"names,omitempty"`
-	Descriptions []string                 `json:"descriptions,omitempty"`
-	Metadatas    []map[string]interface{} `json:"metadatas,omitempty"`
+	token  string
+	Groups []sdk.Group
 }
 
 func (req createGroupsReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
+	}
+	for _, group := range req.Groups {
+		if group.Name == "" {
+			return errMalformedEntity
+		}
 	}
 
 	return nil
