@@ -33,6 +33,105 @@
 									</a>
 								</div>
 								<div class="table-responsive table-container">
+									<div class="d-flex flex-row justify-content-between">
+										<h4>User Things</h4>
+										<button
+											role="button"
+											class="btn body-button"
+											onclick="openThingModal()"
+										>
+											<i class="fa-solid fa-plus fs-4"></i>
+										</button>
+										<!-- modal -->
+										<div
+											class="modal fade"
+											id="addThingModal"
+											tabindex="-1"
+											aria-labelledby="addThingModalLabel"
+											aria-hidden="true"
+										>
+											<div class="modal-dialog modal-dialog-centered">
+												<div class="modal-content">
+													<div class="modal-header">
+														<h1
+															class="modal-title fs-5"
+															id="addThingModalLabel"
+														>
+															Add Thing
+														</h1>
+														<button
+															type="button"
+															class="btn-close"
+															data-bs-dismiss="modal"
+															aria-label="Close"
+														></button>
+													</div>
+													<form
+														action="/users/{{ .UserID }}/things/share?item=users"
+														method="post"
+													>
+														<div class="modal-body">
+															<div class="mb-3">
+																<label for="things" class="form-label">
+																	Thing ID
+																</label>
+																<input
+																	type="text"
+																	name="thingFilter"
+																	id="thingFilterAssign"
+																	placeholder="Filter by Thing ID"
+																	oninput="fetchIndividualEntity(this.value,'things')"
+																/>
+																<select
+																	class="form-select"
+																	name="thingID"
+																	id="things"
+																	size="5"
+																	required
+																>
+																	<option disabled>select a thing</option>
+																</select>
+															</div>
+															<div class="mb-3">
+																<label for="relation" class="form-label">
+																	Relation
+																</label>
+																<select
+																	class="form-control"
+																	name="relation"
+																	id="relation"
+																	aria-describedby="relationHelp"
+																	multiple
+																	required
+																>
+																	{{ range $i, $r := .Relations }}
+																		<option value="{{ $r }}">
+																			{{ $r }}
+																		</option>
+																	{{ end }}
+																</select>
+																<div id="relationHelp" class="form-text">
+																	Select Relation.
+																</div>
+															</div>
+															<div class="modal-footer">
+																<button
+																	type="button"
+																	class="btn btn-secondary"
+																	data-bs-dismiss="modal"
+																>
+																	Cancel
+																</button>
+																<button type="submit" class="btn btn-primary">
+																	Assign
+																</button>
+															</div>
+														</div>
+													</form>
+												</div>
+											</div>
+										</div>
+									</div>
 									{{ template "tableheader" . }}
 									<div class="itemsTable">
 										<table id="itemsTable" class="table">
@@ -47,6 +146,7 @@
 												</tr>
 											</thead>
 											<tbody>
+												{{ $userID := .UserID }}
 												{{ range $i, $t := .Things }}
 													{{ $disableButton := false }}
 													<tr>
@@ -68,12 +168,21 @@
 														<td class="meta-col">{{ toJSON $t.Metadata }}</td>
 														<td class="created-col">{{ $t.CreatedAt }}</td>
 														<td class="text-center">
-															<form action="#" method="post">
+															<form
+																action="/users/{{ $userID }}/things/unshare?item=users"
+																method="post"
+															>
 																<input
 																	type="hidden"
 																	name="thingID"
 																	id="thingID"
 																	value="{{ $t.ID }}"
+																/>
+																<input
+																	type="hidden"
+																	name="relation"
+																	id="relation"
+																	value="owner"
 																/>
 																<button
 																	type="submit"
@@ -101,6 +210,83 @@
 				</div>
 			</div>
 			{{ template "footer" }}
+			<script>
+				const thingModal = new bootstrap.Modal(
+					document.getElementById("addThingModal"),
+				);
+				function openThingModal() {
+					thingModal.show();
+					getThing("");
+					getAdditionalThings("");
+				}
+				function fetchIndividualEntity(filterValue, selectId) {
+					const itemSelect = document.getElementById(selectId);
+					if (filterValue === "") {
+						itemSelect.innerHTML = "<option disabled>select a thing</option>";
+						getThing("");
+						getAdditionalThings();
+					} else {
+						itemSelect.innerHTML = "";
+						getThing(filterValue);
+					}
+				}
+				let limit = 5;
+
+				function getThing(name) {
+					fetchThingData(name, 1);
+				}
+				function getAdditionalThings() {
+					var selectElement = document.getElementById("things");
+					var singleOptionHeight =
+						selectElement.querySelector("option").offsetHeight;
+					var selectBoxHeight = selectElement.offsetHeight;
+					var numOptionsBeforeLoad = 2;
+					var lastScrollTop = 0;
+					var currentPageNo = 1;
+					var currentScroll = 0;
+
+					selectElement.addEventListener("scroll", onselectScroll);
+
+					function onselectScroll(event) {
+						var st = selectElement.scrollTop;
+						var totalHeight =
+							selectElement.querySelectorAll("option").length *
+							singleOptionHeight;
+
+						if (st > lastScrollTop) {
+							currentScroll = st + selectBoxHeight;
+							if (
+								currentScroll + numOptionsBeforeLoad * singleOptionHeight >=
+								totalHeight
+							) {
+								currentPageNo++;
+								fetchThingData("", currentPageNo);
+							}
+						}
+
+						lastScrollTop = st;
+					}
+				}
+				function fetchThingData(name, page) {
+					fetch(
+						`/entities?item=things&limit=${limit}&name=${name}&page=${page}`,
+						{
+							method: "GET",
+						},
+					)
+						.then((response) => response.json())
+						.then((data) => {
+							const selectElement = document.getElementById("things");
+							data.data.forEach((thing) => {
+								const option = document.createElement("option");
+								option.value = thing.id;
+								option.text = thing.name;
+								selectElement.appendChild(option);
+							});
+						})
+						.catch((error) => console.error("Error:", error));
+				}
+			</script>
 		</body>
 	</html>
 {{ end }}

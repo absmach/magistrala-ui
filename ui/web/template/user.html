@@ -10,13 +10,25 @@
 						<div class="col-lg-12 mx-auto py-3">
 							<div class="row">
 								<div class="buttons mb-3">
-									<a href="/users/{{.UserID}}/groups" type="button" class="btn body-button">
+									<a
+										href="/users/{{ .UserID }}/groups"
+										type="button"
+										class="btn body-button"
+									>
 										User Groups
 									</a>
-									<!-- <a href="/users/{{.UserID}}/things" type="button" class="btn body-button">
+									<a
+										href="/users/{{ .UserID }}/things"
+										type="button"
+										class="btn body-button"
+									>
 										User Things
-									</a> -->
-									<a href="/users/{{.UserID}}/channels" type="button" class="btn body-button">
+									</a>
+									<a
+										href="/users/{{ .UserID }}/channels"
+										type="button"
+										class="btn body-button"
+									>
 										User Channels
 									</a>
 								</div>
@@ -29,7 +41,8 @@
 										</thead>
 										<tbody>
 											{{ $disableButton := false }}
-											
+
+
 											<tr>
 												<th>Name</th>
 												<td

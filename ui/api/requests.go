@@ -466,6 +466,7 @@ type connectThingReq struct {
 	token   string
 	ThingID string `json:"thingID,omitempty"`
 	ChanID  string `json:"chanID,omitempty"`
+	Item    string `json:"item,omitempty"`
 }
 
 func (req connectThingReq) validate() error {
@@ -478,6 +479,9 @@ func (req connectThingReq) validate() error {
 	if req.ThingID == "" {
 		return errMalformedEntity
 	}
+	if req.Item == "" {
+		return errMalformedEntity
+	}
 	return nil
 }
 
@@ -486,6 +490,7 @@ type shareThingReq struct {
 	ThingID  string `json:"thingID,omitempty"`
 	UserID   string `json:"userID,omitempty"`
 	Relation string `json:"relation,omitempty"`
+	Item     string `json:"item,omitempty"`
 }
 
 func (req shareThingReq) validate() error {
@@ -499,6 +504,9 @@ func (req shareThingReq) validate() error {
 		return errMalformedEntity
 	}
 	if req.Relation == "" {
+		return errMalformedEntity
+	}
+	if req.Item == "" {
 		return errMalformedEntity
 	}
 	return nil
@@ -585,6 +593,7 @@ type assignReq struct {
 	GroupID  string `json:"groupID"`
 	UserID   string `json:"userID"`
 	Relation string `json:"relation"`
+	Item     string `json:"item"`
 }
 
 func (req assignReq) validate() error {
@@ -599,6 +608,9 @@ func (req assignReq) validate() error {
 		return errMalformedEntity
 	}
 	if req.Relation == "" {
+		return errMalformedEntity
+	}
+	if req.Item == "" {
 		return errMalformedEntity
 	}
 
@@ -806,6 +818,7 @@ type addUserToChannelReq struct {
 	ChannelID string `json:"channelID"`
 	UserID    string `json:"userID"`
 	Relation  string `json:"relation"`
+	Item      string `json:"item"`
 }
 
 func (req addUserToChannelReq) validate() error {
@@ -821,6 +834,9 @@ func (req addUserToChannelReq) validate() error {
 	if req.Relation == "" {
 		return errMalformedEntity
 	}
+	if req.Item == "" {
+		return errMalformedEntity
+	}
 	return nil
 }
 
@@ -828,6 +844,7 @@ type addUserGroupToChannelReq struct {
 	token     string
 	GroupID   string `json:"groupID"`
 	ChannelID string `json:"channelID"`
+	Item      string `json:"item"`
 }
 
 func (req addUserGroupToChannelReq) validate() error {
@@ -838,6 +855,9 @@ func (req addUserGroupToChannelReq) validate() error {
 		return errMalformedEntity
 	}
 	if req.GroupID == "" {
+		return errMalformedEntity
+	}
+	if req.Item == "" {
 		return errMalformedEntity
 	}
 	return nil

@@ -28,17 +28,27 @@ import (
 )
 
 const (
-	contentType = "text/html"
-	staticDir   = "ui/web/static"
-	protocol    = "http"
-	pageKey     = "page"
-	limitKey    = "limit"
-	itemKey     = "item"
-	nameKey     = "name"
-	defPage     = 1
-	defLimit    = 10
-	defName     = ""
-	defItem     = ""
+	contentType       = "text/html"
+	staticDir         = "ui/web/static"
+	protocol          = "http"
+	pageKey           = "page"
+	limitKey          = "limit"
+	itemKey           = "item"
+	nameKey           = "name"
+	defPage           = 1
+	defLimit          = 10
+	defName           = ""
+	defItem           = ""
+	usersEndpoint     = "/users"
+	thingsEndpoint    = "/things"
+	channelsEndpoint  = "/channels"
+	groupsEndpoint    = "/groups"
+	bootstrapEndpoint = "/bootstrap"
+	usersItem         = "users"
+	thingsItem        = "things"
+	channelsItem      = "channels"
+	groupsItem        = "groups"
+	membersEndpoint   = "/members"
 )
 
 var (
@@ -215,7 +225,7 @@ func MakeHandler(svc ui.Service, instanceID string) http.Handler {
 
 	r.Post("/users/:id/groups/unassign", kithttp.NewServer(
 		unassignGroupEndpoint(svc),
-		decodeUnassignGroupRequest,
+		decodeAssignGroupRequest,
 		encodeResponse,
 		opts...,
 	))
@@ -236,7 +246,7 @@ func MakeHandler(svc ui.Service, instanceID string) http.Handler {
 
 	r.Post("/users/:id/channels/unassign", kithttp.NewServer(
 		RemoveChannelFromUserEndpoint(svc),
-		decodeRemoveChannelFromUserRequest,
+		decodeAddChannelToUserRequest,
 		encodeResponse,
 		opts...,
 	))
@@ -244,6 +254,20 @@ func MakeHandler(svc ui.Service, instanceID string) http.Handler {
 	r.Get("/users/:id/things", kithttp.NewServer(
 		listUserThingsEndpoint(svc),
 		decodeListUserThingsRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/users/:id/things/share", kithttp.NewServer(
+		shareThingEndpoint(svc),
+		decodeShareThingRequest,
+		encodeResponse,
+		opts...,
+	))
+
+	r.Post("/users/:id/things/unshare", kithttp.NewServer(
+		unshareThingEndpoint(svc),
+		decodeShareThingRequest,
 		encodeResponse,
 		opts...,
 	))
@@ -334,7 +358,7 @@ func MakeHandler(svc ui.Service, instanceID string) http.Handler {
 
 	r.Post("/things/:id/channels/disconnect", kithttp.NewServer(
 		disconnectChannelEndpoint(svc),
-		decodeDisconnectChannel,
+		decodeConnectChannel,
 		encodeResponse,
 		opts...,
 	))
@@ -409,15 +433,15 @@ func MakeHandler(svc ui.Service, instanceID string) http.Handler {
 		opts...,
 	))
 	r.Post("/channels/:id/things/connect", kithttp.NewServer(
-		connectThingEndpoint(svc),
-		decodeConnectThing,
+		connectChannelEndpoint(svc),
+		decodeConnectChannel,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/channels/:id/things/disconnect", kithttp.NewServer(
-		disconnectThingEndpoint(svc),
-		decodeDisconnectThing,
+		disconnectChannelEndpoint(svc),
+		decodeConnectChannel,
 		encodeResponse,
 		opts...,
 	))
@@ -430,14 +454,14 @@ func MakeHandler(svc ui.Service, instanceID string) http.Handler {
 	))
 
 	r.Post("/channels/:id/users/assign", kithttp.NewServer(
-		AddUserToChannelEndpoint(svc),
-		decodeAddUserToChannelRequest,
+		AddChannelToUserEndpoint(svc),
+		decodeAddChannelToUserRequest,
 		encodeResponse,
 		opts...,
 	))
 	r.Post("/channels/:id/users/unassign", kithttp.NewServer(
-		RemoveUserFromChannelEndpoint(svc),
-		decodeRemoveUserFromChannelRequest,
+		RemoveChannelFromUserEndpoint(svc),
+		decodeAddChannelToUserRequest,
 		encodeResponse,
 		opts...,
 	))
@@ -458,7 +482,7 @@ func MakeHandler(svc ui.Service, instanceID string) http.Handler {
 
 	r.Post("/channels/:id/groups/unassign", kithttp.NewServer(
 		removeUserGroupFromChannelEndpoint(svc),
-		decodeRemoveUserGroupFromChannelRequest,
+		decodeAddUserGroupToChannelRequest,
 		encodeResponse,
 		opts...,
 	))
@@ -527,15 +551,15 @@ func MakeHandler(svc ui.Service, instanceID string) http.Handler {
 	))
 
 	r.Post("/groups/:id/users/assign", kithttp.NewServer(
-		assignEndpoint(svc),
-		decodeAssignRequest,
+		assignGroupEndpoint(svc),
+		decodeAssignGroupRequest,
 		encodeResponse,
 		opts...,
 	))
 
 	r.Post("/groups/:id/users/unassign", kithttp.NewServer(
-		unassignEndpoint(svc),
-		decodeUnassignRequest,
+		unassignGroupEndpoint(svc),
+		decodeAssignGroupRequest,
 		encodeResponse,
 		opts...,
 	))
@@ -554,14 +578,14 @@ func MakeHandler(svc ui.Service, instanceID string) http.Handler {
 	))
 
 	r.Post("/groups/:id/channels/assign", kithttp.NewServer(
-		addChannelToUserGroupEndpoint(svc),
-		decodeAddChannelToUserGroupRequest,
+		addUserGroupToChannelEndpoint(svc),
+		decodeAddUserGroupToChannelRequest,
 		encodeResponse,
 		opts...,
 	))
 	r.Post("/groups/:id/channels/unassign", kithttp.NewServer(
-		removeChannelFromUserGroupEndpoint(svc),
-		decodeRemoveChannelFromUserGroupRequest,
+		removeUserGroupFromChannelEndpoint(svc),
+		decodeAddUserGroupToChannelRequest,
 		encodeResponse,
 		opts...,
 	))
@@ -1016,31 +1040,30 @@ func decodeAssignGroupRequest(_ context.Context, r *http.Request) (interface{}, 
 		return nil, err
 	}
 
-	req := assignReq{
-		token:    token,
-		UserID:   bone.GetValue(r, "id"),
-		GroupID:  r.Form.Get("groupID"),
-		Relation: r.Form.Get("relation"),
-	}
+	var req assignReq
 
-	return req, nil
-}
-
-func decodeUnassignGroupRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
+	item, err := readStringQuery(r, itemKey, defItem)
 	if err != nil {
 		return nil, err
 	}
 
-	if err := r.ParseForm(); err != nil {
-		return nil, err
-	}
-
-	req := assignReq{
-		token:    token,
-		UserID:   bone.GetValue(r, "id"),
-		GroupID:  r.Form.Get("groupID"),
-		Relation: r.Form.Get("relation"),
+	switch item {
+	case usersItem:
+		req = assignReq{
+			token:    token,
+			UserID:   bone.GetValue(r, "id"),
+			GroupID:  r.Form.Get("groupID"),
+			Relation: r.Form.Get("relation"),
+			Item:     item,
+		}
+	case groupsItem:
+		req = assignReq{
+			token:    token,
+			GroupID:  bone.GetValue(r, "id"),
+			UserID:   r.Form.Get("userID"),
+			Relation: r.Form.Get("relation"),
+			Item:     item,
+		}
 	}
 
 	return req, nil
@@ -1069,6 +1092,45 @@ func decodeListUserThingsRequest(_ context.Context, r *http.Request) (interface{
 	return req, nil
 }
 
+func decodeShareThingRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	if err := r.ParseForm(); err != nil {
+		return nil, err
+	}
+
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	var req shareThingReq
+
+	item, err := readStringQuery(r, itemKey, defItem)
+	if err != nil {
+		return nil, err
+	}
+
+	switch item {
+	case usersItem:
+		req = shareThingReq{
+			token:    token,
+			UserID:   bone.GetValue(r, "id"),
+			ThingID:  r.Form.Get("thingID"),
+			Relation: r.Form.Get("relation"),
+			Item:     item,
+		}
+	case thingsItem:
+		req = shareThingReq{
+			token:    token,
+			ThingID:  bone.GetValue(r, "id"),
+			UserID:   r.Form.Get("userID"),
+			Relation: r.Form.Get("relation"),
+			Item:     item,
+		}
+	}
+
+	return req, nil
+}
+
 func decodeAddChannelToUserRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	if err := r.ParseForm(); err != nil {
 		return nil, err
@@ -1079,35 +1141,33 @@ func decodeAddChannelToUserRequest(_ context.Context, r *http.Request) (interfac
 		return nil, err
 	}
 
-	req := addUserToChannelReq{
-		token:     token,
-		UserID:    bone.GetValue(r, "id"),
-		Relation:  r.Form.Get("relation"),
-		ChannelID: r.Form.Get("channelID"),
-	}
+	var req addUserToChannelReq
 
-	return req, nil
-}
-
-func decodeRemoveChannelFromUserRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	if err := r.ParseForm(); err != nil {
-		return nil, err
-	}
-
-	token, err := tokenFromCookie(r, "token")
+	item, err := readStringQuery(r, itemKey, defItem)
 	if err != nil {
 		return nil, err
 	}
 
-	req := addUserToChannelReq{
-		token:     token,
-		UserID:    bone.GetValue(r, "id"),
-		Relation:  r.Form.Get("relation"),
-		ChannelID: r.Form.Get("channelID"),
+	switch item {
+	case usersItem:
+		req = addUserToChannelReq{
+			token:     token,
+			UserID:    bone.GetValue(r, "id"),
+			Relation:  r.Form.Get("relation"),
+			ChannelID: r.Form.Get("channelID"),
+			Item:      item,
+		}
+	case channelsItem:
+		req = addUserToChannelReq{
+			token:     token,
+			ChannelID: bone.GetValue(r, "id"),
+			Relation:  r.Form.Get("relation"),
+			UserID:    r.Form.Get("userID"),
+			Item:      item,
+		}
 	}
 
 	return req, nil
-
 }
 
 func decodeListUserChannelsRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -1384,26 +1444,6 @@ func decodeThingsCreation(_ context.Context, r *http.Request) (interface{}, erro
 	return req, nil
 }
 
-func decodeShareThingRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	if err := r.ParseForm(); err != nil {
-		return nil, err
-	}
-
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-
-	req := shareThingReq{
-		token:    token,
-		ThingID:  bone.GetValue(r, "id"),
-		UserID:   r.Form.Get("userID"),
-		Relation: r.Form.Get("relation"),
-	}
-
-	return req, nil
-}
-
 func decodeListThingUsersRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	token, err := tokenFromCookie(r, "token")
 	if err != nil {
@@ -1559,24 +1599,6 @@ func decodeListChannelsRequest(_ context.Context, r *http.Request) (interface{},
 	return req, nil
 }
 
-func decodeConnectThing(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-	if err := r.ParseForm(); err != nil {
-		return nil, err
-	}
-
-	req := connectThingReq{
-		token:   token,
-		ChanID:  bone.GetValue(r, "id"),
-		ThingID: r.Form.Get("thingID"),
-	}
-
-	return req, nil
-}
-
 func decodeConnectChannel(_ context.Context, r *http.Request) (interface{}, error) {
 	token, err := tokenFromCookie(r, "token")
 	if err != nil {
@@ -1586,44 +1608,29 @@ func decodeConnectChannel(_ context.Context, r *http.Request) (interface{}, erro
 	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
-	req := connectThingReq{
-		token:   token,
-		ChanID:  r.Form.Get("channelID"),
-		ThingID: bone.GetValue(r, "id"),
-	}
 
-	return req, nil
-}
-
-func decodeDisconnectThing(_ context.Context, r *http.Request) (interface{}, error) {
-	if err := r.ParseForm(); err != nil {
-		return nil, err
-	}
-	token, err := tokenFromCookie(r, "token")
+	item, err := readStringQuery(r, itemKey, defItem)
 	if err != nil {
 		return nil, err
 	}
-	req := connectThingReq{
-		token:   token,
-		ThingID: r.Form.Get("thingID"),
-		ChanID:  bone.GetValue(r, "id"),
-	}
 
-	return req, nil
-}
+	var req connectThingReq
 
-func decodeDisconnectChannel(_ context.Context, r *http.Request) (interface{}, error) {
-	if err := r.ParseForm(); err != nil {
-		return nil, err
-	}
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-	req := connectThingReq{
-		token:   token,
-		ChanID:  r.Form.Get("channelID"),
-		ThingID: bone.GetValue(r, "id"),
+	switch item {
+	case thingsItem:
+		req = connectThingReq{
+			token:   token,
+			ChanID:  r.Form.Get("channelID"),
+			ThingID: bone.GetValue(r, "id"),
+			Item:    item,
+		}
+	case channelsItem:
+		req = connectThingReq{
+			token:   token,
+			ChanID:  bone.GetValue(r, "id"),
+			ThingID: r.Form.Get("thingID"),
+			Item:    item,
+		}
 	}
 
 	return req, nil
@@ -1641,48 +1648,6 @@ func decodeChannelStatusUpdate(_ context.Context, r *http.Request) (interface{},
 	}
 
 	return req, nil
-}
-
-func decodeAddUserToChannelRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	if err := r.ParseForm(); err != nil {
-		return nil, err
-	}
-
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-
-	req := addUserToChannelReq{
-		token:     token,
-		ChannelID: bone.GetValue(r, "id"),
-		Relation:  r.Form.Get("relation"),
-		UserID:    r.Form.Get("userID"),
-	}
-
-	return req, nil
-
-}
-
-func decodeRemoveUserFromChannelRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	if err := r.ParseForm(); err != nil {
-		return nil, err
-	}
-
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-
-	req := addUserToChannelReq{
-		token:     token,
-		ChannelID: bone.GetValue(r, "id"),
-		Relation:  r.Form.Get("relation"),
-		UserID:    r.Form.Get("userID"),
-	}
-
-	return req, nil
-
 }
 
 func decodeListChannelUsersRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -1718,33 +1683,30 @@ func decodeAddUserGroupToChannelRequest(_ context.Context, r *http.Request) (int
 		return nil, err
 	}
 
-	req := addUserGroupToChannelReq{
-		token:     token,
-		ChannelID: bone.GetValue(r, "id"),
-		GroupID:   r.Form.Get("groupID"),
-	}
-
-	return req, nil
-
-}
-
-func decodeRemoveUserGroupFromChannelRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	if err := r.ParseForm(); err != nil {
-		return nil, err
-	}
-
-	token, err := tokenFromCookie(r, "token")
+	item, err := readStringQuery(r, itemKey, defItem)
 	if err != nil {
 		return nil, err
 	}
 
-	req := addUserGroupToChannelReq{
-		token:     token,
-		ChannelID: bone.GetValue(r, "id"),
-		GroupID:   r.Form.Get("groupID"),
+	var req addUserGroupToChannelReq
+
+	switch item {
+	case channelsItem:
+		req = addUserGroupToChannelReq{
+			token:     token,
+			ChannelID: bone.GetValue(r, "id"),
+			GroupID:   r.Form.Get("groupID"),
+		}
+	case groupsItem:
+		req = addUserGroupToChannelReq{
+			token:     token,
+			GroupID:   bone.GetValue(r, "id"),
+			ChannelID: r.Form.Get("channelID"),
+		}
 	}
 
 	return req, nil
+
 }
 
 func decodeListChannelUserGroupsRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -1898,46 +1860,6 @@ func decodeGroupUpdate(_ context.Context, r *http.Request) (interface{}, error) 
 	return req, nil
 }
 
-func decodeAssignRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-
-	if err := r.ParseForm(); err != nil {
-		return nil, err
-	}
-
-	req := assignReq{
-		token:    token,
-		GroupID:  bone.GetValue(r, "id"),
-		UserID:   r.Form.Get("userID"),
-		Relation: r.Form.Get("relation"),
-	}
-
-	return req, nil
-}
-
-func decodeUnassignRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-
-	if err := r.ParseForm(); err != nil {
-		return nil, err
-	}
-
-	req := assignReq{
-		token:    token,
-		GroupID:  bone.GetValue(r, "id"),
-		UserID:   r.Form.Get("userID"),
-		Relation: r.Form.Get("relation"),
-	}
-
-	return req, nil
-}
-
 func decodeGroupStatusUpdate(_ context.Context, r *http.Request) (interface{}, error) {
 	token, err := tokenFromCookie(r, "token")
 	if err != nil {
@@ -1996,45 +1918,6 @@ func decodeListChildrenRequest(_ context.Context, r *http.Request) (interface{},
 		page:  page,
 	}
 	return req, nil
-}
-
-func decodeAddChannelToUserGroupRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	if err := r.ParseForm(); err != nil {
-		return nil, err
-	}
-
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-
-	req := addUserGroupToChannelReq{
-		token:     token,
-		GroupID:   bone.GetValue(r, "id"),
-		ChannelID: r.Form.Get("channelID"),
-	}
-
-	return req, nil
-}
-
-func decodeRemoveChannelFromUserGroupRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	if err := r.ParseForm(); err != nil {
-		return nil, err
-	}
-
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-
-	req := addUserGroupToChannelReq{
-		token:     token,
-		GroupID:   bone.GetValue(r, "id"),
-		ChannelID: r.Form.Get("channelID"),
-	}
-
-	return req, nil
-
 }
 
 func decodeListUserGroupChannelsRequest(_ context.Context, r *http.Request) (interface{}, error) {

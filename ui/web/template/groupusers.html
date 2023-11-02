@@ -57,7 +57,7 @@
 														></button>
 													</div>
 													<form
-														action="/groups/{{ .GroupID }}/users/assign"
+														action="/groups/{{ .GroupID }}/users/assign?item=groups"
 														method="post"
 													>
 														<div class="modal-body">
@@ -159,7 +159,7 @@
 														<td class="created-col">{{ $u.CreatedAt }}</td>
 														<td class="text-center">
 															<form
-																action="/groups/{{ $groupID }}/users/unassign"
+																action="/groups/{{ $groupID }}/users/unassign?item=groups"
 																method="post"
 															>
 																<input
