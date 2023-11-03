@@ -149,8 +149,13 @@
 													>
 														<div class="form-group">
 															<label for="groupsFile">
-																Add csv file containing groups names. 
-																Find a sample csv file <a href="https://github.com/ultravioletrs/mainflux-ui/tree/main/samples/groups.csv">here</a>
+																Add csv file containing groups names. Find a
+																sample csv file
+																<a
+																	href="https://github.com/ultravioletrs/mainflux-ui/tree/main/samples/groups.csv"
+																>
+																	here
+																</a>
 															</label>
 															<input
 																type="file"
@@ -326,35 +331,35 @@
 						method: "POST",
 						body: new FormData(form),
 					})
-					.then (response => {
-						switch (response.status) {
-					case 409:
-						errorMessage= "groups already exist!";
-						showAlert(errorMessage,"bulk");
-						return false;
-					case 400:
-						errorMessage= "invalid file contents!";
-						showAlert(errorMessage,"bulk");
-						return false;
-					case 415:
-						errorMessage= "file must be csv!";
-						showAlert(errorMessage,"bulk");
-						return false;
-					case 500:
-						errorMessage= "try again!"
-						showAlert(errorMessage,"bulk");
-						return false;
-					default:
-						form.reset();
-						groupsModal.hide();
-						window.location.reload();
-						return true;
-					}
-					})
-					.catch (error => {
-					console.error("Error submitting bulk groups form: ", error);
-					return false;
-					});
+						.then((response) => {
+							switch (response.status) {
+								case 409:
+									errorMessage = "groups already exist!";
+									showAlert(errorMessage, "bulk");
+									return false;
+								case 400:
+									errorMessage = "invalid file contents!";
+									showAlert(errorMessage, "bulk");
+									return false;
+								case 415:
+									errorMessage = "file must be csv!";
+									showAlert(errorMessage, "bulk");
+									return false;
+								case 500:
+									errorMessage = "try again!";
+									showAlert(errorMessage, "bulk");
+									return false;
+								default:
+									form.reset();
+									groupsModal.hide();
+									window.location.reload();
+									return true;
+							}
+						})
+						.catch((error) => {
+							console.error("Error submitting bulk groups form: ", error);
+							return false;
+						});
 				}
 
 				function showAlert(errorMessage, modal) {

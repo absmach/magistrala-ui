@@ -202,7 +202,7 @@
 														<td>
 															<div class="copy-con-container">
 																<a
-																	href="{{ printf "/bootstrap/%s" $t.ThingID }}"
+																	href="{{ printf "/bootstraps/%s" $t.ThingID }}"
 																>
 																	{{ $t.ThingID }}
 																</a>
@@ -292,7 +292,7 @@
 					document.getElementById("addBootstrapModal"),
 				);
 
-				function openModal(){
+				function openModal() {
 					bootstrapsModal.show();
 					getThings("");
 					getAdditionalThings();
@@ -368,7 +368,6 @@
 						})
 						.catch((error) => console.error("Error:", error));
 				}
-
 			</script>
 		</body>
 	</html>

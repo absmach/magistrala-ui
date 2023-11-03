@@ -15,42 +15,53 @@ import (
 	"strings"
 	"time"
 
-	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/go-zoo/bone"
+	"github.com/ultravioletrs/mainflux-ui/ui"
+
+	"github.com/golang-jwt/jwt"
+
+	"github.com/go-chi/chi/v5"
+	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/mainflux/mainflux"
 	"github.com/mainflux/mainflux/pkg/errors"
 	"github.com/mainflux/mainflux/pkg/messaging"
 	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/ultravioletrs/mainflux-ui/ui"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 const (
-	contentType       = "text/html"
-	staticDir         = "ui/web/static"
-	protocol          = "http"
-	pageKey           = "page"
-	limitKey          = "limit"
-	itemKey           = "item"
-	nameKey           = "name"
-	relationKey       = "relation"
-	defPage           = 1
-	defLimit          = 10
-	defName           = ""
-	defItem           = ""
-	defRelation       = ""
-	usersEndpoint     = "/users"
-	thingsEndpoint    = "/things"
-	channelsEndpoint  = "/channels"
-	groupsEndpoint    = "/groups"
-	bootstrapEndpoint = "/bootstrap"
-	usersItem         = "users"
-	thingsItem        = "things"
-	channelsItem      = "channels"
-	groupsItem        = "groups"
-	membersEndpoint   = "/members"
+	htmContentType          = "text/html"
+	jsonContentType         = "application/json"
+	staticDir               = "ui/web/static"
+	protocol                = "http"
+	pageKey                 = "page"
+	limitKey                = "limit"
+	itemKey                 = "item"
+	nameKey                 = "name"
+	refererKey              = "referer_url"
+	relationKey             = "relation"
+	defPage                 = 1
+	defLimit                = 10
+	defName                 = ""
+	defItem                 = ""
+	defRelation             = ""
+	defReferer              = ""
+	usersAPIEndpoint        = "/users"
+	thingsAPIEndpoint       = "/things"
+	channelsAPIEndpoint     = "/channels"
+	groupsAPIEndpoint       = "/groups"
+	bootstrapAPIEndpoint    = "/bootstrap"
+	membersAPIEndpoint      = "/members"
+	loginAPIEndpoint        = "/login"
+	tokenRefreshAPIEndpoint = "/token/refresh"
+	usersItem               = "users"
+	thingsItem              = "things"
+	channelsItem            = "channels"
+	groupsItem              = "groups"
+	accessTokenKey          = "token"
+	refreshTokenKey         = "refresh_token"
 )
 
 var (
@@ -61,11 +72,9 @@ var (
 	errInvalidQueryParams = errors.New("invalid query parameters")
 	errFileFormat         = errors.New("invalid file format")
 	errInvalidFile        = errors.New("unsupported file type")
-	referer               = ""
-
-	clientsHeaderLen = 5
-	groupsHeaderLen  = 3
-	minRows          = 2
+	clientsHeaderLen      = 5
+	groupsHeaderLen       = 3
+	minRows               = 2
 )
 
 type number interface {
@@ -73,617 +82,635 @@ type number interface {
 }
 
 // MakeHandler returns a HTTP handler for API endpoints.
-func MakeHandler(svc ui.Service, instanceID string) http.Handler {
+func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 	opts := []kithttp.ServerOption{
 		kithttp.ServerErrorEncoder(encodeError),
 	}
-
-	r := bone.New()
-	r.Get("/", kithttp.NewServer(
-		indexEndpoint(svc),
-		decodeIndexRequest,
-		encodeResponse,
-		opts...,
-	))
 
 	r.Get("/login", kithttp.NewServer(
 		loginEndpoint(svc),
 		decodeLoginRequest,
 		encodeResponse,
 		opts...,
-	))
+	).ServeHTTP)
 
 	r.Post("/login", kithttp.NewServer(
 		tokenEndpoint(svc),
 		decodeTokenRequest,
 		encodeResponse,
 		opts...,
-	))
+	).ServeHTTP)
 
-	r.Get("/refresh_token", kithttp.NewServer(
+	r.Get("/token/refresh", kithttp.NewServer(
 		refreshTokenEndpoint(svc),
 		decodeRefreshTokenRequest,
 		encodeResponse,
 		opts...,
-	))
+	).ServeHTTP)
 
 	r.Get("/logout", kithttp.NewServer(
 		logoutEndpoint(svc),
 		decodeLogoutRequest,
 		encodeResponse,
 		opts...,
-	))
+	).ServeHTTP)
 
-	r.Post("/password", kithttp.NewServer(
-		updatePasswordEndpoint(svc),
-		decodePasswordUpdate,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/password", kithttp.NewServer(
-		showUpdatePasswordEndpoint(svc),
-		decodeShowPasswordUpdate,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/password/reset", kithttp.NewServer(
+	r.Post("/reset-request", kithttp.NewServer(
 		passwordResetRequestEndpoint(svc),
 		decodePasswordResetRequest,
 		encodeResponse,
 		opts...,
-	))
-	r.Post("/reset-request", kithttp.NewServer(
-		passwordResetEndpoint(svc),
-		decodePasswordReset,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/reset-request", kithttp.NewServer(
-		showPasswordResetEndpoint(svc),
-		decodeShowPasswordReset,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/users", kithttp.NewServer(
-		createUserEndpoint(svc),
-		decodeUserCreation,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/users/bulk", kithttp.NewServer(
-		createUsersEndpoint(svc),
-		decodeUsersCreation,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/users", kithttp.NewServer(
-		listUsersEndpoint(svc),
-		decodeListUsersRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/users/enabled", kithttp.NewServer(
-		enableUserEndpoint(svc),
-		decodeUserStatusUpdate,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/users/disabled", kithttp.NewServer(
-		disableUserEndpoint(svc),
-		decodeUserStatusUpdate,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/users/:id", kithttp.NewServer(
-		viewUserEndpoint(svc),
-		decodeView,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/users/:id", kithttp.NewServer(
-		updateUserEndpoint(svc),
-		decodeUserUpdate,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/users/:id/tags", kithttp.NewServer(
-		updateUserTagsEndpoint(svc),
-		decodeUserTagsUpdate,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/users/:id/identity", kithttp.NewServer(
-		updateUserIdentityEndpoint(svc),
-		decodeUserIdentityUpdate,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/users/:id/groups", kithttp.NewServer(
-		listUserGroupsEndpoint(svc),
-		decodeListUserGroupsRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/users/:id/groups/assign", kithttp.NewServer(
-		assignGroupEndpoint(svc),
-		decodeAssignGroupRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/users/:id/groups/unassign", kithttp.NewServer(
-		unassignGroupEndpoint(svc),
-		decodeAssignGroupRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/users/:id/channels", kithttp.NewServer(
-		listUserChannelsEndpoint(svc),
-		decodeListUserChannelsRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/users/:id/channels/assign", kithttp.NewServer(
-		AddChannelToUserEndpoint(svc),
-		decodeAddChannelToUserRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/users/:id/channels/unassign", kithttp.NewServer(
-		RemoveChannelFromUserEndpoint(svc),
-		decodeAddChannelToUserRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/users/:id/things", kithttp.NewServer(
-		listUserThingsEndpoint(svc),
-		decodeListUserThingsRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/users/:id/things/share", kithttp.NewServer(
-		shareThingEndpoint(svc),
-		decodeShareThingRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/users/:id/things/unshare", kithttp.NewServer(
-		unshareThingEndpoint(svc),
-		decodeShareThingRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/things", kithttp.NewServer(
-		createThingEndpoint(svc),
-		decodeThingCreation,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/things/bulk", kithttp.NewServer(
-		createThingsEndpoint(svc),
-		decodeThingsCreation,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/things", kithttp.NewServer(
-		listThingsEndpoint(svc),
-		decodeListThingsRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/things/enabled", kithttp.NewServer(
-		enableThingEndpoint(svc),
-		decodeThingStatusUpdate,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/things/disabled", kithttp.NewServer(
-		disableThingEndpoint(svc),
-		decodeThingStatusUpdate,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/things/:id", kithttp.NewServer(
-		viewThingEndpoint(svc),
-		decodeView,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/things/:id", kithttp.NewServer(
-		updateThingEndpoint(svc),
-		decodeThingUpdate,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/things/:id/tags", kithttp.NewServer(
-		updateThingTagsEndpoint(svc),
-		decodeThingTagsUpdate,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/things/:id/secret", kithttp.NewServer(
-		updateThingSecretEndpoint(svc),
-		decodeThingSecretUpdate,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/things/:id/owner", kithttp.NewServer(
-		updateThingOwnerEndpoint(svc),
-		decodeThingOwnerUpdate,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/things/:id/channels", kithttp.NewServer(
-		listChannelsByThingEndpoint(svc),
-		decodeListEntityByIDRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/things/:id/channels/connect", kithttp.NewServer(
-		connectChannelEndpoint(svc),
-		decodeConnectChannel,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/things/:id/channels/disconnect", kithttp.NewServer(
-		disconnectChannelEndpoint(svc),
-		decodeConnectChannel,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/things/:id/share", kithttp.NewServer(
-		shareThingEndpoint(svc),
-		decodeShareThingRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/things/:id/unshare", kithttp.NewServer(
-		unshareThingEndpoint(svc),
-		decodeShareThingRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/things/:id/users", kithttp.NewServer(
-		listThingUsersEndpoint(svc),
-		decodeListThingUsersRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/channels", kithttp.NewServer(
-		createChannelEndpoint(svc),
-		decodeChannelCreation,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/channels/bulk", kithttp.NewServer(
-		createChannelsEndpoint(svc),
-		decodeChannelsCreation,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/channels/enabled", kithttp.NewServer(
-		enableChannelEndpoint(svc),
-		decodeChannelStatusUpdate,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/channels/disabled", kithttp.NewServer(
-		disableChannelEndpoint(svc),
-		decodeChannelStatusUpdate,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/channels/:id", kithttp.NewServer(
-		viewChannelEndpoint(svc),
-		decodeView,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/channels/:id", kithttp.NewServer(
-		updateChannelEndpoint(svc),
-		decodeChannelUpdate,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/channels", kithttp.NewServer(
-		listChannelsEndpoint(svc),
-		decodeListChannelsRequest,
-		encodeResponse,
-		opts...,
-	))
-	r.Post("/channels/:id/things/connect", kithttp.NewServer(
-		connectChannelEndpoint(svc),
-		decodeConnectChannel,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/channels/:id/things/disconnect", kithttp.NewServer(
-		disconnectChannelEndpoint(svc),
-		decodeConnectChannel,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/channels/:id/things", kithttp.NewServer(
-		listThingsByChannelEndpoint(svc),
-		decodeListEntityByIDRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/channels/:id/users/assign", kithttp.NewServer(
-		AddChannelToUserEndpoint(svc),
-		decodeAddChannelToUserRequest,
-		encodeResponse,
-		opts...,
-	))
-	r.Post("/channels/:id/users/unassign", kithttp.NewServer(
-		RemoveChannelFromUserEndpoint(svc),
-		decodeAddChannelToUserRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/channels/:id/users", kithttp.NewServer(
-		ListChannelUsersEndpoint(svc),
-		decodeListChannelUsersRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/channels/:id/groups/assign", kithttp.NewServer(
-		addUserGroupToChannelEndpoint(svc),
-		decodeAddUserGroupToChannelRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/channels/:id/groups/unassign", kithttp.NewServer(
-		removeUserGroupFromChannelEndpoint(svc),
-		decodeAddUserGroupToChannelRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/channels/:id/groups", kithttp.NewServer(
-		ListChannelUserGroupsEndpoint(svc),
-		decodeListChannelUserGroupsRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/groups", kithttp.NewServer(
-		createGroupEndpoint(svc),
-		decodeGroupCreation,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/groups", kithttp.NewServer(
-		listGroupsEndpoint(svc),
-		decodeListGroupsRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/groups/bulk", kithttp.NewServer(
-		createGroupsEndpoint(svc),
-		decodeGroupsCreation,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/groups/enabled", kithttp.NewServer(
-		enableGroupEndpoint(svc),
-		decodeGroupStatusUpdate,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/groups/disabled", kithttp.NewServer(
-		disableGroupEndpoint(svc),
-		decodeGroupStatusUpdate,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/groups/:id", kithttp.NewServer(
-		viewGroupEndpoint(svc),
-		decodeView,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/groups/:id/users", kithttp.NewServer(
-		listGroupUsersEndpoint(svc),
-		decodeListEntityByIDRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/groups/:id", kithttp.NewServer(
-		updateGroupEndpoint(svc),
-		decodeGroupUpdate,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/groups/:id/users/assign", kithttp.NewServer(
-		assignGroupEndpoint(svc),
-		decodeAssignGroupRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/groups/:id/users/unassign", kithttp.NewServer(
-		unassignGroupEndpoint(svc),
-		decodeAssignGroupRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/groups/:id/parents", kithttp.NewServer(
-		listParentsEndpoint(svc),
-		decodeListParentsRequest,
-		encodeResponse,
-		opts...,
-	))
-	r.Get("/groups/:id/children", kithttp.NewServer(
-		listChildrenEndpoint(svc),
-		decodeListChildrenRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/groups/:id/channels/assign", kithttp.NewServer(
-		addUserGroupToChannelEndpoint(svc),
-		decodeAddUserGroupToChannelRequest,
-		encodeResponse,
-		opts...,
-	))
-	r.Post("/groups/:id/channels/unassign", kithttp.NewServer(
-		removeUserGroupFromChannelEndpoint(svc),
-		decodeAddUserGroupToChannelRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/groups/:id/channels", kithttp.NewServer(
-		listUserGroupChannelsEndpoint(svc),
-		decodeListUserGroupChannelsRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/messages", kithttp.NewServer(
-		publishMessageEndpoint(svc),
-		decodePublishRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/readmessages", kithttp.NewServer(
-		readMessageEndpoint(svc),
-		decodeReadMessageRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/bootstraps", kithttp.NewServer(
-		listBootstrap(svc),
-		decodeListBoostrapRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/bootstraps", kithttp.NewServer(
-		createBootstrap(svc),
-		decodeCreateBootstrapRequest,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/bootstrap/:id", kithttp.NewServer(
-		viewBootstrap(svc),
-		decodeView,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/bootstrap/:id", kithttp.NewServer(
-		updateBootstrap(svc),
-		decodeUpdateBootstrap,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/bootstrap/:id/certs", kithttp.NewServer(
-		updateBootstrapCerts(svc),
-		decodeUpdateBootstrapCerts,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/bootstrap/:id/connections", kithttp.NewServer(
-		updateBootstrapConnections(svc),
-		decodeUpdateBootstrapConnections,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Get("/bootstrap/:id/terminal", kithttp.NewServer(
-		getTerminalEndpoint(svc),
-		decodeView,
-		encodeResponse,
-		opts...,
-	))
-
-	r.Post("/bootstrap/:id/terminal/input", kithttp.NewServer(
-		handleTerminalInputEndpoint(svc),
-		decodeTerminalCommandRequest,
-		encodeJSONResponse,
-		opts...,
-	))
-
-	r.Get("/entities", kithttp.NewServer(
-		getEntitiesEndpoint(svc),
-		decodeGetEntitiesRequest,
-		encodeResponse,
-		opts...,
-	))
+	).ServeHTTP)
 
 	r.Get("/error", kithttp.NewServer(
 		errorPageEndpoint(svc),
 		decodeError,
 		encodeResponse,
 		opts...,
-	))
+	).ServeHTTP)
 
-	r.GetFunc("/health", mainflux.Health("ui", instanceID))
+	r.Post("/password/reset", kithttp.NewServer(
+		passwordResetEndpoint(svc),
+		decodePasswordReset,
+		encodeResponse,
+		opts...,
+	).ServeHTTP)
+
+	r.Get("/password/reset", kithttp.NewServer(
+		showPasswordResetEndpoint(svc),
+		decodeShowPasswordReset,
+		encodeResponse,
+		opts...,
+	).ServeHTTP)
+
+	r.Route("/", func(r chi.Router) {
+		r.Use(TokenMiddleware)
+		r.Get("/", http.HandlerFunc(kithttp.NewServer(
+			indexEndpoint(svc),
+			decodeIndexRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP))
+
+		r.Get("/entities", kithttp.NewServer(
+			getEntitiesEndpoint(svc),
+			decodeGetEntitiesRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
+
+		r.Post("/password", kithttp.NewServer(
+			updatePasswordEndpoint(svc),
+			decodePasswordUpdate,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
+
+		r.Get("/password", kithttp.NewServer(
+			showUpdatePasswordEndpoint(svc),
+			decodeShowPasswordUpdate,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
+
+		r.Route("/users", func(r chi.Router) {
+			r.Post("/", kithttp.NewServer(
+				createUserEndpoint(svc),
+				decodeUserCreation,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/bulk", kithttp.NewServer(
+				createUsersEndpoint(svc),
+				decodeUsersCreation,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/", kithttp.NewServer(
+				listUsersEndpoint(svc),
+				decodeListUsersRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/enabled", kithttp.NewServer(
+				enableUserEndpoint(svc),
+				decodeUserStatusUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/disabled", kithttp.NewServer(
+				disableUserEndpoint(svc),
+				decodeUserStatusUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/{id}", kithttp.NewServer(
+				viewUserEndpoint(svc),
+				decodeView,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}", kithttp.NewServer(
+				updateUserEndpoint(svc),
+				decodeUserUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/tags", kithttp.NewServer(
+				updateUserTagsEndpoint(svc),
+				decodeUserTagsUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/identity", kithttp.NewServer(
+				updateUserIdentityEndpoint(svc),
+				decodeUserIdentityUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/{id}/groups", kithttp.NewServer(
+				listUserGroupsEndpoint(svc),
+				decodeListUserGroupsRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/groups/assign", kithttp.NewServer(
+				assignGroupEndpoint(svc),
+				decodeAssignGroupRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/groups/unassign", kithttp.NewServer(
+				unassignGroupEndpoint(svc),
+				decodeAssignGroupRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/{id}/channels", kithttp.NewServer(
+				listUserChannelsEndpoint(svc),
+				decodeListUserChannelsRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/channels/assign", kithttp.NewServer(
+				AddChannelToUserEndpoint(svc),
+				decodeAddChannelToUserRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/channels/unassign", kithttp.NewServer(
+				RemoveChannelFromUserEndpoint(svc),
+				decodeAddChannelToUserRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/{id}/things", kithttp.NewServer(
+				listUserThingsEndpoint(svc),
+				decodeListUserThingsRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/things/share", kithttp.NewServer(
+				shareThingEndpoint(svc),
+				decodeShareThingRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/things/unshare", kithttp.NewServer(
+				unshareThingEndpoint(svc),
+				decodeShareThingRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+		})
+
+		r.Route("/things", func(r chi.Router) {
+			r.Post("/", kithttp.NewServer(
+				createThingEndpoint(svc),
+				decodeThingCreation,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/bulk", kithttp.NewServer(
+				createThingsEndpoint(svc),
+				decodeThingsCreation,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/", kithttp.NewServer(
+				listThingsEndpoint(svc),
+				decodeListThingsRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/enabled", kithttp.NewServer(
+				enableThingEndpoint(svc),
+				decodeThingStatusUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/disabled", kithttp.NewServer(
+				disableThingEndpoint(svc),
+				decodeThingStatusUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/{id}", kithttp.NewServer(
+				viewThingEndpoint(svc),
+				decodeView,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}", kithttp.NewServer(
+				updateThingEndpoint(svc),
+				decodeThingUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/tags", kithttp.NewServer(
+				updateThingTagsEndpoint(svc),
+				decodeThingTagsUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/secret", kithttp.NewServer(
+				updateThingSecretEndpoint(svc),
+				decodeThingSecretUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/owner", kithttp.NewServer(
+				updateThingOwnerEndpoint(svc),
+				decodeThingOwnerUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/{id}/channels", kithttp.NewServer(
+				listChannelsByThingEndpoint(svc),
+				decodeListEntityByIDRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/channels/connect", kithttp.NewServer(
+				connectChannelEndpoint(svc),
+				decodeConnectChannel,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/channels/disconnect", kithttp.NewServer(
+				disconnectChannelEndpoint(svc),
+				decodeConnectChannel,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/share", kithttp.NewServer(
+				shareThingEndpoint(svc),
+				decodeShareThingRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/unshare", kithttp.NewServer(
+				unshareThingEndpoint(svc),
+				decodeShareThingRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/{id}/users", kithttp.NewServer(
+				listThingUsersEndpoint(svc),
+				decodeListThingUsersRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+		})
+
+		r.Route("/channels", func(r chi.Router) {
+			r.Post("/", kithttp.NewServer(
+				createChannelEndpoint(svc),
+				decodeChannelCreation,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/bulk", kithttp.NewServer(
+				createChannelsEndpoint(svc),
+				decodeChannelsCreation,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/", kithttp.NewServer(
+				listChannelsEndpoint(svc),
+				decodeListChannelsRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/enabled", kithttp.NewServer(
+				enableChannelEndpoint(svc),
+				decodeChannelStatusUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/disabled", kithttp.NewServer(
+				disableChannelEndpoint(svc),
+				decodeChannelStatusUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/{id}", kithttp.NewServer(
+				viewChannelEndpoint(svc),
+				decodeView,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}", kithttp.NewServer(
+				updateChannelEndpoint(svc),
+				decodeChannelUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/things/connect", kithttp.NewServer(
+				connectChannelEndpoint(svc),
+				decodeConnectChannel,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/things/disconnect", kithttp.NewServer(
+				disconnectChannelEndpoint(svc),
+				decodeConnectChannel,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/{id}/things", kithttp.NewServer(
+				listThingsByChannelEndpoint(svc),
+				decodeListEntityByIDRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/users/assign", kithttp.NewServer(
+				AddChannelToUserEndpoint(svc),
+				decodeAddChannelToUserRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/users/unassign", kithttp.NewServer(
+				RemoveChannelFromUserEndpoint(svc),
+				decodeAddChannelToUserRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/{id}/users", kithttp.NewServer(
+				ListChannelUsersEndpoint(svc),
+				decodeListChannelUsersRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/groups/assign", kithttp.NewServer(
+				addUserGroupToChannelEndpoint(svc),
+				decodeAddUserGroupToChannelRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/groups/unassign", kithttp.NewServer(
+				removeUserGroupFromChannelEndpoint(svc),
+				decodeAddUserGroupToChannelRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/{id}/groups", kithttp.NewServer(
+				ListChannelUserGroupsEndpoint(svc),
+				decodeListChannelUserGroupsRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+		})
+
+		r.Route("/groups", func(r chi.Router) {
+			r.Post("/", kithttp.NewServer(
+				createGroupEndpoint(svc),
+				decodeGroupCreation,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/bulk", kithttp.NewServer(
+				createGroupsEndpoint(svc),
+				decodeGroupsCreation,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/", kithttp.NewServer(
+				listGroupsEndpoint(svc),
+				decodeListGroupsRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/enabled", kithttp.NewServer(
+				enableGroupEndpoint(svc),
+				decodeGroupStatusUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/disabled", kithttp.NewServer(
+				disableGroupEndpoint(svc),
+				decodeGroupStatusUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/{id}", kithttp.NewServer(
+				viewGroupEndpoint(svc),
+				decodeView,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/{id}/users", kithttp.NewServer(
+				listGroupUsersEndpoint(svc),
+				decodeListEntityByIDRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}", kithttp.NewServer(
+				updateGroupEndpoint(svc),
+				decodeGroupUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/users/assign", kithttp.NewServer(
+				assignGroupEndpoint(svc),
+				decodeAssignGroupRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/users/unassign", kithttp.NewServer(
+				unassignGroupEndpoint(svc),
+				decodeAssignGroupRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/{id}/parents", kithttp.NewServer(
+				listParentsEndpoint(svc),
+				decodeListParentsRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+			r.Get("/{id}/children", kithttp.NewServer(
+				listChildrenEndpoint(svc),
+				decodeListChildrenRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/channels/assign", kithttp.NewServer(
+				addUserGroupToChannelEndpoint(svc),
+				decodeAddUserGroupToChannelRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+			r.Post("/{id}/channels/unassign", kithttp.NewServer(
+				removeUserGroupFromChannelEndpoint(svc),
+				decodeAddUserGroupToChannelRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/{id}/channels", kithttp.NewServer(
+				listUserGroupChannelsEndpoint(svc),
+				decodeListUserGroupChannelsRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+		})
+
+		r.Route("/messages", func(r chi.Router) {
+			r.Post("/", kithttp.NewServer(
+				publishMessageEndpoint(svc),
+				decodePublishRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/read", kithttp.NewServer(
+				readMessageEndpoint(svc),
+				decodeReadMessageRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+		})
+
+		r.Route("/bootstraps", func(r chi.Router) {
+			r.Get("/", kithttp.NewServer(
+				listBootstrap(svc),
+				decodeListBoostrapRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/", kithttp.NewServer(
+				createBootstrap(svc),
+				decodeCreateBootstrapRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/{id}", kithttp.NewServer(
+				viewBootstrap(svc),
+				decodeView,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}", kithttp.NewServer(
+				updateBootstrap(svc),
+				decodeUpdateBootstrap,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/certs", kithttp.NewServer(
+				updateBootstrapCerts(svc),
+				decodeUpdateBootstrapCerts,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/connections", kithttp.NewServer(
+				updateBootstrapConnections(svc),
+				decodeUpdateBootstrapConnections,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/{id}/terminal", kithttp.NewServer(
+				getTerminalEndpoint(svc),
+				decodeView,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/terminal/input", kithttp.NewServer(
+				handleTerminalInputEndpoint(svc),
+				decodeTerminalCommandRequest,
+				encodeJSONResponse,
+				opts...,
+			).ServeHTTP)
+		})
+	})
+
+	r.Get("/health", mainflux.Health("ui", instanceID))
 	r.Handle("/metrics", promhttp.Handler())
 
 	r.NotFound(kithttp.NewServer(
@@ -691,7 +718,7 @@ func MakeHandler(svc ui.Service, instanceID string) http.Handler {
 		decodePageNotFound,
 		encodeResponse,
 		opts...,
-	))
+	).ServeHTTP)
 
 	handleStaticFiles(r)
 
@@ -775,6 +802,11 @@ func decodeTokenRequest(_ context.Context, r *http.Request) (interface{}, error)
 
 func decodeRefreshTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	token, err := tokenFromCookie(r, "refresh_token")
+	if err != nil {
+		return nil, err
+	}
+
+	referer, err := readStringQuery(r, refererKey, defReferer)
 	if err != nil {
 		return nil, err
 	}
@@ -921,7 +953,7 @@ func decodeView(_ context.Context, r *http.Request) (interface{}, error) {
 	}
 	req := viewResourceReq{
 		token: token,
-		id:    bone.GetValue(r, "id"),
+		id:    chi.URLParam(r, "id"),
 	}
 
 	return req, nil
@@ -941,7 +973,7 @@ func decodeUserUpdate(_ context.Context, r *http.Request) (interface{}, error) {
 
 	req := updateUserReq{
 		token:    token,
-		id:       bone.GetValue(r, "id"),
+		id:       chi.URLParam(r, "id"),
 		Name:     data.Name,
 		Metadata: data.Metadata,
 	}
@@ -965,7 +997,7 @@ func decodeUserTagsUpdate(_ context.Context, r *http.Request) (interface{}, erro
 
 	req := updateUserTagsReq{
 		token: token,
-		id:    bone.GetValue(r, "id"),
+		id:    chi.URLParam(r, "id"),
 		Tags:  data.Tags,
 	}
 
@@ -978,7 +1010,7 @@ func decodeUserIdentityUpdate(_ context.Context, r *http.Request) (interface{}, 
 		return nil, err
 	}
 
-	id := bone.GetValue(r, "id")
+	id := chi.URLParam(r, "id")
 
 	var data updateUserIdentityReq
 	err = json.NewDecoder(r.Body).Decode(&data)
@@ -1031,7 +1063,7 @@ func decodeListUserGroupsRequest(_ context.Context, r *http.Request) (interface{
 	}
 	req := listEntityByIDReq{
 		token:    token,
-		id:       bone.GetValue(r, "id"),
+		id:       chi.URLParam(r, "id"),
 		limit:    limit,
 		page:     page,
 		relation: relation,
@@ -1060,7 +1092,7 @@ func decodeAssignGroupRequest(_ context.Context, r *http.Request) (interface{}, 
 	case usersItem:
 		req = assignReq{
 			token:    token,
-			UserID:   bone.GetValue(r, "id"),
+			UserID:   chi.URLParam(r, "id"),
 			GroupID:  r.Form.Get("groupID"),
 			Relation: r.Form.Get("relation"),
 			Item:     item,
@@ -1068,7 +1100,7 @@ func decodeAssignGroupRequest(_ context.Context, r *http.Request) (interface{}, 
 	case groupsItem:
 		req = assignReq{
 			token:    token,
-			GroupID:  bone.GetValue(r, "id"),
+			GroupID:  chi.URLParam(r, "id"),
 			UserID:   r.Form.Get("userID"),
 			Relation: r.Form.Get("relation"),
 			Item:     item,
@@ -1094,7 +1126,7 @@ func decodeListUserThingsRequest(_ context.Context, r *http.Request) (interface{
 	}
 	req := listEntityByIDReq{
 		token: token,
-		id:    bone.GetValue(r, "id"),
+		id:    chi.URLParam(r, "id"),
 		limit: limit,
 		page:  page,
 	}
@@ -1122,7 +1154,7 @@ func decodeShareThingRequest(_ context.Context, r *http.Request) (interface{}, e
 	case usersItem:
 		req = shareThingReq{
 			token:    token,
-			UserID:   bone.GetValue(r, "id"),
+			UserID:   chi.URLParam(r, "id"),
 			ThingID:  r.Form.Get("thingID"),
 			Relation: r.Form.Get("relation"),
 			Item:     item,
@@ -1130,7 +1162,7 @@ func decodeShareThingRequest(_ context.Context, r *http.Request) (interface{}, e
 	case thingsItem:
 		req = shareThingReq{
 			token:    token,
-			ThingID:  bone.GetValue(r, "id"),
+			ThingID:  chi.URLParam(r, "id"),
 			UserID:   r.Form.Get("userID"),
 			Relation: r.Form.Get("relation"),
 			Item:     item,
@@ -1161,7 +1193,7 @@ func decodeAddChannelToUserRequest(_ context.Context, r *http.Request) (interfac
 	case usersItem:
 		req = addUserToChannelReq{
 			token:     token,
-			UserID:    bone.GetValue(r, "id"),
+			UserID:    chi.URLParam(r, "id"),
 			Relation:  r.Form.Get("relation"),
 			ChannelID: r.Form.Get("channelID"),
 			Item:      item,
@@ -1169,7 +1201,7 @@ func decodeAddChannelToUserRequest(_ context.Context, r *http.Request) (interfac
 	case channelsItem:
 		req = addUserToChannelReq{
 			token:     token,
-			ChannelID: bone.GetValue(r, "id"),
+			ChannelID: chi.URLParam(r, "id"),
 			Relation:  r.Form.Get("relation"),
 			UserID:    r.Form.Get("userID"),
 			Item:      item,
@@ -1200,7 +1232,7 @@ func decodeListUserChannelsRequest(_ context.Context, r *http.Request) (interfac
 	}
 	req := listEntityByIDReq{
 		token:    token,
-		id:       bone.GetValue(r, "id"),
+		id:       chi.URLParam(r, "id"),
 		limit:    limit,
 		page:     page,
 		relation: relation,
@@ -1278,7 +1310,7 @@ func decodeThingUpdate(_ context.Context, r *http.Request) (interface{}, error) 
 
 	req := updateThingReq{
 		token:    token,
-		id:       bone.GetValue(r, "id"),
+		id:       chi.URLParam(r, "id"),
 		Name:     data.Name,
 		Metadata: data.Metadata,
 	}
@@ -1300,7 +1332,7 @@ func decodeThingTagsUpdate(_ context.Context, r *http.Request) (interface{}, err
 
 	req := updateThingTagsReq{
 		token: token,
-		id:    bone.GetValue(r, "id"),
+		id:    chi.URLParam(r, "id"),
 		Tags:  data.Tags,
 	}
 
@@ -1321,7 +1353,7 @@ func decodeThingSecretUpdate(_ context.Context, r *http.Request) (interface{}, e
 
 	req := updateThingSecretReq{
 		token:  token,
-		id:     bone.GetValue(r, "id"),
+		id:     chi.URLParam(r, "id"),
 		Secret: data.Secret,
 	}
 
@@ -1356,7 +1388,7 @@ func decodeThingOwnerUpdate(_ context.Context, r *http.Request) (interface{}, er
 
 	req := updateThingOwnerReq{
 		token: token,
-		id:    bone.GetValue(r, "id"),
+		id:    chi.URLParam(r, "id"),
 		Owner: data.Owner,
 	}
 
@@ -1386,7 +1418,7 @@ func decodeListEntityByIDRequest(_ context.Context, r *http.Request) (interface{
 
 	req := listEntityByIDReq{
 		token:    token,
-		id:       bone.GetValue(r, "id"),
+		id:       chi.URLParam(r, "id"),
 		page:     page,
 		limit:    limit,
 		relation: relation,
@@ -1482,7 +1514,7 @@ func decodeListThingUsersRequest(_ context.Context, r *http.Request) (interface{
 	}
 	req := listEntityByIDReq{
 		token: token,
-		id:    bone.GetValue(r, "id"),
+		id:    chi.URLParam(r, "id"),
 		limit: limit,
 		page:  page,
 	}
@@ -1588,7 +1620,7 @@ func decodeChannelUpdate(_ context.Context, r *http.Request) (interface{}, error
 
 	req := updateChannelReq{
 		token:       token,
-		id:          bone.GetValue(r, "id"),
+		id:          chi.URLParam(r, "id"),
 		Name:        data.Name,
 		Metadata:    data.Metadata,
 		Description: data.Description,
@@ -1643,13 +1675,13 @@ func decodeConnectChannel(_ context.Context, r *http.Request) (interface{}, erro
 		req = connectThingReq{
 			token:   token,
 			ChanID:  r.Form.Get("channelID"),
-			ThingID: bone.GetValue(r, "id"),
+			ThingID: chi.URLParam(r, "id"),
 			Item:    item,
 		}
 	case channelsItem:
 		req = connectThingReq{
 			token:   token,
-			ChanID:  bone.GetValue(r, "id"),
+			ChanID:  chi.URLParam(r, "id"),
 			ThingID: r.Form.Get("thingID"),
 			Item:    item,
 		}
@@ -1693,7 +1725,7 @@ func decodeListChannelUsersRequest(_ context.Context, r *http.Request) (interfac
 	}
 	req := listEntityByIDReq{
 		token:    token,
-		id:       bone.GetValue(r, "id"),
+		id:       chi.URLParam(r, "id"),
 		limit:    limit,
 		page:     page,
 		relation: relation,
@@ -1722,14 +1754,16 @@ func decodeAddUserGroupToChannelRequest(_ context.Context, r *http.Request) (int
 	case channelsItem:
 		req = addUserGroupToChannelReq{
 			token:     token,
-			ChannelID: bone.GetValue(r, "id"),
+			ChannelID: chi.URLParam(r, "id"),
 			GroupID:   r.Form.Get("groupID"),
+			Item:      item,
 		}
 	case groupsItem:
 		req = addUserGroupToChannelReq{
 			token:     token,
-			GroupID:   bone.GetValue(r, "id"),
+			GroupID:   chi.URLParam(r, "id"),
 			ChannelID: r.Form.Get("channelID"),
+			Item:      item,
 		}
 	}
 
@@ -1753,7 +1787,7 @@ func decodeListChannelUserGroupsRequest(_ context.Context, r *http.Request) (int
 	}
 	req := listEntityByIDReq{
 		token: token,
-		id:    bone.GetValue(r, "id"),
+		id:    chi.URLParam(r, "id"),
 		limit: limit,
 		page:  page,
 	}
@@ -1880,7 +1914,7 @@ func decodeGroupUpdate(_ context.Context, r *http.Request) (interface{}, error) 
 
 	req := updateGroupReq{
 		token:       token,
-		id:          bone.GetValue(r, "id"),
+		id:          chi.URLParam(r, "id"),
 		Name:        data.Name,
 		Metadata:    data.Metadata,
 		Description: data.Description,
@@ -1918,7 +1952,7 @@ func decodeListParentsRequest(_ context.Context, r *http.Request) (interface{}, 
 	}
 	req := listEntityByIDReq{
 		token: token,
-		id:    bone.GetValue(r, "id"),
+		id:    chi.URLParam(r, "id"),
 		limit: limit,
 		page:  page,
 	}
@@ -1941,7 +1975,7 @@ func decodeListChildrenRequest(_ context.Context, r *http.Request) (interface{},
 	}
 	req := listEntityByIDReq{
 		token: token,
-		id:    bone.GetValue(r, "id"),
+		id:    chi.URLParam(r, "id"),
 		limit: limit,
 		page:  page,
 	}
@@ -1965,7 +1999,7 @@ func decodeListUserGroupChannelsRequest(_ context.Context, r *http.Request) (int
 	}
 	req := listEntityByIDReq{
 		token: token,
-		id:    bone.GetValue(r, "id"),
+		id:    chi.URLParam(r, "id"),
 		limit: limit,
 		page:  page,
 	}
@@ -2042,7 +2076,7 @@ func decodeTerminalCommandRequest(_ context.Context, r *http.Request) (interface
 	}
 	req := bootstrapCommandReq{
 		token:   token,
-		id:      bone.GetValue(r, "id"),
+		id:      chi.URLParam(r, "id"),
 		command: strings.ReplaceAll(strings.Trim(r.PostFormValue("command"), " "), " ", ","),
 	}
 	return req, nil
@@ -2110,7 +2144,7 @@ func decodeUpdateBootstrap(_ context.Context, r *http.Request) (interface{}, err
 		return nil, err
 	}
 	data.token = token
-	data.id = bone.GetValue(r, "id")
+	data.id = chi.URLParam(r, "id")
 
 	return data, nil
 }
@@ -2126,7 +2160,7 @@ func decodeUpdateBootstrapCerts(_ context.Context, r *http.Request) (interface{}
 	if err != nil {
 		return nil, err
 	}
-	data.thingID = bone.GetValue(r, "id")
+	data.thingID = chi.URLParam(r, "id")
 	data.token = token
 
 	return data, nil
@@ -2144,7 +2178,7 @@ func decodeUpdateBootstrapConnections(_ context.Context, r *http.Request) (inter
 		return nil, err
 	}
 
-	data.id = bone.GetValue(r, "id")
+	data.id = chi.URLParam(r, "id")
 	data.token = token
 
 	return data, nil
@@ -2252,7 +2286,30 @@ func tokenFromCookie(r *http.Request, cookie string) (string, error) {
 	return c.Value, nil
 }
 
-func handleStaticFiles(m *bone.Mux) {
+func TokenMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tokenString, err := tokenFromCookie(r, "token")
+		if err != nil {
+			return
+		}
+
+		// Parse the token without validation to get the expiration time
+		token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
+		if err != nil {
+			return
+		}
+		if claims, ok := token.Claims.(jwt.MapClaims); ok {
+			expirationTime := time.Unix(int64(claims["exp"].(float64)), 0)
+			if expirationTime.Before(time.Now()) {
+				http.Redirect(w, r, "/ui/token/refresh?referer_url="+url.QueryEscape(r.URL.String()), http.StatusSeeOther)
+				return
+			}
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func handleStaticFiles(m *chi.Mux) {
 	file, err := os.Open(staticDir)
 	if err != nil {
 		panic(err)
@@ -2272,7 +2329,7 @@ func handleStaticFiles(m *bone.Mux) {
 }
 
 func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
-	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Content-Type", htmContentType)
 	ar, _ := response.(uiRes)
 	for k, v := range ar.Headers() {
 		w.Header().Set(k, v)
@@ -2301,7 +2358,7 @@ func encodeJSONResponse(_ context.Context, w http.ResponseWriter, response inter
 		for k, v := range ar.Headers() {
 			w.Header().Set(k, v)
 		}
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Type", jsonContentType)
 		w.WriteHeader(ar.Code())
 
 		if ar.Empty() {

@@ -4,8 +4,10 @@ go 1.21
 
 require (
 	github.com/caarlos0/env/v9 v9.0.0
+	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-kit/kit v0.13.0
 	github.com/go-zoo/bone v1.3.0
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/mainflux/agent v0.11.1-0.20230724130550-0cd3f4c8c27c
 	github.com/mainflux/mainflux v0.0.0-20231021215047-ab832aff1b52
 	github.com/prometheus/client_golang v1.17.0

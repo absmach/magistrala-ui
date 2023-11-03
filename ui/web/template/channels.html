@@ -152,8 +152,13 @@
 														<div class="form-group">
 															<label for="channelsFile">
 																Add csv file containing channels names with
-																metadata. The metadata field can be empty. 
-																Find a sample csv file <a href="https://github.com/ultravioletrs/mainflux-ui/tree/main/samples/channels.csv">here</a>
+																metadata. The metadata field can be empty. Find
+																a sample csv file
+																<a
+																	href="https://github.com/ultravioletrs/mainflux-ui/tree/main/samples/channels.csv"
+																>
+																	here
+																</a>
 															</label>
 															<input
 																type="file"
@@ -330,66 +335,66 @@
 				function submitBulkChannelsForm() {
 					event.preventDefault();
 					var form = event.target;
-					fetch("/channels/bulk",{
-						method: 'POST',
-						body: new FormData(form)
+					fetch("/channels/bulk", {
+						method: "POST",
+						body: new FormData(form),
 					})
-					.then (response => {
-					switch (response.status) {
-					case 409:
-						errorMessage= "channels already exist!";
-						showAlert(errorMessage,"bulk");
-						return false;
-					case 400:
-						errorMessage= "invalid file contents!";
-						showAlert(errorMessage,"bulk");
-						return false;
-					case 415:
-						errorMessage= "file must be csv!";
-						showAlert(errorMessage,"bulk");
-						return false;
-					case 500:
-						errorMessage= "try again!";
-						showAlert(errorMessage,"bulk");
-						return false;
-					default:
-						form.reset();
-						channelsModal.hide();
-						window.location.reload();
-						return true;
-					}
-					})
-						.catch (error => {
-						console.error("Error submitting bulk channels form: ", error);
-						return false;
+						.then((response) => {
+							switch (response.status) {
+								case 409:
+									errorMessage = "channels already exist!";
+									showAlert(errorMessage, "bulk");
+									return false;
+								case 400:
+									errorMessage = "invalid file contents!";
+									showAlert(errorMessage, "bulk");
+									return false;
+								case 415:
+									errorMessage = "file must be csv!";
+									showAlert(errorMessage, "bulk");
+									return false;
+								case 500:
+									errorMessage = "try again!";
+									showAlert(errorMessage, "bulk");
+									return false;
+								default:
+									form.reset();
+									channelsModal.hide();
+									window.location.reload();
+									return true;
+							}
+						})
+						.catch((error) => {
+							console.error("Error submitting bulk channels form: ", error);
+							return false;
 						});
 				}
 
-				function showAlert(errorMessage,modal) {
-				if (modal === "single") {
-					var alertMessage = document.getElementById("alertMessage");
-					alertMessage.innerHTML = `
+				function showAlert(errorMessage, modal) {
+					if (modal === "single") {
+						var alertMessage = document.getElementById("alertMessage");
+						alertMessage.innerHTML = `
 					<div id="alert-popup" class="alert alert-danger">
 						<span class="close-button" onclick="closeAlertPopup()">&times;</span>
 						<h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
 					</div> `;
-								} else if (modal === "bulk") {
-									var alertMessage = document.getElementById("alertBulkMessage");
-									alertMessage.innerHTML = `
+					} else if (modal === "bulk") {
+						var alertMessage = document.getElementById("alertBulkMessage");
+						alertMessage.innerHTML = `
 					<div id="alert-popup" class="alert alert-danger">
 						<span class="close-button" onclick="closeAlertPopup()">&times;</span>
 						<h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
 					</div> `;
-								}
-							}
+					}
+				}
 
 				function closeAlertPopup() {
 					document.getElementById("alert-popup").style.display = "none";
 				}
 
 				function hideAlert() {
-					var alertElement = document.querySelector('.alert-danger');
-					alertElement.style.display = 'none';
+					var alertElement = document.querySelector(".alert-danger");
+					alertElement.style.display = "none";
 				}
 
 				function fetchIndividualEntity(filterValue, selectId) {

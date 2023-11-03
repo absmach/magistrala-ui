@@ -171,8 +171,13 @@
 														<div class="form-group">
 															<label for="thingsFile">
 																Add csv file containing thing names with
-																metadata. The metadata field can be empty.
-																Find a sample csv file <a href="https://github.com/ultravioletrs/mainflux-ui/tree/main/samples/things.csv">here</a>
+																metadata. The metadata field can be empty. Find
+																a sample csv file
+																<a
+																	href="https://github.com/ultravioletrs/mainflux-ui/tree/main/samples/things.csv"
+																>
+																	here
+																</a>
 															</label>
 															<input
 																type="file"
@@ -365,35 +370,35 @@
 						method: "POST",
 						body: new FormData(form),
 					})
-					.then (response => {
-						switch (response.status) {
-						case 409:
-							errorMessage= "things already exist!";
-							showAlert(errorMessage,"bulk");
-							return false;
-						case 400:
-							errorMessage= "invalid file contents!";
-							showAlert(errorMessage,"bulk");
-							return false;
-						case 415:
-							errorMessage= "file must be csv!";
-							showAlert(errorMessage,"bulk");
-							return false;
-						case 500:
-							errorMessage= "try again!";
-							showAlert(errorMessage,"bulk");
-							return false;
-						default:
-							form.reset();
-							thingsModal.hide();
-							window.location.reload();
-							return true;
-						}
+						.then((response) => {
+							switch (response.status) {
+								case 409:
+									errorMessage = "things already exist!";
+									showAlert(errorMessage, "bulk");
+									return false;
+								case 400:
+									errorMessage = "invalid file contents!";
+									showAlert(errorMessage, "bulk");
+									return false;
+								case 415:
+									errorMessage = "file must be csv!";
+									showAlert(errorMessage, "bulk");
+									return false;
+								case 500:
+									errorMessage = "try again!";
+									showAlert(errorMessage, "bulk");
+									return false;
+								default:
+									form.reset();
+									thingsModal.hide();
+									window.location.reload();
+									return true;
+							}
 						})
-					.catch (error => {
-					console.error("Error submitting bulk things form: ", error);
-					return false;
-					});
+						.catch((error) => {
+							console.error("Error submitting bulk things form: ", error);
+							return false;
+						});
 				}
 
 				function showAlert(errorMessage, modal) {
@@ -417,8 +422,7 @@
 				function closeAlertPopup() {
 					document.getElementById("alert-popup").style.display = "none";
 				}
-
-  </script>
-</body>
-</html>
-{{end}}
+			</script>
+		</body>
+	</html>
+{{ end }}

@@ -201,7 +201,7 @@ func (sdk mfSDK) ResetPasswordRequest(email string) errors.SDKError {
 	if err != nil {
 		return errors.NewSDKError(err)
 	}
-	url := fmt.Sprintf("%s/%s/reset-request", sdk.usersURL, PasswordResetEndpoint)
+	url := fmt.Sprintf("%s/%s/password/reset", sdk.usersURL, PasswordResetEndpoint)
 
 	header := make(map[string]string)
 	header["Referer"] = sdk.HostURL

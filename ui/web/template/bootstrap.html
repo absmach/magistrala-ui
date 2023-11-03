@@ -13,7 +13,7 @@
 									<button
 										type="button"
 										class="btn body-button"
-										onclick="location.href='/bootstrap/{{ .Bootstrap.ThingID }}/terminal'"
+										onclick="location.href='/bootstraps/{{ .Bootstrap.ThingID }}/terminal'"
 									>
 										Remote Terminal
 									</button>
@@ -285,12 +285,12 @@
         let url;
         let data;
         if (field === "name") {
-          url = "/bootstrap/{{.Bootstrap.ThingID}}";
+          url = "/bootstraps/{{.Bootstrap.ThingID}}";
           data = { [field]: updatedValue, content: "{{.Bootstrap.Content}}" };
         } else if (field == "content") {
           try {
             const content = JSON.parse(updatedValue);
-            url = "/bootstrap/{{.Bootstrap.ThingID}}";
+            url = "/bootstraps/{{.Bootstrap.ThingID}}";
             data = { [field]: updatedValue, name: "{{.Bootstrap.Name}}" };
           } catch (error) {
             errorMessage.textContent = "Content must be a valid JSON object!";
@@ -301,7 +301,7 @@
           field == "clientKey" ||
           field == "CACert"
         ) {
-          url = "/bootstrap/{{.Bootstrap.ThingID}}/certs";
+          url = "/bootstraps/{{.Bootstrap.ThingID}}/certs";
           data = { [field]: updatedValue };
         } else if (field === "channels") {
           try {
@@ -315,7 +315,7 @@
               errorMessage.textContent = "Channels must be a string array";
               return;
             }
-            url = "/bootstrap/{{.Bootstrap.ThingID}}/connections";
+            url = "/bootstraps/{{.Bootstrap.ThingID}}/connections";
             data = { [field]: channels };
           } catch (error) {
             errorMessage.textContent = "Channels must be a valid string array";

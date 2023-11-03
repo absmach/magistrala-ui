@@ -43,7 +43,7 @@
 									<!-- Existing terminal content here -->
 								</div>
 								<div class="input-line">
-									<form action="/bootstrap/1/terminal/input" method="POST">
+									<form action="/bootstraps/1/terminal/input" method="POST">
 										<span class="input-prefix">&gt;</span>
 										<input class="input-field" name="command" autofocus />
 									</form>
@@ -64,7 +64,7 @@
           var formData = new FormData(form);
 
           var xhr = new XMLHttpRequest();
-          xhr.open("POST", "/bootstrap/{{.ThingID}}/terminal/input");
+          xhr.open("POST", "/bootstraps/{{.ThingID}}/terminal/input");
           xhr.onload = function () {
             if (xhr.status === 200) {
               var response = JSON.parse(xhr.responseText);

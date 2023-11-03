@@ -22,7 +22,7 @@
 								method="post"
 								id="form"
 								class="row border-bottom pb-3 mb-3"
-								onsubmit="return submitLoginForm()"
+								onsubmit="submitLoginForm()"
 							>
 								<div class="col-md-12">
 									<div class="row mb-3">
@@ -48,7 +48,6 @@
 												id="password"
 												placeholder="Password"
 											/>
-											
 										</div>
 										<div id="passwordError" class="text-danger"></div>
 									</div>
@@ -96,7 +95,7 @@
 							<div class="modal-body">
 								<form
 									method="post"
-									action="/password/reset"
+									action="/reset-request"
 									class="reset-pw-form"
 								>
 									<div class="mb-3">
@@ -131,7 +130,7 @@
 					var password = document.getElementById("password").value;
 					var email = document.getElementById("username").value;
 
-					loginError.innerHTML="";
+					loginError.innerHTML = "";
 					passwordError.innerHTML = "";
 					emailError.innerHTML = "";
 					passwordField.classList.remove("border-red");
@@ -139,15 +138,15 @@
 					var isValid = true;
 
 					if (email === "") {
-					emailError.innerHTML = "email is required!";
-					emailField.classList.add("border-red");
-					isValid=false;
+						emailError.innerHTML = "email is required!";
+						emailField.classList.add("border-red");
+						isValid = false;
 					}
 					if (password.length < 8) {
-					passwordError.innerHTML =
-						"Password must have a minimum of 8 characters!";
-					passwordField.classList.add("border-red");
-					isValid = false;
+						passwordError.innerHTML =
+							"Password must have a minimum of 8 characters!";
+						passwordField.classList.add("border-red");
+						isValid = false;
 					}
 					return isValid;
 				}
@@ -156,26 +155,23 @@
 					event.preventDefault();
 					var form = event.target;
 					fetch("/login", {
-					method: "POST",
-					body: new FormData(form),
+						method: "POST",
+						body: new FormData(form),
 					})
-					.then((response) => {
-						if (response.status === 401) {
-						passwordField.classList.add("border-red");
-						emailField.classList.add("border-red");
-						errorMessage = "invalid email or password. Please try again!";
-						showAlert(errorMessage);
-						return false;
-						} else {
-						form.reset();
-						window.location.href = "/";
-						return true;
-						}
-					})
-					.catch((error) => {
-						console.error("error submitting login form: ", error);
-						return false;
-					});
+						.then((response) => {
+							if (response.status === 401) {
+								passwordField.classList.add("border-red");
+								emailField.classList.add("border-red");
+								errorMessage = "invalid email or password. Please try again!";
+								showAlert(errorMessage);
+							} else {
+								form.reset();
+								window.location.href = "";
+							}
+						})
+						.catch((error) => {
+							console.error("error submitting login form: ", error);
+						});
 				}
 
 				function showAlert(errorMessage) {
