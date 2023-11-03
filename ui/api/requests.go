@@ -105,10 +105,11 @@ func (req listEntityReq) validate() error {
 }
 
 type listEntityByIDReq struct {
-	token string
-	id    string
-	page  uint64
-	limit uint64
+	token    string
+	id       string
+	page     uint64
+	limit    uint64
+	relation string
 }
 
 func (req listEntityByIDReq) validate() error {
@@ -660,8 +661,8 @@ type readMessageReq struct {
 	token    string
 	ChanID   string `json:"chan_id,omitempty"`
 	ThingKey string `json:"thing_key,omitempty"`
-	Page  uint64
-	Limit uint64
+	Page     uint64
+	Limit    uint64
 }
 
 func (req readMessageReq) validate() error {

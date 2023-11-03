@@ -171,11 +171,11 @@ type Service interface {
 	// DisableUser updates the status of a user with the given ID to disabled.
 	DisableUser(token, userID string) error
 	// ListUserGroups retrieves the groups a user belongs to.
-	ListUserGroups(token, userID string, page, limit uint64) (b []byte, err error)
+	ListUserGroups(token, userID, relation string, page, limit uint64) (b []byte, err error)
 	// ListUserThings retrieves the things shared to a user.
 	ListUserThings(token, userID string, page, limit uint64) (b []byte, err error)
 	// ListUserChannels retrievs a list of channels that a user is connected to.
-	ListUserChannels(token, userID string, page, limit uint64) (b []byte, err error)
+	ListUserChannels(token, userID, relation string, page, limit uint64) (b []byte, err error)
 
 	// CreateThing creates a new thing.
 	CreateThing(thing sdk.Thing, token string) error
@@ -235,7 +235,7 @@ type Service interface {
 	// RemoveUserFromChannel removes a user from a channel.
 	RemoveUserFromChannel(token, channelID string, req sdk.UsersRelationRequest) error
 	// ListChannelUsers retrieves a list of users that are connected to a channel.
-	ListChannelUsers(token, channelID string, page, limit uint64) (b []byte, err error)
+	ListChannelUsers(token, channelID, relation string, page, limit uint64) (b []byte, err error)
 	// AddUserGroupToChannel adds a userGroup to a channel.
 	AddUserGroupToChannel(token, channelID string, req sdk.UserGroupsRequest) error
 	// RemoveUserGroupFromChannel removes a userGroup from a channel.
@@ -246,7 +246,7 @@ type Service interface {
 	// CreateGroups creates new groups.
 	CreateGroups(token string, groups ...sdk.Group) error
 	// ListGroupUsers retrieves the members of a group with a given ID.
-	ListGroupUsers(token, id string, page, limit uint64) ([]byte, error)
+	ListGroupUsers(token, id, relation string, page, limit uint64) ([]byte, error)
 	// Assign adds a user to a group.
 	Assign(token, groupID string, userRelation sdk.UsersRelationRequest) error
 	// Unassign removes a user from a group.
@@ -623,13 +623,15 @@ func (us *uiService) DisableUser(token, userID string) error {
 	return nil
 }
 
-func (us *uiService) ListUserGroups(token, userID string, page, limit uint64) (b []byte, err error) {
+func (us *uiService) ListUserGroups(token, userID, relation string, page, limit uint64) (b []byte, err error) {
 	offset := (page - 1) * limit
 	pgm := sdk.PageMetadata{
 		Offset:     offset,
 		Limit:      limit,
 		Visibility: statusAll,
+		Permission: relation,
 	}
+
 	groupsPage, err := us.sdk.ListUserGroups(userID, pgm, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
@@ -650,6 +652,7 @@ func (us *uiService) ListUserGroups(token, userID string, page, limit uint64) (b
 		CurrentPage  int
 		Pages        int
 		Limit        int
+		TabActive    string
 	}{
 		usersActive,
 		groupsPage.Groups,
@@ -659,6 +662,7 @@ func (us *uiService) ListUserGroups(token, userID string, page, limit uint64) (b
 		int(page),
 		noOfPages,
 		int(limit),
+		relation,
 	}
 
 	var btpl bytes.Buffer
@@ -715,11 +719,12 @@ func (us *uiService) ListUserThings(token, userID string, page, limit uint64) (b
 
 }
 
-func (us *uiService) ListUserChannels(token, userID string, page, limit uint64) (b []byte, err error) {
+func (us *uiService) ListUserChannels(token, userID, relation string, page, limit uint64) (b []byte, err error) {
 	offset := (page - 1) * limit
 	pgm := sdk.PageMetadata{
-		Offset: offset,
-		Limit:  limit,
+		Offset:     offset,
+		Limit:      limit,
+		Permission: relation,
 	}
 	channelsPage, err := us.sdk.ListUserChannels(userID, pgm, token)
 	if err != nil {
@@ -741,6 +746,7 @@ func (us *uiService) ListUserChannels(token, userID string, page, limit uint64) 
 		CurrentPage  int
 		Pages        int
 		Limit        int
+		TabActive    string
 	}{
 		usersActive,
 		channelsPage.Channels,
@@ -750,6 +756,7 @@ func (us *uiService) ListUserChannels(token, userID string, page, limit uint64) 
 		int(page),
 		noOfPages,
 		int(limit),
+		relation,
 	}
 
 	var btpl bytes.Buffer
@@ -1221,11 +1228,12 @@ func (gs *uiService) RemoveUserFromChannel(token, channelID string, req sdk.User
 
 }
 
-func (us *uiService) ListChannelUsers(token, channelID string, page, limit uint64) (b []byte, err error) {
+func (us *uiService) ListChannelUsers(token, channelID, relation string, page, limit uint64) (b []byte, err error) {
 	offset := (page - 1) * limit
 	pgm := sdk.PageMetadata{
-		Offset: offset,
-		Limit:  limit,
+		Offset:     offset,
+		Limit:      limit,
+		Permission: relation,
 	}
 	usersPage, err := us.sdk.ListChannelUsers(channelID, pgm, token)
 	if err != nil {
@@ -1247,6 +1255,7 @@ func (us *uiService) ListChannelUsers(token, channelID string, page, limit uint6
 		CurrentPage  int
 		Pages        int
 		Limit        int
+		TabActive    string
 	}{
 		channelsActive,
 		channelID,
@@ -1256,6 +1265,7 @@ func (us *uiService) ListChannelUsers(token, channelID string, page, limit uint6
 		int(page),
 		noOfPages,
 		int(limit),
+		relation,
 	}
 
 	var btpl bytes.Buffer
@@ -1340,13 +1350,14 @@ func (us *uiService) CreateGroups(token string, groups ...sdk.Group) error {
 	return nil
 }
 
-func (us *uiService) ListGroupUsers(token, id string, page, limit uint64) ([]byte, error) {
+func (us *uiService) ListGroupUsers(token, id, relation string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 
 	pgm := sdk.PageMetadata{
 		Offset:     offset,
 		Limit:      limit,
 		Visibility: statusAll,
+		Permission: relation,
 	}
 
 	usersPage, err := us.sdk.ListGroupUsers(id, pgm, token)
@@ -1370,6 +1381,7 @@ func (us *uiService) ListGroupUsers(token, id string, page, limit uint64) ([]byt
 		CurrentPage  int
 		Pages        int
 		Limit        int
+		TabActive    string
 	}{
 		groupsActive,
 		id,
@@ -1379,6 +1391,7 @@ func (us *uiService) ListGroupUsers(token, id string, page, limit uint64) ([]byt
 		int(page),
 		noOfPages,
 		int(limit),
+		relation,
 	}
 
 	var btpl bytes.Buffer

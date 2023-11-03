@@ -449,7 +449,7 @@ func listUserGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(listEntityByIDReq)
 
-		res, err := svc.ListUserGroups(req.token, req.id, req.page, req.limit)
+		res, err := svc.ListUserGroups(req.token, req.id, req.relation, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -551,7 +551,7 @@ func listUserChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(listEntityByIDReq)
 
-		res, err := svc.ListUserChannels(req.token, req.id, req.page, req.limit)
+		res, err := svc.ListUserChannels(req.token, req.id, req.relation, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1152,7 +1152,7 @@ func ListChannelUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(listEntityByIDReq)
 
-		res, err := svc.ListChannelUsers(req.token, req.id, req.page, req.limit)
+		res, err := svc.ListChannelUsers(req.token, req.id, req.relation, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1291,7 +1291,7 @@ func listGroupUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListGroupUsers(req.token, req.id, req.page, req.limit)
+		res, err := svc.ListGroupUsers(req.token, req.id, req.relation, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}

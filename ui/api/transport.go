@@ -35,10 +35,12 @@ const (
 	limitKey          = "limit"
 	itemKey           = "item"
 	nameKey           = "name"
+	relationKey       = "relation"
 	defPage           = 1
 	defLimit          = 10
 	defName           = ""
 	defItem           = ""
+	defRelation       = ""
 	usersEndpoint     = "/users"
 	thingsEndpoint    = "/things"
 	channelsEndpoint  = "/channels"
@@ -1012,6 +1014,12 @@ func decodeListUserGroupsRequest(_ context.Context, r *http.Request) (interface{
 	if err != nil {
 		return nil, err
 	}
+
+	relation, err := readStringQuery(r, relationKey, defRelation)
+	if err != nil {
+		return nil, err
+	}
+
 	page, err := readNumQuery[uint64](r, pageKey, defPage)
 	if err != nil {
 		return nil, err
@@ -1022,10 +1030,11 @@ func decodeListUserGroupsRequest(_ context.Context, r *http.Request) (interface{
 		return nil, err
 	}
 	req := listEntityByIDReq{
-		token: token,
-		id:    bone.GetValue(r, "id"),
-		limit: limit,
-		page:  page,
+		token:    token,
+		id:       bone.GetValue(r, "id"),
+		limit:    limit,
+		page:     page,
+		relation: relation,
 	}
 	return req, nil
 }
@@ -1175,6 +1184,11 @@ func decodeListUserChannelsRequest(_ context.Context, r *http.Request) (interfac
 	if err != nil {
 		return nil, err
 	}
+	relation, err := readStringQuery(r, relationKey, defRelation)
+	if err != nil {
+		return nil, err
+	}
+
 	page, err := readNumQuery[uint64](r, pageKey, defPage)
 	if err != nil {
 		return nil, err
@@ -1185,10 +1199,11 @@ func decodeListUserChannelsRequest(_ context.Context, r *http.Request) (interfac
 		return nil, err
 	}
 	req := listEntityByIDReq{
-		token: token,
-		id:    bone.GetValue(r, "id"),
-		limit: limit,
-		page:  page,
+		token:    token,
+		id:       bone.GetValue(r, "id"),
+		limit:    limit,
+		page:     page,
+		relation: relation,
 	}
 	return req, nil
 }
@@ -1353,6 +1368,12 @@ func decodeListEntityByIDRequest(_ context.Context, r *http.Request) (interface{
 	if err != nil {
 		return nil, err
 	}
+
+	relation, err := readStringQuery(r, relationKey, defRelation)
+	if err != nil {
+		return nil, err
+	}
+
 	page, err := readNumQuery[uint64](r, pageKey, defPage)
 	if err != nil {
 		return nil, err
@@ -1364,10 +1385,11 @@ func decodeListEntityByIDRequest(_ context.Context, r *http.Request) (interface{
 	}
 
 	req := listEntityByIDReq{
-		token: token,
-		id:    bone.GetValue(r, "id"),
-		page:  page,
-		limit: limit,
+		token:    token,
+		id:       bone.GetValue(r, "id"),
+		page:     page,
+		limit:    limit,
+		relation: relation,
 	}
 
 	return req, nil
@@ -1655,6 +1677,11 @@ func decodeListChannelUsersRequest(_ context.Context, r *http.Request) (interfac
 	if err != nil {
 		return nil, err
 	}
+	relation, err := readStringQuery(r, relationKey, defRelation)
+	if err != nil {
+		return nil, err
+	}
+
 	page, err := readNumQuery[uint64](r, pageKey, defPage)
 	if err != nil {
 		return nil, err
@@ -1665,10 +1692,11 @@ func decodeListChannelUsersRequest(_ context.Context, r *http.Request) (interfac
 		return nil, err
 	}
 	req := listEntityByIDReq{
-		token: token,
-		id:    bone.GetValue(r, "id"),
-		limit: limit,
-		page:  page,
+		token:    token,
+		id:       bone.GetValue(r, "id"),
+		limit:    limit,
+		page:     page,
+		relation: relation,
 	}
 	return req, nil
 }
@@ -1925,6 +1953,7 @@ func decodeListUserGroupChannelsRequest(_ context.Context, r *http.Request) (int
 	if err != nil {
 		return nil, err
 	}
+
 	page, err := readNumQuery[uint64](r, pageKey, defPage)
 	if err != nil {
 		return nil, err

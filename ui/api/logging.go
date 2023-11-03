@@ -294,7 +294,7 @@ func (lm *loggingMiddleware) DisableUser(token, id string) (err error) {
 }
 
 // ListUserGroups adds logging middleware to list user groups method.
-func (lm *loggingMiddleware) ListUserGroups(token, userID string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListUserGroups(token, userID, relation string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method list_user_groups took %s to complete", time.Since(begin))
 		if err != nil {
@@ -304,7 +304,7 @@ func (lm *loggingMiddleware) ListUserGroups(token, userID string, page, limit ui
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.ListUserGroups(token, userID, page, limit)
+	return lm.svc.ListUserGroups(token, userID, relation, page, limit)
 }
 
 // ListUserThings adds logging middleware to list user things method.
@@ -322,7 +322,7 @@ func (lm *loggingMiddleware) ListUserThings(token, userID string, page, limit ui
 }
 
 // ListUserChannels adds logging middleware to list user channels method.
-func (lm *loggingMiddleware) ListUserChannels(token, userID string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListUserChannels(token, userID, relation string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method list_user_channels took %s to complete", time.Since(begin))
 		if err != nil {
@@ -332,7 +332,7 @@ func (lm *loggingMiddleware) ListUserChannels(token, userID string, page, limit 
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.ListUserChannels(token, userID, page, limit)
+	return lm.svc.ListUserChannels(token, userID, relation, page, limit)
 }
 
 // CreateThing adds logging middleware to create thing method.
@@ -728,7 +728,7 @@ func (lm *loggingMiddleware) RemoveUserFromChannel(token, channelID string, req 
 }
 
 // ListChannelUsers adds logging middleware to list channel users method.
-func (lm *loggingMiddleware) ListChannelUsers(token, channelID string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListChannelUsers(token, channelID, relation string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method list_channel_users took %s to complete", time.Since(begin))
 		if err != nil {
@@ -738,7 +738,7 @@ func (lm *loggingMiddleware) ListChannelUsers(token, channelID string, page, lim
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.ListChannelUsers(token, channelID, page, limit)
+	return lm.svc.ListChannelUsers(token, channelID, relation, page, limit)
 }
 
 // AddUserGroupToChannel adds logging middleware to add usergroup to channel method.
@@ -798,7 +798,7 @@ func (lm *loggingMiddleware) CreateGroups(token string, groups ...sdk.Group) (er
 }
 
 // ListGroupUsers adds logging middleware to list group users method.
-func (lm *loggingMiddleware) ListGroupUsers(token, id string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListGroupUsers(token, id, relation string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method list_group_users for group %s took %s to complete", id, time.Since(begin))
 		if err != nil {
@@ -808,7 +808,7 @@ func (lm *loggingMiddleware) ListGroupUsers(token, id string, page, limit uint64
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.ListGroupUsers(token, id, page, limit)
+	return lm.svc.ListGroupUsers(token, id, relation, page, limit)
 }
 
 // Assign adds logging middleware to assign method.
