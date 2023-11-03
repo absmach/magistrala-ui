@@ -982,6 +982,11 @@ func (us *uiService) ListChannelsByThing(token, thingID string, page, limit uint
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
+	thing, err := us.sdk.Thing(thingID, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
 	user, err := us.sdk.UserProfile(token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
@@ -990,7 +995,7 @@ func (us *uiService) ListChannelsByThing(token, thingID string, page, limit uint
 
 	data := struct {
 		NavbarActive string
-		ThingID      string
+		Thing        sdk.Thing
 		Channels     []sdk.Channel
 		User         sdk.User
 		CurrentPage  int
@@ -998,7 +1003,7 @@ func (us *uiService) ListChannelsByThing(token, thingID string, page, limit uint
 		Limit        int
 	}{
 		thingsActive,
-		thingID,
+		thing,
 		chsPage.Channels,
 		user,
 		int(page),
