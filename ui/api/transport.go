@@ -1,4 +1,4 @@
-// Copyright (c) Mainflux
+// Copyright (c) Abstract Machines
 // SPDX-License-Identifier: Apache-2.0
 
 package api
@@ -15,17 +15,17 @@ import (
 	"strings"
 	"time"
 
+	"github.com/absmach/magistrala"
+	"github.com/absmach/magistrala-ui/ui"
 	"github.com/go-zoo/bone"
-	"github.com/ultravioletrs/mainflux-ui/ui"
 
 	"github.com/golang-jwt/jwt"
 
+	"github.com/absmach/magistrala/pkg/errors"
+	"github.com/absmach/magistrala/pkg/messaging"
+	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/go-chi/chi/v5"
 	kithttp "github.com/go-kit/kit/transport/http"
-	"github.com/mainflux/mainflux"
-	"github.com/mainflux/mainflux/pkg/errors"
-	"github.com/mainflux/mainflux/pkg/messaging"
-	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -710,7 +710,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 		})
 	})
 
-	r.Get("/health", mainflux.Health("ui", instanceID))
+	r.Get("/health", magistrala.Health("ui", instanceID))
 	r.Handle("/metrics", promhttp.Handler())
 
 	r.NotFound(kithttp.NewServer(
@@ -2354,7 +2354,7 @@ func encodeResponse(_ context.Context, w http.ResponseWriter, response interface
 }
 
 func encodeJSONResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
-	if ar, ok := response.(mainflux.Response); ok {
+	if ar, ok := response.(magistrala.Response); ok {
 		for k, v := range ar.Headers() {
 			w.Header().Set(k, v)
 		}

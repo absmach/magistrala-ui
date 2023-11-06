@@ -1,29 +1,29 @@
-# Copyright (c) Mainflux
+# Copyright (c) Magistrala
 # SPDX-License-Identifier: Apache-2.0
 
 version: "3.7"
 
 networks:
-  mainflux-base-net:
+  magistrala-base-net:
     driver: bridge
 
 services:
   ui:
-    image: mainflux/ui:${MF_RELEASE_TAG}
-    container_name: mainflux-ui
+    image: magistrala/ui:${MG_RELEASE_TAG}
+    container_name: magistrala-ui
     restart: on-failure
     ports:
-      - ${MF_UI_PORT}:${MF_UI_PORT}
+      - ${MG_UI_PORT}:${MG_UI_PORT}
     networks:
-      - mainflux-base-net
+      - magistrala-base-net
     environment:
-      MF_UI_LOG_LEVEL: ${MF_UI_LOG_LEVEL}
-      MF_UI_PORT: ${MF_UI_PORT}
-      MF_HTTP_ADAPTER_URL: ${MF_HTTP_ADAPTER_URL}
-      MF_READER_URL: ${MF_READER_URL}
-      MF_THINGS_URL: ${MF_THINGS_URL}
-      MF_USERS_URL: ${MF_USERS_URL}
-      MF_BOOTSTRAP_URL: ${MF_BOOTSTRAP_URL}
-      MF_VERIFICATION_TLS: ${MF_VERIFICATION_TLS}
-      MF_UI_INSTANCE_ID: ${MF_UI_INSTANCE_ID}
-      MF_UI_HOST_URL: ${MF_UI_HOST_URL}
+      MG_UI_LOG_LEVEL: ${MG_UI_LOG_LEVEL}
+      MG_UI_PORT: ${MG_UI_PORT}
+      MG_HTTP_ADAPTER_URL: ${MG_HTTP_ADAPTER_URL}
+      MG_READER_URL: ${MG_READER_URL}
+      MG_THINGS_URL: ${MG_THINGS_URL}
+      MG_USERS_URL: ${MG_USERS_URL}
+      MG_BOOTSTRAP_URL: ${MG_BOOTSTRAP_URL}
+      MG_VERIFICATION_TLS: ${MG_VERIFICATION_TLS}
+      MG_UI_INSTANCE_ID: ${MG_UI_INSTANCE_ID}
+      MG_UI_HOST_URL: ${MG_UI_HOST_URL}

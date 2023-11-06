@@ -1,5 +1,5 @@
 FROM scratch
 ARG SVC
-COPY ./build/mainflux-$SVC /exe
+COPY ./build/magistrala-$SVC /exe
 COPY ./$SVC/web /$SVC/web
 ENTRYPOINT ["/exe"]
