@@ -9,16 +9,21 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"html/template"
+	"log"
 	"math"
 	"strings"
+	"sync"
 	"time"
 
-	"golang.org/x/exp/slices"
-
+	"github.com/absmach/agent/pkg/bootstrap"
 	"github.com/absmach/magistrala/pkg/errors"
 	"github.com/absmach/magistrala/pkg/messaging"
 	"github.com/absmach/magistrala/pkg/transformers/senml"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
+	mfsenml "github.com/mainflux/senml"
+	"golang.org/x/exp/slices"
 
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 )
@@ -1869,87 +1874,87 @@ func (us *uiService) GetRemoteTerminal(id, token string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-// func (us *uiService) ProcessTerminalCommand(ctx context.Context, id, tkn, command string, res chan string) error {
-// 	cfg, err := us.sdk.ViewBootstrap(id, tkn)
-// 	if err != nil {
-// 		return errors.Wrap(err, ErrFailedRetreive)
-// 	}
+func (us *uiService) ProcessTerminalCommand(ctx context.Context, id, tkn, command string, res chan string) error {
+	cfg, err := us.sdk.ViewBootstrap(id, tkn)
+	if err != nil {
+		return errors.Wrap(err, ErrFailedRetreive)
+	}
 
-// 	var content bootstrap.ServicesConfig
+	var content bootstrap.ServicesConfig
 
-// 	if err := json.Unmarshal([]byte(cfg.Content), &content); err != nil {
-// 		return err
-// 	}
+	if err := json.Unmarshal([]byte(cfg.Content), &content); err != nil {
+		return err
+	}
 
-// 	channels, ok := cfg.Channels.([]sdk.Channel)
-// 	if !ok {
-// 		return errors.New("invalid channels")
-// 	}
+	channels, ok := cfg.Channels.([]sdk.Channel)
+	if !ok {
+		return errors.New("invalid channels")
+	}
 
-// 	pubTopic := fmt.Sprintf("channels/%s/messages/req", channels[0].ID)
-// 	subTopic := fmt.Sprintf("channels/%s/messages/res/#", channels[0].ID)
+	pubTopic := fmt.Sprintf("channels/%s/messages/req", channels[0].ID)
+	subTopic := fmt.Sprintf("channels/%s/messages/res/#", channels[0].ID)
 
-// 	opts := mqtt.NewClientOptions().SetCleanSession(true).SetAutoReconnect(true)
+	opts := mqtt.NewClientOptions().SetCleanSession(true).SetAutoReconnect(true)
 
-// 	opts.AddBroker(content.Agent.MQTT.URL)
-// 	if content.Agent.MQTT.Username == "" || content.Agent.MQTT.Password == "" {
-// 		opts.SetUsername(cfg.ThingID)
-// 		opts.SetPassword(cfg.ThingKey)
-// 	} else {
-// 		opts.SetUsername(content.Agent.MQTT.Username)
-// 		opts.SetPassword(content.Agent.MQTT.Password)
-// 	}
+	opts.AddBroker(content.Agent.MQTT.URL)
+	if content.Agent.MQTT.Username == "" || content.Agent.MQTT.Password == "" {
+		opts.SetUsername(cfg.ThingID)
+		opts.SetPassword(cfg.ThingKey)
+	} else {
+		opts.SetUsername(content.Agent.MQTT.Username)
+		opts.SetPassword(content.Agent.MQTT.Password)
+	}
 
-// 	opts.SetClientID(fmt.Sprintf("ui-terminal-%s", cfg.ThingID))
-// 	client := mqtt.NewClient(opts)
+	opts.SetClientID(fmt.Sprintf("ui-terminal-%s", cfg.ThingID))
+	client := mqtt.NewClient(opts)
 
-// 	if token := client.Connect(); token.Wait() && token.Error() != nil {
-// 		return token.Error()
-// 	}
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		return token.Error()
+	}
 
-// 	req := []mfsenml.Record{
-// 		{BaseName: "1", Name: "exec", StringValue: &command},
-// 	}
-// 	reqByte, err1 := json.Marshal(req)
-// 	if err1 != nil {
-// 		return err1
-// 	}
+	req := []mfsenml.Record{
+		{BaseName: "1", Name: "exec", StringValue: &command},
+	}
+	reqByte, err1 := json.Marshal(req)
+	if err1 != nil {
+		return err1
+	}
 
-// 	token := client.Publish(pubTopic, 0, false, string(reqByte))
-// 	token.Wait()
+	token := client.Publish(pubTopic, 0, false, string(reqByte))
+	token.Wait()
 
-// 	if token.Error() != nil {
-// 		return token.Error()
-// 	}
+	if token.Error() != nil {
+		return token.Error()
+	}
 
-// 	var wg sync.WaitGroup
-// 	wg.Add(1)
-// 	errChan := make(chan error)
+	var wg sync.WaitGroup
+	wg.Add(1)
+	errChan := make(chan error)
 
-// 	client.Subscribe(subTopic, 0, func(_ mqtt.Client, m mqtt.Message) {
-// 		var data []mfsenml.Record
-// 		if err := json.Unmarshal(m.Payload(), &data); err != nil {
-// 			errChan <- err
-// 		}
-// 		res <- *data[0].StringValue
-// 		wg.Done()
-// 	})
+	client.Subscribe(subTopic, 0, func(_ mqtt.Client, m mqtt.Message) {
+		var data []mfsenml.Record
+		if err := json.Unmarshal(m.Payload(), &data); err != nil {
+			errChan <- err
+		}
+		res <- *data[0].StringValue
+		wg.Done()
+	})
 
-// 	select {
-// 	case <-ctx.Done():
-// 		log.Println("ProcessTerminalCommand canceled")
-// 	case <-time.After(time.Second * 5):
-// 		log.Println("Timeout occurred")
-// 		res <- "timeout"
-// 	case err := <-errChan:
-// 		return err
-// 	case <-res:
-// 		wg.Wait()
-// 	}
+	select {
+	case <-ctx.Done():
+		log.Println("ProcessTerminalCommand canceled")
+	case <-time.After(time.Second * 5):
+		log.Println("Timeout occurred")
+		res <- "timeout"
+	case err := <-errChan:
+		return err
+	case <-res:
+		wg.Wait()
+	}
 
-// 	client.Disconnect(250)
-// 	return nil
-// }
+	client.Disconnect(250)
+	return nil
+}
 
 func (us *uiService) GetEntities(token, item, name string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit

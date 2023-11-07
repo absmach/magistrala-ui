@@ -1,8 +1,17 @@
+# github.com/absmach/agent v0.0.0-20231107115142-c8b509f24d50
+## explicit; go 1.21
+github.com/absmach/agent/pkg/agent
+github.com/absmach/agent/pkg/bootstrap
+github.com/absmach/agent/pkg/edgex
+github.com/absmach/agent/pkg/encoder
+github.com/absmach/agent/pkg/terminal
 # github.com/absmach/magistrala v0.11.1-0.20231102134813-44408395e6a3
 ## explicit; go 1.21
 github.com/absmach/magistrala
+github.com/absmach/magistrala/bootstrap
 github.com/absmach/magistrala/internal/apiutil
 github.com/absmach/magistrala/logger
+github.com/absmach/magistrala/pkg/clients
 github.com/absmach/magistrala/pkg/errors
 github.com/absmach/magistrala/pkg/messaging
 github.com/absmach/magistrala/pkg/sdk/go
@@ -18,6 +27,19 @@ github.com/caarlos0/env/v9
 # github.com/cespare/xxhash/v2 v2.2.0
 ## explicit; go 1.11
 github.com/cespare/xxhash/v2
+# github.com/creack/pty v1.1.18
+## explicit; go 1.13
+github.com/creack/pty
+# github.com/eclipse/paho.mqtt.golang v1.4.3
+## explicit; go 1.18
+github.com/eclipse/paho.mqtt.golang
+github.com/eclipse/paho.mqtt.golang/packets
+# github.com/edgexfoundry/go-mod-core-contracts v0.1.70
+## explicit; go 1.13
+github.com/edgexfoundry/go-mod-core-contracts/clients
+github.com/edgexfoundry/go-mod-core-contracts/clients/interfaces
+github.com/edgexfoundry/go-mod-core-contracts/clients/types
+github.com/edgexfoundry/go-mod-core-contracts/models
 # github.com/fxamacker/cbor/v2 v2.5.0
 ## explicit; go 1.12
 github.com/fxamacker/cbor/v2
@@ -55,12 +77,27 @@ github.com/golang/protobuf/ptypes
 github.com/golang/protobuf/ptypes/any
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
+# github.com/google/uuid v1.4.0
+## explicit
+github.com/google/uuid
+# github.com/gorilla/websocket v1.5.0
+## explicit; go 1.12
+github.com/gorilla/websocket
+# github.com/mainflux/export v0.1.1-0.20230724124847-67d0bc7f38cb
+## explicit; go 1.20
+github.com/mainflux/export/pkg/config
+# github.com/mainflux/mainflux v0.12.0
+## explicit; go 1.14
+github.com/mainflux/mainflux/pkg/errors
 # github.com/mainflux/senml v1.5.0
 ## explicit; go 1.13
 github.com/mainflux/senml
 # github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0
 ## explicit; go 1.19
 github.com/matttproud/golang_protobuf_extensions/v2/pbutil
+# github.com/pelletier/go-toml v1.9.5
+## explicit; go 1.12
+github.com/pelletier/go-toml
 # github.com/prometheus/client_golang v1.17.0
 ## explicit; go 1.19
 github.com/prometheus/client_golang/prometheus
@@ -92,11 +129,14 @@ golang.org/x/net/http/httpguts
 golang.org/x/net/http2
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
+golang.org/x/net/internal/socks
 golang.org/x/net/internal/timeseries
+golang.org/x/net/proxy
 golang.org/x/net/trace
 # golang.org/x/sync v0.4.0
 ## explicit; go 1.17
 golang.org/x/sync/errgroup
+golang.org/x/sync/semaphore
 # golang.org/x/sys v0.13.0
 ## explicit; go 1.17
 golang.org/x/sys/unix
