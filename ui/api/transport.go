@@ -2290,18 +2290,20 @@ func TokenMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tokenString, err := tokenFromCookie(r, "token")
 		if err != nil {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 
 		// Parse the token without validation to get the expiration time
 		token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
 		if err != nil {
+			http.Redirect(w, r, "/error?error="+url.QueryEscape(err.Error()), http.StatusSeeOther)
 			return
 		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
 			expirationTime := time.Unix(int64(claims["exp"].(float64)), 0)
 			if expirationTime.Before(time.Now()) {
-				http.Redirect(w, r, "/ui/token/refresh?referer_url="+url.QueryEscape(r.URL.String()), http.StatusSeeOther)
+				http.Redirect(w, r, "/token/refresh?referer_url="+url.QueryEscape(r.URL.String()), http.StatusSeeOther)
 				return
 			}
 		}
