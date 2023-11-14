@@ -1,8 +1,5 @@
-// Copyright (c) Mainflux
+// Copyright (c) Abstract Machines
 // SPDX-License-Identifier: Apache-2.0
-
-//go:build !test
-// +build !test
 
 package api
 
@@ -10,11 +7,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/ultravioletrs/mainflux-ui/ui"
+	"github.com/absmach/magistrala-ui/ui"
 
+	"github.com/absmach/magistrala/pkg/messaging"
+	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/go-kit/kit/metrics"
-	"github.com/mainflux/mainflux/pkg/messaging"
-	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
 )
 
 var _ ui.Service = (*metricsMiddleware)(nil)

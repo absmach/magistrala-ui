@@ -1,8 +1,8 @@
-// Copyright (c) Mainflux
+// Copyright (c) Abstract Machines
 // SPDX-License-Identifier: Apache-2.0
 
 // Package ui contains the domain concept definitions needed to support
-// Mainflux ui adapter service functionality.
+// Magistrala ui adapter service functionality.
 package ui
 
 import (
@@ -17,16 +17,15 @@ import (
 	"sync"
 	"time"
 
+	"github.com/absmach/agent/pkg/bootstrap"
+	"github.com/absmach/magistrala/pkg/errors"
+	"github.com/absmach/magistrala/pkg/messaging"
+	"github.com/absmach/magistrala/pkg/transformers/senml"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
+	mfsenml "github.com/mainflux/senml"
 	"golang.org/x/exp/slices"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/mainflux/agent/pkg/bootstrap"
-	"github.com/mainflux/mainflux/pkg/errors"
-	"github.com/mainflux/mainflux/pkg/messaging"
-	"github.com/mainflux/mainflux/pkg/transformers/senml"
-	mfsenml "github.com/mainflux/senml"
-
-	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
+	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 )
 
 const (

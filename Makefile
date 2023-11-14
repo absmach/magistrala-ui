@@ -1,4 +1,4 @@
-MF_DOCKER_IMAGE_NAME_PREFIX ?= mainflux
+MF_DOCKER_IMAGE_NAME_PREFIX ?= magistrala
 SVC = ui
 BUILD_DIR = build
 CGO_ENABLED ?= 0
@@ -10,11 +10,11 @@ TIME ?= $(shell date +%F_%T)
 
 define compile_service
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) GOARM=$(GOARM) \
-	go build -mod=vendor  -ldflags "-s -w \
-	-X 'github.com/mainflux/mainflux.BuildTime=$(TIME)' \
-	-X 'github.com/mainflux/mainflux.Version=$(VERSION)' \
-	-X 'github.com/mainflux/mainflux.Commit=$(COMMIT)'" \
-	-o ${BUILD_DIR}/mainflux-$(1) cmd/$(1)/main.go
+	go build -ldflags "-s -w \
+	-X 'github.com/absmach/magistrala-ui.BuildTime=$(TIME)' \
+	-X 'github.com/absmach/magistrala-ui.Version=$(VERSION)' \
+	-X 'github.com/absmach/magistrala-ui.Commit=$(COMMIT)'" \
+	-o ${BUILD_DIR}/magistrala-$(1) cmd/$(1)/main.go
 endef
 
 define make_docker
@@ -57,7 +57,7 @@ install:
 	cp ${BUILD_DIR}/* $(GOBIN)
 
 test:
-	GOCACHE=off go test -mod=vendor -v -race -count 1 -tags test $(shell go list ./... | grep -v 'vendor\|cmd')
+	go test -v -race -count 1 -tags test $(shell go list ./... | grep -v 'vendor\|cmd')
 
 lint:
 	golangci-lint run --no-config --disable-all --enable gosimple --enable errcheck --enable govet --enable unused --enable goconst --enable godot --timeout 3m
@@ -76,4 +76,4 @@ run_docker:
 	docker-compose -f docker/docker-compose.yml --env-file docker/.env up
 
 run:
-	${BUILD_DIR}/mainflux-ui
+	${BUILD_DIR}/magistrala-ui

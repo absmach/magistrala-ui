@@ -1,4 +1,4 @@
-// Copyright (c) Mainflux
+// Copyright (c) Abstract Machines
 // SPDX-License-Identifier: Apache-2.0
 
 package api
@@ -9,10 +9,10 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/ultravioletrs/mainflux-ui/ui"
+	"github.com/absmach/magistrala-ui/ui"
 
+	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/go-kit/kit/endpoint"
-	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
 )
 
 func indexEndpoint(svc ui.Service) endpoint.Endpoint {

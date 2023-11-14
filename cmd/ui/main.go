@@ -1,4 +1,4 @@
-// Copyright (c) Mainflux
+// Copyright (c) Abstract Machines
 // SPDX-License-Identifier: Apache-2.0
 
 package main
@@ -11,29 +11,29 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/absmach/magistrala-ui/ui"
+	"github.com/absmach/magistrala-ui/ui/api"
+	"github.com/absmach/magistrala/logger"
+	sdk "github.com/absmach/magistrala/pkg/sdk/go"
+	"github.com/absmach/magistrala/pkg/uuid"
 	"github.com/caarlos0/env/v9"
 	"github.com/go-chi/chi/v5"
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
-	"github.com/mainflux/mainflux/logger"
-	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
-	"github.com/mainflux/mainflux/pkg/uuid"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
-	"github.com/ultravioletrs/mainflux-ui/ui"
-	"github.com/ultravioletrs/mainflux-ui/ui/api"
 )
 
 type config struct {
-	LogLevel        string          `env:"MF_UI_LOG_LEVEL"       envDefault:"info"`
-	Port            string          `env:"MF_UI_PORT"            envDefault:"9095"`
-	InstanceID      string          `env:"MF_UI_INSTANCE_ID"     envDefault:""`
-	HTTPAdapterURL  string          `env:"MF_HTTP_ADAPTER_URL"   envDefault:"http://localhost:8008"`
-	ReaderURL       string          `env:"MF_READER_URL"         envDefault:"http://localhost:9007"`
-	ThingsURL       string          `env:"MF_THINGS_URL"         envDefault:"http://localhost:9000"`
-	UsersURL        string          `env:"MF_USERS_URL"          envDefault:"http://localhost:9002"`
-	HostURL         string          `env:"MF_UI_HOST_URL"        envDefault:"http://localhost:9095"`
-	BootstrapURL    string          `env:"MF_BOOTSTRAP_URL"      envDefault:"http://localhost:9013"`
-	MsgContentType  sdk.ContentType `env:"MF_CONTENT-TYPE"       envDefault:"application/senml+json"`
-	TLSVerification bool            `env:"MF_VERIFICATION_TLS"   envDefault:"false"`
+	LogLevel        string          `env:"MG_UI_LOG_LEVEL"       envDefault:"info"`
+	Port            string          `env:"MG_UI_PORT"            envDefault:"9095"`
+	InstanceID      string          `env:"MG_UI_INSTANCE_ID"     envDefault:""`
+	HTTPAdapterURL  string          `env:"MG_HTTP_ADAPTER_URL"   envDefault:"http://localhost:8008"`
+	ReaderURL       string          `env:"MG_READER_URL"         envDefault:"http://localhost:9007"`
+	ThingsURL       string          `env:"MG_THINGS_URL"         envDefault:"http://localhost:9000"`
+	UsersURL        string          `env:"MG_USERS_URL"          envDefault:"http://localhost:9002"`
+	HostURL         string          `env:"MG_UI_HOST_URL"        envDefault:"http://localhost:9095"`
+	BootstrapURL    string          `env:"MG_BOOTSTRAP_URL"      envDefault:"http://localhost:9013"`
+	MsgContentType  sdk.ContentType `env:"MG_CONTENT-TYPE"       envDefault:"application/senml+json"`
+	TLSVerification bool            `env:"MG_VERIFICATION_TLS"   envDefault:"false"`
 }
 
 func main() {

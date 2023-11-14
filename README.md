@@ -1,14 +1,14 @@
-# Mainflux-ui
+# Magistrala-ui
 
-The Mainflux-ui functions as a Graphical User Interface (GUI) designed to interact with Mainflux services, encompassing both the creation and management aspects of users, things, channels, and groups. It streamlines tasks such as user and thing creation, channel establishment, policy configuration, and HTTP message transmission across various channels.
+The Magistrala-ui functions as a Graphical User Interface (GUI) designed to interact with Magistrala services, encompassing both the creation and management aspects of users, things, channels, and groups. It streamlines tasks such as user and thing creation, channel establishment, policy configuration, and HTTP message transmission across various channels.
 
-Mainflux-ui can be obtained as an independent subset of Mainflux; however, it requires integration with the mainflux core services to function properly.
+Magistrala-ui can be obtained as an independent subset of Magistrala; however, it requires integration with the Magistrala core services to function properly.
 
 ## Prerequisites
 
-To run Mainflux-ui, you need the following components:
+To run Magistrala-ui, you need the following components:
 
-- [Mainflux](https://github.com/mainflux/mainflux) (latest version)
+- [Magistrala](https://github.com/absmach/magistrala) (latest version)
 - [Go](https://golang.org/doc/install) (version 1.19.2)
 - [Docker-compose](https://docs.docker.com/compose/install/) (latest version)
 - [make](https://www.gnu.org/software/make/manual/make.html)
@@ -25,7 +25,7 @@ make
 make run
 ```
 
-These commands will launch Mainflux-ui. To use the Mainflux-ui, ensure that the Mainflux core services are operational. You can achieve this by installing [Mainflux](https://github.com/mainflux/mainflux) and its prerequisites.
+These commands will launch Magistrala-ui. To use the Magistrala-ui, ensure that the Mainflux core services are operational. You can achieve this by installing [Magistrala](https://github.com/absmach/magistrala) and its prerequisites.
 
 To build the docker images for the ui service, run the following commands which will build the docker images in different configurations.
 
@@ -51,7 +51,7 @@ This brings up the docker images and runs ui in the configuration specified in t
 
 ## Usage
 
-Once both Mainflux core and Mainflux-ui are running, you can access the Mainflux-ui interface locally by entering the address: [http://localhost:9090](http://localhost:9090).
+Once both Magistrala core and Magistrala-ui are running, you can access the Magistrala-ui interface locally by entering the address: [http://localhost:9095](http://localhost:9095).
 
 On the login page, use the provided credentials to log in to the interface:
 
@@ -60,7 +60,7 @@ Email: admin@example.com
 Password: 12345678
 ```
 
-Upon logging in, you will be directed to the Dashboard, which provides an overview of the Mainflux user interface. The sidebar elements, such as Users/Groups, allow you to navigate to specific pages for performing actions related to Users, Groups, Users Policies, Things, Channels, Things Policies, and viewing Deleted Clients.
+Upon logging in, you will be directed to the Dashboard, which provides an overview of the Magistrala user interface. The sidebar elements, such as Users/Groups, allow you to navigate to specific pages for performing actions related to Users, Groups, Things, Channels, and Bootstraps.
 
 ### Users
 
@@ -76,10 +76,6 @@ When using a CSV file to create multiple groups, the file should contain group n
 
 For more details, refer to the official [Documentation](http://docs.mainflux.io/cli/#things-management).
 
-### Users Policies
-
-To create a user policy, select the subject and object, and choose the relevant actions (multiple selections are allowed). User policies are utilized to manage permissions for users and groups entities. These Policies determine access rights for these entities. For instance, they define which users can access specific groups. Learn more about policies from the official [Documentation](https://docs.mainflux.io/authorization/#summary-of-defined-policies).
-
 ### Things
 
 You can create individual things or upload a CSV file for multiple things. When adding a thing, provide the Thing Name (required), Thing ID, Identity, Secret, Tags (as a string slice), and Metadata (in JSON format). The Thing Secret should be unique and is used to identify the thing. Metadata offers additional information about the thing.
@@ -90,13 +86,9 @@ For multiple things, use a CSV file with thing names in one column. Refer to the
 
 Similarly, you can add individual or multiple channels using a CSV file. For channel creation, enter the Channel Name (required), select the Parent ID, provide a Description, and include Metadata (in JSON format).
 
-### Things Policies
-
-Creating a thing policy involves selecting the subject and object and specifying the actions (multiple selections are allowed). Things policies control permissions for things and channels entities. They define access permissions, such as a thing's access to a channel. For detailed policy information, consult the official [Documentation](https://docs.mainflux.io/authorization/#summary-of-defined-policies).
-
 ### Bootstrap
 
-To use bootstrap, ensure that the [bootstrap](http://docs.mainflux.io/bootstrap/) addon is active as part of the Mainflux core services.
+To use bootstrap, ensure that the [bootstrap](http://docs.mainflux.io/bootstrap/) addon is active as part of the Magistrala core services.
 
 To configure bootstrap, provide the Name, Thing ID, External ID, External Key, Channel (as a string slice), Content (in JSON format), Client Cert, Client Key, and CA Cert.
 

@@ -1,11 +1,11 @@
-// Copyright (c) Mainflux
+// Copyright (c) Abstract Machines
 // SPDX-License-Identifier: Apache-2.0
 
 package api
 
 import (
-	"github.com/mainflux/mainflux/pkg/messaging"
-	sdk "github.com/mainflux/mainflux/pkg/sdk/go"
+	"github.com/absmach/magistrala/pkg/messaging"
+	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 )
 
 const maxNameSize = 1024

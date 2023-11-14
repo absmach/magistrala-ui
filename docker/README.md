@@ -1,6 +1,6 @@
 # Docker Composition
 
-Configure environment variables and run Mainflux Docker Composition.
+Configure environment variables and run Magistrala UI Docker Composition.
 
 \*Note\*\*: `docker-compose` uses `.env` file to set all environment variables. Ensure that you run the command from the same location as .env file.
 

@@ -1,4 +1,4 @@
-// Copyright (c) Mainflux
+// Copyright (c) Abstract Machines
 // SPDX-License-Identifier: Apache-2.0
 
 package api
@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/mainflux/mainflux"
+	"github.com/absmach/magistrala"
 )
 
 var (
-	_ mainflux.Response = (*uiRes)(nil)
-	_ mainflux.Response = (*tokenRes)(nil)
-	_ mainflux.Response = (*terminalResponse)(nil)
+	_ magistrala.Response = (*uiRes)(nil)
+	_ magistrala.Response = (*tokenRes)(nil)
+	_ magistrala.Response = (*terminalResponse)(nil)
 )
 
 type uiRes struct {
