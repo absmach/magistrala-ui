@@ -27,6 +27,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/ultravioletrs/mainflux-ui/ui"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -527,7 +528,6 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
-
 		})
 
 		r.Route("/groups", func(r chi.Router) {
@@ -1768,7 +1768,6 @@ func decodeAddUserGroupToChannelRequest(_ context.Context, r *http.Request) (int
 	}
 
 	return req, nil
-
 }
 
 func decodeListChannelUserGroupsRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -2217,7 +2216,6 @@ func decodeGetEntitiesRequest(_ context.Context, r *http.Request) (interface{}, 
 	}
 
 	return req, nil
-
 }
 
 func decodeError(_ context.Context, r *http.Request) (interface{}, error) {
@@ -2400,7 +2398,6 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		errors.Contains(err, ui.ErrFailedReset),
 		errors.Contains(err, ui.ErrFailedResetRequest),
 		errors.Contains(err, ui.ErrFailedPublish),
-		errors.Contains(err, ui.ErrFailedDelete),
 		errors.Contains(err, ui.ErrExecTemplate),
 		errors.Contains(err, ui.ErrFailedDelete),
 		errors.Contains(err, ui.ErrFailedShare),

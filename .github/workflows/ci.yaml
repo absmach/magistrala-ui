@@ -1,52 +1,36 @@
-name: CI
+name: Continuous Integration
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   ci:
+    name: Continuous Integration
     runs-on: ubuntu-latest
     steps:
       - name: Install Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
           go-version: 1.21.x
+          cache-dependency-path: "go.sum"
 
       - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Install dependencies
-        uses: actions/setup-node@v2
-        with:
-          node-version: lts/*
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run Prettier
-        id: prettier-run
-        uses: rutajdash/prettier-cli-action@v1.0.0
-        with:
-          config_path: ./.prettierrc
-
-      - name: Prettier Output
-        if: ${{ failure() }}
-        shell: bash
-        run: |
-          echo "The following files are not formatted:"
-          echo "${{steps.prettier-run.outputs.prettier_output}}"
+        uses: actions/checkout@v4
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
-          args: --no-config --disable-all --enable gosimple --enable errcheck --enable govet --enable unused --enable goconst --enable godot --timeout 3m
-
-      - name: Build
-        run: go build -v ./...
+        
+      - name: Build Binaries
+        run: |
+          go mod vendor
+          make all -j $(nproc)
 
       - name: Run tests
-        run: go test -v --race -covermode=atomic -coverprofile cover.out ./...
+        run: |
+          go mod vendor
+          make test
