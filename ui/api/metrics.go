@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/absmach/magistrala-ui/ui"
-
 	"github.com/absmach/magistrala/pkg/messaging"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/go-kit/kit/metrics"

@@ -17,17 +17,14 @@ import (
 
 	"github.com/absmach/magistrala"
 	"github.com/absmach/magistrala-ui/ui"
-	"github.com/go-zoo/bone"
-
-	"github.com/golang-jwt/jwt"
-
 	"github.com/absmach/magistrala/pkg/errors"
 	"github.com/absmach/magistrala/pkg/messaging"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/go-chi/chi/v5"
 	kithttp "github.com/go-kit/kit/transport/http"
+	"github.com/go-zoo/bone"
+	"github.com/golang-jwt/jwt"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/ultravioletrs/mainflux-ui/ui"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

@@ -20,12 +20,11 @@ import (
 	"github.com/absmach/agent/pkg/bootstrap"
 	"github.com/absmach/magistrala/pkg/errors"
 	"github.com/absmach/magistrala/pkg/messaging"
+	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/absmach/magistrala/pkg/transformers/senml"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	mfsenml "github.com/mainflux/senml"
 	"golang.org/x/exp/slices"
-
-	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 )
 
 const (
