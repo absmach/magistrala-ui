@@ -33,13 +33,13 @@ jobs:
               with:
                 images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
             
-            - name: Build UIand push Docker image
+            - name: Build service and push Docker image
               uses: docker/build-push-action@v5
               with:
                   context: .
                   file: ./docker/Dockerfile
                   push: true
                   build-args: |
-                    SVC=ui
+                    SVC=magistrala-ui
                   tags: ghcr.io/absmach/magistrala-ui:latest
                   labels: ${{ steps.meta.outputs.labels }}

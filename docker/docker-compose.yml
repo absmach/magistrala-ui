@@ -1,4 +1,4 @@
-# Copyright (c) Magistrala
+# Copyright (c) Abstract Machines
 # SPDX-License-Identifier: Apache-2.0
 
 version: "3.7"
@@ -9,7 +9,7 @@ networks:
 
 services:
   ui:
-    image: magistrala/ui:${MG_RELEASE_TAG}
+    image: ghcr.io/absmach/magistrala-ui:${MG_RELEASE_TAG}
     container_name: magistrala-ui
     restart: on-failure
     ports:
