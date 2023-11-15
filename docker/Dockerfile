@@ -17,7 +17,7 @@ COPY . .
 RUN apk update \
     && apk add make\
     && make $SVC \
-    && mv build/mainflux-$SVC /exe
+    && mv build/$SVC /exe
 
 FROM scratch
 COPY --from=builder /exe /

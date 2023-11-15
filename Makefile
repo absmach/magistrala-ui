@@ -29,7 +29,7 @@ define make_docker
 		--build-arg VERSION=$(VERSION) \
 		--build-arg COMMIT=$(COMMIT) \
 		--build-arg TIME=$(TIME) \
-		--tag=$(MF_DOCKER_IMAGE_NAME_PREFIX)/$(SVC) \
+		--tag=$(MG_DOCKER_IMAGE_NAME_PREFIX)/$(SVC) \
 		-f docker/Dockerfile .
 endef
 

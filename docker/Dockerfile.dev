@@ -3,6 +3,6 @@
 
 FROM scratch
 ARG SVC
-COPY ./build/magistrala-$SVC /exe
-COPY ./$SVC/web /$SVC/web
+COPY ./build/$SVC /exe
+COPY ./ui/web /ui/web
 ENTRYPOINT ["/exe"]

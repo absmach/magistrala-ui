@@ -53,8 +53,14 @@ jobs:
         run: |
           go mod vendor
           make all -j $(nproc)
+      
+      - name: Build Docker images
+        if: github.event_name == 'pull_request'
+        run: |
+          go mod vendor
+          make docker -j $(nproc)
 
-      - name: Run tests
+      - name: Run Tests
         run: |
           go mod vendor
           make test
