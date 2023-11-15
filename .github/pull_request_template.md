@@ -1,3 +1,6 @@
+<!-- Copyright (c) Abstract Machines
+SPDX-License-Identifier: Apache-2.0 -->
+
 # What type of PR is this?
 
 <!--

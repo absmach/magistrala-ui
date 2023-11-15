@@ -1,4 +1,7 @@
-MF_DOCKER_IMAGE_NAME_PREFIX ?= magistrala
+# Copyright (c) Abstract Machines
+# SPDX-License-Identifier: Apache-2.0
+
+MG_DOCKER_IMAGE_NAME_PREFIX ?= magistrala
 SVC = ui
 BUILD_DIR = build
 CGO_ENABLED ?= 0
@@ -38,7 +41,7 @@ define make_docker_dev
 	docker build \
 		--no-cache \
 		--build-arg SVC=$(svc) \
-		--tag=$(MF_DOCKER_IMAGE_NAME_PREFIX)/$(svc) \
+		--tag=$(MG_DOCKER_IMAGE_NAME_PREFIX)/$(svc) \
 		-f docker/Dockerfile.dev .
 endef
 

@@ -1,3 +1,6 @@
+// Copyright (c) Abstract Machines
+// SPDX-License-Identifier: Apache-2.0
+
 //function to copy the ID to the clipboard
 function copyToClipboard(button) {
 	var clientIDElement = button.previousElementSibling.firstChild;

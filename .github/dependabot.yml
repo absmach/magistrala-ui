@@ -1,3 +1,6 @@
+# Copyright (c) Abstract Machines
+# SPDX-License-Identifier: Apache-2.0
+
 version: 2
 updates:
   - package-ecosystem: "github-actions"
@@ -6,11 +9,11 @@ updates:
       interval: "weekly"
 
   - package-ecosystem: "gomod"
-    directory: "/"
+    directory: "./docker"
     schedule:
       interval: "weekly"
 
   - package-ecosystem: "docker"
-    directory: "./docker"
+    directory: "/"
     schedule:
       interval: "weekly"
