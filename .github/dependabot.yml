@@ -1,12 +1,12 @@
 version: 2
 updates:
   - package-ecosystem: "github-actions"
-    directory: "./docker"
+    directory: "/"
     schedule:
       interval: "weekly"
 
   - package-ecosystem: "gomod"
-    directory: "./docker"
+    directory: "/"
     schedule:
       interval: "weekly"
 
