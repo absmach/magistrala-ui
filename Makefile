@@ -17,7 +17,7 @@ define compile_service
 	-X 'github.com/absmach/magistrala-ui.BuildTime=$(TIME)' \
 	-X 'github.com/absmach/magistrala-ui.Version=$(VERSION)' \
 	-X 'github.com/absmach/magistrala-ui.Commit=$(COMMIT)'" \
-	-o ${BUILD_DIR}/magistrala-ui cmd/ui/main.go
+	-o ${BUILD_DIR}/$(SVC) cmd/ui/main.go
 endef
 
 define make_docker
