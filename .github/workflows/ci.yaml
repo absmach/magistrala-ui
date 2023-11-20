@@ -1,22 +1,27 @@
-name: CI
+# Copyright (c) Abstract Machines
+# SPDX-License-Identifier: Apache-2.0
+
+name: Continuous Integration
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   ci:
+    name: Continuous Integration
     runs-on: ubuntu-latest
     steps:
       - name: Install Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
           go-version: 1.21.x
+          cache-dependency-path: "go.sum"
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install dependencies
         uses: actions/setup-node@v2
@@ -43,10 +48,19 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
-          args: --no-config --disable-all --enable gosimple --enable errcheck --enable govet --enable unused --enable goconst --enable godot --timeout 3m
+        
+      - name: Build Binaries
+        run: |
+          go mod vendor
+          make all -j $(nproc)
+      
+      - name: Build Docker images
+        if: github.event_name == 'pull_request'
+        run: |
+          go mod vendor
+          make docker -j $(nproc)
 
-      - name: Build
-        run: go build -v ./...
-
-      - name: Run tests
-        run: go test -v --race -covermode=atomic -coverprofile cover.out ./...
+      - name: Run Tests
+        run: |
+          go mod vendor
+          make test

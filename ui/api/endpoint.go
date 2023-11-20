@@ -7,12 +7,10 @@ import (
 	"context"
 	"net/http"
 
-	"golang.org/x/sync/errgroup"
-
 	"github.com/absmach/magistrala-ui/ui"
-
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/go-kit/kit/endpoint"
+	"golang.org/x/sync/errgroup"
 )
 
 func indexEndpoint(svc ui.Service) endpoint.Endpoint {

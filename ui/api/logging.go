@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/absmach/magistrala-ui/ui"
-
 	log "github.com/absmach/magistrala/logger"
 	"github.com/absmach/magistrala/pkg/messaging"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"

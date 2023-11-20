@@ -1,3 +1,6 @@
+# Copyright (c) Abstract Machines
+# SPDX-License-Identifier: Apache-2.0
+
 FROM golang:1.21-alpine AS builder
 ARG SVC
 ARG GOARCH
@@ -14,7 +17,7 @@ COPY . .
 RUN apk update \
     && apk add make\
     && make $SVC \
-    && mv build/mainflux-$SVC /exe
+    && mv build/$SVC /exe
 
 FROM scratch
 COPY --from=builder /exe /

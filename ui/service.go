@@ -20,12 +20,11 @@ import (
 	"github.com/absmach/agent/pkg/bootstrap"
 	"github.com/absmach/magistrala/pkg/errors"
 	"github.com/absmach/magistrala/pkg/messaging"
+	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/absmach/magistrala/pkg/transformers/senml"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	mfsenml "github.com/mainflux/senml"
 	"golang.org/x/exp/slices"
-
-	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 )
 
 const (
@@ -368,7 +367,7 @@ func (us *uiService) Index(token string) (b []byte, err error) {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	var summary = dataSummary{
+	summary := dataSummary{
 		TotalUsers:       int(users.Total),
 		TotalGroups:      int(groups.Total),
 		TotalThings:      int(things.Total),
@@ -715,7 +714,6 @@ func (us *uiService) ListUserThings(token, userID string, page, limit uint64) (b
 	}
 
 	return btpl.Bytes(), nil
-
 }
 
 func (us *uiService) ListUserChannels(token, userID, relation string, page, limit uint64) (b []byte, err error) {
@@ -964,7 +962,6 @@ func (us *uiService) ListThingUsers(token, thingID string, page, limit uint64) (
 		return []byte{}, errors.Wrap(err, ErrExecTemplate)
 	}
 	return btpl.Bytes(), nil
-
 }
 
 func (us *uiService) ListChannelsByThing(token, thingID string, page, limit uint64) ([]byte, error) {
@@ -1211,7 +1208,6 @@ func (us *uiService) DisconnectThing(thID, chID, token string) error {
 	}
 
 	return nil
-
 }
 
 func (gs *uiService) AddUserToChannel(token, channelID string, req sdk.UsersRelationRequest) error {
@@ -1220,7 +1216,6 @@ func (gs *uiService) AddUserToChannel(token, channelID string, req sdk.UsersRela
 	}
 
 	return nil
-
 }
 
 func (gs *uiService) RemoveUserFromChannel(token, channelID string, req sdk.UsersRelationRequest) error {
@@ -1229,7 +1224,6 @@ func (gs *uiService) RemoveUserFromChannel(token, channelID string, req sdk.User
 	}
 
 	return nil
-
 }
 
 func (us *uiService) ListChannelUsers(token, channelID, relation string, page, limit uint64) (b []byte, err error) {
@@ -1277,7 +1271,6 @@ func (us *uiService) ListChannelUsers(token, channelID, relation string, page, l
 		return []byte{}, errors.Wrap(err, ErrExecTemplate)
 	}
 	return btpl.Bytes(), nil
-
 }
 
 func (gs *uiService) AddUserGroupToChannel(token, channelID string, req sdk.UserGroupsRequest) error {
@@ -1340,7 +1333,6 @@ func (us *uiService) ListChannelUserGroups(token, channelID string, page, limit 
 	}
 
 	return btpl.Bytes(), nil
-
 }
 
 func (us *uiService) CreateGroups(token string, groups ...sdk.Group) error {
@@ -1560,7 +1552,6 @@ func (us *uiService) ListParents(token, groupID string, page, limit uint64) (b [
 	}
 
 	return btpl.Bytes(), nil
-
 }
 
 func (us *uiService) ListChildren(token, groupID string, page, limit uint64) (b []byte, err error) {
@@ -1604,7 +1595,6 @@ func (us *uiService) ListChildren(token, groupID string, page, limit uint64) (b 
 	}
 
 	return btpl.Bytes(), nil
-
 }
 
 func (us *uiService) ListUserGroupChannels(token, groupID string, page, limit uint64) (b []byte, err error) {
@@ -1650,7 +1640,6 @@ func (us *uiService) ListUserGroupChannels(token, groupID string, page, limit ui
 	}
 
 	return btpl.Bytes(), nil
-
 }
 
 func (gs *uiService) Publish(token, thKey string, msg *messaging.Message) error {
@@ -1786,12 +1775,10 @@ func (us *uiService) UpdateBootstrapConnections(token string, config sdk.Bootstr
 		return errors.Wrap(errors.New("invalid channel"), ErrFailedUpdate)
 	}
 	return us.sdk.UpdateBootstrapConnection(config.ThingID, channels, token)
-
 }
 
 func (us *uiService) UpdateBootstrapCerts(token string, config sdk.BootstrapConfig) error {
 	_, err := us.sdk.UpdateBootstrapCerts(config.ThingID, config.ClientCert, config.ClientKey, config.CACert, token)
-
 	if err != nil {
 		return errors.Wrap(err, ErrFailedUpdate)
 	}
@@ -1964,7 +1951,7 @@ func (us *uiService) GetEntities(token, item, name string, page, limit uint64) (
 		Name:       name,
 		Visibility: statusAll,
 	}
-	var items = make(map[string]interface{})
+	items := make(map[string]interface{})
 	switch item {
 	case "groups":
 		groups, err := us.sdk.Groups(pgm, token)
@@ -2038,7 +2025,6 @@ func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, 
 			return string(ret)
 		},
 		"contains": func(data []string, substring string) bool {
-
 			return slices.Contains(data, substring)
 		},
 		"serviceUnavailable": func(service string) bool {
