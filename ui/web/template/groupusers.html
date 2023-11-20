@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0 -->
     <head>
       <title>Group Users</title>
       {{ template "header" }}
-      <script src="/js/infinitescroll.js" type="module"></script>
     </head>
     <body>
       {{ template "navbar" . }}
@@ -19,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <div class="buttons mb-3">
                   <a class="btn body-button" href="/groups/{{ .GroupID }}" role="button">Group</a>
                   <a class="btn body-button" href="/groups/{{ .GroupID }}/channels" role="button">
-                    Group Channels
+                    Assign Channels
                   </a>
                 </div>
                 <div class="table-responsive table-container">
@@ -125,7 +124,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                      {{ $tabActive = "admin" }}
+                      {{ $tabActive = "administrator" }}
                       <button
                         class="nav-link {{ if eq .TabActive $tabActive }}
                           active
@@ -137,9 +136,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                         role="tab"
                         aria-controls="admin-tab-pane"
                         aria-selected="true"
-                        onclick="openTab('admin')"
+                        onclick="openTab('administrator')"
                       >
-                        Admin
+                        Administrator
                       </button>
                     </li>
                     <li class="nav-item" role="presentation">
@@ -182,7 +181,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <div class="tab-content mt-3" id="roleTabContent">
                     {{ $groupID:= .GroupID }}
                     <div
-                      class="tab-pane active"
+                      class="tab-pane {{ if eq .TabActive "" }}
+                        show active
+                      {{ end }}"
                       id="view-tab-pane"
                       role="tabpanel"
                       aria-labelledby="view-tab"
@@ -190,11 +191,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                     >
                       {{ template "tableheader" . }}
                       <div class="itemsTable">
-                        <table id="itemsTable" class="table">
+                        <table id="itemsTable" class="table table-hover">
                           <thead>
                             <tr>
                               <th scope="col">Name</th>
-                              <th scope="col">ID</th>
                               <th class="tags-col" scope="col">Tags</th>
                               <th class="meta-col" scope="col">Metadata</th>
                               <th class="created-col" scope="col">Created At</th>
@@ -203,22 +203,26 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <tbody>
                             {{ $groupID:= .GroupID }}
                             {{ range $i, $u := .Users }}
-                              {{ $disableButton := false }}
-                              <tr>
+                              <tr
+                                onclick="location.href='/organizations/members?identity={{ $u.Credentials.Identity }}';"
+                                class="clickable-row"
+                              >
                                 <td>{{ $u.Name }}</td>
-                                <td>
-                                  <div class="copy-con-container">
-                                    <a href="{{ printf "/users/%s" $u.ID }}">
-                                      {{ $u.ID }}
-                                    </a>
-                                    <button class="copy-icon" onclick="copyToClipboard(this)">
-                                      <i class="far fa-copy"></i>
-                                    </button>
-                                  </div>
+
+                                <td class="tags-col">
+                                  {{ range $j, $tag := $u.Tags }}
+                                    <span class="badge bg-dark">
+                                      {{ $tag }}
+                                    </span>
+                                  {{ end }}
                                 </td>
-                                <td class="tags-col">{{ toSlice $u.Tags }}</td>
                                 <td class="meta-col">
-                                  {{ toJSON $u.Metadata }}
+                                  {{ range $k, $v := $u.Metadata }}
+                                    <span class="badge bg-success">
+                                      {{ $k }}:
+                                      {{ $v }}
+                                    </span>
+                                  {{ end }}
                                 </td>
                                 <td class="created-col">{{ $u.CreatedAt }}</td>
                               </tr>
@@ -229,7 +233,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                       {{ template "tablefooter" . }}
                     </div>
                     <div
-                      class="tab-pane"
+                      class="tab-pane fade {{ if eq .TabActive "administrator" }}
+                        show active
+                      {{ end }}"
                       id="admin-tab-pane"
                       role="tabpanel"
                       aria-labelledby="admin-tab"
@@ -237,11 +243,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                     >
                       {{ template "tableheader" . }}
                       <div class="itemsTable">
-                        <table id="itemsTable" class="table">
+                        <table id="itemsTable" class="table table-hover">
                           <thead>
                             <tr>
                               <th scope="col">Name</th>
-                              <th scope="col">ID</th>
                               <th class="tags-col" scope="col">Tags</th>
                               <th class="meta-col" scope="col">Metadata</th>
                               <th class="created-col" scope="col">Created At</th>
@@ -250,22 +255,25 @@ SPDX-License-Identifier: Apache-2.0 -->
                           </thead>
                           <tbody>
                             {{ range $i, $u := .Users }}
-                              {{ $disableButton := false }}
-                              <tr>
+                              <tr
+                                onclick="location.href='/organizations/members?identity={{ $u.Credentials.Identity }}';"
+                                class="clickable-row"
+                              >
                                 <td>{{ $u.Name }}</td>
-                                <td>
-                                  <div class="copy-con-container">
-                                    <a href="{{ printf "/users/%s" $u.ID }}">
-                                      {{ $u.ID }}
-                                    </a>
-                                    <button class="copy-icon" onclick="copyToClipboard(this)">
-                                      <i class="far fa-copy"></i>
-                                    </button>
-                                  </div>
+                                <td class="tags-col">
+                                  {{ range $j, $tag := $u.Tags }}
+                                    <span class="badge bg-dark">
+                                      {{ $tag }}
+                                    </span>
+                                  {{ end }}
                                 </td>
-                                <td class="tags-col">{{ toSlice $u.Tags }}</td>
                                 <td class="meta-col">
-                                  {{ toJSON $u.Metadata }}
+                                  {{ range $k, $v := $u.Metadata }}
+                                    <span class="badge bg-success">
+                                      {{ $k }}:
+                                      {{ $v }}
+                                    </span>
+                                  {{ end }}
                                 </td>
                                 <td class="created-col">{{ $u.CreatedAt }}</td>
                                 <td class="text-center">
@@ -285,15 +293,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                       id="relation"
                                       value="admin"
                                     />
-                                    <button
-                                      type="submit"
-                                      class="btn btn-sm"
-                                      {{ if
-                                        $disableButton
-                                      }}
-                                        disabled
-                                      {{ end }}
-                                    >
+                                    <button type="submit" class="btn btn-sm">
                                       <i class="fas fa-trash-alt"></i>
                                     </button>
                                   </form>
@@ -306,7 +306,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                       {{ template "tablefooter" . }}
                     </div>
                     <div
-                      class="tab-pane "
+                      class="tab-pane fade {{ if eq .TabActive "editor" }}
+                        show active
+                      {{ end }}"
                       id="editor-tab-pane"
                       role="tabpanel"
                       aria-labelledby="editor-tab"
@@ -314,11 +316,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                     >
                       {{ template "tableheader" . }}
                       <div class="itemsTable">
-                        <table id="itemsTable" class="table">
+                        <table id="itemsTable" class="table table-hover">
                           <thead>
                             <tr>
                               <th scope="col">Name</th>
-                              <th scope="col">ID</th>
                               <th class="tags-col" scope="col">Tags</th>
                               <th class="meta-col" scope="col">Metadata</th>
                               <th class="created-col" scope="col">Created At</th>
@@ -327,22 +328,25 @@ SPDX-License-Identifier: Apache-2.0 -->
                           </thead>
                           <tbody>
                             {{ range $i, $u := .Users }}
-                              {{ $disableButton := false }}
-                              <tr>
+                              <tr
+                                onclick="location.href='/organizations/members?identity={{ $u.Credentials.Identity }}';"
+                                class="clickable-row"
+                              >
                                 <td>{{ $u.Name }}</td>
-                                <td>
-                                  <div class="copy-con-container">
-                                    <a href="{{ printf "/users/%s" $u.ID }}">
-                                      {{ $u.ID }}
-                                    </a>
-                                    <button class="copy-icon" onclick="copyToClipboard(this)">
-                                      <i class="far fa-copy"></i>
-                                    </button>
-                                  </div>
+                                <td class="tags-col">
+                                  {{ range $j, $tag := $u.Tags }}
+                                    <span class="badge bg-dark">
+                                      {{ $tag }}
+                                    </span>
+                                  {{ end }}
                                 </td>
-                                <td class="tags-col">{{ toSlice $u.Tags }}</td>
                                 <td class="meta-col">
-                                  {{ toJSON $u.Metadata }}
+                                  {{ range $k, $v := $u.Metadata }}
+                                    <span class="badge bg-success">
+                                      {{ $k }}:
+                                      {{ $v }}
+                                    </span>
+                                  {{ end }}
                                 </td>
                                 <td class="created-col">{{ $u.CreatedAt }}</td>
                                 <td class="text-center">
@@ -362,15 +366,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                       id="relation"
                                       value="editor"
                                     />
-                                    <button
-                                      type="submit"
-                                      class="btn btn-sm"
-                                      {{ if
-                                        $disableButton
-                                      }}
-                                        disabled
-                                      {{ end }}
-                                    >
+                                    <button type="submit" class="btn btn-sm">
                                       <i class="fas fa-trash-alt"></i>
                                     </button>
                                   </form>
@@ -383,7 +379,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                       {{ template "tablefooter" . }}
                     </div>
                     <div
-                      class="tab-pane"
+                      class="tab-pane fade {{ if eq .TabActive "viewer" }}
+                        show active
+                      {{ end }}"
                       id="viewer-tab-pane"
                       role="tabpanel"
                       aria-labelledby="viewer-tab"
@@ -391,11 +389,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                     >
                       {{ template "tableheader" . }}
                       <div class="itemsTable">
-                        <table id="itemsTable" class="table">
+                        <table id="itemsTable" class="table table-hover">
                           <thead>
                             <tr>
                               <th scope="col">Name</th>
-                              <th scope="col">ID</th>
                               <th class="tags-col" scope="col">Tags</th>
                               <th class="meta-col" scope="col">Metadata</th>
                               <th class="created-col" scope="col">Created At</th>
@@ -404,22 +401,25 @@ SPDX-License-Identifier: Apache-2.0 -->
                           </thead>
                           <tbody>
                             {{ range $i, $u := .Users }}
-                              {{ $disableButton := false }}
-                              <tr>
+                              <tr
+                                onclick="location.href='/organizations/members?identity={{ $u.Credentials.Identity }}';"
+                                class="clickable-row"
+                              >
                                 <td>{{ $u.Name }}</td>
-                                <td>
-                                  <div class="copy-con-container">
-                                    <a href="{{ printf "/users/%s" $u.ID }}">
-                                      {{ $u.ID }}
-                                    </a>
-                                    <button class="copy-icon" onclick="copyToClipboard(this)">
-                                      <i class="far fa-copy"></i>
-                                    </button>
-                                  </div>
+                                <td class="tags-col">
+                                  {{ range $j, $tag := $u.Tags }}
+                                    <span class="badge bg-dark">
+                                      {{ $tag }}
+                                    </span>
+                                  {{ end }}
                                 </td>
-                                <td class="tags-col">{{ toSlice $u.Tags }}</td>
                                 <td class="meta-col">
-                                  {{ toJSON $u.Metadata }}
+                                  {{ range $k, $v := $u.Metadata }}
+                                    <span class="badge bg-success">
+                                      {{ $k }}:
+                                      {{ $v }}
+                                    </span>
+                                  {{ end }}
                                 </td>
                                 <td class="created-col">{{ $u.CreatedAt }}</td>
                                 <td class="text-center">
@@ -439,15 +439,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                       id="relation"
                                       value="viewer"
                                     />
-                                    <button
-                                      type="submit"
-                                      class="btn btn-sm"
-                                      {{ if
-                                        $disableButton
-                                      }}
-                                        disabled
-                                      {{ end }}
-                                    >
+                                    <button type="submit" class="btn btn-sm">
                                       <i class="fas fa-trash-alt"></i>
                                     </button>
                                   </form>
@@ -466,7 +458,6 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </div>
       </div>
-      {{ template "footer" }}
 			<script>
 				const userModal = new bootstrap.Modal(
 					document.getElementById("addUserModal"),
@@ -476,15 +467,9 @@ SPDX-License-Identifier: Apache-2.0 -->
 				}
 
 				function openTab(relation) {
+					var groupID = "{{ .GroupID }}";
 					event.preventDefault();
-          var groupID = '{{.GroupID}}';
-          fetch(`/groups/${groupID}/users?relation=${relation}`, {
-              method: "GET",
-          })
-          .then((response) => {
-
-          })
-          .catch((error) => console.error("Error:", error));
+					window.location.href = `/groups/${groupID}/users?relation=${relation}`;
 				}
 			</script>
       <script type="module">
@@ -493,7 +478,8 @@ SPDX-License-Identifier: Apache-2.0 -->
         fetchIndividualEntity({
           input: "userFilter",
           itemSelect: "infiniteScroll",
-          item: "users",
+          item: "members",
+          organization: localStorage.getItem("organizationID"),
         });
       </script>
     </body>

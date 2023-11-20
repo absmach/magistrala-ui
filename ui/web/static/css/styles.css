@@ -208,11 +208,6 @@ body.sidebar-toggled .main-content {
 	font-weight: 700;
 }
 
-.doc-button {
-	border: 1px solid var(--main-color) !important;
-	border-radius: var(--border-radius) !important;
-}
-
 .doc-button:hover {
 	border: 1px solid var(--main-color) !important;
 	border-radius: var(--border-radius) !important;
@@ -247,7 +242,7 @@ body.sidebar-toggled .main-content {
 	color: var(--main-color);
 }
 
-.active .page-link {
+.page-item.active .page-link {
 	background: var(--main-color) !important;
 	color: #fff !important;
 }
@@ -284,10 +279,6 @@ body.sidebar-toggled .main-content {
 .login-card {
 	background-color: var(--main-color);
 	border-radius: 1rem;
-}
-
-.login-card h1 {
-	font-family: "Montserrat";
 }
 
 .input-field {
@@ -481,6 +472,55 @@ button.edit-btn {
 	padding: 10px;
 	z-index: 10;
 	position: relative;
+}
+
+
+.organizations-body {
+	background-color: #d5d8dd;
+}
+
+.organizations-card {
+	border-radius: 1rem;
+}
+
+.organizations-card h1 {
+	color: var(--main-color);
+	font-family: "Montserrat";
+}
+
+.organizations-table h2 {
+	color: var(--main-color);
+}
+
+.organizations-table .body-button {
+	background: var(--main-color);
+	border-radius: var(--border-radius);
+	color: #fff;
+	font-size: 1rem;
+	padding: 0.5rem 1rem;
+	border: 1px solid var(--main-color);
+}
+
+.organizations-table .body-button:hover {
+	color: #fff;
+	background: var(--main-color);
+	transform: scale(1.03);
+	font-weight: 700;
+}
+
+.org-col {
+	border-radius: var(--border-radius);
+	background-color: #fff;
+}
+
+.org-nav {
+	font-weight: 700 !important;
+	font-size: 1.2rem !important;
+}
+
+.table tbody tr.clickable-row:hover td,
+.table tbody tr.clickable-row:hover td i {
+	cursor: pointer;
 }
 
 @media (max-width: 768px) {

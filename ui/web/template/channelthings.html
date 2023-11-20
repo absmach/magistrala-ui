@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0 -->
     <head>
       <title>Channel Things</title>
       {{ template "header" }}
-      <script src="/js/infinitescroll.js" type="module"></script>
     </head>
     <body>
       {{ template "navbar" . }}
@@ -21,10 +20,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                     Channel
                   </a>
                   <a href="/channels/{{ .ChannelID }}/users" type="button" class="btn body-button">
-                    Channel Users
+                    Assign Users
                   </a>
                   <a href="/channels/{{ .ChannelID }}/groups" type="button" class="btn body-button">
-                    Channel Groups
+                    Assign Groups
                   </a>
                 </div>
                 <div class="table-responsive table-container">
@@ -93,11 +92,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </div>
                   {{ template "tableheader" . }}
                   <div class="itemsTable">
-                    <table id="itemsTable" class="table">
+                    <table id="itemsTable" class="table table-hover">
                       <thead>
                         <tr>
                           <th scope="col">Name</th>
-                          <th scope="col">ID</th>
                           <th class="tags-col" scope="col">Tags</th>
                           <th class="meta-col" scope="col">Metadata</th>
                           <th class="created-col" scope="col">Created At</th>
@@ -107,21 +105,21 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <tbody>
                         {{ $channelID := .ChannelID }}
                         {{ range $i, $t := .Things }}
-                          {{ $disableButton := false }}
                           <tr>
                             <td>{{ $t.Name }}</td>
-                            <td>
-                              <div class="copy-con-container">
-                                <a href="{{ printf "/things/%s" $t.ID }}">
-                                  {{ $t.ID }}
-                                </a>
-                                <button class="copy-icon" onclick="copyToClipboard(this)">
-                                  <i class="far fa-copy"></i>
-                                </button>
-                              </div>
+                            <td class="tags-col">
+                              {{ range $j, $tag := $t.Tags }}
+                                <span class="badge bg-dark">{{ $tag }}</span>
+                              {{ end }}
                             </td>
-                            <td class="tags-col">{{ toSlice $t.Tags }}</td>
-                            <td class="meta-col">{{ toJSON $t.Metadata }}</td>
+                            <td class="meta-col">
+                              {{ range $k, $v := $t.Metadata }}
+                                <span class="badge bg-success">
+                                  {{ $k }}:
+                                  {{ $v }}
+                                </span>
+                              {{ end }}
+                            </td>
                             <td class="created-col">{{ $t.CreatedAt }}</td>
                             <td class="text-center">
                               <form
@@ -134,15 +132,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   id="thingID"
                                   value="{{ $t.ID }}"
                                 />
-                                <button
-                                  type="submit"
-                                  class="btn btn-sm"
-                                  {{ if
-                                    $disableButton
-                                  }}
-                                    disabled
-                                  {{ end }}
-                                >
+                                <button type="submit" class="btn btn-sm">
                                   <i class="fas fa-trash-alt"></i>
                                 </button>
                               </form>
@@ -159,7 +149,6 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </div>
       </div>
-      {{ template "footer" }}
       <script>
         const thingModal = new bootstrap.Modal(document.getElementById("addThingModal"));
         function openThingModal() {

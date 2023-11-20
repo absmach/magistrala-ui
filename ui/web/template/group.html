@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0 -->
     <head>
       <title>Group</title>
       {{ template "header" }}
-      <script src="/js/update.js" type="module"></script>
     </head>
     <body>
       {{ template "navbar" . }}
@@ -18,10 +17,10 @@ SPDX-License-Identifier: Apache-2.0 -->
               <div class="row">
                 <div class="buttons mb-3">
                   <a class="btn body-button" href="/groups/{{ .Group.ID }}/users" role="button">
-                    Group Users
+                    Assign Users
                   </a>
                   <a class="btn body-button" href="/groups/{{ .Group.ID }}/channels" role="button">
-                    Group Channels
+                    Assign Channels
                   </a>
                 </div>
                 <div class="table-responsive table-container">
@@ -116,7 +115,6 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </div>
       </div>
-      {{ template "footer" }}
     <script type="module">
       import { attachEditRowListener, updateName, updateDescription, updateMetadata} from "/js/update.js";
 

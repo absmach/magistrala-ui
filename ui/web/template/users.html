@@ -7,8 +7,6 @@ SPDX-License-Identifier: Apache-2.0 -->
     <head>
       <title>Users</title>
       {{ template "header" }}
-      <script src="/js/forms.js" type="module"></script>
-      <script src="/js/validation.js" type="module"></script>
     </head>
     <body>
       {{ template "navbar" . }}
@@ -43,66 +41,66 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <div id="alertMessage"></div>
                           <form id="userform">
                             <div class="mb-3">
-                              <label for="name" class="form-label">Name</label>
+                              <label for="Name" class="form-label">Name</label>
                               <input
                                 type="text"
                                 class="form-control"
                                 name="name"
-                                id="name"
+                                id="Name"
                                 placeholder="User Name"
                               />
-                              <div id="nameError" class="text-danger"></div>
+                              <div id="NameError" class="text-danger"></div>
                             </div>
                             <div class="mb-3">
-                              <label for="identity" class="form-label">Identity</label>
+                              <label for="Identity" class="form-label">Identity</label>
                               <input
                                 type="email"
                                 class="form-control"
                                 name="identity"
-                                id="identity"
+                                id="Identity"
                                 placeholder="User Identity"
                               />
-                              <div id="identityError" class="text-danger"></div>
+                              <div id="IdentityError" class="text-danger"></div>
                             </div>
                             <div class="mb-3">
-                              <label for="secret" class="form-label">Secret</label>
+                              <label for="Secret" class="form-label">Secret</label>
                               <input
                                 type="text"
                                 class="form-control"
                                 name="secret"
-                                id="secret"
+                                id="Secret"
                                 placeholder="User Secret"
                               />
-                              <div id="secretError" class="text-danger"></div>
+                              <div id="SecretError" class="text-danger"></div>
                             </div>
                             <div class="mb-3">
-                              <label for="tags" class="form-label">Tags</label>
+                              <label for="Tags" class="form-label">Tags</label>
                               <input
                                 type="text"
                                 class="form-control"
                                 name="tags"
-                                id="tags"
+                                id="Tags"
                                 aria-describedby="tagHelp"
                                 value="[]"
                               />
                               <div id="tagHelp" class="form-text">
                                 Enter user tags as a string slice.
                               </div>
-                              <div id="tagsError" class="text-danger"></div>
+                              <div id="TagsError" class="text-danger"></div>
                             </div>
                             <div class="mb-3">
-                              <label for="metadata" class="form-label">Metadata</label>
+                              <label for="Metadata" class="form-label">Metadata</label>
                               <input
                                 type="text"
                                 class="form-control"
                                 name="metadata"
-                                id="metadata"
+                                id="Metadata"
                                 value="{}"
                               />
                               <div id="metadataHelp" class="form-text">
                                 Enter user metadata in JSON format.
                               </div>
-                              <div id="metadataError" class="text-danger"></div>
+                              <div id="MetadataError" class="text-danger"></div>
                             </div>
                             <button type="submit" class="btn body-button" id="create-user-button">
                               Submit
@@ -162,56 +160,36 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <div class="table-responsive table-container">
                   {{ template "tableheader" . }}
                   <div class="itemsTable">
-                    <table id="itemsTable" class="table">
+                    <table id="itemsTable" class="table table-hover">
                       <thead>
                         <tr>
                           <th scope="col">Name</th>
-                          <th scope="col">ID</th>
                           <th class="tags-col" scope="col">Tags</th>
                           <th class="meta-col" scope="col">Metadata</th>
                           <th class="created-col" scope="col">Created At</th>
-                          <th class="text-center" scope="col"></th>
                         </tr>
                       </thead>
                       <tbody>
                         {{ range $i, $u := .Users }}
-                          {{ $disableButton := false }}
                           <tr>
                             <td>{{ $u.Name }}</td>
-                            <td>
-                              <div class="copy-con-container">
-                                <a href="{{ printf "/users/%s" $u.ID }}">
-                                  {{ $u.ID }}
-                                </a>
-                                <button class="copy-icon" onclick="copyToClipboard(this)">
-                                  <i class="far fa-copy"></i>
-                                </button>
-                              </div>
+                            <td class="userID" style="display: none;">
+                              {{ $u.ID }}
                             </td>
-                            <td class="tags-col">{{ toSlice $u.Tags }}</td>
-                            <td class="meta-col">{{ toJSON $u.Metadata }}</td>
+                            <td class="tags-col">
+                              {{ range $j, $tag := $u.Tags }}
+                                <span class="badge bg-dark">{{ $tag }}</span>
+                              {{ end }}
+                            </td>
+                            <td class="meta-col">
+                              {{ range $k, $v := $u.Metadata }}
+                                <span class="badge bg-success">
+                                  {{ $k }}:
+                                  {{ $v }}
+                                </span>
+                              {{ end }}
+                            </td>
                             <td class="created-col">{{ $u.CreatedAt }}</td>
-                            <td class="text-center">
-                              <form action="/users/disabled" method="post">
-                                <input
-                                  type="hidden"
-                                  name="userID"
-                                  id="userID"
-                                  value="{{ $u.ID }}"
-                                />
-                                <button
-                                  type="submit"
-                                  class="btn btn-sm"
-                                  {{ if
-                                    $disableButton
-                                  }}
-                                    disabled
-                                  {{ end }}
-                                >
-                                  <i class="fas fa-trash-alt"></i>
-                                </button>
-                              </form>
-                            </td>
                           </tr>
                         {{ end }}
                       </tbody>
@@ -224,8 +202,21 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </div>
       </div>
-      {{ template "footer" }}
       <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          const userRole = localStorage.getItem("userRole");
+          if (userRole === "admin") {
+            var table = document.getElementById("itemsTable");
+            var rows = table.querySelectorAll("tbody tr");
+            rows.forEach(function (row) {
+              var userID = row.querySelector(".userID").textContent.trim();
+              row.onclick = () => {
+                window.location.href = "/users/" + userID;
+              };
+              row.classList.add("clickable-row");
+            });
+          }
+        });
         const userModal = new bootstrap.Modal(document.getElementById("addUserModal"));
         const usersModal = new bootstrap.Modal(document.getElementById("addUsersModal"));
 
@@ -251,18 +242,18 @@ SPDX-License-Identifier: Apache-2.0 -->
         attachValidationListener({
           buttonId: "create-user-button",
           errorDivs: {
-            name: "nameError",
-            identity: "identityError",
-            secret: "secretError",
-            metadata: "metadataError",
-            tags: "tagsError",
+            Name: "NameError",
+            Identity: "IdentityError",
+            Secret: "SecretError",
+            Metadata: "MetadataError",
+            Tags: "TagsError",
           },
           validations: {
-            name: validateName,
-            identity: validateEmail,
-            secret: validatePassword,
-            metadata: validateJSON,
-            tags: validateStringArray,
+            Name: validateName,
+            Identity: validateEmail,
+            Secret: validatePassword,
+            Metadata: validateJSON,
+            Tags: validateStringArray,
           },
         });
 

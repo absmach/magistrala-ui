@@ -12,11 +12,15 @@ const maxNameSize = 1024
 
 type indexReq struct {
 	token string
+	orgID string
 }
 
 func (req indexReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
+	}
+	if req.orgID == "" {
+		return errMalformedEntity
 	}
 	return nil
 }
@@ -110,6 +114,7 @@ type listEntityByIDReq struct {
 	page     uint64
 	limit    uint64
 	relation string
+	name     string
 }
 
 func (req listEntityByIDReq) validate() error {
@@ -372,25 +377,6 @@ func (req updateThingStatusReq) validate() error {
 	return nil
 }
 
-type updateThingOwnerReq struct {
-	token string
-	id    string
-	Owner string `json:"owner,omitempty"`
-}
-
-func (req updateThingOwnerReq) validate() error {
-	if req.token == "" {
-		return errAuthorization
-	}
-	if req.id == "" {
-		return errMalformedEntity
-	}
-	if req.Owner == "" {
-		return errMalformedEntity
-	}
-	return nil
-}
-
 type createThingsReq struct {
 	token  string
 	things []sdk.Thing
@@ -491,7 +477,6 @@ type shareThingReq struct {
 	ThingID  string `json:"thingID,omitempty"`
 	UserID   string `json:"userID,omitempty"`
 	Relation string `json:"relation,omitempty"`
-	Item     string `json:"item,omitempty"`
 }
 
 func (req shareThingReq) validate() error {
@@ -505,9 +490,6 @@ func (req shareThingReq) validate() error {
 		return errMalformedEntity
 	}
 	if req.Relation == "" {
-		return errMalformedEntity
-	}
-	if req.Item == "" {
 		return errMalformedEntity
 	}
 	return nil
@@ -594,7 +576,6 @@ type assignReq struct {
 	GroupID  string `json:"groupID"`
 	UserID   string `json:"userID"`
 	Relation string `json:"relation"`
-	Item     string `json:"item"`
 }
 
 func (req assignReq) validate() error {
@@ -609,9 +590,6 @@ func (req assignReq) validate() error {
 		return errMalformedEntity
 	}
 	if req.Relation == "" {
-		return errMalformedEntity
-	}
-	if req.Item == "" {
 		return errMalformedEntity
 	}
 
@@ -778,11 +756,13 @@ func (req createBootstrapReq) validate() error {
 }
 
 type getEntitiesReq struct {
-	token string
-	Page  uint64 `json:"page"`
-	Limit uint64 `json:"limit"`
-	Item  string `json:"item"`
-	Name  string `json:"name"`
+	token      string
+	Page       uint64 `json:"page"`
+	Limit      uint64 `json:"limit"`
+	Item       string `json:"item"`
+	Name       string `json:"name"`
+	OrgID      string `json:"orgID"`
+	Permission string `json:"permission"`
 }
 
 func (req getEntitiesReq) validate() error {
@@ -819,7 +799,6 @@ type addUserToChannelReq struct {
 	ChannelID string `json:"channelID"`
 	UserID    string `json:"userID"`
 	Relation  string `json:"relation"`
-	Item      string `json:"item"`
 }
 
 func (req addUserToChannelReq) validate() error {
@@ -833,9 +812,6 @@ func (req addUserToChannelReq) validate() error {
 		return errMalformedEntity
 	}
 	if req.Relation == "" {
-		return errMalformedEntity
-	}
-	if req.Item == "" {
 		return errMalformedEntity
 	}
 	return nil
@@ -859,6 +835,99 @@ func (req addUserGroupToChannelReq) validate() error {
 		return errMalformedEntity
 	}
 	if req.Item == "" {
+		return errMalformedEntity
+	}
+	return nil
+}
+
+type organizationLoginReq struct {
+	token string
+	OrgID string `json:"orgID"`
+}
+
+func (req organizationLoginReq) validate() error {
+	if req.token == "" {
+		return errAuthentication
+	}
+	if req.OrgID == "" {
+		return errMalformedEntity
+	}
+	return nil
+}
+
+type createOrganizationReq struct {
+	token    string
+	Name     string                 `json:"name,omitempty"`
+	Alias    string                 `json:"alias,omitempty"`
+	Tags     []string               `json:"tags,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
+}
+
+func (req createOrganizationReq) validate() error {
+	if req.token == "" {
+		return errAuthentication
+	}
+	if req.Name == "" {
+		return errMalformedEntity
+	}
+	return nil
+}
+
+type updateOrganizationReq struct {
+	token    string
+	OrgID    string                 `json:"orgID"`
+	Name     string                 `json:"name,omitempty"`
+	Alias    string                 `json:"alias,omitempty"`
+	Tags     []string               `json:"tags,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
+}
+
+func (req updateOrganizationReq) validate() error {
+	if req.token == "" {
+		return errAuthentication
+	}
+	if req.OrgID == "" {
+		return errMalformedEntity
+	}
+	if req.Name == "" && req.Alias == "" && req.Metadata == nil && len(req.Tags) == 0 {
+		return errMalformedEntity
+	}
+	return nil
+}
+
+type assignMemberReq struct {
+	token    string
+	OrgID    string `json:"orgID"`
+	UserID   string `json:"userID"`
+	Relation string `json:"relation"`
+}
+
+func (req assignMemberReq) validate() error {
+	if req.token == "" {
+		return errAuthentication
+	}
+	if req.OrgID == "" {
+		return errMalformedEntity
+	}
+	if req.UserID == "" {
+		return errMalformedEntity
+	}
+	if req.Relation == "" {
+		return errMalformedEntity
+	}
+	return nil
+}
+
+type viewMemberReq struct {
+	token        string
+	UserIdentity string `json:"userIdentity"`
+}
+
+func (req viewMemberReq) validate() error {
+	if req.token == "" {
+		return errAuthentication
+	}
+	if req.UserIdentity == "" {
 		return errMalformedEntity
 	}
 	return nil

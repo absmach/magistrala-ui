@@ -7,9 +7,6 @@ SPDX-License-Identifier: Apache-2.0 -->
     <head>
       <title>Channels</title>
       {{ template "header" }}
-      <script src="/js/forms.js" type="module"></script>
-      <script src="/js/validation.js" type="module"></script>
-      <script src="/js/infinitescroll.js" type="module"></script>
     </head>
     <body>
       {{ template "navbar" . }}
@@ -42,15 +39,15 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <div id="alertMessage"></div>
                           <form method="post" id="channelform">
                             <div class="mb-3">
-                              <label for="name" class="form-label">Name</label>
+                              <label for="Name" class="form-label">Name</label>
                               <input
                                 type="text"
                                 class="form-control"
                                 name="name"
-                                id="name"
+                                id="Name"
                                 placeholder="Channel Name"
                               />
-                              <div id="nameError" class="text-danger"></div>
+                              <div id="NameError" class="text-danger"></div>
                             </div>
                             <div class="mb-3">
                               <label for="infiniteScroll" class="form-label">Parent Name</label>
@@ -71,28 +68,28 @@ SPDX-License-Identifier: Apache-2.0 -->
                               </select>
                             </div>
                             <div class="mb-3">
-                              <label for="description" class="form-label">Description</label>
+                              <label for="Description" class="form-label">Description</label>
                               <input
                                 type="text"
                                 class="form-control"
                                 name="description"
-                                id="description"
+                                id="Description"
                                 placeholder="Channel Description"
                               />
                             </div>
                             <div class="mb-3">
-                              <label for="metadata" class="form-label">Metadata</label>
+                              <label for="Metadata" class="form-label">Metadata</label>
                               <input
                                 type="text"
                                 class="form-control"
                                 name="metadata"
-                                id="metadata"
+                                id="Metadata"
                                 value="{}"
                               />
                               <div id="metadataHelp" class="form-text">
                                 Enter channel metadata in JSON format.
                               </div>
-                              <div id="metadataError" class="text-danger"></div>
+                              <div id="MetadataError" class="text-danger"></div>
                             </div>
                             <button
                               type="submit"
@@ -160,56 +157,33 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <div class="table-responsive table-container">
                   {{ template "tableheader" . }}
                   <div class="itemsTable">
-                    <table id="itemsTable" class="table">
+                    <table id="itemsTable" class="table table-hover">
                       <thead>
                         <tr>
                           <th scope="col">Name</th>
-                          <th scope="col">ID</th>
                           <th class="desc-col" scope="col">Description</th>
                           <th class="meta-col" scope="col">Metadata</th>
                           <th class="created-col" scope="col">Created At</th>
-                          <th class="text-center" scope="col"></th>
                         </tr>
                       </thead>
                       <tbody>
                         {{ range $i, $c := .Channels }}
                           {{ $disableButton := false }}
-                          <tr>
+                          <tr
+                            onclick="location.href='/channels/{{ $c.ID }}';"
+                            class="clickable-row"
+                          >
                             <td>{{ $c.Name }}</td>
-                            <td>
-                              <div class="copy-con-container">
-                                <a href="{{ printf "/channels/%s" $c.ID }}">
-                                  {{ $c.ID }}
-                                </a>
-                                <button class="copy-icon" onclick="copyToClipboard(this)">
-                                  <i class="far fa-copy"></i>
-                                </button>
-                              </div>
-                            </td>
                             <td class="desc-col">{{ $c.Description }}</td>
-                            <td class="meta-col">{{ toJSON $c.Metadata }}</td>
-                            <td class="created-col">{{ $c.CreatedAt }}</td>
-                            <td class="text-center">
-                              <form action="/channels/disabled" method="post">
-                                <input
-                                  type="hidden"
-                                  name="channelID"
-                                  id="channelID"
-                                  value="{{ $c.ID }}"
-                                />
-                                <button
-                                  type="submit"
-                                  class="btn btn-sm"
-                                  {{ if
-                                    $disableButton
-                                  }}
-                                    disabled
-                                  {{ end }}
-                                >
-                                  <i class="fas fa-trash-alt"></i>
-                                </button>
-                              </form>
+                            <td class="meta-col">
+                              {{ range $k, $v := $c.Metadata }}
+                                <span class="badge bg-success">
+                                  {{ $k }}:
+                                  {{ $v }}
+                                </span>
+                              {{ end }}
                             </td>
+                            <td class="created-col">{{ $c.CreatedAt }}</td>
                           </tr>
                         {{ end }}
                       </tbody>
@@ -222,7 +196,6 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </div>
       </div>
-      {{ template "footer" }}
       <script>
         const channelModal = new bootstrap.Modal(document.getElementById("addChannelModal"));
         const channelsModal = new bootstrap.Modal(document.getElementById("addChannelsModal"));
@@ -243,12 +216,12 @@ SPDX-License-Identifier: Apache-2.0 -->
         attachValidationListener({
           buttonId: "create-channel-button",
           errorDivs: {
-            name: "nameError",
-            metadata: "metadataError",
+            Name: "NameError",
+            Metadata: "MetadataError",
           },
           validations: {
-            name: validateName,
-            metadata: validateJSON,
+            Name: validateName,
+            Metadata: validateJSON,
           },
         });
 

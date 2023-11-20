@@ -7,9 +7,6 @@ SPDX-License-Identifier: Apache-2.0 -->
     <head>
       <title>Groups</title>
       {{ template "header" }}
-      <script src="/js/forms.js" type="module"></script>
-      <script src="/js/validation.js" type="module"></script>
-      <script src="/js/infinitescroll.js" type="module"></script>
     </head>
     <body>
       {{ template "navbar" . }}
@@ -42,15 +39,15 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <div id="alertMessage"></div>
                           <form method="post" id="groupform">
                             <div class="mb-3">
-                              <label for="name" class="form-label">Name</label>
+                              <label for="Name" class="form-label">Name</label>
                               <input
                                 type="text"
                                 class="form-control"
                                 name="name"
-                                id="name"
+                                id="Name"
                                 placeholder="Group Name"
                               />
-                              <div id="nameError" class="text-danger"></div>
+                              <div id="NameError" class="text-danger"></div>
                             </div>
                             <div class="mb-3">
                               <label for="description" class="form-label">Description</label>
@@ -81,18 +78,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                               </select>
                             </div>
                             <div class="mb-3">
-                              <label for="metadata" class="form-label">Metadata</label>
+                              <label for="Metadata" class="form-label">Metadata</label>
                               <input
                                 type="text"
                                 class="form-control"
                                 name="metadata"
-                                id="metadata"
+                                id="Metadata"
                                 value="{}"
                               />
                               <div id="metadataHelp" class="form-text">
                                 Enter groups metadata in JSON format.
                               </div>
-                              <div id="metadataError" class="text-danger"></div>
+                              <div id="MetadataError" class="text-danger"></div>
                             </div>
                             <button type="submit" class="btn body-button" id="create-group-button">
                               Submit
@@ -153,56 +150,30 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <div class="table-responsive table-container">
                   {{ template "tableheader" . }}
                   <div class="itemsTable">
-                    <table id="itemsTable" class="table">
+                    <table id="itemsTable" class="table table-hover">
                       <thead>
                         <tr>
                           <th scope="col">Name</th>
-                          <th scope="col">ID</th>
                           <th class="desc-col" scope="col">Description</th>
                           <th class="meta-col" scope="col">Metadata</th>
                           <th class="created-col" scope="col">Created At</th>
-                          <th class="text-center" scope="col"></th>
                         </tr>
                       </thead>
                       <tbody>
                         {{ range $i, $g := .Groups }}
-                          {{ $disableButton := false }}
-                          <tr>
+                          <tr onclick="location.href='/groups/{{ $g.ID }}';" class="clickable-row">
                             <td>{{ $g.Name }}</td>
-                            <td>
-                              <div class="copy-con-container">
-                                <a href="{{ printf "/groups/%s" $g.ID }}">
-                                  {{ $g.ID }}
-                                </a>
-                                <button class="copy-icon" onclick="copyToClipboard(this)">
-                                  <i class="far fa-copy"></i>
-                                </button>
-                              </div>
-                            </td>
+
                             <td class="desc-col">{{ $g.Description }}</td>
-                            <td class="meta-col">{{ toJSON $g.Metadata }}</td>
-                            <td class="created-col">{{ $g.CreatedAt }}</td>
-                            <td class="text-center">
-                              <form action="/groups/disabled" method="post">
-                                <input
-                                  type="hidden"
-                                  name="groupID"
-                                  id="groupID"
-                                  value="{{ $g.ID }}"
-                                />
-                                <button
-                                  type="submit"
-                                  class="btn btn-sm"
-                                  {{ if
-                                    $disableButton
-                                  }}
-                                    disabled
-                                  {{ end }}
-                                >
-                                  <i class="fas fa-trash-alt"></i>
-                                </button>
-                              </form>
+                            <td class="meta-col">
+                              {{ range $k, $v := $g.Metadata }}
+                                <span class="badge bg-success">
+                                  {{ $k }}:
+                                  {{ $v }}
+                                </span>
+                              {{ end }}
                             </td>
+                            <td class="created-col">{{ $g.CreatedAt }}</td>
                           </tr>
                         {{ end }}
                       </tbody>
@@ -215,8 +186,6 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </div>
       </div>
-
-      {{ template "footer" }}
       <script>
         const groupModal = new bootstrap.Modal(document.getElementById("addGroupModal"));
         const groupsModal = new bootstrap.Modal(document.getElementById("addGroupsModal"));
@@ -237,12 +206,12 @@ SPDX-License-Identifier: Apache-2.0 -->
         attachValidationListener({
           buttonId: "create-group-button",
           errorDivs: {
-            name: "nameError",
-            metadata: "metadataError",
+            Name: "NameError",
+            Metadata: "MetadataError",
           },
           validations: {
-            name: validateName,
-            metadata: validateJSON,
+            Name: validateName,
+            Metadata: validateJSON,
           },
         });
 

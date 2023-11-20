@@ -10,6 +10,8 @@ import {
   validatePassword,
 } from "./validation.js";
 
+import { removeErrorMessage } from "./errors.js";
+
 function updateName(config) {
   const button = document.getElementById(config.button);
 
@@ -97,22 +99,6 @@ function updateSecret(config) {
         alertDiv: config.alertDiv,
       });
     }
-  });
-}
-
-function updateOwner(config) {
-  const button = document.getElementById(config.button);
-
-  button.addEventListener("click", function () {
-    const updatedValue = config.cell.textContent.trim();
-    const url = `/${config.entity}/${config.id}/owner`;
-    const data = { [config.field]: updatedValue };
-
-    submitUpdateForm({
-      url: url,
-      data: data,
-      alertDiv: config.alertDiv,
-    });
   });
 }
 
@@ -269,7 +255,6 @@ export {
   updateMetadata,
   updateTags,
   updateSecret,
-  updateOwner,
   updateDescription,
   updateContent,
   updateClientCerts,

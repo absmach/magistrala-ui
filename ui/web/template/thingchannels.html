@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0 -->
     <head>
       <title>Thing Channels</title>
       {{ template "header" }}
-      <script src="/js/infinitescroll.js" type="module"></script>
     </head>
     <body>
       {{ template "navbar" . }}
@@ -19,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <div class="buttons mb-3">
                   <a class="btn body-button" href="/things/{{ .Thing.ID }}" role="button">Thing</a>
                   <a class="btn body-button" href="/things/{{ .Thing.ID }}/users" role="button">
-                    Thing Users
+                    Share
                   </a>
                 </div>
                 <div class="table-responsive table-container">
@@ -88,11 +87,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </div>
                   {{ template "tableheader" . }}
                   <div class="itemsTable">
-                    <table class="table" id="itemsTable">
+                    <table id="itemsTable" class="table table-hover">
                       <thead>
                         <tr>
                           <th scope="col">Name</th>
-                          <th scope="col">ID</th>
                           <th class="desc-col" scope="col">Description</th>
                           <th class="meta-col" scope="col">Metadata</th>
                           <th class="created-col" scope="col">Created At</th>
@@ -102,31 +100,22 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <tbody>
                         {{ $thing := .Thing }}
                         {{ range $i, $c := .Channels }}
-                          {{ $disableButton := false }}
-                          <tr>
+                          <tr
+                            onclick="location.href='/channels/{{ $c.ID }}';"
+                            class="clickable-row"
+                          >
                             <td>{{ $c.Name }}</td>
-                            <td>
-                              <div class="copy-con-container">
-                                <a href="{{ printf "/channels/%s" $c.ID }}">
-                                  {{ $c.ID }}
-                                </a>
-                                <button class="copy-icon" onclick="copyToClipboard(this)">
-                                  <i class="far fa-copy"></i>
-                                </button>
-                              </div>
-                            </td>
                             <td class="desc-col">{{ $c.Description }}</td>
-                            <td class="meta-col">{{ toJSON $c.Metadata }}</td>
+                            <td class="meta-col">
+                              {{ range $k, $v := $c.Metadata }}
+                                <span class="badge bg-success">
+                                  {{ $k }}:
+                                  {{ $v }}
+                                </span>
+                              {{ end }}
+                            </td>
                             <td class="created-col">{{ $c.CreatedAt }}</td>
-                            <td class="d-flex flex-row">
-                              <button
-                                type="button"
-                                class="btn btn-sm doc-button"
-                                data-bs-toggle="modal"
-                                data-bs-target="#sendMesageModal{{ $i }}"
-                              >
-                                Send Message
-                              </button>
+                            <td>
                               <form
                                 action="/things/{{ $thing.ID }}/channels/disconnect?item=things"
                                 method="post"
@@ -137,82 +126,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   id="channelID"
                                   value="{{ $c.ID }}"
                                 />
-                                <button
-                                  type="submit"
-                                  class="btn btn-sm"
-                                  {{ if
-                                    $disableButton
-                                  }}
-                                    disabled
-                                  {{ end }}
-                                >
+                                <button type="submit" class="btn btn-sm">
                                   <i class="fas fa-trash-alt"></i>
                                 </button>
                               </form>
                             </td>
                           </tr>
-                          <!-- modal -->
-                          <div
-                            class="modal fade"
-                            id="sendMesageModal{{ $i }}"
-                            tabindex="-1"
-                            aria-labelledby="sendMesageModalLabel{{ $i }}"
-                            aria-hidden="true"
-                          >
-                            <div class="modal-dialog">
-                              <div class="modal-content">
-                                <div class="modal-header">
-                                  <h1 class="modal-title fs-5" id="sendMesageModalLabel{{ $i }}">
-                                    Send Message
-                                  </h1>
-                                  <button
-                                    type="button"
-                                    class="btn-close"
-                                    data-bs-dismiss="modal"
-                                    aria-label="Close"
-                                  ></button>
-                                </div>
-                                <form action="/messages" method="post">
-                                  <div class="modal-body">
-                                    <input
-                                      type="hidden"
-                                      name="channelID"
-                                      id="channelID"
-                                      value="{{ $c }}"
-                                    />
-                                    <input
-                                      type="hidden"
-                                      name="thingKey"
-                                      id="thingKey"
-                                      value="{{ $thing.Credentials.Secret }}"
-                                    />
-                                    <div class="mb-3">
-                                      <label for="message" class="form-label">Message</label>
-                                      <textarea
-                                        class="form-control"
-                                        name="message"
-                                        id="message"
-                                        aria-describedby="messageHelp"
-                                      ></textarea>
-                                      <div id="messageHelp" class="form-text">Enter Message.</div>
-                                    </div>
-                                  </div>
-                                  <div class="modal-footer">
-                                    <button
-                                      type="button"
-                                      class="btn btn-secondary"
-                                      data-bs-dismiss="modal"
-                                    >
-                                      Close
-                                    </button>
-                                    <button type="submit" class="btn doc-button">
-                                      Send Message
-                                    </button>
-                                  </div>
-                                </form>
-                              </div>
-                            </div>
-                          </div>
                         {{ end }}
                       </tbody>
                     </table>
@@ -224,8 +143,6 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </div>
       </div>
-
-      {{ template "footer" }}
       <script>
         const channelModal = new bootstrap.Modal(document.getElementById("addChannelModal"));
         function openChannelModal() {

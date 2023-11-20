@@ -7,8 +7,6 @@ SPDX-License-Identifier: Apache-2.0 -->
     <head>
       <title>Things</title>
       {{ template "header" }}
-      <script src="/js/forms.js" type="module"></script>
-      <script src="/js/validation.js" type="module"></script>
     </head>
     <body>
       {{ template "navbar" . }}
@@ -41,75 +39,75 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <div id="alertMessage"></div>
                           <form id="thingform">
                             <div class="mb-3">
-                              <label for="name" class="form-label">Name</label>
+                              <label for="Name" class="form-label">Name</label>
                               <input
                                 type="text"
                                 class="form-control"
                                 name="name"
-                                id="name"
+                                id="Name"
                                 placeholder="Device Name"
                               />
-                              <div id="nameError" class="text-danger"></div>
+                              <div id="NameError" class="text-danger"></div>
                             </div>
                             <div class="mb-3">
-                              <label for="thingID" class="form-label">Thing ID</label>
+                              <label for="ThingID" class="form-label">Thing ID</label>
                               <input
                                 type="text"
                                 class="form-control"
                                 name="thingID"
-                                id="thingID"
+                                id="ThingID"
                                 placeholder="Thing ID"
                               />
                             </div>
                             <div class="mb-3">
-                              <label for="identity" class="form-label">Identity</label>
+                              <label for="Identity" class="form-label">Identity</label>
                               <input
                                 type="text"
                                 class="form-control"
                                 name="identity"
-                                id="identity"
+                                id="Identity"
                                 placeholder="Thing Identity"
                               />
                             </div>
                             <div class="mb-3">
-                              <label for="secret" class="form-label">Secret</label>
+                              <label for="Secret" class="form-label">Secret</label>
                               <input
                                 type="text"
                                 class="form-control"
                                 name="secret"
-                                id="secret"
+                                id="Secret"
                                 placeholder="Thing Secret"
                               />
-                              <div id="secretError" class="error-message"></div>
+                              <div id="SecretError" class="error-message"></div>
                             </div>
                             <div class="mb-3">
-                              <label for="tags" class="form-label">Tags</label>
+                              <label for="Tags" class="form-label">Tags</label>
                               <input
                                 type="text"
                                 class="form-control"
                                 name="tags"
-                                id="tags"
+                                id="Tags"
                                 aria-describedby="tagHelp"
                                 value="[]"
                               />
                               <div id="tagHelp" class="form-text">
                                 Enter device tags as a string slice.
                               </div>
-                              <div id="tagsError" class="text-danger"></div>
+                              <div id="TagsError" class="text-danger"></div>
                             </div>
                             <div class="mb-3">
-                              <label for="metadata" class="form-label">Metadata</label>
+                              <label for="Metadata" class="form-label">Metadata</label>
                               <input
                                 type="text"
                                 class="form-control"
                                 name="metadata"
-                                id="metadata"
+                                id="Metadata"
                                 value="{}"
                               />
                               <div id="metadataHelp" class="form-text">
                                 Enter device metadata in JSON format.
                               </div>
-                              <div id="metadataError" class="text-danger"></div>
+                              <div id="MetadataError" class="text-danger"></div>
                             </div>
                             <button type="submit" class="btn body-button" id="create-thing-button">
                               Submit
@@ -173,56 +171,33 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <div class="table-responsive table-container">
                   {{ template "tableheader" . }}
                   <div class="itemsTable">
-                    <table id="itemsTable" class="table">
+                    <table id="itemsTable" class="table table-hover">
                       <thead>
                         <tr>
                           <th scope="col">Name</th>
-                          <th scope="col">ID</th>
                           <th class="tags-col" scope="col">Tags</th>
                           <th class="meta-col" scope="col">Metadata</th>
                           <th class="created-col" scope="col">Created At</th>
-                          <th class="text-center" scope="col"></th>
                         </tr>
                       </thead>
                       <tbody>
                         {{ range $i, $t := .Things }}
-                          {{ $disableButton := false }}
-                          <tr>
+                          <tr onclick="location.href='/things/{{ $t.ID }}';" class="clickable-row">
                             <td>{{ $t.Name }}</td>
-                            <td>
-                              <div class="copy-con-container">
-                                <a href="{{ printf "/things/%s" $t.ID }}">
-                                  {{ $t.ID }}
-                                </a>
-                                <button class="copy-icon" onclick="copyToClipboard(this)">
-                                  <i class="far fa-copy"></i>
-                                </button>
-                              </div>
+                            <td class="tags-col">
+                              {{ range $j, $tag := $t.Tags }}
+                                <span class="badge bg-dark">{{ $tag }}</span>
+                              {{ end }}
                             </td>
-                            <td class="tags-col">{{ toSlice $t.Tags }}</td>
-                            <td class="meta-col">{{ toJSON $t.Metadata }}</td>
+                            <td class="meta-col">
+                              {{ range $k, $v := $t.Metadata }}
+                                <span class="badge bg-success">
+                                  {{ $k }}:
+                                  {{ $v }}
+                                </span>
+                              {{ end }}
+                            </td>
                             <td class="created-col">{{ $t.CreatedAt }}</td>
-                            <td class="text-center">
-                              <form action="/things/disabled" method="post">
-                                <input
-                                  type="hidden"
-                                  name="thingID"
-                                  id="thingID"
-                                  value="{{ $t.ID }}"
-                                />
-                                <button
-                                  type="submit"
-                                  class="btn btn-sm"
-                                  {{ if
-                                    $disableButton
-                                  }}
-                                    disabled
-                                  {{ end }}
-                                >
-                                  <i class="fas fa-trash-alt"></i>
-                                </button>
-                              </form>
-                            </td>
                           </tr>
                         {{ end }}
                       </tbody>
@@ -235,7 +210,6 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </div>
       </div>
-      {{ template "footer" }}
       <script>
         const thingModal = new bootstrap.Modal(document.getElementById("addThingModal"));
         const thingsModal = new bootstrap.Modal(document.getElementById("addThingsModal"));
@@ -260,14 +234,14 @@ SPDX-License-Identifier: Apache-2.0 -->
         attachValidationListener({
           buttonId: "create-thing-button",
           errorDivs: {
-            name: "nameError",
-            metadata: "metadataError",
-            tags: "tagsError",
+            Name: "NameError",
+            Metadata: "MetadataError",
+            Tags: "TagsError",
           },
           validations: {
-            name: validateName,
-            metadata: validateJSON,
-            tags: validateStringArray,
+            Name: validateName,
+            Metadata: validateJSON,
+            Tags: validateStringArray,
           },
         });
 
