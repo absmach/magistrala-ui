@@ -4,7 +4,7 @@ go 1.21.0
 
 require (
 	github.com/absmach/agent v0.0.0-20231107115142-c8b509f24d50
-	github.com/absmach/magistrala v0.11.1-0.20231102134813-44408395e6a3
+	github.com/absmach/magistrala v0.11.1-0.20231117114648-a5fd7b037aea
 	github.com/caarlos0/env/v9 v9.0.0
 	github.com/eclipse/paho.mqtt.golang v1.4.3
 	github.com/go-chi/chi/v5 v5.0.10
@@ -39,7 +39,7 @@ require (
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/sys v0.14.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231030173426-d783a09b4405 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect

@@ -36,6 +36,8 @@ github.com/absmach/agent v0.0.0-20231107115142-c8b509f24d50 h1:RyDGAkOtIuN34HEJ/
 github.com/absmach/agent v0.0.0-20231107115142-c8b509f24d50/go.mod h1:/S3WufAqHTSU6MEq6cN0g6m21RhPX8dxqubYh08vbU8=
 github.com/absmach/magistrala v0.11.1-0.20231102134813-44408395e6a3 h1:g5dSaPtjj9mNnz2cMJ076MRKSnrOcMjW8BsJ7Kbzd7s=
 github.com/absmach/magistrala v0.11.1-0.20231102134813-44408395e6a3/go.mod h1:ebPpg3UNO6ier1Ic2jBHkd8VUDD62707JRacj4UwGkM=
+github.com/absmach/magistrala v0.11.1-0.20231117114648-a5fd7b037aea h1:VPlqBO3Z1sLmPGoypvIjitHH2RYoDuyUouLYAQLJxH4=
+github.com/absmach/magistrala v0.11.1-0.20231117114648-a5fd7b037aea/go.mod h1:IOlItdz21DSTjm6+Wd5ADlWwVGyePaps/OLU+Yu/1WI=
 github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5/go.mod h1:SkGFH1ia65gfNATL8TAiHDNxPzPdmEL5uirI2Uyuz6c=
 github.com/ajstarks/svgo v0.0.0-20180226025133-644b8db467af/go.mod h1:K08gAheRH3/J6wwsYMMT4xOr94bZjxIelGM0+d/wbFw=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
@@ -916,6 +918,8 @@ golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.13.0 h1:Af8nKPmuFypiUBjVoU9V20FiaFXOcuZI21p0ycVYYGE=
 golang.org/x/sys v0.13.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.14.0 h1:Vz7Qs629MkJkGyHxUlRHizWJRG2j8fbQKjELVSNhy7Q=
+golang.org/x/sys v0.14.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.1-0.20181227161524-e6919f6577db/go.mod h1:bEr9sfX3Q8Zfm5fL9x+3itogRgK3+ptLWKqgva+5dAk=

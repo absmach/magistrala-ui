@@ -30,36 +30,37 @@ import (
 )
 
 const (
-	htmContentType          = "text/html"
-	jsonContentType         = "application/json"
-	staticDir               = "ui/web/static"
-	protocol                = "http"
-	pageKey                 = "page"
-	limitKey                = "limit"
-	itemKey                 = "item"
-	nameKey                 = "name"
-	refererKey              = "referer_url"
-	relationKey             = "relation"
-	defPage                 = 1
-	defLimit                = 10
-	defName                 = ""
-	defItem                 = ""
-	defRelation             = ""
-	defReferer              = ""
-	usersAPIEndpoint        = "/users"
-	thingsAPIEndpoint       = "/things"
-	channelsAPIEndpoint     = "/channels"
-	groupsAPIEndpoint       = "/groups"
-	bootstrapAPIEndpoint    = "/bootstrap"
-	membersAPIEndpoint      = "/members"
-	loginAPIEndpoint        = "/login"
-	tokenRefreshAPIEndpoint = "/token/refresh"
-	usersItem               = "users"
-	thingsItem              = "things"
-	channelsItem            = "channels"
-	groupsItem              = "groups"
-	accessTokenKey          = "token"
-	refreshTokenKey         = "refresh_token"
+	htmContentType           = "text/html"
+	jsonContentType          = "application/json"
+	staticDir                = "ui/web/static"
+	protocol                 = "http"
+	pageKey                  = "page"
+	limitKey                 = "limit"
+	itemKey                  = "item"
+	nameKey                  = "name"
+	refererKey               = "referer_url"
+	relationKey              = "relation"
+	defPage                  = 1
+	defLimit                 = 10
+	defName                  = ""
+	defItem                  = ""
+	defRelation              = ""
+	defReferer               = ""
+	usersAPIEndpoint         = "/users"
+	thingsAPIEndpoint        = "/things"
+	channelsAPIEndpoint      = "/channels"
+	groupsAPIEndpoint        = "/groups"
+	bootstrapAPIEndpoint     = "/bootstrap"
+	membersAPIEndpoint       = "/members"
+	loginAPIEndpoint         = "/login"
+	tokenRefreshAPIEndpoint  = "/token/refresh"
+	organizationsAPIEndpoint = "/organizations"
+	usersItem                = "users"
+	thingsItem               = "things"
+	channelsItem             = "channels"
+	groupsItem               = "groups"
+	accessTokenKey           = "token"
+	refreshTokenKey          = "refresh_token"
 )
 
 var (
@@ -137,6 +138,13 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 	r.Get("/password/reset", kithttp.NewServer(
 		showPasswordResetEndpoint(svc),
 		decodeShowPasswordReset,
+		encodeResponse,
+		opts...,
+	).ServeHTTP)
+
+	r.Post("/organizations/login", kithttp.NewServer(
+		organizationLoginEndpoint(svc),
+		decodeOrganizationLoginRequest,
 		encodeResponse,
 		opts...,
 	).ServeHTTP)
@@ -702,6 +710,35 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				handleTerminalInputEndpoint(svc),
 				decodeTerminalCommandRequest,
 				encodeJSONResponse,
+				opts...,
+			).ServeHTTP)
+		})
+		r.Route("/organizations", func(r chi.Router) {
+			r.Post("/", kithttp.NewServer(
+				createOrganizationEndpoint(svc),
+				decodeCreateOrganizationRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/", kithttp.NewServer(
+				listOrganizationsEndpoint(svc),
+				decodeListOrganizationsRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/{id}", kithttp.NewServer(
+				viewOrganizationEndpoint(svc),
+				decodeView,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}", kithttp.NewServer(
+				updateOrganizationEndpoint(svc),
+				decodeUpdateOrganizationRequest,
+				encodeResponse,
 				opts...,
 			).ServeHTTP)
 		})
@@ -2215,6 +2252,93 @@ func decodeGetEntitiesRequest(_ context.Context, r *http.Request) (interface{}, 
 	return req, nil
 }
 
+func decodeOrganizationLoginRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "refresh_token")
+	if err != nil {
+		return nil, err
+	}
+
+	req := organizationLoginReq{
+		token: token,
+		OrgID: r.FormValue("orgID"),
+	}
+
+	return req, nil
+}
+
+func decodeCreateOrganizationRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	meta, err := parseMetadata(r)
+	if err != nil {
+		return nil, err
+	}
+
+	tags, err := parseTags(r)
+	if err != nil {
+		return nil, err
+	}
+
+	req := createOrganizationReq{
+		token:    token,
+		Name:     r.FormValue("name"),
+		Alias:    r.FormValue("alias"),
+		Tags:     tags,
+		Metadata: meta,
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+func decodeListOrganizationsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+	page, err := readNumQuery[uint64](r, pageKey, defPage)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	req := listEntityReq{
+		token: token,
+		page:  page,
+		limit: limit,
+	}
+
+	return req, nil
+}
+
+func decodeUpdateOrganizationRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	req := updateOrganizationReq{
+		token: token,
+		OrgID: bone.GetValue(r, "id"),
+	}
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 func decodeError(_ context.Context, r *http.Request) (interface{}, error) {
 	errValue, err := readStringQuery(r, "error", "")
 	if err != nil {
@@ -2323,6 +2447,32 @@ func handleStaticFiles(m *chi.Mux) {
 			m.Handle(fmt.Sprintf("/%s/*", info.Name()), fs)
 		}
 	}
+}
+
+func parseMetadata(r *http.Request) (map[string]interface{}, error) {
+	metadataStr := r.PostFormValue("metadata")
+
+	metadata := make(map[string]interface{})
+	if len(metadataStr) > 0 {
+		if err := json.Unmarshal([]byte(metadataStr), &metadata); err != nil {
+			return nil, err
+		}
+	}
+
+	return metadata, nil
+}
+
+func parseTags(r *http.Request) ([]string, error) {
+	tagsStr := r.PostFormValue("tags")
+
+	tags := make([]string, 0)
+	if len(tagsStr) > 0 {
+		if err := json.Unmarshal([]byte(tagsStr), &tags); err != nil {
+			return nil, err
+		}
+	}
+
+	return tags, nil
 }
 
 func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {

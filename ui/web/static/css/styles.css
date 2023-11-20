@@ -286,10 +286,6 @@ body.sidebar-toggled .main-content {
 	border-radius: 1rem;
 }
 
-.login-card h1 {
-	font-family: "Montserrat";
-}
-
 .input-field {
 	background-color: #eaeaea;
 	border-radius: 0.5rem;
@@ -482,6 +478,40 @@ button.edit-btn {
 	z-index: 10;
 	position: relative;
 }
+
+
+.organizations-body {
+	background-color: #d5d8dd;
+}
+
+.organizations-card {
+	border-radius: 1rem;
+}
+
+.organizations-card h1 {
+	color: var(--main-color);
+	font-family: "Montserrat";
+}
+
+.organizations-table h2 {
+	color: var(--main-color);
+}
+.organizations-table .body-button {
+	background: var(--main-color);
+	border-radius: var(--border-radius);
+	color: #fff;
+	font-size: 1rem;
+	padding: 0.5rem 1rem;
+	border: 1px solid var(--main-color);
+}
+
+.organizations-table .body-button:hover {
+	color: #fff;
+	background: var(--main-color);
+	transform: scale(1.03);
+	font-weight: 700;
+}
+
 
 @media (max-width: 768px) {
 	.sidebar {

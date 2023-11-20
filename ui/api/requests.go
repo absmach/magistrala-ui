@@ -863,3 +863,58 @@ func (req addUserGroupToChannelReq) validate() error {
 	}
 	return nil
 }
+
+type organizationLoginReq struct {
+	token string
+	OrgID string `json:"orgID"`
+}
+
+func (req organizationLoginReq) validate() error {
+	if req.token == "" {
+		return errAuthentication
+	}
+	if req.OrgID == "" {
+		return errMalformedEntity
+	}
+	return nil
+}
+
+type createOrganizationReq struct {
+	token    string
+	Name     string                 `json:"name,omitempty"`
+	Alias    string                 `json:"alias,omitempty"`
+	Tags     []string               `json:"tags,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
+}
+
+func (req createOrganizationReq) validate() error {
+	if req.token == "" {
+		return errAuthentication
+	}
+	if req.Name == "" {
+		return errMalformedEntity
+	}
+	return nil
+}
+
+type updateOrganizationReq struct {
+	token    string
+	OrgID    string                 `json:"orgID"`
+	Name     string                 `json:"name,omitempty"`
+	Alias    string                 `json:"alias,omitempty"`
+	Tags     []string               `json:"tags,omitempty"`
+	Metadata map[string]interface{} `json:"metadata,omitempty"`
+}
+
+func (req updateOrganizationReq) validate() error {
+	if req.token == "" {
+		return errAuthentication
+	}
+	if req.OrgID == "" {
+		return errMalformedEntity
+	}
+	if req.Name == "" && req.Alias == "" && req.Metadata == nil {
+		return errMalformedEntity
+	}
+	return nil
+}

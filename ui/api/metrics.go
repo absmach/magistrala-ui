@@ -111,13 +111,13 @@ func (mm *metricsMiddleware) UpdatePassword(token, oldPass, newPass string) (err
 }
 
 // Token adds metrics middleware to token method.
-func (mm *metricsMiddleware) Token(user sdk.User) (sdk.Token, error) {
+func (mm *metricsMiddleware) Token(login sdk.Login) (sdk.Token, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "token").Add(1)
 		mm.latency.With("method", "token").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.Token(user)
+	return mm.svc.Token(login)
 }
 
 // RefreshToken adds metrics middleware to refresh token method.
@@ -818,4 +818,54 @@ func (mm *metricsMiddleware) ErrorPage(errMsg string) ([]byte, error) {
 	}(time.Now())
 
 	return mm.svc.ErrorPage(errMsg)
+}
+
+// OrganizationLogin adds metrics middleware to organization login method.
+func (mm *metricsMiddleware) OrganizationLogin(login sdk.Login, refreshToken string) (sdk.Token, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "organization_login").Add(1)
+		mm.latency.With("method", "organization_login").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.OrganizationLogin(login, refreshToken)
+}
+
+// ListOrganizations adds metrics middleware to list organizations method.
+func (mm *metricsMiddleware) ListOrganizations(token string, page, limit uint64) ([]byte, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "list_organizations").Add(1)
+		mm.latency.With("method", "list_organizations").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.ListOrganizations(token, page, limit)
+}
+
+// CreateOrganization adds metrics middleware to create organization method.
+func (mm *metricsMiddleware) CreateOrganization(token string, domain sdk.Domain) error {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "create_organization").Add(1)
+		mm.latency.With("method", "create_organization").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.CreateOrganization(token, domain)
+}
+
+// UpdateOrganization adds metrics middleware to update organization method.
+func (mm *metricsMiddleware) UpdateOrganization(token string, domain sdk.Domain) error {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "update_organization").Add(1)
+		mm.latency.With("method", "update_organization").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.UpdateOrganization(token, domain)
+}
+
+// ViewOrganization adds metrics middleware to view organization method.
+func (mm *metricsMiddleware) ViewOrganization(token, id string) ([]byte, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "view_organization").Add(1)
+		mm.latency.With("method", "view_organization").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.ViewOrganization(token, id)
 }

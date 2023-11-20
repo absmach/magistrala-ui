@@ -78,8 +78,6 @@ var (
 		"groupusers",
 		"groups",
 		"groupchannels",
-		// "parents",
-		// "children",
 
 		"index",
 
@@ -99,6 +97,9 @@ var (
 		"usergroups",
 		"userchannels",
 		"userthings",
+
+		"organizations",
+		// "organization",
 	}
 	ErrToken                = errors.New("failed to create token")
 	ErrTokenRefresh         = errors.New("failed to refresh token")
@@ -146,9 +147,11 @@ type Service interface {
 	// UpdatePassword updates the user's old password to the new password.
 	UpdatePassword(token, oldPass, newPass string) error
 	// Token provides a user with an access token and a refresh token.
-	Token(user sdk.User) (sdk.Token, error)
+	Token(login sdk.Login) (sdk.Token, error)
 	// RefreshToken retrieves a new access token and refresh token from the provided refresh token.
 	RefreshToken(refreshToken string) (sdk.Token, error)
+	// OrganizationLogin provides a user with an organization level access token and a refresh token.
+	OrganizationLogin(login sdk.Login, refreshToken string) (sdk.Token, error)
 
 	// CreateUsers creates new users.
 	CreateUsers(token string, users ...sdk.User) error
@@ -293,6 +296,15 @@ type Service interface {
 	GetEntities(token, item, name string, page, limit uint64) ([]byte, error)
 	// ErrorPage displays an error page.
 	ErrorPage(errMsg string) ([]byte, error)
+
+	// ListOrganizations retrieves organizations owned/shared by a user.
+	ListOrganizations(token string, page, limit uint64) ([]byte, error)
+	// CreateOrganization creates a new organization.
+	CreateOrganization(token string, domain sdk.Domain) error
+	// UpdateOrganization updates the organization with the given ID.
+	UpdateOrganization(token string, domain sdk.Domain) error
+	// ViewOrganization retrieves information about the organization with the given ID.
+	ViewOrganization(token, id string) ([]byte, error)
 }
 
 var _ Service = (*uiService)(nil)
@@ -472,8 +484,8 @@ func (us *uiService) UpdatePassword(token, oldPass, newPass string) error {
 	return nil
 }
 
-func (us *uiService) Token(user sdk.User) (sdk.Token, error) {
-	token, err := us.sdk.CreateToken(user)
+func (us *uiService) Token(login sdk.Login) (sdk.Token, error) {
+	token, err := us.sdk.CreateToken(login)
 	if err != nil {
 		return sdk.Token{}, errors.Wrap(err, ErrToken)
 	}
@@ -481,9 +493,18 @@ func (us *uiService) Token(user sdk.User) (sdk.Token, error) {
 }
 
 func (us *uiService) RefreshToken(refreshToken string) (sdk.Token, error) {
-	token, err := us.sdk.RefreshToken(refreshToken)
+	token, err := us.sdk.RefreshToken(sdk.Login{}, refreshToken)
 	if err != nil {
 		return sdk.Token{}, errors.Wrap(err, ErrTokenRefresh)
+	}
+
+	return token, nil
+}
+
+func (us *uiService) OrganizationLogin(login sdk.Login, refreshToken string) (sdk.Token, error) {
+	token, err := us.sdk.RefreshToken(login, refreshToken)
+	if err != nil {
+		return sdk.Token{}, err
 	}
 
 	return token, nil
@@ -1996,6 +2017,71 @@ func (us *uiService) ErrorPage(errMsg string) ([]byte, error) {
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "error", data); err != nil {
 		return nil, errors.Wrap(err, ErrExecTemplate)
+	}
+
+	return btpl.Bytes(), nil
+}
+
+func (us *uiService) ListOrganizations(token string, page, limit uint64) ([]byte, error) {
+	offset := (page - 1) * limit
+
+	pgm := sdk.PageMetadata{
+		Offset: offset,
+		Limit:  limit,
+	}
+
+	domainsPage, err := us.sdk.Domains(pgm, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	noOfPages := int(math.Ceil(float64(domainsPage.Total) / float64(limit)))
+
+	data := struct {
+		Domains     []sdk.Domain
+		CurrentPage int
+		Pages       int
+		Limit       int
+	}{
+		domainsPage.Domains,
+		int(page),
+		noOfPages,
+		int(limit),
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "organizations", data); err != nil {
+		return []byte{}, err
+	}
+
+	return btpl.Bytes(), nil
+}
+
+func (us *uiService) CreateOrganization(token string, domain sdk.Domain) error {
+	_, err := us.sdk.CreateDomain(domain, token)
+	return err
+}
+
+func (us *uiService) UpdateOrganization(token string, domain sdk.Domain) error {
+	_, err := us.sdk.UpdateDomain(domain, token)
+	return err
+}
+
+func (us *uiService) ViewOrganization(token, id string) ([]byte, error) {
+	domain, err := us.sdk.Domain(id, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	data := struct {
+		Domain sdk.Domain
+	}{
+		domain,
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "organization", data); err != nil {
+		return []byte{}, err
 	}
 
 	return btpl.Bytes(), nil

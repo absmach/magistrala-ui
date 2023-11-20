@@ -66,6 +66,13 @@ func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
 				MaxAge:   -1,
 				HttpOnly: true,
 			},
+			{
+				Name:     refreshTokenKey,
+				Value:    "",
+				Path:     organizationsAPIEndpoint,
+				MaxAge:   -1,
+				HttpOnly: true,
+			},
 		}
 		return uiRes{
 			code:    http.StatusSeeOther,
@@ -171,6 +178,13 @@ func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 				MaxAge:   -1,
 				HttpOnly: true,
 			},
+			{
+				Name:     refreshTokenKey,
+				Value:    "",
+				Path:     organizationsAPIEndpoint,
+				MaxAge:   -1,
+				HttpOnly: true,
+			},
 		}
 
 		return uiRes{
@@ -187,37 +201,32 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		credentials := sdk.Credentials{
-			Identity: req.Identity,
-			Secret:   req.Secret,
-		}
-		user := sdk.User{
-			Credentials: credentials,
-		}
 
-		token, err := svc.Token(user)
+		token, err := svc.Token(
+			sdk.Login{
+				Identity: req.Identity,
+				Secret:   req.Secret,
+			})
 		if err != nil {
 			return nil, err
 		}
 
-		cookies := []*http.Cookie{
-			{
-				Name:     accessTokenKey,
-				Value:    token.AccessToken,
-				Path:     "/",
-				HttpOnly: true,
-			},
-			{
-				Name:     refreshTokenKey,
-				Value:    token.RefreshToken,
-				Path:     tokenRefreshAPIEndpoint,
-				HttpOnly: true,
-			},
-		}
-
 		tkr := uiRes{
-			code:    http.StatusCreated,
-			cookies: cookies,
+			code: http.StatusCreated,
+			cookies: []*http.Cookie{
+				{
+					Name:     accessTokenKey,
+					Value:    token.AccessToken,
+					Path:     "/",
+					HttpOnly: true,
+				},
+				{
+					Name:     refreshTokenKey,
+					Value:    token.RefreshToken,
+					Path:     organizationsAPIEndpoint,
+					HttpOnly: true,
+				},
+			},
 		}
 
 		return tkr, nil
@@ -236,25 +245,29 @@ func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		cookies := []*http.Cookie{
-			{
-				Name:     accessTokenKey,
-				Value:    token.AccessToken,
-				Path:     "/",
-				HttpOnly: true,
-			},
-			{
-				Name:     refreshTokenKey,
-				Value:    token.RefreshToken,
-				Path:     tokenRefreshAPIEndpoint,
-				HttpOnly: true,
-			},
-		}
-
 		tkr := uiRes{
 			code:    http.StatusSeeOther,
 			headers: map[string]string{"Location": req.ref},
-			cookies: cookies,
+			cookies: []*http.Cookie{
+				{
+					Name:     accessTokenKey,
+					Value:    token.AccessToken,
+					Path:     "/",
+					HttpOnly: true,
+				},
+				{
+					Name:     refreshTokenKey,
+					Value:    token.RefreshToken,
+					Path:     tokenRefreshAPIEndpoint,
+					HttpOnly: true,
+				},
+				{
+					Name:     refreshTokenKey,
+					Value:    token.RefreshToken,
+					Path:     organizationsAPIEndpoint,
+					HttpOnly: true,
+				},
+			},
 		}
 
 		return tkr, nil
@@ -1698,6 +1711,141 @@ func errorPageEndpoint(svc ui.Service) endpoint.Endpoint {
 		return uiRes{
 			html: res,
 			code: http.StatusOK,
+		}, nil
+	}
+}
+
+func organizationLoginEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(organizationLoginReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		token, err := svc.OrganizationLogin(
+			sdk.Login{
+				DomainID: req.OrgID,
+			},
+			req.token,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code: http.StatusSeeOther,
+			cookies: []*http.Cookie{
+				{
+					Name:     accessTokenKey,
+					Value:    token.AccessToken,
+					Path:     "/",
+					HttpOnly: true,
+				},
+				{
+					Name:     refreshTokenKey,
+					Value:    token.RefreshToken,
+					Path:     organizationsAPIEndpoint,
+					HttpOnly: true,
+				},
+				{
+					Name:     refreshTokenKey,
+					Value:    token.RefreshToken,
+					Path:     tokenRefreshAPIEndpoint,
+					HttpOnly: true,
+				},
+			},
+			headers: map[string]string{"Location": "/"},
+		}, nil
+	}
+}
+
+func listOrganizationsEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(listEntityReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.ListOrganizations(req.token, req.page, req.limit)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code: http.StatusOK,
+			html: res,
+		}, nil
+	}
+}
+
+func createOrganizationEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(createOrganizationReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		err := svc.CreateOrganization(
+			req.token,
+			sdk.Domain{
+				Name:     req.Name,
+				Metadata: req.Metadata,
+				Tags:     req.Tags,
+				Alias:    req.Alias,
+			},
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code:    http.StatusSeeOther,
+			headers: map[string]string{"Location": organizationsAPIEndpoint},
+		}, nil
+	}
+}
+
+func updateOrganizationEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(updateOrganizationReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		if err := svc.UpdateOrganization(
+			req.token,
+			sdk.Domain{
+				ID:       req.OrgID,
+				Name:     req.Name,
+				Metadata: req.Metadata,
+				Tags:     req.Tags,
+				Alias:    req.Alias,
+			},
+		); err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code: http.StatusOK,
+		}, nil
+	}
+}
+
+func viewOrganizationEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(viewResourceReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.ViewOrganization(req.token, req.id)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code: http.StatusOK,
+			html: res,
 		}, nil
 	}
 }
