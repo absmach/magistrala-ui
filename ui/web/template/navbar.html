@@ -18,7 +18,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 		<li class="nav-item mb-2 mx-2">
 			{{ $active := "dashboard" }}
 			<a
-				href="/"
+				href=""
+				id="indexLink"
 				class="nav-link {{ if eq .NavbarActive $active }}active{{ end }}"
 			>
 				<i class="fas fa-home"></i>
@@ -26,9 +27,21 @@ SPDX-License-Identifier: Apache-2.0 -->
 			</a>
 		</li>
 		<li class="nav-item mb-2 mx-2">
+			{{ $active = "organization" }}
+			<a
+				href=""
+				class="nav-link {{ if eq .NavbarActive $active }}active{{ end }}"
+				id="organizationsettings"
+			>
+				<i class="fa-solid fa-building"></i>
+				<span>Organization</span>
+			</a>
+		</li>
+		<li class="nav-item mb-2 mx-2">
 			{{ $active = "users" }}
 			<a
-				href="/users"
+				href=""
+				id="usersLink"
 				class=" nav-link {{ if (serviceUnavailable "users") }}
 					disabled-item
 				{{ end }} {{ if eq .NavbarActive $active }}active{{ end }}"
@@ -109,7 +122,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 	<!-- Header navbar -->
 	<nav class="navbar navbar-expand topbar fixed-top">
 		<div class="container-fluid mb-3">
-			<div class="">
+			<div class="sidebar-toggle">
 				<!-- Sidebar Toggle (Topbar) -->
 				<button
 					id="sidebarToggleTop"
@@ -131,17 +144,51 @@ SPDX-License-Identifier: Apache-2.0 -->
 							<span>Documentation</span>
 						</a>
 					</li>
+					<li class="nav-item dropdown me-3">
+						<a
+							class="nav-link dropdown-toggle"
+							href="#"
+							role="button"
+							data-bs-toggle="dropdown"
+							aria-expanded="false"
+							id="organizationName"
+						></a>
+						<ul class="dropdown-menu mt-3 position-absolute end-0 p-3">
+							<li class="text-center fw-bold">
+								<span id="organizationName2"></span>
+							</li>
+							<li><hr class="dropdown-divider" /></li>
+							<li>
+								<a
+									class="dropdown-item user-item-button p-2 mb-2"
+									href="#"
+									role="button"
+									onclick="openCreateOrganizationModal()"
+								>
+									<i class="fa-solid fa-square-plus"></i>
+									Create Organization
+								</a>
+							</li>
+							<li><hr class="dropdown-divider" /></li>
+							<li>
+								<a
+									class="dropdown-item user-item-button p-2 mb-2"
+									href="/organizations"
+								>
+									<i class="fa-solid fa-repeat"></i>
+									Switch Organization
+								</a>
+							</li>
+						</ul>
+					</li>
 					<li class="nav-item dropstart me-3">
 						<a
-							class="user-item nav-link d-flex flex-row"
+							class="user-item nav-link"
 							href="#"
 							role="button"
 							data-bs-toggle="dropdown"
 							aria-expanded="false"
 						>
-							<span class="me-2 d-none d-lg-inline text-muted-600 small">
-								{{ .User.Name }}
-							</span>
 							<i class="fa-solid fa-user"></i>
 						</a>
 						<ul class="dropdown-menu mt-5 position-absolute end-0 p-3">
@@ -150,10 +197,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 									<i class="fa-regular fa-user fs-2"></i>
 								</div>
 								<div>
-									<span class="dropdown-item">{{ .User.Name }}</span>
-									<span class="dropdown-item text-muted">
-										{{ .User.Credentials.Identity }}
-									</span>
+									<span class="dropdown-item" id="username"></span>
+									<span class="dropdown-item text-muted" id="identity"></span>
 								</div>
 							</li>
 							<li class="mb-2"><hr class="dropdown-divider" /></li>
@@ -186,7 +231,127 @@ SPDX-License-Identifier: Apache-2.0 -->
 			</div>
 		</div>
 	</nav>
+
+	<!-- Modal -->
+	<div
+		class="modal fade"
+		id="createOrganizationModal"
+		tabindex="-1"
+		aria-labelledby="createOrganizationModalLabel"
+		aria-hidden="true"
+	>
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1
+						class="modal-title fs-5 fw-bold"
+						id="createOrganizationModalLabel"
+						style="font-weight: 600"
+					>
+						Create Organization
+					</h1>
+					<button
+						type="button"
+						class="btn-close"
+						data-bs-dismiss="modal"
+						aria-label="Close"
+					></button>
+				</div>
+				<form action="/organizations" method="post">
+					<div class="modal-body">
+						<div class="row mb-3">
+							<div class="col-md-12">
+								<label for="name" class="form-label">Name *</label>
+								<input
+									type="text"
+									class="form-control p-2"
+									name="name"
+									id="name"
+									required
+								/>
+							</div>
+						</div>
+						<div class="row mb-3">
+							<div class="col-md-12">
+								<label for="alias" class="form-label">Alias</label>
+								<input
+									type="text"
+									class="form-control p-2"
+									name="alias"
+									id="alias"
+								/>
+							</div>
+						</div>
+						<div class="row mb-3">
+							<div class="col-md-12">
+								<label for="tags" class="form-label">Tags</label>
+								<input
+									type="text"
+									class="form-control"
+									name="tags"
+									id="tags"
+									aria-describedby="tagHelp"
+									value="[]"
+								/>
+								<div id="tagHelp" class="form-text">
+									Enter organization tags as a string slice.
+								</div>
+								<div id="tagsError" class="error-message text-danger"></div>
+							</div>
+						</div>
+						<div class="row mb-3">
+							<div class="col-md-12">
+								<label for="metadata" class="form-label">Metadata</label>
+								<input
+									type="text"
+									class="form-control"
+									name="metadata"
+									id="metadata"
+									value="{}"
+								/>
+								<div id="metadataHelp" class="form-text">
+									Enter organization metadata in JSON format.
+								</div>
+								<div id="metadataError" class="error-message text-danger"></div>
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button
+							type="button"
+							class="btn btn-secondary"
+							data-bs-dismiss="modal"
+						>
+							Cancel
+						</button>
+						<button type="submit" class="btn btn-outline-dark">Create</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
 	<script defer>
+		var name = localStorage.getItem("userName");
+		var identity = localStorage.getItem("userIdentity");
+		var organizationID = localStorage.getItem("organizationID");
+		var organizationName = localStorage.getItem("organizationName");
+		document.getElementById("organizationsettings").href =
+			"/organizations/" + organizationID;
+		document.getElementById("usersLink").href =
+			"/users?organization=" + organizationID;
+		document.getElementById("indexLink").href =
+			"/?organization=" + organizationID;
+		document.getElementById("organizationName").innerHTML = organizationName;
+		document.getElementById("organizationName2").innerHTML = organizationName;
+		document.getElementById("username").innerHTML = name;
+		document.getElementById("identity").innerHTML = identity;
+		const createOrganizationModal = new bootstrap.Modal(
+			document.getElementById("createOrganizationModal"),
+		);
+		function openCreateOrganizationModal() {
+			createOrganizationModal.show();
+		}
 		// Toggle the side navigation
 		document
 			.querySelectorAll("#sidebarToggle, #sidebarToggleTop")

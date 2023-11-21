@@ -19,7 +19,7 @@ func indexEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.Index(req.token)
+		res, err := svc.Index(req.token, req.orgID)
 		if err != nil {
 			return nil, err
 		}
@@ -271,6 +271,25 @@ func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return tkr, nil
+	}
+}
+
+func userProfileEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(listEntityReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.UserProfile(req.token, req.page, req.limit)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code: http.StatusOK,
+			html: res,
+		}, nil
 	}
 }
 
@@ -1411,38 +1430,6 @@ func disableGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func listParentsEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		req := request.(listEntityByIDReq)
-
-		res, err := svc.ListParents(req.token, req.id, req.page, req.limit)
-		if err != nil {
-			return nil, err
-		}
-
-		return uiRes{
-			html: res,
-			code: http.StatusOK,
-		}, nil
-	}
-}
-
-func listChildrenEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-		req := request.(listEntityByIDReq)
-
-		res, err := svc.ListChildren(req.token, req.id, req.page, req.limit)
-		if err != nil {
-			return nil, err
-		}
-
-		return uiRes{
-			html: res,
-			code: http.StatusOK,
-		}, nil
-	}
-}
-
 func listUserGroupChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(listEntityByIDReq)
@@ -1685,7 +1672,7 @@ func getEntitiesEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.GetEntities(req.token, req.Item, req.Name, req.Page, req.Limit)
+		res, err := svc.GetEntities(req.token, req.Item, req.Name, req.OrgID, req.Page, req.Limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1754,7 +1741,7 @@ func organizationLoginEndpoint(svc ui.Service) endpoint.Endpoint {
 					HttpOnly: true,
 				},
 			},
-			headers: map[string]string{"Location": "/"},
+			headers: map[string]string{"Location": "/?organization=" + req.OrgID},
 		}, nil
 	}
 }
@@ -1831,14 +1818,14 @@ func updateOrganizationEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func viewOrganizationEndpoint(svc ui.Service) endpoint.Endpoint {
+func organizationEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(viewResourceReq)
+		req := request.(listEntityByIDReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.ViewOrganization(req.token, req.id)
+		res, err := svc.Organization(req.token, req.id, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1846,6 +1833,56 @@ func viewOrganizationEndpoint(svc ui.Service) endpoint.Endpoint {
 		return uiRes{
 			code: http.StatusOK,
 			html: res,
+		}, nil
+	}
+}
+
+func assignMemberEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(assignMemberReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		if err := svc.AssignMember(
+			req.token,
+			req.OrgID,
+			sdk.UsersRelationRequest{
+				Relation: req.Relation,
+				UserIDs:  []string{req.UserID},
+			},
+		); err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code:    http.StatusSeeOther,
+			headers: map[string]string{"Location": organizationsAPIEndpoint + "/" + req.OrgID},
+		}, nil
+	}
+}
+
+func unassignMemberEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(assignMemberReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		if err := svc.UnassignMember(
+			req.token,
+			req.OrgID,
+			sdk.UsersRelationRequest{
+				Relation: req.Relation,
+				UserIDs:  []string{req.UserID},
+			},
+		); err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code:    http.StatusSeeOther,
+			headers: map[string]string{"Location": organizationsAPIEndpoint + "/" + req.OrgID},
 		}, nil
 	}
 }

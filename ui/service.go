@@ -38,6 +38,7 @@ const (
 	channelsActive     = "channels"
 	readMessagesActive = "readmessages"
 	bootstrapsActive   = "bootstraps"
+	organizationActive = "organization"
 )
 
 type dataSummary struct {
@@ -59,7 +60,6 @@ var (
 	templates = []string{
 		"header",
 		"navbar",
-		"footer",
 		"tableheader",
 		"tablefooter",
 		"error",
@@ -99,7 +99,7 @@ var (
 		"userthings",
 
 		"organizations",
-		// "organization",
+		"organization",
 	}
 	ErrToken                = errors.New("failed to create token")
 	ErrTokenRefresh         = errors.New("failed to refresh token")
@@ -131,7 +131,7 @@ var (
 // Service specifies service API.
 type Service interface {
 	// Index displays the landing page of the UI.
-	Index(token string) ([]byte, error)
+	Index(token, orgID string) ([]byte, error)
 	// Login displays the login page.
 	Login() ([]byte, error)
 	// Logout deletes the access token and refresh token from the cookies and logs the user out of the UI.
@@ -152,6 +152,8 @@ type Service interface {
 	RefreshToken(refreshToken string) (sdk.Token, error)
 	// OrganizationLogin provides a user with an organization level access token and a refresh token.
 	OrganizationLogin(login sdk.Login, refreshToken string) (sdk.Token, error)
+	// UserProfile displays the user profile page.
+	UserProfile(token string, page, limit uint64) ([]byte, error)
 
 	// CreateUsers creates new users.
 	CreateUsers(token string, users ...sdk.User) error
@@ -262,10 +264,6 @@ type Service interface {
 	EnableGroup(token, id string) error
 	// DisableGroup updates the status of the group to disabled.
 	DisableGroup(token, id string) error
-	// ListParents retrieves the parents of a group.
-	ListParents(token, groupID string, page, limit uint64) (b []byte, err error)
-	// ListChildren retrieves the children of a group.
-	ListChildren(token, groupID string, page, limit uint64) (b []byte, err error)
 	// ListUserGroupChannels retrieves a list of channels that a userGroup is connected to.
 	ListUserGroupChannels(token, groupID string, page, limit uint64) (b []byte, err error)
 
@@ -293,7 +291,7 @@ type Service interface {
 	ProcessTerminalCommand(ctx context.Context, id, token, command string, res chan string) error
 
 	// GetEntities retrieves all entities.
-	GetEntities(token, item, name string, page, limit uint64) ([]byte, error)
+	GetEntities(token, item, name, orgID string, page, limit uint64) ([]byte, error)
 	// ErrorPage displays an error page.
 	ErrorPage(errMsg string) ([]byte, error)
 
@@ -303,8 +301,12 @@ type Service interface {
 	CreateOrganization(token string, domain sdk.Domain) error
 	// UpdateOrganization updates the organization with the given ID.
 	UpdateOrganization(token string, domain sdk.Domain) error
-	// ViewOrganization retrieves information about the organization with the given ID.
-	ViewOrganization(token, id string) ([]byte, error)
+	// Organization displays the organization page.
+	Organization(token, orgID string, page, limit uint64) ([]byte, error)
+	// AssignMember adds a member to an organization.
+	AssignMember(token, orgID string, req sdk.UsersRelationRequest) error
+	// UnassignMember removes a member from an organization.
+	UnassignMember(token, orgID string, req sdk.UsersRelationRequest) error
 }
 
 var _ Service = (*uiService)(nil)
@@ -326,7 +328,7 @@ func New(sdk sdk.SDK) (Service, error) {
 	}, nil
 }
 
-func (us *uiService) Index(token string) (b []byte, err error) {
+func (us *uiService) Index(token, orgID string) (b []byte, err error) {
 	pgm := sdk.PageMetadata{
 		Offset:     uint64(0),
 		Visibility: statusAll,
@@ -339,7 +341,7 @@ func (us *uiService) Index(token string) (b []byte, err error) {
 		Status:     enabled,
 	}
 
-	users, err := us.sdk.Users(pgm, token)
+	users, err := us.sdk.ListDomainUsers(orgID, pgm, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -359,7 +361,7 @@ func (us *uiService) Index(token string) (b []byte, err error) {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	enabledUsers, err := us.sdk.Users(enabledPgm, token)
+	enabledUsers, err := us.sdk.ListDomainUsers(orgID, enabledPgm, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -510,6 +512,50 @@ func (us *uiService) OrganizationLogin(login sdk.Login, refreshToken string) (sd
 	return token, nil
 }
 
+func (us *uiService) UserProfile(token string, page, limit uint64) ([]byte, error) {
+	user, err := us.sdk.UserProfile(token)
+	if err != nil {
+		return nil, err
+	}
+
+	offset := (page - 1) * limit
+
+	pgm := sdk.PageMetadata{
+		Offset: offset,
+		Limit:  limit,
+	}
+
+	domainsPage, err := us.sdk.Domains(pgm, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	noOfPages := int(math.Ceil(float64(domainsPage.Total) / float64(limit)))
+
+	data := struct {
+		NavbarActive string
+		User         sdk.User
+		Domains      []sdk.Domain
+		CurrentPage  int
+		Pages        int
+		Limit        int
+	}{
+		"profile",
+		user,
+		domainsPage.Domains,
+		int(page),
+		noOfPages,
+		int(limit),
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "profile", data); err != nil {
+		return []byte{}, err
+	}
+
+	return btpl.Bytes(), nil
+}
+
 func (us *uiService) CreateUsers(token string, users ...sdk.User) error {
 	for i := range users {
 		_, err := us.sdk.CreateUser(users[i], token)
@@ -525,9 +571,8 @@ func (us *uiService) ListUsers(token string, page, limit uint64) ([]byte, error)
 	offset := (page - 1) * limit
 
 	pgm := sdk.PageMetadata{
-		Offset:     offset,
-		Limit:      limit,
-		Visibility: statusAll,
+		Offset: offset,
+		Limit:  limit,
 	}
 	users, err := us.sdk.Users(pgm, token)
 	if err != nil {
@@ -1532,92 +1577,6 @@ func (us *uiService) DisableGroup(token, id string) error {
 	return nil
 }
 
-func (us *uiService) ListParents(token, groupID string, page, limit uint64) (b []byte, err error) {
-	offset := (page - 1) * limit
-	pgm := sdk.PageMetadata{
-		Offset: offset,
-		Limit:  limit,
-	}
-	groupsPage, err := us.sdk.Parents(groupID, pgm, token)
-	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
-	}
-	user, err := us.sdk.UserProfile(token)
-	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
-	}
-
-	noOfPages := int(math.Ceil(float64(groupsPage.Total) / float64(limit)))
-
-	data := struct {
-		NavbarActive string
-		Groups       []sdk.Group
-		User         sdk.User
-		GroupID      string
-		CurrentPage  int
-		Pages        int
-		Limit        int
-	}{
-		groupsActive,
-		groupsPage.Groups,
-		user,
-		groupID,
-		int(page),
-		noOfPages,
-		int(limit),
-	}
-
-	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "parents", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
-	}
-
-	return btpl.Bytes(), nil
-}
-
-func (us *uiService) ListChildren(token, groupID string, page, limit uint64) (b []byte, err error) {
-	offset := (page - 1) * limit
-	pgm := sdk.PageMetadata{
-		Offset: offset,
-		Limit:  limit,
-	}
-	groupsPage, err := us.sdk.Children(groupID, pgm, token)
-	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
-	}
-	user, err := us.sdk.UserProfile(token)
-	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
-	}
-
-	noOfPages := int(math.Ceil(float64(groupsPage.Total) / float64(limit)))
-
-	data := struct {
-		NavbarActive string
-		Groups       []sdk.Group
-		User         sdk.User
-		GroupID      string
-		CurrentPage  int
-		Pages        int
-		Limit        int
-	}{
-		groupsActive,
-		groupsPage.Groups,
-		user,
-		groupID,
-		int(page),
-		noOfPages,
-		int(limit),
-	}
-
-	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "children", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
-	}
-
-	return btpl.Bytes(), nil
-}
-
 func (us *uiService) ListUserGroupChannels(token, groupID string, page, limit uint64) (b []byte, err error) {
 	offset := (page - 1) * limit
 	pgm := sdk.PageMetadata{
@@ -1964,13 +1923,12 @@ func (us *uiService) ProcessTerminalCommand(ctx context.Context, id, tkn, comman
 	return nil
 }
 
-func (us *uiService) GetEntities(token, item, name string, page, limit uint64) ([]byte, error) {
+func (us *uiService) GetEntities(token, item, name, orgID string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 	pgm := sdk.PageMetadata{
-		Offset:     offset,
-		Limit:      limit,
-		Name:       name,
-		Visibility: statusAll,
+		Offset: offset,
+		Limit:  limit,
+		Name:   name,
 	}
 	items := make(map[string]interface{})
 	switch item {
@@ -1998,6 +1956,12 @@ func (us *uiService) GetEntities(token, item, name string, page, limit uint64) (
 			return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 		}
 		items["data"] = channels.Channels
+	case "members":
+		members, err := us.sdk.ListDomainUsers(orgID, pgm, token)
+		if err != nil {
+			return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		}
+		items["data"] = members.Users
 	}
 
 	jsonData, err := json.Marshal(items)
@@ -2067,16 +2031,41 @@ func (us *uiService) UpdateOrganization(token string, domain sdk.Domain) error {
 	return err
 }
 
-func (us *uiService) ViewOrganization(token, id string) ([]byte, error) {
-	domain, err := us.sdk.Domain(id, token)
+func (us *uiService) Organization(token, orgID string, page, limit uint64) ([]byte, error) {
+	offset := (page - 1) * limit
+
+	pgm := sdk.PageMetadata{
+		Offset: offset,
+		Limit:  limit,
+	}
+	domain, err := us.sdk.Domain(orgID, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
+	membersPage, err := us.sdk.ListDomainUsers(orgID, pgm, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	noOfPages := int(math.Ceil(float64(membersPage.Total) / float64(limit)))
+
 	data := struct {
-		Domain sdk.Domain
+		NavbarActive string
+		Organization sdk.Domain
+		Members      []sdk.User
+		Relations    []string
+		CurrentPage  int
+		Pages        int
+		Limit        int
 	}{
+		organizationActive,
 		domain,
+		membersPage.Users,
+		groupRelations,
+		int(page),
+		noOfPages,
+		int(limit),
 	}
 
 	var btpl bytes.Buffer
@@ -2085,6 +2074,14 @@ func (us *uiService) ViewOrganization(token, id string) ([]byte, error) {
 	}
 
 	return btpl.Bytes(), nil
+}
+
+func (us *uiService) AssignMember(token, orgID string, req sdk.UsersRelationRequest) error {
+	return us.sdk.AddUserToDomain(orgID, req, token)
+}
+
+func (us *uiService) UnassignMember(token, orgID string, req sdk.UsersRelationRequest) error {
+	return us.sdk.RemoveUserFromDomain(orgID, req, token)
 }
 
 func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, err error) {

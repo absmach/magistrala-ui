@@ -40,12 +40,10 @@ const (
 	nameKey                  = "name"
 	refererKey               = "referer_url"
 	relationKey              = "relation"
+	organizationKey          = "organization"
 	defPage                  = 1
 	defLimit                 = 10
-	defName                  = ""
-	defItem                  = ""
-	defRelation              = ""
-	defReferer               = ""
+	defKey                   = ""
 	usersAPIEndpoint         = "/users"
 	thingsAPIEndpoint        = "/things"
 	channelsAPIEndpoint      = "/channels"
@@ -149,6 +147,13 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 		opts...,
 	).ServeHTTP)
 
+	r.Get("/profile", kithttp.NewServer(
+		userProfileEndpoint(svc),
+		decodeListEntityRequest,
+		encodeResponse,
+		opts...,
+	).ServeHTTP)
+
 	r.Route("/", func(r chi.Router) {
 		r.Use(TokenMiddleware)
 		r.Get("/", http.HandlerFunc(kithttp.NewServer(
@@ -187,16 +192,16 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				opts...,
 			).ServeHTTP)
 
-			r.Post("/bulk", kithttp.NewServer(
-				createUsersEndpoint(svc),
-				decodeUsersCreation,
+			r.Get("/", kithttp.NewServer(
+				listUsersEndpoint(svc),
+				decodeListEntityRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
 
-			r.Get("/", kithttp.NewServer(
-				listUsersEndpoint(svc),
-				decodeListUsersRequest,
+			r.Post("/bulk", kithttp.NewServer(
+				createUsersEndpoint(svc),
+				decodeUsersCreation,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
@@ -245,7 +250,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 
 			r.Get("/{id}/groups", kithttp.NewServer(
 				listUserGroupsEndpoint(svc),
-				decodeListUserGroupsRequest,
+				decodeListEntityByIDRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
@@ -266,7 +271,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 
 			r.Get("/{id}/channels", kithttp.NewServer(
 				listUserChannelsEndpoint(svc),
-				decodeListUserChannelsRequest,
+				decodeListEntityByIDRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
@@ -287,7 +292,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 
 			r.Get("/{id}/things", kithttp.NewServer(
 				listUserThingsEndpoint(svc),
-				decodeListUserThingsRequest,
+				decodeListEntityByIDRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
@@ -415,7 +420,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 
 			r.Get("/{id}/users", kithttp.NewServer(
 				listThingUsersEndpoint(svc),
-				decodeListThingUsersRequest,
+				decodeListEntityByIDRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
@@ -508,7 +513,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 
 			r.Get("/{id}/users", kithttp.NewServer(
 				ListChannelUsersEndpoint(svc),
-				decodeListChannelUsersRequest,
+				decodeListEntityByIDRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
@@ -529,7 +534,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 
 			r.Get("/{id}/groups", kithttp.NewServer(
 				ListChannelUserGroupsEndpoint(svc),
-				decodeListChannelUserGroupsRequest,
+				decodeListEntityByIDRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
@@ -606,19 +611,6 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				opts...,
 			).ServeHTTP)
 
-			r.Get("/{id}/parents", kithttp.NewServer(
-				listParentsEndpoint(svc),
-				decodeListParentsRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-			r.Get("/{id}/children", kithttp.NewServer(
-				listChildrenEndpoint(svc),
-				decodeListChildrenRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
 			r.Post("/{id}/channels/assign", kithttp.NewServer(
 				addUserGroupToChannelEndpoint(svc),
 				decodeAddUserGroupToChannelRequest,
@@ -634,7 +626,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 
 			r.Get("/{id}/channels", kithttp.NewServer(
 				listUserGroupChannelsEndpoint(svc),
-				decodeListUserGroupChannelsRequest,
+				decodeListEntityByIDRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
@@ -729,8 +721,8 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 			).ServeHTTP)
 
 			r.Get("/{id}", kithttp.NewServer(
-				viewOrganizationEndpoint(svc),
-				decodeView,
+				organizationEndpoint(svc),
+				decodeListEntityByIDRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
@@ -738,6 +730,20 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 			r.Post("/{id}", kithttp.NewServer(
 				updateOrganizationEndpoint(svc),
 				decodeUpdateOrganizationRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/assign", kithttp.NewServer(
+				assignMemberEndpoint(svc),
+				decodeAssignMemberRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/unassign", kithttp.NewServer(
+				unassignMemberEndpoint(svc),
+				decodeAssignMemberRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
@@ -764,8 +770,15 @@ func decodeIndexRequest(_ context.Context, r *http.Request) (interface{}, error)
 	if err != nil {
 		return nil, err
 	}
+
+	organization, err := readStringQuery(r, organizationKey, defKey)
+	if err != nil {
+		return nil, err
+	}
+
 	req := indexReq{
 		token: token,
+		orgID: organization,
 	}
 
 	return req, nil
@@ -840,7 +853,7 @@ func decodeRefreshTokenRequest(_ context.Context, r *http.Request) (interface{},
 		return nil, err
 	}
 
-	referer, err := readStringQuery(r, refererKey, defReferer)
+	referer, err := readStringQuery(r, refererKey, defKey)
 	if err != nil {
 		return nil, err
 	}
@@ -956,30 +969,6 @@ func decodeUsersCreation(_ context.Context, r *http.Request) (interface{}, error
 	return req, nil
 }
 
-func decodeListUsersRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-	page, err := readNumQuery[uint64](r, pageKey, defPage)
-	if err != nil {
-		return nil, err
-	}
-
-	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
-	if err != nil {
-		return nil, err
-	}
-
-	req := listEntityReq{
-		token: token,
-		page:  page,
-		limit: limit,
-	}
-
-	return req, nil
-}
-
 func decodeView(_ context.Context, r *http.Request) (interface{}, error) {
 	token, err := tokenFromCookie(r, "token")
 	if err != nil {
@@ -1075,36 +1064,6 @@ func decodeUserStatusUpdate(_ context.Context, r *http.Request) (interface{}, er
 	return req, nil
 }
 
-func decodeListUserGroupsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-
-	relation, err := readStringQuery(r, relationKey, defRelation)
-	if err != nil {
-		return nil, err
-	}
-
-	page, err := readNumQuery[uint64](r, pageKey, defPage)
-	if err != nil {
-		return nil, err
-	}
-
-	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
-	if err != nil {
-		return nil, err
-	}
-	req := listEntityByIDReq{
-		token:    token,
-		id:       chi.URLParam(r, "id"),
-		limit:    limit,
-		page:     page,
-		relation: relation,
-	}
-	return req, nil
-}
-
 func decodeAssignGroupRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	token, err := tokenFromCookie(r, "token")
 	if err != nil {
@@ -1117,7 +1076,7 @@ func decodeAssignGroupRequest(_ context.Context, r *http.Request) (interface{}, 
 
 	var req assignReq
 
-	item, err := readStringQuery(r, itemKey, defItem)
+	item, err := readStringQuery(r, itemKey, defKey)
 	if err != nil {
 		return nil, err
 	}
@@ -1144,29 +1103,6 @@ func decodeAssignGroupRequest(_ context.Context, r *http.Request) (interface{}, 
 	return req, nil
 }
 
-func decodeListUserThingsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-	page, err := readNumQuery[uint64](r, pageKey, defPage)
-	if err != nil {
-		return nil, err
-	}
-
-	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
-	if err != nil {
-		return nil, err
-	}
-	req := listEntityByIDReq{
-		token: token,
-		id:    chi.URLParam(r, "id"),
-		limit: limit,
-		page:  page,
-	}
-	return req, nil
-}
-
 func decodeShareThingRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	if err := r.ParseForm(); err != nil {
 		return nil, err
@@ -1179,7 +1115,7 @@ func decodeShareThingRequest(_ context.Context, r *http.Request) (interface{}, e
 
 	var req shareThingReq
 
-	item, err := readStringQuery(r, itemKey, defItem)
+	item, err := readStringQuery(r, itemKey, defKey)
 	if err != nil {
 		return nil, err
 	}
@@ -1218,7 +1154,7 @@ func decodeAddChannelToUserRequest(_ context.Context, r *http.Request) (interfac
 
 	var req addUserToChannelReq
 
-	item, err := readStringQuery(r, itemKey, defItem)
+	item, err := readStringQuery(r, itemKey, defKey)
 	if err != nil {
 		return nil, err
 	}
@@ -1242,35 +1178,6 @@ func decodeAddChannelToUserRequest(_ context.Context, r *http.Request) (interfac
 		}
 	}
 
-	return req, nil
-}
-
-func decodeListUserChannelsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-	relation, err := readStringQuery(r, relationKey, defRelation)
-	if err != nil {
-		return nil, err
-	}
-
-	page, err := readNumQuery[uint64](r, pageKey, defPage)
-	if err != nil {
-		return nil, err
-	}
-
-	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
-	if err != nil {
-		return nil, err
-	}
-	req := listEntityByIDReq{
-		token:    token,
-		id:       chi.URLParam(r, "id"),
-		limit:    limit,
-		page:     page,
-		relation: relation,
-	}
 	return req, nil
 }
 
@@ -1429,38 +1336,6 @@ func decodeThingOwnerUpdate(_ context.Context, r *http.Request) (interface{}, er
 	return req, nil
 }
 
-func decodeListEntityByIDRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-
-	relation, err := readStringQuery(r, relationKey, defRelation)
-	if err != nil {
-		return nil, err
-	}
-
-	page, err := readNumQuery[uint64](r, pageKey, defPage)
-	if err != nil {
-		return nil, err
-	}
-
-	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
-	if err != nil {
-		return nil, err
-	}
-
-	req := listEntityByIDReq{
-		token:    token,
-		id:       chi.URLParam(r, "id"),
-		page:     page,
-		limit:    limit,
-		relation: relation,
-	}
-
-	return req, nil
-}
-
 func decodeThingsCreation(_ context.Context, r *http.Request) (interface{}, error) {
 	token, err := tokenFromCookie(r, "token")
 	if err != nil {
@@ -1529,29 +1404,6 @@ func decodeThingsCreation(_ context.Context, r *http.Request) (interface{}, erro
 		things: things,
 	}
 
-	return req, nil
-}
-
-func decodeListThingUsersRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-	page, err := readNumQuery[uint64](r, pageKey, defPage)
-	if err != nil {
-		return nil, err
-	}
-
-	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
-	if err != nil {
-		return nil, err
-	}
-	req := listEntityByIDReq{
-		token: token,
-		id:    chi.URLParam(r, "id"),
-		limit: limit,
-		page:  page,
-	}
 	return req, nil
 }
 
@@ -1697,7 +1549,7 @@ func decodeConnectChannel(_ context.Context, r *http.Request) (interface{}, erro
 		return nil, err
 	}
 
-	item, err := readStringQuery(r, itemKey, defItem)
+	item, err := readStringQuery(r, itemKey, defKey)
 	if err != nil {
 		return nil, err
 	}
@@ -1738,35 +1590,6 @@ func decodeChannelStatusUpdate(_ context.Context, r *http.Request) (interface{},
 	return req, nil
 }
 
-func decodeListChannelUsersRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-	relation, err := readStringQuery(r, relationKey, defRelation)
-	if err != nil {
-		return nil, err
-	}
-
-	page, err := readNumQuery[uint64](r, pageKey, defPage)
-	if err != nil {
-		return nil, err
-	}
-
-	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
-	if err != nil {
-		return nil, err
-	}
-	req := listEntityByIDReq{
-		token:    token,
-		id:       chi.URLParam(r, "id"),
-		limit:    limit,
-		page:     page,
-		relation: relation,
-	}
-	return req, nil
-}
-
 func decodeAddUserGroupToChannelRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	if err := r.ParseForm(); err != nil {
 		return nil, err
@@ -1777,7 +1600,7 @@ func decodeAddUserGroupToChannelRequest(_ context.Context, r *http.Request) (int
 		return nil, err
 	}
 
-	item, err := readStringQuery(r, itemKey, defItem)
+	item, err := readStringQuery(r, itemKey, defKey)
 	if err != nil {
 		return nil, err
 	}
@@ -1801,29 +1624,6 @@ func decodeAddUserGroupToChannelRequest(_ context.Context, r *http.Request) (int
 		}
 	}
 
-	return req, nil
-}
-
-func decodeListChannelUserGroupsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-	page, err := readNumQuery[uint64](r, pageKey, defPage)
-	if err != nil {
-		return nil, err
-	}
-
-	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
-	if err != nil {
-		return nil, err
-	}
-	req := listEntityByIDReq{
-		token: token,
-		id:    chi.URLParam(r, "id"),
-		limit: limit,
-		page:  page,
-	}
 	return req, nil
 }
 
@@ -1966,76 +1766,6 @@ func decodeGroupStatusUpdate(_ context.Context, r *http.Request) (interface{}, e
 		GroupID: r.PostFormValue("groupID"),
 	}
 
-	return req, nil
-}
-
-func decodeListParentsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-	page, err := readNumQuery[uint64](r, pageKey, defPage)
-	if err != nil {
-		return nil, err
-	}
-
-	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
-	if err != nil {
-		return nil, err
-	}
-	req := listEntityByIDReq{
-		token: token,
-		id:    chi.URLParam(r, "id"),
-		limit: limit,
-		page:  page,
-	}
-	return req, nil
-}
-
-func decodeListChildrenRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-	page, err := readNumQuery[uint64](r, pageKey, defPage)
-	if err != nil {
-		return nil, err
-	}
-
-	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
-	if err != nil {
-		return nil, err
-	}
-	req := listEntityByIDReq{
-		token: token,
-		id:    chi.URLParam(r, "id"),
-		limit: limit,
-		page:  page,
-	}
-	return req, nil
-}
-
-func decodeListUserGroupChannelsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-
-	page, err := readNumQuery[uint64](r, pageKey, defPage)
-	if err != nil {
-		return nil, err
-	}
-
-	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
-	if err != nil {
-		return nil, err
-	}
-	req := listEntityByIDReq{
-		token: token,
-		id:    chi.URLParam(r, "id"),
-		limit: limit,
-		page:  page,
-	}
 	return req, nil
 }
 
@@ -2217,20 +1947,81 @@ func decodeUpdateBootstrapConnections(_ context.Context, r *http.Request) (inter
 	return data, nil
 }
 
+func decodeListEntityRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+	page, err := readNumQuery[uint64](r, pageKey, defPage)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	req := listEntityReq{
+		token: token,
+		page:  page,
+		limit: limit,
+	}
+
+	return req, nil
+}
+
+func decodeListEntityByIDRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+	page, err := readNumQuery[uint64](r, pageKey, defPage)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	relation, err := readStringQuery(r, relationKey, defKey)
+	if err != nil {
+		return nil, err
+	}
+
+	req := listEntityByIDReq{
+		token:    token,
+		id:       chi.URLParam(r, "id"),
+		page:     page,
+		limit:    limit,
+		relation: relation,
+	}
+
+	return req, nil
+}
+
 func decodeGetEntitiesRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
 
-	item, err := readStringQuery(r, itemKey, defItem)
+	item, err := readStringQuery(r, itemKey, defKey)
 	if err != nil {
 		return nil, err
 	}
-	name, err := readStringQuery(r, nameKey, defName)
+	name, err := readStringQuery(r, nameKey, defKey)
 	if err != nil {
 		return nil, err
 	}
+
+	orgID, err := readStringQuery(r, organizationKey, defKey)
+	if err != nil {
+		return nil, err
+	}
+
 	page, err := readNumQuery[uint64](r, pageKey, defPage)
 	if err != nil {
 		return nil, err
@@ -2246,6 +2037,7 @@ func decodeGetEntitiesRequest(_ context.Context, r *http.Request) (interface{}, 
 		Item:  item,
 		Page:  page,
 		Name:  name,
+		OrgID: orgID,
 		Limit: limit,
 	}
 
@@ -2329,11 +2121,30 @@ func decodeUpdateOrganizationRequest(_ context.Context, r *http.Request) (interf
 
 	req := updateOrganizationReq{
 		token: token,
-		OrgID: bone.GetValue(r, "id"),
+		OrgID: chi.URLParam(r, "id"),
 	}
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		return nil, err
+	}
+
+	return req, nil
+}
+
+func decodeAssignMemberRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	if err := r.ParseForm(); err != nil {
+		return nil, err
+	}
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	req := assignMemberReq{
+		token:    token,
+		OrgID:    chi.URLParam(r, "id"),
+		UserID:   r.Form.Get("userID"),
+		Relation: r.Form.Get("relation"),
 	}
 
 	return req, nil

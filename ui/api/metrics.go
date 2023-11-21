@@ -31,13 +31,13 @@ func MetricsMiddleware(svc ui.Service, counter metrics.Counter, latency metrics.
 }
 
 // Index adds metrics middleware to index method.
-func (mm *metricsMiddleware) Index(token string) (b []byte, err error) {
+func (mm *metricsMiddleware) Index(token, orgID string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "index").Add(1)
 		mm.latency.With("method", "index").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.Index(token)
+	return mm.svc.Index(token, orgID)
 }
 
 // Login adds metrics middleware to login method.
@@ -128,6 +128,16 @@ func (mm *metricsMiddleware) RefreshToken(refreshToken string) (sdk.Token, error
 	}(time.Now())
 
 	return mm.svc.RefreshToken(refreshToken)
+}
+
+// UserProfile adds metrics middleware to user profile method.
+func (mm *metricsMiddleware) UserProfile(token string, page, limit uint64) ([]byte, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "user_profile").Add(1)
+		mm.latency.With("method", "user_profile").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.UserProfile(token, page, limit)
 }
 
 // CreateUsers adds metrics middleware to create users method.
@@ -660,26 +670,6 @@ func (mm *metricsMiddleware) DisableGroup(token, id string) (err error) {
 	return mm.svc.DisableGroup(token, id)
 }
 
-// ListParents adds metrics middleware to list parents method.
-func (mm *metricsMiddleware) ListParents(token, groupID string, page, limit uint64) (b []byte, err error) {
-	defer func(begin time.Time) {
-		mm.counter.With("method", "list_parents").Add(1)
-		mm.latency.With("method", "list_parents").Observe(time.Since(begin).Seconds())
-	}(time.Now())
-
-	return mm.svc.ListParents(token, groupID, page, limit)
-}
-
-// ListChildren adds metrics middleware to list children method.
-func (mm *metricsMiddleware) ListChildren(token, groupID string, page, limit uint64) (b []byte, err error) {
-	defer func(begin time.Time) {
-		mm.counter.With("method", "list_children").Add(1)
-		mm.latency.With("method", "list_children").Observe(time.Since(begin).Seconds())
-	}(time.Now())
-
-	return mm.svc.ListChildren(token, groupID, page, limit)
-}
-
 // ListUSerGroupChannels adds metrics middleware to list usergroup channels method.
 func (mm *metricsMiddleware) ListUserGroupChannels(token, userID string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
@@ -801,13 +791,13 @@ func (mm *metricsMiddleware) ProcessTerminalCommand(ctx context.Context, id, tok
 }
 
 // GetEntities adds metrics middleware to get entities method.
-func (mm *metricsMiddleware) GetEntities(token, item, name string, page, limit uint64) ([]byte, error) {
+func (mm *metricsMiddleware) GetEntities(token, item, name, orgID string, page, limit uint64) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "get_entities").Add(1)
 		mm.latency.With("method", "get_entities").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.GetEntities(token, item, name, page, limit)
+	return mm.svc.GetEntities(token, item, name, orgID, page, limit)
 }
 
 // ErrorPage adds metrics middleware to error page method.
@@ -860,12 +850,32 @@ func (mm *metricsMiddleware) UpdateOrganization(token string, domain sdk.Domain)
 	return mm.svc.UpdateOrganization(token, domain)
 }
 
-// ViewOrganization adds metrics middleware to view organization method.
-func (mm *metricsMiddleware) ViewOrganization(token, id string) ([]byte, error) {
+// Organization adds metrics middleware to organization method.
+func (mm *metricsMiddleware) Organization(token, orgID string, page, limit uint64) ([]byte, error) {
 	defer func(begin time.Time) {
-		mm.counter.With("method", "view_organization").Add(1)
-		mm.latency.With("method", "view_organization").Observe(time.Since(begin).Seconds())
+		mm.counter.With("method", "organization").Add(1)
+		mm.latency.With("method", "organization").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ViewOrganization(token, id)
+	return mm.svc.Organization(token, orgID, page, limit)
+}
+
+// AssignMember adds metrics middleware to assign member method.
+func (mm *metricsMiddleware) AssignMember(token, orgID string, req sdk.UsersRelationRequest) (err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "assign_member").Add(1)
+		mm.latency.With("method", "assign_member").Observe(float64(time.Since(begin).Seconds()))
+	}(time.Now())
+
+	return mm.svc.AssignMember(token, orgID, req)
+}
+
+// UnassignMember adds metrics middleware to unassign member method.
+func (mm *metricsMiddleware) UnassignMember(token, orgID string, req sdk.UsersRelationRequest) (err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "unassign_member").Add(1)
+		mm.latency.With("method", "unassign_member").Observe(float64(time.Since(begin).Seconds()))
+	}(time.Now())
+
+	return mm.svc.UnassignMember(token, orgID, req)
 }

@@ -86,8 +86,13 @@ SPDX-License-Identifier: Apache-2.0 -->
 					</div>
 				</div>
 			</div>
-			{{ template "footer" }}
+
     <script>
+      window.localStorage.setItem("userName", "{{.User.Name}}");
+      window.localStorage.setItem(
+        "userIdentity",
+        "{{.User.Credentials.Identity}}"
+      );
       var enabledUsers = parseInt("{{.Summary.EnabledUsers}}");
       var disabledUsers = parseInt("{{.Summary.DisabledUsers}}");
       var enabledThings = parseInt("{{.Summary.EnabledThings}}");

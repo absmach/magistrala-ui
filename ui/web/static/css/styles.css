@@ -208,11 +208,6 @@ body.sidebar-toggled .main-content {
 	font-weight: 700;
 }
 
-.doc-button {
-	border: 1px solid var(--main-color) !important;
-	border-radius: var(--border-radius) !important;
-}
-
 .doc-button:hover {
 	border: 1px solid var(--main-color) !important;
 	border-radius: var(--border-radius) !important;
@@ -496,6 +491,7 @@ button.edit-btn {
 .organizations-table h2 {
 	color: var(--main-color);
 }
+
 .organizations-table .body-button {
 	background: var(--main-color);
 	border-radius: var(--border-radius);
@@ -512,6 +508,17 @@ button.edit-btn {
 	font-weight: 700;
 }
 
+.org-col {
+	border-radius: var(--border-radius);
+	background-color: #fff;
+}
+
+.table tbody tr.clickable-row:hover td,
+.table tbody tr.clickable-row:hover td i {
+	cursor: pointer;
+	background-color: var(--main-color);
+	color: #fff;
+}
 
 @media (max-width: 768px) {
 	.sidebar {

@@ -12,11 +12,15 @@ const maxNameSize = 1024
 
 type indexReq struct {
 	token string
+	orgID string
 }
 
 func (req indexReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
+	}
+	if req.orgID == "" {
+		return errMalformedEntity
 	}
 	return nil
 }
@@ -783,6 +787,7 @@ type getEntitiesReq struct {
 	Limit uint64 `json:"limit"`
 	Item  string `json:"item"`
 	Name  string `json:"name"`
+	OrgID string `json:"orgID"`
 }
 
 func (req getEntitiesReq) validate() error {
@@ -913,7 +918,30 @@ func (req updateOrganizationReq) validate() error {
 	if req.OrgID == "" {
 		return errMalformedEntity
 	}
-	if req.Name == "" && req.Alias == "" && req.Metadata == nil {
+	if req.Name == "" && req.Alias == "" && req.Metadata == nil && len(req.Tags) == 0 {
+		return errMalformedEntity
+	}
+	return nil
+}
+
+type assignMemberReq struct {
+	token    string
+	OrgID    string `json:"orgID"`
+	UserID   string `json:"userID"`
+	Relation string `json:"relation"`
+}
+
+func (req assignMemberReq) validate() error {
+	if req.token == "" {
+		return errAuthentication
+	}
+	if req.OrgID == "" {
+		return errMalformedEntity
+	}
+	if req.UserID == "" {
+		return errMalformedEntity
+	}
+	if req.Relation == "" {
 		return errMalformedEntity
 	}
 	return nil

@@ -167,10 +167,10 @@ SPDX-License-Identifier: Apache-2.0 -->
 												aria-label="Close"
 											></button>
 										</div>
-										<form action="/organizations/create" method="post">
+										<form action="/organizations" method="post">
 											<div class="modal-body">
 												<div class="row mb-3">
-													<div class="col-md-6">
+													<div class="col-md-12">
 														<label for="name" class="form-label">Name *</label>
 														<input
 															type="text"
@@ -180,7 +180,9 @@ SPDX-License-Identifier: Apache-2.0 -->
 															required
 														/>
 													</div>
-													<div class="col-md-6">
+												</div>
+												<div class="row mb-3">
+													<div class="col-md-12">
 														<label for="alias" class="form-label">Alias</label>
 														<input
 															type="text"
@@ -191,7 +193,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 													</div>
 												</div>
 												<div class="row mb-3">
-													<div class="col-md-6">
+													<div class="col-md-12">
 														<label for="tags" class="form-label">Tags</label>
 														<input
 															type="text"
@@ -209,7 +211,10 @@ SPDX-License-Identifier: Apache-2.0 -->
 															class="error-message text-danger"
 														></div>
 													</div>
-													<div class="col-md-6">
+													
+												</div>
+                                                <div class="row mb-3">
+                                                    <div class="col-md-12">
 														<label for="metadata" class="form-label">
 															Metadata
 														</label>
@@ -228,101 +233,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 															class="error-message text-danger"
 														></div>
 													</div>
-												</div>
-												<div class="row mb-3">
-													<div class="col-md-6">
-														<label for="email" class="form-label">
-															Email *
-														</label>
-														<input
-															type="email"
-															class="form-control"
-															name="email"
-															id="email"
-															required
-														/>
-													</div>
-													<div class="col-md-6">
-														<label for="phone" class="form-label">
-															Phone *
-														</label>
-														<input
-															type="text"
-															class="form-control"
-															name="phone"
-															id="phone"
-															required
-														/>
-													</div>
-												</div>
-												<div class="row mb-3">
-													<div class="col-md-6">
-														<label for="line1" class="form-label">Line 1</label>
-														<input
-															type="text"
-															class="form-control"
-															name="line1"
-															id="line1"
-														/>
-													</div>
-													<div class="col-md-6">
-														<label for="line2" class="form-label">Line 2</label>
-														<input
-															type="text"
-															class="form-control"
-															name="line2"
-															id="line2"
-														/>
-													</div>
-												</div>
-												<div class="row mb-3">
-													<div class="col-md-6">
-														<label for="city" class="form-label">City *</label>
-														<input
-															type="city"
-															class="form-control"
-															name="city"
-															id="city"
-															required
-														/>
-													</div>
-													<div class="col-md-6">
-														<label for="postalcode" class="form-label">
-															Postal code
-														</label>
-														<input
-															type="text"
-															class="form-control"
-															name="postalcode"
-															id="postalcode"
-														/>
-													</div>
-												</div>
-												<div class="row mb-3">
-													<div class="col-md-6">
-														<label for="country" class="form-label">
-															Country *
-														</label>
-														<input
-															type="text"
-															class="form-control"
-															name="country"
-															id="country"
-															required
-														/>
-													</div>
-													<div class="col-md-6">
-														<label for="state" class="form-label">
-															State/Province
-														</label>
-														<input
-															type="text"
-															class="form-control"
-															name="state"
-															id="state"
-														/>
-													</div>
-												</div>
+                                                </div>
 											</div>
 											<div class="modal-footer">
 												<button
@@ -344,7 +255,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 					</div>
 				</div>
 			</div>
-			{{ template "footer" }}
+			
 			<script>
 				function addToLocalStorage(id, name) {
 					localStorage.setItem("organizationID", id);
