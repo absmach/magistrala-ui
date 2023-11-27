@@ -75,20 +75,19 @@ SPDX-License-Identifier: Apache-2.0 -->
 													>
 														<div class="modal-body">
 															<div class="mb-3">
-																<label for="groups" class="form-label">
+																<label for="infiniteScroll" class="form-label">
 																	Group ID
 																</label>
 																<input
 																	type="text"
 																	name="groupFilter"
-																	id="groupFilterAssign"
+																	id="groupFilter"
 																	placeholder="Filter by Group ID"
-																	oninput="fetchIndividualEntity(this.value,'groups')"
 																/>
 																<select
 																	class="form-select"
 																	name="groupID"
-																	id="groups"
+																	id="infiniteScroll"
 																	size="5"
 																	required
 																>
@@ -524,76 +523,13 @@ SPDX-License-Identifier: Apache-2.0 -->
 				);
 				function openGroupModal() {
 					groupModal.show();
-					getGroup("");
-					getAdditionalGroups("");
 				}
-				function fetchIndividualEntity(filterValue, selectId) {
-					const itemSelect = document.getElementById(selectId);
-					if (filterValue === "") {
-						itemSelect.innerHTML = "<option disabled>select a group</option>";
-						getGroup("");
-						getAdditionalGroups();
-					} else {
-						itemSelect.innerHTML = "";
-						getGroup(filterValue);
-					}
-				}
-				let limit = 5;
 
-				function getGroup(name) {
-					fetchGroupData(name, 1);
-				}
-				function getAdditionalGroups() {
-					var selectElement = document.getElementById("groups");
-					var singleOptionHeight =
-						selectElement.querySelector("option").offsetHeight;
-					var selectBoxHeight = selectElement.offsetHeight;
-					var numOptionsBeforeLoad = 2;
-					var lastScrollTop = 0;
-					var currentPageNo = 1;
-					var currentScroll = 0;
-
-					selectElement.addEventListener("scroll", onselectScroll);
-
-					function onselectScroll(event) {
-						var st = selectElement.scrollTop;
-						var totalHeight =
-							selectElement.querySelectorAll("option").length *
-							singleOptionHeight;
-
-						if (st > lastScrollTop) {
-							currentScroll = st + selectBoxHeight;
-							if (
-								currentScroll + numOptionsBeforeLoad * singleOptionHeight >=
-								totalHeight
-							) {
-								currentPageNo++;
-								fetchGroupData("", currentPageNo);
-							}
-						}
-
-						lastScrollTop = st;
-					}
-				}
-				function fetchGroupData(name, page) {
-					fetch(
-						`/entities?item=groups&limit=${limit}&name=${name}&page=${page}`,
-						{
-							method: "GET",
-						},
-					)
-						.then((response) => response.json())
-						.then((data) => {
-							const selectElement = document.getElementById("groups");
-							data.data.forEach((group) => {
-								const option = document.createElement("option");
-								option.value = group.id;
-								option.text = group.name;
-								selectElement.appendChild(option);
-							});
-						})
-						.catch((error) => console.error("Error:", error));
-				}
+				fetchIndividualEntity({
+					input: "groupFilter",
+					itemSelect: "infiniteScroll",
+					item: "groups",
+				});
 
 				function openTab(relation) {
 					event.preventDefault();

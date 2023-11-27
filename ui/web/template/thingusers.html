@@ -65,20 +65,19 @@ SPDX-License-Identifier: Apache-2.0 -->
 													>
 														<div class="modal-body">
 															<div class="mb-3">
-																<label for="users" class="form-label">
+																<label for="infiniteScroll" class="form-label">
 																	User ID
 																</label>
 																<input
 																	type="text"
 																	name="userFilter"
-																	id="userFilterAssign"
+																	id="userFilter"
 																	placeholder="Filter by User ID"
-																	oninput="fetchIndividualEntity(this.value,'users')"
 																/>
 																<select
 																	class="form-select"
 																	name="userID"
-																	id="users"
+																	id="infiniteScroll"
 																	size="5"
 																	required
 																>
@@ -209,76 +208,12 @@ SPDX-License-Identifier: Apache-2.0 -->
 				);
 				function openUserModal() {
 					userModal.show();
-					getUser("");
-					getAdditionalUsers("");
 				}
-				function fetchIndividualEntity(filterValue, selectId) {
-					const itemSelect = document.getElementById(selectId);
-					if (filterValue === "") {
-						itemSelect.innerHTML = "<option disabled>select a user</option>";
-						getUser("");
-						getAdditionalUsers();
-					} else {
-						itemSelect.innerHTML = "";
-						getUser(filterValue);
-					}
-				}
-				let limit = 5;
-
-				function getUser(name) {
-					fetchUserData(name, 1);
-				}
-				function getAdditionalUsers() {
-					var selectElement = document.getElementById("users");
-					var singleOptionHeight =
-						selectElement.querySelector("option").offsetHeight;
-					var selectBoxHeight = selectElement.offsetHeight;
-					var numOptionsBeforeLoad = 2;
-					var lastScrollTop = 0;
-					var currentPageNo = 1;
-					var currentScroll = 0;
-
-					selectElement.addEventListener("scroll", onselectScroll);
-
-					function onselectScroll(event) {
-						var st = selectElement.scrollTop;
-						var totalHeight =
-							selectElement.querySelectorAll("option").length *
-							singleOptionHeight;
-
-						if (st > lastScrollTop) {
-							currentScroll = st + selectBoxHeight;
-							if (
-								currentScroll + numOptionsBeforeLoad * singleOptionHeight >=
-								totalHeight
-							) {
-								currentPageNo++;
-								fetchUserData("", currentPageNo);
-							}
-						}
-
-						lastScrollTop = st;
-					}
-				}
-				function fetchUserData(name, page) {
-					fetch(
-						`/entities?item=users&limit=${limit}&name=${name}&page=${page}`,
-						{
-							method: "GET",
-						},
-					)
-						.then((response) => response.json())
-						.then((data) => {
-							const selectElement = document.getElementById("users");
-							data.data.forEach((user) => {
-								const option = document.createElement("option");
-								option.value = user.id;
-								option.text = user.name;
-								selectElement.appendChild(option);
-							});
-						})
-						.catch((error) => console.error("Error:", error));
-				}
+				fetchIndividualEntity({
+					input: "userFilter",
+					itemSelect: "infiniteScroll",
+					item: "users",
+				});
 			</script>
 		</body>
 	</html>

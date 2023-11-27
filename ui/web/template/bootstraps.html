@@ -62,7 +62,6 @@ SPDX-License-Identifier: Apache-2.0 -->
 																name="thingFilter"
 																id="thingFilter"
 																placeholder="Filter by Thing name"
-																oninput="fetchIndividualEntity(this.value,'infiniteScroll')"
 															/>
 															<select
 																class="form-select"
@@ -276,20 +275,6 @@ SPDX-License-Identifier: Apache-2.0 -->
 
 					return isValid;
 				}
-				function filterItem(filterValue, selectId) {
-					const itemSelect = document.getElementById(selectId);
-					const options = itemSelect.getElementsByTagName("option");
-
-					for (let i = 0; i < options.length; i++) {
-						const option = options[i];
-						const itemId = option.value;
-						const itemName = option.innerHTML;
-						const shouldShow =
-							itemId.includes(filterValue) ||
-							itemName.toLowerCase().includes(filterValue.toLowerCase());
-						option.style.display = shouldShow ? "" : "none";
-					}
-				}
 
 				const bootstrapsModal = new bootstrap.Modal(
 					document.getElementById("addBootstrapModal"),
@@ -297,80 +282,13 @@ SPDX-License-Identifier: Apache-2.0 -->
 
 				function openModal() {
 					bootstrapsModal.show();
-					getThings("");
-					getAdditionalThings();
 				}
 
-				function fetchIndividualEntity(filterValue, selectId) {
-					const itemSelect = document.getElementById(selectId);
-					if (filterValue === "") {
-						itemSelect.innerHTML = "<option disabled>select a group</option>";
-						getThings("");
-						getAdditionalThings();
-					} else {
-						itemSelect.innerHTML = "";
-						getThings(filterValue);
-					}
-				}
-
-				let limit = 5;
-
-				function getThings(name) {
-					fetchData(name, 1);
-				}
-
-				function getAdditionalThings() {
-					var selectElement = document.getElementById("infiniteScroll");
-					var singleOptionHeight =
-						selectElement.querySelector("option").offsetHeight;
-					var selectBoxHeight = selectElement.offsetHeight;
-					var numOptionsBeforeLoad = 2;
-					var lastScrollTop = 0;
-					var currentPageNo = 1;
-					var currentScroll = 0;
-
-					selectElement.addEventListener("scroll", onselectScroll);
-
-					function onselectScroll(event) {
-						var st = selectElement.scrollTop;
-						var totalHeight =
-							selectElement.querySelectorAll("option").length *
-							singleOptionHeight;
-
-						if (st > lastScrollTop) {
-							currentScroll = st + selectBoxHeight;
-							if (
-								currentScroll + numOptionsBeforeLoad * singleOptionHeight >=
-								totalHeight
-							) {
-								currentPageNo++;
-								fetchData("", currentPageNo);
-							}
-						}
-
-						lastScrollTop = st;
-					}
-				}
-
-				function fetchData(name, page) {
-					fetch(
-						`/entities?item=things&limit=${limit}&name=${name}&page=${page}`,
-						{
-							method: "GET",
-						},
-					)
-						.then((response) => response.json())
-						.then((data) => {
-							const selectElement = document.getElementById("infiniteScroll");
-							data.data.forEach((group) => {
-								const option = document.createElement("option");
-								option.value = group.id;
-								option.text = group.name;
-								selectElement.appendChild(option);
-							});
-						})
-						.catch((error) => console.error("Error:", error));
-				}
+				fetchIndividualEntity({
+					input: "thingFilter",
+					itemSelect: "infiniteScroll",
+					item: "things",
+				});
 			</script>
 		</body>
 	</html>

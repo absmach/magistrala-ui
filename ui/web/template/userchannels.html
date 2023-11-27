@@ -75,20 +75,19 @@ SPDX-License-Identifier: Apache-2.0 -->
 													>
 														<div class="modal-body">
 															<div class="mb-3">
-																<label for="channels" class="form-label">
+																<label for="infiniteScroll" class="form-label">
 																	Channel ID
 																</label>
 																<input
 																	type="text"
 																	name="channelFilter"
-																	id="channelFilterAssign"
+																	id="channelFilter"
 																	placeholder="Filter by Channel ID"
-																	oninput="fetchIndividualEntity(this.value,'channels')"
 																/>
 																<select
 																	class="form-select"
 																	name="channelID"
-																	id="channels"
+																	id="infiniteScroll"
 																	size="5"
 																	required
 																>
@@ -523,76 +522,14 @@ SPDX-License-Identifier: Apache-2.0 -->
 				);
 				function openChannelModal() {
 					channelModal.show();
-					getChannel("");
-					getAdditionalChannels("");
 				}
-				function fetchIndividualGroup(filterValue, selectId) {
-					const itemSelect = document.getElementById(selectId);
-					if (filterValue === "") {
-						itemSelect.innerHTML = "<option disabled>select a channel</option>";
-						getChannel("");
-						getAdditionalChannels();
-					} else {
-						itemSelect.innerHTML = "";
-						getChannel(filterValue);
-					}
-				}
-				let limit = 5;
 
-				function getChannel(name) {
-					fetchChannelData(name, 1);
-				}
-				function getAdditionalChannels() {
-					var selectElement = document.getElementById("channels");
-					var singleOptionHeight =
-						selectElement.querySelector("option").offsetHeight;
-					var selectBoxHeight = selectElement.offsetHeight;
-					var numOptionsBeforeLoad = 2;
-					var lastScrollTop = 0;
-					var currentPageNo = 1;
-					var currentScroll = 0;
+				fetchIndividualEntity({
+					input: "channelFilter",
+					itemSelect: "infiniteScroll",
+					item: "channels",
+				});
 
-					selectElement.addEventListener("scroll", onselectScroll);
-
-					function onselectScroll(event) {
-						var st = selectElement.scrollTop;
-						var totalHeight =
-							selectElement.querySelectorAll("option").length *
-							singleOptionHeight;
-
-						if (st > lastScrollTop) {
-							currentScroll = st + selectBoxHeight;
-							if (
-								currentScroll + numOptionsBeforeLoad * singleOptionHeight >=
-								totalHeight
-							) {
-								currentPageNo++;
-								fetchChannelData("", currentPageNo);
-							}
-						}
-
-						lastScrollTop = st;
-					}
-				}
-				function fetchChannelData(name, page) {
-					fetch(
-						`/entities?item=channels&limit=${limit}&name=${name}&page=${page}`,
-						{
-							method: "GET",
-						},
-					)
-						.then((response) => response.json())
-						.then((data) => {
-							const selectElement = document.getElementById("channels");
-							data.data.forEach((channel) => {
-								const option = document.createElement("option");
-								option.value = channel.id;
-								option.text = channel.name;
-								selectElement.appendChild(option);
-							});
-						})
-						.catch((error) => console.error("Error:", error));
-				}
                 function openTab(relation) {
 					event.preventDefault();
                     var userID = '{{.UserID}}';
