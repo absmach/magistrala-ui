@@ -2,145 +2,123 @@
 SPDX-License-Identifier: Apache-2.0 -->
 
 {{ define "things" }}
-	<!doctype html>
-	<html lang="en">
-		{{ template "header" }}
-		<body>
-			{{ template "navbar" . }}
-			<div class="main-content pt-3">
-				<div class="container">
-					<div class="row">
-						<div class="col-lg-12 mx-auto py-3">
-							<div class="row">
-								<div class="buttons mb-3">
-									<!-- Button trigger modal -->
-									<button
-										type="button"
-										class="btn body-button"
-										onclick="openModal('single')"
-									>
-										Add Thing
-									</button>
+  <!doctype html>
+  <html lang="en">
+    {{ template "header" }}
+    <body>
+      {{ template "navbar" . }}
+      <div class="main-content pt-3">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-12 mx-auto py-3">
+              <div class="row">
+                <div class="buttons mb-3">
+                  <!-- Button trigger modal -->
+                  <button type="button" class="btn body-button" onclick="openModal('single')">
+                    Add Thing
+                  </button>
 
-									<!-- Modal -->
-									<div
-										class="modal fade"
-										id="addThingModal"
-										tabindex="-1"
-										role="dialog"
-										aria-labelledby="addThingModalLabel"
-										aria-hidden="true"
-									>
-										<div class="modal-dialog" role="document">
-											<div class="modal-content">
-												<div class="modal-header">
-													<h5 class="modal-title" id="addThingModalLabel">
-														Add Thing
-													</h5>
-												</div>
-												<div class="modal-body">
-													<div id="alertMessage"></div>
-													<form id="thingform">
-														<div class="mb-3">
-															<label for="name" class="form-label">Name</label>
-															<input
-																type="text"
-																class="form-control"
-																name="name"
-																id="name"
-																placeholder="Device Name"
-															/>
-															<div id="nameError" class="text-danger"></div>
-														</div>
-														<div class="mb-3">
-															<label for="thingID" class="form-label">
-																Thing ID
-															</label>
-															<input
-																type="text"
-																class="form-control"
-																name="thingID"
-																id="thingID"
-																placeholder="Thing ID"
-															/>
-														</div>
-														<div class="mb-3">
-															<label for="identity" class="form-label">
-																Identity
-															</label>
-															<input
-																type="text"
-																class="form-control"
-																name="identity"
-																id="identity"
-																placeholder="Thing Identity"
-															/>
-														</div>
-														<div class="mb-3">
-															<label for="secret" class="form-label">
-																Secret
-															</label>
-															<input
-																type="text"
-																class="form-control"
-																name="secret"
-																id="secret"
-																placeholder="Thing Secret"
-															/>
-															<div id="secretError" class="error-message"></div>
-														</div>
-														<div class="mb-3">
-															<label for="tags" class="form-label">Tags</label>
-															<input
-																type="text"
-																class="form-control"
-																name="tags"
-																id="tags"
-																aria-describedby="tagHelp"
-																value="[]"
-															/>
-															<div id="tagHelp" class="form-text">
-																Enter device tags as a string slice.
-															</div>
-															<div id="tagsError" class="text-danger"></div>
-														</div>
-														<div class="mb-3">
-															<label for="metadata" class="form-label">
-																Metadata
-															</label>
-															<input
-																type="text"
-																class="form-control"
-																name="metadata"
-																id="metadata"
-																value="{}"
-															/>
-															<div id="metadataHelp" class="form-text">
-																Enter device metadata in JSON format.
-															</div>
-															<div id="metadataError" class="text-danger"></div>
-														</div>
-														<button
-															type="submit"
-															class="btn body-button"
-															id="create-thing-button"
-														>
-															Submit
-														</button>
-													</form>
-												</div>
-											</div>
-										</div>
-									</div>
+                  <!-- Modal -->
+                  <div
+                    class="modal fade"
+                    id="addThingModal"
+                    tabindex="-1"
+                    role="dialog"
+                    aria-labelledby="addThingModalLabel"
+                    aria-hidden="true"
+                  >
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="addThingModalLabel">Add Thing</h5>
+                        </div>
+                        <div class="modal-body">
+                          <div id="alertMessage"></div>
+                          <form id="thingform">
+                            <div class="mb-3">
+                              <label for="name" class="form-label">Name</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                name="name"
+                                id="name"
+                                placeholder="Device Name"
+                              />
+                              <div id="nameError" class="text-danger"></div>
+                            </div>
+                            <div class="mb-3">
+                              <label for="thingID" class="form-label">Thing ID</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                name="thingID"
+                                id="thingID"
+                                placeholder="Thing ID"
+                              />
+                            </div>
+                            <div class="mb-3">
+                              <label for="identity" class="form-label">Identity</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                name="identity"
+                                id="identity"
+                                placeholder="Thing Identity"
+                              />
+                            </div>
+                            <div class="mb-3">
+                              <label for="secret" class="form-label">Secret</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                name="secret"
+                                id="secret"
+                                placeholder="Thing Secret"
+                              />
+                              <div id="secretError" class="error-message"></div>
+                            </div>
+                            <div class="mb-3">
+                              <label for="tags" class="form-label">Tags</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                name="tags"
+                                id="tags"
+                                aria-describedby="tagHelp"
+                                value="[]"
+                              />
+                              <div id="tagHelp" class="form-text">
+                                Enter device tags as a string slice.
+                              </div>
+                              <div id="tagsError" class="text-danger"></div>
+                            </div>
+                            <div class="mb-3">
+                              <label for="metadata" class="form-label">Metadata</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                name="metadata"
+                                id="metadata"
+                                value="{}"
+                              />
+                              <div id="metadataHelp" class="form-text">
+                                Enter device metadata in JSON format.
+                              </div>
+                              <div id="metadataError" class="text-danger"></div>
+                            </div>
+                            <button type="submit" class="btn body-button" id="create-thing-button">
+                              Submit
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-									<!-- Button trigger modal -->
-									<button
-										type="button"
-										class="btn body-button"
-										onclick="openModal('bulk')"
-									>
-										Add Things
-									</button>
+                  <!-- Button trigger modal -->
+                  <button type="button" class="btn body-button" onclick="openModal('bulk')">
+                    Add Things
+                  </button>
 
 									<!-- Modal -->
 									<div
@@ -282,35 +260,31 @@ SPDX-License-Identifier: Apache-2.0 -->
 					},
 				});
 
-				const thingModal = new bootstrap.Modal(
-					document.getElementById("addThingModal"),
-				);
-				const thingsModal = new bootstrap.Modal(
-					document.getElementById("addThingsModal"),
-				);
+        const thingModal = new bootstrap.Modal(document.getElementById("addThingModal"));
+        const thingsModal = new bootstrap.Modal(document.getElementById("addThingsModal"));
 
-				function openModal(modal) {
-					if (modal === "single") {
-						thingModal.show();
-					} else if (modal === "bulk") {
-						thingsModal.show();
-					}
-				}
+        function openModal(modal) {
+          if (modal === "single") {
+            thingModal.show();
+          } else if (modal === "bulk") {
+            thingsModal.show();
+          }
+        }
 
-				submitCreateForm({
-					url: "/things",
-					formId: "thingform",
-					alertDiv: "alertMessage",
-					modal: thingModal,
-				});
+        submitCreateForm({
+          url: "/things",
+          formId: "thingform",
+          alertDiv: "alertMessage",
+          modal: thingModal,
+        });
 
-				submitCreateForm({
-					url: "/things/bulk",
-					formId: "bulkThingsForm",
-					alertDiv: "alertBulkMessage",
-					modal: thingsModal,
-				});
-			</script>
-		</body>
-	</html>
+        submitCreateForm({
+          url: "/things/bulk",
+          formId: "bulkThingsForm",
+          alertDiv: "alertBulkMessage",
+          modal: thingsModal,
+        });
+      </script>
+    </body>
+  </html>
 {{ end }}

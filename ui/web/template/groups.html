@@ -2,123 +2,103 @@
 SPDX-License-Identifier: Apache-2.0 -->
 
 {{ define "groups" }}
-	<!doctype html>
-	<html lang="en">
-		{{ template "header" }}
-		<body>
-			{{ template "navbar" . }}
-			<div class="main-content pt-3">
-				<div class="container">
-					<div class="row">
-						<div class="col-lg-12 mx-auto py-3">
-							<div class="row">
-								<div class="buttons mb-3">
-									<!-- Button trigger modal -->
-									<button
-										type="button"
-										class="btn body-button"
-										onclick="openModal('single')"
-									>
-										Add Group
-									</button>
+  <!doctype html>
+  <html lang="en">
+    {{ template "header" }}
+    <body>
+      {{ template "navbar" . }}
+      <div class="main-content pt-3">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-12 mx-auto py-3">
+              <div class="row">
+                <div class="buttons mb-3">
+                  <!-- Button trigger modal -->
+                  <button type="button" class="btn body-button" onclick="openModal('single')">
+                    Add Group
+                  </button>
 
-									<!-- Modal -->
-									<div
-										class="modal fade"
-										id="addGroupModal"
-										tabindex="-1"
-										role="dialog"
-										aria-labelledby="addGroupModalLabel"
-										aria-hidden="true"
-									>
-										<div class="modal-dialog" role="document">
-											<div class="modal-content">
-												<div class="modal-header">
-													<h5 class="modal-title" id="addGroupModalLabel">
-														Add Group
-													</h5>
-												</div>
-												<div class="modal-body">
-													<div id="alertMessage"></div>
-													<form method="post" id="groupform">
-														<div class="mb-3">
-															<label for="name" class="form-label">Name</label>
-															<input
-																type="text"
-																class="form-control"
-																name="name"
-																id="name"
-																placeholder="Group Name"
-															/>
-															<div id="nameError" class="text-danger"></div>
-														</div>
-														<div class="mb-3">
-															<label for="description" class="form-label">
-																Description
-															</label>
-															<input
-																type="text"
-																class="form-control"
-																name="description"
-																id="description"
-																placeholder="Group Description"
-															/>
-														</div>
-														<div class="mb-3">
-															<label for="infiniteScroll" class="form-label">
-																Parent Name
-															</label>
-															<input
-																type="text"
-																class="itemsFilter"
-																name="parentFilter"
-																id="parentFilter"
-																placeholder="Filter by parent name"
-															/>
-															<select
-																class="form-select"
-																name="parentID"
-																id="infiniteScroll"
-																size="5"
-															>
-																<option disabled>select a group</option>
-															</select>
-														</div>
-														<div class="mb-3">
-															<label for="metadata" class="form-label">
-																Metadata
-															</label>
-															<input
-																type="text"
-																class="form-control"
-																name="metadata"
-																id="metadata"
-																value="{}"
-															/>
-															<div id="metadataHelp" class="form-text">
-																Enter groups metadata in JSON format.
-															</div>
-															<div id="metadataError" class="text-danger"></div>
-														</div>
-														<button
-															type="submit"
-															class="btn body-button"
-															id="create-group-button"
-														>
-															Submit
-														</button>
-													</form>
-												</div>
-											</div>
-										</div>
-									</div>
-									<button
-										type="button"
-										class="btn body-button"
-										onclick="openModal('bulk')"
-									>
-										Add Groups
-									</button>
+                  <!-- Modal -->
+                  <div
+                    class="modal fade"
+                    id="addGroupModal"
+                    tabindex="-1"
+                    role="dialog"
+                    aria-labelledby="addGroupModalLabel"
+                    aria-hidden="true"
+                  >
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="addGroupModalLabel">Add Group</h5>
+                        </div>
+                        <div class="modal-body">
+                          <div id="alertMessage"></div>
+                          <form method="post" id="groupform">
+                            <div class="mb-3">
+                              <label for="name" class="form-label">Name</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                name="name"
+                                id="name"
+                                placeholder="Group Name"
+                              />
+                              <div id="nameError" class="text-danger"></div>
+                            </div>
+                            <div class="mb-3">
+                              <label for="description" class="form-label">Description</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                name="description"
+                                id="description"
+                                placeholder="Group Description"
+                              />
+                            </div>
+                            <div class="mb-3">
+                              <label for="infiniteScroll" class="form-label">Parent Name</label>
+                              <input
+                                type="text"
+                                class="itemsFilter"
+                                name="parentFilter"
+                                id="parentFilter"
+                                placeholder="Filter by parent name"
+                              />
+                              <select
+                                class="form-select"
+                                name="parentID"
+                                id="infiniteScroll"
+                                size="5"
+                              >
+                                <option disabled>select a group</option>
+                              </select>
+                            </div>
+                            <div class="mb-3">
+                              <label for="metadata" class="form-label">Metadata</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                name="metadata"
+                                id="metadata"
+                                value="{}"
+                              />
+                              <div id="metadataHelp" class="form-text">
+                                Enter groups metadata in JSON format.
+                              </div>
+                              <div id="metadataError" class="text-danger"></div>
+                            </div>
+                            <button type="submit" class="btn body-button" id="create-group-button">
+                              Submit
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button type="button" class="btn body-button" onclick="openModal('bulk')">
+                    Add Groups
+                  </button>
 
 									<!-- Modal -->
 									<div
@@ -243,55 +223,51 @@ SPDX-License-Identifier: Apache-2.0 -->
 				</div>
 			</div>
 
-			{{ template "footer" }}
-			<script>
-				attachValidationListener({
-					buttonId: "create-group-button",
-					errorDivs: {
-						name: "nameError",
-						metadata: "metadataError",
-					},
-					validations: {
-						name: validateName,
-						metadata: validateMetadata,
-					},
-				});
+      {{ template "footer" }}
+      <script>
+        attachValidationListener({
+          buttonId: "create-group-button",
+          errorDivs: {
+            name: "nameError",
+            metadata: "metadataError",
+          },
+          validations: {
+            name: validateName,
+            metadata: validateMetadata,
+          },
+        });
 
-				const groupModal = new bootstrap.Modal(
-					document.getElementById("addGroupModal"),
-				);
-				const groupsModal = new bootstrap.Modal(
-					document.getElementById("addGroupsModal"),
-				);
+        const groupModal = new bootstrap.Modal(document.getElementById("addGroupModal"));
+        const groupsModal = new bootstrap.Modal(document.getElementById("addGroupsModal"));
 
-				function openModal(modal) {
-					if (modal === "single") {
-						groupModal.show();
-					} else if (modal === "bulk") {
-						groupsModal.show();
-					}
-				}
+        function openModal(modal) {
+          if (modal === "single") {
+            groupModal.show();
+          } else if (modal === "bulk") {
+            groupsModal.show();
+          }
+        }
 
-				submitCreateForm({
-					url: "/groups",
-					formId: "groupform",
-					alertDiv: "alertMessage",
-					modal: groupModal,
-				});
+        submitCreateForm({
+          url: "/groups",
+          formId: "groupform",
+          alertDiv: "alertMessage",
+          modal: groupModal,
+        });
 
-				submitCreateForm({
-					url: "/groups/bulk",
-					formId: "bulkgroupsform",
-					alertDiv: "alertBulkMessage",
-					modal: groupsModal,
-				});
+        submitCreateForm({
+          url: "/groups/bulk",
+          formId: "bulkgroupsform",
+          alertDiv: "alertBulkMessage",
+          modal: groupsModal,
+        });
 
-				fetchIndividualEntity({
-					input: "parentFilter",
-					itemSelect: "infiniteScroll",
-					item: "groups",
-				});
-			</script>
-		</body>
-	</html>
+        fetchIndividualEntity({
+          input: "parentFilter",
+          itemSelect: "infiniteScroll",
+          item: "groups",
+        });
+      </script>
+    </body>
+  </html>
 {{ end }}

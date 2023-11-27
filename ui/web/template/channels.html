@@ -2,125 +2,109 @@
 SPDX-License-Identifier: Apache-2.0 -->
 
 {{ define "channels" }}
-	<!doctype html>
-	<html lang="en">
-		{{ template "header" }}
-		<body>
-			{{ template "navbar" . }}
-			<div class="main-content pt-3">
-				<div class="container">
-					<div class="row">
-						<div class="col-lg-12 mx-auto py-3">
-							<div class="row">
-								<div class="buttons mb-3">
-									<!-- Button trigger modal -->
-									<button
-										type="button"
-										class="btn body-button"
-										onclick="openModal('single')"
-									>
-										Add Channel
-									</button>
+  <!doctype html>
+  <html lang="en">
+    {{ template "header" }}
+    <body>
+      {{ template "navbar" . }}
+      <div class="main-content pt-3">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-12 mx-auto py-3">
+              <div class="row">
+                <div class="buttons mb-3">
+                  <!-- Button trigger modal -->
+                  <button type="button" class="btn body-button" onclick="openModal('single')">
+                    Add Channel
+                  </button>
 
-									<!-- Modal -->
-									<div
-										class="modal fade"
-										id="addChannelModal"
-										tabindex="-1"
-										role="dialog"
-										aria-labelledby="addChannelModalLabel"
-										aria-hidden="true"
-									>
-										<div class="modal-dialog" role="document">
-											<div class="modal-content">
-												<div class="modal-header">
-													<h5 class="modal-title" id="addChannelModalLabel">
-														Add Channel
-													</h5>
-												</div>
-												<div class="modal-body">
-													<div id="alertMessage"></div>
-													<form method="post" id="channelform">
-														<div class="mb-3">
-															<label for="name" class="form-label">Name</label>
-															<input
-																type="text"
-																class="form-control"
-																name="name"
-																id="name"
-																placeholder="Channel Name"
-															/>
-															<div id="nameError" class="text-danger"></div>
-														</div>
-														<div class="mb-3">
-															<label for="infiniteScroll" class="form-label">
-																Parent Name
-															</label>
-															<input
-																type="text"
-																class="itemsFilter"
-																name="parentFilter"
-																id="parentFilter"
-																placeholder="Filter by parent name"
-															/>
-															<select
-																class="form-select"
-																name="parentID"
-																id="infiniteScroll"
-																size="5"
-															>
-																<option disabled>select a channel</option>
-															</select>
-														</div>
-														<div class="mb-3">
-															<label for="description" class="form-label">
-																Description
-															</label>
-															<input
-																type="text"
-																class="form-control"
-																name="description"
-																id="description"
-																placeholder="Channel Description"
-															/>
-														</div>
-														<div class="mb-3">
-															<label for="metadata" class="form-label">
-																Metadata
-															</label>
-															<input
-																type="text"
-																class="form-control"
-																name="metadata"
-																id="metadata"
-																value="{}"
-															/>
-															<div id="metadataHelp" class="form-text">
-																Enter channel metadata in JSON format.
-															</div>
-															<div id="metadataError" class="text-danger"></div>
-														</div>
-														<button
-															type="submit"
-															class="btn body-button"
-															id="create-channel-button"
-														>
-															Submit
-														</button>
-													</form>
-												</div>
-											</div>
-										</div>
-									</div>
+                  <!-- Modal -->
+                  <div
+                    class="modal fade"
+                    id="addChannelModal"
+                    tabindex="-1"
+                    role="dialog"
+                    aria-labelledby="addChannelModalLabel"
+                    aria-hidden="true"
+                  >
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="addChannelModalLabel">Add Channel</h5>
+                        </div>
+                        <div class="modal-body">
+                          <div id="alertMessage"></div>
+                          <form method="post" id="channelform">
+                            <div class="mb-3">
+                              <label for="name" class="form-label">Name</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                name="name"
+                                id="name"
+                                placeholder="Channel Name"
+                              />
+                              <div id="nameError" class="text-danger"></div>
+                            </div>
+                            <div class="mb-3">
+                              <label for="infiniteScroll" class="form-label">Parent Name</label>
+                              <input
+                                type="text"
+                                class="itemsFilter"
+                                name="parentFilter"
+                                id="parentFilter"
+                                placeholder="Filter by parent name"
+                              />
+                              <select
+                                class="form-select"
+                                name="parentID"
+                                id="infiniteScroll"
+                                size="5"
+                              >
+                                <option disabled>select a channel</option>
+                              </select>
+                            </div>
+                            <div class="mb-3">
+                              <label for="description" class="form-label">Description</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                name="description"
+                                id="description"
+                                placeholder="Channel Description"
+                              />
+                            </div>
+                            <div class="mb-3">
+                              <label for="metadata" class="form-label">Metadata</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                name="metadata"
+                                id="metadata"
+                                value="{}"
+                              />
+                              <div id="metadataHelp" class="form-text">
+                                Enter channel metadata in JSON format.
+                              </div>
+                              <div id="metadataError" class="text-danger"></div>
+                            </div>
+                            <button
+                              type="submit"
+                              class="btn body-button"
+                              id="create-channel-button"
+                            >
+                              Submit
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
-									<!-- Button trigger modal -->
-									<button
-										type="button"
-										class="btn body-button"
-										onclick="openModal('bulk')"
-									>
-										Add Channels
-									</button>
+                  <!-- Button trigger modal -->
+                  <button type="button" class="btn body-button" onclick="openModal('bulk')">
+                    Add Channels
+                  </button>
 
 									<!-- Modal -->
 									<div
@@ -260,41 +244,37 @@ SPDX-License-Identifier: Apache-2.0 -->
 					},
 				});
 
-				const channelModal = new bootstrap.Modal(
-					document.getElementById("addChannelModal"),
-				);
-				const channelsModal = new bootstrap.Modal(
-					document.getElementById("addChannelsModal"),
-				);
+        const channelModal = new bootstrap.Modal(document.getElementById("addChannelModal"));
+        const channelsModal = new bootstrap.Modal(document.getElementById("addChannelsModal"));
 
-				function openModal(modal) {
-					if (modal === "single") {
-						channelModal.show();
-					} else if (modal === "bulk") {
-						channelsModal.show();
-					}
-				}
+        function openModal(modal) {
+          if (modal === "single") {
+            channelModal.show();
+          } else if (modal === "bulk") {
+            channelsModal.show();
+          }
+        }
 
-				submitCreateForm({
-					url: "/channels",
-					formId: "channelform",
-					alertDiv: "alertMessage",
-					modal: channelModal,
-				});
+        submitCreateForm({
+          url: "/channels",
+          formId: "channelform",
+          alertDiv: "alertMessage",
+          modal: channelModal,
+        });
 
-				submitCreateForm({
-					url: "/channels/bulk",
-					formId: "bulkchannelsform",
-					alertDiv: "alertBulkMessage",
-					modal: channelsModal,
-				});
+        submitCreateForm({
+          url: "/channels/bulk",
+          formId: "bulkchannelsform",
+          alertDiv: "alertBulkMessage",
+          modal: channelsModal,
+        });
 
-				fetchIndividualEntity({
-					input: "parentFilter",
-					itemSelect: "infiniteScroll",
-					item: "channels",
-				});
-			</script>
-		</body>
-	</html>
+        fetchIndividualEntity({
+          input: "parentFilter",
+          itemSelect: "infiniteScroll",
+          item: "channels",
+        });
+      </script>
+    </body>
+  </html>
 {{ end }}

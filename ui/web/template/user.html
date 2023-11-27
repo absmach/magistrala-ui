@@ -2,206 +2,150 @@
 SPDX-License-Identifier: Apache-2.0 -->
 
 {{ define "user" }}
-	<!doctype html>
-	<html lang="en">
-		{{ template "header" }}
-		<body>
-			{{ template "navbar" . }}
-			<div class="main-content pt-3">
-				<div class="container">
-					<div class="row">
-						<div class="col-lg-12 mx-auto py-3">
-							<div class="row">
-								<div class="buttons mb-3">
-									<a
-										href="/users/{{ .UserID }}/groups"
-										type="button"
-										class="btn body-button"
-									>
-										User Groups
-									</a>
-									<a
-										href="/users/{{ .UserID }}/things"
-										type="button"
-										class="btn body-button"
-									>
-										User Things
-									</a>
-									<a
-										href="/users/{{ .UserID }}/channels"
-										type="button"
-										class="btn body-button"
-									>
-										User Channels
-									</a>
-								</div>
-								<div class="table-responsive table-container">
-									<table id="itemsTable" class="table">
-										<thead>
-											<tr>
-												<th scope="row">USER</th>
-											</tr>
-										</thead>
-										<tbody>
-											{{ $disableButton := false }}
+  <!doctype html>
+  <html lang="en">
+    {{ template "header" }}
+    <body>
+      {{ template "navbar" . }}
+      <div class="main-content pt-3">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-12 mx-auto py-3">
+              <div class="row">
+                <div class="buttons mb-3">
+                  <a href="/users/{{ .UserID }}/groups" type="button" class="btn body-button">
+                    User Groups
+                  </a>
+                  <a href="/users/{{ .UserID }}/things" type="button" class="btn body-button">
+                    User Things
+                  </a>
+                  <a href="/users/{{ .UserID }}/channels" type="button" class="btn body-button">
+                    User Channels
+                  </a>
+                </div>
+                <div class="table-responsive table-container">
+                  <table id="itemsTable" class="table">
+                    <thead>
+                      <tr>
+                        <th scope="row">USER</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {{ $disableButton := false }}
 
 
-											<tr>
-												<th>Name</th>
-												<td
-													class="editable"
-													contenteditable="false"
-													data-field="name"
-												>
-													{{ .ViewedUser.Name }}
-												</td>
-												<td>
-													<button
-														class="edit-btn"
-														id="edit-name"
-														{{ if
-															$disableButton
-														}}
-															disabled
-														{{ end }}
-													>
-														<i class="fas fa-pencil-alt"></i>
-													</button>
-													<div
-														class="save-cancel-buttons"
-														style="display: none"
-													>
-														<button class="save-btn" id="save-name">
-															Save
-														</button>
-														<button class="cancel-btn" id="cancel-name">
-															Cancel
-														</button>
-													</div>
-												</td>
-											</tr>
-											<tr>
-												<th>ID</th>
-												<td>{{ .ViewedUser.ID }}</td>
-												<td></td>
-											</tr>
-											<tr>
-												<th>Owner</th>
-												<td>{{ .ViewedUser.Owner }}</td>
-												<td></td>
-											</tr>
-											<tr>
-												<th>Identity</th>
-												<td
-													class="editable"
-													contenteditable="false"
-													data-field="identity"
-												>
-													{{ .ViewedUser.Credentials.Identity }}
-												</td>
-												<td>
-													<button
-														class="edit-btn"
-														id="edit-identity"
-														{{ if
-															$disableButton
-														}}
-															disabled
-														{{ end }}
-													>
-														<i class="fas fa-pencil-alt"></i>
-													</button>
-													<div
-														class="save-cancel-buttons"
-														style="display: none"
-													>
-														<button class="save-btn" id="save-identity">
-															Save
-														</button>
-														<button class="cancel-btn" id="cancel-identity">
-															Cancel
-														</button>
-													</div>
-												</td>
-											</tr>
-											<tr>
-												<th>Tags</th>
-												<td
-													class="editable"
-													contenteditable="false"
-													data-field="tags"
-												>
-													{{ toSlice .ViewedUser.Tags }}
-												</td>
-												<td>
-													<button
-														class="edit-btn"
-														id="edit-tags"
-														{{ if
-															$disableButton
-														}}
-															disabled
-														{{ end }}
-													>
-														<i class="fas fa-pencil-alt"></i>
-													</button>
-													<div
-														class="save-cancel-buttons"
-														style="display: none"
-													>
-														<button class="save-btn" id="save-tags">
-															Save
-														</button>
-														<button class="cancel-btn" id="cancel-tags">
-															Cancel
-														</button>
-													</div>
-												</td>
-											</tr>
-											<tr>
-												<th>Metadata</th>
-												<td
-													class="editable"
-													contenteditable="false"
-													data-field="metadata"
-												>
-													{{ toJSON .ViewedUser.Metadata }}
-												</td>
-												<td>
-													<button
-														class="edit-btn"
-														id="edit-metadata"
-														{{ if
-															$disableButton
-														}}
-															disabled
-														{{ end }}
-													>
-														<i class="fas fa-pencil-alt"></i>
-													</button>
-													<div
-														class="save-cancel-buttons"
-														style="display: none"
-													>
-														<button class="save-btn" id="save-metadata">
-															Save
-														</button>
-														<button class="cancel-btn" id="cancel-metadata">
-															Cancel
-														</button>
-													</div>
-												</td>
-											</tr>
-										</tbody>
-									</table>
-									<div id="error-message" class="text-danger"></div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			{{ template "footer" }}
+                      <tr>
+                        <th>Name</th>
+                        <td class="editable" contenteditable="false" data-field="name">
+                          {{ .ViewedUser.Name }}
+                        </td>
+                        <td>
+                          <button
+                            class="edit-btn"
+                            id="edit-name"
+                            {{ if
+                              $disableButton
+                            }}
+                              disabled
+                            {{ end }}
+                          >
+                            <i class="fas fa-pencil-alt"></i>
+                          </button>
+                          <div class="save-cancel-buttons" style="display: none">
+                            <button class="save-btn" id="save-name">Save</button>
+                            <button class="cancel-btn" id="cancel-name">Cancel</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>ID</th>
+                        <td>{{ .ViewedUser.ID }}</td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <th>Owner</th>
+                        <td>{{ .ViewedUser.Owner }}</td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <th>Identity</th>
+                        <td class="editable" contenteditable="false" data-field="identity">
+                          {{ .ViewedUser.Credentials.Identity }}
+                        </td>
+                        <td>
+                          <button
+                            class="edit-btn"
+                            id="edit-identity"
+                            {{ if
+                              $disableButton
+                            }}
+                              disabled
+                            {{ end }}
+                          >
+                            <i class="fas fa-pencil-alt"></i>
+                          </button>
+                          <div class="save-cancel-buttons" style="display: none">
+                            <button class="save-btn" id="save-identity">Save</button>
+                            <button class="cancel-btn" id="cancel-identity">Cancel</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Tags</th>
+                        <td class="editable" contenteditable="false" data-field="tags">
+                          {{ toSlice .ViewedUser.Tags }}
+                        </td>
+                        <td>
+                          <button
+                            class="edit-btn"
+                            id="edit-tags"
+                            {{ if
+                              $disableButton
+                            }}
+                              disabled
+                            {{ end }}
+                          >
+                            <i class="fas fa-pencil-alt"></i>
+                          </button>
+                          <div class="save-cancel-buttons" style="display: none">
+                            <button class="save-btn" id="save-tags">Save</button>
+                            <button class="cancel-btn" id="cancel-tags">Cancel</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Metadata</th>
+                        <td class="editable" contenteditable="false" data-field="metadata">
+                          {{ toJSON .ViewedUser.Metadata }}
+                        </td>
+                        <td>
+                          <button
+                            class="edit-btn"
+                            id="edit-metadata"
+                            {{ if
+                              $disableButton
+                            }}
+                              disabled
+                            {{ end }}
+                          >
+                            <i class="fas fa-pencil-alt"></i>
+                          </button>
+                          <div class="save-cancel-buttons" style="display: none">
+                            <button class="save-btn" id="save-metadata">Save</button>
+                            <button class="cancel-btn" id="cancel-metadata">Cancel</button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div id="error-message" class="text-danger"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{ template "footer" }}
     <script>
 		attachEditRowListener(
 			{
@@ -217,6 +161,6 @@ SPDX-License-Identifier: Apache-2.0 -->
 			}
 		);
     </script>
-		</body>
-	</html>
+    </body>
+  </html>
 {{ end }}

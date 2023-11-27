@@ -2,131 +2,111 @@
 SPDX-License-Identifier: Apache-2.0 -->
 
 {{ define "users" }}
-	<!doctype html>
-	<html lang="en">
-		{{ template "header" }}
-		<body>
-			{{ template "navbar" . }}
-			<div class="main-content pt-3">
-				<div class="container">
-					<div class="row">
-						<div class="col-lg-12 mx-auto py-3">
-							<div class="row">
-								<div class="buttons mb-3">
-									<button
-										class="btn body-button"
-										type="button"
-										onclick="openModal('single')"
-									>
-										Add User
-									</button>
-									<button
-										class="btn body-button"
-										type="button"
-										onclick="openModal('bulk')"
-									>
-										Add Users
-									</button>
-									<!-- modals -->
-									<!-- add user modal -->
-									<div
-										class="modal fade"
-										id="addUserModal"
-										tabindex="-1"
-										role="dialog"
-										aria-labelledby="addUserModalLabel"
-										aria-hidden="true"
-									>
-										<div class="modal-dialog" role="document">
-											<div class="modal-content">
-												<div class="modal-header">
-													<h5 class="modal-title" id="addUserModalLabel">
-														Add User
-													</h5>
-												</div>
-												<div class="modal-body">
-													<div id="alertMessage"></div>
-													<form id="userform">
-														<div class="mb-3">
-															<label for="name" class="form-label">Name</label>
-															<input
-																type="text"
-																class="form-control"
-																name="name"
-																id="name"
-																placeholder="User Name"
-															/>
-															<div id="nameError" class="text-danger"></div>
-														</div>
-														<div class="mb-3">
-															<label for="identity" class="form-label">
-																Identity
-															</label>
-															<input
-																type="email"
-																class="form-control"
-																name="identity"
-																id="identity"
-																placeholder="User Identity"
-															/>
-															<div id="identityError" class="text-danger"></div>
-														</div>
-														<div class="mb-3">
-															<label for="secret" class="form-label">
-																Secret
-															</label>
-															<input
-																type="text"
-																class="form-control"
-																name="secret"
-																id="secret"
-																placeholder="User Secret"
-															/>
-															<div id="secretError" class="text-danger"></div>
-														</div>
-														<div class="mb-3">
-															<label for="tags" class="form-label">Tags</label>
-															<input
-																type="text"
-																class="form-control"
-																name="tags"
-																id="tags"
-																aria-describedby="tagHelp"
-																value="[]"
-															/>
-															<div id="tagHelp" class="form-text">
-																Enter user tags as a string slice.
-															</div>
-															<div id="tagsError" class="text-danger"></div>
-														</div>
-														<div class="mb-3">
-															<label for="metadata" class="form-label">
-																Metadata
-															</label>
-															<input
-																type="text"
-																class="form-control"
-																name="metadata"
-																id="metadata"
-																value="{}"
-															/>
-															<div id="metadataHelp" class="form-text">
-																Enter user metadata in JSON format.
-															</div>
-															<div id="metadataError" class="text-danger"></div>
-														</div>
-														<button
-															type="submit"
-															class="btn body-button"
-															id="create-user-button"
-														>
-															Submit
-														</button>
-													</form>
-												</div>
-											</div>
-										</div>
-									</div>
+  <!doctype html>
+  <html lang="en">
+    {{ template "header" }}
+    <body>
+      {{ template "navbar" . }}
+      <div class="main-content pt-3">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-12 mx-auto py-3">
+              <div class="row">
+                <div class="buttons mb-3">
+                  <button class="btn body-button" type="button" onclick="openModal('single')">
+                    Add User
+                  </button>
+                  <button class="btn body-button" type="button" onclick="openModal('bulk')">
+                    Add Users
+                  </button>
+                  <!-- modals -->
+                  <!-- add user modal -->
+                  <div
+                    class="modal fade"
+                    id="addUserModal"
+                    tabindex="-1"
+                    role="dialog"
+                    aria-labelledby="addUserModalLabel"
+                    aria-hidden="true"
+                  >
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="addUserModalLabel">Add User</h5>
+                        </div>
+                        <div class="modal-body">
+                          <div id="alertMessage"></div>
+                          <form id="userform">
+                            <div class="mb-3">
+                              <label for="name" class="form-label">Name</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                name="name"
+                                id="name"
+                                placeholder="User Name"
+                              />
+                              <div id="nameError" class="text-danger"></div>
+                            </div>
+                            <div class="mb-3">
+                              <label for="identity" class="form-label">Identity</label>
+                              <input
+                                type="email"
+                                class="form-control"
+                                name="identity"
+                                id="identity"
+                                placeholder="User Identity"
+                              />
+                              <div id="identityError" class="text-danger"></div>
+                            </div>
+                            <div class="mb-3">
+                              <label for="secret" class="form-label">Secret</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                name="secret"
+                                id="secret"
+                                placeholder="User Secret"
+                              />
+                              <div id="secretError" class="text-danger"></div>
+                            </div>
+                            <div class="mb-3">
+                              <label for="tags" class="form-label">Tags</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                name="tags"
+                                id="tags"
+                                aria-describedby="tagHelp"
+                                value="[]"
+                              />
+                              <div id="tagHelp" class="form-text">
+                                Enter user tags as a string slice.
+                              </div>
+                              <div id="tagsError" class="text-danger"></div>
+                            </div>
+                            <div class="mb-3">
+                              <label for="metadata" class="form-label">Metadata</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                name="metadata"
+                                id="metadata"
+                                value="{}"
+                              />
+                              <div id="metadataHelp" class="form-text">
+                                Enter user metadata in JSON format.
+                              </div>
+                              <div id="metadataError" class="text-danger"></div>
+                            </div>
+                            <button type="submit" class="btn body-button" id="create-user-button">
+                              Submit
+                            </button>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
 									<!-- add users modal -->
 									<div
@@ -271,35 +251,31 @@ SPDX-License-Identifier: Apache-2.0 -->
 					},
 				});
 
-				const userModal = new bootstrap.Modal(
-					document.getElementById("addUserModal"),
-				);
-				const usersModal = new bootstrap.Modal(
-					document.getElementById("addUsersModal"),
-				);
+        const userModal = new bootstrap.Modal(document.getElementById("addUserModal"));
+        const usersModal = new bootstrap.Modal(document.getElementById("addUsersModal"));
 
-				function openModal(modal) {
-					if (modal === "single") {
-						userModal.show();
-					} else if (modal === "bulk") {
-						usersModal.show();
-					}
-				}
+        function openModal(modal) {
+          if (modal === "single") {
+            userModal.show();
+          } else if (modal === "bulk") {
+            usersModal.show();
+          }
+        }
 
-				submitCreateForm({
-					url: "/users",
-					formId: "userform",
-					alertDiv: "alertMessage",
-					modal: userModal,
-				});
+        submitCreateForm({
+          url: "/users",
+          formId: "userform",
+          alertDiv: "alertMessage",
+          modal: userModal,
+        });
 
-				submitCreateForm({
-					url: "/users/bulk",
-					formId: "bulkusersform",
-					alertDiv: "alertBulkMessage",
-					modal: usersModal,
-				});
-			</script>
-		</body>
-	</html>
+        submitCreateForm({
+          url: "/users/bulk",
+          formId: "bulkusersform",
+          alertDiv: "alertBulkMessage",
+          modal: usersModal,
+        });
+      </script>
+    </body>
+  </html>
 {{ end }}

@@ -2,184 +2,169 @@
 SPDX-License-Identifier: Apache-2.0 -->
 
 {{ define "login" }}
-	<!doctype html>
-	<html lang="en">
-		{{ template "header" }}
-		<body class="login-body">
-			<div class="container mt-5 pt-5">
-				<div class="row p-5">
-					<div class="login-card col-lg-4 p-md-5 mx-auto mt-5">
-						<div
-							class="row text-center mb-4 d-flex flex-column align-items-center"
-						>
-							<div class="mb-3 border-bottom pb-3">
-								<div class="d-flex justify-content-center mt-2">
-									<h1 class="mx-3">Magistrala</h1>
-								</div>
-							</div>
-							<div class="login-header mb-4">
-								<h2>LOGIN</h2>
-							</div>
-							<form
-								method="post"
-								id="form"
-								class="row border-bottom pb-3 mb-3"
-								onsubmit="submitLoginForm()"
-							>
-								<div class="col-md-12">
-									<div class="row mb-3">
-										<div class="col-md-12 input-field email-field">
-											<i class="fas fa-solid fa-envelope"></i>
-											<input
-												class="p-3 w-100"
-												type="email"
-												name="username"
-												id="username"
-												placeholder="Email Address"
-											/>
-										</div>
-										<div id="emailError" class="text-danger"></div>
-									</div>
-									<div class="row mb-3">
-										<div class="col-md-12 input-field password-field">
-											<i class="fas fa-solid fa-lock"></i>
-											<input
-												class="p-3 w-100"
-												type="password"
-												name="password"
-												id="password"
-												placeholder="Password"
-											/>
-										</div>
-										<div id="passwordError" class="text-danger"></div>
-									</div>
-									<div id="loginError" class="text-danger"></div>
-								</div>
-								<div class="col-md-12 d-grid py-3">
-									<button
-										type="submit"
-										class="login-btn py-3"
-										onclick="return validateForm()"
-									>
-										Log In
-									</button>
-								</div>
-							</form>
-							<div class="forgot-password">
-								<button
-									type="button"
-									id="fp-button"
-									class="btn btn-link text-light"
-									data-bs-toggle="modal"
-									data-bs-target="#forgotPasswordModal"
-								>
-									Forgot Password?
-								</button>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div
-					class="modal fade"
-					id="forgotPasswordModal"
-					tabindex="-1"
-					role="dialog"
-					aria-labelledby="forgotPasswordModalLabel"
-					aria-hidden="true"
-				>
-					<div class="modal-dialog" role="document">
-						<div class="modal-content">
-							<div class="modal-header">
-								<h5 class="modal-title" id="forgotPasswordModalLabel">
-									Enter email
-								</h5>
-							</div>
-							<div class="modal-body">
-								<form
-									method="post"
-									action="/reset-request"
-									class="reset-pw-form"
-								>
-									<div class="mb-3">
-										<label for="email" class="form-label">Email</label>
-										<input
-											type="email"
-											class="form-control"
-											name="email"
-											id="email"
-											placeholder="Email"
-											required
-										/>
-									</div>
-									<button type="submit" class="btn submit-button">
-										Submit
-									</button>
-								</form>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			{{ template "footer" }}
-			<script>
-				const passwordField = document.querySelector(".password-field");
-				const emailField = document.querySelector(".email-field");
-				const loginError = document.getElementById("loginError");
-				const passwordError = document.getElementById("passwordError");
-				const emailError = document.getElementById("emailError");
+  <!doctype html>
+  <html lang="en">
+    {{ template "header" }}
+    <body class="login-body">
+      <div class="container mt-5 pt-5">
+        <div class="row p-5">
+          <div class="login-card col-lg-4 p-md-5 mx-auto mt-5">
+            <div class="row text-center mb-4 d-flex flex-column align-items-center">
+              <div class="mb-3 border-bottom pb-3">
+                <div class="d-flex justify-content-center mt-2">
+                  <h1 class="mx-3">Magistrala</h1>
+                </div>
+              </div>
+              <div class="login-header mb-4">
+                <h2>LOGIN</h2>
+              </div>
+              <form
+                method="post"
+                id="form"
+                class="row border-bottom pb-3 mb-3"
+                onsubmit="submitLoginForm()"
+              >
+                <div class="col-md-12">
+                  <div class="row mb-3">
+                    <div class="col-md-12 input-field email-field">
+                      <i class="fas fa-solid fa-envelope"></i>
+                      <input
+                        class="p-3 w-100"
+                        type="email"
+                        name="username"
+                        id="username"
+                        placeholder="Email Address"
+                      />
+                    </div>
+                    <div id="emailError" class="text-danger"></div>
+                  </div>
+                  <div class="row mb-3">
+                    <div class="col-md-12 input-field password-field">
+                      <i class="fas fa-solid fa-lock"></i>
+                      <input
+                        class="p-3 w-100"
+                        type="password"
+                        name="password"
+                        id="password"
+                        placeholder="Password"
+                      />
+                    </div>
+                    <div id="passwordError" class="text-danger"></div>
+                  </div>
+                  <div id="loginError" class="text-danger"></div>
+                </div>
+                <div class="col-md-12 d-grid py-3">
+                  <button type="submit" class="login-btn py-3" onclick="return validateForm()">
+                    Log In
+                  </button>
+                </div>
+              </form>
+              <div class="forgot-password">
+                <button
+                  type="button"
+                  id="fp-button"
+                  class="btn btn-link text-light"
+                  data-bs-toggle="modal"
+                  data-bs-target="#forgotPasswordModal"
+                >
+                  Forgot Password?
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="modal fade"
+          id="forgotPasswordModal"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby="forgotPasswordModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="forgotPasswordModalLabel">Enter email</h5>
+              </div>
+              <div class="modal-body">
+                <form method="post" action="/reset-request" class="reset-pw-form">
+                  <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input
+                      type="email"
+                      class="form-control"
+                      name="email"
+                      id="email"
+                      placeholder="Email"
+                      required
+                    />
+                  </div>
+                  <button type="submit" class="btn submit-button">Submit</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{ template "footer" }}
+      <script>
+        const passwordField = document.querySelector(".password-field");
+        const emailField = document.querySelector(".email-field");
+        const loginError = document.getElementById("loginError");
+        const passwordError = document.getElementById("passwordError");
+        const emailError = document.getElementById("emailError");
 
-				function validateForm() {
-					var password = document.getElementById("password").value;
-					var email = document.getElementById("username").value;
+        function validateForm() {
+          var password = document.getElementById("password").value;
+          var email = document.getElementById("username").value;
 
-					loginError.innerHTML = "";
-					passwordError.innerHTML = "";
-					emailError.innerHTML = "";
-					passwordField.classList.remove("border-red");
-					emailField.classList.remove("border-red");
-					var isValid = true;
+          loginError.innerHTML = "";
+          passwordError.innerHTML = "";
+          emailError.innerHTML = "";
+          passwordField.classList.remove("border-red");
+          emailField.classList.remove("border-red");
+          var isValid = true;
 
-					if (email === "") {
-						emailError.innerHTML = "email is required!";
-						emailField.classList.add("border-red");
-						isValid = false;
-					}
-					if (password.length < 8) {
-						passwordError.innerHTML =
-							"Password must have a minimum of 8 characters!";
-						passwordField.classList.add("border-red");
-						isValid = false;
-					}
-					return isValid;
-				}
+          if (email === "") {
+            emailError.innerHTML = "email is required!";
+            emailField.classList.add("border-red");
+            isValid = false;
+          }
+          if (password.length < 8) {
+            passwordError.innerHTML = "Password must have a minimum of 8 characters!";
+            passwordField.classList.add("border-red");
+            isValid = false;
+          }
+          return isValid;
+        }
 
-				function submitLoginForm() {
-					event.preventDefault();
-					var form = event.target;
-					fetch("/login", {
-						method: "POST",
-						body: new FormData(form),
-					})
-						.then((response) => {
-							if (response.status === 401) {
-								passwordField.classList.add("border-red");
-								emailField.classList.add("border-red");
-								errorMessage = "invalid email or password. Please try again!";
-								showAlert(errorMessage);
-							} else {
-								form.reset();
-								window.location.href = "/";
-							}
-						})
-						.catch((error) => {
-							console.error("error submitting login form: ", error);
-						});
-				}
+        function submitLoginForm() {
+          event.preventDefault();
+          var form = event.target;
+          fetch("/login", {
+            method: "POST",
+            body: new FormData(form),
+          })
+            .then((response) => {
+              if (response.status === 401) {
+                passwordField.classList.add("border-red");
+                emailField.classList.add("border-red");
+                errorMessage = "invalid email or password. Please try again!";
+                showAlert(errorMessage);
+              } else {
+                form.reset();
+                window.location.href = "/";
+              }
+            })
+            .catch((error) => {
+              console.error("error submitting login form: ", error);
+            });
+        }
 
-				function showAlert(errorMessage) {
-					loginError.innerHTML = errorMessage;
-				}
-			</script>
-		</body>
-	</html>
+        function showAlert(errorMessage) {
+          loginError.innerHTML = errorMessage;
+        }
+      </script>
+    </body>
+  </html>
 {{ end }}

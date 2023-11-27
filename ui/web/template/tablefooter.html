@@ -2,62 +2,62 @@
 SPDX-License-Identifier: Apache-2.0 -->
 
 {{ define "tablefooter" }}
-	{{ $currentPage := .CurrentPage }}
-	{{ $totalPages :=
-		.Pages
-	}}
-	<script>
-		document.addEventListener("DOMContentLoaded", function () {
-			var selectedLimit = localStorage.getItem("selectedLimit");
-			if (selectedLimit) {
-				var paginationLinks = document.querySelectorAll(".pagination a");
+  {{ $currentPage := .CurrentPage }}
+  {{ $totalPages :=
+    .Pages
+  }}
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var selectedLimit = localStorage.getItem("selectedLimit");
+      if (selectedLimit) {
+        var paginationLinks = document.querySelectorAll(".pagination a");
 
-				paginationLinks.forEach(function (link) {
-					var href = link.getAttribute("href");
-					link.setAttribute("href", href + "&limit=" + selectedLimit);
-				});
-			}
-		});
-	</script>
-	<nav class="border-top" aria-label="Page navigation example">
-		<ul class="pagination justify-content-end mt-3">
-			{{ $prevPage := sub $currentPage 1 }}
-			{{ if le $prevPage 0 }}
-				<li class="page-item disabled">
-					<span class="page-link">Previous</span>
-				</li>
-			{{ else }}
-				<li class="page-item">
-					<a class="page-link" href="?page={{ $prevPage }}">Previous</a>
-				</li>
-			{{ end }}
-			{{ $startPage := max 1 (sub $currentPage 2) }}
-			{{ $endPage := min
-				$totalPages (add $currentPage 2)
-			}}
-			{{ range fromTo $startPage $endPage }}
-				{{ if eq . $currentPage }}
-					<li class="page-item active">
-						<span class="page-link">{{ . }}</span>
-					</li>
-				{{ else }}
-					<li class="page-item">
-						<a class="page-link" href="?page={{ . }}">{{ . }}</a>
-					</li>
-				{{ end }}
-			{{ end }}
-			{{ $nextPage := add $currentPage 1 }}
-			{{ if ge $nextPage
-				$totalPages
-			}}
-				<li class="page-item disabled">
-					<span class="page-link">Next</span>
-				</li>
-			{{ else }}
-				<li class="page-item">
-					<a class="page-link" href="?page={{ $nextPage }}">Next</a>
-				</li>
-			{{ end }}
-		</ul>
-	</nav>
+        paginationLinks.forEach(function (link) {
+          var href = link.getAttribute("href");
+          link.setAttribute("href", href + "&limit=" + selectedLimit);
+        });
+      }
+    });
+  </script>
+  <nav class="border-top" aria-label="Page navigation example">
+    <ul class="pagination justify-content-end mt-3">
+      {{ $prevPage := sub $currentPage 1 }}
+      {{ if le $prevPage 0 }}
+        <li class="page-item disabled">
+          <span class="page-link">Previous</span>
+        </li>
+      {{ else }}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ $prevPage }}">Previous</a>
+        </li>
+      {{ end }}
+      {{ $startPage := max 1 (sub $currentPage 2) }}
+      {{ $endPage := min
+        $totalPages (add $currentPage 2)
+      }}
+      {{ range fromTo $startPage $endPage }}
+        {{ if eq . $currentPage }}
+          <li class="page-item active">
+            <span class="page-link">{{ . }}</span>
+          </li>
+        {{ else }}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ . }}">{{ . }}</a>
+          </li>
+        {{ end }}
+      {{ end }}
+      {{ $nextPage := add $currentPage 1 }}
+      {{ if ge $nextPage
+        $totalPages
+      }}
+        <li class="page-item disabled">
+          <span class="page-link">Next</span>
+        </li>
+      {{ else }}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ $nextPage }}">Next</a>
+        </li>
+      {{ end }}
+    </ul>
+  </nav>
 {{ end }}
