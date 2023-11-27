@@ -975,6 +975,8 @@ func decodeUserUpdate(_ context.Context, r *http.Request) (interface{}, error) {
 		Metadata: data.Metadata,
 	}
 
+	fmt.Println(req)
+
 	return req, nil
 }
 

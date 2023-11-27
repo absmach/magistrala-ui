@@ -273,8 +273,7 @@ func createUserEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": usersAPIEndpoint},
+			code: http.StatusCreated,
 		}, nil
 	}
 }
@@ -291,8 +290,7 @@ func createUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": usersAPIEndpoint},
+			code: http.StatusCreated,
 		}, nil
 	}
 }
@@ -353,8 +351,7 @@ func updateUserEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": usersAPIEndpoint + "/" + req.id},
+			code: http.StatusOK,
 		}, nil
 	}
 }
@@ -375,8 +372,7 @@ func updateUserTagsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": usersAPIEndpoint + "/" + req.id},
+			code: http.StatusOK,
 		}, nil
 	}
 }
@@ -400,8 +396,7 @@ func updateUserIdentityEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": usersAPIEndpoint + "/" + req.id},
+			code: http.StatusOK,
 		}, nil
 	}
 }

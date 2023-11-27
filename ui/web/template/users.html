@@ -46,10 +46,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 												</div>
 												<div class="modal-body">
 													<div id="alertMessage"></div>
-													<form
-												
-														
-													>
+													<form id="userform">
 														<div class="mb-3">
 															<label for="name" class="form-label">Name</label>
 															<input
@@ -150,9 +147,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 												<div class="modal-body">
 													<div id="alertBulkMessage"></div>
 													<form
-														method="post"
 														enctype="multipart/form-data"
-														onsubmit="return submitBulkUsersForm()"
+														id="bulkusersform"
 													>
 														<div class="form-group">
 															<label for="usersFile">
@@ -272,59 +268,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 						secret: validatePassword,
 						metadata: validateMetadata,
 						tags: validateTags,
-					}
-				})
-
-				function validateForm() {
-					var secret = document.getElementById("secret").value;
-					var tagsInput = document.getElementById("tags").value;
-					var metadataInput = document.getElementById("metadata").value;
-					var secretError = document.getElementById("secretError");
-					var tagsError = document.getElementById("tagsError");
-					var metadataError = document.getElementById("metadataError");
-					var submit = document.getElementById("submit");
-
-					var tags;
-					var metadata;
-
-					secretError.innerHTML = "";
-					tagsError.innerHTML = "";
-					metadataError.innerHTML = "";
-
-					var isValid = true;
-
-					if (secret.length < 8) {
-						secretError.innerHTML =
-							"secret must have a minimum of 8 characters";
-						isValid = false;
-					}
-					try {
-						tags = JSON.parse(tagsInput);
-					} catch (error) {
-						tagsError.innerHTML = "please enter valid tags as a string array!";
-						isValid = false;
-					}
-
-					if (
-						!Array.isArray(tags) ||
-						!tags.every(function (tag) {
-							return typeof tag === "string";
-						})
-					) {
-						tagsError.innerHTML = "tags must be a string array!";
-						isValid = false;
-					}
-
-					try {
-						metadata = JSON.parse(metadataInput);
-					} catch (error) {
-						metadataError.innerHTML =
-							"please enter valid metadata in JSON format!";
-						isValid = false;
-					}
-
-					return isValid;
-				}
+					},
+				});
 
 				const userModal = new bootstrap.Modal(
 					document.getElementById("addUserModal"),
@@ -341,86 +286,19 @@ SPDX-License-Identifier: Apache-2.0 -->
 					}
 				}
 
-				function submitUserForm() {
-					event.preventDefault();
-					var form = event.target;
-					fetch("/users", {
-						method: "POST",
-						body: new FormData(form),
-					})
-						.then((response) => {
-							if (response.status === 409) {
-								errorMessage = "user already exists!";
-								showAlert(errorMessage, "single");
-								return false;
-							} else {
-								form.reset();
-								userModal.hide();
-								window.location.reload();
-								return true;
-							}
-						})
-						.catch((error) => {
-							console.error("error submitting user form: ", error);
-							return false;
-						});
-				}
+				submitCreateForm({
+					url: "/users",
+					formId: "userform",
+					alertDiv: "alertMessage",
+					modal: userModal,
+				});
 
-				function submitBulkUsersForm() {
-					event.preventDefault();
-					var form = event.target;
-					fetch("/users/bulk", {
-						method: "POST",
-						body: new FormData(form),
-					})
-						.then((response) => {
-							switch (response.status) {
-								case 409:
-									errorMessage = "users already exist!";
-									showAlert(errorMessage, "bulk");
-									return false;
-								case 400:
-									errorMessage = "invalid file contents!";
-									showAlert(errorMessage, "bulk");
-									return false;
-								case 415:
-									errorMessage = "file must be csv!";
-									showAlert(errorMessage, "bulk");
-									return false;
-								default:
-									form.reset();
-									usersModal.hide();
-									window.location.reload();
-									return true;
-							}
-						})
-						.catch((error) => {
-							console.error("Error submitting bulk users form: ", error);
-							return false;
-						});
-				}
-
-				function showAlert(errorMessage, modal) {
-					if (modal === "single") {
-						var alertMessage = document.getElementById("alertMessage");
-						alertMessage.innerHTML = `
-          <div id="alert-popup" class="alert alert-danger">
-            <span class="close-button" onclick="closeAlertPopup()">&times;</span>
-            <h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
-          </div> `;
-					} else if (modal === "bulk") {
-						var alertMessage = document.getElementById("alertBulkMessage");
-						alertMessage.innerHTML = `
-          <div id="alert-popup" class="alert alert-danger">
-            <span class="close-button" onclick="closeAlertPopup()">&times;</span>
-            <h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
-          </div> `;
-					}
-				}
-
-				function closeAlertPopup() {
-					document.getElementById("alert-popup").style.display = "none";
-				}
+				submitCreateForm({
+					url: "/users/bulk",
+					formId: "bulkusersform",
+					alertDiv: "alertBulkMessage",
+					modal: usersModal,
+				});
 			</script>
 		</body>
 	</html>
