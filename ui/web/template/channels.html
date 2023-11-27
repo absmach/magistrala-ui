@@ -40,10 +40,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 												</div>
 												<div class="modal-body">
 													<div id="alertMessage"></div>
-													<form
-														method="post"
-														onsubmit="return submitChannelForm()"
-													>
+													<form method="post" id="channelform">
 														<div class="mb-3">
 															<label for="name" class="form-label">Name</label>
 															<input
@@ -52,8 +49,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 																name="name"
 																id="name"
 																placeholder="Channel Name"
-																required
 															/>
+															<div id="nameError" class="text-danger"></div>
 														</div>
 														<div class="mb-3">
 															<label for="infiniteScroll" class="form-label">
@@ -65,7 +62,6 @@ SPDX-License-Identifier: Apache-2.0 -->
 																name="parentFilter"
 																id="parentFilter"
 																placeholder="Filter by parent name"
-																oninput="fetchIndividualEntity(this.value, 'infiniteScroll')"
 															/>
 															<select
 																class="form-select"
@@ -102,15 +98,12 @@ SPDX-License-Identifier: Apache-2.0 -->
 															<div id="metadataHelp" class="form-text">
 																Enter channel metadata in JSON format.
 															</div>
-															<div
-																id="metadataError"
-																class="error-message"
-															></div>
+															<div id="metadataError" class="text-danger"></div>
 														</div>
 														<button
 															type="submit"
 															class="btn body-button"
-															onclick="return validateForm()"
+															id="create-channel-button"
 														>
 															Submit
 														</button>
@@ -150,7 +143,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 													<form
 														method="post"
 														enctype="multipart/form-data"
-														onsubmit="return submitBulkChannelsForm()"
+														id="bulkchannelsform"
 													>
 														<div class="form-group">
 															<label for="channelsFile">
@@ -255,45 +248,18 @@ SPDX-License-Identifier: Apache-2.0 -->
 			</div>
 			{{ template "footer" }}
 			<script>
-				function filterItem(filterValue, selectId) {
-					const itemSelect = document.getElementById(selectId);
-					const options = itemSelect.getElementsByTagName("option");
+				attachValidationListener({
+					buttonId: "create-channel-button",
+					errorDivs: {
+						name: "nameError",
+						metadata: "metadataError",
+					},
+					validations: {
+						name: validateName,
+						metadata: validateMetadata,
+					},
+				});
 
-					for (let i = 0; i < options.length; i++) {
-						const option = options[i];
-						const itemId = option.value;
-						const itemName = option.innerHTML;
-						const shouldShow =
-							itemId.includes(filterValue) ||
-							itemName.toLowerCase().includes(filterValue.toLowerCase());
-						option.style.display = shouldShow ? "" : "none";
-					}
-				}
-				function validateForm() {
-					var name = document.getElementById("name").value;
-					var metadataInput = document.getElementById("metadata").value;
-					var nameError = document.getElementById("nameError");
-					var metadataError = document.getElementById("metadataError");
-					var metadata;
-
-					nameError.innerHTML = "";
-					metadataError.innerHTML = "";
-
-					var isValid = true;
-					if (name === "") {
-						nameError.innerHTML = "Field Required!";
-						isValid = false;
-					}
-					try {
-						metadata = JSON.parse(metadataInput);
-					} catch (error) {
-						metadataError.innerHTML =
-							"Please enter a valid metadaat in JSON  format!";
-						isValid = false;
-					}
-
-					return isValid;
-				}
 				const channelModal = new bootstrap.Modal(
 					document.getElementById("addChannelModal"),
 				);
@@ -304,173 +270,30 @@ SPDX-License-Identifier: Apache-2.0 -->
 				function openModal(modal) {
 					if (modal === "single") {
 						channelModal.show();
-						getChannels("");
-						getAdditionalChannels();
 					} else if (modal === "bulk") {
 						channelsModal.show();
 					}
 				}
 
-				function submitChannelForm() {
-					event.preventDefault();
-					var form = event.target;
-					fetch("/channels", {
-						method: "POST",
-						body: new FormData(form),
-					})
-						.then((response) => {
-							if (response.status === 409) {
-								errorMessage = "channel already exists!";
-								showAlert(errorMessage, "single");
-								return false;
-							} else {
-								form.reset();
-								channelModal.hide();
-								window.location.reload();
-								return true;
-							}
-						})
-						.catch((error) => {
-							console.error("error submitting channel form: ", error);
-							return false;
-						});
-				}
+				submitCreateForm({
+					url: "/channels",
+					formId: "channelform",
+					alertDiv: "alertMessage",
+					modal: channelModal,
+				});
 
-				function submitBulkChannelsForm() {
-					event.preventDefault();
-					var form = event.target;
-					fetch("/channels/bulk", {
-						method: "POST",
-						body: new FormData(form),
-					})
-						.then((response) => {
-							switch (response.status) {
-								case 409:
-									errorMessage = "channels already exist!";
-									showAlert(errorMessage, "bulk");
-									return false;
-								case 400:
-									errorMessage = "invalid file contents!";
-									showAlert(errorMessage, "bulk");
-									return false;
-								case 415:
-									errorMessage = "file must be csv!";
-									showAlert(errorMessage, "bulk");
-									return false;
-								case 500:
-									errorMessage = "try again!";
-									showAlert(errorMessage, "bulk");
-									return false;
-								default:
-									form.reset();
-									channelsModal.hide();
-									window.location.reload();
-									return true;
-							}
-						})
-						.catch((error) => {
-							console.error("Error submitting bulk channels form: ", error);
-							return false;
-						});
-				}
+				submitCreateForm({
+					url: "/channels/bulk",
+					formId: "bulkchannelsform",
+					alertDiv: "alertBulkMessage",
+					modal: channelsModal,
+				});
 
-				function showAlert(errorMessage, modal) {
-					if (modal === "single") {
-						var alertMessage = document.getElementById("alertMessage");
-						alertMessage.innerHTML = `
-					<div id="alert-popup" class="alert alert-danger">
-						<span class="close-button" onclick="closeAlertPopup()">&times;</span>
-						<h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
-					</div> `;
-					} else if (modal === "bulk") {
-						var alertMessage = document.getElementById("alertBulkMessage");
-						alertMessage.innerHTML = `
-					<div id="alert-popup" class="alert alert-danger">
-						<span class="close-button" onclick="closeAlertPopup()">&times;</span>
-						<h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
-					</div> `;
-					}
-				}
-
-				function closeAlertPopup() {
-					document.getElementById("alert-popup").style.display = "none";
-				}
-
-				function hideAlert() {
-					var alertElement = document.querySelector(".alert-danger");
-					alertElement.style.display = "none";
-				}
-
-				function fetchIndividualEntity(filterValue, selectId) {
-					const itemSelect = document.getElementById(selectId);
-					if (filterValue === "") {
-						itemSelect.innerHTML = "<option disabled>select a channel</option>";
-						getChannels("");
-						getAdditionalChannels();
-					} else {
-						itemSelect.innerHTML = "";
-						getChannels(filterValue);
-					}
-				}
-
-				let limit = 5;
-
-				function getChannels(name) {
-					fetchData(name, 1);
-				}
-
-				function getAdditionalChannels() {
-					var selectElement = document.getElementById("infiniteScroll");
-					var singleOptionHeight =
-						selectElement.querySelector("option").offsetHeight;
-					var selectBoxHeight = selectElement.offsetHeight;
-					var numOptionsBeforeLoad = 2;
-					var lastScrollTop = 0;
-					var currentPageNo = 1;
-					var currentScroll = 0;
-
-					selectElement.addEventListener("scroll", onselectScroll);
-
-					function onselectScroll(event) {
-						var st = selectElement.scrollTop;
-						var totalHeight =
-							selectElement.querySelectorAll("option").length *
-							singleOptionHeight;
-
-						if (st > lastScrollTop) {
-							currentScroll = st + selectBoxHeight;
-							if (
-								currentScroll + numOptionsBeforeLoad * singleOptionHeight >=
-								totalHeight
-							) {
-								currentPageNo++;
-								fetchData("", currentPageNo);
-							}
-						}
-
-						lastScrollTop = st;
-					}
-				}
-
-				function fetchData(name, page) {
-					fetch(
-						`/entities?item=channels&limit=${limit}&name=${name}&page=${page}`,
-						{
-							method: "GET",
-						},
-					)
-						.then((response) => response.json())
-						.then((data) => {
-							const selectElement = document.getElementById("infiniteScroll");
-							data.data.forEach((group) => {
-								const option = document.createElement("option");
-								option.value = group.id;
-								option.text = group.name;
-								selectElement.appendChild(option);
-							});
-						})
-						.catch((error) => console.error("Error:", error));
-				}
+				fetchIndividualEntity({
+					input: "parentFilter",
+					itemSelect: "infiniteScroll",
+					item: "channels",
+				});
 			</script>
 		</body>
 	</html>

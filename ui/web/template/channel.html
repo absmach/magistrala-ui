@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 												<td>
 													<button
 														class="edit-btn"
-														onclick="editRow('name')"
+														id="edit-name"
 														{{ if
 															$disableButton
 														}}
@@ -69,13 +69,10 @@ SPDX-License-Identifier: Apache-2.0 -->
 														class="save-cancel-buttons"
 														style="display: none"
 													>
-														<button class="save-btn" onclick="saveRow('name')">
+														<button class="save-btn" id="save-name">
 															Save
 														</button>
-														<button
-															class="cancel-btn"
-															onclick="cancelEditRow('name')"
-														>
+														<button class="cancel-btn" id="cancel-name">
 															Cancel
 														</button>
 													</div>
@@ -103,7 +100,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 												<td>
 													<button
 														class="edit-btn"
-														onclick="editRow('description')"
+														id="edit-description"
 														{{ if
 															$disableButton
 														}}
@@ -116,16 +113,10 @@ SPDX-License-Identifier: Apache-2.0 -->
 														class="save-cancel-buttons"
 														style="display: none"
 													>
-														<button
-															class="save-btn"
-															onclick="saveRow('description')"
-														>
+														<button class="save-btn" id="save-description">
 															Save
 														</button>
-														<button
-															class="cancel-btn"
-															onclick="cancelEditRow('description')"
-														>
+														<button class="cancel-btn" id="cancel-description">
 															Cancel
 														</button>
 													</div>
@@ -143,7 +134,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 												<td>
 													<button
 														class="edit-btn"
-														onclick="editRow('metadata')"
+														id="edit-metadata"
 														{{ if
 															$disableButton
 														}}
@@ -156,16 +147,10 @@ SPDX-License-Identifier: Apache-2.0 -->
 														class="save-cancel-buttons"
 														style="display: none"
 													>
-														<button
-															class="save-btn"
-															onclick="saveRow('metadata')"
-														>
+														<button class="save-btn" id="save-metadata">
 															Save
 														</button>
-														<button
-															class="cancel-btn"
-															onclick="cancelEditRow('metadata')"
-														>
+														<button class="cancel-btn" id="cancel-metadata">
 															Cancel
 														</button>
 													</div>
@@ -182,119 +167,18 @@ SPDX-License-Identifier: Apache-2.0 -->
 			</div>
 			{{ template "footer" }}
     <script>
-      function makeEditable(cell) {
-        cell.setAttribute("contenteditable", "true");
-        cell.dataset.originalContent = cell.innerHTML;
-      }
-
-      function makeUneditable(cell) {
-        const originalContent = cell.dataset.originalContent;
-        cell.innerHTML = originalContent;
-        cell.setAttribute("contenteditable", "false");
-      }
-
-      function showButtons(editBtn, saveCancelBtn) {
-        editBtn.style.display = "none";
-        saveCancelBtn.style.display = "inline-block";
-      }
-      function hideButtons(editBtn, saveCancelBtn) {
-        editBtn.style.display = "inline-block";
-        saveCancelBtn.style.display = "none";
-      }
-
-      function editRow(field) {
-        const cell = document.querySelector(`td[data-field='${field}']`);
-        const editBtn = cell.parentNode.querySelector(".edit-btn");
-        const saveCancelBtn = cell.parentNode.querySelector(
-          ".save-cancel-buttons",
-        );
-
-        //make the row editable
-        makeEditable(cell);
-
-        //Hide edit button and show save and cancel buttons
-        showButtons(editBtn, saveCancelBtn);
-      }
-
-      function cancelEditRow(field) {
-        const cell = document.querySelector(`td[data-field='${field}']`);
-        const editBtn = cell.parentNode.querySelector(".edit-btn");
-        const saveCancelBtn = cell.parentNode.querySelector(
-          ".save-cancel-buttons",
-        );
-        const errorMessage = document.getElementById("error-message");
-
-        errorMessage.textContent = "";
-
-        //Restore original values in the row
-        makeUneditable(cell);
-
-        //show the edit button and hide the save and cancel buttons
-        hideButtons(editBtn, saveCancelBtn);
-      }
-
-      function saveRow(field) {
-        const cell = document.querySelector(`td[data-field='${field}']`);
-        const editBtn = cell.parentNode.querySelector(".edit-btn");
-        const saveCancelBtn = cell.parentNode.querySelector(
-          ".save-cancel-buttons",
-        );
-        const errorMessage = document.getElementById("error-message");
-
-        //Get the updated value from the nameCell
-        const updatedValue = cell.textContent.trim();
-
-        //send the updated value to the server using a post request
-        let url;
-        let data;
-        if (field === "name" || field === "description") {
-          url = "/channels/{{.Channel.ID}}";
-          data = { [field]: updatedValue };
-        } else if (field === "metadata") {
-          try {
-            const metadata = JSON.parse(updatedValue);
-            url = "/channels/{{.Channel.ID}}";
-            data = { [field]: metadata };
-          } catch (error) {
-            errorMessage.textContent = "Metadata must be a valid JSON object!";
-            return;
-          }
-        }
-
-        if (url) {
-			errorMessage.textContent="";
-			fetch(url, {
-				method: "POST",
-				body: JSON.stringify(data),
-				headers: {
-				"Content-Type": "application/json",
+      attachEditRowListener(
+			{
+				entity: "channels",
+				id: "{{ .Channel.ID }}",
+				rows: {
+					name:updateName,
+					description: updateDescription,
+					metadata:updateMetadata,
 				},
-			})
-            .then((response) => {
-              if (response.ok) {
-                //make the row uneditable
-                cell.setAttribute("contenteditable", "false");
-
-                //show edit button and hide save and cancel buttons
-                hideButtons(editBtn, saveCancelBtn);
-              } else {
-                throw new Error("Response not OK");
-              }
-            })
-            .catch((error) => {
-              //Restore original values in the row if there is an error
-              makeUneditable(cell);
-
-              //show edit button and hide save and cancel buttons
-              hideButtons(editBtn, saveCancelBtn);
-
-              console.error("Error", error);
-              errorMessage.textContent = "Entity already exists";
-            });
-        } else {
-          console.error("Invalid field:", field);
-        }
-      }
+				errorDiv: "error-message",
+			}
+		);
     </script>
 		</body>
 	</html>

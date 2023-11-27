@@ -40,10 +40,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 												</div>
 												<div class="modal-body">
 													<div id="alertMessage"></div>
-													<form
-														method="post"
-														onsubmit="return submitThingForm()"
-													>
+													<form id="thingform">
 														<div class="mb-3">
 															<label for="name" class="form-label">Name</label>
 															<input
@@ -52,8 +49,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 																name="name"
 																id="name"
 																placeholder="Device Name"
-																required
 															/>
+															<div id="nameError" class="text-danger"></div>
 														</div>
 														<div class="mb-3">
 															<label for="thingID" class="form-label">
@@ -105,7 +102,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 															<div id="tagHelp" class="form-text">
 																Enter device tags as a string slice.
 															</div>
-															<div id="tagsError" class="error-message"></div>
+															<div id="tagsError" class="text-danger"></div>
 														</div>
 														<div class="mb-3">
 															<label for="metadata" class="form-label">
@@ -121,15 +118,12 @@ SPDX-License-Identifier: Apache-2.0 -->
 															<div id="metadataHelp" class="form-text">
 																Enter device metadata in JSON format.
 															</div>
-															<div
-																id="metadataError"
-																class="error-message"
-															></div>
+															<div id="metadataError" class="text-danger"></div>
 														</div>
 														<button
 															type="submit"
 															class="btn body-button"
-															onclick="return validateForm()"
+															id="create-thing-button"
 														>
 															Submit
 														</button>
@@ -169,7 +163,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 													<form
 														method="post"
 														enctype="multipart/form-data"
-														onsubmit="return submitBulkThingsForm()"
+														id="bulkThingsForm"
 													>
 														<div class="form-group">
 															<label for="thingsFile">
@@ -274,58 +268,19 @@ SPDX-License-Identifier: Apache-2.0 -->
 			</div>
 			{{ template "footer" }}
 			<script>
-				function validateForm() {
-					var secret = document.getElementById("secret").value;
-					var tagsInput = document.getElementById("tags").value;
-					var metadataInput = document.getElementById("metadata").value;
-
-					var secretError = document.getElementById("secretError");
-					var tagsError = document.getElementById("tagsError");
-					var metadataError = document.getElementById("metadataError");
-
-					var tags;
-					var metadata;
-
-					secretError.innerHTML = "";
-					tagsError.innerHTML = "";
-					metadataError.innerHTML = "";
-
-					var isValid = true;
-
-					if (secret.trim() != "") {
-						if (secret.length < 8) {
-							secretError.innerHTML =
-								"Secret must have a minimum of 8 characters";
-							isValid = false;
-						}
-					}
-					try {
-						tags = JSON.parse(tagsInput);
-					} catch (error) {
-						tagsError.innerHTML = "Please enter valid tags as a string array!";
-						isValid = false;
-					}
-
-					if (
-						!Array.isArray(tags) ||
-						!tags.every(function (tag) {
-							return typeof tag === "string";
-						})
-					) {
-						tagsError.innerHTML = "Tags must be a string array!";
-						isValid = false;
-					}
-
-					try {
-						metadata = JSON.parse(metadataInput);
-					} catch (error) {
-						metadataError.innerHTML =
-							"Please enter valid metadata in JSON format!";
-						isValid = false;
-					}
-
-					return isValid;
-				}
+				attachValidationListener({
+					buttonId: "create-thing-button",
+					errorDivs: {
+						name: "nameError",
+						metadata: "metadataError",
+						tags: "tagsError",
+					},
+					validations: {
+						name: validateName,
+						metadata: validateMetadata,
+						tags: validateTags,
+					},
+				});
 
 				const thingModal = new bootstrap.Modal(
 					document.getElementById("addThingModal"),
@@ -342,90 +297,19 @@ SPDX-License-Identifier: Apache-2.0 -->
 					}
 				}
 
-				function submitThingForm() {
-					event.preventDefault();
-					var form = event.target;
-					fetch("/things", {
-						method: "POST",
-						body: new FormData(form),
-					})
-						.then((response) => {
-							if (response.status === 409) {
-								errorMessage = "thing already exists!";
-								showAlert(errorMessage, "single");
-								return false;
-							} else {
-								form.reset();
-								thingModal.hide();
-								window.location.reload();
-								return true;
-							}
-						})
-						.catch((error) => {
-							console.error("error submitting thing form: ", error);
-							return false;
-						});
-				}
+				submitCreateForm({
+					url: "/things",
+					formId: "thingform",
+					alertDiv: "alertMessage",
+					modal: thingModal,
+				});
 
-				function submitBulkThingsForm() {
-					event.preventDefault();
-					var form = event.target;
-					fetch("/things/bulk", {
-						method: "POST",
-						body: new FormData(form),
-					})
-						.then((response) => {
-							switch (response.status) {
-								case 409:
-									errorMessage = "things already exist!";
-									showAlert(errorMessage, "bulk");
-									return false;
-								case 400:
-									errorMessage = "invalid file contents!";
-									showAlert(errorMessage, "bulk");
-									return false;
-								case 415:
-									errorMessage = "file must be csv!";
-									showAlert(errorMessage, "bulk");
-									return false;
-								case 500:
-									errorMessage = "try again!";
-									showAlert(errorMessage, "bulk");
-									return false;
-								default:
-									form.reset();
-									thingsModal.hide();
-									window.location.reload();
-									return true;
-							}
-						})
-						.catch((error) => {
-							console.error("Error submitting bulk things form: ", error);
-							return false;
-						});
-				}
-
-				function showAlert(errorMessage, modal) {
-					if (modal === "single") {
-						var alertMessage = document.getElementById("alertMessage");
-						alertMessage.innerHTML = `
-          <div id="alert-popup" class="alert alert-danger">
-            <span class="close-button" onclick="closeAlertPopup()">&times;</span>
-            <h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
-          </div> `;
-					} else if (modal === "bulk") {
-						var alertMessage = document.getElementById("alertBulkMessage");
-						alertMessage.innerHTML = `
-          <div id="alert-popup" class="alert alert-danger">
-            <span class="close-button" onclick="closeAlertPopup()">&times;</span>
-            <h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
-          </div> `;
-					}
-				}
-
-				function closeAlertPopup() {
-					document.getElementById("alert-popup").style.display = "none";
-				}
+				submitCreateForm({
+					url: "/things/bulk",
+					formId: "bulkThingsForm",
+					alertDiv: "alertBulkMessage",
+					modal: thingsModal,
+				});
 			</script>
 		</body>
 	</html>

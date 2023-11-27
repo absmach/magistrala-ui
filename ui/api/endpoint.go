@@ -707,8 +707,7 @@ func createThingEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": thingsAPIEndpoint},
+			code: http.StatusCreated,
 		}, nil
 	}
 }
@@ -725,8 +724,7 @@ func createThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": thingsAPIEndpoint},
+			code: http.StatusCreated,
 		}, nil
 	}
 }
@@ -787,8 +785,7 @@ func updateThingEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": thingsAPIEndpoint + "/" + req.id},
+			code: http.StatusOK,
 		}, nil
 	}
 }
@@ -809,8 +806,7 @@ func updateThingTagsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": thingsAPIEndpoint + "/" + req.id},
+			code: http.StatusOK,
 		}, nil
 	}
 }
@@ -827,8 +823,7 @@ func updateThingSecretEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": thingsAPIEndpoint + "/" + req.id},
+			code: http.StatusOK,
 		}, nil
 	}
 }
@@ -849,8 +844,7 @@ func updateThingOwnerEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": thingsAPIEndpoint + "/" + req.id},
+			code: http.StatusOK,
 		}, nil
 	}
 }

@@ -40,10 +40,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 												</div>
 												<div class="modal-body">
 													<div id="alertMessage"></div>
-													<form
-														method="post"
-														onsubmit="return submitGroupForm()"
-													>
+													<form method="post" id="groupform">
 														<div class="mb-3">
 															<label for="name" class="form-label">Name</label>
 															<input
@@ -52,8 +49,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 																name="name"
 																id="name"
 																placeholder="Group Name"
-																required
 															/>
+															<div id="nameError" class="text-danger"></div>
 														</div>
 														<div class="mb-3">
 															<label for="description" class="form-label">
@@ -77,7 +74,6 @@ SPDX-License-Identifier: Apache-2.0 -->
 																name="parentFilter"
 																id="parentFilter"
 																placeholder="Filter by parent name"
-																oninput="fetchIndividualEntity(this.value, 'infiniteScroll')"
 															/>
 															<select
 																class="form-select"
@@ -102,15 +98,12 @@ SPDX-License-Identifier: Apache-2.0 -->
 															<div id="metadataHelp" class="form-text">
 																Enter groups metadata in JSON format.
 															</div>
-															<div
-																id="metadataError"
-																class="error-message"
-															></div>
+															<div id="metadataError" class="text-danger"></div>
 														</div>
 														<button
 															type="submit"
 															class="btn body-button"
-															onclick="return validateForm()"
+															id="create-group-button"
 														>
 															Submit
 														</button>
@@ -146,9 +139,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 												<div class="modal-body">
 													<div id="alertBulkMessage"></div>
 													<form
-														method="post"
 														enctype="multipart/form-data"
-														onsubmit="return submitBulkGroupForm()"
+														id="bulkgroupsform"
 													>
 														<div class="form-group">
 															<label for="groupsFile">
@@ -253,38 +245,17 @@ SPDX-License-Identifier: Apache-2.0 -->
 
 			{{ template "footer" }}
 			<script>
-				function validateForm() {
-					var metadataInput = document.getElementById("metadata").value;
-					var metadataError = document.getElementById("metadataError");
-					var metadata;
-
-					metadataError.innerHTML = "";
-
-					var isValid = true;
-					try {
-						metadata = JSON.parse(metadataInput);
-					} catch (error) {
-						metadataError.innerHTML =
-							"Please enter a valid metadata in JSON  format!";
-						isValid = false;
-					}
-
-					return isValid;
-				}
-				function filterItem(filterValue, selectId) {
-					const itemSelect = document.getElementById(selectId);
-					const options = itemSelect.getElementsByTagName("option");
-
-					for (let i = 0; i < options.length; i++) {
-						const option = options[i];
-						const itemId = option.value;
-						const itemName = option.innerHTML;
-						const shouldShow =
-							itemId.includes(filterValue) ||
-							itemName.toLowerCase().includes(filterValue.toLowerCase());
-						option.style.display = shouldShow ? "" : "none";
-					}
-				}
+				attachValidationListener({
+					buttonId: "create-group-button",
+					errorDivs: {
+						name: "nameError",
+						metadata: "metadataError",
+					},
+					validations: {
+						name: validateName,
+						metadata: validateMetadata,
+					},
+				});
 
 				const groupModal = new bootstrap.Modal(
 					document.getElementById("addGroupModal"),
@@ -296,168 +267,30 @@ SPDX-License-Identifier: Apache-2.0 -->
 				function openModal(modal) {
 					if (modal === "single") {
 						groupModal.show();
-						getGroups("");
-						getAdditionalGroups();
 					} else if (modal === "bulk") {
 						groupsModal.show();
 					}
 				}
 
-				function submitGroupForm() {
-					event.preventDefault();
-					var form = event.target;
-					fetch("/groups", {
-						method: "POST",
-						body: new FormData(form),
-					})
-						.then((response) => {
-							if (response.status === 409) {
-								errorMessage = "group already exists!";
-								showAlert(errorMessage, "single");
-								return false;
-							} else {
-								form.reset();
-								groupModal.hide();
-								window.location.reload();
-								return true;
-							}
-						})
-						.catch((error) => {
-							console.error("error submitting group form: ", error);
-							return false;
-						});
-				}
+				submitCreateForm({
+					url: "/groups",
+					formId: "groupform",
+					alertDiv: "alertMessage",
+					modal: groupModal,
+				});
 
-				function submitBulkGroupForm() {
-					event.preventDefault();
-					var form = event.target;
-					fetch("/groups/bulk", {
-						method: "POST",
-						body: new FormData(form),
-					})
-						.then((response) => {
-							switch (response.status) {
-								case 409:
-									errorMessage = "groups already exist!";
-									showAlert(errorMessage, "bulk");
-									return false;
-								case 400:
-									errorMessage = "invalid file contents!";
-									showAlert(errorMessage, "bulk");
-									return false;
-								case 415:
-									errorMessage = "file must be csv!";
-									showAlert(errorMessage, "bulk");
-									return false;
-								case 500:
-									errorMessage = "try again!";
-									showAlert(errorMessage, "bulk");
-									return false;
-								default:
-									form.reset();
-									groupsModal.hide();
-									window.location.reload();
-									return true;
-							}
-						})
-						.catch((error) => {
-							console.error("Error submitting bulk groups form: ", error);
-							return false;
-						});
-				}
+				submitCreateForm({
+					url: "/groups/bulk",
+					formId: "bulkgroupsform",
+					alertDiv: "alertBulkMessage",
+					modal: groupsModal,
+				});
 
-				function showAlert(errorMessage, modal) {
-					if (modal === "single") {
-						var alertMessage = document.getElementById("alertMessage");
-						alertMessage.innerHTML = `
-        <div id="alert-popup" class="alert alert-danger">
-          <span class="close-button" onclick="closeAlertPopup()">&times;</span>
-          <h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
-        </div> `;
-					} else if (modal === "bulk") {
-						var alertMessage = document.getElementById("alertBulkMessage");
-						alertMessage.innerHTML = `
-        <div id="alert-popup" class="alert alert-danger">
-          <span class="close-button" onclick="closeAlertPopup()">&times;</span>
-          <h5 class="alert-messsage" id="alert-message">${errorMessage}</h5>
-        </div> `;
-					}
-				}
-
-				function closeAlertPopup() {
-					document.getElementById("alert-popup").style.display = "none";
-				}
-
-				function fetchIndividualEntity(filterValue, selectId) {
-					const itemSelect = document.getElementById(selectId);
-					if (filterValue === "") {
-						itemSelect.innerHTML = "<option disabled>select a group</option>";
-						getGroups("");
-						getAdditionalGroups();
-					} else {
-						itemSelect.innerHTML = "";
-						getGroups(filterValue);
-					}
-				}
-
-				let limit = 5;
-
-				function getGroups(name) {
-					fetchData(name, 1);
-				}
-
-				function getAdditionalGroups() {
-					var selectElement = document.getElementById("infiniteScroll");
-					var singleOptionHeight =
-						selectElement.querySelector("option").offsetHeight;
-					var selectBoxHeight = selectElement.offsetHeight;
-					var numOptionsBeforeLoad = 2;
-					var lastScrollTop = 0;
-					var currentPageNo = 1;
-					var currentScroll = 0;
-
-					selectElement.addEventListener("scroll", onselectScroll);
-
-					function onselectScroll(event) {
-						var st = selectElement.scrollTop;
-						var totalHeight =
-							selectElement.querySelectorAll("option").length *
-							singleOptionHeight;
-
-						if (st > lastScrollTop) {
-							currentScroll = st + selectBoxHeight;
-							if (
-								currentScroll + numOptionsBeforeLoad * singleOptionHeight >=
-								totalHeight
-							) {
-								currentPageNo++;
-								fetchData("", currentPageNo);
-							}
-						}
-
-						lastScrollTop = st;
-					}
-				}
-
-				function fetchData(name, page) {
-					fetch(
-						`/entities?item=groups&limit=${limit}&name=${name}&page=${page}`,
-						{
-							method: "GET",
-						},
-					)
-						.then((response) => response.json())
-						.then((data) => {
-							const selectElement = document.getElementById("infiniteScroll");
-							data.data.forEach((group) => {
-								const option = document.createElement("option");
-								option.value = group.id;
-								option.text = group.name;
-								selectElement.appendChild(option);
-							});
-						})
-						.catch((error) => console.error("Error:", error));
-				}
+				fetchIndividualEntity({
+					input: "parentFilter",
+					itemSelect: "infiniteScroll",
+					item: "groups",
+				});
 			</script>
 		</body>
 	</html>
