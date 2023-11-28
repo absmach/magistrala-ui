@@ -4,7 +4,11 @@ SPDX-License-Identifier: Apache-2.0 -->
 {{ define "thing" }}
   <!doctype html>
   <html lang="en">
-    {{ template "header" }}
+    <head>
+      <title>Thing</title>
+      {{ template "header" }}
+      <script src="/js/update.js" type="module"></script>
+    </head>
     <body>
       {{ template "navbar" . }}
       <div class="main-content pt-3">
@@ -159,21 +163,23 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
       </div>
       {{ template "footer" }}
-    <script>
-		attachEditRowListener(
-			{
-				entity: "things",
-				id: "{{ .Thing.ID }}",
-				rows: {
-					name:updateName,
-					secret: updateSecret,
-					tags:updateTags,
-					owner: updateOwner,
-					metadata:updateMetadata,
-				},
-				errorDiv: "error-message",
-			}
-		);
+    <script type="module">
+      import { attachEditRowListener, updateName, updateSecret, updateTags,updateOwner, updateMetadata} from "/js/update.js";
+
+      attachEditRowListener(
+        {
+          entity: "things",
+          id: "{{ .Thing.ID }}",
+          rows: {
+            name:updateName,
+            secret: updateSecret,
+            tags:updateTags,
+            owner: updateOwner,
+            metadata:updateMetadata,
+          },
+          errorDiv: "error-message",
+        }
+      );
     </script>
     </body>
   </html>

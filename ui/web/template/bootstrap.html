@@ -4,7 +4,11 @@ SPDX-License-Identifier: Apache-2.0 -->
 {{ define "bootstrap" }}
   <!doctype html>
   <html lang="en">
-    {{ template "header" }}
+    <head>
+      <title>Bootstrap</title>
+      {{ template "header" }}
+      <script src="/js/update.js" type="module"></script>
+    </head>
     <body>
       {{ template "navbar" . }}
       <div class="main-content pt-3">
@@ -129,7 +133,8 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
       </div>
       {{ template "footer" }}
-    <script>
+    <script type="module">
+      import { attachEditRowListener, updateName, updateContent, updateConnections, updateClientCerts } from "/js/update.js";
       attachEditRowListener({
         entity: "bootstraps",
         id: "{{ .Bootstrap.ThingID }}",

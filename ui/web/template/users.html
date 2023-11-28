@@ -4,7 +4,12 @@ SPDX-License-Identifier: Apache-2.0 -->
 {{ define "users" }}
   <!doctype html>
   <html lang="en">
-    {{ template "header" }}
+    <head>
+      <title>Users</title>
+      {{ template "header" }}
+      <script src="/js/forms.js" type="module"></script>
+      <script src="/js/validation.js" type="module"></script>
+    </head>
     <body>
       {{ template "navbar" . }}
       <div class="main-content pt-3">
@@ -108,149 +113,119 @@ SPDX-License-Identifier: Apache-2.0 -->
                     </div>
                   </div>
 
-									<!-- add users modal -->
-									<div
-										class="modal fade"
-										id="addUsersModal"
-										tabindex="-1"
-										role="dialog"
-										aria-labelledby="addUsersModalLabel"
-										aria-hidden="true"
-									>
-										<div class="modal-dialog" role="document">
-											<div class="modal-content">
-												<div class="modal-header">
-													<h5 class="modal-title" id="addUsersModalLabel">
-														Add Users
-													</h5>
-												</div>
-												<div class="modal-body">
-													<div id="alertBulkMessage"></div>
-													<form
-														enctype="multipart/form-data"
-														id="bulkusersform"
-													>
-														<div class="form-group">
-															<label for="usersFile">
-																Add csv file containing users names and
-																passwords. Find a sample csv file
-																<a
-																	href="https://github.com/absmach/magistrala-ui/blob/main/samples/users.csv"
-																	target="_blank"
-																>
-																	here
-																</a>
-															</label>
-															<input
-																type="file"
-																class="form-control-file"
-																id="usersFile"
-																name="usersFile"
-																required
-															/>
-															<button
-																type="submit"
-																value="upload"
-																class="btn body-button"
-															>
-																Submit
-															</button>
-														</div>
-													</form>
-												</div>
-											</div>
-										</div>
-									</div>
-									<!-- modals end -->
-								</div>
-								<div class="table-responsive table-container">
-									{{ template "tableheader" . }}
-									<div class="itemsTable">
-										<table id="itemsTable" class="table">
-											<thead>
-												<tr>
-													<th scope="col">Name</th>
-													<th scope="col">ID</th>
-													<th class="tags-col" scope="col">Tags</th>
-													<th class="meta-col" scope="col">Metadata</th>
-													<th class="created-col" scope="col">Created At</th>
-													<th class="text-center" scope="col"></th>
-												</tr>
-											</thead>
-											<tbody>
-												{{ range $i, $u := .Users }}
-													{{ $disableButton := false }}
-													<tr>
-														<td>{{ $u.Name }}</td>
-														<td>
-															<div class="copy-con-container">
-																<a href="{{ printf "/users/%s" $u.ID }}">
-																	{{ $u.ID }}
-																</a>
-																<button
-																	class="copy-icon"
-																	onclick="copyToClipboard(this)"
-																>
-																	<i class="far fa-copy"></i>
-																</button>
-															</div>
-														</td>
-														<td class="tags-col">{{ toSlice $u.Tags }}</td>
-														<td class="meta-col">{{ toJSON $u.Metadata }}</td>
-														<td class="created-col">{{ $u.CreatedAt }}</td>
-														<td class="text-center">
-															<form action="/users/disabled" method="post">
-																<input
-																	type="hidden"
-																	name="userID"
-																	id="userID"
-																	value="{{ $u.ID }}"
-																/>
-																<button
-																	type="submit"
-																	class="btn btn-sm"
-																	{{ if
-																		$disableButton
-																	}}
-																		disabled
-																	{{ end }}
-																>
-																	<i class="fas fa-trash-alt"></i>
-																</button>
-															</form>
-														</td>
-													</tr>
-												{{ end }}
-											</tbody>
-										</table>
-									</div>
-									{{ template "tablefooter" . }}
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			{{ template "footer" }}
-			<script>
-				attachValidationListener({
-					buttonId: "create-user-button",
-					errorDivs: {
-						name: "nameError",
-						identity: "identityError",
-						secret: "secretError",
-						metadata: "metadataError",
-						tags: "tagsError",
-					},
-					validations: {
-						name: validateName,
-						identity: validateEmail,
-						secret: validatePassword,
-						metadata: validateJSON,
-						tags: validateStringArray,
-					},
-				});
-
+                  <!-- add users modal -->
+                  <div
+                    class="modal fade"
+                    id="addUsersModal"
+                    tabindex="-1"
+                    role="dialog"
+                    aria-labelledby="addUsersModalLabel"
+                    aria-hidden="true"
+                  >
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="addUsersModalLabel">Add Users</h5>
+                        </div>
+                        <div class="modal-body">
+                          <div id="alertBulkMessage"></div>
+                          <form enctype="multipart/form-data" id="bulkusersform">
+                            <div class="form-group">
+                              <label for="usersFile">
+                                Add csv file containing users names and passwords. Find a sample csv
+                                file
+                                <a
+                                  href="https://github.com/absmach/magistrala-ui/blob/main/samples/users.csv"
+                                  target="_blank"
+                                >
+                                  here
+                                </a>
+                              </label>
+                              <input
+                                type="file"
+                                class="form-control-file"
+                                id="usersFile"
+                                name="usersFile"
+                                required
+                              />
+                              <button type="submit" value="upload" class="btn body-button">
+                                Submit
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- modals end -->
+                </div>
+                <div class="table-responsive table-container">
+                  {{ template "tableheader" . }}
+                  <div class="itemsTable">
+                    <table id="itemsTable" class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Name</th>
+                          <th scope="col">ID</th>
+                          <th class="tags-col" scope="col">Tags</th>
+                          <th class="meta-col" scope="col">Metadata</th>
+                          <th class="created-col" scope="col">Created At</th>
+                          <th class="text-center" scope="col"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {{ range $i, $u := .Users }}
+                          {{ $disableButton := false }}
+                          <tr>
+                            <td>{{ $u.Name }}</td>
+                            <td>
+                              <div class="copy-con-container">
+                                <a href="{{ printf "/users/%s" $u.ID }}">
+                                  {{ $u.ID }}
+                                </a>
+                                <button class="copy-icon" onclick="copyToClipboard(this)">
+                                  <i class="far fa-copy"></i>
+                                </button>
+                              </div>
+                            </td>
+                            <td class="tags-col">{{ toSlice $u.Tags }}</td>
+                            <td class="meta-col">{{ toJSON $u.Metadata }}</td>
+                            <td class="created-col">{{ $u.CreatedAt }}</td>
+                            <td class="text-center">
+                              <form action="/users/disabled" method="post">
+                                <input
+                                  type="hidden"
+                                  name="userID"
+                                  id="userID"
+                                  value="{{ $u.ID }}"
+                                />
+                                <button
+                                  type="submit"
+                                  class="btn btn-sm"
+                                  {{ if
+                                    $disableButton
+                                  }}
+                                    disabled
+                                  {{ end }}
+                                >
+                                  <i class="fas fa-trash-alt"></i>
+                                </button>
+                              </form>
+                            </td>
+                          </tr>
+                        {{ end }}
+                      </tbody>
+                    </table>
+                  </div>
+                  {{ template "tablefooter" . }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{ template "footer" }}
+      <script>
         const userModal = new bootstrap.Modal(document.getElementById("addUserModal"));
         const usersModal = new bootstrap.Modal(document.getElementById("addUsersModal"));
 
@@ -261,6 +236,35 @@ SPDX-License-Identifier: Apache-2.0 -->
             usersModal.show();
           }
         }
+      </script>
+      <script type="module">
+        import {
+          attachValidationListener,
+          validateName,
+          validateEmail,
+          validatePassword,
+          validateJSON,
+          validateStringArray,
+        } from "/js/validation.js";
+        import { submitCreateForm } from "/js/forms.js";
+
+        attachValidationListener({
+          buttonId: "create-user-button",
+          errorDivs: {
+            name: "nameError",
+            identity: "identityError",
+            secret: "secretError",
+            metadata: "metadataError",
+            tags: "tagsError",
+          },
+          validations: {
+            name: validateName,
+            identity: validateEmail,
+            secret: validatePassword,
+            metadata: validateJSON,
+            tags: validateStringArray,
+          },
+        });
 
         submitCreateForm({
           url: "/users",

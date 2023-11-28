@@ -4,7 +4,11 @@ SPDX-License-Identifier: Apache-2.0 -->
 {{ define "thingchannels" }}
   <!doctype html>
   <html lang="en">
-    {{ template "header" }}
+    <head>
+      <title>Thing Channels</title>
+      {{ template "header" }}
+      <script src="/js/infinitescroll.js" type="module"></script>
+    </head>
     <body>
       {{ template "navbar" . }}
       <div class="main-content pt-3">
@@ -227,6 +231,9 @@ SPDX-License-Identifier: Apache-2.0 -->
         function openChannelModal() {
           channelModal.show();
         }
+      </script>
+      <script type="module">
+        import { fetchIndividualEntity } from "/js/infinitescroll.js";
 
         fetchIndividualEntity({
           input: "channelFilter",

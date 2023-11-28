@@ -4,7 +4,13 @@ SPDX-License-Identifier: Apache-2.0 -->
 {{ define "groups" }}
   <!doctype html>
   <html lang="en">
-    {{ template "header" }}
+    <head>
+      <title>Groups</title>
+      {{ template "header" }}
+      <script src="/js/forms.js" type="module"></script>
+      <script src="/js/validation.js" type="module"></script>
+      <script src="/js/infinitescroll.js" type="module"></script>
+    </head>
     <body>
       {{ template "navbar" . }}
       <div class="main-content pt-3">
@@ -100,131 +106,134 @@ SPDX-License-Identifier: Apache-2.0 -->
                     Add Groups
                   </button>
 
-									<!-- Modal -->
-									<div
-										class="modal fade"
-										id="addGroupsModal"
-										tabindex="-1"
-										role="dialog"
-										aria-labelledby="addGroupsModalLabel"
-										aria-hidden="true"
-									>
-										<div class="modal-dialog" role="document">
-											<div class="modal-content">
-												<div class="modal-header">
-													<h5 class="modal-title" id="addGroupsModalLabel">
-														Add Groups
-													</h5>
-												</div>
-												<div class="modal-body">
-													<div id="alertBulkMessage"></div>
-													<form
-														enctype="multipart/form-data"
-														id="bulkgroupsform"
-													>
-														<div class="form-group">
-															<label for="groupsFile">
-																Add csv file containing groups names. Find a
-																sample csv file
-																<a
-																	href="https://github.com/absmach/magistrala-ui/blob/main/samples/groups.csv"
-																	target="_blank"
-																>
-																	here
-																</a>
-															</label>
-															<input
-																type="file"
-																class="form-control-file"
-																id="groupsFile"
-																name="groupsFile"
-																required
-															/>
-															<button
-																type="submit"
-																value="upload"
-																class="btn body-button"
-															>
-																Submit
-															</button>
-														</div>
-													</form>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="table-responsive table-container">
-									{{ template "tableheader" . }}
-									<div class="itemsTable">
-										<table id="itemsTable" class="table">
-											<thead>
-												<tr>
-													<th scope="col">Name</th>
-													<th scope="col">ID</th>
-													<th class="desc-col" scope="col">Description</th>
-													<th class="meta-col" scope="col">Metadata</th>
-													<th class="created-col" scope="col">Created At</th>
-													<th class="text-center" scope="col"></th>
-												</tr>
-											</thead>
-											<tbody>
-												{{ range $i, $g := .Groups }}
-													{{ $disableButton := false }}
-													<tr>
-														<td>{{ $g.Name }}</td>
-														<td>
-															<div class="copy-con-container">
-																<a href="{{ printf "/groups/%s" $g.ID }}">
-																	{{ $g.ID }}
-																</a>
-																<button
-																	class="copy-icon"
-																	onclick="copyToClipboard(this)"
-																>
-																	<i class="far fa-copy"></i>
-																</button>
-															</div>
-														</td>
-														<td class="desc-col">{{ $g.Description }}</td>
-														<td class="meta-col">{{ toJSON $g.Metadata }}</td>
-														<td class="created-col">{{ $g.CreatedAt }}</td>
-														<td class="text-center">
-															<form action="/groups/disabled" method="post">
-																<input
-																	type="hidden"
-																	name="groupID"
-																	id="groupID"
-																	value="{{ $g.ID }}"
-																/>
-																<button
-																	type="submit"
-																	class="btn btn-sm"
-																	{{ if
-																		$disableButton
-																	}}
-																		disabled
-																	{{ end }}
-																>
-																	<i class="fas fa-trash-alt"></i>
-																</button>
-															</form>
-														</td>
-													</tr>
-												{{ end }}
-											</tbody>
-										</table>
-									</div>
-									{{ template "tablefooter" . }}
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+                  <!-- Modal -->
+                  <div
+                    class="modal fade"
+                    id="addGroupsModal"
+                    tabindex="-1"
+                    role="dialog"
+                    aria-labelledby="addGroupsModalLabel"
+                    aria-hidden="true"
+                  >
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="addGroupsModalLabel">Add Groups</h5>
+                        </div>
+                        <div class="modal-body">
+                          <div id="alertBulkMessage"></div>
+                          <form enctype="multipart/form-data" id="bulkgroupsform">
+                            <div class="form-group">
+                              <label for="groupsFile">
+                                Add csv file containing groups names. Find a sample csv file
+                                <a
+                                  href="https://github.com/absmach/magistrala-ui/blob/main/samples/groups.csv"
+                                  target="_blank"
+                                >
+                                  here
+                                </a>
+                              </label>
+                              <input
+                                type="file"
+                                class="form-control-file"
+                                id="groupsFile"
+                                name="groupsFile"
+                                required
+                              />
+                              <button type="submit" value="upload" class="btn body-button">
+                                Submit
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="table-responsive table-container">
+                  {{ template "tableheader" . }}
+                  <div class="itemsTable">
+                    <table id="itemsTable" class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Name</th>
+                          <th scope="col">ID</th>
+                          <th class="desc-col" scope="col">Description</th>
+                          <th class="meta-col" scope="col">Metadata</th>
+                          <th class="created-col" scope="col">Created At</th>
+                          <th class="text-center" scope="col"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {{ range $i, $g := .Groups }}
+                          {{ $disableButton := false }}
+                          <tr>
+                            <td>{{ $g.Name }}</td>
+                            <td>
+                              <div class="copy-con-container">
+                                <a href="{{ printf "/groups/%s" $g.ID }}">
+                                  {{ $g.ID }}
+                                </a>
+                                <button class="copy-icon" onclick="copyToClipboard(this)">
+                                  <i class="far fa-copy"></i>
+                                </button>
+                              </div>
+                            </td>
+                            <td class="desc-col">{{ $g.Description }}</td>
+                            <td class="meta-col">{{ toJSON $g.Metadata }}</td>
+                            <td class="created-col">{{ $g.CreatedAt }}</td>
+                            <td class="text-center">
+                              <form action="/groups/disabled" method="post">
+                                <input
+                                  type="hidden"
+                                  name="groupID"
+                                  id="groupID"
+                                  value="{{ $g.ID }}"
+                                />
+                                <button
+                                  type="submit"
+                                  class="btn btn-sm"
+                                  {{ if
+                                    $disableButton
+                                  }}
+                                    disabled
+                                  {{ end }}
+                                >
+                                  <i class="fas fa-trash-alt"></i>
+                                </button>
+                              </form>
+                            </td>
+                          </tr>
+                        {{ end }}
+                      </tbody>
+                    </table>
+                  </div>
+                  {{ template "tablefooter" . }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {{ template "footer" }}
       <script>
+        const groupModal = new bootstrap.Modal(document.getElementById("addGroupModal"));
+        const groupsModal = new bootstrap.Modal(document.getElementById("addGroupsModal"));
+
+        function openModal(modal) {
+          if (modal === "single") {
+            groupModal.show();
+          } else if (modal === "bulk") {
+            groupsModal.show();
+          }
+        }
+      </script>
+      <script type="module">
+        import { attachValidationListener, validateName, validateJSON } from "/js/validation.js";
+        import { submitCreateForm } from "/js/forms.js";
+        import { fetchIndividualEntity } from "/js/infinitescroll.js";
+
         attachValidationListener({
           buttonId: "create-group-button",
           errorDivs: {
@@ -236,17 +245,6 @@ SPDX-License-Identifier: Apache-2.0 -->
             metadata: validateJSON,
           },
         });
-
-        const groupModal = new bootstrap.Modal(document.getElementById("addGroupModal"));
-        const groupsModal = new bootstrap.Modal(document.getElementById("addGroupsModal"));
-
-        function openModal(modal) {
-          if (modal === "single") {
-            groupModal.show();
-          } else if (modal === "bulk") {
-            groupsModal.show();
-          }
-        }
 
         submitCreateForm({
           url: "/groups",

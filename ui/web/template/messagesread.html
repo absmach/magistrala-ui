@@ -4,13 +4,13 @@ SPDX-License-Identifier: Apache-2.0 -->
 {{ define "messagesread" }}
   <!doctype html>
   <html lang="en">
-    {{ template "header" }}
+    <head>
+      <title>Messages</title>
+      {{ template "header" }}
 
-
+    </head>
     <body>
       {{ template "navbar" . }}
-
-
       <div class="main-content pt-3">
         <div class="container">
           <div class="row">
@@ -127,6 +127,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       </div>
 
       {{ template "footer" }}
+
 
       <script>
         const messageModal = new bootstrap.Modal(document.getElementById("sendMessageModal"));

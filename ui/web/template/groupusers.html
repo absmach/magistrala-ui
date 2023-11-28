@@ -4,7 +4,11 @@ SPDX-License-Identifier: Apache-2.0 -->
 {{ define "groupusers" }}
   <!doctype html>
   <html lang="en">
-    {{ template "header" }}
+    <head>
+      <title>Group Users</title>
+      {{ template "header" }}
+      <script src="/js/infinitescroll.js" type="module"></script>
+    </head>
     <body>
       {{ template "navbar" . }}
       <div class="main-content pt-3">
@@ -471,12 +475,6 @@ SPDX-License-Identifier: Apache-2.0 -->
 					userModal.show();
 				}
 
-				fetchIndividualEntity({
-					input: "userFilter",
-					itemSelect: "infiniteScroll",
-					item: "users",
-				});
-
 				function openTab(relation) {
 					event.preventDefault();
           var groupID = '{{.GroupID}}';
@@ -489,6 +487,15 @@ SPDX-License-Identifier: Apache-2.0 -->
           .catch((error) => console.error("Error:", error));
 				}
 			</script>
+      <script type="module">
+        import { fetchIndividualEntity } from "/js/infinitescroll.js";
+
+        fetchIndividualEntity({
+          input: "userFilter",
+          itemSelect: "infiniteScroll",
+          item: "users",
+        });
+      </script>
     </body>
   </html>
 {{ end }}

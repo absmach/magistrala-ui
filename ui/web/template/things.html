@@ -4,7 +4,12 @@ SPDX-License-Identifier: Apache-2.0 -->
 {{ define "things" }}
   <!doctype html>
   <html lang="en">
-    {{ template "header" }}
+    <head>
+      <title>Things</title>
+      {{ template "header" }}
+      <script src="/js/forms.js" type="module"></script>
+      <script src="/js/validation.js" type="module"></script>
+    </head>
     <body>
       {{ template "navbar" . }}
       <div class="main-content pt-3">
@@ -120,146 +125,118 @@ SPDX-License-Identifier: Apache-2.0 -->
                     Add Things
                   </button>
 
-									<!-- Modal -->
-									<div
-										class="modal fade"
-										id="addThingsModal"
-										tabindex="-1"
-										role="dialog"
-										aria-labelledby="addThingsModalLabel"
-										aria-hidden="true"
-									>
-										<div class="modal-dialog" role="document">
-											<div class="modal-content">
-												<div class="modal-header">
-													<h5 class="modal-title" id="addThingsModalLabel">
-														Add Things
-													</h5>
-												</div>
-												<div class="modal-body">
-													<div id="alertBulkMessage"></div>
-													<form
-														method="post"
-														enctype="multipart/form-data"
-														id="bulkThingsForm"
-													>
-														<div class="form-group">
-															<label for="thingsFile">
-																Add csv file containing thing names with
-																metadata. The metadata field can be empty. Find
-																a sample csv file
-																<a
-																	href="https://github.com/absmach/magistrala-ui/blob/main/samples/things.csv"
-																	target="_blank"
-																>
-																	here
-																</a>
-															</label>
-															<input
-																type="file"
-																class="form-control-file"
-																id="thingsFile"
-																name="thingsFile"
-																required
-															/>
-															<button
-																type="submit"
-																value="upload"
-																class="btn body-button"
-															>
-																Submit
-															</button>
-														</div>
-													</form>
-												</div>
-											</div>
-										</div>
-									</div>
-								</div>
-								<div class="table-responsive table-container">
-									{{ template "tableheader" . }}
-									<div class="itemsTable">
-										<table id="itemsTable" class="table">
-											<thead>
-												<tr>
-													<th scope="col">Name</th>
-													<th scope="col">ID</th>
-													<th class="tags-col" scope="col">Tags</th>
-													<th class="meta-col" scope="col">Metadata</th>
-													<th class="created-col" scope="col">Created At</th>
-													<th class="text-center" scope="col"></th>
-												</tr>
-											</thead>
-											<tbody>
-												{{ range $i, $t := .Things }}
-													{{ $disableButton := false }}
-													<tr>
-														<td>{{ $t.Name }}</td>
-														<td>
-															<div class="copy-con-container">
-																<a href="{{ printf "/things/%s" $t.ID }}">
-																	{{ $t.ID }}
-																</a>
-																<button
-																	class="copy-icon"
-																	onclick="copyToClipboard(this)"
-																>
-																	<i class="far fa-copy"></i>
-																</button>
-															</div>
-														</td>
-														<td class="tags-col">{{ toSlice $t.Tags }}</td>
-														<td class="meta-col">{{ toJSON $t.Metadata }}</td>
-														<td class="created-col">{{ $t.CreatedAt }}</td>
-														<td class="text-center">
-															<form action="/things/disabled" method="post">
-																<input
-																	type="hidden"
-																	name="thingID"
-																	id="thingID"
-																	value="{{ $t.ID }}"
-																/>
-																<button
-																	type="submit"
-																	class="btn btn-sm"
-																	{{ if
-																		$disableButton
-																	}}
-																		disabled
-																	{{ end }}
-																>
-																	<i class="fas fa-trash-alt"></i>
-																</button>
-															</form>
-														</td>
-													</tr>
-												{{ end }}
-											</tbody>
-										</table>
-									</div>
-									{{ template "tablefooter" . }}
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			{{ template "footer" }}
-			<script>
-				attachValidationListener({
-					buttonId: "create-thing-button",
-					errorDivs: {
-						name: "nameError",
-						metadata: "metadataError",
-						tags: "tagsError",
-					},
-					validations: {
-						name: validateName,
-						metadata: validateJSON,
-						tags: validateStringArray,
-					},
-				});
-
+                  <!-- Modal -->
+                  <div
+                    class="modal fade"
+                    id="addThingsModal"
+                    tabindex="-1"
+                    role="dialog"
+                    aria-labelledby="addThingsModalLabel"
+                    aria-hidden="true"
+                  >
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="addThingsModalLabel">Add Things</h5>
+                        </div>
+                        <div class="modal-body">
+                          <div id="alertBulkMessage"></div>
+                          <form method="post" enctype="multipart/form-data" id="bulkThingsForm">
+                            <div class="form-group">
+                              <label for="thingsFile">
+                                Add csv file containing thing names with metadata. The metadata
+                                field can be empty. Find a sample csv file
+                                <a
+                                  href="https://github.com/absmach/magistrala-ui/blob/main/samples/things.csv"
+                                  target="_blank"
+                                >
+                                  here
+                                </a>
+                              </label>
+                              <input
+                                type="file"
+                                class="form-control-file"
+                                id="thingsFile"
+                                name="thingsFile"
+                                required
+                              />
+                              <button type="submit" value="upload" class="btn body-button">
+                                Submit
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="table-responsive table-container">
+                  {{ template "tableheader" . }}
+                  <div class="itemsTable">
+                    <table id="itemsTable" class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Name</th>
+                          <th scope="col">ID</th>
+                          <th class="tags-col" scope="col">Tags</th>
+                          <th class="meta-col" scope="col">Metadata</th>
+                          <th class="created-col" scope="col">Created At</th>
+                          <th class="text-center" scope="col"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {{ range $i, $t := .Things }}
+                          {{ $disableButton := false }}
+                          <tr>
+                            <td>{{ $t.Name }}</td>
+                            <td>
+                              <div class="copy-con-container">
+                                <a href="{{ printf "/things/%s" $t.ID }}">
+                                  {{ $t.ID }}
+                                </a>
+                                <button class="copy-icon" onclick="copyToClipboard(this)">
+                                  <i class="far fa-copy"></i>
+                                </button>
+                              </div>
+                            </td>
+                            <td class="tags-col">{{ toSlice $t.Tags }}</td>
+                            <td class="meta-col">{{ toJSON $t.Metadata }}</td>
+                            <td class="created-col">{{ $t.CreatedAt }}</td>
+                            <td class="text-center">
+                              <form action="/things/disabled" method="post">
+                                <input
+                                  type="hidden"
+                                  name="thingID"
+                                  id="thingID"
+                                  value="{{ $t.ID }}"
+                                />
+                                <button
+                                  type="submit"
+                                  class="btn btn-sm"
+                                  {{ if
+                                    $disableButton
+                                  }}
+                                    disabled
+                                  {{ end }}
+                                >
+                                  <i class="fas fa-trash-alt"></i>
+                                </button>
+                              </form>
+                            </td>
+                          </tr>
+                        {{ end }}
+                      </tbody>
+                    </table>
+                  </div>
+                  {{ template "tablefooter" . }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{ template "footer" }}
+      <script>
         const thingModal = new bootstrap.Modal(document.getElementById("addThingModal"));
         const thingsModal = new bootstrap.Modal(document.getElementById("addThingsModal"));
 
@@ -270,6 +247,29 @@ SPDX-License-Identifier: Apache-2.0 -->
             thingsModal.show();
           }
         }
+      </script>
+      <script type="module">
+        import {
+          attachValidationListener,
+          validateName,
+          validateJSON,
+          validateStringArray,
+        } from "/js/validation.js";
+        import { submitCreateForm } from "/js/forms.js";
+
+        attachValidationListener({
+          buttonId: "create-thing-button",
+          errorDivs: {
+            name: "nameError",
+            metadata: "metadataError",
+            tags: "tagsError",
+          },
+          validations: {
+            name: validateName,
+            metadata: validateJSON,
+            tags: validateStringArray,
+          },
+        });
 
         submitCreateForm({
           url: "/things",

@@ -4,7 +4,13 @@ SPDX-License-Identifier: Apache-2.0 -->
 {{ define "bootstraps" }}
   <!doctype html>
   <html lang="en">
-    {{ template "header" }}
+    <head>
+      <title>Bootstraps</title>
+      {{ template "header" }}
+      <script src="/js/forms.js" type="module"></script>
+      <script src="/js/validation.js" type="module"></script>
+      <script src="/js/infinitescroll.js" type="module"></script>
+    </head>
     <body>
       {{ template "navbar" . }}
       <div class="main-content pt-3">
@@ -32,7 +38,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           </h5>
                         </div>
                         <div class="modal-body">
-                          <form method="post" onsubmit="return validateForm()">
+                          <form method="post">
                             <div class="mb-3">
                               <label for="name" class="form-label">Bootstrap Name</label>
                               <input
@@ -97,7 +103,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                               <div id="channelsHelp" class="form-text">
                                 Enter channels as a string slice.
                               </div>
-                              <div id="channelsError" class="error-message"></div>
+                              <div id="channelsError" class="text-danger"></div>
                             </div>
 
                             <div class="mb-3">
@@ -112,7 +118,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                               <div id="contentHelp" class="form-text">
                                 Enter content in JSON format.
                               </div>
-                              <div id="contentError" class="error-message"></div>
+                              <div id="contentError" class="text-danger"></div>
                             </div>
                             <div class="mb-3">
                               <label for="clientCert" class="form-label">Client Cert</label>
@@ -147,7 +153,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 value="CACert"
                               />
                             </div>
-                            <button type="submit" class="btn body-button">Submit</button>
+                            <button
+                              type="submit"
+                              id="create-bootstrap-button"
+                              class="btn body-button"
+                            >
+                              Submit
+                            </button>
                           </form>
                         </div>
                       </div>
@@ -194,54 +206,31 @@ SPDX-License-Identifier: Apache-2.0 -->
       </div>
       {{ template "footer" }}
       <script>
-        function validateForm() {
-          var channelsInput = document.getElementById("channels").value;
-          var contentInput = document.getElementById("content").value;
-
-          var channelsError = document.getElementById("channelsError");
-          var contentError = document.getElementById("contentError");
-
-          channelsError.innerHTML = "";
-          contentError.innerHTML = "";
-
-          var content;
-          var channels;
-
-          var isValid = true;
-
-          try {
-            channels = JSON.parse(channelsInput);
-          } catch (error) {
-            channelsError.innerHTML = "Please enter valid channels as a string array!";
-            isValid = false;
-          }
-
-          if (
-            !Array.isArray(channels) ||
-            !channels.every(function (channels) {
-              return typeof channels === "string";
-            })
-          ) {
-            channelsError.innerHTML = "Channels must be a string array!";
-            isValid = false;
-          }
-
-          try {
-            content = JSON.parse(contentInput);
-            content = contentInput;
-          } catch (error) {
-            contentError.innerHTML = "Please enter valid content in JSON format!";
-            isValid = false;
-          }
-
-          return isValid;
-        }
-
         const bootstrapsModal = new bootstrap.Modal(document.getElementById("addBootstrapModal"));
 
         function openModal() {
           bootstrapsModal.show();
         }
+      </script>
+      <script type="module">
+        import {
+          attachValidationListener,
+          validateStringArray,
+          validateJSON,
+        } from "/js/validation.js";
+        import { fetchIndividualEntity } from "/js/infinitescroll.js";
+
+        attachValidationListener({
+          buttonId: "create-bootstrap-button",
+          errorDivs: {
+            channels: "channelsError",
+            content: "contentError",
+          },
+          validations: {
+            channels: validateStringArray,
+            content: validateJSON,
+          },
+        });
 
         fetchIndividualEntity({
           input: "thingFilter",

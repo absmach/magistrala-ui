@@ -4,7 +4,11 @@ SPDX-License-Identifier: Apache-2.0 -->
 {{ define "userchannels" }}
   <!doctype html>
   <html lang="en">
-    {{ template "header" }}
+    <head>
+      <title>User Channels</title>
+      {{ template "header" }}
+      <script src="/js/infinitescroll.js" type="module"></script>
+    </head>
     <body>
       {{ template "navbar" . }}
       <div class="main-content pt-3">
@@ -473,12 +477,6 @@ SPDX-License-Identifier: Apache-2.0 -->
 					channelModal.show();
 				}
 
-				fetchIndividualEntity({
-					input: "channelFilter",
-					itemSelect: "infiniteScroll",
-					item: "channels",
-				});
-
         function openTab(relation) {
 					event.preventDefault();
 					var userID = '{{.UserID}}';
@@ -491,6 +489,15 @@ SPDX-License-Identifier: Apache-2.0 -->
 						.catch((error) => console.error("Error:", error));
 				}
 			</script>
+      <script type="module">
+        import { fetchIndividualEntity } from "/js/infinitescroll.js";
+
+        fetchIndividualEntity({
+          input: "channelFilter",
+          itemSelect: "infiniteScroll",
+          item: "channels",
+        });
+      </script>
     </body>
   </html>
 {{ end }}

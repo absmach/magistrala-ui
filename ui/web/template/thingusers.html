@@ -4,7 +4,11 @@ SPDX-License-Identifier: Apache-2.0 -->
 {{ define "thingusers" }}
   <!doctype html>
   <html lang="en">
-    {{ template "header" }}
+    <head>
+      <title>Thing Users</title>
+      {{ template "header" }}
+      <script src="/js/infinitescroll.js" type="module"></script>
+    </head>
     <body>
       {{ template "navbar" . }}
       <div class="main-content pt-3">
@@ -172,6 +176,10 @@ SPDX-License-Identifier: Apache-2.0 -->
         function openUserModal() {
           userModal.show();
         }
+      </script>
+      <script type="module">
+        import { fetchIndividualEntity } from "/js/infinitescroll.js";
+
         fetchIndividualEntity({
           input: "userFilter",
           itemSelect: "infiniteScroll",
