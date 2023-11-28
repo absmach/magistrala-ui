@@ -992,8 +992,7 @@ func createChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": channelsAPIEndpoint},
+			code: http.StatusCreated,
 		}, nil
 	}
 }
@@ -1010,8 +1009,7 @@ func createChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": channelsAPIEndpoint},
+			code: http.StatusCreated,
 		}, nil
 	}
 }
@@ -1073,8 +1071,7 @@ func updateChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": channelsAPIEndpoint + "/" + req.id},
+			code: http.StatusOK,
 		}, nil
 	}
 }
@@ -1246,8 +1243,7 @@ func createGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": groupsAPIEndpoint},
+			code: http.StatusCreated,
 		}, nil
 	}
 }
@@ -1264,8 +1260,7 @@ func createGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": groupsAPIEndpoint},
+			code: http.StatusCreated,
 		}, nil
 	}
 }
@@ -1327,8 +1322,7 @@ func updateGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": groupsAPIEndpoint + "/" + req.id},
+			code: http.StatusOK,
 		}, nil
 	}
 }
@@ -1536,8 +1530,7 @@ func updateBootstrap(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": bootstrapAPIEndpoint + "/" + req.id},
+			code: http.StatusOK,
 		}, nil
 	}
 }
@@ -1558,8 +1551,7 @@ func updateBootstrapConnections(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": bootstrapAPIEndpoint + "/" + req.id},
+			code: http.StatusOK,
 		}, nil
 	}
 }
@@ -1582,8 +1574,7 @@ func updateBootstrapCerts(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": bootstrapAPIEndpoint + "/" + req.thingID},
+			code: http.StatusOK,
 		}, nil
 	}
 }
