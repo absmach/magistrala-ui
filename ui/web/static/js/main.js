@@ -61,21 +61,21 @@ function validatePassword(password, errorDiv, event) {
   return true;
 }
 
-function validateMetadata(metadata, errorDiv, event) {
+function validateJSON(data, errorDiv, event) {
   removeErrorMessage(errorDiv);
   try {
-    if (metadata.trim() !== "") {
-      JSON.parse(metadata);
+    if (data.trim() !== "") {
+      JSON.parse(data);
     }
   } catch (error) {
     event.preventDefault();
-    displayErrorMessage("Metadata is not a valid JSON object", errorDiv);
+    displayErrorMessage("not a valid JSON object", errorDiv);
     return false;
   }
   return true;
 }
 
-function validateTags(tags, errorDiv, event) {
+function validateStringArray(tags, errorDiv, event) {
   removeErrorMessage(errorDiv);
   var tagsArray;
   try {
@@ -89,12 +89,12 @@ function validateTags(tags, errorDiv, event) {
       })
     ) {
       event.preventDefault();
-      displayErrorMessage("tags must be strings in an array", errorDiv);
+      displayErrorMessage("must be strings in an array", errorDiv);
       return false;
     }
   } catch (error) {
     event.preventDefault();
-    displayErrorMessage("tags must be a string array", errorDiv);
+    displayErrorMessage("must be a string array", errorDiv);
     return false;
   }
 
@@ -220,7 +220,7 @@ function cancelEditRow(config) {
 function submitUpdateForm(config) {
   fetch(config.url, {
     method: "POST",
-    body: config.data,
+    body: JSON.stringify(config.data),
     headers: {
       "Content-Type": "application/json",
     },
@@ -242,7 +242,7 @@ function updateName(config) {
     const updatedValue = config.cell.textContent.trim();
     if (validateName(updatedValue, config.alertDiv, event)) {
       const url = `/${config.entity}/${config.id}`;
-      const data = JSON.stringify({ [config.field]: updatedValue });
+      const data = { [config.field]: updatedValue };
 
       submitUpdateForm({
         url: url,
@@ -260,7 +260,7 @@ function updateIdentity(config) {
     const updatedValue = config.cell.textContent.trim();
     if (validateEmail(updatedValue, config.alertDiv, event)) {
       const url = `/${config.entity}/${config.id}/identity`;
-      const data = JSON.stringify({ [config.field]: updatedValue });
+      const data = { [config.field]: updatedValue };
 
       submitUpdateForm({
         url: url,
@@ -276,9 +276,9 @@ function updateMetadata(config) {
 
   button.addEventListener("click", function (event) {
     const updatedValue = config.cell.textContent.trim();
-    if (validateMetadata(updatedValue, config.alertDiv, event)) {
+    if (validateJSON(updatedValue, config.alertDiv, event)) {
       const url = `/${config.entity}/${config.id}`;
-      const data = JSON.stringify({ [config.field]: JSON.parse(updatedValue) });
+      const data = { [config.field]: JSON.parse(updatedValue) };
 
       submitUpdateForm({
         url: url,
@@ -294,9 +294,9 @@ function updateTags(config) {
 
   button.addEventListener("click", function (event) {
     const updatedValue = config.cell.textContent.trim();
-    if (validateTags(updatedValue, config.alertDiv, event)) {
+    if (validateStringArray(updatedValue, config.alertDiv, event)) {
       const url = `/${config.entity}/${config.id}/tags`;
-      const data = JSON.stringify({ [config.field]: JSON.parse(updatedValue) });
+      const data = { [config.field]: JSON.parse(updatedValue) };
 
       submitUpdateForm({
         url: url,
@@ -314,7 +314,7 @@ function updateSecret(config) {
     const updatedValue = config.cell.textContent.trim();
     if (validatePassword(updatedValue, config.alertDiv, event)) {
       const url = `/${config.entity}/${config.id}/secret`;
-      const data = JSON.stringify({ [config.field]: updatedValue });
+      const data = { [config.field]: updatedValue };
 
       submitUpdateForm({
         url: url,
@@ -331,7 +331,7 @@ function updateOwner(config) {
   button.addEventListener("click", function () {
     const updatedValue = config.cell.textContent.trim();
     const url = `/${config.entity}/${config.id}/owner`;
-    const data = JSON.stringify({ [config.field]: updatedValue });
+    const data = { [config.field]: updatedValue };
 
     submitUpdateForm({
       url: url,
@@ -347,13 +347,65 @@ function updateDescription(config) {
   button.addEventListener("click", function () {
     const updatedValue = config.cell.textContent.trim();
     const url = `/${config.entity}/${config.id}`;
-    const data = JSON.stringify({ [config.field]: updatedValue });
+    const data = { [config.field]: updatedValue };
 
     submitUpdateForm({
       url: url,
       data: data,
       alertDiv: config.alertDiv,
     });
+  });
+}
+
+// Bootstrap update functions
+function updateContent(config) {
+  const button = document.getElementById(config.button);
+
+  button.addEventListener("click", function () {
+    const updatedValue = config.cell.textContent.trim();
+    const url = `/${config.entity}/${config.id}`;
+    const data = { [config.field]: updatedValue };
+
+    submitUpdateForm({
+      url: url,
+      data: data,
+      alertDiv: config.alertDiv,
+    });
+  });
+}
+
+function updateClientCerts(config) {
+  const button = document.getElementById(config.button);
+
+  button.addEventListener("click", function () {
+    const updatedValue = config.cell.textContent.trim();
+    const url = `/${config.entity}/${config.id}/certs`;
+    const data = { [config.field]: updatedValue };
+
+    submitUpdateForm({
+      url: url,
+      data: data,
+      alertDiv: config.alertDiv,
+    });
+  });
+}
+
+function updateConnections(config) {
+  const button = document.getElementById(config.button);
+
+  button.addEventListener("click", function (event) {
+    const updatedValue = config.cell.textContent.trim();
+
+    if (validateStringArray(updatedValue, config.alertDiv, event)) {
+      const url = `/${config.entity}/${config.id}/connections`;
+      const data = { [config.field]: JSON.parse(updatedValue) };
+
+      submitUpdateForm({
+        url: url,
+        data: data,
+        alertDiv: config.alertDiv,
+      });
+    }
   });
 }
 
