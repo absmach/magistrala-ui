@@ -9,7 +9,6 @@
     }
   ],
   "goTemplateBracketSpacing": true,
-  "useTabs": false,
   "printWidth": 100,
   "semi": true,
   "tabWidth": 2,
