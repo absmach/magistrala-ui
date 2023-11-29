@@ -2,340 +2,245 @@
 SPDX-License-Identifier: Apache-2.0 -->
 
 {{ define "thingchannels" }}
-	<!doctype html>
-	<html lang="en">
-		{{ template "header" }}
-		<body>
-			{{ template "navbar" . }}
-			<div class="main-content pt-3">
-				<div class="container">
-					<div class="row">
-						<div class="col-lg-12 mx-auto py-3">
-							<div class="row">
-								<div class="buttons mb-3">
-									<a
-										class="btn body-button"
-										href="/things/{{ .Thing.ID }}"
-										role="button"
-									>
-										Thing
-									</a>
-									<a
-										class="btn body-button"
-										href="/things/{{ .Thing.ID }}/users"
-										role="button"
-									>
-										Thing Users
-									</a>
-								</div>
-								<div class="table-responsive table-container">
-									<div class="d-flex flex-row justify-content-between">
-										<h4>Thing Channels</h4>
-										<button
-											role="button"
-											class="btn body-button"
-											onclick="openChannelModal()"
-										>
-											<i class="fa-solid fa-plus fs-4"></i>
-										</button>
-										<!-- modal -->
-										<div
-											class="modal fade"
-											id="addChannelModal"
-											tabindex="-1"
-											aria-labelledby="addChannelModalLabel"
-											aria-hidden="true"
-										>
-											<div class="modal-dialog modal-dialog-centered">
-												<div class="modal-content">
-													<div class="modal-header">
-														<h1
-															class="modal-title fs-5"
-															id="addChannelModalLabel"
-														>
-															Add Channel
-														</h1>
-														<button
-															type="button"
-															class="btn-close"
-															data-bs-dismiss="modal"
-															aria-label="Close"
-														></button>
-													</div>
-													<form
-														action="/things/{{ .Thing.ID }}/channels/connect?item=things"
-														method="post"
-													>
-														<div class="modal-body">
-															<div class="mb-3">
-																<label for="channels" class="form-label">
-																	Channel ID
-																</label>
-																<input
-																	type="text"
-																	name="channelFilter"
-																	id="channelFilterAssign"
-																	placeholder="Filter by Channel ID"
-																	oninput="fetchIndividualEntity(this.value,'channels')"
-																/>
-																<select
-																	class="form-select"
-																	name="channelID"
-																	id="channels"
-																	size="5"
-																	required
-																>
-																	<option disabled>select a channel</option>
-																</select>
-															</div>
-															<div class="modal-footer">
-																<button
-																	type="button"
-																	class="btn btn-secondary"
-																	data-bs-dismiss="modal"
-																>
-																	Cancel
-																</button>
-																<button type="submit" class="btn btn-primary">
-																	Assign
-																</button>
-															</div>
-														</div>
-													</form>
-												</div>
-											</div>
-										</div>
-									</div>
-									{{ template "tableheader" . }}
-									<div class="itemsTable">
-										<table class="table" id="itemsTable">
-											<thead>
-												<tr>
-													<th scope="col">Name</th>
-													<th scope="col">ID</th>
-													<th class="desc-col" scope="col">Description</th>
-													<th class="meta-col" scope="col">Metadata</th>
-													<th class="created-col" scope="col">Created At</th>
-													<th class="text-center" scope="col"></th>
-												</tr>
-											</thead>
-											<tbody>
-												{{ $thing := .Thing }}
-												{{ range $i, $c := .Channels }}
-													{{ $disableButton := false }}
-													<tr>
-														<td>{{ $c.Name }}</td>
-														<td>
-															<div class="copy-con-container">
-																<a href="{{ printf "/channels/%s" $c.ID }}">
-																	{{ $c.ID }}
-																</a>
-																<button
-																	class="copy-icon"
-																	onclick="copyToClipboard(this)"
-																>
-																	<i class="far fa-copy"></i>
-																</button>
-															</div>
-														</td>
-														<td class="desc-col">{{ $c.Description }}</td>
-														<td class="meta-col">{{ toJSON $c.Metadata }}</td>
-														<td class="created-col">{{ $c.CreatedAt }}</td>
-														<td class="d-flex flex-row">
-															<button
-																type="button"
-																class="btn btn-sm doc-button"
-																data-bs-toggle="modal"
-																data-bs-target="#sendMesageModal{{ $i }}"
-															>
-																Send Message
-															</button>
-															<form
-																action="/things/{{ $thing.ID }}/channels/disconnect?item=things"
-																method="post"
-															>
-																<input
-																	type="hidden"
-																	name="channelID"
-																	id="channelID"
-																	value="{{ $c.ID }}"
-																/>
-																<button
-																	type="submit"
-																	class="btn btn-sm"
-																	{{ if
-																		$disableButton
-																	}}
-																		disabled
-																	{{ end }}
-																>
-																	<i class="fas fa-trash-alt"></i>
-																</button>
-															</form>
-														</td>
-													</tr>
-													<!-- modal -->
-													<div
-														class="modal fade"
-														id="sendMesageModal{{ $i }}"
-														tabindex="-1"
-														aria-labelledby="sendMesageModalLabel{{ $i }}"
-														aria-hidden="true"
-													>
-														<div class="modal-dialog">
-															<div class="modal-content">
-																<div class="modal-header">
-																	<h1
-																		class="modal-title fs-5"
-																		id="sendMesageModalLabel{{ $i }}"
-																	>
-																		Send Message
-																	</h1>
-																	<button
-																		type="button"
-																		class="btn-close"
-																		data-bs-dismiss="modal"
-																		aria-label="Close"
-																	></button>
-																</div>
-																<form action="/messages" method="post">
-																	<div class="modal-body">
-																		<input
-																			type="hidden"
-																			name="channelID"
-																			id="channelID"
-																			value="{{ $c }}"
-																		/>
-																		<input
-																			type="hidden"
-																			name="thingKey"
-																			id="thingKey"
-																			value="{{ $thing.Credentials.Secret }}"
-																		/>
-																		<div class="mb-3">
-																			<label for="message" class="form-label">
-																				Message
-																			</label>
-																			<textarea
-																				class="form-control"
-																				name="message"
-																				id="message"
-																				aria-describedby="messageHelp"
-																			></textarea>
-																			<div id="messageHelp" class="form-text">
-																				Enter Message.
-																			</div>
-																		</div>
-																	</div>
-																	<div class="modal-footer">
-																		<button
-																			type="button"
-																			class="btn btn-secondary"
-																			data-bs-dismiss="modal"
-																		>
-																			Close
-																		</button>
-																		<button
-																			type="submit"
-																			class="btn doc-button"
-																		>
-																			Send Message
-																		</button>
-																	</div>
-																</form>
-															</div>
-														</div>
-													</div>
-												{{ end }}
-											</tbody>
-										</table>
-									</div>
-									{{ template "tablefooter" . }}
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
+  <!doctype html>
+  <html lang="en">
+    <head>
+      <title>Thing Channels</title>
+      {{ template "header" }}
+      <script src="/js/infinitescroll.js" type="module"></script>
+    </head>
+    <body>
+      {{ template "navbar" . }}
+      <div class="main-content pt-3">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-12 mx-auto py-3">
+              <div class="row">
+                <div class="buttons mb-3">
+                  <a class="btn body-button" href="/things/{{ .Thing.ID }}" role="button">Thing</a>
+                  <a class="btn body-button" href="/things/{{ .Thing.ID }}/users" role="button">
+                    Thing Users
+                  </a>
+                </div>
+                <div class="table-responsive table-container">
+                  <div class="d-flex flex-row justify-content-between">
+                    <h4>Thing Channels</h4>
+                    <button role="button" class="btn body-button" onclick="openChannelModal()">
+                      <i class="fa-solid fa-plus fs-4"></i>
+                    </button>
+                    <!-- modal -->
+                    <div
+                      class="modal fade"
+                      id="addChannelModal"
+                      tabindex="-1"
+                      aria-labelledby="addChannelModalLabel"
+                      aria-hidden="true"
+                    >
+                      <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="addChannelModalLabel">Add Channel</h1>
+                            <button
+                              type="button"
+                              class="btn-close"
+                              data-bs-dismiss="modal"
+                              aria-label="Close"
+                            ></button>
+                          </div>
+                          <form
+                            action="/things/{{ .Thing.ID }}/channels/connect?item=things"
+                            method="post"
+                          >
+                            <div class="modal-body">
+                              <div class="mb-3">
+                                <label for="infiniteScroll" class="form-label">Channel ID</label>
+                                <input
+                                  type="text"
+                                  name="channelFilter"
+                                  id="channelFilter"
+                                  placeholder="Filter by Channel ID"
+                                />
+                                <select
+                                  class="form-select"
+                                  name="channelID"
+                                  id="infiniteScroll"
+                                  size="5"
+                                  required
+                                >
+                                  <option disabled>select a channel</option>
+                                </select>
+                              </div>
+                              <div class="modal-footer">
+                                <button
+                                  type="button"
+                                  class="btn btn-secondary"
+                                  data-bs-dismiss="modal"
+                                >
+                                  Cancel
+                                </button>
+                                <button type="submit" class="btn btn-primary">Assign</button>
+                              </div>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {{ template "tableheader" . }}
+                  <div class="itemsTable">
+                    <table class="table" id="itemsTable">
+                      <thead>
+                        <tr>
+                          <th scope="col">Name</th>
+                          <th scope="col">ID</th>
+                          <th class="desc-col" scope="col">Description</th>
+                          <th class="meta-col" scope="col">Metadata</th>
+                          <th class="created-col" scope="col">Created At</th>
+                          <th class="text-center" scope="col"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {{ $thing := .Thing }}
+                        {{ range $i, $c := .Channels }}
+                          {{ $disableButton := false }}
+                          <tr>
+                            <td>{{ $c.Name }}</td>
+                            <td>
+                              <div class="copy-con-container">
+                                <a href="{{ printf "/channels/%s" $c.ID }}">
+                                  {{ $c.ID }}
+                                </a>
+                                <button class="copy-icon" onclick="copyToClipboard(this)">
+                                  <i class="far fa-copy"></i>
+                                </button>
+                              </div>
+                            </td>
+                            <td class="desc-col">{{ $c.Description }}</td>
+                            <td class="meta-col">{{ toJSON $c.Metadata }}</td>
+                            <td class="created-col">{{ $c.CreatedAt }}</td>
+                            <td class="d-flex flex-row">
+                              <button
+                                type="button"
+                                class="btn btn-sm doc-button"
+                                data-bs-toggle="modal"
+                                data-bs-target="#sendMesageModal{{ $i }}"
+                              >
+                                Send Message
+                              </button>
+                              <form
+                                action="/things/{{ $thing.ID }}/channels/disconnect?item=things"
+                                method="post"
+                              >
+                                <input
+                                  type="hidden"
+                                  name="channelID"
+                                  id="channelID"
+                                  value="{{ $c.ID }}"
+                                />
+                                <button
+                                  type="submit"
+                                  class="btn btn-sm"
+                                  {{ if
+                                    $disableButton
+                                  }}
+                                    disabled
+                                  {{ end }}
+                                >
+                                  <i class="fas fa-trash-alt"></i>
+                                </button>
+                              </form>
+                            </td>
+                          </tr>
+                          <!-- modal -->
+                          <div
+                            class="modal fade"
+                            id="sendMesageModal{{ $i }}"
+                            tabindex="-1"
+                            aria-labelledby="sendMesageModalLabel{{ $i }}"
+                            aria-hidden="true"
+                          >
+                            <div class="modal-dialog">
+                              <div class="modal-content">
+                                <div class="modal-header">
+                                  <h1 class="modal-title fs-5" id="sendMesageModalLabel{{ $i }}">
+                                    Send Message
+                                  </h1>
+                                  <button
+                                    type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal"
+                                    aria-label="Close"
+                                  ></button>
+                                </div>
+                                <form action="/messages" method="post">
+                                  <div class="modal-body">
+                                    <input
+                                      type="hidden"
+                                      name="channelID"
+                                      id="channelID"
+                                      value="{{ $c }}"
+                                    />
+                                    <input
+                                      type="hidden"
+                                      name="thingKey"
+                                      id="thingKey"
+                                      value="{{ $thing.Credentials.Secret }}"
+                                    />
+                                    <div class="mb-3">
+                                      <label for="message" class="form-label">Message</label>
+                                      <textarea
+                                        class="form-control"
+                                        name="message"
+                                        id="message"
+                                        aria-describedby="messageHelp"
+                                      ></textarea>
+                                      <div id="messageHelp" class="form-text">Enter Message.</div>
+                                    </div>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button
+                                      type="button"
+                                      class="btn btn-secondary"
+                                      data-bs-dismiss="modal"
+                                    >
+                                      Close
+                                    </button>
+                                    <button type="submit" class="btn doc-button">
+                                      Send Message
+                                    </button>
+                                  </div>
+                                </form>
+                              </div>
+                            </div>
+                          </div>
+                        {{ end }}
+                      </tbody>
+                    </table>
+                  </div>
+                  {{ template "tablefooter" . }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-			{{ template "footer" }}
-			<script>
-				const channelModal = new bootstrap.Modal(
-					document.getElementById("addChannelModal"),
-				);
-				function openChannelModal() {
-					channelModal.show();
-					getChannel("");
-					getAdditionalChannels("");
-				}
-				function fetchIndividualEntity(filterValue, selectId) {
-					const itemSelect = document.getElementById(selectId);
-					if (filterValue === "") {
-						itemSelect.innerHTML = "<option disabled>select a channel</option>";
-						getChannel("");
-						getAdditionalChannels();
-					} else {
-						itemSelect.innerHTML = "";
-						getChannel(filterValue);
-					}
-				}
-				let limit = 5;
+      {{ template "footer" }}
+      <script>
+        const channelModal = new bootstrap.Modal(document.getElementById("addChannelModal"));
+        function openChannelModal() {
+          channelModal.show();
+        }
+      </script>
+      <script type="module">
+        import { fetchIndividualEntity } from "/js/infinitescroll.js";
 
-				function getChannel(name) {
-					fetchChannelData(name, 1);
-				}
-				function getAdditionalChannels() {
-					var selectElement = document.getElementById("channels");
-					var singleOptionHeight =
-						selectElement.querySelector("option").offsetHeight;
-					var selectBoxHeight = selectElement.offsetHeight;
-					var numOptionsBeforeLoad = 2;
-					var lastScrollTop = 0;
-					var currentPageNo = 1;
-					var currentScroll = 0;
-
-					selectElement.addEventListener("scroll", onselectScroll);
-
-					function onselectScroll(event) {
-						var st = selectElement.scrollTop;
-						var totalHeight =
-							selectElement.querySelectorAll("option").length *
-							singleOptionHeight;
-
-						if (st > lastScrollTop) {
-							currentScroll = st + selectBoxHeight;
-							if (
-								currentScroll + numOptionsBeforeLoad * singleOptionHeight >=
-								totalHeight
-							) {
-								currentPageNo++;
-								fetchChannelData("", currentPageNo);
-							}
-						}
-
-						lastScrollTop = st;
-					}
-				}
-				function fetchChannelData(name, page) {
-					fetch(
-						`/entities?item=channels&limit=${limit}&name=${name}&page=${page}`,
-						{
-							method: "GET",
-						},
-					)
-						.then((response) => response.json())
-						.then((data) => {
-							const selectElement = document.getElementById("channels");
-							data.data.forEach((channel) => {
-								const option = document.createElement("option");
-								option.value = channel.id;
-								option.text = channel.name;
-								selectElement.appendChild(option);
-							});
-						})
-						.catch((error) => console.error("Error:", error));
-				}
-			</script>
-		</body>
-	</html>
+        fetchIndividualEntity({
+          input: "channelFilter",
+          itemSelect: "infiniteScroll",
+          item: "channels",
+        });
+      </script>
+    </body>
+  </html>
 {{ end }}

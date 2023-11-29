@@ -2,284 +2,190 @@
 SPDX-License-Identifier: Apache-2.0 -->
 
 {{ define "thingusers" }}
-	<!doctype html>
-	<html lang="en">
-		{{ template "header" }}
-		<body>
-			{{ template "navbar" . }}
-			<div class="main-content pt-3">
-				<div class="container">
-					<div class="row">
-						<div class="col-lg-12 mx-auto py-3">
-							<div class="row">
-								<div class="buttons mb-3">
-									<a
-										class="btn body-button"
-										href="/things/{{ .ThingID }}"
-										role="button"
-									>
-										Thing
-									</a>
-									<a
-										class="btn body-button"
-										href="/things/{{ .ThingID }}/channels"
-										role="button"
-									>
-										Thing Channels
-									</a>
-								</div>
-								<div class="table-responsive table-container">
-									<div class="d-flex flex-row justify-content-between">
-										<h4>Thing Users</h4>
-										<button
-											role="button"
-											class="btn body-button"
-											onclick="openUserModal()"
-										>
-											<i class="fa-solid fa-plus fs-4"></i>
-										</button>
-										<!-- modal -->
-										<div
-											class="modal fade"
-											id="addUserModal"
-											tabindex="-1"
-											aria-labelledby="addUserModalLabel"
-											aria-hidden="true"
-										>
-											<div class="modal-dialog modal-dialog-centered">
-												<div class="modal-content">
-													<div class="modal-header">
-														<h1 class="modal-title fs-5" id="addUserModalLabel">
-															Share Thing
-														</h1>
-														<button
-															type="button"
-															class="btn-close"
-															data-bs-dismiss="modal"
-															aria-label="Close"
-														></button>
-													</div>
-													<form
-														action="/things/{{ .ThingID }}/share?item=things"
-														method="post"
-													>
-														<div class="modal-body">
-															<div class="mb-3">
-																<label for="users" class="form-label">
-																	User ID
-																</label>
-																<input
-																	type="text"
-																	name="userFilter"
-																	id="userFilterAssign"
-																	placeholder="Filter by User ID"
-																	oninput="fetchIndividualEntity(this.value,'users')"
-																/>
-																<select
-																	class="form-select"
-																	name="userID"
-																	id="users"
-																	size="5"
-																	required
-																>
-																	<option disabled>select a User</option>
-																</select>
-															</div>
-															<div class="mb-3">
-																<label for="relation" class="form-label">
-																	Relation
-																</label>
-																<select
-																	class="form-control"
-																	name="relation"
-																	id="relation"
-																	aria-describedby="relationHelp"
-																	multiple
-																	required
-																>
-																	{{ range $r := .Relations }}
-																		<option value="{{ $r }}">
-																			{{ $r }}
-																		</option>
-																	{{ end }}
-																</select>
-																<div id="relationHelp" class="form-text">
-																	Select Relation.
-																</div>
-															</div>
-															<div class="modal-footer">
-																<button
-																	type="button"
-																	class="btn btn-secondary"
-																	data-bs-dismiss="modal"
-																>
-																	Cancel
-																</button>
-																<button type="submit" class="btn btn-primary">
-																	Assign
-																</button>
-															</div>
-														</div>
-													</form>
-												</div>
-											</div>
-										</div>
-									</div>
-									{{ template "tableheader" . }}
-									<div class="itemsTable">
-										<table id="itemsTable" class="table">
-											<thead>
-												<tr>
-													<th scope="col">Name</th>
-													<th scope="col">ID</th>
-													<th class="tags-col" scope="col">Tags</th>
-													<th class="meta-col" scope="col">Metadata</th>
-													<th class="created-col" scope="col">Created At</th>
-													<th class="text-center" scope="col"></th>
-												</tr>
-											</thead>
-											<tbody>
-												{{ $thingID := .ThingID }}
-												{{ range $i, $u := .Users }}
-													{{ $disableButton := false }}
-													<tr>
-														<td>{{ $u.Name }}</td>
-														<td>
-															<div class="copy-con-container">
-																<a href="{{ printf "/users/%s" $u.ID }}">
-																	{{ $u.ID }}
-																</a>
-																<button
-																	class="copy-icon"
-																	onclick="copyToClipboard(this)"
-																>
-																	<i class="far fa-copy"></i>
-																</button>
-															</div>
-														</td>
-														<td class="tags-col">{{ toSlice $u.Tags }}</td>
-														<td class="meta-col">{{ toJSON $u.Metadata }}</td>
-														<td class="created-col">{{ $u.CreatedAt }}</td>
-														<td class="text-center">
-															<form
-																action="/things/{{ $thingID }}/unshare?item=things"
-																method="post"
-															>
-																<input
-																	type="hidden"
-																	name="userID"
-																	id="userID"
-																	value="{{ $u.ID }}"
-																/>
-																<input
-																	type="hidden"
-																	name="relation"
-																	id="relation"
-																	value="owner"
-																/>
-																<button
-																	type="submit"
-																	class="btn btn-sm"
-																	{{ if
-																		$disableButton
-																	}}
-																		disabled
-																	{{ end }}
-																>
-																	<i class="fas fa-trash-alt"></i>
-																</button>
-															</form>
-														</td>
-													</tr>
-												{{ end }}
-											</tbody>
-										</table>
-									</div>
-									{{ template "tablefooter" . }}
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			{{ template "footer" }}
-			<script>
-				const userModal = new bootstrap.Modal(
-					document.getElementById("addUserModal"),
-				);
-				function openUserModal() {
-					userModal.show();
-					getUser("");
-					getAdditionalUsers("");
-				}
-				function fetchIndividualEntity(filterValue, selectId) {
-					const itemSelect = document.getElementById(selectId);
-					if (filterValue === "") {
-						itemSelect.innerHTML = "<option disabled>select a user</option>";
-						getUser("");
-						getAdditionalUsers();
-					} else {
-						itemSelect.innerHTML = "";
-						getUser(filterValue);
-					}
-				}
-				let limit = 5;
+  <!doctype html>
+  <html lang="en">
+    <head>
+      <title>Thing Users</title>
+      {{ template "header" }}
+      <script src="/js/infinitescroll.js" type="module"></script>
+    </head>
+    <body>
+      {{ template "navbar" . }}
+      <div class="main-content pt-3">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-12 mx-auto py-3">
+              <div class="row">
+                <div class="buttons mb-3">
+                  <a class="btn body-button" href="/things/{{ .ThingID }}" role="button">Thing</a>
+                  <a class="btn body-button" href="/things/{{ .ThingID }}/channels" role="button">
+                    Thing Channels
+                  </a>
+                </div>
+                <div class="table-responsive table-container">
+                  <div class="d-flex flex-row justify-content-between">
+                    <h4>Thing Users</h4>
+                    <button role="button" class="btn body-button" onclick="openUserModal()">
+                      <i class="fa-solid fa-plus fs-4"></i>
+                    </button>
+                    <!-- modal -->
+                    <div
+                      class="modal fade"
+                      id="addUserModal"
+                      tabindex="-1"
+                      aria-labelledby="addUserModalLabel"
+                      aria-hidden="true"
+                    >
+                      <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="addUserModalLabel">Share Thing</h1>
+                            <button
+                              type="button"
+                              class="btn-close"
+                              data-bs-dismiss="modal"
+                              aria-label="Close"
+                            ></button>
+                          </div>
+                          <form action="/things/{{ .ThingID }}/share?item=things" method="post">
+                            <div class="modal-body">
+                              <div class="mb-3">
+                                <label for="infiniteScroll" class="form-label">User ID</label>
+                                <input
+                                  type="text"
+                                  name="userFilter"
+                                  id="userFilter"
+                                  placeholder="Filter by User ID"
+                                />
+                                <select
+                                  class="form-select"
+                                  name="userID"
+                                  id="infiniteScroll"
+                                  size="5"
+                                  required
+                                >
+                                  <option disabled>select a User</option>
+                                </select>
+                              </div>
+                              <div class="mb-3">
+                                <label for="relation" class="form-label">Relation</label>
+                                <select
+                                  class="form-control"
+                                  name="relation"
+                                  id="relation"
+                                  aria-describedby="relationHelp"
+                                  multiple
+                                  required
+                                >
+                                  {{ range $r := .Relations }}
+                                    <option value="{{ $r }}">
+                                      {{ $r }}
+                                    </option>
+                                  {{ end }}
+                                </select>
+                                <div id="relationHelp" class="form-text">Select Relation.</div>
+                              </div>
+                              <div class="modal-footer">
+                                <button
+                                  type="button"
+                                  class="btn btn-secondary"
+                                  data-bs-dismiss="modal"
+                                >
+                                  Cancel
+                                </button>
+                                <button type="submit" class="btn btn-primary">Assign</button>
+                              </div>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  {{ template "tableheader" . }}
+                  <div class="itemsTable">
+                    <table id="itemsTable" class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">Name</th>
+                          <th scope="col">ID</th>
+                          <th class="tags-col" scope="col">Tags</th>
+                          <th class="meta-col" scope="col">Metadata</th>
+                          <th class="created-col" scope="col">Created At</th>
+                          <th class="text-center" scope="col"></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {{ $thingID := .ThingID }}
+                        {{ range $i, $u := .Users }}
+                          {{ $disableButton := false }}
+                          <tr>
+                            <td>{{ $u.Name }}</td>
+                            <td>
+                              <div class="copy-con-container">
+                                <a href="{{ printf "/users/%s" $u.ID }}">
+                                  {{ $u.ID }}
+                                </a>
+                                <button class="copy-icon" onclick="copyToClipboard(this)">
+                                  <i class="far fa-copy"></i>
+                                </button>
+                              </div>
+                            </td>
+                            <td class="tags-col">{{ toSlice $u.Tags }}</td>
+                            <td class="meta-col">{{ toJSON $u.Metadata }}</td>
+                            <td class="created-col">{{ $u.CreatedAt }}</td>
+                            <td class="text-center">
+                              <form
+                                action="/things/{{ $thingID }}/unshare?item=things"
+                                method="post"
+                              >
+                                <input
+                                  type="hidden"
+                                  name="userID"
+                                  id="userID"
+                                  value="{{ $u.ID }}"
+                                />
+                                <input type="hidden" name="relation" id="relation" value="owner" />
+                                <button
+                                  type="submit"
+                                  class="btn btn-sm"
+                                  {{ if
+                                    $disableButton
+                                  }}
+                                    disabled
+                                  {{ end }}
+                                >
+                                  <i class="fas fa-trash-alt"></i>
+                                </button>
+                              </form>
+                            </td>
+                          </tr>
+                        {{ end }}
+                      </tbody>
+                    </table>
+                  </div>
+                  {{ template "tablefooter" . }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{ template "footer" }}
+      <script>
+        const userModal = new bootstrap.Modal(document.getElementById("addUserModal"));
+        function openUserModal() {
+          userModal.show();
+        }
+      </script>
+      <script type="module">
+        import { fetchIndividualEntity } from "/js/infinitescroll.js";
 
-				function getUser(name) {
-					fetchUserData(name, 1);
-				}
-				function getAdditionalUsers() {
-					var selectElement = document.getElementById("users");
-					var singleOptionHeight =
-						selectElement.querySelector("option").offsetHeight;
-					var selectBoxHeight = selectElement.offsetHeight;
-					var numOptionsBeforeLoad = 2;
-					var lastScrollTop = 0;
-					var currentPageNo = 1;
-					var currentScroll = 0;
-
-					selectElement.addEventListener("scroll", onselectScroll);
-
-					function onselectScroll(event) {
-						var st = selectElement.scrollTop;
-						var totalHeight =
-							selectElement.querySelectorAll("option").length *
-							singleOptionHeight;
-
-						if (st > lastScrollTop) {
-							currentScroll = st + selectBoxHeight;
-							if (
-								currentScroll + numOptionsBeforeLoad * singleOptionHeight >=
-								totalHeight
-							) {
-								currentPageNo++;
-								fetchUserData("", currentPageNo);
-							}
-						}
-
-						lastScrollTop = st;
-					}
-				}
-				function fetchUserData(name, page) {
-					fetch(
-						`/entities?item=users&limit=${limit}&name=${name}&page=${page}`,
-						{
-							method: "GET",
-						},
-					)
-						.then((response) => response.json())
-						.then((data) => {
-							const selectElement = document.getElementById("users");
-							data.data.forEach((user) => {
-								const option = document.createElement("option");
-								option.value = user.id;
-								option.text = user.name;
-								selectElement.appendChild(option);
-							});
-						})
-						.catch((error) => console.error("Error:", error));
-				}
-			</script>
-		</body>
-	</html>
+        fetchIndividualEntity({
+          input: "userFilter",
+          itemSelect: "infiniteScroll",
+          item: "users",
+        });
+      </script>
+    </body>
+  </html>
 {{ end }}

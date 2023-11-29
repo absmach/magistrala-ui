@@ -2,300 +2,152 @@
 SPDX-License-Identifier: Apache-2.0 -->
 
 {{ define "channel" }}
-	<!doctype html>
-	<html lang="en">
-		{{ template "header" }}
-		<body>
-			{{ template "navbar" . }}
-			<div class="main-content pt-3">
-				<div class="container">
-					<div class="row">
-						<div class="col-lg-12 mx-auto py-3">
-							<div class="row">
-								<div class="buttons mb-3">
-									<a
-										href="/channels/{{ .Channel.ID }}/things"
-										type="button"
-										class="btn body-button"
-									>
-										Channel Things
-									</a>
-									<a
-										href="/channels/{{ .Channel.ID }}/users"
-										type="button"
-										class="btn body-button"
-									>
-										Channel Users
-									</a>
-									<a
-										href="/channels/{{ .Channel.ID }}/groups"
-										type="button"
-										class="btn body-button"
-									>
-										Channel Groups
-									</a>
-								</div>
-								<div class="table-responsive table-container">
-									<table id="itemsTable" class="table">
-										<thead>
-											<tr>
-												<th scope="row">CHANNEL</th>
-											</tr>
-										</thead>
-										<tbody>
-											{{ $disableButton := false }}
-											<tr>
-												<th>NAME</th>
-												<td
-													class="editable"
-													contenteditable="false"
-													data-field="name"
-												>
-													{{ .Channel.Name }}
-												</td>
-												<td>
-													<button
-														class="edit-btn"
-														onclick="editRow('name')"
-														{{ if
-															$disableButton
-														}}
-															disabled
-														{{ end }}
-													>
-														<i class="fas fa-pencil-alt"></i>
-													</button>
-													<div
-														class="save-cancel-buttons"
-														style="display: none"
-													>
-														<button class="save-btn" onclick="saveRow('name')">
-															Save
-														</button>
-														<button
-															class="cancel-btn"
-															onclick="cancelEditRow('name')"
-														>
-															Cancel
-														</button>
-													</div>
-												</td>
-											</tr>
-											<tr>
-												<th>ID</th>
-												<td>{{ .Channel.ID }}</td>
-												<td></td>
-											</tr>
-											<tr>
-												<th>Owner</th>
-												<td>{{ .Channel.OwnerID }}</td>
-												<td></td>
-											</tr>
-											<tr>
-												<th>Description</th>
-												<td
-													class="editable"
-													contenteditable="false"
-													data-field="description"
-												>
-													{{ .Channel.Description }}
-												</td>
-												<td>
-													<button
-														class="edit-btn"
-														onclick="editRow('description')"
-														{{ if
-															$disableButton
-														}}
-															disabled
-														{{ end }}
-													>
-														<i class="fas fa-pencil-alt"></i>
-													</button>
-													<div
-														class="save-cancel-buttons"
-														style="display: none"
-													>
-														<button
-															class="save-btn"
-															onclick="saveRow('description')"
-														>
-															Save
-														</button>
-														<button
-															class="cancel-btn"
-															onclick="cancelEditRow('description')"
-														>
-															Cancel
-														</button>
-													</div>
-												</td>
-											</tr>
-											<tr>
-												<th>Metadata</th>
-												<td
-													class="editable"
-													contenteditable="false"
-													data-field="metadata"
-												>
-													{{ toJSON .Channel.Metadata }}
-												</td>
-												<td>
-													<button
-														class="edit-btn"
-														onclick="editRow('metadata')"
-														{{ if
-															$disableButton
-														}}
-															disabled
-														{{ end }}
-													>
-														<i class="fas fa-pencil-alt"></i>
-													</button>
-													<div
-														class="save-cancel-buttons"
-														style="display: none"
-													>
-														<button
-															class="save-btn"
-															onclick="saveRow('metadata')"
-														>
-															Save
-														</button>
-														<button
-															class="cancel-btn"
-															onclick="cancelEditRow('metadata')"
-														>
-															Cancel
-														</button>
-													</div>
-												</td>
-											</tr>
-										</tbody>
-									</table>
-									<div id="error-message" class="text-danger"></div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			{{ template "footer" }}
-    <script>
-      function makeEditable(cell) {
-        cell.setAttribute("contenteditable", "true");
-        cell.dataset.originalContent = cell.innerHTML;
-      }
+  <!doctype html>
+  <html lang="en">
+    <head>
+      <title>Channel</title>
+      {{ template "header" }}
+      <script src="/js/update.js" type="module"></script>
+    </head>
+    <body>
+      {{ template "navbar" . }}
+      <div class="main-content pt-3">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-12 mx-auto py-3">
+              <div class="row">
+                <div class="buttons mb-3">
+                  <a
+                    href="/channels/{{ .Channel.ID }}/things"
+                    type="button"
+                    class="btn body-button"
+                  >
+                    Channel Things
+                  </a>
+                  <a href="/channels/{{ .Channel.ID }}/users" type="button" class="btn body-button">
+                    Channel Users
+                  </a>
+                  <a
+                    href="/channels/{{ .Channel.ID }}/groups"
+                    type="button"
+                    class="btn body-button"
+                  >
+                    Channel Groups
+                  </a>
+                </div>
+                <div class="table-responsive table-container">
+                  <table id="itemsTable" class="table">
+                    <thead>
+                      <tr>
+                        <th scope="row">CHANNEL</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {{ $disableButton := false }}
+                      <tr>
+                        <th>NAME</th>
+                        <td class="editable" contenteditable="false" data-field="name">
+                          {{ .Channel.Name }}
+                        </td>
+                        <td>
+                          <button
+                            class="edit-btn"
+                            id="edit-name"
+                            {{ if
+                              $disableButton
+                            }}
+                              disabled
+                            {{ end }}
+                          >
+                            <i class="fas fa-pencil-alt"></i>
+                          </button>
+                          <div class="save-cancel-buttons" style="display: none">
+                            <button class="save-btn" id="save-name">Save</button>
+                            <button class="cancel-btn" id="cancel-name">Cancel</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>ID</th>
+                        <td>{{ .Channel.ID }}</td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <th>Owner</th>
+                        <td>{{ .Channel.OwnerID }}</td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <th>Description</th>
+                        <td class="editable" contenteditable="false" data-field="description">
+                          {{ .Channel.Description }}
+                        </td>
+                        <td>
+                          <button
+                            class="edit-btn"
+                            id="edit-description"
+                            {{ if
+                              $disableButton
+                            }}
+                              disabled
+                            {{ end }}
+                          >
+                            <i class="fas fa-pencil-alt"></i>
+                          </button>
+                          <div class="save-cancel-buttons" style="display: none">
+                            <button class="save-btn" id="save-description">Save</button>
+                            <button class="cancel-btn" id="cancel-description">Cancel</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Metadata</th>
+                        <td class="editable" contenteditable="false" data-field="metadata">
+                          {{ toJSON .Channel.Metadata }}
+                        </td>
+                        <td>
+                          <button
+                            class="edit-btn"
+                            id="edit-metadata"
+                            {{ if
+                              $disableButton
+                            }}
+                              disabled
+                            {{ end }}
+                          >
+                            <i class="fas fa-pencil-alt"></i>
+                          </button>
+                          <div class="save-cancel-buttons" style="display: none">
+                            <button class="save-btn" id="save-metadata">Save</button>
+                            <button class="cancel-btn" id="cancel-metadata">Cancel</button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div id="error-message" class="text-danger"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{ template "footer" }}
+      <script type="module">
+        import { attachEditRowListener, updateName, updateDescription, updateMetadata} from "/js/update.js";
 
-      function makeUneditable(cell) {
-        const originalContent = cell.dataset.originalContent;
-        cell.innerHTML = originalContent;
-        cell.setAttribute("contenteditable", "false");
-      }
-
-      function showButtons(editBtn, saveCancelBtn) {
-        editBtn.style.display = "none";
-        saveCancelBtn.style.display = "inline-block";
-      }
-      function hideButtons(editBtn, saveCancelBtn) {
-        editBtn.style.display = "inline-block";
-        saveCancelBtn.style.display = "none";
-      }
-
-      function editRow(field) {
-        const cell = document.querySelector(`td[data-field='${field}']`);
-        const editBtn = cell.parentNode.querySelector(".edit-btn");
-        const saveCancelBtn = cell.parentNode.querySelector(
-          ".save-cancel-buttons",
-        );
-
-        //make the row editable
-        makeEditable(cell);
-
-        //Hide edit button and show save and cancel buttons
-        showButtons(editBtn, saveCancelBtn);
-      }
-
-      function cancelEditRow(field) {
-        const cell = document.querySelector(`td[data-field='${field}']`);
-        const editBtn = cell.parentNode.querySelector(".edit-btn");
-        const saveCancelBtn = cell.parentNode.querySelector(
-          ".save-cancel-buttons",
-        );
-        const errorMessage = document.getElementById("error-message");
-
-        errorMessage.textContent = "";
-
-        //Restore original values in the row
-        makeUneditable(cell);
-
-        //show the edit button and hide the save and cancel buttons
-        hideButtons(editBtn, saveCancelBtn);
-      }
-
-      function saveRow(field) {
-        const cell = document.querySelector(`td[data-field='${field}']`);
-        const editBtn = cell.parentNode.querySelector(".edit-btn");
-        const saveCancelBtn = cell.parentNode.querySelector(
-          ".save-cancel-buttons",
-        );
-        const errorMessage = document.getElementById("error-message");
-
-        //Get the updated value from the nameCell
-        const updatedValue = cell.textContent.trim();
-
-        //send the updated value to the server using a post request
-        let url;
-        let data;
-        if (field === "name" || field === "description") {
-          url = "/channels/{{.Channel.ID}}";
-          data = { [field]: updatedValue };
-        } else if (field === "metadata") {
-          try {
-            const metadata = JSON.parse(updatedValue);
-            url = "/channels/{{.Channel.ID}}";
-            data = { [field]: metadata };
-          } catch (error) {
-            errorMessage.textContent = "Metadata must be a valid JSON object!";
-            return;
-          }
-        }
-
-        if (url) {
-			errorMessage.textContent="";
-			fetch(url, {
-				method: "POST",
-				body: JSON.stringify(data),
-				headers: {
-				"Content-Type": "application/json",
-				},
-			})
-            .then((response) => {
-              if (response.ok) {
-                //make the row uneditable
-                cell.setAttribute("contenteditable", "false");
-
-                //show edit button and hide save and cancel buttons
-                hideButtons(editBtn, saveCancelBtn);
-              } else {
-                throw new Error("Response not OK");
-              }
-            })
-            .catch((error) => {
-              //Restore original values in the row if there is an error
-              makeUneditable(cell);
-
-              //show edit button and hide save and cancel buttons
-              hideButtons(editBtn, saveCancelBtn);
-
-              console.error("Error", error);
-              errorMessage.textContent = "Entity already exists";
-            });
-        } else {
-          console.error("Invalid field:", field);
-        }
-      }
-    </script>
-		</body>
-	</html>
+        attachEditRowListener(
+        {
+          entity: "channels",
+          id: "{{ .Channel.ID }}",
+          rows: {
+            name:updateName,
+            description: updateDescription,
+            metadata:updateMetadata,
+          },
+          errorDiv: "error-message",
+        });
+      </script>
+    </body>
+  </html>
 {{ end }}

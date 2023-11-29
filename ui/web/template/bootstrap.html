@@ -2,380 +2,152 @@
 SPDX-License-Identifier: Apache-2.0 -->
 
 {{ define "bootstrap" }}
-	<!doctype html>
-	<html lang="en">
-		{{ template "header" }}
-		<body>
-			{{ template "navbar" . }}
-			<div class="main-content pt-3">
-				<div class="container">
-					<div class="row">
-						<div class="col-lg-12 mx-auto py-3">
-							<div class="row">
-								<div class="buttons mb-3">
-									<button
-										type="button"
-										class="btn body-button"
-										onclick="location.href='/bootstraps/{{ .Bootstrap.ThingID }}/terminal'"
-									>
-										Remote Terminal
-									</button>
-								</div>
-								<div class="table-responsive table-container">
-									<table id="itemsTable" class="table">
-										<thead>
-											<tr>
-												<th scope="row">Bootstrap</th>
-											</tr>
-										</thead>
-										<tbody>
-											<tr>
-												<th>Name</th>
-												<td
-													class="editable"
-													contenteditable="false"
-													data-field="name"
-												>
-													{{ .Bootstrap.Name }}
-												</td>
-												<td>
-													<button class="edit-btn" onclick="editRow('name')">
-														<i class="fas fa-pencil-alt"></i>
-													</button>
-													<div
-														class="save-cancel-buttons"
-														style="display: none"
-													>
-														<button class="save-btn" onclick="saveRow('name')">
-															Save
-														</button>
-														<button
-															class="cancel-btn"
-															onclick="cancelEditRow('name')"
-														>
-															Cancel
-														</button>
-													</div>
-												</td>
-											</tr>
-											<tr>
-												<th>Content</th>
-												<td
-													class="editable"
-													contenteditable="false"
-													data-field="content"
-												>
-													{{ .Bootstrap.Content }}
-												</td>
-												<td>
-													<button class="edit-btn" onclick="editRow('content')">
-														<i class="fas fa-pencil-alt"></i>
-													</button>
-													<div
-														class="save-cancel-buttons"
-														style="display: none"
-													>
-														<button
-															class="save-btn"
-															onclick="saveRow('content')"
-														>
-															Save
-														</button>
-														<button
-															class="cancel-btn"
-															onclick="cancelEditRow('content')"
-														>
-															Cancel
-														</button>
-													</div>
-												</td>
-											</tr>
-											<tr>
-												<th>Channels</th>
-												<td
-													class="editable"
-													contenteditable="false"
-													data-field="channels"
-												>
-													{{ toSlice .Bootstrap.Channels }}
-												</td>
-												<td>
-													<button
-														class="edit-btn"
-														onclick="editRow('channels')"
-													>
-														<i class="fas fa-pencil-alt"></i>
-													</button>
-													<div
-														class="save-cancel-buttons"
-														style="display: none"
-													>
-														<button
-															class="save-btn"
-															onclick="saveRow('channels')"
-														>
-															Save
-														</button>
-														<button
-															class="cancel-btn"
-															onclick="cancelEditRow('channels')"
-														>
-															Cancel
-														</button>
-													</div>
-												</td>
-											</tr>
-											<tr>
-												<th>Client Cert</th>
-												<td
-													class="editable"
-													contenteditable="false"
-													data-field="clientCert"
-												>
-													{{ .Bootstrap.ClientCert }}
-												</td>
-												<td>
-													<button
-														class="edit-btn"
-														onclick="editRow('clientCert')"
-													>
-														<i class="fas fa-pencil-alt"></i>
-													</button>
-													<div
-														class="save-cancel-buttons"
-														style="display: none"
-													>
-														<button
-															class="save-btn"
-															onclick="saveRow('clientCert')"
-														>
-															Save
-														</button>
-														<button
-															class="cancel-btn"
-															onclick="cancelEditRow('clientCert')"
-														>
-															Cancel
-														</button>
-													</div>
-												</td>
-											</tr>
-											<tr>
-												<th>Client Key</th>
-												<td
-													class="editable"
-													contenteditable="false"
-													data-field="clientKey"
-												>
-													{{ .Bootstrap.ClientKey }}
-												</td>
-												<td>
-													<button
-														class="edit-btn"
-														onclick="editRow('clientKey')"
-													>
-														<i class="fas fa-pencil-alt"></i>
-													</button>
-													<div
-														class="save-cancel-buttons"
-														style="display: none"
-													>
-														<button
-															class="save-btn"
-															onclick="saveRow('clientKey')"
-														>
-															Save
-														</button>
-														<button
-															class="cancel-btn"
-															onclick="cancelEditRow('clientKey')"
-														>
-															Cancel
-														</button>
-													</div>
-												</td>
-											</tr>
-											<tr>
-												<th>CA Cert</th>
-												<td
-													class="editable"
-													contenteditable="false"
-													data-field="CACert"
-												>
-													{{ .Bootstrap.CACert }}
-												</td>
-												<td>
-													<button class="edit-btn" onclick="editRow('CACert')">
-														<i class="fas fa-pencil-alt"></i>
-													</button>
-													<div
-														class="save-cancel-buttons"
-														style="display: none"
-													>
-														<button
-															class="save-btn"
-															onclick="saveRow('CACert')"
-														>
-															Save
-														</button>
-														<button
-															class="cancel-btn"
-															onclick="cancelEditRow('CACert')"
-														>
-															Cancel
-														</button>
-													</div>
-												</td>
-											</tr>
-										</tbody>
-									</table>
-									<div id="error-message" class="text-danger"></div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			{{ template "footer" }}
-    <script>
-      function makeEditable(cell) {
-        cell.setAttribute("contenteditable", "true");
-        cell.dataset.originalContent = cell.innerHTML;
-      }
-
-      function makeUneditable(cell) {
-        const originalContent = cell.dataset.originalContent;
-        cell.innerHTML = originalContent;
-        cell.setAttribute("contenteditable", "false");
-      }
-
-      function showButtons(editBtn, saveCancelBtn) {
-        editBtn.style.display = "none";
-        saveCancelBtn.style.display = "inline-block";
-      }
-
-      function hideButtons(editBtn, saveCancelBtn) {
-        editBtn.style.display = "inline-block";
-        saveCancelBtn.style.display = "none";
-      }
-
-      function editRow(field) {
-        const cell = document.querySelector(`td[data-field='${field}']`);
-        const editBtn = cell.parentNode.querySelector(".edit-btn");
-        const saveCancelBtn = cell.parentNode.querySelector(
-          ".save-cancel-buttons",
-        );
-
-        // Make the row editable
-        makeEditable(cell);
-
-        // Hide the edit button and show save and cancel buttons
-        showButtons(editBtn, saveCancelBtn);
-      }
-
-      function saveRow(field) {
-        const cell = document.querySelector(`td[data-field='${field}']`);
-        const editBtn = cell.parentNode.querySelector(".edit-btn");
-        const saveCancelBtn = cell.parentNode.querySelector(
-          ".save-cancel-buttons",
-        );
-        const errorMessage = document.getElementById("error-message");
-
-        // Get the updated value from the nameCell
-        const updatedValue = cell.textContent.trim();
-
-        // Send the updated value to the server using a POST request
-        let url;
-        let data;
-        if (field === "name") {
-          url = "/bootstraps/{{.Bootstrap.ThingID}}";
-          data = { [field]: updatedValue, content: "{{.Bootstrap.Content}}" };
-        } else if (field == "content") {
-          try {
-            const content = JSON.parse(updatedValue);
-            url = "/bootstraps/{{.Bootstrap.ThingID}}";
-            data = { [field]: updatedValue, name: "{{.Bootstrap.Name}}" };
-          } catch (error) {
-            errorMessage.textContent = "Content must be a valid JSON object!";
-            return;
-          }
-        } else if (
-          field == "clientCert" ||
-          field == "clientKey" ||
-          field == "CACert"
-        ) {
-          url = "/bootstraps/{{.Bootstrap.ThingID}}/certs";
-          data = { [field]: updatedValue };
-        } else if (field === "channels") {
-          try {
-            const channels = JSON.parse(updatedValue);
-            if (
-              !Array.isArray(channels) ||
-              !channels.every(function (channel) {
-                return typeof channel === "string";
-              })
-            ) {
-              errorMessage.textContent = "Channels must be a string array";
-              return;
-            }
-            url = "/bootstraps/{{.Bootstrap.ThingID}}/connections";
-            data = { [field]: channels };
-          } catch (error) {
-            errorMessage.textContent = "Channels must be a valid string array";
-            return;
-          }
+  <!doctype html>
+  <html lang="en">
+    <head>
+      <title>Bootstrap</title>
+      {{ template "header" }}
+      <script src="/js/update.js" type="module"></script>
+    </head>
+    <body>
+      {{ template "navbar" . }}
+      <div class="main-content pt-3">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-12 mx-auto py-3">
+              <div class="row">
+                <div class="buttons mb-3">
+                  <button
+                    type="button"
+                    class="btn body-button"
+                    onclick="location.href='/bootstraps/{{ .Bootstrap.ThingID }}/terminal'"
+                  >
+                    Remote Terminal
+                  </button>
+                </div>
+                <div class="table-responsive table-container">
+                  <table id="itemsTable" class="table">
+                    <thead>
+                      <tr>
+                        <th scope="row">Bootstrap</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <th>Name</th>
+                        <td class="editable" contenteditable="false" data-field="name">
+                          {{ .Bootstrap.Name }}
+                        </td>
+                        <td>
+                          <button class="edit-btn" id="edit-name">
+                            <i class="fas fa-pencil-alt"></i>
+                          </button>
+                          <div class="save-cancel-buttons" style="display: none">
+                            <button class="save-btn" id="save-name">Save</button>
+                            <button class="cancel-btn" id="cancel-name">Cancel</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Content</th>
+                        <td class="editable" contenteditable="false" data-field="content">
+                          {{ .Bootstrap.Content }}
+                        </td>
+                        <td>
+                          <button class="edit-btn" id="edit-content">
+                            <i class="fas fa-pencil-alt"></i>
+                          </button>
+                          <div class="save-cancel-buttons" style="display: none">
+                            <button class="save-btn" id="save-content">Save</button>
+                            <button class="cancel-btn" id="cancel-content">Cancel</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Channels</th>
+                        <td class="editable" contenteditable="false" data-field="channels">
+                          {{ toSlice .Bootstrap.Channels }}
+                        </td>
+                        <td>
+                          <button class="edit-btn" id="edit-channels">
+                            <i class="fas fa-pencil-alt"></i>
+                          </button>
+                          <div class="save-cancel-buttons" style="display: none">
+                            <button class="save-btn" id="save-channels">Save</button>
+                            <button class="cancel-btn" id="cancel-channels">Cancel</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Client Cert</th>
+                        <td class="editable" contenteditable="false" data-field="clientCert">
+                          {{ .Bootstrap.ClientCert }}
+                        </td>
+                        <td>
+                          <button class="edit-btn" id="edit-clientCert">
+                            <i class="fas fa-pencil-alt"></i>
+                          </button>
+                          <div class="save-cancel-buttons" style="display: none">
+                            <button class="save-btn" id="save-clientCert">Save</button>
+                            <button class="cancel-btn" id="cancel-clientCert">Cancel</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Client Key</th>
+                        <td class="editable" contenteditable="false" data-field="clientKey">
+                          {{ .Bootstrap.ClientKey }}
+                        </td>
+                        <td>
+                          <button class="edit-btn" id="edit-clientKey">
+                            <i class="fas fa-pencil-alt"></i>
+                          </button>
+                          <div class="save-cancel-buttons" style="display: none">
+                            <button class="save-btn" id="save-clientKey">Save</button>
+                            <button class="cancel-btn" id="cancel-clientKey">Cancel</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>CA Cert</th>
+                        <td class="editable" contenteditable="false" data-field="CACert">
+                          {{ .Bootstrap.CACert }}
+                        </td>
+                        <td>
+                          <button class="edit-btn" id="edit-CACert">
+                            <i class="fas fa-pencil-alt"></i>
+                          </button>
+                          <div class="save-cancel-buttons" style="display: none">
+                            <button class="save-btn" id="save-CACert">Save</button>
+                            <button class="cancel-btn" id="cancel-CACert">Cancel</button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div id="error-message" class="text-danger"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{ template "footer" }}
+    <script type="module">
+      import { attachEditRowListener, updateName, updateContent, updateConnections, updateClientCerts } from "/js/update.js";
+      attachEditRowListener({
+        entity: "bootstraps",
+        id: "{{ .Bootstrap.ThingID }}",
+        rows: {
+          name:updateName,
+          content:updateContent,
+          channels:updateConnections,
+          clientCert:updateClientCerts,
+          clientKey:updateClientCerts,
+          CACert:updateClientCerts,
         }
-
-        errorMessage.textContent = "";
-
-        if (url) {
-			errorMessage.textContent="";
-			fetch(url, {
-				method: "POST",
-				body: JSON.stringify(data),
-				headers: {
-				"Content-Type": "application/json",
-				},
-			})
-            .then((response) => {
-              if (response.ok) {
-                // Make the row uneditable
-                cell.setAttribute("contenteditable", "false");
-
-                // Show edit button and hide save and cancel buttons
-                hideButtons(editBtn, saveCancelBtn);
-              }
-            })
-            .catch((error) => {
-              // Restore original values in the row if there is an error
-              makeUneditable(cell);
-
-              // Show edit button and hide save and cancel buttons
-              hideButtons(editBtn, saveCancelBtn);
-
-              console.error("Error", error);
-            });
-        } else {
-          console.error("Invalid field:", field);
-        }
-      }
-
-      function cancelEditRow(field) {
-        const cell = document.querySelector(`td[data-field='${field}']`);
-        const editBtn = cell.parentNode.querySelector(".edit-btn");
-        const saveCancelBtn = cell.parentNode.querySelector(
-          ".save-cancel-buttons",
-        );
-        const errorMessage = document.getElementById("error-message");
-
-        errorMessage.textContent = "";
-        // Restore original values in the row
-        makeUneditable(cell);
-
-        // Show the edit button and hide the save and cancel buttons
-        hideButtons(editBtn, saveCancelBtn);
-      }
+      });
     </script>
-		</body>
-	</html>
+    </body>
+  </html>
 {{ end }}

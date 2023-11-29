@@ -2,369 +2,170 @@
 SPDX-License-Identifier: Apache-2.0 -->
 
 {{ define "user" }}
-	<!doctype html>
-	<html lang="en">
-		{{ template "header" }}
-		<body>
-			{{ template "navbar" . }}
-			<div class="main-content pt-3">
-				<div class="container">
-					<div class="row">
-						<div class="col-lg-12 mx-auto py-3">
-							<div class="row">
-								<div class="buttons mb-3">
-									<a
-										href="/users/{{ .UserID }}/groups"
-										type="button"
-										class="btn body-button"
-									>
-										User Groups
-									</a>
-									<a
-										href="/users/{{ .UserID }}/things"
-										type="button"
-										class="btn body-button"
-									>
-										User Things
-									</a>
-									<a
-										href="/users/{{ .UserID }}/channels"
-										type="button"
-										class="btn body-button"
-									>
-										User Channels
-									</a>
-								</div>
-								<div class="table-responsive table-container">
-									<table id="itemsTable" class="table">
-										<thead>
-											<tr>
-												<th scope="row">USER</th>
-											</tr>
-										</thead>
-										<tbody>
-											{{ $disableButton := false }}
+  <!doctype html>
+  <html lang="en">
+    <head>
+      <title>User</title>
+      {{ template "header" }}
+      <script src="/js/update.js" type="module"></script>
+    </head>
+    <body>
+      {{ template "navbar" . }}
+      <div class="main-content pt-3">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-12 mx-auto py-3">
+              <div class="row">
+                <div class="buttons mb-3">
+                  <a href="/users/{{ .UserID }}/groups" type="button" class="btn body-button">
+                    User Groups
+                  </a>
+                  <a href="/users/{{ .UserID }}/things" type="button" class="btn body-button">
+                    User Things
+                  </a>
+                  <a href="/users/{{ .UserID }}/channels" type="button" class="btn body-button">
+                    User Channels
+                  </a>
+                </div>
+                <div class="table-responsive table-container">
+                  <table id="itemsTable" class="table">
+                    <thead>
+                      <tr>
+                        <th scope="row">USER</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {{ $disableButton := false }}
 
 
-											<tr>
-												<th>Name</th>
-												<td
-													class="editable"
-													contenteditable="false"
-													data-field="name"
-												>
-													{{ .ViewedUser.Name }}
-												</td>
-												<td>
-													<button
-														class="edit-btn"
-														onclick="editRow('name')"
-														{{ if
-															$disableButton
-														}}
-															disabled
-														{{ end }}
-													>
-														<i class="fas fa-pencil-alt"></i>
-													</button>
-													<div
-														class="save-cancel-buttons"
-														style="display: none"
-													>
-														<button class="save-btn" onclick="saveRow('name')">
-															Save
-														</button>
-														<button
-															class="cancel-btn"
-															onclick="cancelEditRow('name')"
-														>
-															Cancel
-														</button>
-													</div>
-												</td>
-											</tr>
-											<tr>
-												<th>ID</th>
-												<td>{{ .ViewedUser.ID }}</td>
-												<td></td>
-											</tr>
-											<tr>
-												<th>Owner</th>
-												<td>{{ .ViewedUser.Owner }}</td>
-												<td></td>
-											</tr>
-											<tr>
-												<th>Identity</th>
-												<td
-													class="editable"
-													contenteditable="false"
-													data-field="identity"
-												>
-													{{ .ViewedUser.Credentials.Identity }}
-												</td>
-												<td>
-													<button
-														class="edit-btn"
-														onclick="editRow('identity')"
-														{{ if
-															$disableButton
-														}}
-															disabled
-														{{ end }}
-													>
-														<i class="fas fa-pencil-alt"></i>
-													</button>
-													<div
-														class="save-cancel-buttons"
-														style="display: none"
-													>
-														<button
-															class="save-btn"
-															onclick="saveRow('identity')"
-														>
-															Save
-														</button>
-														<button
-															class="cancel-btn"
-															onclick="cancelEditRow('identity')"
-														>
-															Cancel
-														</button>
-													</div>
-												</td>
-											</tr>
-											<tr>
-												<th>Tags</th>
-												<td
-													class="editable"
-													contenteditable="false"
-													data-field="tags"
-												>
-													{{ toSlice .ViewedUser.Tags }}
-												</td>
-												<td>
-													<button
-														class="edit-btn"
-														onclick="editRow('tags')"
-														{{ if
-															$disableButton
-														}}
-															disabled
-														{{ end }}
-													>
-														<i class="fas fa-pencil-alt"></i>
-													</button>
-													<div
-														class="save-cancel-buttons"
-														style="display: none"
-													>
-														<button class="save-btn" onclick="saveRow('tags')">
-															Save
-														</button>
-														<button
-															class="cancel-btn"
-															onclick="cancelEditRow('tags')"
-														>
-															Cancel
-														</button>
-													</div>
-												</td>
-											</tr>
-											<tr>
-												<th>Metadata</th>
-												<td
-													class="editable"
-													contenteditable="false"
-													data-field="metadata"
-												>
-													{{ toJSON .ViewedUser.Metadata }}
-												</td>
-												<td>
-													<button
-														class="edit-btn"
-														onclick="editRow('metadata')"
-														{{ if
-															$disableButton
-														}}
-															disabled
-														{{ end }}
-													>
-														<i class="fas fa-pencil-alt"></i>
-													</button>
-													<div
-														class="save-cancel-buttons"
-														style="display: none"
-													>
-														<button
-															class="save-btn"
-															onclick="saveRow('metadata')"
-														>
-															Save
-														</button>
-														<button
-															class="cancel-btn"
-															onclick="cancelEditRow('metadata')"
-														>
-															Cancel
-														</button>
-													</div>
-												</td>
-											</tr>
-										</tbody>
-									</table>
-									<div id="error-message" class="text-danger"></div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-			{{ template "footer" }}
-    <script>
-      function makeEditable(cell) {
-        cell.setAttribute("contenteditable", "true");
-        cell.dataset.originalContent = cell.innerHTML;
-      }
+                      <tr>
+                        <th>Name</th>
+                        <td class="editable" contenteditable="false" data-field="name">
+                          {{ .ViewedUser.Name }}
+                        </td>
+                        <td>
+                          <button
+                            class="edit-btn"
+                            id="edit-name"
+                            {{ if
+                              $disableButton
+                            }}
+                              disabled
+                            {{ end }}
+                          >
+                            <i class="fas fa-pencil-alt"></i>
+                          </button>
+                          <div class="save-cancel-buttons" style="display: none">
+                            <button class="save-btn" id="save-name">Save</button>
+                            <button class="cancel-btn" id="cancel-name">Cancel</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>ID</th>
+                        <td>{{ .ViewedUser.ID }}</td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <th>Owner</th>
+                        <td>{{ .ViewedUser.Owner }}</td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <th>Identity</th>
+                        <td class="editable" contenteditable="false" data-field="identity">
+                          {{ .ViewedUser.Credentials.Identity }}
+                        </td>
+                        <td>
+                          <button
+                            class="edit-btn"
+                            id="edit-identity"
+                            {{ if
+                              $disableButton
+                            }}
+                              disabled
+                            {{ end }}
+                          >
+                            <i class="fas fa-pencil-alt"></i>
+                          </button>
+                          <div class="save-cancel-buttons" style="display: none">
+                            <button class="save-btn" id="save-identity">Save</button>
+                            <button class="cancel-btn" id="cancel-identity">Cancel</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Tags</th>
+                        <td class="editable" contenteditable="false" data-field="tags">
+                          {{ toSlice .ViewedUser.Tags }}
+                        </td>
+                        <td>
+                          <button
+                            class="edit-btn"
+                            id="edit-tags"
+                            {{ if
+                              $disableButton
+                            }}
+                              disabled
+                            {{ end }}
+                          >
+                            <i class="fas fa-pencil-alt"></i>
+                          </button>
+                          <div class="save-cancel-buttons" style="display: none">
+                            <button class="save-btn" id="save-tags">Save</button>
+                            <button class="cancel-btn" id="cancel-tags">Cancel</button>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Metadata</th>
+                        <td class="editable" contenteditable="false" data-field="metadata">
+                          {{ toJSON .ViewedUser.Metadata }}
+                        </td>
+                        <td>
+                          <button
+                            class="edit-btn"
+                            id="edit-metadata"
+                            {{ if
+                              $disableButton
+                            }}
+                              disabled
+                            {{ end }}
+                          >
+                            <i class="fas fa-pencil-alt"></i>
+                          </button>
+                          <div class="save-cancel-buttons" style="display: none">
+                            <button class="save-btn" id="save-metadata">Save</button>
+                            <button class="cancel-btn" id="cancel-metadata">Cancel</button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div id="error-message" class="text-danger"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{ template "footer" }}
+      <script type="module">
+        import { attachEditRowListener, updateName, updateIdentity, updateTags, updateMetadata} from "/js/update.js";
 
-      function makeUneditable(cell) {
-        const originalContent = cell.dataset.originalContent;
-        cell.innerHTML = originalContent;
-        cell.setAttribute("contenteditable", "false");
-      }
-
-      function showButtons(editBtn, saveCancelBtn) {
-        editBtn.style.display = "none";
-        saveCancelBtn.style.display = "inline-block";
-      }
-
-      function hideButtons(editBtn, saveCancelBtn) {
-        editBtn.style.display = "inline-block";
-        saveCancelBtn.style.display = "none";
-      }
-
-      function editRow(field) {
-        const cell = document.querySelector(`td[data-field='${field}']`);
-        const editBtn = cell.parentNode.querySelector(".edit-btn");
-        const saveCancelBtn = cell.parentNode.querySelector(
-          ".save-cancel-buttons",
-        );
-
-        // Make the row editable
-        makeEditable(cell);
-
-        // Hide the edit button and show save and cancel buttons
-        showButtons(editBtn, saveCancelBtn);
-      }
-
-      function saveRow(field) {
-        const cell = document.querySelector(`td[data-field='${field}']`);
-        const editBtn = cell.parentNode.querySelector(".edit-btn");
-        const saveCancelBtn = cell.parentNode.querySelector(
-          ".save-cancel-buttons",
-        );
-        const errorMessage = document.getElementById("error-message");
-
-        // Get the updated value from the nameCell
-        const updatedValue = cell.textContent.trim();
-
-        // Email format validation regular expression
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-        // Send the updated value to the server using a POST request
-        let url;
-        let data;
-        if (field === "name") {
-          url = "/users/{{.UserID}}";
-          data = { [field]: updatedValue };
-        } else if (field == "metadata") {
-          try {
-            const metadata = JSON.parse(updatedValue);
-            url = "/users/{{.UserID}}";
-            data = { [field]: metadata };
-          } catch (error) {
-            errorMessage.textContent = "Metadata must be a valid JSON object!";
-            return;
-          }
-        } else if (field === "identity") {
-          if (!emailRegex.test(updatedValue)) {
-            errorMessage.textContent = "Identity should be in email format!";
-            return;
-          }
-          url = "/users/{{.UserID}}/identity";
-          data = { [field]: updatedValue };
-        } else if (field === "tags") {
-          try {
-            const tags = JSON.parse(updatedValue);
-            if (
-              !Array.isArray(tags) ||
-              !tags.every(function (tag) {
-                return typeof tag === "string";
-              })
-            ) {
-              errorMessage.textContent = "Tags must be a string array";
-              return;
-            }
-            url = "/users/{{.UserID}}/tags";
-            data = { [field]: tags };
-          } catch (error) {
-            errorMessage.textContent = "Tags must be a valid string array";
-            return;
-          }
-        }
-
-        errorMessage.textContent = "";
-
-        if (url) {
-			errorMessage.textContent="";
-			fetch(url, {
-				method: "POST",
-				body: JSON.stringify(data),
-				headers: {
-				"Content-Type": "application/json",
-				},
-			})
-            .then((response) => {
-              if (response.ok) {
-                // Make the row uneditable
-                cell.setAttribute("contenteditable", "false");
-
-                // Show edit button and hide save and cancel buttons
-                hideButtons(editBtn, saveCancelBtn);
-              } else {
-                throw new Error("Response not OK");
-              }
-            })
-            .catch((error) => {
-              // Restore original values in the row if there is an error
-              makeUneditable(cell);
-
-              // Show edit button and hide save and cancel buttons
-              hideButtons(editBtn, saveCancelBtn);
-
-              console.error("Error", error);
-              errorMessage.textContent = "Entity already exists";
-            });
-        } else {
-          console.error("Invalid field:", field);
-        }
-      }
-
-      function cancelEditRow(field) {
-        const cell = document.querySelector(`td[data-field='${field}']`);
-        const editBtn = cell.parentNode.querySelector(".edit-btn");
-        const saveCancelBtn = cell.parentNode.querySelector(
-          ".save-cancel-buttons",
-        );
-        const errorMessage = document.getElementById("error-message");
-
-        errorMessage.textContent = "";
-        // Restore original values in the row
-        makeUneditable(cell);
-
-        // Show the edit button and hide the save and cancel buttons
-        hideButtons(editBtn, saveCancelBtn);
-      }
-    </script>
-		</body>
-	</html>
+        attachEditRowListener(
+          {
+            entity: "users",
+            id: "{{ .UserID }}",
+            rows: {
+              name:updateName,
+              identity:updateIdentity,
+              tags:updateTags,
+              metadata:updateMetadata,
+            },
+            errorDiv: "error-message",
+          });
+      </script>
+    </body>
+  </html>
 {{ end }}
