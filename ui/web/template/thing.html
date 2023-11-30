@@ -31,13 +31,21 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                     </thead>
                     <tbody>
+                      {{ $editButton := true }}
+                      {{ if (hasPermission .Permissions "edit") }}
+                        {{ $editButton = false }}
+                      {{ end }}
                       <tr>
                         <th>Name</th>
                         <td class="editable" contenteditable="false" data-field="name">
                           {{ .Thing.Name }}
                         </td>
                         <td>
-                          <button class="edit-btn" id="edit-name">
+                          <button
+                            class="edit-btn"
+                            id="edit-name"
+                            {{ if $editButton }}disabled{{ end }}
+                          >
                             <i class="fas fa-pencil-alt"></i>
                           </button>
                           <div class="save-cancel-buttons" style="display: none">
@@ -57,7 +65,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                           {{ .Thing.Credentials.Secret }}
                         </td>
                         <td>
-                          <button class="edit-btn" id="edit-secret">
+                          <button
+                            class="edit-btn"
+                            id="edit-secret"
+                            {{ if $editButton }}disabled{{ end }}
+                          >
                             <i class="fas fa-pencil-alt"></i>
                           </button>
                           <div class="save-cancel-buttons" style="display: none">
@@ -72,7 +84,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                           {{ toSlice .Thing.Tags }}
                         </td>
                         <td>
-                          <button class="edit-btn" id="edit-tags">
+                          <button
+                            class="edit-btn"
+                            id="edit-tags"
+                            {{ if $editButton }}disabled{{ end }}
+                          >
                             <i class="fas fa-pencil-alt"></i>
                           </button>
                           <div class="save-cancel-buttons" style="display: none">
@@ -94,7 +110,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                           {{ toJSON .Thing.Metadata }}
                         </td>
                         <td>
-                          <button class="edit-btn" id="edit-metadata">
+                          <button
+                            class="edit-btn"
+                            id="edit-metadata"
+                            {{ if $editButton }}disabled{{ end }}
+                          >
                             <i class="fas fa-pencil-alt"></i>
                           </button>
                           <div class="save-cancel-buttons" style="display: none">
@@ -106,6 +126,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                     </tbody>
                   </table>
                   <div id="error-message" class="text-danger"></div>
+                  <div class="row mt-3">
+                    <form action="/things/disabled" method="post">
+                      <input type="hidden" name="thingID" id="thingID" value="{{ .Thing.ID }}" />
+                      <button
+                        type="submit"
+                        class="btn body-button"
+                        {{ if not (hasPermission .Permissions "delete") }}disabled{{ end }}
+                      >
+                        Disable Thing
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </div>
             </div>

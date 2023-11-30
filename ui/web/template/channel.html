@@ -42,7 +42,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                     </thead>
                     <tbody>
-                      {{ $disableButton := false }}
+                      {{ $editButton := true }}
+                      {{ if (hasPermission .Permissions "edit") }}
+                        {{ $editButton = false }}
+                      {{ end }}
                       <tr>
                         <th>NAME</th>
                         <td class="editable" contenteditable="false" data-field="name">
@@ -52,11 +55,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <button
                             class="edit-btn"
                             id="edit-name"
-                            {{ if
-                              $disableButton
-                            }}
-                              disabled
-                            {{ end }}
+                            {{ if $editButton }}disabled{{ end }}
                           >
                             <i class="fas fa-pencil-alt"></i>
                           </button>
@@ -85,11 +84,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <button
                             class="edit-btn"
                             id="edit-description"
-                            {{ if
-                              $disableButton
-                            }}
-                              disabled
-                            {{ end }}
+                            {{ if $editButton }}disabled{{ end }}
                           >
                             <i class="fas fa-pencil-alt"></i>
                           </button>
@@ -108,11 +103,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <button
                             class="edit-btn"
                             id="edit-metadata"
-                            {{ if
-                              $disableButton
-                            }}
-                              disabled
-                            {{ end }}
+                            {{ if $editButton }}disabled{{ end }}
                           >
                             <i class="fas fa-pencil-alt"></i>
                           </button>
@@ -125,6 +116,23 @@ SPDX-License-Identifier: Apache-2.0 -->
                     </tbody>
                   </table>
                   <div id="error-message" class="text-danger"></div>
+                  <div class="row mt-3">
+                    <form action="/channels/disabled" method="post">
+                      <input
+                        type="hidden"
+                        name="channelID"
+                        id="channelID"
+                        value="{{ .Channel.ID }}"
+                      />
+                      <button
+                        type="submit"
+                        class="btn body-button"
+                        {{ if not (hasPermission .Permissions "delete") }}disabled{{ end }}
+                      >
+                        Disable Group
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </div>
             </div>

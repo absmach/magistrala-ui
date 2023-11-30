@@ -4,7 +4,7 @@ go 1.21.0
 
 require (
 	github.com/absmach/agent v0.0.0-20231107115142-c8b509f24d50
-	github.com/absmach/magistrala v0.11.1-0.20231130085244-39999ad5ee3a
+	github.com/absmach/magistrala v0.11.1-0.20231203162844-3ef67f7ffdf0
 	github.com/caarlos0/env/v9 v9.0.0
 	github.com/eclipse/paho.mqtt.golang v1.4.3
 	github.com/go-chi/chi/v5 v5.0.10

@@ -168,7 +168,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </thead>
                       <tbody>
                         {{ range $i, $c := .Channels }}
-                          {{ $disableButton := false }}
                           <tr
                             onclick="location.href='/channels/{{ $c.ID }}';"
                             class="clickable-row"

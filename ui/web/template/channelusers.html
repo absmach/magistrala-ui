@@ -27,9 +27,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </a>
                 </div>
                 <div class="table-responsive table-container">
+                  {{ $shareButton := true }}
+                  {{ if (hasPermission .Permissions "share") }}
+                    {{ $shareButton = false }}
+                  {{ end }}
                   <div class="d-flex flex-row justify-content-between">
                     <h4>Channel Users</h4>
-                    <button role="button" class="btn body-button" onclick="openUserModal()">
+                    <button
+                      role="button"
+                      class="btn body-button"
+                      onclick="openUserModal()"
+                      {{ if $shareButton }}disabled{{ end }}
+                    >
                       <i class="fa-solid fa-plus fs-4"></i>
                     </button>
                     <!-- modal -->
@@ -142,6 +151,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                         aria-controls="admin-tab-pane"
                         aria-selected="true"
                         onclick="openTab('administrator')"
+                        {{ if not (hasPermission .Permissions "admin") }}disabled{{ end }}
                       >
                         Administrator
                       </button>
@@ -160,6 +170,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                         aria-controls="editor-tab-pane"
                         aria-selected="false"
                         onclick="openTab('editor')"
+                        {{ if $shareButton }}disabled{{ end }}
                       >
                         Editor
                       </button>
@@ -178,6 +189,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                         aria-controls="viewer-tab-pane"
                         aria-selected="false"
                         onclick="openTab('viewer')"
+                        {{ if $shareButton }}disabled{{ end }}
                       >
                         Viewer
                       </button>
