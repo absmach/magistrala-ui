@@ -30,36 +30,36 @@ import (
 )
 
 const (
-	htmContentType           = "text/html"
-	jsonContentType          = "application/json"
-	staticDir                = "ui/web/static"
-	protocol                 = "http"
-	pageKey                  = "page"
-	limitKey                 = "limit"
-	itemKey                  = "item"
-	nameKey                  = "name"
-	refererKey               = "referer_url"
-	relationKey              = "relation"
-	organizationKey          = "organization"
-	permissionKey            = "permission"
-	identityKey              = "identity"
-	defPage                  = 1
-	defLimit                 = 10
-	defKey                   = ""
-	usersAPIEndpoint         = "/users"
-	thingsAPIEndpoint        = "/things"
-	channelsAPIEndpoint      = "/channels"
-	groupsAPIEndpoint        = "/groups"
-	bootstrapAPIEndpoint     = "/bootstrap"
-	membersAPIEndpoint       = "/organizations/members"
-	loginAPIEndpoint         = "/login"
-	tokenRefreshAPIEndpoint  = "/token/refresh"
-	organizationsAPIEndpoint = "/organizations"
-	thingsItem               = "things"
-	channelsItem             = "channels"
-	groupsItem               = "groups"
-	accessTokenKey           = "token"
-	refreshTokenKey          = "refresh_token"
+	htmContentType          = "text/html"
+	jsonContentType         = "application/json"
+	staticDir               = "ui/web/static"
+	protocol                = "http"
+	pageKey                 = "page"
+	limitKey                = "limit"
+	itemKey                 = "item"
+	nameKey                 = "name"
+	refererKey              = "referer_url"
+	relationKey             = "relation"
+	domainKey               = "domain"
+	permissionKey           = "permission"
+	identityKey             = "identity"
+	defPage                 = 1
+	defLimit                = 10
+	defKey                  = ""
+	usersAPIEndpoint        = "/users"
+	thingsAPIEndpoint       = "/things"
+	channelsAPIEndpoint     = "/channels"
+	groupsAPIEndpoint       = "/groups"
+	bootstrapAPIEndpoint    = "/bootstrap"
+	membersAPIEndpoint      = "/domains/members"
+	loginAPIEndpoint        = "/login"
+	tokenRefreshAPIEndpoint = "/token/refresh"
+	domainsAPIEndpoint      = "/domains"
+	thingsItem              = "things"
+	channelsItem            = "channels"
+	groupsItem              = "groups"
+	accessTokenKey          = "token"
+	refreshTokenKey         = "refresh_token"
 )
 
 var (
@@ -141,9 +141,9 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 		opts...,
 	).ServeHTTP)
 
-	r.Post("/organizations/login", kithttp.NewServer(
-		organizationLoginEndpoint(svc),
-		decodeOrganizationLoginRequest,
+	r.Post("/domains/login", kithttp.NewServer(
+		domainLoginEndpoint(svc),
+		decodeDomainLoginRequest,
 		encodeResponse,
 		opts...,
 	).ServeHTTP)
@@ -636,31 +636,38 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				opts...,
 			).ServeHTTP)
 		})
-		r.Route("/organizations", func(r chi.Router) {
+		r.Route("/domains", func(r chi.Router) {
 			r.Post("/", kithttp.NewServer(
-				createOrganizationEndpoint(svc),
-				decodeCreateOrganizationRequest,
+				createDomainEndpoint(svc),
+				decodeCreateDomainRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
 
 			r.Get("/", kithttp.NewServer(
-				listOrganizationsEndpoint(svc),
+				listDomainsEndpoint(svc),
 				decodeListEntityRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
 
 			r.Get("/{id}", kithttp.NewServer(
-				organizationEndpoint(svc),
+				domainEndpoint(svc),
 				decodeListEntityByIDRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
 
 			r.Post("/{id}", kithttp.NewServer(
-				updateOrganizationEndpoint(svc),
-				decodeUpdateOrganizationRequest,
+				updateDomainEndpoint(svc),
+				decodeUpdateDomainRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/tags", kithttp.NewServer(
+				updateDomainTagsEndpoint(svc),
+				decodeUpdateDomainTagsRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
@@ -709,14 +716,14 @@ func decodeIndexRequest(_ context.Context, r *http.Request) (interface{}, error)
 		return nil, err
 	}
 
-	organization, err := readStringQuery(r, organizationKey, defKey)
+	domain, err := readStringQuery(r, domainKey, defKey)
 	if err != nil {
 		return nil, err
 	}
 
 	req := indexReq{
-		token: token,
-		orgID: organization,
+		token:    token,
+		DomainID: domain,
 	}
 
 	return req, nil
@@ -1777,7 +1784,7 @@ func decodeGetEntitiesRequest(_ context.Context, r *http.Request) (interface{}, 
 		return nil, err
 	}
 
-	orgID, err := readStringQuery(r, organizationKey, defKey)
+	domainID, err := readStringQuery(r, domainKey, defKey)
 	if err != nil {
 		return nil, err
 	}
@@ -1802,7 +1809,7 @@ func decodeGetEntitiesRequest(_ context.Context, r *http.Request) (interface{}, 
 		Item:       item,
 		Page:       page,
 		Name:       name,
-		OrgID:      orgID,
+		DomainID:   domainID,
 		Limit:      limit,
 		Permission: permission,
 	}
@@ -1810,21 +1817,21 @@ func decodeGetEntitiesRequest(_ context.Context, r *http.Request) (interface{}, 
 	return req, nil
 }
 
-func decodeOrganizationLoginRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeDomainLoginRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	token, err := tokenFromCookie(r, "refresh_token")
 	if err != nil {
 		return nil, err
 	}
 
-	req := organizationLoginReq{
-		token: token,
-		OrgID: r.FormValue("orgID"),
+	req := domainLoginReq{
+		token:    token,
+		DomainID: r.FormValue("domainID"),
 	}
 
 	return req, nil
 }
 
-func decodeCreateOrganizationRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeCreateDomainRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
@@ -1840,7 +1847,7 @@ func decodeCreateOrganizationRequest(_ context.Context, r *http.Request) (interf
 		return nil, err
 	}
 
-	req := createOrganizationReq{
+	req := createDomainReq{
 		token:    token,
 		Name:     r.FormValue("name"),
 		Alias:    r.FormValue("alias"),
@@ -1855,15 +1862,33 @@ func decodeCreateOrganizationRequest(_ context.Context, r *http.Request) (interf
 	return req, nil
 }
 
-func decodeUpdateOrganizationRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeUpdateDomainRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
 
-	req := updateOrganizationReq{
-		token: token,
-		OrgID: chi.URLParam(r, "id"),
+	req := updateDomainReq{
+		token:    token,
+		DomainID: chi.URLParam(r, "id"),
+	}
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+func decodeUpdateDomainTagsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	req := updateDomainTagsReq{
+		token:    token,
+		DomainID: chi.URLParam(r, "id"),
 	}
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -1884,7 +1909,7 @@ func decodeAssignMemberRequest(_ context.Context, r *http.Request) (interface{},
 
 	req := assignMemberReq{
 		token:    token,
-		OrgID:    chi.URLParam(r, "id"),
+		DomainID: chi.URLParam(r, "id"),
 		UserID:   r.Form.Get("userID"),
 		Relation: r.Form.Get("relation"),
 	}

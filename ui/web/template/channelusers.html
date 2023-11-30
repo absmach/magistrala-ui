@@ -220,7 +220,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <tbody>
                             {{ range $i, $u := .Users }}
                               <tr
-                                onclick="location.href='/organizations/members?identity={{ $u.Credentials.Identity }}';"
+                                onclick="location.href='/domains/members?identity={{ $u.Credentials.Identity }}';"
                                 class="clickable-row"
                               >
                                 <td>{{ $u.Name }}</td>
@@ -271,7 +271,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <tbody>
                             {{ range $i, $u := .Users }}
                               <tr
-                                onclick="location.href='/organizations/members?identity={{ $u.Credentials.Identity }}';"
+                                onclick="location.href='/domains/members?identity={{ $u.Credentials.Identity }}';"
                                 class="clickable-row"
                               >
                                 <td>{{ $u.Name }}</td>
@@ -344,7 +344,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <tbody>
                             {{ range $i, $u := .Users }}
                               <tr
-                                onclick="location.href='/organizations/members?identity={{ $u.Credentials.Identity }}';"
+                                onclick="location.href='/domains/members?identity={{ $u.Credentials.Identity }}';"
                                 class="clickable-row"
                               >
                                 <td>{{ $u.Name }}</td>
@@ -417,7 +417,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <tbody>
                             {{ range $i, $u := .Users }}
                               <tr
-                                onclick="location.href='/organizations/members?identity={{ $u.Credentials.Identity }}';"
+                                onclick="location.href='/domains/members?identity={{ $u.Credentials.Identity }}';"
                                 class="clickable-row"
                               >
                                 <td>{{ $u.Name }}</td>
@@ -494,7 +494,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           input: "userFilter",
           itemSelect: "infiniteScroll",
           item: "members",
-          organization: localStorage.getItem("organizationID"),
+          domain: localStorage.getItem("domainID"),
         });
       </script>
     </body>

@@ -20,14 +20,14 @@ SPDX-License-Identifier: Apache-2.0 -->
       </a>
     </li>
     <li class="nav-item mb-2 mx-2">
-      {{ $active = "organization" }}
+      {{ $active = "domain" }}
       <a
         href=""
         class="nav-link {{ if eq .NavbarActive $active }}active{{ end }}"
-        id="organizationsettings"
+        id="domainsettings"
       >
         <i class="fa-solid fa-building"></i>
-        <span>Organization</span>
+        <span>Domain</span>
       </a>
     </li>
     <li class="nav-item mb-2 mx-2">
@@ -142,11 +142,11 @@ SPDX-License-Identifier: Apache-2.0 -->
               data-bs-toggle="dropdown"
               data-bs-display="static"
               aria-expanded="false"
-              id="organizationName"
+              id="domainName"
             ></a>
             <ul class="dropdown-menu dropdown-menu-md-end mt-2 p-3">
               <li class="text-center fw-bold">
-                <span class="drop-item" id="organizationName2"></span>
+                <span class="drop-item" id="domainName2"></span>
               </li>
               <li><hr class="dropdown-divider" /></li>
               <li>
@@ -154,17 +154,17 @@ SPDX-License-Identifier: Apache-2.0 -->
                   class="dropdown-item user-item-button p-2 mb-2"
                   href="#"
                   role="button"
-                  onclick="openCreateOrganizationModal()"
+                  onclick="openCreateDomainModal()"
                 >
                   <i class="fa-solid fa-square-plus"></i>
-                  Create Organization
+                  Create Domain
                 </a>
               </li>
               <li><hr class="dropdown-divider" /></li>
               <li>
-                <a class="dropdown-item user-item-button p-2 mb-2" href="/organizations">
+                <a class="dropdown-item user-item-button p-2 mb-2" href="/domains">
                   <i class="fa-solid fa-repeat"></i>
-                  Switch Organization
+                  Switch Domain
                 </a>
               </li>
             </ul>
@@ -210,9 +210,9 @@ SPDX-License-Identifier: Apache-2.0 -->
   <!-- Modal -->
   <div
     class="modal fade"
-    id="createOrganizationModal"
+    id="createDomainModal"
     tabindex="-1"
-    aria-labelledby="createOrganizationModalLabel"
+    aria-labelledby="createDomainModalLabel"
     aria-hidden="true"
   >
     <div class="modal-dialog modal-dialog-centered">
@@ -220,10 +220,10 @@ SPDX-License-Identifier: Apache-2.0 -->
         <div class="modal-header">
           <h1
             class="modal-title fs-5 fw-bold"
-            id="createOrganizationModalLabel"
+            id="createDomainModalLabel"
             style="font-weight: 600"
           >
-            Create Organization
+            Create Domain
           </h1>
           <button
             type="button"
@@ -232,7 +232,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form action="/organizations" method="post">
+        <form action="/domains" method="post">
           <div class="modal-body">
             <div class="row mb-3">
               <div class="col-md-12">
@@ -257,7 +257,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   aria-describedby="tagHelp"
                   value="[]"
                 />
-                <div id="tagHelp" class="form-text">Enter organization tags as a string slice.</div>
+                <div id="tagHelp" class="form-text">Enter Domain tags as a string slice.</div>
                 <div id="tagsError" class="error-message text-danger"></div>
               </div>
             </div>
@@ -266,7 +266,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <label for="metadata" class="form-label">Metadata</label>
                 <input type="text" class="form-control" name="metadata" id="metadata" value="{}" />
                 <div id="metadataHelp" class="form-text">
-                  Enter organization metadata in JSON format.
+                  Enter Domain metadata in JSON format.
                 </div>
                 <div id="metadataError" class="error-message text-danger"></div>
               </div>
@@ -284,20 +284,20 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script defer>
     var name = localStorage.getItem("userName");
     var identity = localStorage.getItem("userIdentity");
-    var organizationID = localStorage.getItem("organizationID");
-    var organizationName = localStorage.getItem("organizationName");
-    document.getElementById("organizationsettings").href = "/organizations/" + organizationID;
-    document.getElementById("usersLink").href = "/users?organization=" + organizationID;
-    document.getElementById("indexLink").href = "/?organization=" + organizationID;
-    document.getElementById("organizationName").innerHTML = organizationName;
-    document.getElementById("organizationName2").innerHTML = organizationName;
+    var domainID = localStorage.getItem("domainID");
+    var domainName = localStorage.getItem("domainName");
+    document.getElementById("domainsettings").href = "/domains/" + domainID;
+    document.getElementById("usersLink").href = "/users?domain=" + domainID;
+    document.getElementById("indexLink").href = "/?domain=" + domainID;
+    document.getElementById("domainName").innerHTML = domainName;
+    document.getElementById("domainName2").innerHTML = domainName;
     document.getElementById("username").innerHTML = name;
     document.getElementById("identity").innerHTML = identity;
-    const createOrganizationModal = new bootstrap.Modal(
-      document.getElementById("createOrganizationModal"),
+    const createDomainModal = new bootstrap.Modal(
+      document.getElementById("createDomainModal"),
     );
-    function openCreateOrganizationModal() {
-      createOrganizationModal.show();
+    function openCreateDomainModal() {
+      createDomainModal.show();
     }
     // Toggle the side navigation
     document.querySelectorAll("#sidebarToggle, #sidebarToggleTop").forEach(function (element) {

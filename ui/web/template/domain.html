@@ -1,11 +1,11 @@
 <!-- Copyright (c) Abstract Machines
 SPDX-License-Identifier: Apache-2.0 -->
 
-{{ define "organization" }}
+{{ define "domain" }}
   <!doctype html>
   <html lang="en">
     <head>
-      <title>Organization</title>
+      <title>domain</title>
       {{ template "header" }}
     </head>
     <body>
@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         <div class="container">
           <div class="row">
             <div class="col-lg-12 mx-auto py-3 org-col mt-5">
-              <div class="organization-nav">
+              <div class="domain-nav">
                 <ul
                   class="nav nav-underline col-lg-3 justify-content-between py-3 px-5"
                   role="tablist"
@@ -63,20 +63,20 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <div class="row mb-3 p-3">
                     <div class="col-md-12">
                       <p>
-                        Welcome to the organizations details page. You can update your organization
+                        Welcome to the domains details page. You can update your domain
                         details in this page.
                       </p>
                     </div>
                   </div>
                   <div class="row mb-3 p-3">
-                    <h4 class="mb-3">Organization Information</h4>
+                    <h4 class="mb-3">Domain Information</h4>
                     <div class="table-responsive">
                       <table class="table border-top">
                         <tbody>
                           <tr>
-                            <th>Organization Name</th>
+                            <th>Domain Name</th>
                             <td class="editable" contenteditable="false" data-field="name">
-                              {{ .Organization.Name }}
+                              {{ .Domain.Name }}
                             </td>
                             <td>
                               <button class="edit-btn" id="edit-name">
@@ -89,9 +89,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                             </td>
                           </tr>
                           <tr>
-                            <th>Organization Metadata</th>
+                            <th>Domain Metadata</th>
                             <td class="editable" contenteditable="false" data-field="metadata">
-                              {{ toJSON .Organization.Metadata }}
+                              {{ toJSON .Domain.Metadata }}
                             </td>
                             <td>
                               <button class="edit-btn" id="edit-metadata">
@@ -104,9 +104,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                             </td>
                           </tr>
                           <tr>
-                            <th>Organization Tags</th>
+                            <th>Domain Tags</th>
                             <td class="editable" contenteditable="false" data-field="tags">
-                              {{ toSlice .Organization.Tags }}
+                              {{ toSlice .Domain.Tags }}
                             </td>
                             <td>
                               <button class="edit-btn" id="edit-tags">
@@ -120,9 +120,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                           </tr>
 
                           <tr>
-                            <th>Organization Alias</th>
+                            <th>Domain Alias</th>
                             <td class="editable" contenteditable="false" data-field="alias">
-                              {{ .Organization.Alias }}
+                              {{ .Domain.Alias }}
                             </td>
                             <td>
                               <button class="edit-btn" id="edit-alias">
@@ -136,12 +136,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                           </tr>
                           <tr>
                             <th class="text-muted">Created By</th>
-                            <td>{{ .Organization.CreatedBy }}</td>
+                            <td>{{ .Domain.CreatedBy }}</td>
                             <td></td>
                           </tr>
                           <tr>
                             <th class="text-muted">Created At</th>
-                            <td>{{ .Organization.CreatedAt }}</td>
+                            <td>{{ .Domain.CreatedAt }}</td>
                             <td></td>
                           </tr>
                         </tbody>
@@ -161,7 +161,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <div class="row mb-3 p-3">
                     <div class="col-md-12">
                       <div class="row-mb-3 d-flex justify-content-between mb-3">
-                        <h2>Organization Members</h2>
+                        <h2>Domain Members</h2>
                         <button role="button" class="btn body-button" onclick="opeMemberModal()">
                           <i class="fa-solid fa-plus me-2"></i>
                           Add Member
@@ -182,7 +182,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             <tbody>
                               {{ range $i, $m := .Members }}
                                 <tr
-                                  onclick="location.href='/organizations/members?identity={{ $m.Credentials.Identity }}';"
+                                  onclick="location.href='/domains/members?identity={{ $m.Credentials.Identity }}';"
                                   class="clickable-row"
                                 >
                                   <td>{{ $m.Name }}</td>
@@ -240,7 +240,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   aria-label="Close"
                 ></button>
               </div>
-              <form action="/organizations/{{ .Organization.ID }}/assign" method="post">
+              <form action="/domains/{{ .Domain.ID }}/assign" method="post">
                 <div class="modal-body">
                   <div class="mb-3">
                     <label for="infiniteScroll" class="form-label">User ID</label>
@@ -298,8 +298,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 
         attachEditRowListener(
           {
-            entity: "organizations",
-            id: "{{ .Organization.ID }}",
+            entity: "domains",
+            id: "{{ .Domain.ID }}",
             rows: {
               name:updateName,
               metadata:updateMetadata,

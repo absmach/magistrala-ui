@@ -27,7 +27,7 @@ func LoggingMiddleware(svc ui.Service, logger log.Logger) ui.Service {
 }
 
 // Index adds logging middleware to index method.
-func (lm *loggingMiddleware) Index(token, orgID string) (b []byte, err error) {
+func (lm *loggingMiddleware) Index(token, domainID string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method index took %s to complete", time.Since(begin))
 		if err != nil {
@@ -37,7 +37,7 @@ func (lm *loggingMiddleware) Index(token, orgID string) (b []byte, err error) {
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.Index(token, orgID)
+	return lm.svc.Index(token, domainID)
 }
 
 // Login adds logging middleware to login method.
@@ -1035,7 +1035,7 @@ func (lm *loggingMiddleware) ProcessTerminalCommand(ctx context.Context, id, tok
 }
 
 // GetEntities adds logging middleware to get entities method.
-func (lm *loggingMiddleware) GetEntities(token, item, name, orgID, permission string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) GetEntities(token, item, name, domainID, permission string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method get_entities took %s to complete", time.Since(begin))
 		if err != nil {
@@ -1045,7 +1045,7 @@ func (lm *loggingMiddleware) GetEntities(token, item, name, orgID, permission st
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.GetEntities(token, item, name, orgID, permission, page, limit)
+	return lm.svc.GetEntities(token, item, name, domainID, permission, page, limit)
 }
 
 // ErrorPage adds logging middleware to error page method.
@@ -1062,10 +1062,10 @@ func (lm *loggingMiddleware) ErrorPage(errMsg string) (b []byte, err error) {
 	return lm.svc.ErrorPage(errMsg)
 }
 
-// OrganizationLogin adds logging middleware to organization login method.
-func (lm *loggingMiddleware) OrganizationLogin(login sdk.Login, refreshToken string) (token sdk.Token, err error) {
+// DomainLogin adds logging middleware to domain login method.
+func (lm *loggingMiddleware) DomainLogin(login sdk.Login, refreshToken string) (token sdk.Token, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method organization_login took %s to complete", time.Since(begin))
+		message := fmt.Sprintf("Method domain_login took %s to complete", time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -1074,65 +1074,65 @@ func (lm *loggingMiddleware) OrganizationLogin(login sdk.Login, refreshToken str
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.OrganizationLogin(login, refreshToken)
+	return lm.svc.DomainLogin(login, refreshToken)
 }
 
-// ListOrganizations adds logging middleware to list organizations method.
-func (lm *loggingMiddleware) ListOrganizations(token string, page, limit uint64) (b []byte, err error) {
+// ListDomains adds logging middleware to list domains method.
+func (lm *loggingMiddleware) ListDomains(token string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method list_organizations took %s to complete", time.Since(begin))
+		message := fmt.Sprintf("Method list_domains took %s to complete", time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 		}
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.ListOrganizations(token, page, limit)
+	return lm.svc.ListDomains(token, page, limit)
 }
 
-// CreateOrganization adds logging middleware to create organization method.
-func (lm *loggingMiddleware) CreateOrganization(token string, domain sdk.Domain) (err error) {
+// CreateDomain adds logging middleware to create domain method.
+func (lm *loggingMiddleware) CreateDomain(token string, domain sdk.Domain) (err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method create_organization took %s to complete", time.Since(begin))
+		message := fmt.Sprintf("Method create_domain took %s to complete", time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 		}
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.CreateOrganization(token, domain)
+	return lm.svc.CreateDomain(token, domain)
 }
 
-// UpdateOrganization adds logging middleware to update organization method.
-func (lm *loggingMiddleware) UpdateOrganization(token string, domain sdk.Domain) (err error) {
+// UpdateDomain adds logging middleware to update domain method.
+func (lm *loggingMiddleware) UpdateDomain(token string, domain sdk.Domain) (err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method update_organization for organization %s took %s to complete", domain.ID, time.Since(begin))
+		message := fmt.Sprintf("Method update_domain for domain %s took %s to complete", domain.ID, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 		}
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.UpdateOrganization(token, domain)
+	return lm.svc.UpdateDomain(token, domain)
 }
 
-// Organization adds logging middleware to organization method.
-func (lm *loggingMiddleware) Organization(token, orgID, tabActive string, page, limit uint64) (b []byte, err error) {
+// Domain adds logging middleware to domain method.
+func (lm *loggingMiddleware) Domain(token, domainID, tabActive string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method organization for organization %s took %s to complete", orgID, time.Since(begin))
+		message := fmt.Sprintf("Method domain for domain %s took %s to complete", domainID, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 		}
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.Organization(token, orgID, tabActive, page, limit)
+	return lm.svc.Domain(token, domainID, tabActive, page, limit)
 }
 
 // AssignMember adds logging middleware to assign member method.
-func (lm *loggingMiddleware) AssignMember(token, orgID string, req sdk.UsersRelationRequest) (err error) {
+func (lm *loggingMiddleware) AssignMember(token, domainID string, req sdk.UsersRelationRequest) (err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method assign_member for organization %s took %s to complete", orgID, time.Since(begin))
+		message := fmt.Sprintf("Method assign_member for domain %s took %s to complete", domainID, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -1140,13 +1140,13 @@ func (lm *loggingMiddleware) AssignMember(token, orgID string, req sdk.UsersRela
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.AssignMember(token, orgID, req)
+	return lm.svc.AssignMember(token, domainID, req)
 }
 
 // UnassignMember adds logging middleware to unassign member method.
-func (lm *loggingMiddleware) UnassignMember(token, orgID string, req sdk.UsersRelationRequest) (err error) {
+func (lm *loggingMiddleware) UnassignMember(token, domainID string, req sdk.UsersRelationRequest) (err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method unassign_member for organization %s took %s to complete", orgID, time.Since(begin))
+		message := fmt.Sprintf("Method unassign_member for domain %s took %s to complete", domainID, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
@@ -1154,7 +1154,7 @@ func (lm *loggingMiddleware) UnassignMember(token, orgID string, req sdk.UsersRe
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.UnassignMember(token, orgID, req)
+	return lm.svc.UnassignMember(token, domainID, req)
 }
 
 // ViewMember adds logging middleware to view member method.
