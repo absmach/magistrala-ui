@@ -32,6 +32,7 @@ type config struct {
 	UsersURL        string          `env:"MG_USERS_URL"          envDefault:"http://localhost:9002"`
 	HostURL         string          `env:"MG_UI_HOST_URL"        envDefault:"http://localhost:9095"`
 	BootstrapURL    string          `env:"MG_BOOTSTRAP_URL"      envDefault:"http://localhost:9013"`
+	DomainsURL      string          `env:"MG_DOMAINS_URL"        envDefault:"http://localhost:8189"`
 	MsgContentType  sdk.ContentType `env:"MG_CONTENT-TYPE"       envDefault:"application/senml+json"`
 	TLSVerification bool            `env:"MG_VERIFICATION_TLS"   envDefault:"false"`
 }
@@ -51,6 +52,7 @@ func main() {
 		MsgContentType:  cfg.MsgContentType,
 		TLSVerification: cfg.TLSVerification,
 		BootstrapURL:    cfg.BootstrapURL,
+		DomainsURL:      cfg.DomainsURL,
 	}
 
 	logger, err := logger.New(os.Stdout, cfg.LogLevel)

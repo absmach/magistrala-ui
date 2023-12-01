@@ -2,9 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 
 export function fetchIndividualEntity(config) {
+  if (config.item === "members") {
+    config.permission = "member";
+  } else {
+    config.permission = "";
+  }
   document.addEventListener("DOMContentLoaded", function () {
-    getEntities(config.item, "");
-    infiniteScroll(config.item);
+    getEntities(config, "");
+    infiniteScroll(config);
   });
 
   const input = document.getElementById(config.input);
@@ -13,21 +18,27 @@ export function fetchIndividualEntity(config) {
     const itemSelect = document.getElementById(config.itemSelect);
     if (event.target.value === "") {
       itemSelect.innerHTML = `<option disabled>select a ${config.type}</option>`;
-      getEntities(config.item, "");
-      infiniteScroll(config.item);
+      getEntities(config, "");
+      infiniteScroll(config);
     } else {
       itemSelect.innerHTML = "";
-      getEntities(config.item, event.target.value);
+      getEntities(config, event.target.value);
     }
   });
 }
 
-function getEntities(item, name) {
-  fetchData(item, name, 1);
+function getEntities(config, name) {
+  fetchData({
+    item: config.item,
+    organization: config.organization,
+    permission: config.permission,
+    name: name,
+    page: 1,
+  });
 }
 
-function infiniteScroll(item) {
-  var selectElement = document.getElementById("infiniteScroll");
+function infiniteScroll(config) {
+  var selectElement = document.getElementById(config.itemSelect);
   var singleOptionHeight = selectElement.querySelector("option").offsetHeight;
   var selectBoxHeight = selectElement.offsetHeight;
   var numOptionsBeforeLoad = 2;
@@ -43,7 +54,14 @@ function infiniteScroll(item) {
       currentScroll = st + selectBoxHeight;
       if (currentScroll + numOptionsBeforeLoad * singleOptionHeight >= totalHeight) {
         currentPageNo++;
-        fetchData(item, "", currentPageNo);
+        fetchData({
+          item: config.item,
+          item: config.item,
+          name: "",
+          organization: config.organization,
+          permission: config.permission,
+          page: currentPageNo,
+        });
       }
     }
 
@@ -52,10 +70,13 @@ function infiniteScroll(item) {
 }
 
 let limit = 5;
-function fetchData(item, name, page) {
-  fetch(`/entities?item=${item}&limit=${limit}&name=${name}&page=${page}`, {
-    method: "GET",
-  })
+function fetchData(config) {
+  fetch(
+    `/entities?item=${config.item}&limit=${limit}&name=${config.name}&page=${config.page}&organization=${config.organization}&permission=${config.permission}`,
+    {
+      method: "GET",
+    },
+  )
     .then((response) => response.json())
     .then((data) => {
       const selectElement = document.getElementById("infiniteScroll");

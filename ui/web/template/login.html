@@ -109,7 +109,6 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </div>
       </div>
-      {{ template "footer" }}
       <script>
         const passwordField = document.querySelector(".password-field");
         const emailField = document.querySelector(".email-field");
@@ -156,7 +155,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 showAlert(errorMessage);
               } else {
                 form.reset();
-                window.location.href = "/";
+                window.location.href = "/organizations";
               }
             })
             .catch((error) => {

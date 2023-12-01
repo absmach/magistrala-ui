@@ -1,0 +1,77 @@
+<!-- Copyright (c) Abstract Machines
+SPDX-License-Identifier: Apache-2.0 -->
+
+{{ define "member" }}
+  <!doctype html>
+  <html lang="en">
+    {{ template "header" }}
+    <body>
+      {{ template "navbar" . }}
+      <div class="main-content pt-3">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-12 mx-auto py-3">
+              <div class="row">
+                <div class="table-responsive table-container">
+                  <table id="itemsTable" class="table">
+                    <thead>
+                      <tr>
+                        <th scope="row">Member</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {{ $disableButton := false }}
+
+
+                      <tr>
+                        <th>Name</th>
+                        <td>
+                          {{ .User.Name }}
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>ID</th>
+                        <td>{{ .User.ID }}</td>
+                      </tr>
+                      <tr>
+                        <th>Owner</th>
+                        <td>{{ .User.Owner }}</td>
+                      </tr>
+                      <tr>
+                        <th>Identity</th>
+                        <td>
+                          {{ .User.Credentials.Identity }}
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Tags</th>
+                        <td>
+                          {{ range $j, $tag := .User.Tags }}
+                            <span class="badge bg-dark">
+                              {{ $tag }}
+                            </span>
+                          {{ end }}
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Metadata</th>
+                        <td>
+                          {{ range $k, $v := .User.Metadata }}
+                            <span class="badge bg-success">
+                              {{ $k }}:
+                              {{ $v }}
+                            </span>
+                          {{ end }}
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+  </html>
+{{ end }}

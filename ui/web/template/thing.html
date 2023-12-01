@@ -7,7 +7,6 @@ SPDX-License-Identifier: Apache-2.0 -->
     <head>
       <title>Thing</title>
       {{ template "header" }}
-      <script src="/js/update.js" type="module"></script>
     </head>
     <body>
       {{ template "navbar" . }}
@@ -18,10 +17,10 @@ SPDX-License-Identifier: Apache-2.0 -->
               <div class="row">
                 <div class="buttons mb-3">
                   <a class="btn body-button" href="/things/{{ .Thing.ID }}/channels" role="button">
-                    Thing Channels
+                    Connect
                   </a>
                   <a class="btn body-button" href="/things/{{ .Thing.ID }}/users" role="button">
-                    Thing Users
+                    Share
                   </a>
                 </div>
                 <div class="table-responsive table-container">
@@ -32,22 +31,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                     </thead>
                     <tbody>
-                      {{ $disableButton := false }}
                       <tr>
                         <th>Name</th>
                         <td class="editable" contenteditable="false" data-field="name">
                           {{ .Thing.Name }}
                         </td>
                         <td>
-                          <button
-                            class="edit-btn"
-                            id="edit-name"
-                            {{ if
-                              $disableButton
-                            }}
-                              disabled
-                            {{ end }}
-                          >
+                          <button class="edit-btn" id="edit-name">
                             <i class="fas fa-pencil-alt"></i>
                           </button>
                           <div class="save-cancel-buttons" style="display: none">
@@ -67,15 +57,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           {{ .Thing.Credentials.Secret }}
                         </td>
                         <td>
-                          <button
-                            class="edit-btn"
-                            id="edit-secret"
-                            {{ if
-                              $disableButton
-                            }}
-                              disabled
-                            {{ end }}
-                          >
+                          <button class="edit-btn" id="edit-secret">
                             <i class="fas fa-pencil-alt"></i>
                           </button>
                           <div class="save-cancel-buttons" style="display: none">
@@ -90,15 +72,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           {{ toSlice .Thing.Tags }}
                         </td>
                         <td>
-                          <button
-                            class="edit-btn"
-                            id="edit-tags"
-                            {{ if
-                              $disableButton
-                            }}
-                              disabled
-                            {{ end }}
-                          >
+                          <button class="edit-btn" id="edit-tags">
                             <i class="fas fa-pencil-alt"></i>
                           </button>
                           <div class="save-cancel-buttons" style="display: none">
@@ -109,26 +83,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                       <tr>
                         <th>Owner</th>
-                        <td class="editable" contenteditable="false" data-field="owner">
+                        <td>
                           {{ .Thing.Owner }}
                         </td>
-                        <td>
-                          <button
-                            class="edit-btn"
-                            id="edit-owner"
-                            {{ if
-                              $disableButton
-                            }}
-                              disabled
-                            {{ end }}
-                          >
-                            <i class="fas fa-pencil-alt"></i>
-                          </button>
-                          <div class="save-cancel-buttons" style="display: none">
-                            <button class="save-btn" id="save-owner">Save</button>
-                            <button class="cancel-btn" id="cancel-owner">Cancel</button>
-                          </div>
-                        </td>
+                        <td></td>
                       </tr>
                       <tr>
                         <th>Metadata</th>
@@ -136,15 +94,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           {{ toJSON .Thing.Metadata }}
                         </td>
                         <td>
-                          <button
-                            class="edit-btn"
-                            id="edit-metadata"
-                            {{ if
-                              $disableButton
-                            }}
-                              disabled
-                            {{ end }}
-                          >
+                          <button class="edit-btn" id="edit-metadata">
                             <i class="fas fa-pencil-alt"></i>
                           </button>
                           <div class="save-cancel-buttons" style="display: none">
@@ -162,9 +112,8 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </div>
       </div>
-      {{ template "footer" }}
     <script type="module">
-      import { attachEditRowListener, updateName, updateSecret, updateTags,updateOwner, updateMetadata} from "/js/update.js";
+      import { attachEditRowListener, updateName, updateSecret, updateTags, updateMetadata} from "/js/update.js";
 
       attachEditRowListener(
         {
@@ -174,7 +123,6 @@ SPDX-License-Identifier: Apache-2.0 -->
             name:updateName,
             secret: updateSecret,
             tags:updateTags,
-            owner: updateOwner,
             metadata:updateMetadata,
           },
           errorDiv: "error-message",
