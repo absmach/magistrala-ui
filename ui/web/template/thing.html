@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       {{ end }}
                       <tr>
                         <th>Name</th>
-                        <td class="editable" contenteditable="false" data-field="name">
+                        <td class="editable Name-field" contenteditable="false" data-field="name">
                           {{ .Thing.Name }}
                         </td>
                         <td>
@@ -61,7 +61,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                       <tr>
                         <th>Secret</th>
-                        <td class="editable" contenteditable="false" data-field="secret">
+                        <td
+                          class="editable Secret-field"
+                          contenteditable="false"
+                          data-field="secret"
+                        >
                           {{ .Thing.Credentials.Secret }}
                         </td>
                         <td>
@@ -80,7 +84,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                       <tr>
                         <th>Tags</th>
-                        <td class="editable" contenteditable="false" data-field="tags">
+                        <td class="editable Tags-field" contenteditable="false" data-field="tags">
                           {{ toSlice .Thing.Tags }}
                         </td>
                         <td>
@@ -106,7 +110,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                       <tr>
                         <th>Metadata</th>
-                        <td class="editable" contenteditable="false" data-field="metadata">
+                        <td
+                          class="editable Metadata-field"
+                          contenteditable="false"
+                          data-field="metadata"
+                        >
                           {{ toJSON .Thing.Metadata }}
                         </td>
                         <td>
@@ -158,6 +166,12 @@ SPDX-License-Identifier: Apache-2.0 -->
             metadata:updateMetadata,
           },
           errorDiv: "error-message",
+          fields:{
+            name: "Name-field",
+            secret: "Secret-field",
+            tags: "Tags-field",
+            metadata: "Metadata-field",
+          },
         }
       );
     </script>

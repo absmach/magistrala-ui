@@ -6,57 +6,57 @@ import { displayErrorMessage, removeErrorMessage } from "./errors.js";
 const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
 const minLength = 8;
 
-function validateName(name, errorDiv, event) {
-  removeErrorMessage(errorDiv);
+function validateName(name, errorDiv, fieldName, event) {
+  removeErrorMessage(errorDiv, fieldName);
   if (name.trim() === "") {
     event.preventDefault();
-    displayErrorMessage("Name is Required", errorDiv);
+    displayErrorMessage("Name is Required", errorDiv, fieldName);
     return false;
   }
   return true;
 }
 
-function validateEmail(email, errorDiv, event) {
-  removeErrorMessage(errorDiv);
+function validateEmail(email, errorDiv, fieldName, event) {
+  removeErrorMessage(errorDiv, fieldName);
   if (email.trim() === "") {
     event.preventDefault();
-    displayErrorMessage("Email is Required", errorDiv);
+    displayErrorMessage("Email is Required", errorDiv, fieldName);
     return false;
   } else if (!email.match(emailRegex)) {
     event.preventDefault();
-    displayErrorMessage("Invalid email format", errorDiv);
+    displayErrorMessage("Invalid email format", errorDiv, fieldName);
     return false;
   }
   return true;
 }
 
-function validatePassword(password, errorDiv, event) {
-  removeErrorMessage(errorDiv);
+function validatePassword(password, errorDiv, fieldName, event) {
+  removeErrorMessage(errorDiv, fieldName);
   if (password.trim().length < minLength) {
     event.preventDefault();
     var errorMessage = `Password must be at least ${minLength} characters long`;
-    displayErrorMessage(errorMessage, errorDiv);
+    displayErrorMessage(errorMessage, errorDiv, fieldName);
     return false;
   }
   return true;
 }
 
-function validateJSON(data, errorDiv, event) {
-  removeErrorMessage(errorDiv);
+function validateJSON(data, errorDiv, fieldName, event) {
+  removeErrorMessage(errorDiv, fieldName);
   try {
     if (data.trim() !== "") {
       JSON.parse(data);
     }
   } catch (error) {
     event.preventDefault();
-    displayErrorMessage("not a valid JSON object", errorDiv);
+    displayErrorMessage("not a valid JSON object", errorDiv, fieldName);
     return false;
   }
   return true;
 }
 
-function validateStringArray(tags, errorDiv, event) {
-  removeErrorMessage(errorDiv);
+function validateStringArray(tags, errorDiv, fieldName, event) {
+  removeErrorMessage(errorDiv, fieldName);
   var tagsArray;
   try {
     if (tags.trim() !== "") {
@@ -69,12 +69,12 @@ function validateStringArray(tags, errorDiv, event) {
       })
     ) {
       event.preventDefault();
-      displayErrorMessage("must be strings in an array", errorDiv);
+      displayErrorMessage("must be strings in an array", errorDiv, fieldName);
       return false;
     }
   } catch (error) {
     event.preventDefault();
-    displayErrorMessage("must be a string array", errorDiv);
+    displayErrorMessage("must be a string array", errorDiv, fieldName);
     return false;
   }
 
@@ -89,7 +89,7 @@ function attachValidationListener(config) {
       if (config.validations.hasOwnProperty(key)) {
         const validationFunc = config.validations[key];
         const elementValue = document.getElementById(key).value;
-        validationFunc(elementValue, config.errorDivs[key], event);
+        validationFunc(elementValue, config.errorDivs[key], config.fields[key], event);
       }
     }
   });

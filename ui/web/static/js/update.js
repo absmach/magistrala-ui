@@ -17,7 +17,7 @@ function updateName(config) {
 
   button.addEventListener("click", function (event) {
     const updatedValue = config.cell.textContent.trim();
-    if (validateName(updatedValue, config.alertDiv, event)) {
+    if (validateName(updatedValue, config.alertDiv, config.fieldName, event)) {
       const url = `/${config.entity}/${config.id}`;
       const data = { [config.field]: updatedValue };
 
@@ -35,7 +35,7 @@ function updateIdentity(config) {
 
   button.addEventListener("click", function (event) {
     const updatedValue = config.cell.textContent.trim();
-    if (validateEmail(updatedValue, config.alertDiv, event)) {
+    if (validateEmail(updatedValue, config.alertDiv, config.fieldName, event)) {
       const url = `/${config.entity}/${config.id}/identity`;
       const data = { [config.field]: updatedValue };
 
@@ -53,7 +53,7 @@ function updateMetadata(config) {
 
   button.addEventListener("click", function (event) {
     const updatedValue = config.cell.textContent.trim();
-    if (validateJSON(updatedValue, config.alertDiv, event)) {
+    if (validateJSON(updatedValue, config.alertDiv, config.fieldName, event)) {
       const url = `/${config.entity}/${config.id}`;
       const data = { [config.field]: JSON.parse(updatedValue) };
 
@@ -71,7 +71,7 @@ function updateTags(config) {
 
   button.addEventListener("click", function (event) {
     const updatedValue = config.cell.textContent.trim();
-    if (validateStringArray(updatedValue, config.alertDiv, event)) {
+    if (validateStringArray(updatedValue, config.alertDiv, config.fieldName, event)) {
       const url = `/${config.entity}/${config.id}/tags`;
       const data = { [config.field]: JSON.parse(updatedValue) };
 
@@ -89,7 +89,7 @@ function updateSecret(config) {
 
   button.addEventListener("click", function (event) {
     const updatedValue = config.cell.textContent.trim();
-    if (validatePassword(updatedValue, config.alertDiv, event)) {
+    if (validatePassword(updatedValue, config.alertDiv, config.fieldName, event)) {
       const url = `/${config.entity}/${config.id}/secret`;
       const data = { [config.field]: updatedValue };
 
@@ -157,7 +157,7 @@ function updateConnections(config) {
   button.addEventListener("click", function (event) {
     const updatedValue = config.cell.textContent.trim();
 
-    if (validateStringArray(updatedValue, config.alertDiv, event)) {
+    if (validateStringArray(updatedValue, config.alertDiv, config.fieldName, event)) {
       const url = `/${config.entity}/${config.id}/connections`;
       const data = { [config.field]: JSON.parse(updatedValue) };
 
@@ -211,7 +211,7 @@ function cancelEditRow(config) {
   button.addEventListener("click", function () {
     makeUneditable(config.cell);
     showEditButton(config.editBtn, config.saveCancelBtn);
-    removeErrorMessage(config.alertDiv);
+    removeErrorMessage(config.alertDiv, config.fieldName);
   });
 }
 
@@ -233,6 +233,7 @@ function attachEditRowListener(config) {
         editBtn: editBtn,
         saveCancelBtn: saveCancelBtn,
         alertDiv: config.errorDiv,
+        fieldName: config.fields[key],
       });
       const saveRow = config.rows[key];
       saveRow({
@@ -244,6 +245,7 @@ function attachEditRowListener(config) {
         id: config.id,
         entity: config.entity,
         alertDiv: config.errorDiv,
+        fieldName: config.fields[key],
       });
     }
   }

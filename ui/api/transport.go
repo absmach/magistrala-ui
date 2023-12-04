@@ -781,7 +781,7 @@ func decodeShowPasswordReset(_ context.Context, _ *http.Request) (interface{}, e
 }
 
 func decodeTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	identity := r.PostFormValue("username")
+	identity := r.PostFormValue("email")
 	secret := r.PostFormValue("password")
 
 	req := tokenReq{

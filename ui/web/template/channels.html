@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                               <label for="Name" class="form-label">Name</label>
                               <input
                                 type="text"
-                                class="form-control"
+                                class="form-control Name-field"
                                 name="name"
                                 id="Name"
                                 placeholder="Channel Name"
@@ -81,7 +81,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                               <label for="Metadata" class="form-label">Metadata</label>
                               <input
                                 type="text"
-                                class="form-control"
+                                class="form-control Metadata-field"
                                 name="metadata"
                                 id="Metadata"
                                 value="{}"
@@ -221,6 +221,10 @@ SPDX-License-Identifier: Apache-2.0 -->
           validations: {
             Name: validateName,
             Metadata: validateJSON,
+          },
+          fields: {
+            Name: "Name-field",
+            Metadata: "Metadata-field",
           },
         });
 

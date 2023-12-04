@@ -44,7 +44,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                               <label for="Name" class="form-label">Name</label>
                               <input
                                 type="text"
-                                class="form-control"
+                                class="form-control Name-field"
                                 name="name"
                                 id="Name"
                                 placeholder="User Name"
@@ -55,7 +55,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                               <label for="Identity" class="form-label">Identity</label>
                               <input
                                 type="email"
-                                class="form-control"
+                                class="form-control Identity-field"
                                 name="identity"
                                 id="Identity"
                                 placeholder="User Identity"
@@ -66,7 +66,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                               <label for="Secret" class="form-label">Secret</label>
                               <input
                                 type="text"
-                                class="form-control"
+                                class="form-control Secret-field"
                                 name="secret"
                                 id="Secret"
                                 placeholder="User Secret"
@@ -77,7 +77,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                               <label for="Tags" class="form-label">Tags</label>
                               <input
                                 type="text"
-                                class="form-control"
+                                class="form-control Tags-field"
                                 name="tags"
                                 id="Tags"
                                 aria-describedby="tagHelp"
@@ -92,7 +92,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                               <label for="Metadata" class="form-label">Metadata</label>
                               <input
                                 type="text"
-                                class="form-control"
+                                class="form-control Metadata-field"
                                 name="metadata"
                                 id="Metadata"
                                 value="{}"
@@ -254,6 +254,13 @@ SPDX-License-Identifier: Apache-2.0 -->
             Secret: validatePassword,
             Metadata: validateJSON,
             Tags: validateStringArray,
+          },
+          fields: {
+            Name: "Name-field",
+            Identity: "Identity-field",
+            Secret: "Secret-field",
+            Metadata: "Metadata-field",
+            Tags: "Tags-field",
           },
         });
 
