@@ -22,9 +22,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </a>
                 </div>
                 <div class="table-responsive table-container">
-                  {{ $shareButton := true }}
+                  {{ $shareButton := false }}
                   {{ if (hasPermission .Permissions "share") }}
-                    {{ $shareButton = false }}
+                    {{ $shareButton = true }}
                   {{ end }}
                   <div class="d-flex flex-row justify-content-between">
                     <h4>Group Users</h4>
@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       role="button"
                       class="btn body-button"
                       onclick="openUserModal()"
-                      {{ if $shareButton }}disabled{{ end }}
+                      {{ if not $shareButton }}disabled{{ end }}
                     >
                       <i class="fa-solid fa-plus fs-4"></i>
                     </button>
@@ -165,7 +165,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                         aria-controls="editor-tab-pane"
                         aria-selected="false"
                         onclick="openTab('editor')"
-                        {{ if $shareButton }}disabled{{ end }}
+                        {{ if not $shareButton }}disabled{{ end }}
                       >
                         Editor
                       </button>
@@ -184,7 +184,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                         aria-controls="viewer-tab-pane"
                         aria-selected="false"
                         onclick="openTab('viewer')"
-                        {{ if $shareButton }}disabled{{ end }}
+                        {{ if not $shareButton }}disabled{{ end }}
                       >
                         Viewer
                       </button>

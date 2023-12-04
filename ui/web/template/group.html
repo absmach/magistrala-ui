@@ -31,9 +31,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                     </thead>
                     <tbody>
-                      {{ $editButton := true }}
+                      {{ $editButton := false }}
                       {{ if (hasPermission .Permissions "edit") }}
-                        {{ $editButton = false}}
+                        {{ $editButton = true }}
                       {{ end }}
                       <tr>
                         <th>NAME</th>
@@ -44,7 +44,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <button
                             class="edit-btn"
                             id="edit-name"
-                            {{ if $editButton }}disabled{{ end }}
+                            {{ if not $editButton }}disabled{{ end }}
                           >
                             <i class="fas fa-pencil-alt"></i>
                           </button>
@@ -68,7 +68,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <button
                             class="edit-btn"
                             id="edit-description"
-                            {{ if $editButton }}disabled{{ end }}
+                            {{ if not $editButton }}disabled{{ end }}
                           >
                             <i class="fas fa-pencil-alt"></i>
                           </button>
@@ -87,7 +87,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <button
                             class="edit-btn"
                             id="edit-metadata"
-                            {{ if $editButton }}disabled{{ end }}
+                            {{ if not $editButton }}disabled{{ end }}
                           >
                             <i class="fas fa-pencil-alt"></i>
                           </button>
