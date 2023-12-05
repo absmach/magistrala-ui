@@ -29,7 +29,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               >
                 <div class="col-md-12">
                   <div class="row mb-3">
-                    <div class="col-md-12 input-field Email-field">
+                    <div class="col-md-12 input-field email-field">
                       <i class="fas fa-solid fa-envelope"></i>
                       <input
                         class="p-3 w-100"
@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     <div id="EmailError" class="text-danger"></div>
                   </div>
                   <div class="row mb-3">
-                    <div class="col-md-12 input-field Password-field">
+                    <div class="col-md-12 input-field password-field">
                       <i class="fas fa-solid fa-lock"></i>
                       <input
                         class="p-3 w-100"
@@ -125,14 +125,14 @@ SPDX-License-Identifier: Apache-2.0 -->
             Password: "PasswordError",
           },
           fields: {
-            Email: "Email-field",
-            Password: "Password-field",
+            Email: "email-field",
+            Password: "password-field",
           },
         });
       </script>
       <script>
-        const passwordField = document.querySelector(".Password-field");
-        const emailField = document.querySelector(".Email-field");
+        const passwordField = document.querySelector(".password-field");
+        const emailField = document.querySelector(".email-field");
         const loginError = document.getElementById("LoginError");
 
         function submitLoginForm() {
