@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                         placeholder="Email Address"
                       />
                     </div>
-                    <div id="EmailError" class="text-danger"></div>
+                    <div id="emailError" class="text-danger"></div>
                   </div>
                   <div class="row mb-3">
                     <div class="col-md-12 input-field password-field">
@@ -52,9 +52,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                         placeholder="Password"
                       />
                     </div>
-                    <div id="PasswordError" class="text-danger"></div>
+                    <div id="passwordError" class="text-danger"></div>
                   </div>
-                  <div id="LoginError" class="text-danger"></div>
+                  <div id="loginError" class="text-danger"></div>
                 </div>
                 <div class="col-md-12 d-grid py-3">
                   <button type="submit" class="login-btn py-3" id="login-button">Log In</button>
@@ -121,8 +121,8 @@ SPDX-License-Identifier: Apache-2.0 -->
             Password: validatePassword,
           },
           errorDivs: {
-            Email: "EmailError",
-            Password: "PasswordError",
+            Email: "emailError",
+            Password: "passwordError",
           },
           fields: {
             Email: "email-field",
@@ -133,7 +133,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       <script>
         const passwordField = document.querySelector(".password-field");
         const emailField = document.querySelector(".email-field");
-        const loginError = document.getElementById("LoginError");
+        const loginError = document.getElementById("loginError");
 
         function submitLoginForm() {
           event.preventDefault();
