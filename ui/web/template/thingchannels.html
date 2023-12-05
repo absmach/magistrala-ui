@@ -16,15 +16,24 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div class="col-lg-12 mx-auto py-3">
               <div class="row">
                 <div class="buttons mb-3">
-                  <a class="btn body-button" href="/things/{{ .Thing.ID }}" role="button">Thing</a>
-                  <a class="btn body-button" href="/things/{{ .Thing.ID }}/users" role="button">
+                  <a class="btn body-button" href="/things/{{ .ThingID }}" role="button">Thing</a>
+                  <a class="btn body-button" href="/things/{{ .ThingID }}/users" role="button">
                     Share
                   </a>
                 </div>
                 <div class="table-responsive table-container">
+                  {{ $shareButton := false }}
+                  {{ if (hasPermission .Permissions "share") }}
+                    {{ $shareButton = true }}
+                  {{ end }}
                   <div class="d-flex flex-row justify-content-between">
                     <h4>Thing Channels</h4>
-                    <button role="button" class="btn body-button" onclick="openChannelModal()">
+                    <button
+                      role="button"
+                      class="btn body-button"
+                      onclick="openChannelModal()"
+                      {{ if not $shareButton }}disabled{{ end }}
+                    >
                       <i class="fa-solid fa-plus fs-4"></i>
                     </button>
                     <!-- modal -->
@@ -47,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             ></button>
                           </div>
                           <form
-                            action="/things/{{ .Thing.ID }}/channels/connect?item=things"
+                            action="/things/{{ .ThingID }}/channels/connect?item=things"
                             method="post"
                           >
                             <div class="modal-body">
@@ -98,7 +107,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                         </tr>
                       </thead>
                       <tbody>
-                        {{ $thing := .Thing }}
+                        {{ $thingID := .ThingID }}
                         {{ range $i, $c := .Channels }}
                           <tr
                             onclick="location.href='/channels/{{ $c.ID }}';"
@@ -117,7 +126,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             <td class="created-col">{{ $c.CreatedAt }}</td>
                             <td>
                               <form
-                                action="/things/{{ $thing.ID }}/channels/disconnect?item=things"
+                                action="/things/{{ $thingID }}/channels/disconnect?item=things"
                                 method="post"
                               >
                                 <input
@@ -126,7 +135,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   id="channelID"
                                   value="{{ $c.ID }}"
                                 />
-                                <button type="submit" class="btn btn-sm">
+                                <button
+                                  type="submit"
+                                  class="btn btn-sm"
+                                  {{ if not $shareButton }}disabled{{ end }}
+                                >
                                   <i class="fas fa-trash-alt"></i>
                                 </button>
                               </form>

@@ -712,14 +712,21 @@ func (us *uiService) ViewThing(token, id string) (b []byte, err error) {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
+	permissions, err := us.sdk.ThingPermissions(id, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
 	data := struct {
 		NavbarActive string
 		ID           string
 		Thing        sdk.Thing
+		Permissions  []string
 	}{
 		thingsActive,
 		id,
 		thing,
+		permissions.Permissions,
 	}
 
 	var btpl bytes.Buffer
@@ -798,6 +805,11 @@ func (us *uiService) ListThingUsers(token, thingID, relation string, page, limit
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
+	permissions, err := us.sdk.ThingPermissions(thingID, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
 
 	data := struct {
@@ -809,6 +821,7 @@ func (us *uiService) ListThingUsers(token, thingID, relation string, page, limit
 		Pages        int
 		Limit        int
 		TabActive    string
+		Permissions  []string
 	}{
 		thingsActive,
 		thingID,
@@ -818,6 +831,7 @@ func (us *uiService) ListThingUsers(token, thingID, relation string, page, limit
 		noOfPages,
 		int(limit),
 		relation,
+		permissions.Permissions,
 	}
 
 	var btpl bytes.Buffer
@@ -841,7 +855,7 @@ func (us *uiService) ListChannelsByThing(token, thingID string, page, limit uint
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	thing, err := us.sdk.Thing(thingID, token)
+	permissions, err := us.sdk.ThingPermissions(thingID, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -850,18 +864,20 @@ func (us *uiService) ListChannelsByThing(token, thingID string, page, limit uint
 
 	data := struct {
 		NavbarActive string
-		Thing        sdk.Thing
+		ThingID      string
 		Channels     []sdk.Channel
 		CurrentPage  int
 		Pages        int
 		Limit        int
+		Permissions  []string
 	}{
 		thingsActive,
-		thing,
+		thingID,
 		chsPage.Channels,
 		int(page),
 		noOfPages,
 		int(limit),
+		permissions.Permissions,
 	}
 
 	var btpl bytes.Buffer
@@ -933,14 +949,21 @@ func (us *uiService) ViewChannel(token, id string) (b []byte, err error) {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
+	permissions, err := us.sdk.ChannelPermissions(id, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
 	data := struct {
 		NavbarActive string
 		ID           string
 		Channel      sdk.Channel
+		Permissions  []string
 	}{
 		channelsActive,
 		id,
 		channel,
+		permissions.Permissions,
 	}
 
 	var btpl bytes.Buffer
@@ -972,6 +995,11 @@ func (us *uiService) ListThingsByChannel(token, channelID string, page, limit ui
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
+	permissions, err := us.sdk.ChannelPermissions(channelID, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
 	noOfPages := int(math.Ceil(float64(thsPage.Total) / float64(limit)))
 
 	data := struct {
@@ -981,6 +1009,7 @@ func (us *uiService) ListThingsByChannel(token, channelID string, page, limit ui
 		CurrentPage  int
 		Pages        int
 		Limit        int
+		Permissions  []string
 	}{
 		channelsActive,
 		channelID,
@@ -988,6 +1017,7 @@ func (us *uiService) ListThingsByChannel(token, channelID string, page, limit ui
 		int(page),
 		noOfPages,
 		int(limit),
+		permissions.Permissions,
 	}
 
 	var btpl bytes.Buffer
@@ -1075,6 +1105,11 @@ func (us *uiService) ListChannelUsers(token, channelID, relation string, page, l
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
+	permissions, err := us.sdk.ChannelPermissions(channelID, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
 
 	data := struct {
@@ -1086,6 +1121,7 @@ func (us *uiService) ListChannelUsers(token, channelID, relation string, page, l
 		Pages        int
 		Limit        int
 		TabActive    string
+		Permissions  []string
 	}{
 		channelsActive,
 		channelID,
@@ -1095,6 +1131,7 @@ func (us *uiService) ListChannelUsers(token, channelID, relation string, page, l
 		noOfPages,
 		int(limit),
 		relation,
+		permissions.Permissions,
 	}
 
 	var btpl bytes.Buffer
@@ -1131,6 +1168,11 @@ func (us *uiService) ListChannelUserGroups(token, channelID string, page, limit 
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
+	permissions, err := us.sdk.ChannelPermissions(channelID, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
 	noOfPages := int(math.Ceil(float64(groupsPage.Total) / float64(limit)))
 
 	data := struct {
@@ -1141,6 +1183,7 @@ func (us *uiService) ListChannelUserGroups(token, channelID string, page, limit 
 		CurrentPage  int
 		Pages        int
 		Limit        int
+		Permissions  []string
 	}{
 		channelsActive,
 		groupsPage.Groups,
@@ -1149,6 +1192,7 @@ func (us *uiService) ListChannelUserGroups(token, channelID string, page, limit 
 		int(page),
 		noOfPages,
 		int(limit),
+		permissions.Permissions,
 	}
 
 	var btpl bytes.Buffer
@@ -1185,6 +1229,11 @@ func (us *uiService) ListGroupUsers(token, id, relation string, page, limit uint
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
+	permissions, err := us.sdk.GroupPermissions(id, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
 
 	data := struct {
@@ -1196,6 +1245,7 @@ func (us *uiService) ListGroupUsers(token, id, relation string, page, limit uint
 		Pages        int
 		Limit        int
 		TabActive    string
+		Permissions  []string
 	}{
 		groupsActive,
 		id,
@@ -1205,6 +1255,7 @@ func (us *uiService) ListGroupUsers(token, id, relation string, page, limit uint
 		noOfPages,
 		int(limit),
 		relation,
+		permissions.Permissions,
 	}
 
 	var btpl bytes.Buffer
@@ -1236,14 +1287,21 @@ func (us *uiService) ViewGroup(token, id string) (b []byte, err error) {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
+	permissions, err := us.sdk.GroupPermissions(id, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
 	data := struct {
 		NavbarActive string
 		ID           string
 		Group        sdk.Group
+		Permissions  []string
 	}{
 		groupsActive,
 		id,
 		group,
+		permissions.Permissions,
 	}
 
 	var btpl bytes.Buffer
@@ -1326,6 +1384,11 @@ func (us *uiService) ListUserGroupChannels(token, groupID string, page, limit ui
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
+	permissions, err := us.sdk.GroupPermissions(groupID, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
 	noOfPages := int(math.Ceil(float64(channelsPage.Total) / float64(limit)))
 
 	data := struct {
@@ -1336,6 +1399,7 @@ func (us *uiService) ListUserGroupChannels(token, groupID string, page, limit ui
 		CurrentPage  int
 		Pages        int
 		Limit        int
+		Permissions  []string
 	}{
 		groupsActive,
 		channelsPage.Groups,
@@ -1344,6 +1408,7 @@ func (us *uiService) ListUserGroupChannels(token, groupID string, page, limit ui
 		int(page),
 		noOfPages,
 		int(limit),
+		permissions.Permissions,
 	}
 
 	var btpl bytes.Buffer
@@ -1895,6 +1960,9 @@ func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, 
 				return ""
 			}
 			return time.Unix(int64(t), 0).String()
+		},
+		"hasPermission": func(permissions []string, permission string) bool {
+			return slices.Contains(permissions, permission)
 		},
 	})
 

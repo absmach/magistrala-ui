@@ -27,9 +27,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </a>
                 </div>
                 <div class="table-responsive table-container">
+                  {{ $shareButton := false }}
+                  {{ if (hasPermission .Permissions "share") }}
+                    {{ $shareButton = true }}
+                  {{ end }}
                   <div class="d-flex flex-row justify-content-between">
                     <h4>Channel Things</h4>
-                    <button role="button" class="btn body-button" onclick="openThingModal()">
+                    <button
+                      role="button"
+                      class="btn body-button"
+                      onclick="openThingModal()"
+                      {{ if not $shareButton }}disabled{{ end }}
+                    >
                       <i class="fa-solid fa-plus fs-4"></i>
                     </button>
                     <!-- modal -->
@@ -132,7 +141,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   id="thingID"
                                   value="{{ $t.ID }}"
                                 />
-                                <button type="submit" class="btn btn-sm">
+                                <button
+                                  type="submit"
+                                  class="btn btn-sm"
+                                  {{ if not $shareButton }}disabled{{ end }}
+                                >
                                   <i class="fas fa-trash-alt"></i>
                                 </button>
                               </form>
