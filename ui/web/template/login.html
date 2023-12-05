@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                         class="p-3 w-100"
                         type="email"
                         name="email"
-                        id="Email"
+                        id="email"
                         placeholder="Email Address"
                       />
                     </div>
@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                         class="p-3 w-100"
                         type="password"
                         name="password"
-                        id="Password"
+                        id="password"
                         placeholder="Password"
                       />
                     </div>
@@ -117,16 +117,16 @@ SPDX-License-Identifier: Apache-2.0 -->
         attachValidationListener({
           buttonId: "login-button",
           validations: {
-            Email: validateEmail,
-            Password: validatePassword,
+            email: validateEmail,
+            password: validatePassword,
           },
           errorDivs: {
-            Email: "emailError",
+            email: "emailError",
             Password: "passwordError",
           },
           fields: {
             Email: "email-field",
-            Password: "password-field",
+            password: "password-field",
           },
         });
       </script>

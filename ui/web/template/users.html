@@ -41,66 +41,66 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <div id="alertMessage"></div>
                           <form id="userform">
                             <div class="mb-3">
-                              <label for="Name" class="form-label">Name</label>
+                              <label for="name" class="form-label">Name</label>
                               <input
                                 type="text"
                                 class="form-control name-field"
                                 name="name"
-                                id="Name"
+                                id="name"
                                 placeholder="User Name"
                               />
-                              <div id="NameError" class="text-danger"></div>
+                              <div id="nameError" class="text-danger"></div>
                             </div>
                             <div class="mb-3">
-                              <label for="Identity" class="form-label">Identity</label>
+                              <label for="identity" class="form-label">Identity</label>
                               <input
                                 type="email"
                                 class="form-control identity-field"
                                 name="identity"
-                                id="Identity"
+                                id="identity"
                                 placeholder="User Identity"
                               />
-                              <div id="IdentityError" class="text-danger"></div>
+                              <div id="identityError" class="text-danger"></div>
                             </div>
                             <div class="mb-3">
-                              <label for="Secret" class="form-label">Secret</label>
+                              <label for="secret" class="form-label">Secret</label>
                               <input
                                 type="text"
                                 class="form-control secret-field"
                                 name="secret"
-                                id="Secret"
+                                id="secret"
                                 placeholder="User Secret"
                               />
-                              <div id="SecretError" class="text-danger"></div>
+                              <div id="secretError" class="text-danger"></div>
                             </div>
                             <div class="mb-3">
-                              <label for="Tags" class="form-label">Tags</label>
+                              <label for="tags" class="form-label">Tags</label>
                               <input
                                 type="text"
                                 class="form-control tags-field"
                                 name="tags"
-                                id="Tags"
+                                id="tags"
                                 aria-describedby="tagHelp"
                                 value="[]"
                               />
                               <div id="tagHelp" class="form-text">
                                 Enter user tags as a string slice.
                               </div>
-                              <div id="TagsError" class="text-danger"></div>
+                              <div id="tagsError" class="text-danger"></div>
                             </div>
                             <div class="mb-3">
-                              <label for="Metadata" class="form-label">Metadata</label>
+                              <label for="metadata" class="form-label">Metadata</label>
                               <input
                                 type="text"
                                 class="form-control metadata-field"
                                 name="metadata"
-                                id="Metadata"
+                                id="metadata"
                                 value="{}"
                               />
                               <div id="metadataHelp" class="form-text">
                                 Enter user metadata in JSON format.
                               </div>
-                              <div id="MetadataError" class="text-danger"></div>
+                              <div id="metadataError" class="text-danger"></div>
                             </div>
                             <button type="submit" class="btn body-button" id="create-user-button">
                               Submit
@@ -242,25 +242,25 @@ SPDX-License-Identifier: Apache-2.0 -->
         attachValidationListener({
           buttonId: "create-user-button",
           errorDivs: {
-            Name: "NameError",
-            Identity: "IdentityError",
-            Secret: "SecretError",
-            Metadata: "MetadataError",
-            Tags: "TagsError",
+            name: "nameError",
+            identity: "identityError",
+            secret: "secretError",
+            metadata: "metadataError",
+            tags: "tagsError",
           },
           validations: {
-            Name: validateName,
-            Identity: validateEmail,
-            Secret: validatePassword,
-            Metadata: validateJSON,
-            Tags: validateStringArray,
+            name: validateName,
+            identity: validateEmail,
+            secret: validatePassword,
+            metadata: validateJSON,
+            tags: validateStringArray,
           },
           fields: {
-            Name: "name-field",
-            Identity: "identity-field",
-            Secret: "secret-field",
-            Metadata: "metadata-field",
-            Tags: "tags-field",
+            name: "name-field",
+            identity: "identity-field",
+            secret: "secret-field",
+            metadata: "metadata-field",
+            tags: "tags-field",
           },
         });
 
