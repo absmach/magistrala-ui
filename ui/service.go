@@ -129,7 +129,7 @@ var (
 // Service specifies service API.
 type Service interface {
 	// Index displays the landing page of the UI.
-	Index(token, domainID string) ([]byte, error)
+	Index(token string) ([]byte, error)
 	// Login displays the login page.
 	Login() ([]byte, error)
 	// Logout deletes the access token and refresh token from the cookies and logs the user out of the UI.
@@ -320,20 +320,18 @@ func New(sdk sdk.SDK) (Service, error) {
 	}, nil
 }
 
-func (us *uiService) Index(token, domainID string) (b []byte, err error) {
+func (us *uiService) Index(token string) (b []byte, err error) {
 	pgm := sdk.PageMetadata{
-		Offset:     uint64(0),
-		Visibility: statusAll,
-		Status:     statusAll,
+		Offset: uint64(0),
+		Status: statusAll,
 	}
 
 	enabledPgm := sdk.PageMetadata{
-		Offset:     uint64(0),
-		Visibility: statusAll,
-		Status:     enabled,
+		Offset: uint64(0),
+		Status: enabled,
 	}
 
-	users, err := us.sdk.ListDomainUsers(domainID, pgm, token)
+	users, err := us.sdk.Users(pgm, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -353,7 +351,7 @@ func (us *uiService) Index(token, domainID string) (b []byte, err error) {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	enabledUsers, err := us.sdk.ListDomainUsers(domainID, enabledPgm, token)
+	enabledUsers, err := us.sdk.Users(enabledPgm, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}

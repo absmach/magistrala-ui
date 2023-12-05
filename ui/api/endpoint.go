@@ -19,7 +19,7 @@ func indexEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.Index(req.token, req.DomainID)
+		res, err := svc.Index(req.token)
 		if err != nil {
 			return nil, err
 		}

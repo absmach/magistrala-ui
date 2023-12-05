@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 
     <li class="nav-item mb-2 mx-2">
       {{ $active := "dashboard" }}
-      <a href="" id="indexLink" class="nav-link {{ if eq .NavbarActive $active }}active{{ end }}">
+      <a href="/" class="nav-link {{ if eq .NavbarActive $active }}active{{ end }}">
         <i class="fas fa-home"></i>
         <span>Dashboard</span>
       </a>
@@ -33,8 +33,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     <li class="nav-item mb-2 mx-2">
       {{ $active = "users" }}
       <a
-        href=""
-        id="usersLink"
+        href="/users"
         class=" nav-link {{ if (serviceUnavailable "users") }}
           disabled-item
         {{ end }} {{ if eq .NavbarActive $active }}active{{ end }}"
@@ -218,11 +217,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h1
-            class="modal-title fs-5 fw-bold"
-            id="createDomainModalLabel"
-            style="font-weight: 600"
-          >
+          <h1 class="modal-title fs-5 fw-bold" id="createDomainModalLabel" style="font-weight: 600">
             Create Domain
           </h1>
           <button
@@ -265,9 +260,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               <div class="col-md-12">
                 <label for="metadata" class="form-label">Metadata</label>
                 <input type="text" class="form-control" name="metadata" id="metadata" value="{}" />
-                <div id="metadataHelp" class="form-text">
-                  Enter Domain metadata in JSON format.
-                </div>
+                <div id="metadataHelp" class="form-text">Enter Domain metadata in JSON format.</div>
                 <div id="metadataError" class="error-message text-danger"></div>
               </div>
             </div>
@@ -288,14 +281,11 @@ SPDX-License-Identifier: Apache-2.0 -->
     var domainName = localStorage.getItem("domainName");
     document.getElementById("domainsettings").href = "/domains/" + domainID;
     document.getElementById("usersLink").href = "/users?domain=" + domainID;
-    document.getElementById("indexLink").href = "/?domain=" + domainID;
     document.getElementById("domainName").innerHTML = domainName;
     document.getElementById("domainName2").innerHTML = domainName;
     document.getElementById("username").innerHTML = name;
     document.getElementById("identity").innerHTML = identity;
-    const createDomainModal = new bootstrap.Modal(
-      document.getElementById("createDomainModal"),
-    );
+    const createDomainModal = new bootstrap.Modal(document.getElementById("createDomainModal"));
     function openCreateDomainModal() {
       createDomainModal.show();
     }

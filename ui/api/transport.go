@@ -716,14 +716,8 @@ func decodeIndexRequest(_ context.Context, r *http.Request) (interface{}, error)
 		return nil, err
 	}
 
-	domain, err := readStringQuery(r, domainKey, defKey)
-	if err != nil {
-		return nil, err
-	}
-
 	req := indexReq{
-		token:    token,
-		DomainID: domain,
+		token: token,
 	}
 
 	return req, nil

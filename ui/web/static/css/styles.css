@@ -523,6 +523,10 @@ button.edit-btn {
 	cursor: pointer;
 }
 
+.breadcrumb-item a {
+	color: var(--main-color);
+}
+
 @media (max-width: 768px) {
 	.sidebar {
 		width: var(--sidebar-min);

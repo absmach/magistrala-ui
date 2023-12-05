@@ -31,13 +31,13 @@ func MetricsMiddleware(svc ui.Service, counter metrics.Counter, latency metrics.
 }
 
 // Index adds metrics middleware to index method.
-func (mm *metricsMiddleware) Index(token, domainID string) (b []byte, err error) {
+func (mm *metricsMiddleware) Index(token string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "index").Add(1)
 		mm.latency.With("method", "index").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.Index(token, domainID)
+	return mm.svc.Index(token)
 }
 
 // Login adds metrics middleware to login method.
