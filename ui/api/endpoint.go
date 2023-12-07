@@ -1572,8 +1572,7 @@ func createDomainEndpoint(svc ui.Service) endpoint.Endpoint {
 			Alias:    req.Alias,
 		}
 
-		err := svc.CreateDomain(req.token, domain)
-		if err != nil {
+		if err := svc.CreateDomain(req.token, domain); err != nil {
 			return nil, err
 		}
 
