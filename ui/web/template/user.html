@@ -85,21 +85,20 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                       <tr>
                         <th>Metadata</th>
-                        <td
-                          class="editable metadata-field"
-                          contenteditable="false"
-                          data-field="metadata"
-                        >
-                          {{ toJSON .User.Metadata }}
+                        <td>
+                          <div>
+                            <pre id="meta-data"></pre>
+                          </div>
                         </td>
                         <td>
-                          <button class="edit-btn" id="edit-metadata">
+                          <button
+                            type="button"
+                            class="edit-btn"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editMetadataModal"
+                          >
                             <i class="fas fa-pencil-alt"></i>
                           </button>
-                          <div class="save-cancel-buttons" style="display: none">
-                            <button class="save-btn" id="save-metadata">Save</button>
-                            <button class="cancel-btn" id="cancel-metadata">Cancel</button>
-                          </div>
                         </td>
                       </tr>
                       <tr>
@@ -205,7 +204,25 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
         </div>
+        <!-- Edit Metadata Modal -->
+        {{ template "metadatamodal" }}
+
       </div>
+      <script>
+        var metadata = "{{ toJSON .User.Metadata }}";
+        var parsedMetadata = JSON.parse(metadata);
+
+        attachFormatJsonWithPrettifyListener({
+          id: "meta-data",
+          metadata: metadata,
+        });
+
+        codeMirrorEditor({
+          textArea: "metadataTextArea",
+          button: "save-metadata",
+          value: parsedMetadata,
+        });
+      </script>      
       <script type="module">
         import { attachEditRowListener, updateName, updateIdentity, updateTags, updateMetadata} from "/js/update.js";
 
@@ -217,16 +234,24 @@ SPDX-License-Identifier: Apache-2.0 -->
               name:updateName,
               identity:updateIdentity,
               tags:updateTags,
-              metadata:updateMetadata,
             },
             errorDiv: "error-message",
             fields: {
               name: "name-field",
               identity: "identity-field",
               tags: "tags-field",
-              metadata: "metadata-field",
             },
           });
+
+          updateMetadata({
+          textArea: "metadataTextArea",
+          field:"metadata",
+          alertDiv: "metadataError",
+          fieldName: "metadata-field",
+          id: "{{ .User.ID }}",
+          entity: "users",
+          button: "save-metadata",
+        });
       </script>
     </body>
   </html>

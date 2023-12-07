@@ -2,6 +2,8 @@
 SPDX-License-Identifier: Apache-2.0 */
 
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300&family=Roboto:wght@400&family=Montserrat:wght@700&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Inconsolata&display=swap');
+
 
 :root {
 	--main-color: #003366;
@@ -15,6 +17,8 @@ SPDX-License-Identifier: Apache-2.0 */
 	--pill-color-1: #1d2231;
 	--pill-color-2: #003366;
 	--pill-color-3: #8390a2;
+
+	--codemirror-font: 'Inconsolata', monospace;
 }
 
 * {
@@ -583,6 +587,44 @@ button.edit-btn {
 .modal-title {
 	font-weight: 700;
 	font-size: 1.25rem;
+}
+
+.string,
+.cm-s-default .cm-string {
+	color: var(--main-color);
+}
+
+.key,
+.cm-property {
+	color: red !important;
+}
+
+.number,
+.cm-s-default .cm-number {
+	color: darkorange;
+}
+
+.boolean,
+.cm-s-default .cm-atom {
+	color: green;
+}
+
+.null {
+	color: magenta;
+}
+
+.table-container .meta-div {
+	overflow: auto;
+	max-height: 5rem;
+	max-width: 100%;
+}
+
+.table-container .meta-col {
+	max-width: 50%;
+}
+
+.metadata-field span {
+	font-family: var(--codemirror-font) !important;
 }
 
 @media (max-width: 768px) {

@@ -80,13 +80,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                             </div>
                             <div class="mb-3">
                               <label for="metadata" class="form-label">Metadata</label>
-                              <input
-                                type="text"
-                                class="form-control metadata-field"
-                                name="metadata"
-                                id="metadata"
-                                value="{}"
-                              />
+                              <div class="metadata-field">
+                                <textarea name="metadata" id="metadata"></textarea>
+                              </div>
                               <div id="metadataHelp" class="form-text">
                                 Enter channel metadata in JSON format.
                               </div>
@@ -176,15 +172,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                             <td>{{ $c.Name }}</td>
                             <td class="desc-col">{{ $c.Description }}</td>
                             <td class="meta-col">
-                              {{ range $k, $v := $c.Metadata }}
-                                <span class="badge bg-success">
-                                  {{ $k }}:
-                                  {{ $v }}
-                                </span>
-                              {{ end }}
+                              <div class="meta-div">
+                                <pre id="meta-{{ $i }}"></pre>
+                              </div>
                             </td>
                             <td class="created-col">{{ $c.CreatedAt }}</td>
                           </tr>
+                          <script>
+                            attachFormatJsonWithPrettifyListener({
+                              metadata: '{{ toJSON $c.Metadata }}',
+                              id: "meta-{{ $i }}",
+                            })
+                          </script>
                         {{ end }}
                       </tbody>
                     </table>
@@ -207,6 +206,12 @@ SPDX-License-Identifier: Apache-2.0 -->
             channelsModal.show();
           }
         }
+
+        codeMirrorEditor({
+          textArea: "metadata",
+          button: "create-channel-button",
+          value: {},
+        });
       </script>
       <script type="module">
         import { attachValidationListener, validateName, validateJSON } from "/js/validation.js";

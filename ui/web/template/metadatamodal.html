@@ -1,0 +1,39 @@
+<!-- Copyright (c) Abstract Machines
+SPDX-License-Identifier: Apache-2.0 -->
+
+{{ define "metadatamodal" }}
+  <div
+    class="modal fade"
+    id="editMetadataModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="editMetadataModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-title" id="editMetadataModalLabel">Edit Metadata</div>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <form id="updateMetadataForm">
+          <div class="modal-body">
+            <div class="metadata-field">
+              <textarea name="metadata" id="metadataTextArea"></textarea>
+            </div>
+            <div id="metadataError" class="text-danger"></div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+            <button class="btn body-button" id="save-metadata" type="submit">Update</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{{ end }}

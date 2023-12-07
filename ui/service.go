@@ -74,6 +74,7 @@ var (
 		"tablefooter",
 		"error",
 		"breadcrumb",
+		"metadatamodal",
 
 		"bootstrap",
 		"bootstraps",
