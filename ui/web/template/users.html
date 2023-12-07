@@ -55,12 +55,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                               <label for="email" class="form-label">Identity</label>
                               <input
                                 type="email"
-                                class="form-control identity-field"
+                                class="form-control email-field"
                                 name="identity"
                                 id="email"
                                 placeholder="User Identity"
                               />
-                              <div id="identityError" class="text-danger"></div>
+                              <div id="emailError" class="text-danger"></div>
                             </div>
                             <div class="mb-3">
                               <label for="secret" class="form-label">Secret</label>
@@ -243,7 +243,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           buttonId: "create-user-button",
           errorDivs: {
             name: "nameError",
-            email: "identityError",
+            email: "emailError",
             secret: "secretError",
             metadata: "metadataError",
             tags: "tagsError",
@@ -257,7 +257,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           },
           fields: {
             name: "name-field",
-            email: "identity-field",
+            email: "email-field",
             secret: "secret-field",
             metadata: "metadata-field",
             tags: "tags-field",
