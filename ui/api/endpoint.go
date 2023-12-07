@@ -1565,15 +1565,14 @@ func createDomainEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		err := svc.CreateDomain(
-			req.token,
-			sdk.Domain{
-				Name:     req.Name,
-				Metadata: req.Metadata,
-				Tags:     req.Tags,
-				Alias:    req.Alias,
-			},
-		)
+		domain := sdk.Domain{
+			Name:     req.Name,
+			Metadata: req.Metadata,
+			Tags:     req.Tags,
+			Alias:    req.Alias,
+		}
+
+		err := svc.CreateDomain(req.token, domain)
 		if err != nil {
 			return nil, err
 		}
@@ -1592,16 +1591,15 @@ func updateDomainEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		if err := svc.UpdateDomain(
-			req.token,
-			sdk.Domain{
-				ID:       req.DomainID,
-				Name:     req.Name,
-				Metadata: req.Metadata,
-				Tags:     req.Tags,
-				Alias:    req.Alias,
-			},
-		); err != nil {
+		domain := sdk.Domain{
+			ID:       req.DomainID,
+			Name:     req.Name,
+			Metadata: req.Metadata,
+			Tags:     req.Tags,
+			Alias:    req.Alias,
+		}
+
+		if err := svc.UpdateDomain(req.token, domain); err != nil {
 			return nil, err
 		}
 
@@ -1618,13 +1616,12 @@ func updateDomainTagsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		if err := svc.UpdateDomain(
-			req.token,
-			sdk.Domain{
-				ID:   req.DomainID,
-				Tags: req.Tags,
-			},
-		); err != nil {
+		domain := sdk.Domain{
+			ID:   req.DomainID,
+			Tags: req.Tags,
+		}
+
+		if err := svc.UpdateDomain(req.token, domain); err != nil {
 			return nil, err
 		}
 
@@ -1660,14 +1657,12 @@ func assignMemberEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		if err := svc.AssignMember(
-			req.token,
-			req.DomainID,
-			sdk.UsersRelationRequest{
-				Relation: req.Relation,
-				UserIDs:  []string{req.UserID},
-			},
-		); err != nil {
+		relation := sdk.UsersRelationRequest{
+			Relation: req.Relation,
+			UserIDs:  []string{req.UserID},
+		}
+
+		if err := svc.AssignMember(req.token, req.DomainID, relation); err != nil {
 			return nil, err
 		}
 
@@ -1685,14 +1680,12 @@ func unassignMemberEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		if err := svc.UnassignMember(
-			req.token,
-			req.DomainID,
-			sdk.UsersRelationRequest{
-				Relation: req.Relation,
-				UserIDs:  []string{req.UserID},
-			},
-		); err != nil {
+		relation := sdk.UsersRelationRequest{
+			Relation: req.Relation,
+			UserIDs:  []string{req.UserID},
+		}
+
+		if err := svc.UnassignMember(req.token, req.DomainID, relation); err != nil {
 			return nil, err
 		}
 
