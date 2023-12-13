@@ -33,6 +33,7 @@ type config struct {
 	HostURL         string          `env:"MG_UI_HOST_URL"         envDefault:"http://localhost:9095"`
 	BootstrapURL    string          `env:"MG_BOOTSTRAP_URL"       envDefault:"http://localhost:9013"`
 	DomainsURL      string          `env:"MG_DOMAINS_URL"         envDefault:"http://localhost:8189"`
+	InvitationsURL  string          `env:"MG_INVITATIONS_URL"     envDefault:"http://localhost:9020"`
 	MsgContentType  sdk.ContentType `env:"MG_UI_CONTENT_TYPE"     envDefault:"application/senml+json"`
 	TLSVerification bool            `env:"MG_UI_VERIFICATION_TLS" envDefault:"false"`
 }
@@ -53,6 +54,7 @@ func main() {
 		TLSVerification: cfg.TLSVerification,
 		BootstrapURL:    cfg.BootstrapURL,
 		DomainsURL:      cfg.DomainsURL,
+		InvitationsURL:  cfg.InvitationsURL,
 	}
 
 	logger, err := logger.New(os.Stdout, cfg.LogLevel)

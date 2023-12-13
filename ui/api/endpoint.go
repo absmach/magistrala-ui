@@ -211,8 +211,14 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
+		user, err := svc.UserProfile(token.AccessToken)
+		if err != nil {
+			return nil, err
+		}
+
 		tkr := uiRes{
 			code: http.StatusCreated,
+			html: user,
 			cookies: []*http.Cookie{
 				{
 					Name:     accessTokenKey,
@@ -271,25 +277,6 @@ func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return tkr, nil
-	}
-}
-
-func userProfileEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(listEntityReq)
-		if err := req.validate(); err != nil {
-			return nil, err
-		}
-
-		res, err := svc.UserProfile(req.token, req.page, req.limit)
-		if err != nil {
-			return nil, err
-		}
-
-		return uiRes{
-			code: http.StatusOK,
-			html: res,
-		}, nil
 	}
 }
 
@@ -1637,7 +1624,7 @@ func domainEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.Domain(req.token, req.id, req.relation, req.page, req.limit)
+		res, err := svc.Domain(req.token, req.id)
 		if err != nil {
 			return nil, err
 		}
@@ -1645,6 +1632,42 @@ func domainEndpoint(svc ui.Service) endpoint.Endpoint {
 		return uiRes{
 			code: http.StatusOK,
 			html: res,
+		}, nil
+	}
+}
+
+func enableDomainEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(updateDomainStatusReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		if err := svc.EnableDomain(req.token, req.DomainID); err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code:    http.StatusSeeOther,
+			headers: map[string]string{"Location": domainsAPIEndpoint},
+		}, nil
+	}
+}
+
+func disableDomainEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(updateDomainStatusReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		if err := svc.DisableDomain(req.token, req.DomainID); err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code:    http.StatusSeeOther,
+			headers: map[string]string{"Location": domainsAPIEndpoint},
 		}, nil
 	}
 }
@@ -1667,7 +1690,7 @@ func assignMemberEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": domainsAPIEndpoint + "/" + req.DomainID + "?relation=members"},
+			headers: map[string]string{"Location": domainsAPIEndpoint + "/" + req.DomainID + "/members"},
 		}, nil
 	}
 }
@@ -1690,7 +1713,7 @@ func unassignMemberEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": domainsAPIEndpoint + "/" + req.DomainID + "?relation=members"},
+			headers: map[string]string{"Location": domainsAPIEndpoint + "/" + req.DomainID + "/members"},
 		}, nil
 	}
 }
@@ -1703,6 +1726,25 @@ func viewMemberEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		res, err := svc.ViewMember(req.token, req.UserIdentity)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code: http.StatusOK,
+			html: res,
+		}, nil
+	}
+}
+
+func listMembersEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(listEntityByIDReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.Members(req.token, req.id, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1757,5 +1799,109 @@ func unshareThingEndpoint(svc ui.Service) endpoint.Endpoint {
 			code:    http.StatusSeeOther,
 			headers: map[string]string{"Location": thingsAPIEndpoint + "/" + req.ThingID + usersAPIEndpoint},
 		}, nil
+	}
+}
+
+func sendInvitationEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(sendInvitationReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		invitation := sdk.Invitation{
+			DomainID: req.DomainID,
+			UserID:   req.UserID,
+			Relation: req.Relation,
+		}
+
+		if err := svc.SendInvitation(req.token, invitation); err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code: http.StatusOK,
+		}, nil
+	}
+}
+
+func listInvitationsEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(listInvitationsReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.Invitations(req.token, req.page, req.limit)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code: http.StatusOK,
+			html: res,
+		}, nil
+	}
+}
+
+func listDomainInvitationsEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(listInvitationsReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.DomainInvitations(req.token, req.DomainID, req.page, req.limit)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code: http.StatusOK,
+			html: res,
+		}, nil
+	}
+}
+
+func acceptInvitationEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(acceptInvitationReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		if err := svc.AcceptInvitation(req.token, req.DomainID); err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code:    http.StatusSeeOther,
+			headers: map[string]string{"Location": "/domains"},
+		}, nil
+	}
+}
+
+func deleteInvitationEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(deleteInvitationReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		if err := svc.DeleteInvitation(req.token, req.UserID, req.DomainID); err != nil {
+			return nil, err
+		}
+
+		if req.domain == "" {
+			return uiRes{
+				code:    http.StatusSeeOther,
+				headers: map[string]string{"Location": "/invitations"},
+			}, nil
+		} else {
+			return uiRes{
+				code:    http.StatusSeeOther,
+				headers: map[string]string{"Location": domainsAPIEndpoint + "/" + req.DomainID + "/invitations"},
+			}, nil
+		}
 	}
 }

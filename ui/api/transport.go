@@ -148,13 +148,6 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 		opts...,
 	).ServeHTTP)
 
-	r.Get("/profile", kithttp.NewServer(
-		userProfileEndpoint(svc),
-		decodeListEntityRequest,
-		encodeResponse,
-		opts...,
-	).ServeHTTP)
-
 	r.Route("/", func(r chi.Router) {
 		r.Use(TokenMiddleware)
 		r.Get("/", http.HandlerFunc(kithttp.NewServer(
@@ -651,6 +644,20 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				opts...,
 			).ServeHTTP)
 
+			r.Post("/enable", kithttp.NewServer(
+				enableDomainEndpoint(svc),
+				decodeDomainStatusUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/disable", kithttp.NewServer(
+				disableDomainEndpoint(svc),
+				decodeDomainStatusUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
 			r.Get("/{id}", kithttp.NewServer(
 				domainEndpoint(svc),
 				decodeListEntityByIDRequest,
@@ -672,6 +679,13 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				opts...,
 			).ServeHTTP)
 
+			r.Get("/{id}/invitations", kithttp.NewServer(
+				listDomainInvitationsEndpoint(svc),
+				decodeListDomainInvitationsRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
 			r.Post("/{id}/assign", kithttp.NewServer(
 				assignMemberEndpoint(svc),
 				decodeAssignMemberRequest,
@@ -686,9 +700,46 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				opts...,
 			).ServeHTTP)
 
+			r.Get("/{id}/members", kithttp.NewServer(
+				listMembersEndpoint(svc),
+				decodeListEntityByIDRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
 			r.Get("/members", kithttp.NewServer(
 				viewMemberEndpoint(svc),
 				decodeViewMemberRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+		})
+
+		r.Route("/invitations", func(r chi.Router) {
+			r.Post("/", kithttp.NewServer(
+				sendInvitationEndpoint(svc),
+				decodeSendInvitationRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Get("/", kithttp.NewServer(
+				listInvitationsEndpoint(svc),
+				decodeListInvitationsRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/accept", kithttp.NewServer(
+				acceptInvitationEndpoint(svc),
+				decodeAcceptInvitationRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/delete", kithttp.NewServer(
+				deleteInvitationEndpoint(svc),
+				decodeDeleteInvitationRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
@@ -1892,6 +1943,20 @@ func decodeUpdateDomainTagsRequest(_ context.Context, r *http.Request) (interfac
 	return req, nil
 }
 
+func decodeDomainStatusUpdate(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	req := updateDomainStatusReq{
+		token:    token,
+		DomainID: r.PostFormValue("domainID"),
+	}
+
+	return req, nil
+}
+
 func decodeAssignMemberRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	if err := r.ParseForm(); err != nil {
 		return nil, err
@@ -1925,6 +1990,116 @@ func decodeViewMemberRequest(_ context.Context, r *http.Request) (interface{}, e
 	req := viewMemberReq{
 		token:        token,
 		UserIdentity: identity,
+	}
+
+	return req, nil
+}
+
+func decodeSendInvitationRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	req := sendInvitationReq{
+		token:    token,
+		DomainID: r.PostFormValue("domainID"),
+		UserID:   r.PostFormValue("userID"),
+		Relation: r.PostFormValue("relation"),
+	}
+
+	return req, nil
+}
+
+func decodeListInvitationsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	page, err := readNumQuery[uint64](r, pageKey, defPage)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	req := listInvitationsReq{
+		token: token,
+		page:  page,
+		limit: limit,
+	}
+
+	return req, nil
+}
+
+func decodeListDomainInvitationsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	page, err := readNumQuery[uint64](r, pageKey, defPage)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	req := listInvitationsReq{
+		token:    token,
+		DomainID: chi.URLParam(r, "id"),
+		page:     page,
+		limit:    limit,
+	}
+
+	return req, nil
+}
+
+func decodeAcceptInvitationRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	if err := r.ParseForm(); err != nil {
+		return nil, err
+	}
+
+	req := acceptInvitationReq{
+		token:    token,
+		DomainID: r.Form.Get("domainID"),
+	}
+
+	return req, nil
+}
+
+func decodeDeleteInvitationRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	domain, err := readStringQuery(r, domainKey, defKey)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := r.ParseForm(); err != nil {
+		return nil, err
+	}
+
+	req := deleteInvitationReq{
+		token:    token,
+		domain:   domain,
+		DomainID: r.Form.Get("domainID"),
+		UserID:   r.Form.Get("userID"),
 	}
 
 	return req, nil

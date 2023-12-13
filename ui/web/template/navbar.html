@@ -12,96 +12,221 @@ SPDX-License-Identifier: Apache-2.0 -->
     <!-- Divider -->
     <hr class="sidebar-divider my-0 text-light mb-3" />
 
+    <div id="index-nav-items">
+      <li class="nav-item mb-2 mx-2">
+        {{ $navbarActive := "dashboard" }}
+        <a
+          href="/"
+          id="index"
+          class="nav-link sidebar-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
+        >
+          <i class="fas fa-home"></i>
+          <span>Dashboard</span>
+        </a>
+      </li>
+
+      <!-- Divider -->
+      <hr class="sidebar-divider my-0 text-light mb-3" />
+    </div>
+
+    <!-- Heading -->
+    <div class="sidebar-heading mb-3">DOMAINS MANAGEMENT</div>
+
     <li class="nav-item mb-2 mx-2">
-      {{ $active := "dashboard" }}
-      <a href="/" class="nav-link {{ if eq .NavbarActive $active }}active{{ end }}">
-        <i class="fas fa-home"></i>
-        <span>Dashboard</span>
-      </a>
-    </li>
-    <li class="nav-item mb-2 mx-2">
-      {{ $active = "domain" }}
+      {{ $collapseActive := "domains" }}
       <a
-        href=""
-        class="nav-link {{ if eq .NavbarActive $active }}active{{ end }}"
-        id="domainsettings"
+        href="#domains-collapse"
+        data-bs-toggle="collapse"
+        aria-expanded="false"
+        aria-controls="domains-collapse"
+        class="dropdown-toggle nav-link sidebar-link {{ if eq .CollapseActive $collapseActive }}
+          active
+        {{ end }}"
+      >
+        <i class="fa-solid fa-sitemap"></i>
+        <span>Domains</span>
+      </a>
+      <div
+        class="collapse {{ if eq .CollapseActive $collapseActive }}
+          show
+        {{ end }}"
+        id="domains-collapse"
+      >
+        <ul class="collapse-list">
+          <li class="nav-item mb-2 mx-2">
+            {{ $navbarActive = "domains" }}
+            <a
+              href="/domains"
+              class="nav-link {{ if eq .NavbarActive $navbarActive }}
+                active
+              {{ end }}
+              "
+              id="domains"
+            >
+              <i class="fa-solid fa-sitemap"></i>
+              <span>Domains</span>
+            </a>
+          </li>
+          <li class="nav-item mb-2 mx-2">
+            {{ $navbarActive = "invitations" }}
+            <a
+              href="/invitations"
+              class="nav-link {{ if eq .NavbarActive $navbarActive }}
+                active
+              {{ end }}"
+              id="invitations"
+            >
+              <i class="fa-solid fa-envelope"></i>
+              <span>Invitations</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </li>
+
+    <li class="nav-item mb-2 mx-2" id="domain-nav-item">
+      {{ $collapseActive = "domain" }}
+      <a
+        href="#domain-collapse"
+        data-bs-toggle="collapse"
+        aria-expanded="false"
+        aria-controls="domain-collapse"
+        class="dropdown-toggle nav-link sidebar-link {{ if eq .CollapseActive $collapseActive }}
+          active
+        {{ end }}"
       >
         <i class="fa-solid fa-building"></i>
-        <span>Domain</span>
+        <span id="sidebar-domain-name"></span>
       </a>
+      <div
+        class="collapse {{ if eq .CollapseActive $collapseActive }}
+          show
+        {{ end }}"
+        id="domain-collapse"
+      >
+        <ul class="collapse-list">
+          <li class="nav-item mb-2 mx-2">
+            {{ $navbarActive = "domain" }}
+            <a
+              href=""
+              class="nav-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
+              id="domain"
+            >
+              <i class="fa-solid fa-building"></i>
+              <span>Domain</span>
+            </a>
+          </li>
+          <li class="nav-item mb-2 mx-2">
+            {{ $navbarActive = "members" }}
+            <a
+              href=""
+              id="members"
+              class="nav-link  {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
+            >
+              <i class="fa-solid fa-users"></i>
+              <span>Members</span>
+            </a>
+          </li>
+          <li class="nav-item mb-2 mx-2">
+            {{ $navbarActive = "domaininvitations" }}
+            <a
+              href=""
+              class="nav-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
+              id="domainInvitations"
+            >
+              <i class="fa-solid fa-envelope"></i>
+              <span>Invitations</span>
+            </a>
+          </li>
+        </ul>
+      </div>
     </li>
+
     <li class="nav-item mb-2 mx-2">
-      {{ $active = "users" }}
+      {{ $navbarActive = "users" }}
       <a
         href="/users"
-        class=" nav-link {{ if (serviceUnavailable "users") }}
+        class=" nav-link sidebar-link {{ if (serviceUnavailable "users") }}
           disabled-item
-        {{ end }} {{ if eq .NavbarActive $active }}active{{ end }}"
+        {{ end }} {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
       >
         <i class="fas fa-users"></i>
         <span>Users</span>
       </a>
     </li>
-    <li class="nav-item mb-2 mx-2">
-      {{ $active = "groups" }}
-      <a
-        href="/groups"
-        class="nav-link {{ if (serviceUnavailable "users") }}
-          disabled-item
-        {{ end }} {{ if eq .NavbarActive $active }}active{{ end }}"
-      >
-        <i class="fas fa-layer-group"></i>
-        <span>Groups</span>
-      </a>
-    </li>
-    <li class="nav-item mb-2 mx-2">
-      {{ $active = "things" }}
-      <a
-        href="/things"
-        class="nav-link {{ if (serviceUnavailable "things") }}
-          disabled-item
-        {{ end }} {{ if eq .NavbarActive $active }}active{{ end }}"
-      >
-        <i class="fas fa-microchip"></i>
-        <span>Things</span>
-      </a>
-    </li>
-    <li class="nav-item mb-2 mx-2">
-      {{ $active = "channels" }}
-      <a
-        href="/channels"
-        class="nav-link {{ if (serviceUnavailable "things") }}
-          disabled-item
-        {{ end }} {{ if eq .NavbarActive $active }}active{{ end }}"
-      >
-        <i class="fas fa-exchange-alt"></i>
-        <span>Channels</span>
-      </a>
-    </li>
-    <li class="nav-item mb-2 mx-2">
-      {{ $active = "readmessages" }}
-      <a
-        href="/messages/read"
-        class="nav-link {{ if (serviceUnavailable "things") }}
-          disabled-item
-        {{ end }} {{ if eq .NavbarActive $active }}active{{ end }}"
-      >
-        <i class="fas fa-envelope-open"></i>
-        <span>Messages</span>
-      </a>
-    </li>
-    <li class="nav-item mb-2 mx-2">
-      {{ $active = "bootstraps" }}
-      <a
-        href="/bootstraps"
-        class="nav-link {{ if (serviceUnavailable "bootstrap") }}
-          disabled-item
-        {{ end }} {{ if eq .NavbarActive $active }}active{{ end }}"
-      >
-        <i class="fas fa-solid fa-broadcast-tower"></i>
-        <span>Bootstrap</span>
-      </a>
-    </li>
+
+    <div id="things-nav-items">
+      <!-- Divider -->
+      <hr class="sidebar-divider my-0 text-light mb-3" />
+
+      <!-- Heading -->
+      <div class="sidebar-heading mb-3">THINGS MANAGEMENT</div>
+      <li class="nav-item mb-2 mx-2">
+        {{ $navbarActive = "groups" }}
+        <a
+          href="/groups"
+          id="groups"
+          class="nav-link sidebar-link {{ if (serviceUnavailable "users") }}
+            disabled-item
+          {{ end }} {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
+        >
+          <i class="fas fa-layer-group"></i>
+          <span>Groups</span>
+        </a>
+      </li>
+      <li class="nav-item mb-2 mx-2">
+        {{ $navbarActive = "things" }}
+        <a
+          href="/things"
+          id="things"
+          class="nav-link sidebar-link {{ if (serviceUnavailable "things") }}
+            disabled-item
+          {{ end }} {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
+        >
+          <i class="fas fa-microchip"></i>
+          <span>Things</span>
+        </a>
+      </li>
+      <li class="nav-item mb-2 mx-2">
+        {{ $navbarActive = "channels" }}
+        <a
+          href="/channels"
+          id="channels"
+          class="nav-link sidebar-link {{ if (serviceUnavailable "things") }}
+            disabled-item
+          {{ end }} {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
+        >
+          <i class="fas fa-exchange-alt"></i>
+          <span>Channels</span>
+        </a>
+      </li>
+      <li class="nav-item mb-2 mx-2">
+        {{ $navbarActive = "readmessages" }}
+        <a
+          href="/messages/read"
+          id="readmessages"
+          class="nav-link sidebar-link {{ if (serviceUnavailable "things") }}
+            disabled-item
+          {{ end }} {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
+        >
+          <i class="fas fa-envelope-open"></i>
+          <span>Messages</span>
+        </a>
+      </li>
+      <li class="nav-item mb-2 mx-2">
+        {{ $navbarActive = "bootstraps" }}
+        <a
+          href="/bootstraps"
+          id="bootstraps"
+          class="nav-link sidebar-link {{ if (serviceUnavailable "bootstrap") }}
+            disabled-item
+          {{ end }} {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
+        >
+          <i class="fas fa-solid fa-broadcast-tower"></i>
+          <span>Bootstrap</span>
+        </a>
+      </li>
+    </div>
 
     <!-- Sidebar Toggler (Sidebar) -->
     <div class="d-flex justify-content-center">
@@ -133,7 +258,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               <span>Documentation</span>
             </a>
           </li>
-          <li class="nav-item dropdown me-3">
+          <li class="nav-item dropdown me-3" id="domain-header-dropdown">
             <a
               class="nav-link dropdown-toggle"
               href="#"
@@ -194,7 +319,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <i class="fas fa-solid fa-lock me-2"></i>
                   <span>Update password</span>
                 </a>
-                <a href="/logout" class="dropdown-item user-item-button p-2 mb-2">
+                <a class="dropdown-item user-item-button p-2 mb-2" onclick="logout();">
                   <i class="fa-solid fa-right-from-bracket me-2"></i>
                   <span>Log out</span>
                 </a>
@@ -231,24 +356,24 @@ SPDX-License-Identifier: Apache-2.0 -->
           <div class="modal-body">
             <div class="row mb-3">
               <div class="col-md-12">
-                <label for="name" class="form-label">Name *</label>
-                <input type="text" class="form-control p-2" name="name" id="name" required />
+                <label for="domain-name" class="form-label">Name *</label>
+                <input type="text" class="form-control p-2" name="name" id="domain-name" required />
               </div>
             </div>
             <div class="row mb-3">
               <div class="col-md-12">
-                <label for="alias" class="form-label">Alias</label>
-                <input type="text" class="form-control p-2" name="alias" id="alias" />
+                <label for="domain-alias" class="form-label">Alias</label>
+                <input type="text" class="form-control p-2" name="alias" id="domain-alias" />
               </div>
             </div>
             <div class="row mb-3">
               <div class="col-md-12">
-                <label for="tags" class="form-label">Tags</label>
+                <label for="domain-tags" class="form-label">Tags</label>
                 <input
                   type="text"
                   class="form-control"
                   name="tags"
-                  id="tags"
+                  id="domain-tags"
                   aria-describedby="tagHelp"
                   value="[]"
                 />
@@ -258,8 +383,14 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
             <div class="row mb-3">
               <div class="col-md-12">
-                <label for="metadata" class="form-label">Metadata</label>
-                <input type="text" class="form-control" name="metadata" id="metadata" value="{}" />
+                <label for="domain-metadata" class="form-label">Metadata</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="metadata"
+                  id="domain-metadata"
+                  value="{}"
+                />
                 <div id="metadataHelp" class="form-text">Enter Domain metadata in JSON format.</div>
                 <div id="metadataError" class="error-message text-danger"></div>
               </div>
@@ -275,15 +406,32 @@ SPDX-License-Identifier: Apache-2.0 -->
   </div>
 
   <script defer>
+    var loginStatus = localStorage.getItem("loginStatus");
     var name = localStorage.getItem("userName");
     var identity = localStorage.getItem("userIdentity");
     var domainID = localStorage.getItem("domainID");
     var domainName = localStorage.getItem("domainName");
-    document.getElementById("domainsettings").href = "/domains/" + domainID;
+    var domainPermission = localStorage.getItem("domainPermission");
+
+    if (loginStatus === "general") {
+      document.getElementById("domain-nav-item").style.display = "none";
+      document.getElementById("things-nav-items").style.display = "none";
+      document.getElementById("index-nav-items").style.display = "none";
+      document.getElementById("domain-header-dropdown").style.display = "none";
+    }
+    document.getElementById("domain").href = "/domains/" + domainID;
+    document.getElementById("members").href = "/domains/" + domainID + "/members";
+    document.getElementById("domainInvitations").href = "/domains/" + domainID + "/invitations";
     document.getElementById("domainName").innerHTML = domainName;
     document.getElementById("domainName2").innerHTML = domainName;
     document.getElementById("username").innerHTML = name;
     document.getElementById("identity").innerHTML = identity;
+    document.getElementById("sidebar-domain-name").innerHTML = domainName;
+
+    if (domainPermission !== "administrator") {
+      document.getElementById("domainInvitations").style.display = "none";
+    }
+
     const createDomainModal = new bootstrap.Modal(document.getElementById("createDomainModal"));
     function openCreateDomainModal() {
       createDomainModal.show();
@@ -307,5 +455,16 @@ SPDX-License-Identifier: Apache-2.0 -->
         document.querySelector(".sidebar").classList.add("toggled");
       }
     });
+
+    function logout() {
+      fetch("/logout", {
+        method: "GET",
+      }).then((response) => {
+        if (response.status === 200) {
+          localStorage.clear();
+          window.location.href = "/login";
+        }
+      });
+    }
   </script>
 {{ end }}

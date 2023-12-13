@@ -25,7 +25,7 @@ make
 make run
 ```
 
-These commands will launch Magistrala-ui. To use the Magistrala-ui, ensure that the Mainflux core services are operational. You can achieve this by installing [Magistrala](https://github.com/absmach/magistrala) and its prerequisites.
+These commands will launch Magistrala-ui. To use the Magistrala-ui, ensure that the Magistrala core services are operational. You can achieve this by installing [Magistrala](https://github.com/absmach/magistrala) and its prerequisites.
 
 To build the docker images for the ui service, run the following commands which will build the docker images in different configurations.
 

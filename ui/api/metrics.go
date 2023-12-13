@@ -131,13 +131,13 @@ func (mm *metricsMiddleware) RefreshToken(refreshToken string) (sdk.Token, error
 }
 
 // UserProfile adds metrics middleware to user profile method.
-func (mm *metricsMiddleware) UserProfile(token string, page, limit uint64) ([]byte, error) {
+func (mm *metricsMiddleware) UserProfile(token string) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "user_profile").Add(1)
 		mm.latency.With("method", "user_profile").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.UserProfile(token, page, limit)
+	return mm.svc.UserProfile(token)
 }
 
 // CreateUsers adds metrics middleware to create users method.
@@ -811,13 +811,33 @@ func (mm *metricsMiddleware) UpdateDomain(token string, domain sdk.Domain) error
 }
 
 // Domain adds metrics middleware to domain method.
-func (mm *metricsMiddleware) Domain(token, domainID, tabActive string, page, limit uint64) ([]byte, error) {
+func (mm *metricsMiddleware) Domain(token, domainID string) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "domain").Add(1)
 		mm.latency.With("method", "domain").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.Domain(token, domainID, tabActive, page, limit)
+	return mm.svc.Domain(token, domainID)
+}
+
+// EnableDomain adds metrics middleware to enable domain method.
+func (mm *metricsMiddleware) EnableDomain(token, domainID string) (err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "enable_domain").Add(1)
+		mm.latency.With("method", "enable_domain").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.EnableDomain(token, domainID)
+}
+
+// DisableDomain adds metrics middleware to disable domain method.
+func (mm *metricsMiddleware) DisableDomain(token, domainID string) (err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "disable_domain").Add(1)
+		mm.latency.With("method", "disable_domain").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.DisableDomain(token, domainID)
 }
 
 // AssignMember adds metrics middleware to assign member method.
@@ -848,4 +868,64 @@ func (mm *metricsMiddleware) ViewMember(token, identity string) (b []byte, err e
 	}(time.Now())
 
 	return mm.svc.ViewMember(token, identity)
+}
+
+// Members adds metrics middleware to members method.
+func (mm *metricsMiddleware) Members(token, domainID string, page, limit uint64) (b []byte, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "members").Add(1)
+		mm.latency.With("method", "members").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.Members(token, domainID, page, limit)
+}
+
+// SendInvitation adds metrics middleware to send invitation method.
+func (mm *metricsMiddleware) SendInvitation(token string, invitation sdk.Invitation) (err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "send_invitation").Add(1)
+		mm.latency.With("method", "send_invitation").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.SendInvitation(token, invitation)
+}
+
+// Invitations adds metrics middleware to invitations method.
+func (mm *metricsMiddleware) Invitations(token string, page, limit uint64) (b []byte, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "invitations").Add(1)
+		mm.latency.With("method", "invitations").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.Invitations(token, page, limit)
+}
+
+// DomainInvitations adds metrics middleware to domain invitations method.
+func (mm *metricsMiddleware) DomainInvitations(token, domainID string, page, limit uint64) (b []byte, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "domain_invitations").Add(1)
+		mm.latency.With("method", "domain_invitations").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.DomainInvitations(token, domainID, page, limit)
+}
+
+// AcceptInvitation adds metrics middleware to accept invitation method.
+func (mm *metricsMiddleware) AcceptInvitation(token, domainID string) (err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "accept_invitation").Add(1)
+		mm.latency.With("method", "accept_invitation").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.AcceptInvitation(token, domainID)
+}
+
+// DeleteInvitation adds metrics middleware to delete invitation method.
+func (mm *metricsMiddleware) DeleteInvitation(token, userID, domainID string) (err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "delete_invitation").Add(1)
+		mm.latency.With("method", "delete_invitation").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.DeleteInvitation(token, userID, domainID)
 }

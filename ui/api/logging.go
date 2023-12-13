@@ -164,7 +164,7 @@ func (lm *loggingMiddleware) RefreshToken(refreshToken string) (token sdk.Token,
 }
 
 // UserProfile adds logging middleware to user profile method.
-func (lm *loggingMiddleware) UserProfile(token string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) UserProfile(token string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method user_profile took %s to complete", time.Since(begin))
 		if err != nil {
@@ -174,7 +174,7 @@ func (lm *loggingMiddleware) UserProfile(token string, page, limit uint64) (b []
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.UserProfile(token, page, limit)
+	return lm.svc.UserProfile(token)
 }
 
 // CreateUsers adds logging middleware to create users method.
@@ -1117,7 +1117,7 @@ func (lm *loggingMiddleware) UpdateDomain(token string, domain sdk.Domain) (err 
 }
 
 // Domain adds logging middleware to domain method.
-func (lm *loggingMiddleware) Domain(token, domainID, tabActive string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) Domain(token, domainID string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method domain for domain %s took %s to complete", domainID, time.Since(begin))
 		if err != nil {
@@ -1126,7 +1126,35 @@ func (lm *loggingMiddleware) Domain(token, domainID, tabActive string, page, lim
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.Domain(token, domainID, tabActive, page, limit)
+	return lm.svc.Domain(token, domainID)
+}
+
+// EnableDomain adds logging middleware to enable domain method.
+func (lm *loggingMiddleware) EnableDomain(token, domainID string) (err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method enable_domain for domain %s took %s to complete", domainID, time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.EnableDomain(token, domainID)
+}
+
+// DisableDomain adds logging middleware to disable domain method.
+func (lm *loggingMiddleware) DisableDomain(token, domainID string) (err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method disable_domain for domain %s took %s to complete", domainID, time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.DisableDomain(token, domainID)
 }
 
 // AssignMember adds logging middleware to assign member method.
@@ -1169,4 +1197,82 @@ func (lm *loggingMiddleware) ViewMember(token, identity string) (b []byte, err e
 	}(time.Now())
 
 	return lm.svc.ViewMember(token, identity)
+}
+
+// Members adds logging middleware to members method.
+func (lm *loggingMiddleware) Members(token, domainID string, page, limit uint64) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method members for domain %s took %s to complete", domainID, time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.Members(token, domainID, page, limit)
+}
+
+// SendInvitation adds logging middleware to send invitation method.
+func (lm *loggingMiddleware) SendInvitation(token string, invitation sdk.Invitation) (err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method send_invitation for user %s to domain %s took %s to complete", invitation.UserID, invitation.DomainID, time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.SendInvitation(token, invitation)
+}
+
+// Invitations adds logging middleware to invitations method.
+func (lm *loggingMiddleware) Invitations(token string, page, limit uint64) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method invitations took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.Invitations(token, page, limit)
+}
+
+// DomainInvitations adds logging middleware to domain invitations method.
+func (lm *loggingMiddleware) DomainInvitations(token, domainID string, page, limit uint64) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method domain_invitations took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.DomainInvitations(token, domainID, page, limit)
+}
+
+// AcceptInvitation adds logging middleware to accept invitation method.
+func (lm *loggingMiddleware) AcceptInvitation(token, domainID string) (err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method accept_invitation took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.AcceptInvitation(token, domainID)
+}
+
+// DeleteInvitation adds logging middleware to delete invitation method.
+func (lm *loggingMiddleware) DeleteInvitation(token, userID, domainID string) (err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method delete_invitation for user %s to domain %s took %s to complete", userID, domainID, time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.DeleteInvitation(token, userID, domainID)
 }
