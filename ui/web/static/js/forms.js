@@ -31,6 +31,7 @@ export function submitCreateForm(config) {
       })
       .catch((error) => {
         console.error("error submitting form: ", error);
+        showAlert(`error submitting form: ${error}`, config.alertDiv);
       });
   });
 }
@@ -42,15 +43,20 @@ export function submitUpdateForm(config) {
     headers: {
       "Content-Type": "application/json",
     },
-  }).then((response) => {
-    switch (response.status) {
-      case 409:
-        showAlert("entity already exists!", config.alertDiv);
-        break;
-      default:
-        window.location.reload();
-    }
-  });
+  })
+    .then((response) => {
+      switch (response.status) {
+        case 409:
+          showAlert("entity already exists!", config.alertDiv);
+          break;
+        default:
+          window.location.reload();
+      }
+    })
+    .catch((error) => {
+      console.error("error submitting form: ", error);
+      showAlert(`error submitting form: ${error}`, config.alertDiv);
+    });
 }
 
 function showAlert(errorMessage, alertDiv) {

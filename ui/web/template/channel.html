@@ -48,7 +48,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       {{ end }}
                       <tr>
                         <th>NAME</th>
-                        <td class="editable" contenteditable="false" data-field="name">
+                        <td class="editable name-field" contenteditable="false" data-field="name">
                           {{ .Channel.Name }}
                         </td>
                         <td>
@@ -96,7 +96,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                       <tr>
                         <th>Metadata</th>
-                        <td class="editable" contenteditable="false" data-field="metadata">
+                        <td
+                          class="editable metadata-field"
+                          contenteditable="false"
+                          data-field="metadata"
+                        >
                           {{ toJSON .Channel.Metadata }}
                         </td>
                         <td>
@@ -152,6 +156,10 @@ SPDX-License-Identifier: Apache-2.0 -->
             metadata:updateMetadata,
           },
           errorDiv: "error-message",
+          fields:{
+            name: "name-field",
+            metadata: "metadata-field",
+          },
         });
       </script>
     </body>

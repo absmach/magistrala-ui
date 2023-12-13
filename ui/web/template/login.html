@@ -34,8 +34,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <input
                         class="p-3 w-100"
                         type="email"
-                        name="username"
-                        id="username"
+                        name="email"
+                        id="email"
                         placeholder="Email Address"
                       />
                     </div>
@@ -57,9 +57,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <div id="loginError" class="text-danger"></div>
                 </div>
                 <div class="col-md-12 d-grid py-3">
-                  <button type="submit" class="login-btn py-3" onclick="return validateForm()">
-                    Log In
-                  </button>
+                  <button type="submit" class="login-btn py-3" id="login-button">Log In</button>
                 </div>
               </form>
               <div class="forgot-password">
@@ -109,36 +107,33 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </div>
       </div>
+      <script type="module">
+        import {
+          attachValidationListener,
+          validateEmail,
+          validatePassword,
+        } from "/js/validation.js";
+
+        attachValidationListener({
+          buttonId: "login-button",
+          validations: {
+            email: validateEmail,
+            password: validatePassword,
+          },
+          errorDivs: {
+            email: "emailError",
+            Password: "passwordError",
+          },
+          fields: {
+            Email: "email-field",
+            password: "password-field",
+          },
+        });
+      </script>
       <script>
         const passwordField = document.querySelector(".password-field");
         const emailField = document.querySelector(".email-field");
         const loginError = document.getElementById("loginError");
-        const passwordError = document.getElementById("passwordError");
-        const emailError = document.getElementById("emailError");
-
-        function validateForm() {
-          var password = document.getElementById("password").value;
-          var email = document.getElementById("username").value;
-
-          loginError.innerHTML = "";
-          passwordError.innerHTML = "";
-          emailError.innerHTML = "";
-          passwordField.classList.remove("border-red");
-          emailField.classList.remove("border-red");
-          var isValid = true;
-
-          if (email === "") {
-            emailError.innerHTML = "email is required!";
-            emailField.classList.add("border-red");
-            isValid = false;
-          }
-          if (password.length < 8) {
-            passwordError.innerHTML = "Password must have a minimum of 8 characters!";
-            passwordField.classList.add("border-red");
-            isValid = false;
-          }
-          return isValid;
-        }
 
         function submitLoginForm() {
           event.preventDefault();

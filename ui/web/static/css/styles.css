@@ -450,7 +450,7 @@ button.edit-btn {
 }
 
 .border-red {
-	border: 1px solid #eb2f2f;
+	border: 1px solid #eb2f2f !important;
 }
 
 .error-header {

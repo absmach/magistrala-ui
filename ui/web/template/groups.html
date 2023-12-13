@@ -39,15 +39,15 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <div id="alertMessage"></div>
                           <form method="post" id="groupform">
                             <div class="mb-3">
-                              <label for="Name" class="form-label">Name</label>
+                              <label for="name" class="form-label">Name</label>
                               <input
                                 type="text"
-                                class="form-control"
+                                class="form-control name-field"
                                 name="name"
-                                id="Name"
+                                id="name"
                                 placeholder="Group Name"
                               />
-                              <div id="NameError" class="text-danger"></div>
+                              <div id="nameError" class="text-danger"></div>
                             </div>
                             <div class="mb-3">
                               <label for="description" class="form-label">Description</label>
@@ -78,18 +78,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                               </select>
                             </div>
                             <div class="mb-3">
-                              <label for="Metadata" class="form-label">Metadata</label>
+                              <label for="metadata" class="form-label">Metadata</label>
                               <input
                                 type="text"
-                                class="form-control"
+                                class="form-control metadata-field"
                                 name="metadata"
-                                id="Metadata"
+                                id="metadata"
                                 value="{}"
                               />
                               <div id="metadataHelp" class="form-text">
                                 Enter groups metadata in JSON format.
                               </div>
-                              <div id="MetadataError" class="text-danger"></div>
+                              <div id="metadataError" class="text-danger"></div>
                             </div>
                             <button type="submit" class="btn body-button" id="create-group-button">
                               Submit
@@ -206,12 +206,16 @@ SPDX-License-Identifier: Apache-2.0 -->
         attachValidationListener({
           buttonId: "create-group-button",
           errorDivs: {
-            Name: "NameError",
-            Metadata: "MetadataError",
+            name: "nameError",
+            metadata: "metadataError",
           },
           validations: {
-            Name: validateName,
-            Metadata: validateJSON,
+            name: validateName,
+            metadata: validateJSON,
+          },
+          fields: {
+            name: "name-field",
+            metadata: "metadata-field",
           },
         });
 

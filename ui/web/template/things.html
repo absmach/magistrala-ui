@@ -39,75 +39,75 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <div id="alertMessage"></div>
                           <form id="thingform">
                             <div class="mb-3">
-                              <label for="Name" class="form-label">Name</label>
+                              <label for="name" class="form-label">Name</label>
                               <input
                                 type="text"
-                                class="form-control"
+                                class="form-control name-field"
                                 name="name"
-                                id="Name"
+                                id="name"
                                 placeholder="Device Name"
                               />
-                              <div id="NameError" class="text-danger"></div>
+                              <div id="nameError" class="text-danger"></div>
                             </div>
                             <div class="mb-3">
-                              <label for="ThingID" class="form-label">Thing ID</label>
+                              <label for="thingID" class="form-label">Thing ID</label>
                               <input
                                 type="text"
                                 class="form-control"
                                 name="thingID"
-                                id="ThingID"
+                                id="thingID"
                                 placeholder="Thing ID"
                               />
                             </div>
                             <div class="mb-3">
-                              <label for="Identity" class="form-label">Identity</label>
+                              <label for="identity" class="form-label">Identity</label>
                               <input
                                 type="text"
                                 class="form-control"
                                 name="identity"
-                                id="Identity"
+                                id="identity"
                                 placeholder="Thing Identity"
                               />
                             </div>
                             <div class="mb-3">
-                              <label for="Secret" class="form-label">Secret</label>
+                              <label for="secret" class="form-label">Secret</label>
                               <input
                                 type="text"
                                 class="form-control"
                                 name="secret"
-                                id="Secret"
+                                id="secret"
                                 placeholder="Thing Secret"
                               />
-                              <div id="SecretError" class="error-message"></div>
+                              <div id="secretError" class="error-message"></div>
                             </div>
                             <div class="mb-3">
-                              <label for="Tags" class="form-label">Tags</label>
+                              <label for="tags" class="form-label">Tags</label>
                               <input
                                 type="text"
-                                class="form-control"
+                                class="form-control tags-field"
                                 name="tags"
-                                id="Tags"
+                                id="tags"
                                 aria-describedby="tagHelp"
                                 value="[]"
                               />
                               <div id="tagHelp" class="form-text">
                                 Enter device tags as a string slice.
                               </div>
-                              <div id="TagsError" class="text-danger"></div>
+                              <div id="tagsError" class="text-danger"></div>
                             </div>
                             <div class="mb-3">
-                              <label for="Metadata" class="form-label">Metadata</label>
+                              <label for="metadata" class="form-label">Metadata</label>
                               <input
                                 type="text"
-                                class="form-control"
+                                class="form-control metadata-field"
                                 name="metadata"
-                                id="Metadata"
+                                id="metadata"
                                 value="{}"
                               />
                               <div id="metadataHelp" class="form-text">
                                 Enter device metadata in JSON format.
                               </div>
-                              <div id="MetadataError" class="text-danger"></div>
+                              <div id="metadataError" class="text-danger"></div>
                             </div>
                             <button type="submit" class="btn body-button" id="create-thing-button">
                               Submit
@@ -234,14 +234,19 @@ SPDX-License-Identifier: Apache-2.0 -->
         attachValidationListener({
           buttonId: "create-thing-button",
           errorDivs: {
-            Name: "NameError",
-            Metadata: "MetadataError",
-            Tags: "TagsError",
+            name: "nameError",
+            metadata: "metadataError",
+            tags: "tagsError",
           },
           validations: {
-            Name: validateName,
-            Metadata: validateJSON,
-            Tags: validateStringArray,
+            name: validateName,
+            metadata: validateJSON,
+            tags: validateStringArray,
+          },
+          fields: {
+            name: "name-field",
+            metadata: "metadata-field",
+            tags: "tags-field",
           },
         });
 
