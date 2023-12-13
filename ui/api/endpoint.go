@@ -19,7 +19,7 @@ func indexEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.Index(req.token, req.orgID)
+		res, err := svc.Index(req.token, req.DomainID)
 		if err != nil {
 			return nil, err
 		}
@@ -69,7 +69,7 @@ func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
 			{
 				Name:     refreshTokenKey,
 				Value:    "",
-				Path:     organizationsAPIEndpoint,
+				Path:     domainsAPIEndpoint,
 				MaxAge:   -1,
 				HttpOnly: true,
 			},
@@ -181,7 +181,7 @@ func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 			{
 				Name:     refreshTokenKey,
 				Value:    "",
-				Path:     organizationsAPIEndpoint,
+				Path:     domainsAPIEndpoint,
 				MaxAge:   -1,
 				HttpOnly: true,
 			},
@@ -223,7 +223,7 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
-					Path:     organizationsAPIEndpoint,
+					Path:     domainsAPIEndpoint,
 					HttpOnly: true,
 				},
 			},
@@ -264,7 +264,7 @@ func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
-					Path:     organizationsAPIEndpoint,
+					Path:     domainsAPIEndpoint,
 					HttpOnly: true,
 				},
 			},
@@ -1465,7 +1465,7 @@ func getEntitiesEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.GetEntities(req.token, req.Item, req.Name, req.OrgID, req.Permission, req.Page, req.Limit)
+		res, err := svc.GetEntities(req.token, req.Item, req.Name, req.DomainID, req.Permission, req.Page, req.Limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1495,16 +1495,16 @@ func errorPageEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func organizationLoginEndpoint(svc ui.Service) endpoint.Endpoint {
+func domainLoginEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(organizationLoginReq)
+		req := request.(domainLoginReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		token, err := svc.OrganizationLogin(
+		token, err := svc.DomainLogin(
 			sdk.Login{
-				DomainID: req.OrgID,
+				DomainID: req.DomainID,
 			},
 			req.token,
 		)
@@ -1524,7 +1524,7 @@ func organizationLoginEndpoint(svc ui.Service) endpoint.Endpoint {
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
-					Path:     organizationsAPIEndpoint,
+					Path:     domainsAPIEndpoint,
 					HttpOnly: true,
 				},
 				{
@@ -1534,19 +1534,19 @@ func organizationLoginEndpoint(svc ui.Service) endpoint.Endpoint {
 					HttpOnly: true,
 				},
 			},
-			headers: map[string]string{"Location": "/?organization=" + req.OrgID},
+			headers: map[string]string{"Location": "/?domain=" + req.DomainID},
 		}, nil
 	}
 }
 
-func listOrganizationsEndpoint(svc ui.Service) endpoint.Endpoint {
+func listDomainsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(listEntityReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.ListOrganizations(req.token, req.page, req.limit)
+		res, err := svc.ListDomains(req.token, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1558,50 +1558,47 @@ func listOrganizationsEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func createOrganizationEndpoint(svc ui.Service) endpoint.Endpoint {
+func createDomainEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(createOrganizationReq)
+		req := request.(createDomainReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		err := svc.CreateOrganization(
-			req.token,
-			sdk.Domain{
-				Name:     req.Name,
-				Metadata: req.Metadata,
-				Tags:     req.Tags,
-				Alias:    req.Alias,
-			},
-		)
-		if err != nil {
+		domain := sdk.Domain{
+			Name:     req.Name,
+			Metadata: req.Metadata,
+			Tags:     req.Tags,
+			Alias:    req.Alias,
+		}
+
+		if err := svc.CreateDomain(req.token, domain); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": organizationsAPIEndpoint},
+			headers: map[string]string{"Location": domainsAPIEndpoint},
 		}, nil
 	}
 }
 
-func updateOrganizationEndpoint(svc ui.Service) endpoint.Endpoint {
+func updateDomainEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(updateOrganizationReq)
+		req := request.(updateDomainReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		if err := svc.UpdateOrganization(
-			req.token,
-			sdk.Domain{
-				ID:       req.OrgID,
-				Name:     req.Name,
-				Metadata: req.Metadata,
-				Tags:     req.Tags,
-				Alias:    req.Alias,
-			},
-		); err != nil {
+		domain := sdk.Domain{
+			ID:       req.DomainID,
+			Name:     req.Name,
+			Metadata: req.Metadata,
+			Tags:     req.Tags,
+			Alias:    req.Alias,
+		}
+
+		if err := svc.UpdateDomain(req.token, domain); err != nil {
 			return nil, err
 		}
 
@@ -1611,14 +1608,36 @@ func updateOrganizationEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func organizationEndpoint(svc ui.Service) endpoint.Endpoint {
+func updateDomainTagsEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(updateDomainTagsReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		domain := sdk.Domain{
+			ID:   req.DomainID,
+			Tags: req.Tags,
+		}
+
+		if err := svc.UpdateDomain(req.token, domain); err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code: http.StatusOK,
+		}, nil
+	}
+}
+
+func domainEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(listEntityByIDReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.Organization(req.token, req.id, req.relation, req.page, req.limit)
+		res, err := svc.Domain(req.token, req.id, req.relation, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1637,20 +1656,18 @@ func assignMemberEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		if err := svc.AssignMember(
-			req.token,
-			req.OrgID,
-			sdk.UsersRelationRequest{
-				Relation: req.Relation,
-				UserIDs:  []string{req.UserID},
-			},
-		); err != nil {
+		relation := sdk.UsersRelationRequest{
+			Relation: req.Relation,
+			UserIDs:  []string{req.UserID},
+		}
+
+		if err := svc.AssignMember(req.token, req.DomainID, relation); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": organizationsAPIEndpoint + "/" + req.OrgID + "?relation=members"},
+			headers: map[string]string{"Location": domainsAPIEndpoint + "/" + req.DomainID + "?relation=members"},
 		}, nil
 	}
 }
@@ -1662,20 +1679,18 @@ func unassignMemberEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		if err := svc.UnassignMember(
-			req.token,
-			req.OrgID,
-			sdk.UsersRelationRequest{
-				Relation: req.Relation,
-				UserIDs:  []string{req.UserID},
-			},
-		); err != nil {
+		relation := sdk.UsersRelationRequest{
+			Relation: req.Relation,
+			UserIDs:  []string{req.UserID},
+		}
+
+		if err := svc.UnassignMember(req.token, req.DomainID, relation); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": organizationsAPIEndpoint + "/" + req.OrgID + "?relation=members"},
+			headers: map[string]string{"Location": domainsAPIEndpoint + "/" + req.DomainID + "?relation=members"},
 		}, nil
 	}
 }

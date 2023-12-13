@@ -11,15 +11,15 @@ import (
 const maxNameSize = 1024
 
 type indexReq struct {
-	token string
-	orgID string
+	token    string
+	DomainID string
 }
 
 func (req indexReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.orgID == "" {
+	if req.DomainID == "" {
 		return errMalformedEntity
 	}
 	return nil
@@ -761,7 +761,7 @@ type getEntitiesReq struct {
 	Limit      uint64 `json:"limit"`
 	Item       string `json:"item"`
 	Name       string `json:"name"`
-	OrgID      string `json:"orgID"`
+	DomainID   string `json:"domainID"`
 	Permission string `json:"permission"`
 }
 
@@ -840,22 +840,22 @@ func (req addUserGroupToChannelReq) validate() error {
 	return nil
 }
 
-type organizationLoginReq struct {
-	token string
-	OrgID string `json:"orgID"`
+type domainLoginReq struct {
+	token    string
+	DomainID string `json:"domainID"`
 }
 
-func (req organizationLoginReq) validate() error {
+func (req domainLoginReq) validate() error {
 	if req.token == "" {
 		return errAuthentication
 	}
-	if req.OrgID == "" {
+	if req.DomainID == "" {
 		return errMalformedEntity
 	}
 	return nil
 }
 
-type createOrganizationReq struct {
+type createDomainReq struct {
 	token    string
 	Name     string                 `json:"name,omitempty"`
 	Alias    string                 `json:"alias,omitempty"`
@@ -863,7 +863,7 @@ type createOrganizationReq struct {
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
 }
 
-func (req createOrganizationReq) validate() error {
+func (req createDomainReq) validate() error {
 	if req.token == "" {
 		return errAuthentication
 	}
@@ -873,23 +873,39 @@ func (req createOrganizationReq) validate() error {
 	return nil
 }
 
-type updateOrganizationReq struct {
+type updateDomainReq struct {
 	token    string
-	OrgID    string                 `json:"orgID"`
+	DomainID string                 `json:"domainID"`
 	Name     string                 `json:"name,omitempty"`
 	Alias    string                 `json:"alias,omitempty"`
 	Tags     []string               `json:"tags,omitempty"`
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
 }
 
-func (req updateOrganizationReq) validate() error {
+func (req updateDomainReq) validate() error {
 	if req.token == "" {
 		return errAuthentication
 	}
-	if req.OrgID == "" {
+	if req.DomainID == "" {
 		return errMalformedEntity
 	}
-	if req.Name == "" && req.Alias == "" && req.Metadata == nil && len(req.Tags) == 0 {
+	if req.Name == "" && req.Alias == "" && req.Metadata == nil {
+		return errMalformedEntity
+	}
+	return nil
+}
+
+type updateDomainTagsReq struct {
+	token    string
+	DomainID string   `json:"domainID"`
+	Tags     []string `json:"tags,omitempty"`
+}
+
+func (req updateDomainTagsReq) validate() error {
+	if req.token == "" {
+		return errAuthentication
+	}
+	if req.DomainID == "" {
 		return errMalformedEntity
 	}
 	return nil
@@ -897,7 +913,7 @@ func (req updateOrganizationReq) validate() error {
 
 type assignMemberReq struct {
 	token    string
-	OrgID    string `json:"orgID"`
+	DomainID string `json:"domainID"`
 	UserID   string `json:"userID"`
 	Relation string `json:"relation"`
 }
@@ -906,7 +922,7 @@ func (req assignMemberReq) validate() error {
 	if req.token == "" {
 		return errAuthentication
 	}
-	if req.OrgID == "" {
+	if req.DomainID == "" {
 		return errMalformedEntity
 	}
 	if req.UserID == "" {

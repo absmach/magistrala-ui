@@ -30,7 +30,7 @@ export function fetchIndividualEntity(config) {
 function getEntities(config, name) {
   fetchData({
     item: config.item,
-    organization: config.organization,
+    domain: config.domain,
     permission: config.permission,
     name: name,
     page: 1,
@@ -58,7 +58,7 @@ function infiniteScroll(config) {
           item: config.item,
           item: config.item,
           name: "",
-          organization: config.organization,
+          domain: config.domain,
           permission: config.permission,
           page: currentPageNo,
         });
@@ -72,7 +72,7 @@ function infiniteScroll(config) {
 let limit = 5;
 function fetchData(config) {
   fetch(
-    `/entities?item=${config.item}&limit=${limit}&name=${config.name}&page=${config.page}&organization=${config.organization}&permission=${config.permission}`,
+    `/entities?item=${config.item}&limit=${limit}&name=${config.name}&page=${config.page}&domain=${config.domain}&permission=${config.permission}`,
     {
       method: "GET",
     },

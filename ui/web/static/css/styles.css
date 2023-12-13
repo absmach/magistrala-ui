@@ -475,24 +475,24 @@ button.edit-btn {
 }
 
 
-.organizations-body {
+.domains-body {
 	background-color: #d5d8dd;
 }
 
-.organizations-card {
+.domains-card {
 	border-radius: 1rem;
 }
 
-.organizations-card h1 {
+.domains-card h1 {
 	color: var(--main-color);
 	font-family: "Montserrat";
 }
 
-.organizations-table h2 {
+.domains-table h2 {
 	color: var(--main-color);
 }
 
-.organizations-table .body-button {
+.domains-table .body-button {
 	background: var(--main-color);
 	border-radius: var(--border-radius);
 	color: #fff;
@@ -501,7 +501,7 @@ button.edit-btn {
 	border: 1px solid var(--main-color);
 }
 
-.organizations-table .body-button:hover {
+.domains-table .body-button:hover {
 	color: #fff;
 	background: var(--main-color);
 	transform: scale(1.03);

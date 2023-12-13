@@ -38,7 +38,7 @@ const (
 	channelsActive     = "channels"
 	readMessagesActive = "readmessages"
 	bootstrapsActive   = "bootstraps"
-	organizationActive = "organization"
+	domainActive       = "domain"
 )
 
 type dataSummary struct {
@@ -95,8 +95,8 @@ var (
 		"users",
 		"user",
 
-		"organizations",
-		"organization",
+		"domains",
+		"domain",
 		"member",
 	}
 	ErrToken                = errors.New("failed to create token")
@@ -129,7 +129,7 @@ var (
 // Service specifies service API.
 type Service interface {
 	// Index displays the landing page of the UI.
-	Index(token, orgID string) ([]byte, error)
+	Index(token, domainID string) ([]byte, error)
 	// Login displays the login page.
 	Login() ([]byte, error)
 	// Logout deletes the access token and refresh token from the cookies and logs the user out of the UI.
@@ -148,8 +148,8 @@ type Service interface {
 	Token(login sdk.Login) (sdk.Token, error)
 	// RefreshToken retrieves a new access token and refresh token from the provided refresh token.
 	RefreshToken(refreshToken string) (sdk.Token, error)
-	// OrganizationLogin provides a user with an organization level access token and a refresh token.
-	OrganizationLogin(login sdk.Login, refreshToken string) (sdk.Token, error)
+	// DomainLogin provides a user with an domain level access token and a refresh token.
+	DomainLogin(login sdk.Login, refreshToken string) (sdk.Token, error)
 	// UserProfile displays the user profile page.
 	UserProfile(token string, page, limit uint64) ([]byte, error)
 
@@ -281,23 +281,23 @@ type Service interface {
 	ProcessTerminalCommand(ctx context.Context, id, token, command string, res chan string) error
 
 	// GetEntities retrieves all entities.
-	GetEntities(token, item, name, orgID, permission string, page, limit uint64) ([]byte, error)
+	GetEntities(token, item, name, domainID, permission string, page, limit uint64) ([]byte, error)
 	// ErrorPage displays an error page.
 	ErrorPage(errMsg string) ([]byte, error)
 
-	// ListOrganizations retrieves organizations owned/shared by a user.
-	ListOrganizations(token string, page, limit uint64) ([]byte, error)
-	// CreateOrganization creates a new organization.
-	CreateOrganization(token string, domain sdk.Domain) error
-	// UpdateOrganization updates the organization with the given ID.
-	UpdateOrganization(token string, domain sdk.Domain) error
-	// Organization displays the organization page.
-	Organization(token, orgID, tabActive string, page, limit uint64) ([]byte, error)
-	// AssignMember adds a member to an organization.
-	AssignMember(token, orgID string, req sdk.UsersRelationRequest) error
-	// UnassignMember removes a member from an organization.
-	UnassignMember(token, orgID string, req sdk.UsersRelationRequest) error
-	// View Member retrieves information about the organization Member with the given ID.
+	// ListDomains retrieves domains owned/shared by a user.
+	ListDomains(token string, page, limit uint64) ([]byte, error)
+	// CreateDomain creates a new domain.
+	CreateDomain(token string, domain sdk.Domain) error
+	// UpdateDomain updates the domain with the given ID.
+	UpdateDomain(token string, domain sdk.Domain) error
+	// Domain displays the domain page.
+	Domain(token, domainID, tabActive string, page, limit uint64) ([]byte, error)
+	// AssignMember adds a member to an domain.
+	AssignMember(token, domainID string, req sdk.UsersRelationRequest) error
+	// UnassignMember removes a member from an domain.
+	UnassignMember(token, domainID string, req sdk.UsersRelationRequest) error
+	// View Member retrieves information about the domain Member with the given ID.
 	ViewMember(token, userIdentity string) ([]byte, error)
 }
 
@@ -320,7 +320,7 @@ func New(sdk sdk.SDK) (Service, error) {
 	}, nil
 }
 
-func (us *uiService) Index(token, orgID string) (b []byte, err error) {
+func (us *uiService) Index(token, domainID string) (b []byte, err error) {
 	pgm := sdk.PageMetadata{
 		Offset:     uint64(0),
 		Visibility: statusAll,
@@ -333,7 +333,7 @@ func (us *uiService) Index(token, orgID string) (b []byte, err error) {
 		Status:     enabled,
 	}
 
-	users, err := us.sdk.ListDomainUsers(orgID, pgm, token)
+	users, err := us.sdk.ListDomainUsers(domainID, pgm, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -353,7 +353,7 @@ func (us *uiService) Index(token, orgID string) (b []byte, err error) {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	enabledUsers, err := us.sdk.ListDomainUsers(orgID, enabledPgm, token)
+	enabledUsers, err := us.sdk.ListDomainUsers(domainID, enabledPgm, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -481,7 +481,7 @@ func (us *uiService) RefreshToken(refreshToken string) (sdk.Token, error) {
 	return token, nil
 }
 
-func (us *uiService) OrganizationLogin(login sdk.Login, refreshToken string) (sdk.Token, error) {
+func (us *uiService) DomainLogin(login sdk.Login, refreshToken string) (sdk.Token, error) {
 	token, err := us.sdk.RefreshToken(login, refreshToken)
 	if err != nil {
 		return sdk.Token{}, err
@@ -1699,7 +1699,7 @@ func (us *uiService) ProcessTerminalCommand(ctx context.Context, id, tkn, comman
 	return nil
 }
 
-func (us *uiService) GetEntities(token, item, name, orgID, permission string, page, limit uint64) ([]byte, error) {
+func (us *uiService) GetEntities(token, item, name, domainID, permission string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 	pgm := sdk.PageMetadata{
 		Offset:     offset,
@@ -1735,7 +1735,7 @@ func (us *uiService) GetEntities(token, item, name, orgID, permission string, pa
 		}
 		items["data"] = channels.Channels
 	case "members":
-		members, err := us.sdk.ListDomainUsers(orgID, pgm, token)
+		members, err := us.sdk.ListDomainUsers(domainID, pgm, token)
 		if err != nil {
 			return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 		}
@@ -1764,7 +1764,7 @@ func (us *uiService) ErrorPage(errMsg string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) ListOrganizations(token string, page, limit uint64) ([]byte, error) {
+func (us *uiService) ListDomains(token string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 
 	pgm := sdk.PageMetadata{
@@ -1799,36 +1799,36 @@ func (us *uiService) ListOrganizations(token string, page, limit uint64) ([]byte
 	}
 
 	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "organizations", data); err != nil {
+	if err := us.tpls.ExecuteTemplate(&btpl, "domains", data); err != nil {
 		return []byte{}, err
 	}
 
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) CreateOrganization(token string, domain sdk.Domain) error {
+func (us *uiService) CreateDomain(token string, domain sdk.Domain) error {
 	_, err := us.sdk.CreateDomain(domain, token)
 	return err
 }
 
-func (us *uiService) UpdateOrganization(token string, domain sdk.Domain) error {
+func (us *uiService) UpdateDomain(token string, domain sdk.Domain) error {
 	_, err := us.sdk.UpdateDomain(domain, token)
 	return err
 }
 
-func (us *uiService) Organization(token, orgID, tabActive string, page, limit uint64) ([]byte, error) {
+func (us *uiService) Domain(token, domainID, tabActive string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 
 	pgm := sdk.PageMetadata{
 		Offset: offset,
 		Limit:  limit,
 	}
-	domain, err := us.sdk.Domain(orgID, token)
+	domain, err := us.sdk.Domain(domainID, token)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	membersPage, err := us.sdk.ListDomainUsers(orgID, pgm, token)
+	membersPage, err := us.sdk.ListDomainUsers(domainID, pgm, token)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -1837,7 +1837,7 @@ func (us *uiService) Organization(token, orgID, tabActive string, page, limit ui
 
 	data := struct {
 		NavbarActive string
-		Organization sdk.Domain
+		Domain       sdk.Domain
 		Members      []sdk.User
 		Relations    []string
 		TabActive    string
@@ -1845,7 +1845,7 @@ func (us *uiService) Organization(token, orgID, tabActive string, page, limit ui
 		Pages        int
 		Limit        int
 	}{
-		organizationActive,
+		domainActive,
 		domain,
 		membersPage.Users,
 		groupRelations,
@@ -1856,19 +1856,19 @@ func (us *uiService) Organization(token, orgID, tabActive string, page, limit ui
 	}
 
 	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "organization", data); err != nil {
+	if err := us.tpls.ExecuteTemplate(&btpl, "domain", data); err != nil {
 		return []byte{}, err
 	}
 
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) AssignMember(token, orgID string, req sdk.UsersRelationRequest) error {
-	return us.sdk.AddUserToDomain(orgID, req, token)
+func (us *uiService) AssignMember(token, domainID string, req sdk.UsersRelationRequest) error {
+	return us.sdk.AddUserToDomain(domainID, req, token)
 }
 
-func (us *uiService) UnassignMember(token, orgID string, req sdk.UsersRelationRequest) error {
-	return us.sdk.RemoveUserFromDomain(orgID, req, token)
+func (us *uiService) UnassignMember(token, domainID string, req sdk.UsersRelationRequest) error {
+	return us.sdk.RemoveUserFromDomain(domainID, req, token)
 }
 
 func (us *uiService) ViewMember(token, userIdentity string) (b []byte, err error) {
@@ -1883,7 +1883,7 @@ func (us *uiService) ViewMember(token, userIdentity string) (b []byte, err error
 		NavbarActive string
 		User         sdk.User
 	}{
-		organizationActive,
+		domainActive,
 		usersPage.Users[0],
 	}
 
