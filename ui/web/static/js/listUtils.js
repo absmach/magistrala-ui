@@ -3,47 +3,47 @@
 
 let colorIndex = 0;
 
- function addItem(event, inputId, listId) {
-    if (event.key === 'Enter') {
-        event.preventDefault();
+function addItem(event, inputId, listId) {
+  if (event.key === "Enter") {
+    event.preventDefault();
 
-        const itemInput = document.getElementById(inputId);
-        const itemList = document.getElementById(listId);
+    const itemInput = document.getElementById(inputId);
+    const itemList = document.getElementById(listId);
 
-        if (itemInput && itemList) {
-            const newItem = document.createElement('div');
-            newItem.textContent = itemInput.value;
-            newItem.className = 'highlight-list-item';
-            newItem.style.backgroundColor = generateColor();
-            itemList.appendChild(newItem);
-            itemInput.value = '';
-        }
+    if (itemInput && itemList) {
+      const newItem = document.createElement("div");
+      newItem.textContent = itemInput.value;
+      newItem.className = "highlight-list-item";
+      newItem.style.backgroundColor = generateColor();
+      itemList.appendChild(newItem);
+      itemInput.value = "";
     }
+  }
 }
 
 function generateColor() {
-    const colors = ['#FF7F50', '#FFD700', '#32CD32', '#87CEEB', '#FF69B4'];
-    const color = colors[colorIndex % colors.length];
-    colorIndex++;
-    return color;
+  const colors = ["#FF7F50", "#FFD700", "#32CD32", "#87CEEB", "#FF69B4"];
+  const color = colors[colorIndex % colors.length];
+  colorIndex++;
+  return color;
 }
 
 function deleteItem(event) {
-    const target = event.target;
-    if (target.className === 'highlight-list-item') {
-      target.remove();
-    }
+  const target = event.target;
+  if (target.className === "highlight-list-item") {
+    target.remove();
+  }
 }
 
 function submitItemList(inputId, listId) {
-    const itemList = document.getElementById(listId);
-    const listItems = itemList.getElementsByClassName('highlight-list-item');
-    
-    const itemsArray = Array.from(listItems).map(item => item.textContent.trim());
+  const itemList = document.getElementById(listId);
+  const listItems = itemList.getElementsByClassName("highlight-list-item");
 
-    const jsonData = JSON.stringify(itemsArray);
-    alert('JSON data ready to submit:\n' + jsonData);
+  const itemsArray = Array.from(listItems).map((item) => item.textContent.trim());
 
-    const jsonInput = document.getElementById(inputId);
-    jsonInput.value = jsonData;
+  const jsonData = JSON.stringify(itemsArray);
+  alert("JSON data ready to submit:\n" + jsonData);
+
+  const jsonInput = document.getElementById(inputId);
+  jsonInput.value = jsonData;
 }
