@@ -11,16 +11,12 @@ import (
 const maxNameSize = 1024
 
 type indexReq struct {
-	token    string
-	DomainID string
+	token string
 }
 
 func (req indexReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
-	}
-	if req.DomainID == "" {
-		return errMalformedEntity
 	}
 	return nil
 }

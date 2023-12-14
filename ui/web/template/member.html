@@ -11,6 +11,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         <div class="container">
           <div class="row">
             <div class="col-lg-12 mx-auto py-3">
+              {{ template "breadcrumb" . }}
               <div class="row">
                 <div class="table-responsive table-container">
                   <table id="itemsTable" class="table">
@@ -70,5 +71,11 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
       </div>
     </body>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var organizationID = localStorage.getItem("organizationID");
+        document.getElementById("organization-link").href = "/organizations/" + organizationID;
+      });
+    </script>
   </html>
 {{ end }}

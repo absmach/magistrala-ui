@@ -27,7 +27,7 @@ func LoggingMiddleware(svc ui.Service, logger log.Logger) ui.Service {
 }
 
 // Index adds logging middleware to index method.
-func (lm *loggingMiddleware) Index(token, domainID string) (b []byte, err error) {
+func (lm *loggingMiddleware) Index(token string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method index took %s to complete", time.Since(begin))
 		if err != nil {
@@ -37,7 +37,7 @@ func (lm *loggingMiddleware) Index(token, domainID string) (b []byte, err error)
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.Index(token, domainID)
+	return lm.svc.Index(token)
 }
 
 // Login adds logging middleware to login method.
