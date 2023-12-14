@@ -1,7 +1,7 @@
 # Copyright (c) Abstract Machines
 # SPDX-License-Identifier: Apache-2.0
 
-MG_DOCKER_IMAGE_NAME_PREFIX ?= ghcr.io/absmach
+MG_DOCKER_IMAGE_NAME_PREFIX ?= magistrala
 SVC = magistrala-ui
 BUILD_DIR = build
 CGO_ENABLED ?= 0
@@ -70,6 +70,13 @@ docker:
 
 docker_dev:
 	$(call make_docker_dev)
+
+define docker_push
+	docker push $(MG_DOCKER_IMAGE_NAME_PREFIX)/ui:$(1)
+endef
+
+latest: docker
+	$(call docker_push,latest)
 
 run_docker:
 	docker-compose -f docker/docker-compose.yml --env-file docker/.env up
