@@ -1,0 +1,16 @@
+<!-- Copyright (c) Abstract Machines
+SPDX-License-Identifier: Apache-2.0 -->
+
+{{ define "breadcrumb" }}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+      {{ if (ne .Breadcrumb.Previous "") }}
+        <li class="breadcrumb-item">
+          <a href="/{{ .Breadcrumb.Previous }}">{{ .Breadcrumb.Previous }}</a>
+        </li>
+      {{ end }}
+      <li class="breadcrumb-item active" aria-current="page">{{ .Breadcrumb.Current }}</li>
+    </ol>
+  </nav>
+{{ end }}

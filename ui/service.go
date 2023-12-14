@@ -56,6 +56,11 @@ type dataSummary struct {
 	TotalChannels    int
 }
 
+type breadcrumb struct {
+	Previous string
+	Current  string
+}
+
 var (
 	templates = []string{
 		"header",
@@ -63,6 +68,7 @@ var (
 		"tableheader",
 		"tablefooter",
 		"error",
+		"breadcrumb",
 
 		"bootstrap",
 		"bootstraps",
@@ -557,15 +563,22 @@ func (us *uiService) ListUsers(token string, page, limit uint64) ([]byte, error)
 
 	noOfPages := int(math.Ceil(float64(users.Total) / float64(limit)))
 
+	crumb := breadcrumb{
+		Previous: "",
+		Current:  "users",
+	}
+
 	data := struct {
 		NavbarActive string
 		Users        []sdk.User
+		Breadcrumb   breadcrumb
 		CurrentPage  int
 		Pages        int
 		Limit        int
 	}{
 		usersActive,
 		users.Users,
+		crumb,
 		int(page),
 		noOfPages,
 		int(limit),
@@ -585,12 +598,19 @@ func (us *uiService) ViewUser(token, userID string) (b []byte, err error) {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
+	crumb := breadcrumb{
+		Previous: "users",
+		Current:  userID,
+	}
+
 	data := struct {
 		NavbarActive string
 		User         sdk.User
+		Breadcrumb   breadcrumb
 	}{
 		usersActive,
 		user,
+		crumb,
 	}
 
 	var btpl bytes.Buffer
@@ -684,15 +704,22 @@ func (us *uiService) ListThings(token string, page, limit uint64) ([]byte, error
 
 	noOfPages := int(math.Ceil(float64(things.Total) / float64(limit)))
 
+	crumb := breadcrumb{
+		Previous: "",
+		Current:  "things",
+	}
+
 	data := struct {
 		NavbarActive string
 		Things       []sdk.Thing
+		Breadcrumb   breadcrumb
 		CurrentPage  int
 		Pages        int
 		Limit        int
 	}{
 		thingsActive,
 		things.Things,
+		crumb,
 		int(page),
 		noOfPages,
 		int(limit),
@@ -704,15 +731,20 @@ func (us *uiService) ListThings(token string, page, limit uint64) ([]byte, error
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) ViewThing(token, id string) (b []byte, err error) {
-	thing, err := us.sdk.Thing(id, token)
+func (us *uiService) ViewThing(token, thingID string) (b []byte, err error) {
+	thing, err := us.sdk.Thing(thingID, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	permissions, err := us.sdk.ThingPermissions(id, token)
+	permissions, err := us.sdk.ThingPermissions(thingID, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	crumb := breadcrumb{
+		Previous: "things",
+		Current:  thingID,
 	}
 
 	data := struct {
@@ -720,11 +752,13 @@ func (us *uiService) ViewThing(token, id string) (b []byte, err error) {
 		ID           string
 		Thing        sdk.Thing
 		Permissions  []string
+		Breadcrumb   breadcrumb
 	}{
 		thingsActive,
-		id,
+		thingID,
 		thing,
 		permissions.Permissions,
+		crumb,
 	}
 
 	var btpl bytes.Buffer
@@ -810,6 +844,11 @@ func (us *uiService) ListThingUsers(token, thingID, relation string, page, limit
 
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
 
+	crumb := breadcrumb{
+		Previous: "things",
+		Current:  thingID,
+	}
+
 	data := struct {
 		NavbarActive string
 		ThingID      string
@@ -820,6 +859,7 @@ func (us *uiService) ListThingUsers(token, thingID, relation string, page, limit
 		Limit        int
 		TabActive    string
 		Permissions  []string
+		Breadcrumb   breadcrumb
 	}{
 		thingsActive,
 		thingID,
@@ -830,6 +870,7 @@ func (us *uiService) ListThingUsers(token, thingID, relation string, page, limit
 		int(limit),
 		relation,
 		permissions.Permissions,
+		crumb,
 	}
 
 	var btpl bytes.Buffer
@@ -860,6 +901,11 @@ func (us *uiService) ListChannelsByThing(token, thingID string, page, limit uint
 
 	noOfPages := int(math.Ceil(float64(chsPage.Total) / float64(limit)))
 
+	crumb := breadcrumb{
+		Previous: "things",
+		Current:  thingID,
+	}
+
 	data := struct {
 		NavbarActive string
 		ThingID      string
@@ -868,6 +914,7 @@ func (us *uiService) ListChannelsByThing(token, thingID string, page, limit uint
 		Pages        int
 		Limit        int
 		Permissions  []string
+		Breadcrumb   breadcrumb
 	}{
 		thingsActive,
 		thingID,
@@ -876,6 +923,7 @@ func (us *uiService) ListChannelsByThing(token, thingID string, page, limit uint
 		noOfPages,
 		int(limit),
 		permissions.Permissions,
+		crumb,
 	}
 
 	var btpl bytes.Buffer
@@ -919,18 +967,25 @@ func (us *uiService) ListChannels(token string, page, limit uint64) ([]byte, err
 
 	noOfPages := int(math.Ceil(float64(chsPage.Total) / float64(limit)))
 
+	crumb := breadcrumb{
+		Previous: "",
+		Current:  "channels",
+	}
+
 	data := struct {
 		NavbarActive string
 		Channels     []sdk.Channel
 		CurrentPage  int
 		Pages        int
 		Limit        int
+		Breadcrumb   breadcrumb
 	}{
 		channelsActive,
 		chsPage.Channels,
 		int(page),
 		noOfPages,
 		int(limit),
+		crumb,
 	}
 
 	var btpl bytes.Buffer
@@ -941,15 +996,20 @@ func (us *uiService) ListChannels(token string, page, limit uint64) ([]byte, err
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) ViewChannel(token, id string) (b []byte, err error) {
-	channel, err := us.sdk.Channel(id, token)
+func (us *uiService) ViewChannel(token, channelID string) (b []byte, err error) {
+	channel, err := us.sdk.Channel(channelID, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	permissions, err := us.sdk.ChannelPermissions(id, token)
+	permissions, err := us.sdk.ChannelPermissions(channelID, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	crumb := breadcrumb{
+		Previous: "channels",
+		Current:  channelID,
 	}
 
 	data := struct {
@@ -957,11 +1017,13 @@ func (us *uiService) ViewChannel(token, id string) (b []byte, err error) {
 		ID           string
 		Channel      sdk.Channel
 		Permissions  []string
+		Breadcrumb   breadcrumb
 	}{
 		channelsActive,
-		id,
+		channelID,
 		channel,
 		permissions.Permissions,
+		crumb,
 	}
 
 	var btpl bytes.Buffer
@@ -1000,6 +1062,11 @@ func (us *uiService) ListThingsByChannel(token, channelID string, page, limit ui
 
 	noOfPages := int(math.Ceil(float64(thsPage.Total) / float64(limit)))
 
+	crumb := breadcrumb{
+		Previous: "channels",
+		Current:  channelID,
+	}
+
 	data := struct {
 		NavbarActive string
 		ChannelID    string
@@ -1008,6 +1075,7 @@ func (us *uiService) ListThingsByChannel(token, channelID string, page, limit ui
 		Pages        int
 		Limit        int
 		Permissions  []string
+		Breadcrumb   breadcrumb
 	}{
 		channelsActive,
 		channelID,
@@ -1016,6 +1084,7 @@ func (us *uiService) ListThingsByChannel(token, channelID string, page, limit ui
 		noOfPages,
 		int(limit),
 		permissions.Permissions,
+		crumb,
 	}
 
 	var btpl bytes.Buffer
@@ -1110,6 +1179,11 @@ func (us *uiService) ListChannelUsers(token, channelID, relation string, page, l
 
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
 
+	crumb := breadcrumb{
+		Previous: "channels",
+		Current:  channelID,
+	}
+
 	data := struct {
 		NavbarActive string
 		ChannelID    string
@@ -1120,6 +1194,7 @@ func (us *uiService) ListChannelUsers(token, channelID, relation string, page, l
 		Limit        int
 		TabActive    string
 		Permissions  []string
+		Breadcrumb   breadcrumb
 	}{
 		channelsActive,
 		channelID,
@@ -1130,6 +1205,7 @@ func (us *uiService) ListChannelUsers(token, channelID, relation string, page, l
 		int(limit),
 		relation,
 		permissions.Permissions,
+		crumb,
 	}
 
 	var btpl bytes.Buffer
@@ -1173,6 +1249,11 @@ func (us *uiService) ListChannelUserGroups(token, channelID string, page, limit 
 
 	noOfPages := int(math.Ceil(float64(groupsPage.Total) / float64(limit)))
 
+	crumb := breadcrumb{
+		Previous: "channels",
+		Current:  channelID,
+	}
+
 	data := struct {
 		NavbarActive string
 		Groups       []sdk.Group
@@ -1182,6 +1263,7 @@ func (us *uiService) ListChannelUserGroups(token, channelID string, page, limit 
 		Pages        int
 		Limit        int
 		Permissions  []string
+		Breadcrumb   breadcrumb
 	}{
 		channelsActive,
 		groupsPage.Groups,
@@ -1191,6 +1273,7 @@ func (us *uiService) ListChannelUserGroups(token, channelID string, page, limit 
 		noOfPages,
 		int(limit),
 		permissions.Permissions,
+		crumb,
 	}
 
 	var btpl bytes.Buffer
@@ -1212,7 +1295,7 @@ func (us *uiService) CreateGroups(token string, groups ...sdk.Group) error {
 	return nil
 }
 
-func (us *uiService) ListGroupUsers(token, id, relation string, page, limit uint64) ([]byte, error) {
+func (us *uiService) ListGroupUsers(token, groupID, relation string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 
 	pgm := sdk.PageMetadata{
@@ -1222,17 +1305,22 @@ func (us *uiService) ListGroupUsers(token, id, relation string, page, limit uint
 		Permission: relation,
 	}
 
-	usersPage, err := us.sdk.ListGroupUsers(id, pgm, token)
+	usersPage, err := us.sdk.ListGroupUsers(groupID, pgm, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	permissions, err := us.sdk.GroupPermissions(id, token)
+	permissions, err := us.sdk.GroupPermissions(groupID, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
+
+	crumb := breadcrumb{
+		Previous: "groups",
+		Current:  groupID,
+	}
 
 	data := struct {
 		NavbarActive string
@@ -1244,9 +1332,10 @@ func (us *uiService) ListGroupUsers(token, id, relation string, page, limit uint
 		Limit        int
 		TabActive    string
 		Permissions  []string
+		Breadcrumb   breadcrumb
 	}{
 		groupsActive,
-		id,
+		groupID,
 		usersPage.Users,
 		groupRelations,
 		int(page),
@@ -1254,6 +1343,7 @@ func (us *uiService) ListGroupUsers(token, id, relation string, page, limit uint
 		int(limit),
 		relation,
 		permissions.Permissions,
+		crumb,
 	}
 
 	var btpl bytes.Buffer
@@ -1279,15 +1369,20 @@ func (gs *uiService) Unassign(token, groupID string, userRelation sdk.UsersRelat
 	return nil
 }
 
-func (us *uiService) ViewGroup(token, id string) (b []byte, err error) {
-	group, err := us.sdk.Group(id, token)
+func (us *uiService) ViewGroup(token, groupID string) (b []byte, err error) {
+	group, err := us.sdk.Group(groupID, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	permissions, err := us.sdk.GroupPermissions(id, token)
+	permissions, err := us.sdk.GroupPermissions(groupID, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	crumb := breadcrumb{
+		Previous: "groups",
+		Current:  groupID,
 	}
 
 	data := struct {
@@ -1295,11 +1390,13 @@ func (us *uiService) ViewGroup(token, id string) (b []byte, err error) {
 		ID           string
 		Group        sdk.Group
 		Permissions  []string
+		Breadcrumb   breadcrumb
 	}{
 		groupsActive,
-		id,
+		groupID,
 		group,
 		permissions.Permissions,
+		crumb,
 	}
 
 	var btpl bytes.Buffer
@@ -1333,18 +1430,25 @@ func (us *uiService) ListGroups(token string, page, limit uint64) ([]byte, error
 
 	noOfPages := int(math.Ceil(float64(grpPage.Total) / float64(limit)))
 
+	crumb := breadcrumb{
+		Previous: "",
+		Current:  "groups",
+	}
+
 	data := struct {
 		NavbarActive string
 		Groups       []sdk.Group
 		CurrentPage  int
 		Pages        int
 		Limit        int
+		Breadcrumb   breadcrumb
 	}{
 		groupsActive,
 		grpPage.Groups,
 		int(page),
 		noOfPages,
 		int(limit),
+		crumb,
 	}
 
 	var btpl bytes.Buffer
@@ -1389,6 +1493,11 @@ func (us *uiService) ListUserGroupChannels(token, groupID string, page, limit ui
 
 	noOfPages := int(math.Ceil(float64(channelsPage.Total) / float64(limit)))
 
+	crumb := breadcrumb{
+		Previous: "groups",
+		Current:  groupID,
+	}
+
 	data := struct {
 		NavbarActive string
 		Channels     []sdk.Group
@@ -1398,6 +1507,7 @@ func (us *uiService) ListUserGroupChannels(token, groupID string, page, limit ui
 		Pages        int
 		Limit        int
 		Permissions  []string
+		Breadcrumb   breadcrumb
 	}{
 		groupsActive,
 		channelsPage.Groups,
@@ -1407,6 +1517,7 @@ func (us *uiService) ListUserGroupChannels(token, groupID string, page, limit ui
 		noOfPages,
 		int(limit),
 		permissions.Permissions,
+		crumb,
 	}
 
 	var btpl bytes.Buffer
@@ -1442,6 +1553,11 @@ func (us *uiService) ReadMessage(token, chID, thKey string, page, limit uint64) 
 
 	noOfPages := int(math.Ceil(float64(msg.Total) / float64(limit)))
 
+	crumb := breadcrumb{
+		Previous: "",
+		Current:  "Read Messages",
+	}
+
 	data := struct {
 		NavbarActive string
 		ChanID       string
@@ -1450,6 +1566,7 @@ func (us *uiService) ReadMessage(token, chID, thKey string, page, limit uint64) 
 		CurrentPage  int
 		Pages        int
 		Limit        int
+		Breadcrumb   breadcrumb
 	}{
 		readMessagesActive,
 		chID,
@@ -1458,6 +1575,7 @@ func (us *uiService) ReadMessage(token, chID, thKey string, page, limit uint64) 
 		int(page),
 		noOfPages,
 		int(limit),
+		crumb,
 	}
 
 	var btpl bytes.Buffer
@@ -1505,6 +1623,11 @@ func (us *uiService) ListBootstrap(token string, page, limit uint64) ([]byte, er
 
 	noOfPages := int(math.Ceil(float64(bootstraps.Total) / float64(limit)))
 
+	crumb := breadcrumb{
+		Previous: "",
+		Current:  "bootstraps",
+	}
+
 	data := struct {
 		NavbarActive string
 		Bootstraps   []sdk.BootstrapConfig
@@ -1512,6 +1635,7 @@ func (us *uiService) ListBootstrap(token string, page, limit uint64) ([]byte, er
 		CurrentPage  int
 		Pages        int
 		Limit        int
+		Breadcrumb   breadcrumb
 	}{
 		bootstrapsActive,
 		bootstraps.Configs,
@@ -1519,6 +1643,7 @@ func (us *uiService) ListBootstrap(token string, page, limit uint64) ([]byte, er
 		int(page),
 		noOfPages,
 		int(limit),
+		crumb,
 	}
 
 	var btpl bytes.Buffer
@@ -1562,8 +1687,8 @@ func (us *uiService) DeleteBootstrap(token, id string) error {
 	return nil
 }
 
-func (us *uiService) ViewBootstrap(token, id string) ([]byte, error) {
-	bootstrap, err := us.sdk.ViewBootstrap(id, token)
+func (us *uiService) ViewBootstrap(token, thingID string) ([]byte, error) {
+	bootstrap, err := us.sdk.ViewBootstrap(thingID, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -1583,12 +1708,19 @@ func (us *uiService) ViewBootstrap(token, id string) ([]byte, error) {
 		return nil, errors.Wrap(errors.New("invalid channels"), ErrFailedRetreive)
 	}
 
+	crumb := breadcrumb{
+		Previous: "bootstraps",
+		Current:  thingID,
+	}
+
 	data := struct {
 		NavbarActive string
 		Bootstrap    sdk.BootstrapConfig
+		Breadcrumb   breadcrumb
 	}{
 		bootstrapsActive,
 		bootstrap,
+		crumb,
 	}
 
 	var btpl bytes.Buffer
@@ -1599,13 +1731,20 @@ func (us *uiService) ViewBootstrap(token, id string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) GetRemoteTerminal(id, token string) ([]byte, error) {
+func (us *uiService) GetRemoteTerminal(thingID, token string) ([]byte, error) {
+	crumb := breadcrumb{
+		Previous: "bootstraps",
+		Current:  thingID,
+	}
+
 	data := struct {
 		NavbarActive string
 		ThingID      string
+		Breadcrumb   breadcrumb
 	}{
 		NavbarActive: bootstrapsActive,
-		ThingID:      id,
+		ThingID:      thingID,
+		Breadcrumb:   crumb,
 	}
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "remoteTerminal", data); err != nil {
@@ -1833,6 +1972,11 @@ func (us *uiService) Domain(token, domainID, tabActive string, page, limit uint6
 
 	noOfPages := int(math.Ceil(float64(membersPage.Total) / float64(limit)))
 
+	crumb := breadcrumb{
+		Previous: "",
+		Current:  "domains",
+	}
+
 	data := struct {
 		NavbarActive string
 		Domain       sdk.Domain
@@ -1842,6 +1986,7 @@ func (us *uiService) Domain(token, domainID, tabActive string, page, limit uint6
 		CurrentPage  int
 		Pages        int
 		Limit        int
+		Breadcrumb   breadcrumb
 	}{
 		domainActive,
 		domain,
@@ -1851,6 +1996,7 @@ func (us *uiService) Domain(token, domainID, tabActive string, page, limit uint6
 		int(page),
 		noOfPages,
 		int(limit),
+		crumb,
 	}
 
 	var btpl bytes.Buffer
@@ -1877,12 +2023,20 @@ func (us *uiService) ViewMember(token, userIdentity string) (b []byte, err error
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
+
+	crumb := breadcrumb{
+		Previous: "domains",
+		Current:  usersPage.Users[0].ID,
+	}
+
 	data := struct {
 		NavbarActive string
 		User         sdk.User
+		Breadcrumb   breadcrumb
 	}{
 		domainActive,
 		usersPage.Users[0],
+		crumb,
 	}
 
 	var btpl bytes.Buffer
