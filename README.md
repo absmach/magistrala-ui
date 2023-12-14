@@ -95,3 +95,8 @@ To configure bootstrap, provide the Name, Thing ID, External ID, External Key, C
 ## Dev Guide
 
 UI code is formatted using [prettier](https://prettier.io/). To install prettier, check the [installation guide](https://github.com/NiklasPor/prettier-plugin-go-template).
+
+run:
+```bash
+ npm install -g prettier prettier-plugin-go-template
+```
