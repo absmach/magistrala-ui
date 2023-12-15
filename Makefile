@@ -41,9 +41,9 @@ define make_docker_dev
 		-f docker/Dockerfile.dev .
 endef
 
-all: magistrala-ui
+all: ui
 
-.PHONY: magistrala-ui docker docker_dev run_docker run
+.PHONY: ui docker docker_dev run_docker run
 
 clean:
 	rm -rf ${BUILD_DIR}
@@ -62,7 +62,7 @@ lint:
 	golangci-lint run --no-config --disable-all --enable gosimple --enable errcheck --enable govet --enable unused --enable goconst --enable godot --timeout 3m
 	prettier --check --write ui
 
-magistrala-ui:
+$(SVC):
 	$(call compile_service)
 
 docker:
