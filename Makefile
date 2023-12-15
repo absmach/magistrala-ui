@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 MG_DOCKER_IMAGE_NAME_PREFIX ?= magistrala
-SVC = magistrala-ui
+SVC = ui
 BUILD_DIR = build
 CGO_ENABLED ?= 0
 GOOS ?= linux
@@ -17,7 +17,7 @@ define compile_service
 	-X 'github.com/absmach/magistrala-ui.BuildTime=$(TIME)' \
 	-X 'github.com/absmach/magistrala-ui.Version=$(VERSION)' \
 	-X 'github.com/absmach/magistrala-ui.Commit=$(COMMIT)'" \
-	-o ${BUILD_DIR}/$(SVC) cmd/ui/main.go
+	-o ${BUILD_DIR}/$(SVC) cmd/$(SVC)/main.go
 endef
 
 define make_docker
@@ -72,7 +72,7 @@ docker_dev:
 	$(call make_docker_dev)
 
 define docker_push
-	docker push $(MG_DOCKER_IMAGE_NAME_PREFIX)/ui:$(1)
+	docker push $(MG_DOCKER_IMAGE_NAME_PREFIX)/$(SVC):$(1)
 endef
 
 latest: docker
@@ -82,4 +82,4 @@ run_docker:
 	docker-compose -f docker/docker-compose.yml --env-file docker/.env up
 
 run:
-	${BUILD_DIR}/magistrala-ui
+	${BUILD_DIR}/$(SVC)

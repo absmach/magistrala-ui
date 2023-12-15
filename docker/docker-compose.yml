@@ -9,7 +9,7 @@ networks:
 
 services:
   ui:
-    image: ghcr.io/absmach/magistrala-ui:${MG_RELEASE_TAG}
+    image: magistrala/ui:${MG_RELEASE_TAG}
     container_name: magistrala-ui
     restart: on-failure
     ports:
