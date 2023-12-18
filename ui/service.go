@@ -2013,8 +2013,6 @@ func (us *uiService) Domain(token, domainID string) ([]byte, error) {
 		return []byte{}, err
 	}
 
-	fmt.Println("permissions: ", permissions.Permissions)
-
 	crumb := breadcrumb{
 		Previous: "",
 		Current:  domainID,
