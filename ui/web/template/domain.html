@@ -128,6 +128,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                     </tbody>
                   </table>
                   <div id="error-message" class="text-danger"></div>
+                  <div class="row mt-3">
+                    <form action="" method="post">
+                      <input type="hidden" name="domainID" id="domainID" value="{{ .Domain.ID }}" />
+                      <button
+                        type="submit"
+                        class="btn body-button"
+                        {{ if not (hasPermission .Permissions "admin") }}disabled{{ end }}
+                      >
+                        Disable Domain
+                      </button>
+                    </form>
+                  </div>
                 </div>
               </div>
             </div>
