@@ -2168,14 +2168,16 @@ func (us *uiService) Invitations(token, domainID string, page, limit uint64) ([]
 	var crumb breadcrumb
 	var collapseActive, navbarActive string
 
-	if domainID == "" {
+	switch domainID {
+	case "":
 		crumb = breadcrumb{
 			Previous: "",
 			Current:  invitationsActive,
 		}
 		collapseActive = domainsActive
 		navbarActive = invitationsActive
-	} else {
+
+	default:
 		crumb = breadcrumb{
 			Previous: "",
 			Current:  domainInvitationsActive,
