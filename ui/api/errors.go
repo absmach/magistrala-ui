@@ -1,3 +1,6 @@
+// Copyright (c) Abstract Machines
+// SPDX-License-Identifier: Apache-2.0
+
 package api
 
 import "github.com/mainflux/mainflux/pkg/errors"
@@ -39,4 +42,6 @@ var (
 	errInvalidQueryParams     = errors.New("invalid query parameters")
 	errFileFormat             = errors.New("invalid file format")
 	errInvalidFile            = errors.New("unsupported file type")
+	errMissingDomainID        = errors.New("missing domain id")
+	errMissingAlias           = errors.New("missing alias")
 )

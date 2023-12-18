@@ -401,25 +401,6 @@ func (req updateThingStatusReq) validate() error {
 	return nil
 }
 
-type updateThingOwnerReq struct {
-	token string
-	id    string
-	Owner string `json:"owner,omitempty"`
-}
-
-func (req updateThingOwnerReq) validate() error {
-	if req.token == "" {
-		return errAuthorization
-	}
-	if req.id == "" {
-		return errMissingThingID
-	}
-	if req.Owner == "" {
-		return errMissingOwner
-	}
-	return nil
-}
-
 type createThingsReq struct {
 	token  string
 	things []sdk.Thing
@@ -644,7 +625,6 @@ func (req assignReq) validate() error {
 	if req.Relation == "" {
 		return errMissingRelation
 	}
-
 	return nil
 }
 
@@ -879,7 +859,7 @@ func (req addUserGroupToChannelReq) validate() error {
 		return errMissingGroupID
 	}
 	if req.Item == "" {
-		return errMalformedEntity
+		return errMissingItem
 	}
 	return nil
 }
@@ -894,7 +874,7 @@ func (req domainLoginReq) validate() error {
 		return errAuthentication
 	}
 	if req.DomainID == "" {
-		return errMalformedEntity
+		return errMissingDomainID
 	}
 	return nil
 }
@@ -912,7 +892,7 @@ func (req createDomainReq) validate() error {
 		return errAuthentication
 	}
 	if req.Name == "" {
-		return errMalformedEntity
+		return errMissingName
 	}
 	return nil
 }
@@ -931,10 +911,16 @@ func (req updateDomainReq) validate() error {
 		return errAuthentication
 	}
 	if req.DomainID == "" {
-		return errMalformedEntity
+		return errMissingDomainID
 	}
-	if req.Name == "" && req.Alias == "" && req.Metadata == nil {
-		return errMalformedEntity
+	if req.Name == "" && req.Metadata == nil {
+		return errMissingName
+	}
+	if req.Alias == "" {
+		return errMissingAlias
+	}
+	if req.Metadata == nil {
+		return errMissingMetadata
 	}
 	return nil
 }
@@ -950,7 +936,7 @@ func (req updateDomainTagsReq) validate() error {
 		return errAuthentication
 	}
 	if req.DomainID == "" {
-		return errMalformedEntity
+		return errMissingDomainID
 	}
 	return nil
 }
@@ -983,13 +969,13 @@ func (req assignMemberReq) validate() error {
 		return errAuthentication
 	}
 	if req.DomainID == "" {
-		return errMalformedEntity
+		return errMissingDomainID
 	}
 	if req.UserID == "" {
-		return errMalformedEntity
+		return errMissingUserID
 	}
 	if req.Relation == "" {
-		return errMalformedEntity
+		return errMissingRelation
 	}
 	return nil
 }
@@ -1004,7 +990,7 @@ func (req viewMemberReq) validate() error {
 		return errAuthentication
 	}
 	if req.UserIdentity == "" {
-		return errMalformedEntity
+		return errMissingIdentity
 	}
 	return nil
 }

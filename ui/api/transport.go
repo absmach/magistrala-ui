@@ -2339,6 +2339,7 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		errMissingItem,
 		errMissingThingID,
 		errMissingChannelID,
+		errMissingDomainID,
 		errMissingUserID,
 		errMissingRelation,
 		errMissingGroupID,
@@ -2346,6 +2347,7 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		errMissingDescription,
 		errMissingThingKey,
 		errMissingExternalID,
+		errMissingAlias,
 		errMissingExternalKey:
 		w.Header().Set("Location", "/error?error="+url.QueryEscape(err.Error()))
 		w.WriteHeader(http.StatusSeeOther)
