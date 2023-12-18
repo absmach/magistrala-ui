@@ -679,13 +679,6 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				opts...,
 			).ServeHTTP)
 
-			r.Get("/{id}/invitations", kithttp.NewServer(
-				listDomainInvitationsEndpoint(svc),
-				decodeListDomainInvitationsRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
 			r.Post("/{id}/assign", kithttp.NewServer(
 				assignMemberEndpoint(svc),
 				decodeAssignMemberRequest,
@@ -2027,34 +2020,14 @@ func decodeListInvitationsRequest(_ context.Context, r *http.Request) (interface
 		return nil, err
 	}
 
-	req := listInvitationsReq{
-		token: token,
-		page:  page,
-		limit: limit,
-	}
-
-	return req, nil
-}
-
-func decodeListDomainInvitationsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-
-	page, err := readNumQuery[uint64](r, pageKey, defPage)
-	if err != nil {
-		return nil, err
-	}
-
-	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	domainID, err := readStringQuery(r, domainKey, defKey)
 	if err != nil {
 		return nil, err
 	}
 
 	req := listInvitationsReq{
 		token:    token,
-		DomainID: chi.URLParam(r, "id"),
+		DomainID: domainID,
 		page:     page,
 		limit:    limit,
 	}

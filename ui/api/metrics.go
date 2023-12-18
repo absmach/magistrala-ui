@@ -891,23 +891,13 @@ func (mm *metricsMiddleware) SendInvitation(token string, invitation sdk.Invitat
 }
 
 // Invitations adds metrics middleware to invitations method.
-func (mm *metricsMiddleware) Invitations(token string, page, limit uint64) (b []byte, err error) {
+func (mm *metricsMiddleware) Invitations(token, domainID string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "invitations").Add(1)
 		mm.latency.With("method", "invitations").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.Invitations(token, page, limit)
-}
-
-// DomainInvitations adds metrics middleware to domain invitations method.
-func (mm *metricsMiddleware) DomainInvitations(token, domainID string, page, limit uint64) (b []byte, err error) {
-	defer func(begin time.Time) {
-		mm.counter.With("method", "domain_invitations").Add(1)
-		mm.latency.With("method", "domain_invitations").Observe(time.Since(begin).Seconds())
-	}(time.Now())
-
-	return mm.svc.DomainInvitations(token, domainID, page, limit)
+	return mm.svc.Invitations(token, domainID, page, limit)
 }
 
 // AcceptInvitation adds metrics middleware to accept invitation method.

@@ -111,7 +111,6 @@ var (
 		"member",
 		"members",
 		"invitations",
-		"domaininvitations",
 	}
 	ErrToken                = errors.New("failed to create token")
 	ErrTokenRefresh         = errors.New("failed to refresh token")
@@ -323,9 +322,7 @@ type Service interface {
 	// SendInvitation sends an invitation to a given user to join a domain.
 	SendInvitation(token string, invitation sdk.Invitation) error
 	// Invitations returns a list of invitations.
-	Invitations(token string, page, limit uint64) ([]byte, error)
-	// DomainInvitations returns a list of DomainInvitations.
-	DomainInvitations(token, domainID string, page, limit uint64) ([]byte, error)
+	Invitations(token, domainID string, page, limit uint64) ([]byte, error)
 	// AcceptInvitation accepts an invitation by adding the user to the domain they were invited to.
 	AcceptInvitation(token, domainID string) error
 	// DeleteInvitation deletes an invitation.
@@ -2152,55 +2149,7 @@ func (us *uiService) SendInvitation(token string, invitation sdk.Invitation) err
 	return us.sdk.SendInvitation(invitation, token)
 }
 
-func (us *uiService) Invitations(token string, page, limit uint64) ([]byte, error) {
-	offset := (page - 1) * limit
-
-	pgm := sdk.PageMetadata{
-		Offset: offset,
-		Limit:  limit,
-		State:  statePending,
-	}
-	invitationsPage, err := us.sdk.Invitations(pgm, token)
-	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
-	}
-
-	noOfPages := int(math.Ceil(float64(invitationsPage.Total) / float64(limit)))
-
-	crumb := breadcrumb{
-		Previous: "",
-		Current:  invitationsActive,
-	}
-
-	data := struct {
-		NavbarActive   string
-		CollapseActive string
-		Invitations    []sdk.Invitation
-		Relations      []string
-		CurrentPage    int
-		Pages          int
-		Limit          int
-		Breadcrumb     breadcrumb
-	}{
-		invitationsActive,
-		domainsActive,
-		invitationsPage.Invitations,
-		groupRelations,
-		int(page),
-		noOfPages,
-		int(limit),
-		crumb,
-	}
-
-	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "invitations", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
-	}
-
-	return btpl.Bytes(), nil
-}
-
-func (us *uiService) DomainInvitations(token, domainID string, page, limit uint64) ([]byte, error) {
+func (us *uiService) Invitations(token, domainID string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 
 	pgm := sdk.PageMetadata{
@@ -2216,9 +2165,23 @@ func (us *uiService) DomainInvitations(token, domainID string, page, limit uint6
 
 	noOfPages := int(math.Ceil(float64(invitationsPage.Total) / float64(limit)))
 
-	crumb := breadcrumb{
-		Previous: "",
-		Current:  domainInvitationsActive,
+	var crumb breadcrumb
+	var collapseActive, navbarActive string
+
+	if domainID == "" {
+		crumb = breadcrumb{
+			Previous: "",
+			Current:  invitationsActive,
+		}
+		collapseActive = domainsActive
+		navbarActive = invitationsActive
+	} else {
+		crumb = breadcrumb{
+			Previous: "",
+			Current:  domainInvitationsActive,
+		}
+		collapseActive = domainActive
+		navbarActive = domainInvitationsActive
 	}
 
 	data := struct {
@@ -2232,8 +2195,8 @@ func (us *uiService) DomainInvitations(token, domainID string, page, limit uint6
 		Limit          int
 		Breadcrumb     breadcrumb
 	}{
-		domainInvitationsActive,
-		domainActive,
+		navbarActive,
+		collapseActive,
 		domainID,
 		invitationsPage.Invitations,
 		groupRelations,
@@ -2244,7 +2207,7 @@ func (us *uiService) DomainInvitations(token, domainID string, page, limit uint6
 	}
 
 	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "domaininvitations", data); err != nil {
+	if err := us.tpls.ExecuteTemplate(&btpl, "invitations", data); err != nil {
 		return []byte{}, errors.Wrap(err, ErrExecTemplate)
 	}
 

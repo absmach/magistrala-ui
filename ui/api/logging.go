@@ -1226,7 +1226,7 @@ func (lm *loggingMiddleware) SendInvitation(token string, invitation sdk.Invitat
 }
 
 // Invitations adds logging middleware to invitations method.
-func (lm *loggingMiddleware) Invitations(token string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) Invitations(token, domainID string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method invitations took %s to complete", time.Since(begin))
 		if err != nil {
@@ -1235,20 +1235,7 @@ func (lm *loggingMiddleware) Invitations(token string, page, limit uint64) (b []
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.Invitations(token, page, limit)
-}
-
-// DomainInvitations adds logging middleware to domain invitations method.
-func (lm *loggingMiddleware) DomainInvitations(token, domainID string, page, limit uint64) (b []byte, err error) {
-	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method domain_invitations took %s to complete", time.Since(begin))
-		if err != nil {
-			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
-		}
-		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
-	}(time.Now())
-
-	return lm.svc.DomainInvitations(token, domainID, page, limit)
+	return lm.svc.Invitations(token, domainID, page, limit)
 }
 
 // AcceptInvitation adds logging middleware to accept invitation method.

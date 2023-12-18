@@ -1832,26 +1832,7 @@ func listInvitationsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.Invitations(req.token, req.page, req.limit)
-		if err != nil {
-			return nil, err
-		}
-
-		return uiRes{
-			code: http.StatusOK,
-			html: res,
-		}, nil
-	}
-}
-
-func listDomainInvitationsEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(listInvitationsReq)
-		if err := req.validate(); err != nil {
-			return nil, err
-		}
-
-		res, err := svc.DomainInvitations(req.token, req.DomainID, req.page, req.limit)
+		res, err := svc.Invitations(req.token, req.DomainID, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}

@@ -421,7 +421,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     }
     document.getElementById("domain").href = "/domains/" + domainID;
     document.getElementById("members").href = "/domains/" + domainID + "/members";
-    document.getElementById("domainInvitations").href = "/domains/" + domainID + "/invitations";
+    document.getElementById("domainInvitations").href = "/invitations?domain=" + domainID;
     document.getElementById("domainName").innerHTML = domainName;
     document.getElementById("domainName2").innerHTML = domainName;
     document.getElementById("username").innerHTML = name;

@@ -21,98 +21,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                   role="button"
                   class="btn body-button"
                   id="invite-button"
-                  onclick="openInvitationModal()"
+                  onclick="openInvitationModal('{{ .NavbarActive }}')"
                 >
                   <i class="fa-solid fa-plus me-2"></i>
                   <span>Invite User</span>
                 </button>
-                <!-- Invitation Modal -->
-                <div
-                  class="modal fade"
-                  id="invitationModal"
-                  tabindex="-1"
-                  role="dialog"
-                  aria-labelledby="invitationModalLabel"
-                  aria-hidden="true"
-                >
-                  <div class="modal-dialog" role="document">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="invitationModalLabel">Invite User</h5>
-                        <button
-                          type="button"
-                          class="btn-close"
-                          data-bs-dismiss="modal"
-                          aria-label="Close"
-                        ></button>
-                      </div>
-                      <form id="invitation-form">
-                        <div class="modal-body">
-                          <div class="mb-3">
-                            <label for="users-scroll" class="form-label">User</label>
-                            <input
-                              type="text"
-                              name="userFilter"
-                              id="userFilter"
-                              placeholder="Filter by User Name"
-                            />
-                            <select
-                              class="form-select"
-                              name="userID"
-                              id="users-scroll"
-                              size="5"
-                              required
-                            >
-                              <option disabled>select a User</option>
-                            </select>
-                          </div>
-                          <div class="mb-3">
-                            <label for="domains-scroll" class="form-label">Domain</label>
-                            <input
-                              type="text"
-                              name="domainFilter"
-                              id="domainFilter"
-                              placeholder="Filter by Domain"
-                            />
-                            <select
-                              class="form-select"
-                              name="domainID"
-                              id="domains-scroll"
-                              size="5"
-                              required
-                            >
-                              <option disabled>select a domain</option>
-                            </select>
-                          </div>
-                          <div class="mb-3">
-                            <label for="relation" class="form-label">Relation</label>
-                            <select
-                              class="form-control"
-                              name="relation"
-                              id="relation"
-                              aria-describedby="relationHelp"
-                              required
-                            >
-                              <option value="" disabled>Select relation</option>
-                              {{ range $i, $r := .Relations }}
-                                <option value="{{ $r }}">
-                                  {{ $r }}
-                                </option>
-                              {{ end }}
-                            </select>
-                            <div id="relationHelp" class="form-text">Select Relation.</div>
-                          </div>
-                        </div>
-                        <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            Cancel
-                          </button>
-                          <button type="submit" class="btn btn-primary">Invite</button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                </div>
               </div>
               <div class="table-responsive table-container">
                 {{ template "tableheader" . }}
@@ -180,16 +93,104 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
         </div>
+
+        <!-- Invitation Modal -->
+        <div
+          class="modal fade"
+          id="invitationModal"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby="invitationModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="invitationModalLabel">Invite User</h5>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <form id="invitation-form">
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <label for="users-scroll" class="form-label">User</label>
+                    <input
+                      type="text"
+                      name="userFilter"
+                      id="userFilter"
+                      placeholder="Filter by User Name"
+                    />
+                    <select class="form-select" name="userID" id="users-scroll" size="5" required>
+                      <option disabled>select a User</option>
+                    </select>
+                  </div>
+                  <div class="mb-3" id="domains-select">
+                    <label for="domains-scroll" class="form-label">Domain</label>
+                    <input
+                      type="text"
+                      name="domainFilter"
+                      id="domainFilter"
+                      placeholder="Filter by Domain"
+                    />
+                    <select
+                      class="form-select"
+                      name="domainID"
+                      id="domains-scroll"
+                      size="5"
+                      required
+                    >
+                      <option disabled>select a domain</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="relation" class="form-label">Relation</label>
+                    <select
+                      class="form-control"
+                      name="relation"
+                      id="relation"
+                      aria-describedby="relationHelp"
+                      required
+                    >
+                      <option value="" disabled>Select relation</option>
+                      {{ range $i, $r := .Relations }}
+                        <option value="{{ $r }}">
+                          {{ $r }}
+                        </option>
+                      {{ end }}
+                    </select>
+                    <div id="relationHelp" class="form-text">Select Relation.</div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Cancel
+                  </button>
+                  <button type="submit" class="btn btn-primary">Invite</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
       <script>
         const invitationModal = new bootstrap.Modal(document.getElementById("invitationModal"));
 
-        function openInvitationModal() {
+        function openInvitationModal(active) {
+          var domainsSelect = document.getElementById("domains-select");
+          var domainID = '{{.DomainID}}';
+          if (active !== "invitations") {
+            domainsSelect.innerHTML = domainsSelect.innerHTML = `<input type="hidden" name="domainID" value="${domainID}" />`;
+          }
           invitationModal.show();
         }
         var loggedInUser = localStorage.getItem("userID");
         var loginStatus = localStorage.getItem("loginStatus");
         var userRole = localStorage.getItem("userRole");
+        var domainPermission = localStorage.getItem("domainPermission");
         var table = document.getElementById("itemsTable");
         var rows = table.querySelectorAll("tbody tr");
         rows.forEach(function (row) {
@@ -212,7 +213,8 @@ SPDX-License-Identifier: Apache-2.0 -->
           }
         });
 
-        if (loginStatus === "general" || userRole !== "admin") {
+        const navbarActive = '{{.NavbarActive}}';
+        if ((navbarActive === "invitations") && (loginStatus === "general" || domainPermission !== "admin")) {
           document.getElementById("invite-button").style.display = "none";
         }
 
