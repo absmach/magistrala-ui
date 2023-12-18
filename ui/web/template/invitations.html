@@ -21,7 +21,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   role="button"
                   class="btn body-button"
                   id="invite-button"
-                  onclick="openInvitationModal('{{ .NavbarActive }}')"
+                  onclick="openInvitationModal()"
                 >
                   <i class="fa-solid fa-plus me-2"></i>
                   <span>Invite User</span>
@@ -178,21 +178,23 @@ SPDX-License-Identifier: Apache-2.0 -->
       </div>
       <script>
         const invitationModal = new bootstrap.Modal(document.getElementById("invitationModal"));
-
-        function openInvitationModal(active) {
-          var domainsSelect = document.getElementById("domains-select");
-          var domainID = '{{.DomainID}}';
-          if (active !== "invitations") {
-            domainsSelect.innerHTML = domainsSelect.innerHTML = `<input type="hidden" name="domainID" value="${domainID}" />`;
-          }
-          invitationModal.show();
-        }
         var loggedInUser = localStorage.getItem("userID");
         var loginStatus = localStorage.getItem("loginStatus");
         var userRole = localStorage.getItem("userRole");
         var domainPermission = localStorage.getItem("domainPermission");
         var table = document.getElementById("itemsTable");
         var rows = table.querySelectorAll("tbody tr");
+        const navbarActive = '{{.NavbarActive}}';
+
+        function openInvitationModal() {
+          var domainsSelect = document.getElementById("domains-select");
+          var domainID = '{{.DomainID}}';
+          if (navbarActive !== "invitations") {
+            domainsSelect.innerHTML = domainsSelect.innerHTML = `<input type="hidden" name="domainID" value="${domainID}" />`;
+          }
+          invitationModal.show();
+        }
+
         rows.forEach(function (row) {
           var inviter = row.querySelector(".inviter").textContent.trim();
           var invited = row.querySelector(".invited").textContent.trim();
@@ -213,7 +215,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           }
         });
 
-        const navbarActive = '{{.NavbarActive}}';
+
         if ((navbarActive === "invitations") && (loginStatus === "general" || domainPermission !== "admin")) {
           document.getElementById("invite-button").style.display = "none";
         }
