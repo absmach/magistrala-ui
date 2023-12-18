@@ -13,7 +13,7 @@ function addItem(event, inputId, listId) {
     if (itemInput && itemList) {
       const newItem = document.createElement("div");
       newItem.textContent = itemInput.value;
-      newItem.className = "highlight-list-item";
+      newItem.className = "mb-2 highlight-list-item";
       newItem.style.backgroundColor = generateColor();
       itemList.appendChild(newItem);
       itemInput.value = "";
