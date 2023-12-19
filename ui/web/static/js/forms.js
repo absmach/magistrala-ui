@@ -17,14 +17,16 @@ export function submitCreateForm(config) {
           case 409:
             showAlert("entity already exists!", config.alertDiv);
             break;
-          case 400:
-            showAlert("invalid file contents!", config.alertDiv);
-            break;
           case 415:
             showAlert("invalid file type!", config.alertDiv);
             break;
-          case 400: 
-            showAlert("missing idenity", config.alertDiv);
+          case 400:
+            const errorMessage = response.headers.get("X-Error-Message");
+            if (errorMessage) {
+              showAlert(errorMessage, config.alertDiv);
+            } else {
+              showAlert("Bad Request", config.alertDiv);
+            }
             break;
           default:
             form.reset();

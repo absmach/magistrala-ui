@@ -3,7 +3,7 @@
 
 package api
 
-import "github.com/mainflux/mainflux/pkg/errors"
+import "github.com/absmach/magistrala/pkg/errors"
 
 var (
 	errAuthorization          = errors.New("missing or invalid credentials provided")

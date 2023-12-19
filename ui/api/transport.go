@@ -2314,7 +2314,6 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 			}
 			return
 		}
-		w.WriteHeader(http.StatusInternalServerError)
 	}
 	switch err {
 	case errMissingSecret,
@@ -2348,10 +2347,15 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		errMissingExternalID,
 		errMissingAlias,
 		errMissingExternalKey:
-		w.WriteHeader(http.StatusSeeOther)
+		w.Header().Set("X-Error-Message", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
 	case errInvalidFile:
+		w.Header().Set("X-Error-Message", err.Error())
 		w.WriteHeader(http.StatusUnsupportedMediaType)
 	case errFileFormat:
+		w.Header().Set("X-Error-Message", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+	default:
 		w.WriteHeader(http.StatusBadRequest)
 	}
 }
