@@ -10,7 +10,7 @@ function addItem(event, inputId, listId) {
     const itemInput = document.getElementById(inputId);
     const itemList = document.getElementById(listId);
 
-    if (itemInput && itemList) {
+    if (itemInput && itemList && itemInput.value.trim() !== "") {
       const newItem = document.createElement("div");
       newItem.textContent = itemInput.value;
       newItem.className = "mb-2 highlight-list-item";
