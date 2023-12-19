@@ -603,8 +603,6 @@ func (us *uiService) ViewUser(token, userID string) (b []byte, err error) {
 		Current:  userID,
 	}
 
-	fmt.Println("user: ", user)
-
 	data := struct {
 		NavbarActive   string
 		CollapseActive string
