@@ -218,6 +218,26 @@ func (req updateUserStatusReq) validate() error {
 	return nil
 }
 
+type updateUserRoleReq struct {
+	token  string
+	UserID string `json:"user_id,omitempty"`
+	Role   string `json:"role,omitempty"`
+}
+
+func (req updateUserRoleReq) validate() error {
+	if req.token == "" {
+		return errAuthorization
+	}
+	if req.UserID == "" {
+		return errMalformedEntity
+	}
+	if req.Role == "" {
+		return errMalformedEntity
+	}
+
+	return nil
+}
+
 type showUpdatePasswordReq struct {
 	token string
 }

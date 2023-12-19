@@ -241,6 +241,13 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
+
+			r.Post("/{id}/role", kithttp.NewServer(
+				updateUserRoleEndpoint(svc),
+				decodeUserRoleUpdate,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
 		})
 
 		r.Route("/things", func(r chi.Router) {
@@ -1042,6 +1049,21 @@ func decodeUserStatusUpdate(_ context.Context, r *http.Request) (interface{}, er
 	req := updateUserStatusReq{
 		token:  token,
 		UserID: r.PostFormValue("userID"),
+	}
+
+	return req, nil
+}
+
+func decodeUserRoleUpdate(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	req := updateUserRoleReq{
+		token:  token,
+		UserID: chi.URLParam(r, "id"),
+		Role:   r.PostFormValue("role"),
 	}
 
 	return req, nil

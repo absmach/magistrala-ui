@@ -420,6 +420,29 @@ func updateUserIdentityEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
+func updateUserRoleEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(updateUserRoleReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		user := sdk.User{
+			ID:   req.UserID,
+			Role: req.Role,
+		}
+
+		if err := svc.UpdateUserRole(req.token, user); err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code:    http.StatusSeeOther,
+			headers: map[string]string{"Location": usersAPIEndpoint + "/" + req.UserID},
+		}, nil
+	}
+}
+
 func enableUserEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateUserStatusReq)

@@ -102,17 +102,106 @@ SPDX-License-Identifier: Apache-2.0 -->
                           </div>
                         </td>
                       </tr>
+                      <tr>
+                        <th>Role</th>
+                        <td>{{ .User.Role }}</td>
+                        <td></td>
+                      </tr>
                     </tbody>
                   </table>
                   <div id="error-message" class="text-danger"></div>
-                  <div class="row mt-3">
+                  <div class="row-mb-3 d-flex flex-row gap-2 mt-3">
                     <form action="/users/disabled" method="post">
                       <input type="hidden" name="userID" id="userID" value="{{ .User.ID }}" />
                       <button type="submit" class="btn body-button">Disable User</button>
                     </form>
+                    <button
+                      type="button"
+                      class="btn body-button"
+                      data-bs-toggle="modal"
+                      data-bs-target="#updateRoleModal"
+                    >
+                      Update Role
+                    </button>
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Update Role Modal -->
+        <div
+          class="modal fade"
+          id="updateRoleModal"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby="updateRoleModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <div class="modal-title" id="updateRoleModalLabel">Update Role</div>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <form action="/users/{{ .User.ID }}/role" method="post">
+                <div class="modal-body">
+                  <span>
+                    Are you sure you want to update the role of
+                    <span class="badge text-bg-info">{{ .User.Name }}</span>
+                    to
+                  </span>
+                  <div class="mb-3 ">
+                    {{ if eq .User.Role "admin" }}
+
+                      <div class="form-check">
+                        <input
+                          type="radio"
+                          class="form-check-input"
+                          name="role"
+                          id="userRole"
+                          value="user"
+                          checked
+                        />
+                        <label for="userRole" class="form-check-label">User</label>
+                        <div class="form-text" id="user-roleHelp">
+                          This will revoke all super admin privileges from the user and make the
+                          user a normal user
+                        </div>
+                      </div>
+                    {{ else }}
+                      <div class="form-check">
+                        <input
+                          type="radio"
+                          class="form-check-input"
+                          name="role"
+                          id="adminRole"
+                          value="admin"
+                          checked
+                        />
+                        <label for="adminRole" class="form-check-label">Admin</label>
+                        <div class="form-text" id="adminRoleHelp">
+                          This will make the user a super admin in the system
+                        </div>
+                      </div>
+                    {{ end }}
+                  </div>
+                  <input type="hidden" name="userID" id="userID" value="{{ .User.ID }}" />
+                  <div id="error-message" class="text-danger"></div>
+                </div>
+                <div class="modal-footer">
+                  <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">
+                    Cancel
+                  </button>
+                  <button class="btn body-button" type="submit">Update</button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
