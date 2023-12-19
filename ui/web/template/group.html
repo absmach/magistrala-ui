@@ -61,6 +61,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                         <td></td>
                       </tr>
                       <tr>
+                        <th>Parent Group</th>
+                        <td><a href="/groups/{{ .Group.ParentID }}">{{ .Parent }}</a></td>
+                        <td></td>
+                      </tr>
+                      <tr>
                         <th>Description</th>
                         <td class="editable" contenteditable="false" data-field="description">
                           {{ .Group.Description }}
