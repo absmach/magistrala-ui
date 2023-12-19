@@ -38,12 +38,8 @@ function deleteItem(event) {
 function submitItemList(inputId, listId) {
   const itemList = document.getElementById(listId);
   const listItems = itemList.getElementsByClassName("highlight-list-item");
-
   const itemsArray = Array.from(listItems).map((item) => item.textContent.trim());
-
   const jsonData = JSON.stringify(itemsArray);
-  alert("JSON data ready to submit:\n" + jsonData);
-
   const jsonInput = document.getElementById(inputId);
   jsonInput.value = jsonData;
 }
