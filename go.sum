@@ -34,8 +34,6 @@ github.com/VividCortex/gohistogram v1.0.0 h1:6+hBz+qvs0JOrrNhhmR7lFxo5sINxBCGXrd
 github.com/VividCortex/gohistogram v1.0.0/go.mod h1:Pf5mBqqDxYaXu3hDrrU+w6nw50o/4+TcAqDqk/vUH7g=
 github.com/absmach/agent v0.0.0-20231107115142-c8b509f24d50 h1:RyDGAkOtIuN34HEJ/UDTc0r7qZFO5jBx5cB3wmUtPJE=
 github.com/absmach/agent v0.0.0-20231107115142-c8b509f24d50/go.mod h1:/S3WufAqHTSU6MEq6cN0g6m21RhPX8dxqubYh08vbU8=
-github.com/absmach/magistrala v0.11.1-0.20231214104257-5e541f6a2c71 h1:V+LmfwSJDTyAgGiNmpEQ4EVXHsBUP2ZfjrEn9RsPVfQ=
-github.com/absmach/magistrala v0.11.1-0.20231214104257-5e541f6a2c71/go.mod h1:LiF4qov0bRFK7eyD79w0IAABjuGa+Ybix24i9q/aiwI=
 github.com/absmach/magistrala v0.11.1-0.20231217131421-48e971180bb4 h1:moYrqFW4bJ7LlGsRvFyJFcBe5KuvjClIdUJz/hF8olg=
 github.com/absmach/magistrala v0.11.1-0.20231217131421-48e971180bb4/go.mod h1:ll3GBNSvNs2FJvOdOd3kdlKqbUijFrYzGc0+dji1Pz4=
 github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5/go.mod h1:SkGFH1ia65gfNATL8TAiHDNxPzPdmEL5uirI2Uyuz6c=

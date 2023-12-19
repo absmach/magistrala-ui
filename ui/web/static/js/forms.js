@@ -14,12 +14,6 @@ export function submitCreateForm(config) {
     })
       .then(function (response) {
         switch (response.status) {
-          case 303:
-            const location = response.headers.get("Location");
-            const url = new URL(location);
-            const errorMessage = url.searchParams.get("error");
-            showAlert(errorMessage, config.alertDiv);
-            break;
           case 409:
             showAlert("entity already exists!", config.alertDiv);
             break;
@@ -28,6 +22,9 @@ export function submitCreateForm(config) {
             break;
           case 415:
             showAlert("invalid file type!", config.alertDiv);
+            break;
+          case 400: 
+            showAlert("missing idenity", config.alertDiv);
             break;
           default:
             form.reset();

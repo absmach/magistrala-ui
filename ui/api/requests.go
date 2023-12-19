@@ -951,7 +951,7 @@ func (req updateDomainStatusReq) validate() error {
 		return errAuthorization
 	}
 	if req.DomainID == "" {
-		return errMalformedEntity
+		return errMissingDomainID
 	}
 
 	return nil
@@ -1007,13 +1007,13 @@ func (req sendInvitationReq) validate() error {
 		return errAuthentication
 	}
 	if req.DomainID == "" {
-		return errMalformedEntity
+		return errMissingDomainID
 	}
 	if req.UserID == "" {
-		return errMalformedEntity
+		return errMissingUserID
 	}
 	if req.Relation == "" {
-		return errMalformedEntity
+		return errMissingRelation
 	}
 
 	return nil
@@ -1029,7 +1029,7 @@ func (req acceptInvitationReq) validate() error {
 		return errAuthentication
 	}
 	if req.DomainID == "" {
-		return errMalformedEntity
+		return errMissingDomainID
 	}
 
 	return nil
@@ -1047,10 +1047,10 @@ func (req deleteInvitationReq) validate() error {
 		return errAuthentication
 	}
 	if req.DomainID == "" {
-		return errMalformedEntity
+		return errMissingDomainID
 	}
 	if req.UserID == "" {
-		return errMalformedEntity
+		return errMissingUserID
 	}
 
 	return nil
@@ -1068,10 +1068,10 @@ func (req listInvitationsReq) validate() error {
 		return errAuthentication
 	}
 	if req.page == 0 {
-		return errMalformedEntity
+		return errPageSize
 	}
 	if req.limit == 0 {
-		return errMalformedEntity
+		return errLimitSize
 	}
 
 	return nil
