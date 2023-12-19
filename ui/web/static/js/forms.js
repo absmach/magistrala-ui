@@ -54,6 +54,14 @@ export function submitUpdateForm(config) {
         case 409:
           showAlert("entity already exists!", config.alertDiv);
           break;
+        case 400:
+          const errorMessage = response.headers.get("X-Error-Message");
+          if (errorMessage) {
+            showAlert(errorMessage, config.alertDiv);
+          } else {
+            showAlert("Bad Request", config.alertDiv);
+          }
+          break;
         default:
           window.location.reload();
       }
