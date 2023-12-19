@@ -32,6 +32,7 @@ function getEntities(config, name) {
     item: config.item,
     domain: config.domain,
     permission: config.permission,
+    itemSelect: config.itemSelect,
     name: name,
     page: 1,
   });
@@ -56,7 +57,7 @@ function infiniteScroll(config) {
         currentPageNo++;
         fetchData({
           item: config.item,
-          item: config.item,
+          itemSelect: config.itemSelect,
           name: "",
           domain: config.domain,
           permission: config.permission,
@@ -79,7 +80,7 @@ function fetchData(config) {
   )
     .then((response) => response.json())
     .then((data) => {
-      const selectElement = document.getElementById("infiniteScroll");
+      var selectElement = document.getElementById(config.itemSelect);
       data.data.forEach((entity) => {
         const option = document.createElement("option");
         option.value = entity.id;

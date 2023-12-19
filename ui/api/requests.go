@@ -204,7 +204,7 @@ func (req updateUserIdentityReq) validate() error {
 
 type updateUserStatusReq struct {
 	token  string
-	UserID string `json:"userId,omitempty"`
+	UserID string `json:"user_id,omitempty"`
 }
 
 func (req updateUserStatusReq) validate() error {
@@ -231,8 +231,8 @@ func (req showUpdatePasswordReq) validate() error {
 
 type updateUserPasswordReq struct {
 	token   string
-	OldPass string `json:"oldpass"`
-	NewPass string `json:"newpass"`
+	OldPass string `json:"old_pass"`
+	NewPass string `json:"new_pass"`
 }
 
 func (req updateUserPasswordReq) validate() error {
@@ -359,7 +359,7 @@ func (req updateThingSecretReq) validate() error {
 
 type updateThingStatusReq struct {
 	token   string
-	ThingID string `json:"thingID,omitempty"`
+	ThingID string `json:"thing_id,omitempty"`
 }
 
 func (req updateThingStatusReq) validate() error {
@@ -447,8 +447,8 @@ func (req updateChannelReq) validate() error {
 
 type connectThingReq struct {
 	token   string
-	ThingID string `json:"thingID,omitempty"`
-	ChanID  string `json:"chanID,omitempty"`
+	ThingID string `json:"thing_id,omitempty"`
+	ChanID  string `json:"channel_id,omitempty"`
 	Item    string `json:"item,omitempty"`
 }
 
@@ -470,8 +470,8 @@ func (req connectThingReq) validate() error {
 
 type shareThingReq struct {
 	token    string
-	ThingID  string `json:"thingID,omitempty"`
-	UserID   string `json:"userID,omitempty"`
+	ThingID  string `json:"thing_id,omitempty"`
+	UserID   string `json:"user_id,omitempty"`
 	Relation string `json:"relation,omitempty"`
 }
 
@@ -493,7 +493,7 @@ func (req shareThingReq) validate() error {
 
 type updateChannelStatusReq struct {
 	token     string
-	ChannelID string `json:"channelID,omitempty"`
+	ChannelID string `json:"channel_id,omitempty"`
 }
 
 func (req updateChannelStatusReq) validate() error {
@@ -569,8 +569,8 @@ func (req updateGroupReq) validate() error {
 
 type assignReq struct {
 	token    string
-	GroupID  string `json:"groupID"`
-	UserID   string `json:"userID"`
+	GroupID  string `json:"group_id"`
+	UserID   string `json:"user_id"`
 	Relation string `json:"relation"`
 }
 
@@ -594,7 +594,7 @@ func (req assignReq) validate() error {
 
 type updateGroupStatusReq struct {
 	token   string
-	GroupID string `json:"groupId"`
+	GroupID string `json:"group_id"`
 }
 
 func (req updateGroupStatusReq) validate() error {
@@ -687,8 +687,8 @@ func (req updateBootstrapReq) validate() error {
 type updateBootstrapCertReq struct {
 	token      string
 	thingID    string
-	ClientCert string `json:"clientCert"`
-	ClientKey  string `json:"clientKey"`
+	ClientCert string `json:"client_cert"`
+	ClientKey  string `json:"client_key"`
 	CACert     string `json:"CAcert"`
 }
 
@@ -724,14 +724,14 @@ func (req updateBootstrapConnReq) validate() error {
 
 type createBootstrapReq struct {
 	token       string
-	ThingID     string   `json:"thingID"`
-	ExternalID  string   `json:"externalID"`
-	ExternalKey string   `json:"externalKey"`
+	ThingID     string   `json:"thing_id"`
+	ExternalID  string   `json:"external_id"`
+	ExternalKey string   `json:"externa_key"`
 	Channels    []string `json:"channels"`
 	Name        string   `json:"name"`
 	Content     string   `json:"content"`
-	ClientCert  string   `json:"clientCert"`
-	ClientKey   string   `json:"clientKey"`
+	ClientCert  string   `json:"client_cert"`
+	ClientKey   string   `json:"client_key"`
 	CACert      string   `json:"CAcert"`
 }
 
@@ -757,7 +757,7 @@ type getEntitiesReq struct {
 	Limit      uint64 `json:"limit"`
 	Item       string `json:"item"`
 	Name       string `json:"name"`
-	DomainID   string `json:"domainID"`
+	DomainID   string `json:"domain_id"`
 	Permission string `json:"permission"`
 }
 
@@ -792,8 +792,8 @@ func (req errorReq) validate() error {
 
 type addUserToChannelReq struct {
 	token     string
-	ChannelID string `json:"channelID"`
-	UserID    string `json:"userID"`
+	ChannelID string `json:"channel_id"`
+	UserID    string `json:"user_id"`
 	Relation  string `json:"relation"`
 }
 
@@ -815,8 +815,8 @@ func (req addUserToChannelReq) validate() error {
 
 type addUserGroupToChannelReq struct {
 	token     string
-	GroupID   string `json:"groupID"`
-	ChannelID string `json:"channelID"`
+	GroupID   string `json:"group_id"`
+	ChannelID string `json:"channel_id"`
 	Item      string `json:"item"`
 }
 
@@ -838,7 +838,7 @@ func (req addUserGroupToChannelReq) validate() error {
 
 type domainLoginReq struct {
 	token    string
-	DomainID string `json:"domainID"`
+	DomainID string `json:"domain_id"`
 }
 
 func (req domainLoginReq) validate() error {
@@ -871,7 +871,7 @@ func (req createDomainReq) validate() error {
 
 type updateDomainReq struct {
 	token    string
-	DomainID string                 `json:"domainID"`
+	DomainID string                 `json:"domain_id"`
 	Name     string                 `json:"name,omitempty"`
 	Alias    string                 `json:"alias,omitempty"`
 	Tags     []string               `json:"tags,omitempty"`
@@ -893,7 +893,7 @@ func (req updateDomainReq) validate() error {
 
 type updateDomainTagsReq struct {
 	token    string
-	DomainID string   `json:"domainID"`
+	DomainID string   `json:"domain_id"`
 	Tags     []string `json:"tags,omitempty"`
 }
 
@@ -907,10 +907,26 @@ func (req updateDomainTagsReq) validate() error {
 	return nil
 }
 
+type updateDomainStatusReq struct {
+	token    string
+	DomainID string `json:"domain_id"`
+}
+
+func (req updateDomainStatusReq) validate() error {
+	if req.token == "" {
+		return errAuthorization
+	}
+	if req.DomainID == "" {
+		return errMalformedEntity
+	}
+
+	return nil
+}
+
 type assignMemberReq struct {
 	token    string
-	DomainID string `json:"domainID"`
-	UserID   string `json:"userID"`
+	DomainID string `json:"domain_id"`
+	UserID   string `json:"user_id"`
 	Relation string `json:"relation"`
 }
 
@@ -932,7 +948,7 @@ func (req assignMemberReq) validate() error {
 
 type viewMemberReq struct {
 	token        string
-	UserIdentity string `json:"userIdentity"`
+	UserIdentity string `json:"user_identity"`
 }
 
 func (req viewMemberReq) validate() error {
@@ -942,5 +958,87 @@ func (req viewMemberReq) validate() error {
 	if req.UserIdentity == "" {
 		return errMalformedEntity
 	}
+	return nil
+}
+
+type sendInvitationReq struct {
+	token    string
+	DomainID string `json:"domain_id"`
+	UserID   string `json:"user_id"`
+	Relation string `json:"relation"`
+}
+
+func (req sendInvitationReq) validate() error {
+	if req.token == "" {
+		return errAuthentication
+	}
+	if req.DomainID == "" {
+		return errMalformedEntity
+	}
+	if req.UserID == "" {
+		return errMalformedEntity
+	}
+	if req.Relation == "" {
+		return errMalformedEntity
+	}
+
+	return nil
+}
+
+type acceptInvitationReq struct {
+	token    string
+	DomainID string `json:"domain_id"`
+}
+
+func (req acceptInvitationReq) validate() error {
+	if req.token == "" {
+		return errAuthentication
+	}
+	if req.DomainID == "" {
+		return errMalformedEntity
+	}
+
+	return nil
+}
+
+type deleteInvitationReq struct {
+	token    string
+	domain   string
+	DomainID string `json:"domain_id"`
+	UserID   string `json:"user_id"`
+}
+
+func (req deleteInvitationReq) validate() error {
+	if req.token == "" {
+		return errAuthentication
+	}
+	if req.DomainID == "" {
+		return errMalformedEntity
+	}
+	if req.UserID == "" {
+		return errMalformedEntity
+	}
+
+	return nil
+}
+
+type listInvitationsReq struct {
+	token    string
+	DomainID string `json:"domain_id"`
+	page     uint64
+	limit    uint64
+}
+
+func (req listInvitationsReq) validate() error {
+	if req.token == "" {
+		return errAuthentication
+	}
+	if req.page == 0 {
+		return errMalformedEntity
+	}
+	if req.limit == 0 {
+		return errMalformedEntity
+	}
+
 	return nil
 }

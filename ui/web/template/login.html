@@ -90,12 +90,12 @@ SPDX-License-Identifier: Apache-2.0 -->
               <div class="modal-body">
                 <form method="post" action="/reset-request" class="reset-pw-form">
                   <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
+                    <label for="reset-email" class="form-label">Email</label>
                     <input
                       type="email"
                       class="form-control"
                       name="email"
-                      id="email"
+                      id="reset-email"
                       placeholder="Email"
                       required
                     />
@@ -122,10 +122,10 @@ SPDX-License-Identifier: Apache-2.0 -->
           },
           errorDivs: {
             email: "emailError",
-            Password: "passwordError",
+            password: "passwordError",
           },
           fields: {
-            Email: "email-field",
+            email: "email-field",
             password: "password-field",
           },
         });
@@ -143,14 +143,23 @@ SPDX-License-Identifier: Apache-2.0 -->
             body: new FormData(form),
           })
             .then((response) => {
-              if (response.status === 401) {
-                passwordField.classList.add("border-red");
-                emailField.classList.add("border-red");
-                errorMessage = "invalid email or password. Please try again!";
-                showAlert(errorMessage);
-              } else {
-                form.reset();
-                window.location.href = "/domains";
+              switch (response.status) {
+                case 401:
+                  passwordField.classList.add("border-red");
+                  emailField.classList.add("border-red");
+                  errorMessage = "invalid email or password. Please try again!";
+                  showAlert(errorMessage);
+                  break;
+                default:
+                  form.reset();
+                  response.json().then((data) => {
+                    localStorage.setItem("userName", data.name);
+                    localStorage.setItem("userIdentity", data.credentials.identity);
+                    localStorage.setItem("userRole", data.role);
+                    localStorage.setItem("userID", data.id);
+                  });
+                  localStorage.setItem("loginStatus", "general");
+                  window.location.href = "/domains";
               }
             })
             .catch((error) => {
