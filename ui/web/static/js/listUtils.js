@@ -30,7 +30,7 @@ function generateColor() {
 
 function deleteItem(event) {
   const target = event.target;
-  if (target.className === "highlight-list-item") {
+  if (target.classList.contains("highlight-list-item")) {
     target.remove();
   }
 }
