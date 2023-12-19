@@ -1395,6 +1395,11 @@ func (us *uiService) ViewGroup(token, groupID string) (b []byte, err error) {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
+	parent, err := us.sdk.Group(group.ParentID, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
 	permissions, err := us.sdk.GroupPermissions(groupID, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
@@ -1410,6 +1415,7 @@ func (us *uiService) ViewGroup(token, groupID string) (b []byte, err error) {
 		CollapseActive string
 		ID             string
 		Group          sdk.Group
+		Parent         string
 		Permissions    []string
 		Breadcrumb     breadcrumb
 	}{
@@ -1417,6 +1423,7 @@ func (us *uiService) ViewGroup(token, groupID string) (b []byte, err error) {
 		groupsActive,
 		groupID,
 		group,
+		parent.Name,
 		permissions.Permissions,
 		crumb,
 	}
