@@ -151,7 +151,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                   showAlert(errorMessage);
                   break;
                 default:
-                  form.reset();
                   response.json().then((data) => {
                     localStorage.setItem("userName", data.name);
                     localStorage.setItem("userIdentity", data.credentials.identity);
