@@ -1665,9 +1665,34 @@ func disableDomainEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
+		cookies := []*http.Cookie{
+			{
+				Name:     accessTokenKey,
+				Value:    "",
+				Path:     "/",
+				MaxAge:   -1,
+				HttpOnly: true,
+			},
+			{
+				Name:     refreshTokenKey,
+				Value:    "",
+				Path:     tokenRefreshAPIEndpoint,
+				MaxAge:   -1,
+				HttpOnly: true,
+			},
+			{
+				Name:     refreshTokenKey,
+				Value:    "",
+				Path:     domainsAPIEndpoint,
+				MaxAge:   -1,
+				HttpOnly: true,
+			},
+		}
+
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": domainsAPIEndpoint},
+			cookies: cookies,
+			headers: map[string]string{"Location": loginAPIEndpoint},
 		}, nil
 	}
 }
