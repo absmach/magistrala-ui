@@ -275,6 +275,19 @@ func (lm *loggingMiddleware) UpdateUserOwner(token, id string, user sdk.User) (e
 	return lm.svc.UpdateUserOwner(token, id, user)
 }
 
+// UpdateUserRole adds logging middleware to update user role method.
+func (lm *loggingMiddleware) UpdateUserRole(token string, user sdk.User) (err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method update_user_role for user %s took %s to complete", user.ID, time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.UpdateUserRole(token, user)
+}
+
 // EnableUser adds logging middleware to enable user method.
 func (lm *loggingMiddleware) EnableUser(token, id string) (err error) {
 	defer func(begin time.Time) {
