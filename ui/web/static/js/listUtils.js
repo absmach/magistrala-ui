@@ -13,20 +13,13 @@ function addItem(event, inputId, listId) {
     if (itemInput && itemList && itemInput.value.trim() !== "") {
       const newItem = document.createElement("div");
       newItem.textContent = itemInput.value;
-      newItem.className = "mb-2 highlight-list-item";
-      newItem.style.backgroundColor = generateColor();
+      newItem.className = "mb-2 buttons highlight-list-item";
       itemList.appendChild(newItem);
       itemInput.value = "";
     }
   }
 }
 
-function generateColor() {
-  const colors = ["#FF7F50", "#FFD700", "#32CD32", "#87CEEB", "#FF69B4"];
-  const color = colors[colorIndex % colors.length];
-  colorIndex++;
-  return color;
-}
 
 function deleteItem(event) {
   const target = event.target;
