@@ -376,7 +376,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   name="tags"
                   id="domain-tags"
                   aria-describedby="tagHelp"
-                  onkeydown="addItem(event, 'tags', 'tagsList')"
+                  onkeydown="addItem(event, 'domain-tags', 'tagsList')"
                   placeholder="Add a tag"
                 />
                 <div id="tagHelp" class="form-text">Enter Domain tags as a string slice.</div>
@@ -396,7 +396,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" id="create-domain-button" class="btn body-button" onclick="submitItemList('tags', 'tagsList')">Create</button>
+            <button type="submit" id="create-domain-button" class="btn body-button" onclick="submitItemList('domain-tags', 'tagsList')">Create</button>
           </div>
         </form>
       </div>
