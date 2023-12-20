@@ -35,7 +35,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     <tbody>
                       <tr>
                         <th>Name</th>
-                        <td class="editable" contenteditable="false" data-field="name">
+                        <td class="editable name-field" contenteditable="false" data-field="name">
                           {{ .Bootstrap.Name }}
                         </td>
                         <td>
@@ -50,7 +50,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                       <tr>
                         <th>Content</th>
-                        <td class="editable" contenteditable="false" data-field="content">
+                        <td
+                          class="editable content-field"
+                          contenteditable="false"
+                          data-field="content"
+                        >
                           {{ .Bootstrap.Content }}
                         </td>
                         <td>
@@ -65,7 +69,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                       <tr>
                         <th>Channels</th>
-                        <td class="editable" contenteditable="false" data-field="channels">
+                        <td
+                          class="editable channels-field"
+                          contenteditable="false"
+                          data-field="channels"
+                        >
                           {{ toSlice .Bootstrap.Channels }}
                         </td>
                         <td>
@@ -80,7 +88,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                       <tr>
                         <th>Client Cert</th>
-                        <td class="editable" contenteditable="false" data-field="clientCert">
+                        <td
+                          class="editable clientCert-field"
+                          contenteditable="false"
+                          data-field="clientCert"
+                        >
                           {{ .Bootstrap.ClientCert }}
                         </td>
                         <td>
@@ -95,7 +107,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                       <tr>
                         <th>Client Key</th>
-                        <td class="editable" contenteditable="false" data-field="clientKey">
+                        <td
+                          class="editable clientKey-field"
+                          contenteditable="false"
+                          data-field="clientKey"
+                        >
                           {{ .Bootstrap.ClientKey }}
                         </td>
                         <td>
@@ -110,7 +126,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                       <tr>
                         <th>CA Cert</th>
-                        <td class="editable" contenteditable="false" data-field="CACert">
+                        <td
+                          class="editable CACert-field"
+                          contenteditable="false"
+                          data-field="CACert"
+                        >
                           {{ .Bootstrap.CACert }}
                         </td>
                         <td>
@@ -144,6 +164,15 @@ SPDX-License-Identifier: Apache-2.0 -->
           clientCert:updateClientCerts,
           clientKey:updateClientCerts,
           CACert:updateClientCerts,
+        },
+        errorDiv: "error-message",
+        fields: {
+          name: "name-field",
+          content: "content-field",
+          channels: "channels-field",
+          clientCert: "clientCert-field",
+          clientKey: "clientKey-field",
+          CACert: "CACert-field",
         }
       });
     </script>

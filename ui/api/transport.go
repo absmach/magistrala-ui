@@ -50,7 +50,7 @@ const (
 	thingsAPIEndpoint       = "/things"
 	channelsAPIEndpoint     = "/channels"
 	groupsAPIEndpoint       = "/groups"
-	bootstrapAPIEndpoint    = "/bootstrap"
+	bootstrapAPIEndpoint    = "/bootstraps"
 	membersAPIEndpoint      = "/domains/members"
 	loginAPIEndpoint        = "/login"
 	tokenRefreshAPIEndpoint = "/token/refresh"
