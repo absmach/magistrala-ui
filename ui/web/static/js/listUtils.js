@@ -13,7 +13,7 @@ function addItem(event, inputId, listId) {
     if (itemInput && itemList && itemInput.value.trim() !== "") {
       const newItem = document.createElement("div");
       newItem.textContent = itemInput.value;
-      newItem.className = "mb-2 buttons highlight-list-item";
+      newItem.className = "mb-2 btn btn-primary highlight-list-item";
       itemList.appendChild(newItem);
       itemInput.value = "";
     }
