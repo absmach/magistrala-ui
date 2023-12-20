@@ -574,7 +574,7 @@ func (req updateGroupReq) validate() error {
 	if req.id == "" {
 		return errMissingGroupID
 	}
-	if req.Name == "" && req.Description == "" && req.ParentID == "" && req.Metadata == nil {
+	if req.Name == "" && req.Description == "" && req.Metadata == nil {
 		return errMissingValue
 	}
 	if len(req.Name) > maxNameSize {

@@ -134,6 +134,7 @@ function updateContent(config) {
       url: url,
       data: data,
       alertDiv: config.alertDiv,
+      field: config.field,
     });
   });
 }
