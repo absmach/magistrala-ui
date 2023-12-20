@@ -6,12 +6,12 @@ SPDX-License-Identifier: Apache-2.0 */
 
 
 :root {
-	--main-color: #003366;
-	--color-dark: #1d2231;
-	--text-grey: #8390a2;
-	--sidebar-max: 15rem;
-	--sidebar-min: 7rem;
-	--border-radius: 5px;
+  --main-color: #003366;
+  --color-dark: #1d2231;
+  --text-grey: #8390a2;
+  --sidebar-max: 15rem;
+  --sidebar-min: 7rem;
+  --border-radius: 5px;
 
 	/* pills */
 	--pill-color-1: #1d2231;
@@ -45,7 +45,7 @@ SPDX-License-Identifier: Apache-2.0 */
 }
 
 .sidebar a {
-	text-decoration: none;
+  text-decoration: none;
 }
 
 .sidebar-brand .logo {
@@ -54,8 +54,8 @@ SPDX-License-Identifier: Apache-2.0 */
 }
 
 .sidebar-brand {
-	margin-bottom: 1rem;
-	color: #fff;
+  margin-bottom: 1rem;
+  color: #fff;
 }
 
 .sidebar-brand h1 {
@@ -63,28 +63,28 @@ SPDX-License-Identifier: Apache-2.0 */
 }
 
 .sidebar .nav-item .nav-link i {
-	margin-right: 1.2rem;
-	width: 0.5rem;
+  margin-right: 1.2rem;
+  width: 0.5rem;
 }
 
 .sidebar a.sidebar-link {
-	color: #fff;
-	opacity: 0.8;
-	padding-left: 1rem;
-	font-size: 1.1rem;
+  color: #fff;
+  opacity: 0.8;
+  padding-left: 1rem;
+  font-size: 1.1rem;
 }
 
 .sidebar a.sidebar-link.active {
-	color: #fff;
-	opacity: 1;
+  color: #fff;
+  opacity: 1;
 }
 
 .sidebar .sidebar-heading {
-	text-align: left;
-	padding: 0 1rem;
-	font-weight: 800;
-	font-size: 0.65rem;
-	color: #b7b9cc;
+  text-align: left;
+  padding: 0 1rem;
+  font-weight: 800;
+  font-size: 0.65rem;
+  color: #b7b9cc;
 }
 
 body {
@@ -92,14 +92,14 @@ body {
 }
 
 .sidebar a.nav-link.active {
-	font-weight: bold;
+  font-weight: bold;
 }
 
 .sidebar .nav-item .collapse-list {
-	background: #f0f0f0;
-	color: var(--main-color);
-	padding: 0.5em 0.5em 0.5em 1em;
-	border-radius: var(--border-radius);
+  background: #f0f0f0;
+  color: var(--main-color);
+  padding: 0.5em 0.5em 0.5em 1em;
+  border-radius: var(--border-radius);
 }
 
 .topbar {
@@ -135,8 +135,8 @@ body.sidebar-toggled {
 }
 
 .sidebar.toggled {
-	width: var(--sidebar-min);
-	overflow-y: auto;
+  width: var(--sidebar-min);
+  overflow-y: auto;
 }
 
 .sidebar.toggled .nav-item:last-child {
@@ -144,8 +144,8 @@ body.sidebar-toggled {
 }
 
 .sidebar.toggled .nav-item .nav-link {
-	text-align: center;
-	padding: 0.75rem 1rem;
+  text-align: center;
+  padding: 0.75rem 1rem;
 }
 
 .sidebar.toggled .nav-item .nav-link span {
@@ -167,15 +167,15 @@ body.sidebar-toggled {
 }
 
 .sidebar.toggled .collapse-list {
-	padding-left: 0;
+  padding-left: 0;
 }
 
 .sidebar.toggled .collapse-list .nav-item {
-	text-align: center;
+  text-align: center;
 }
 
 .sidebar.toggled .collapse-list .nav-item .nav-link {
-	padding: 0;
+  padding: 0;
 }
 
 .sidebar #sidebarToggle {
@@ -431,12 +431,12 @@ body .body-button:hover {
 }
 
 .disabled-item {
-	pointer-events: none;
-	opacity: 0.3;
+  pointer-events: none;
+  opacity: 0.3;
 }
 
 .display-none {
-	display: none !important;
+  display: none !important;
 }
 
 /* edit, save and cancel buttons */
@@ -493,7 +493,7 @@ button.edit-btn {
 }
 
 .border-red {
-	border: 1px solid #eb2f2f !important;
+  border: 1px solid #eb2f2f !important;
 }
 
 .error-header {
@@ -517,22 +517,21 @@ button.edit-btn {
   position: relative;
 }
 
-
 .domains-body {
-	background-color: #d5d8dd;
+  background-color: #d5d8dd;
 }
 
 .domains-card {
-	border-radius: 1rem;
+  border-radius: 1rem;
 }
 
 .domains-card h1 {
-	color: var(--main-color);
-	font-family: "Montserrat";
+  color: var(--main-color);
+  font-family: "Montserrat";
 }
 
 .domains-table h2 {
-	color: var(--main-color);
+  color: var(--main-color);
 }
 
 .domains-table .body-button {
@@ -544,10 +543,10 @@ button.edit-btn {
 }
 
 .domains-table .body-button:hover {
-	color: #fff;
-	background: var(--main-color);
-	transform: scale(1.03);
-	font-weight: 700;
+  color: #fff;
+  background: var(--main-color);
+  transform: scale(1.03);
+  font-weight: 700;
 }
 
 .org-col {
@@ -566,15 +565,15 @@ button.edit-btn {
 }
 
 .breadcrumb-item a {
-	color: var(--main-color);
+  color: var(--main-color);
 }
 
 .invited-pill {
-	background: var(--pill-color-1);
+  background: var(--pill-color-1);
 }
 
 .domain-pill {
-	background: var(--pill-color-2);
+  background: var(--pill-color-2);
 }
 
 .relation-pill {
