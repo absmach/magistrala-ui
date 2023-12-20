@@ -57,7 +57,11 @@ export function submitUpdateForm(config) {
         case 400:
           const errorMessage = response.headers.get("X-Error-Message");
           if (errorMessage) {
-            showAlert(errorMessage, config.alertDiv);
+            if (config.field) {
+              showAlert(errorMessage + ": " + config.field, config.alertDiv);
+            } else {
+              showAlert(errorMessage, config.alertDiv);
+            }
           } else {
             showAlert("Bad Request", config.alertDiv);
           }

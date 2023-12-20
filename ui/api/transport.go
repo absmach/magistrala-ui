@@ -2345,7 +2345,8 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		errMissingDescription,
 		errMissingThingKey,
 		errMissingExternalID,
-		errMissingAlias,
+		errMissingRole,
+		errMissingValue,
 		errMissingExternalKey:
 		w.Header().Set("X-Error-Message", err.Error())
 		w.WriteHeader(http.StatusBadRequest)

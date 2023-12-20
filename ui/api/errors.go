@@ -43,5 +43,6 @@ var (
 	errFileFormat             = errors.New("invalid file format")
 	errInvalidFile            = errors.New("unsupported file type")
 	errMissingDomainID        = errors.New("missing domain id")
-	errMissingAlias           = errors.New("missing alias")
+	errMissingRole            = errors.New("missing role")
+	errMissingValue		   = errors.New("missing value")
 )

@@ -25,6 +25,7 @@ function updateName(config) {
         url: url,
         data: data,
         alertDiv: config.alertDiv,
+        field: config.field,
       });
     }
   });
@@ -61,6 +62,7 @@ function updateMetadata(config) {
         url: url,
         data: data,
         alertDiv: config.alertDiv,
+        field: config.field,
       });
     }
   });
@@ -114,6 +116,7 @@ function updateDescription(config) {
       url: url,
       data: data,
       alertDiv: config.alertDiv,
+      field: config.field,
     });
   });
 }

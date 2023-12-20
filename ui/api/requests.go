@@ -165,11 +165,8 @@ func (req updateUserReq) validate() error {
 	if req.id == "" {
 		return errMissingUserID
 	}
-	if req.Metadata == nil {
-		return errMissingMetadata
-	}
-	if req.Name == "" {
-		return errMissingName
+	if req.Name == "" && req.Metadata == nil {
+		return errMissingValue
 	}
 	return nil
 }
@@ -237,10 +234,10 @@ func (req updateUserRoleReq) validate() error {
 		return errAuthorization
 	}
 	if req.UserID == "" {
-		return errMalformedEntity
+		return errMissingUserID
 	}
 	if req.Role == "" {
-		return errMalformedEntity
+		return errMissingRole
 	}
 
 	return nil
@@ -338,11 +335,8 @@ func (req updateThingReq) validate() error {
 	if req.id == "" {
 		return errMissingThingID
 	}
-	if req.Metadata == nil {
-		return errMissingMetadata
-	}
-	if req.Name == "" {
-		return errMissingName
+	if req.Name == "" && req.Metadata == nil {
+		return errMissingValue
 	}
 	if len(req.Name) > maxNameSize {
 		return errNameSize
@@ -460,14 +454,8 @@ func (req updateChannelReq) validate() error {
 	if req.id == "" {
 		return errMissingChannelID
 	}
-	if req.Name == "" {
-		return errMissingName
-	}
-	if req.Metadata == nil {
-		return errMissingMetadata
-	}
-	if req.Description == "" {
-		return errMissingDescription
+	if req.Name == "" && req.Description == "" && req.Metadata == nil {
+		return errMissingValue
 	}
 	if len(req.Name) > maxNameSize {
 		return errNameSize
@@ -586,17 +574,8 @@ func (req updateGroupReq) validate() error {
 	if req.id == "" {
 		return errMissingGroupID
 	}
-	if req.Name == "" {
-		return errMissingName
-	}
-	if req.Description == "" {
-		return errMissingDescription
-	}
-	if req.ParentID == "" {
-		return errMissingParentID
-	}
-	if req.Metadata == nil {
-		return errMissingMetadata
+	if req.Name == "" && req.Description == "" && req.ParentID == "" && req.Metadata == nil {
+		return errMissingValue
 	}
 	if len(req.Name) > maxNameSize {
 		return errNameSize
@@ -913,14 +892,8 @@ func (req updateDomainReq) validate() error {
 	if req.DomainID == "" {
 		return errMissingDomainID
 	}
-	if req.Name == "" && req.Metadata == nil {
-		return errMissingName
-	}
-	if req.Alias == "" {
-		return errMissingAlias
-	}
-	if req.Metadata == nil {
-		return errMissingMetadata
+	if req.Name == "" && req.Alias == "" && req.Metadata == nil {
+		return errMissingValue
 	}
 	return nil
 }
