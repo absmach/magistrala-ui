@@ -20,7 +20,6 @@ function addItem(event, inputId, listId) {
   }
 }
 
-
 function deleteItem(event) {
   const target = event.target;
   if (target.classList.contains("highlight-list-item")) {
