@@ -54,29 +54,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                         </td>
                       </tr>
                       <tr>
-                        <th>Domain Metadata</th>
-                        <td
-                          class="editable metadata-field"
-                          contenteditable="false"
-                          data-field="metadata"
-                        >
-                          {{ toJSON .Domain.Metadata }}
-                        </td>
-                        <td>
-                          <button
-                            class="edit-btn"
-                            id="edit-metadata"
-                            {{ if not $editButton }}disabled{{ end }}
-                          >
-                            <i class="fas fa-pencil-alt"></i>
-                          </button>
-                          <div class="save-cancel-buttons" style="display: none">
-                            <button class="save-btn" id="save-metadata">Save</button>
-                            <button class="cancel-btn" id="cancel-metadata">Cancel</button>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr>
                         <th>Domain Tags</th>
                         <td class="editable tags-field" contenteditable="false" data-field="tags">
                           {{ toSlice .Domain.Tags }}
@@ -113,6 +90,25 @@ SPDX-License-Identifier: Apache-2.0 -->
                             <button class="save-btn" id="save-alias">Save</button>
                             <button class="cancel-btn" id="cancel-alias">Cancel</button>
                           </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Domain Metadata</th>
+                        <td>
+                          <div>
+                            <pre id="meta-data"></pre>
+                          </div>
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            class="edit-btn"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editMetadataModal"
+                            {{ if not $editButton }}disabled{{ end }}
+                          >
+                            <i class="fas fa-pencil-alt"></i>
+                          </button>
                         </td>
                       </tr>
                       <tr>
@@ -185,6 +181,21 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </div>
       </div>
+      <script>
+        var metadata = "{{ toJSON .Domain.Metadata }}";
+        var parsedMetadata = JSON.parse(metadata);
+
+        attachFormatJsonWithPrettifyListener({
+          id: "meta-data",
+          metadata: metadata,
+        });
+
+        codeMirrorEditor({
+          textArea: "metadataTextArea",
+          button: "save-metadata",
+          value: parsedMetadata,
+        });
+      </script>      
       <script type="module">
         import { attachEditRowListener, updateName, updateMetadata, updateTags, updateDescription } from "/js/update.js";
 
@@ -194,7 +205,6 @@ SPDX-License-Identifier: Apache-2.0 -->
             id: "{{ .Domain.ID }}",
             rows: {
               name:updateName,
-              metadata:updateMetadata,
               tags:updateTags,
               alias:updateDescription,
             },
@@ -203,10 +213,19 @@ SPDX-License-Identifier: Apache-2.0 -->
               name: "name-field",
               alias: "alias-field",
               tags: "tags-field",
-              metadata: "metadata-field",
             },
           }
-        )
+        );
+
+        updateMetadata({
+      textArea: "metadataTextArea",
+      field:"metadata",
+      alertDiv: "metadataError",
+      fieldName: "metadata-field",
+      id: "{{ .Domain.ID }}",
+      entity: "domains",
+      button: "save-metadata",
+    });
       </script>
     </body>
   </html>

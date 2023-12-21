@@ -224,12 +224,11 @@ body.sidebar-toggled .main-content {
 	margin-left: 0.25rem;
 }
 
-.main-content .body-button {
+body .body-button {
 	background: var(--main-color);
 	border-radius: var(--border-radius);
 	color: #fff;
 	font-size: 1rem;
-	padding: 0.5rem 1rem;
 	border: 1px solid var(--main-color);
 	margin-bottom: 0.5rem;
 }
@@ -241,7 +240,7 @@ body.sidebar-toggled .main-content {
 }
 
 .main-content .sendMessage-button:hover,
-.main-content .body-button:hover {
+body .body-button:hover {
 	color: #fff;
 	background: var(--main-color);
 	transform: scale(1.03);
@@ -541,7 +540,6 @@ button.edit-btn {
 	border-radius: var(--border-radius);
 	color: #fff;
 	font-size: 1rem;
-	padding: 0.5rem 1rem;
 	border: 1px solid var(--main-color);
 }
 

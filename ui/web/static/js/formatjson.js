@@ -45,7 +45,5 @@ function codeMirrorEditor(config) {
   editor.setSize("100%", 200);
   document.getElementById(config.button).addEventListener("click", function () {
     document.getElementById(config.textArea).value = editor.getValue();
-    console.log(document.getElementById(config.textArea));
-    console.log(document.getElementById(config.textArea).value);
   });
 }
