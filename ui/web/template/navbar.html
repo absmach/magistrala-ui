@@ -331,6 +331,8 @@ SPDX-License-Identifier: Apache-2.0 -->
     </div>
   </nav>
 
+  {{ template "metadatamodal" }}
+
   <!-- Modal -->
   <div
     class="modal fade"
@@ -378,27 +380,23 @@ SPDX-License-Identifier: Apache-2.0 -->
                   value="[]"
                 />
                 <div id="tagHelp" class="form-text">Enter Domain tags as a string slice.</div>
-                <div id="tagsError" class="error-message text-danger"></div>
+                <div id="domainTagsError" class="error-message text-danger"></div>
               </div>
             </div>
             <div class="row mb-3">
               <div class="col-md-12">
                 <label for="domain-metadata" class="form-label">Metadata</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  name="metadata"
-                  id="domain-metadata"
-                  value="{}"
-                />
+                <div class="metadata-field">
+                  <textarea name="metadata" id="domain-metadata"></textarea>
+                </div>
                 <div id="metadataHelp" class="form-text">Enter Domain metadata in JSON format.</div>
-                <div id="metadataError" class="error-message text-danger"></div>
+                <div id="domainMetadataError" class="error-message text-danger"></div>
               </div>
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-outline-dark">Create</button>
+            <button type="submit" id="create-domain-button" class="btn body-button">Create</button>
           </div>
         </form>
       </div>
@@ -466,5 +464,11 @@ SPDX-License-Identifier: Apache-2.0 -->
         }
       });
     }
+
+    codeMirrorEditor({
+      textArea: "domain-metadata",
+      button: "create-domain-button",
+      value: {},
+    });
   </script>
 {{ end }}

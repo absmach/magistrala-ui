@@ -50,9 +50,9 @@ function updateIdentity(config) {
 
 function updateMetadata(config) {
   const button = document.getElementById(config.button);
-
   button.addEventListener("click", function (event) {
-    const updatedValue = config.cell.textContent.trim();
+    event.preventDefault();
+    const updatedValue = document.getElementById(config.textArea).value;
     if (validateJSON(updatedValue, config.alertDiv, config.fieldName, event)) {
       const url = `/${config.entity}/${config.id}`;
       const data = { [config.field]: JSON.parse(updatedValue) };
