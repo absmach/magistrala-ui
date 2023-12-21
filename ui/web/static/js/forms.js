@@ -42,7 +42,7 @@ export function submitUpdateForm(config) {
     },
   })
     .then((response) => {
-      if (!response.ok ) {
+      if (!response.ok) {
         const errorMessage = response.headers.get("X-Error-Message");
         if (errorMessage) {
           if (config.field) {

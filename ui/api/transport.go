@@ -2282,13 +2282,14 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	case errors.Contains(err, ui.ErrToken):
 		w.WriteHeader(http.StatusUnauthorized)
 	case errors.Contains(err, errConflict):
+		w.Header().Set("X-Error-Message", err.Error())
 		w.WriteHeader(http.StatusConflict)
 	case errors.Contains(err, errInvalidFile):
-        w.Header().Set("X-Error-Message", err.Error())
-        w.WriteHeader(http.StatusUnsupportedMediaType)
-    case errors.Contains(err, errFileFormat):
-        w.Header().Set("X-Error-Message", err.Error())
-        w.WriteHeader(http.StatusBadRequest)
+		w.Header().Set("X-Error-Message", err.Error())
+		w.WriteHeader(http.StatusUnsupportedMediaType)
+	case errors.Contains(err, errFileFormat):
+		w.Header().Set("X-Error-Message", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
 	case errors.Contains(err, ui.ErrFailedCreate),
 		errors.Contains(err, ui.ErrFailedRetreive),
 		errors.Contains(err, ui.ErrFailedUpdate),
