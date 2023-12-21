@@ -13,20 +13,17 @@ export function submitCreateForm(config) {
       body: formData,
     })
       .then(function (response) {
-        switch (response.status) {
-          case 409:
-            showAlert("entity already exists!", config.alertDiv);
-            break;
-          case 400:
-            showAlert("invalid file contents!", config.alertDiv);
-            break;
-          case 415:
-            showAlert("invalid file type!", config.alertDiv);
-            break;
-          default:
-            form.reset();
-            config.modal.hide();
-            window.location.reload();
+        if (!response.ok) {
+          const errorMessage = response.headers.get("X-Error-Message");
+          if (errorMessage) {
+            showAlert(errorMessage, config.alertDiv);
+          } else {
+            showAlert(`Error: ${response.status}`, config.alertDiv);
+          }
+        } else {
+          form.reset();
+          config.modal.hide();
+          window.location.reload();
         }
       })
       .catch((error) => {
@@ -45,12 +42,19 @@ export function submitUpdateForm(config) {
     },
   })
     .then((response) => {
-      switch (response.status) {
-        case 409:
-          showAlert("entity already exists!", config.alertDiv);
-          break;
-        default:
-          window.location.reload();
+      if (!response.ok) {
+        const errorMessage = response.headers.get("X-Error-Message");
+        if (errorMessage) {
+          if (config.field) {
+            showAlert(errorMessage + ": " + config.field, config.alertDiv);
+          } else {
+            showAlert(errorMessage, config.alertDiv);
+          }
+        } else {
+          showAlert(`Error: ${response.status}`, config.alertDiv);
+        }
+      } else {
+        window.location.reload();
       }
     })
     .catch((error) => {

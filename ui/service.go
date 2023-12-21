@@ -22,8 +22,8 @@ import (
 	"github.com/absmach/magistrala/pkg/messaging"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/absmach/magistrala/pkg/transformers/senml"
+	mgsenml "github.com/absmach/senml"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	mfsenml "github.com/mainflux/senml"
 	"golang.org/x/exp/slices"
 )
 
@@ -1844,7 +1844,7 @@ func (us *uiService) ProcessTerminalCommand(ctx context.Context, id, tkn, comman
 		return token.Error()
 	}
 
-	req := []mfsenml.Record{
+	req := []mgsenml.Record{
 		{BaseName: "1", Name: "exec", StringValue: &command},
 	}
 	reqByte, err1 := json.Marshal(req)
@@ -1864,7 +1864,7 @@ func (us *uiService) ProcessTerminalCommand(ctx context.Context, id, tkn, comman
 	errChan := make(chan error)
 
 	client.Subscribe(subTopic, 0, func(_ mqtt.Client, m mqtt.Message) {
-		var data []mfsenml.Record
+		var data []mgsenml.Record
 		if err := json.Unmarshal(m.Payload(), &data); err != nil {
 			errChan <- err
 		}

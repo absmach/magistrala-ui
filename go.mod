@@ -5,13 +5,13 @@ go 1.21.0
 require (
 	github.com/absmach/agent v0.0.0-20231107115142-c8b509f24d50
 	github.com/absmach/magistrala v0.11.1-0.20231217131421-48e971180bb4
+	github.com/absmach/senml v1.0.5
 	github.com/caarlos0/env/v9 v9.0.0
 	github.com/eclipse/paho.mqtt.golang v1.4.3
 	github.com/go-chi/chi/v5 v5.0.10
 	github.com/go-kit/kit v0.13.0
 	github.com/go-zoo/bone v1.3.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
-	github.com/mainflux/senml v1.5.0
 	github.com/prometheus/client_golang v1.17.0
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
 	golang.org/x/sync v0.5.0
@@ -32,6 +32,7 @@ require (
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/mainflux/export v0.1.1-0.20230724124847-67d0bc7f38cb // indirect
 	github.com/mainflux/mainflux v0.12.0 // indirect
+	github.com/mainflux/senml v1.5.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect

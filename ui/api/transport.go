@@ -63,16 +63,9 @@ const (
 )
 
 var (
-	errAuthorization      = errors.New("missing or invalid credentials provided")
-	errAuthentication     = errors.New("failed to perform authentication over the entity")
-	errMalformedEntity    = errors.New("malformed entity specification")
-	errConflict           = errors.New("entity already exists")
-	errInvalidQueryParams = errors.New("invalid query parameters")
-	errFileFormat         = errors.New("invalid file format")
-	errInvalidFile        = errors.New("unsupported file type")
-	clientsHeaderLen      = 5
-	groupsHeaderLen       = 3
-	minRows               = 2
+	clientsHeaderLen = 5
+	groupsHeaderLen  = 3
+	minRows          = 2
 )
 
 type number interface {
@@ -2289,9 +2282,15 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	case errors.Contains(err, ui.ErrToken):
 		w.WriteHeader(http.StatusUnauthorized)
 	case errors.Contains(err, errConflict):
+		w.Header().Set("X-Error-Message", err.Error())
 		w.WriteHeader(http.StatusConflict)
-	case errors.Contains(err, errMalformedEntity),
-		errors.Contains(err, ui.ErrFailedCreate),
+	case errors.Contains(err, errInvalidFile):
+		w.Header().Set("X-Error-Message", err.Error())
+		w.WriteHeader(http.StatusUnsupportedMediaType)
+	case errors.Contains(err, errFileFormat):
+		w.Header().Set("X-Error-Message", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+	case errors.Contains(err, ui.ErrFailedCreate),
 		errors.Contains(err, ui.ErrFailedRetreive),
 		errors.Contains(err, ui.ErrFailedUpdate),
 		errors.Contains(err, ui.ErrFailedEnable),
@@ -2312,11 +2311,6 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		errors.Contains(err, ui.ErrFailedUnshare):
 		w.Header().Set("Location", "/error?error="+url.QueryEscape(displayError.Error()))
 		w.WriteHeader(http.StatusSeeOther)
-	case errors.Contains(err, errInvalidFile):
-		w.WriteHeader(http.StatusUnsupportedMediaType)
-	case errors.Contains(err, errFileFormat):
-		w.WriteHeader(http.StatusBadRequest)
-
 	default:
 		if e, ok := status.FromError(err); ok {
 			switch e.Code() {
@@ -2327,6 +2321,43 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 			}
 			return
 		}
-		w.WriteHeader(http.StatusInternalServerError)
+	}
+	switch err {
+	case errMissingSecret,
+		errMissingIdentity,
+		errLimitSize,
+		errPageSize,
+		errMissingConfigID,
+		errMissingMetadata,
+		errMissingEmail,
+		errMissingName,
+		errMissingChannel,
+		errMissingPayload,
+		errMissingPassword,
+		errMissingError,
+		errMissingRefreshToken,
+		errMissingRef,
+		errMissingConfirmPassword,
+		errNameSize,
+		errBearerKey,
+		errMissingOwner,
+		errMissingItem,
+		errMissingThingID,
+		errMissingChannelID,
+		errMissingDomainID,
+		errMissingUserID,
+		errMissingRelation,
+		errMissingGroupID,
+		errMissingParentID,
+		errMissingDescription,
+		errMissingThingKey,
+		errMissingExternalID,
+		errMissingRole,
+		errMissingValue,
+		errMissingExternalKey:
+		w.Header().Set("X-Error-Message", err.Error())
+		w.WriteHeader(http.StatusBadRequest)
+	default:
+		w.WriteHeader(http.StatusBadRequest)
 	}
 }

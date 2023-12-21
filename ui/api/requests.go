@@ -28,10 +28,10 @@ type tokenReq struct {
 
 func (req tokenReq) validate() error {
 	if req.Identity == "" {
-		return errMalformedEntity
+		return errMissingIdentity
 	}
 	if req.Secret == "" {
-		return errMalformedEntity
+		return errMissingSecret
 	}
 	return nil
 }
@@ -43,10 +43,10 @@ type refreshTokenReq struct {
 
 func (req refreshTokenReq) validate() error {
 	if req.refreshToken == "" {
-		return errMalformedEntity
+		return errMissingRefreshToken
 	}
 	if req.ref == "" {
-		return errMalformedEntity
+		return errMissingRef
 	}
 	return nil
 }
@@ -60,10 +60,12 @@ func (req createUserReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.User.Credentials.Secret == "" || req.User.Credentials.Identity == "" {
-		return errMalformedEntity
+	if req.User.Credentials.Secret == "" {
+		return errMissingSecret
 	}
-
+	if req.User.Credentials.Identity == "" {
+		return errMissingIdentity
+	}
 	return nil
 }
 
@@ -77,8 +79,11 @@ func (req createUsersReq) validate() error {
 		return errAuthorization
 	}
 	for _, user := range req.users {
-		if user.Credentials.Secret == "" || user.Credentials.Identity == "" {
-			return errMalformedEntity
+		if user.Credentials.Secret == "" {
+			return errMissingSecret
+		}
+		if user.Credentials.Identity == "" {
+			return errMissingIdentity
 		}
 	}
 
@@ -96,10 +101,10 @@ func (req listEntityReq) validate() error {
 		return errAuthorization
 	}
 	if req.page == 0 {
-		return errMalformedEntity
+		return errPageSize
 	}
 	if req.limit == 0 {
-		return errMalformedEntity
+		return errLimitSize
 	}
 	return nil
 }
@@ -118,13 +123,13 @@ func (req listEntityByIDReq) validate() error {
 		return errAuthorization
 	}
 	if req.id == "" {
-		return errMalformedEntity
+		return errMissingUserID
 	}
 	if req.page == 0 {
-		return errMalformedEntity
+		return errPageSize
 	}
 	if req.limit == 0 {
-		return errMalformedEntity
+		return errLimitSize
 	}
 	return nil
 }
@@ -140,7 +145,7 @@ func (req viewResourceReq) validate() error {
 	}
 
 	if req.id == "" {
-		return errMalformedEntity
+		return errMissingUserID
 	}
 
 	return nil
@@ -158,10 +163,10 @@ func (req updateUserReq) validate() error {
 		return errAuthorization
 	}
 	if req.id == "" {
-		return errMalformedEntity
+		return errMissingUserID
 	}
 	if req.Name == "" && req.Metadata == nil {
-		return errMalformedEntity
+		return errMissingValue
 	}
 	return nil
 }
@@ -177,7 +182,7 @@ func (req updateUserTagsReq) validate() error {
 		return errAuthorization
 	}
 	if req.id == "" {
-		return errMalformedEntity
+		return errMissingUserID
 	}
 	return nil
 }
@@ -193,10 +198,10 @@ func (req updateUserIdentityReq) validate() error {
 		return errAuthorization
 	}
 	if req.id == "" {
-		return errMalformedEntity
+		return errMissingUserID
 	}
 	if req.Identity == "" {
-		return errMalformedEntity
+		return errMissingIdentity
 	}
 
 	return nil
@@ -212,7 +217,7 @@ func (req updateUserStatusReq) validate() error {
 		return errAuthorization
 	}
 	if req.UserID == "" {
-		return errMalformedEntity
+		return errMissingUserID
 	}
 
 	return nil
@@ -229,10 +234,10 @@ func (req updateUserRoleReq) validate() error {
 		return errAuthorization
 	}
 	if req.UserID == "" {
-		return errMalformedEntity
+		return errMissingUserID
 	}
 	if req.Role == "" {
-		return errMalformedEntity
+		return errMissingRole
 	}
 
 	return nil
@@ -260,10 +265,10 @@ func (req updateUserPasswordReq) validate() error {
 		return errAuthorization
 	}
 	if req.OldPass == "" {
-		return errMalformedEntity
+		return errMissingSecret
 	}
 	if req.NewPass == "" {
-		return errMalformedEntity
+		return errMissingSecret
 	}
 	return nil
 }
@@ -274,7 +279,7 @@ type passwordResetRequestReq struct {
 
 func (req passwordResetRequestReq) validate() error {
 	if req.Email == "" {
-		return errMalformedEntity
+		return errMissingEmail
 	}
 	return nil
 }
@@ -290,13 +295,13 @@ func (req passwordResetReq) validate() error {
 		return errAuthorization
 	}
 	if req.Password == "" {
-		return errMalformedEntity
+		return errMissingPassword
 	}
 	if req.ConfirmPassword == "" {
-		return errMalformedEntity
+		return errMissingConfirmPassword
 	}
 	if req.Password != req.ConfirmPassword {
-		return errMalformedEntity
+		return errInvalidResetPassword
 	}
 	return nil
 }
@@ -311,9 +316,8 @@ func (req createThingReq) validate() error {
 		return errAuthorization
 	}
 	if req.Thing.Name == "" {
-		return errMalformedEntity
+		return errMissingName
 	}
-
 	return nil
 }
 
@@ -329,15 +333,14 @@ func (req updateThingReq) validate() error {
 		return errAuthorization
 	}
 	if req.id == "" {
-		return errMalformedEntity
+		return errMissingThingID
 	}
 	if req.Name == "" && req.Metadata == nil {
-		return errMalformedEntity
+		return errMissingValue
 	}
 	if len(req.Name) > maxNameSize {
-		return errMalformedEntity
+		return errNameSize
 	}
-
 	return nil
 }
 
@@ -352,7 +355,7 @@ func (req updateThingTagsReq) validate() error {
 		return errAuthorization
 	}
 	if req.id == "" {
-		return errMalformedEntity
+		return errMissingThingID
 	}
 	return nil
 }
@@ -368,12 +371,11 @@ func (req updateThingSecretReq) validate() error {
 		return errAuthorization
 	}
 	if req.id == "" {
-		return errMalformedEntity
+		return errMissingThingID
 	}
 	if req.Secret == "" {
-		return errMalformedEntity
+		return errBearerKey
 	}
-
 	return nil
 }
 
@@ -387,7 +389,7 @@ func (req updateThingStatusReq) validate() error {
 		return errAuthorization
 	}
 	if req.ThingID == "" {
-		return errMalformedEntity
+		return errMissingThingID
 	}
 
 	return nil
@@ -402,7 +404,6 @@ func (req createThingsReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-
 	return nil
 }
 
@@ -416,9 +417,8 @@ func (req createChannelReq) validate() error {
 		return errAuthorization
 	}
 	if req.Channel.Name == "" {
-		return errMalformedEntity
+		return errMissingName
 	}
-
 	return nil
 }
 
@@ -433,10 +433,9 @@ func (req createChannelsReq) validate() error {
 	}
 	for _, channel := range req.Channels {
 		if channel.Name == "" {
-			return errMalformedEntity
+			return errMissingName
 		}
 	}
-
 	return nil
 }
 
@@ -453,15 +452,14 @@ func (req updateChannelReq) validate() error {
 		return errAuthorization
 	}
 	if req.id == "" {
-		return errMalformedEntity
+		return errMissingChannelID
 	}
 	if req.Name == "" && req.Description == "" && req.Metadata == nil {
-		return errMalformedEntity
+		return errMissingValue
 	}
 	if len(req.Name) > maxNameSize {
-		return errMalformedEntity
+		return errNameSize
 	}
-
 	return nil
 }
 
@@ -477,13 +475,13 @@ func (req connectThingReq) validate() error {
 		return errAuthorization
 	}
 	if req.ChanID == "" {
-		return errMalformedEntity
+		return errMissingChannelID
 	}
 	if req.ThingID == "" {
-		return errMalformedEntity
+		return errMissingThingID
 	}
 	if req.Item == "" {
-		return errMalformedEntity
+		return errMissingItem
 	}
 	return nil
 }
@@ -500,13 +498,13 @@ func (req shareThingReq) validate() error {
 		return errAuthorization
 	}
 	if req.UserID == "" {
-		return errMalformedEntity
+		return errMissingUserID
 	}
 	if req.ThingID == "" {
-		return errMalformedEntity
+		return errMissingThingID
 	}
 	if req.Relation == "" {
-		return errMalformedEntity
+		return errMissingRelation
 	}
 	return nil
 }
@@ -521,9 +519,8 @@ func (req updateChannelStatusReq) validate() error {
 		return errAuthorization
 	}
 	if req.ChannelID == "" {
-		return errMalformedEntity
+		return errMissingChannelID
 	}
-
 	return nil
 }
 
@@ -537,7 +534,7 @@ func (req createGroupReq) validate() error {
 		return errAuthorization
 	}
 	if req.Group.Name == "" {
-		return errMalformedEntity
+		return errMissingName
 	}
 
 	return nil
@@ -554,7 +551,7 @@ func (req createGroupsReq) validate() error {
 	}
 	for _, group := range req.Groups {
 		if group.Name == "" {
-			return errMalformedEntity
+			return errMissingName
 		}
 	}
 
@@ -575,15 +572,14 @@ func (req updateGroupReq) validate() error {
 		return errAuthorization
 	}
 	if req.id == "" {
-		return errMalformedEntity
+		return errMissingGroupID
 	}
-	if req.Name == "" && req.Description == "" && req.ParentID == "" && req.Metadata == nil {
-		return errMalformedEntity
+	if req.Name == "" && req.Description == "" && req.Metadata == nil {
+		return errMissingValue
 	}
 	if len(req.Name) > maxNameSize {
-		return errMalformedEntity
+		return errNameSize
 	}
-
 	return nil
 }
 
@@ -600,15 +596,14 @@ func (req assignReq) validate() error {
 	}
 
 	if req.GroupID == "" {
-		return errMalformedEntity
+		return errMissingGroupID
 	}
 	if req.UserID == "" {
-		return errMalformedEntity
+		return errMissingUserID
 	}
 	if req.Relation == "" {
-		return errMalformedEntity
+		return errMissingRelation
 	}
-
 	return nil
 }
 
@@ -622,9 +617,8 @@ func (req updateGroupStatusReq) validate() error {
 		return errAuthorization
 	}
 	if req.GroupID == "" {
-		return errMalformedEntity
+		return errMissingGroupID
 	}
-
 	return nil
 }
 
@@ -640,13 +634,13 @@ func (req publishReq) validate() error {
 	}
 
 	if req.thingKey == "" {
-		return errMalformedEntity
+		return errMissingThingKey
 	}
 	if req.Msg.Channel == "" {
-		return errMalformedEntity
+		return errMissingChannel
 	}
 	if req.Msg.Payload == nil {
-		return errMalformedEntity
+		return errMissingPayload
 	}
 	return nil
 }
@@ -663,7 +657,12 @@ func (req readMessageReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-
+	if req.ChanID == "" {
+		return errMissingChannelID
+	}
+	if req.ThingKey == "" {
+		return errMissingThingKey
+	}
 	return nil
 }
 
@@ -677,11 +676,9 @@ func (req bootstrapCommandReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-
 	if req.id == "" {
-		return errMalformedEntity
+		return errMissingConfigID
 	}
-
 	return nil
 }
 
@@ -698,9 +695,8 @@ func (req updateBootstrapReq) validate() error {
 	}
 
 	if req.id == "" {
-		return errMalformedEntity
+		return errMissingConfigID
 	}
-
 	return nil
 }
 
@@ -716,11 +712,9 @@ func (req updateBootstrapCertReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-
 	if req.thingID == "" {
-		return errMalformedEntity
+		return errMissingThingID
 	}
-
 	return nil
 }
 
@@ -734,11 +728,9 @@ func (req updateBootstrapConnReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-
 	if req.id == "" {
-		return errMalformedEntity
+		return errMissingConfigID
 	}
-
 	return nil
 }
 
@@ -759,15 +751,12 @@ func (req createBootstrapReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-
 	if req.ExternalID == "" {
-		return errMalformedEntity
+		return errMissingExternalID
 	}
-
 	if req.ExternalKey == "" {
-		return errMalformedEntity
+		return errMissingExternalKey
 	}
-
 	return nil
 }
 
@@ -785,16 +774,14 @@ func (req getEntitiesReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-
 	if req.Page == 0 {
-		return errMalformedEntity
+		return errPageSize
 	}
 	if req.Item == "" {
-		return errMalformedEntity
+		return errMissingItem
 	}
-
 	if req.Limit == 0 {
-		return errMalformedEntity
+		return errLimitSize
 	}
 	return nil
 }
@@ -805,7 +792,7 @@ type errorReq struct {
 
 func (req errorReq) validate() error {
 	if req.err == "" {
-		return errMalformedEntity
+		return errMissingError
 	}
 	return nil
 }
@@ -822,13 +809,13 @@ func (req addUserToChannelReq) validate() error {
 		return errAuthorization
 	}
 	if req.ChannelID == "" {
-		return errMalformedEntity
+		return errMissingChannelID
 	}
 	if req.UserID == "" {
-		return errMalformedEntity
+		return errMissingUserID
 	}
 	if req.Relation == "" {
-		return errMalformedEntity
+		return errMissingRelation
 	}
 	return nil
 }
@@ -845,13 +832,13 @@ func (req addUserGroupToChannelReq) validate() error {
 		return errAuthorization
 	}
 	if req.ChannelID == "" {
-		return errMalformedEntity
+		return errMissingChannelID
 	}
 	if req.GroupID == "" {
-		return errMalformedEntity
+		return errMissingGroupID
 	}
 	if req.Item == "" {
-		return errMalformedEntity
+		return errMissingItem
 	}
 	return nil
 }
@@ -866,7 +853,7 @@ func (req domainLoginReq) validate() error {
 		return errAuthentication
 	}
 	if req.DomainID == "" {
-		return errMalformedEntity
+		return errMissingDomainID
 	}
 	return nil
 }
@@ -884,7 +871,7 @@ func (req createDomainReq) validate() error {
 		return errAuthentication
 	}
 	if req.Name == "" {
-		return errMalformedEntity
+		return errMissingName
 	}
 	return nil
 }
@@ -903,10 +890,10 @@ func (req updateDomainReq) validate() error {
 		return errAuthentication
 	}
 	if req.DomainID == "" {
-		return errMalformedEntity
+		return errMissingDomainID
 	}
 	if req.Name == "" && req.Alias == "" && req.Metadata == nil {
-		return errMalformedEntity
+		return errMissingValue
 	}
 	return nil
 }
@@ -922,7 +909,7 @@ func (req updateDomainTagsReq) validate() error {
 		return errAuthentication
 	}
 	if req.DomainID == "" {
-		return errMalformedEntity
+		return errMissingDomainID
 	}
 	return nil
 }
@@ -937,7 +924,7 @@ func (req updateDomainStatusReq) validate() error {
 		return errAuthorization
 	}
 	if req.DomainID == "" {
-		return errMalformedEntity
+		return errMissingDomainID
 	}
 
 	return nil
@@ -955,13 +942,13 @@ func (req assignMemberReq) validate() error {
 		return errAuthentication
 	}
 	if req.DomainID == "" {
-		return errMalformedEntity
+		return errMissingDomainID
 	}
 	if req.UserID == "" {
-		return errMalformedEntity
+		return errMissingUserID
 	}
 	if req.Relation == "" {
-		return errMalformedEntity
+		return errMissingRelation
 	}
 	return nil
 }
@@ -976,7 +963,7 @@ func (req viewMemberReq) validate() error {
 		return errAuthentication
 	}
 	if req.UserIdentity == "" {
-		return errMalformedEntity
+		return errMissingIdentity
 	}
 	return nil
 }
@@ -993,13 +980,13 @@ func (req sendInvitationReq) validate() error {
 		return errAuthentication
 	}
 	if req.DomainID == "" {
-		return errMalformedEntity
+		return errMissingDomainID
 	}
 	if req.UserID == "" {
-		return errMalformedEntity
+		return errMissingUserID
 	}
 	if req.Relation == "" {
-		return errMalformedEntity
+		return errMissingRelation
 	}
 
 	return nil
@@ -1015,7 +1002,7 @@ func (req acceptInvitationReq) validate() error {
 		return errAuthentication
 	}
 	if req.DomainID == "" {
-		return errMalformedEntity
+		return errMissingDomainID
 	}
 
 	return nil
@@ -1033,10 +1020,10 @@ func (req deleteInvitationReq) validate() error {
 		return errAuthentication
 	}
 	if req.DomainID == "" {
-		return errMalformedEntity
+		return errMissingDomainID
 	}
 	if req.UserID == "" {
-		return errMalformedEntity
+		return errMissingUserID
 	}
 
 	return nil
@@ -1054,10 +1041,10 @@ func (req listInvitationsReq) validate() error {
 		return errAuthentication
 	}
 	if req.page == 0 {
-		return errMalformedEntity
+		return errPageSize
 	}
 	if req.limit == 0 {
-		return errMalformedEntity
+		return errLimitSize
 	}
 
 	return nil
