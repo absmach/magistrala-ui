@@ -36,6 +36,8 @@ github.com/absmach/agent v0.0.0-20231107115142-c8b509f24d50 h1:RyDGAkOtIuN34HEJ/
 github.com/absmach/agent v0.0.0-20231107115142-c8b509f24d50/go.mod h1:/S3WufAqHTSU6MEq6cN0g6m21RhPX8dxqubYh08vbU8=
 github.com/absmach/magistrala v0.11.1-0.20231217131421-48e971180bb4 h1:moYrqFW4bJ7LlGsRvFyJFcBe5KuvjClIdUJz/hF8olg=
 github.com/absmach/magistrala v0.11.1-0.20231217131421-48e971180bb4/go.mod h1:ll3GBNSvNs2FJvOdOd3kdlKqbUijFrYzGc0+dji1Pz4=
+github.com/absmach/senml v1.0.5 h1:zNPRYpGr2Wsb8brAusz8DIfFqemy1a2dNbmMnegY3GE=
+github.com/absmach/senml v1.0.5/go.mod h1:NDEjk3O4V4YYu9Bs2/+t/AZ/F+0wu05ikgecp+/FsSU=
 github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5/go.mod h1:SkGFH1ia65gfNATL8TAiHDNxPzPdmEL5uirI2Uyuz6c=
 github.com/ajstarks/svgo v0.0.0-20180226025133-644b8db467af/go.mod h1:K08gAheRH3/J6wwsYMMT4xOr94bZjxIelGM0+d/wbFw=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
