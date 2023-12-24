@@ -1969,7 +1969,7 @@ func (us *uiService) ListDomains(token string, page, limit uint64) ([]byte, erro
 
 	domainsPage, err := us.sdk.Domains(pgm, token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	noOfPages := int(math.Ceil(float64(domainsPage.Total) / float64(limit)))
@@ -2020,12 +2020,12 @@ func (us *uiService) UpdateDomain(token string, domain sdk.Domain) error {
 func (us *uiService) Domain(token, domainID string) ([]byte, error) {
 	domain, err := us.sdk.Domain(domainID, token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	permissions, err := us.sdk.DomainPermissions(domainID, token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	crumb := breadcrumb{
@@ -2073,7 +2073,7 @@ func (us *uiService) DisableDomain(token, domainID string) error {
 
 func (us *uiService) AssignMember(token, orgID string, req sdk.UsersRelationRequest) error {
 	if err := us.sdk.AddUserToDomain(orgID, req, token); err != nil {
-		return errors.Wrap(err, ErrFailedAssign)
+		return errors.Wrap(ErrFailedAssign, err)
 	}
 
 	return nil
@@ -2081,7 +2081,7 @@ func (us *uiService) AssignMember(token, orgID string, req sdk.UsersRelationRequ
 
 func (us *uiService) UnassignMember(token, domainID string, req sdk.UsersRelationRequest) error {
 	if err := us.sdk.RemoveUserFromDomain(domainID, req, token); err != nil {
-		return errors.Wrap(err, ErrFailedUnassign)
+		return errors.Wrap(ErrFailedUnassign, err)
 	}
 
 	return nil
