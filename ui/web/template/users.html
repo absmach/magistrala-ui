@@ -36,11 +36,17 @@ SPDX-License-Identifier: Apache-2.0 -->
                     <div class="modal-dialog" role="document">
                       <div class="modal-content">
                         <div class="modal-header">
-                          <h5 class="modal-title" id="addUserModalLabel">Add User</h5>
+                          <h1 class="modal-title" id="addUserModalLabel">Add User</h1>
+                          <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                          ></button>
                         </div>
-                        <div class="modal-body">
-                          <div id="alertMessage"></div>
-                          <form id="userform">
+                        <form id="userform">
+                          <div class="modal-body">
+                            <div id="alertMessage"></div>
                             <div class="mb-3">
                               <label for="name" class="form-label">Name</label>
                               <input
@@ -100,11 +106,16 @@ SPDX-License-Identifier: Apache-2.0 -->
                               </div>
                               <div id="metadataError" class="text-danger"></div>
                             </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                              Cancel
+                            </button>
                             <button type="submit" class="btn body-button" id="create-user-button">
                               Submit
                             </button>
-                          </form>
-                        </div>
+                          </div>
+                        </form>
                       </div>
                     </div>
                   </div>
@@ -121,11 +132,17 @@ SPDX-License-Identifier: Apache-2.0 -->
                     <div class="modal-dialog" role="document">
                       <div class="modal-content">
                         <div class="modal-header">
-                          <h5 class="modal-title" id="addUsersModalLabel">Add Users</h5>
+                          <h1 class="modal-title" id="addUsersModalLabel">Add Users</h1>
+                          <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                          ></button>
                         </div>
-                        <div class="modal-body">
-                          <div id="alertBulkMessage"></div>
-                          <form enctype="multipart/form-data" id="bulkusersform">
+                        <form enctype="multipart/form-data" id="bulkusersform">
+                          <div class="modal-body">
+                            <div id="alertBulkMessage"></div>
                             <div class="form-group">
                               <label for="usersFile">
                                 Add csv file containing users names and passwords. Find a sample csv
@@ -144,12 +161,17 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 name="usersFile"
                                 required
                               />
-                              <button type="submit" value="upload" class="btn body-button">
-                                Submit
-                              </button>
                             </div>
-                          </form>
-                        </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                              Cancel
+                            </button>
+                            <button type="submit" value="upload" class="btn body-button">
+                              Submit
+                            </button>
+                          </div>
+                        </form>
                       </div>
                     </div>
                   </div>
