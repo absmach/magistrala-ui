@@ -31,12 +31,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                     <div class="modal-dialog" role="document">
                       <div class="modal-content">
                         <div class="modal-header">
-                          <h5 class="modal-title" id="addBootstrapModalLabel">
+                          <h1 class="modal-title" id="addBootstrapModalLabel">
                             Add Bootstrap Config
-                          </h5>
+                          </h1>
+                          <button
+                            type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close"
+                          ></button>
                         </div>
-                        <div class="modal-body">
-                          <form method="post">
+                        <form method="post">
+                          <div class="modal-body">
                             <div class="mb-3">
                               <label for="name" class="form-label">Bootstrap Name</label>
                               <input
@@ -151,6 +157,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 value="CACert"
                               />
                             </div>
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                              Cancel
+                            </button>
                             <button
                               type="submit"
                               id="create-bootstrap-button"
@@ -158,8 +169,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                             >
                               Submit
                             </button>
-                          </form>
-                        </div>
+                          </div>
+                        </form>
                       </div>
                     </div>
                   </div>

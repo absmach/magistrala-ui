@@ -22,23 +22,30 @@ SPDX-License-Identifier: Apache-2.0 -->
                     Read Message
                   </button>
                 </div>
-                <!-- Modal -->
+                <!-- read message modal -->
                 <div
                   class="modal fade"
-                  id="sendMessageModal"
+                  id="readMessageModal"
                   tabindex="-1"
                   role="dialog"
-                  aria-labelledby="sendMessageModalLabel"
+                  aria-labelledby="readMessageModalLabel"
                   aria-hidden="true"
                 >
                   <div class="modal-dialog" role="document">
                     <div class="modal-content">
                       <div class="modal-header">
-                        <h5 class="modal-title" id="sendMessageModalLabel">Read Message</h5>
+                        <h1 class="modal-title" id="readMessageModalLabel">Read Message</h1>
+                        <button
+                          type="button"
+                          class="btn-close"
+                          data-bs-dismiss="modal"
+                          aria-label="Close"
+                        ></button>
                       </div>
-                      <div class="modal-body">
-                        <div id="alertMessage"></div>
-                        <form method="get">
+                      <form method="get">
+                        <div class="modal-body">
+                          <div id="alertMessage"></div>
+
                           <div class="mb-3">
                             <label for="chanID" class="form-label">Channel ID</label>
                             <input
@@ -61,9 +68,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                             />
                             <div id="thingKeyHelp" class="form-text">Enter thing key.</div>
                           </div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancel
+                          </button>
                           <button type="submit" class="btn body-button">Submit</button>
-                        </form>
-                      </div>
+                        </div>
+                      </form>
                     </div>
                   </div>
                 </div>
@@ -127,7 +139,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
       </div>
       <script>
-        const messageModal = new bootstrap.Modal(document.getElementById("sendMessageModal"));
+        const messageModal = new bootstrap.Modal(document.getElementById("readMessageModal"));
 
         function openModal() {
           messageModal.show();
