@@ -131,7 +131,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     </tbody>
                   </table>
                   <div id="error-message" class="text-danger"></div>
-                  <div class="row mt-3">
+                  <div class="row-mb-3 mt-3">
                     <form action="/things/disabled" method="post">
                       <input type="hidden" name="thingID" id="thingID" value="{{ .Thing.ID }}" />
                       <button
@@ -163,8 +163,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           button: "save-metadata",
           value: parsedMetadata,
         });
-      </script>      
-      <script type="module">
+      </script>      <script type="module">
       import { attachEditRowListener, updateName, updateSecret, updateTags, updateMetadata} from "/js/update.js";
 
       attachEditRowListener(
