@@ -706,7 +706,12 @@ button.edit-btn {
 	.table-container .meta-col,
 	.table-container .created-col,
 	.table-container .desc-col,
-	.table-container .alias-col {
+	.table-container .alias-col,
+	.doc-button {
 		display: none;
+	}
+
+	body .body-button{
+		margin-left: 0.2rem;
 	}
 }
