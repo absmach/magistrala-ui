@@ -657,12 +657,6 @@ func (req readMessageReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.ChanID == "" {
-		return errMissingChannelID
-	}
-	if req.ThingKey == "" {
-		return errMissingThingKey
-	}
 	return nil
 }
 
