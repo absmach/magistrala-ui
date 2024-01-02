@@ -32,6 +32,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <th class="tags-col" scope="col">Tags</th>
                       <th scope="col">Role</th>
                       <th class="alias-col" scope="col">Alias</th>
+                      <th class="col">Status</th>
                       <th scope="col">Enter</th>
                     </thead>
                     <tbody>
@@ -46,6 +47,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           </td>
                           <td><span class="badge bg-secondary">{{ $d.Permission }}</span></td>
                           <td class="alias-col">{{ $d.Alias }}</td>
+                          <td class="alias-col">{{ $d.Status }}</td>
                           <td>
                             <form
                               method="post"
