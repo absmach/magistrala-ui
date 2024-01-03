@@ -47,7 +47,15 @@ SPDX-License-Identifier: Apache-2.0 -->
                           </td>
                           <td><span class="badge bg-secondary">{{ $d.Permission }}</span></td>
                           <td class="alias-col">{{ $d.Alias }}</td>
-                          <td class="alias-col">{{ $d.Status }}</td>
+                          <td>
+                            {{ if eq $d.Status "enabled" }}
+                              <span class="badge rounded-pill enabled-pill">{{ $d.Status }}</span>
+                            {{ else if eq $d.Status "disabled" }}
+                              <span class="badge rounded-pill disabled-pill">
+                                {{ $d.Status }}
+                              </span>
+                            {{ end }}
+                          </td>
                           <td>
                             <form
                               method="post"

@@ -91,9 +91,10 @@ func (req createUsersReq) validate() error {
 }
 
 type listEntityReq struct {
-	token string
-	page  uint64
-	limit uint64
+	token  string
+	status string
+	page   uint64
+	limit  uint64
 }
 
 func (req listEntityReq) validate() error {

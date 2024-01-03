@@ -203,6 +203,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <th class="tags-col" scope="col">Tags</th>
                           <th class="meta-col" scope="col">Metadata</th>
                           <th class="created-col" scope="col">Created At</th>
+                          <th class="status-col" scope="col">Status</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -220,6 +221,15 @@ SPDX-License-Identifier: Apache-2.0 -->
                               </div>
                             </td>
                             <td class="created-col">{{ $t.CreatedAt }}</td>
+                            <td>
+                              {{ if eq $t.Status "enabled" }}
+                                <span class="badge rounded-pill enabled-pill">{{ $t.Status }}</span>
+                              {{ else if eq $t.Status "disabled" }}
+                                <span class="badge rounded-pill disabled-pill">
+                                  {{ $t.Status }}
+                                </span>
+                              {{ end }}
+                            </td>
                           </tr>
                           <script>
                             attachFormatJsonWithPrettifyListener({

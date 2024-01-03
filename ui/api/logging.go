@@ -192,7 +192,7 @@ func (lm *loggingMiddleware) CreateUsers(token string, users ...sdk.User) (err e
 }
 
 // ListUsers adds logging middleware to list users method.
-func (lm *loggingMiddleware) ListUsers(token string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListUsers(token, status string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method list_users took %s to complete", time.Since(begin))
 		if err != nil {
@@ -202,7 +202,7 @@ func (lm *loggingMiddleware) ListUsers(token string, page, limit uint64) (b []by
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.ListUsers(token, page, limit)
+	return lm.svc.ListUsers(token, status, page, limit)
 }
 
 // ViewUser adds logging middleware to view user method.
@@ -345,7 +345,7 @@ func (lm *loggingMiddleware) CreateThings(token string, things ...sdk.Thing) (er
 }
 
 // ListThings adds logging middleware to list things method.
-func (lm *loggingMiddleware) ListThings(token string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListThings(token, status string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method list_things took %s to complete", time.Since(begin))
 		if err != nil {
@@ -355,7 +355,7 @@ func (lm *loggingMiddleware) ListThings(token string, page, limit uint64) (b []b
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.ListThings(token, page, limit)
+	return lm.svc.ListThings(token, status, page, limit)
 }
 
 // ViewThing adds logging middleware to view thing method.
@@ -527,7 +527,7 @@ func (lm *loggingMiddleware) CreateChannels(token string, channels ...sdk.Channe
 }
 
 // ListChannels adds logging middleware to list channels method.
-func (lm *loggingMiddleware) ListChannels(token string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListChannels(token, status string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method list_channels took %s to complete", time.Since(begin))
 		if err != nil {
@@ -537,7 +537,7 @@ func (lm *loggingMiddleware) ListChannels(token string, page, limit uint64) (b [
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.ListChannels(token, page, limit)
+	return lm.svc.ListChannels(token, status, page, limit)
 }
 
 // ViewChannel adds logging middleware to view channel method.
@@ -835,7 +835,7 @@ func (lm *loggingMiddleware) UpdateGroup(token, id string, group sdk.Group) (err
 }
 
 // ListGroups adds logging middleware to list groups method.
-func (lm *loggingMiddleware) ListGroups(token string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListGroups(token, status string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method list_groups took %s to complete", time.Since(begin))
 		if err != nil {
@@ -845,7 +845,7 @@ func (lm *loggingMiddleware) ListGroups(token string, page, limit uint64) (b []b
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.ListGroups(token, page, limit)
+	return lm.svc.ListGroups(token, status, page, limit)
 }
 
 // EnableGroup adds logging middleware to enable group method.
@@ -1091,7 +1091,7 @@ func (lm *loggingMiddleware) DomainLogin(login sdk.Login, refreshToken string) (
 }
 
 // ListDomains adds logging middleware to list domains method.
-func (lm *loggingMiddleware) ListDomains(token string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListDomains(token, status string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		message := fmt.Sprintf("Method list_domains took %s to complete", time.Since(begin))
 		if err != nil {
@@ -1100,7 +1100,7 @@ func (lm *loggingMiddleware) ListDomains(token string, page, limit uint64) (b []
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
 
-	return lm.svc.ListDomains(token, page, limit)
+	return lm.svc.ListDomains(token, status, page, limit)
 }
 
 // CreateDomain adds logging middleware to create domain method.

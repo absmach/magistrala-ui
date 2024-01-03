@@ -17,21 +17,13 @@ SPDX-License-Identifier: Apache-2.0 -->
               {{ template "breadcrumb" . }}
               <div class="row">
                 <div class="buttons mb-3">
-                  <a
-                    href="/channels/{{ .Channel.ID }}/things"
-                    type="button"
-                    class="btn body-button"
-                  >
+                  <a href="/channels/{{ .Entity.ID }}/things" type="button" class="btn body-button">
                     Connect
                   </a>
-                  <a href="/channels/{{ .Channel.ID }}/users" type="button" class="btn body-button">
+                  <a href="/channels/{{ .Entity.ID }}/users" type="button" class="btn body-button">
                     Assign Users
                   </a>
-                  <a
-                    href="/channels/{{ .Channel.ID }}/groups"
-                    type="button"
-                    class="btn body-button"
-                  >
+                  <a href="/channels/{{ .Entity.ID }}/groups" type="button" class="btn body-button">
                     Assign Groups
                   </a>
                 </div>
@@ -50,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <tr>
                         <th>NAME</th>
                         <td class="editable name-field" contenteditable="false" data-field="name">
-                          {{ .Channel.Name }}
+                          {{ .Entity.Name }}
                         </td>
                         <td>
                           <button
@@ -68,18 +60,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                       <tr>
                         <th>ID</th>
-                        <td>{{ .Channel.ID }}</td>
+                        <td>{{ .Entity.ID }}</td>
                         <td></td>
                       </tr>
                       <tr>
                         <th>Owner</th>
-                        <td>{{ .Channel.OwnerID }}</td>
+                        <td>{{ .Entity.OwnerID }}</td>
                         <td></td>
                       </tr>
                       <tr>
                         <th>Description</th>
                         <td class="editable" contenteditable="false" data-field="description">
-                          {{ .Channel.Description }}
+                          {{ .Entity.Description }}
                         </td>
                         <td>
                           <button
@@ -118,30 +110,40 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </table>
                   <div id="error-message" class="text-danger"></div>
                   <div class="row-mb-3 mt-3">
-                    <form action="/channels/disabled" method="post">
-                      <input
-                        type="hidden"
-                        name="channelID"
-                        id="channelID"
-                        value="{{ .Channel.ID }}"
-                      />
+                    {{ if eq .Entity.Status "enabled" }}
                       <button
-                        type="submit"
+                        type="button"
                         class="btn body-button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#disableEntityModal"
                         {{ if not (hasPermission .Permissions "delete") }}disabled{{ end }}
                       >
                         Disable Channel
                       </button>
-                    </form>
+                    {{ else }}
+                      <button
+                        type="button"
+                        class="btn body-button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#enableEntityModal"
+                        {{ if not (hasPermission .Permissions "delete") }}disabled{{ end }}
+                      >
+                        Enable Channel
+                      </button>
+                    {{ end }}
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
+          <!-- status update modals -->
+          {{ template "statusupdate" . }}
+
         </div>
       </div>
       <script>
-        var metadata = "{{ toJSON .Channel.Metadata }}";
+        var metadata = "{{ toJSON .Entity.Metadata }}";
         var parsedMetadata = JSON.parse(metadata);
 
         attachFormatJsonWithPrettifyListener({
@@ -154,14 +156,13 @@ SPDX-License-Identifier: Apache-2.0 -->
           button: "save-metadata",
           value: parsedMetadata,
         });
-      </script>      
-      <script type="module">
+      </script>      <script type="module">
         import { attachEditRowListener, updateName, updateDescription, updateMetadata} from "/js/update.js";
 
         attachEditRowListener(
         {
           entity: "channels",
-          id: "{{ .Channel.ID }}",
+          id: "{{ .Entity.ID }}",
           rows: {
             name:updateName,
             description: updateDescription,
@@ -176,7 +177,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           field:"metadata",
           alertDiv: "metadataError",
           fieldName: "metadata-field",
-          id: "{{ .Channel.ID }}",
+          id: "{{ .Entity.ID }}",
           entity: "channels",
           button: "save-metadata",
         });

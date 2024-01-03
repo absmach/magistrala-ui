@@ -321,7 +321,7 @@ func listUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListUsers(req.token, req.page, req.limit)
+		res, err := svc.ListUsers(req.token, req.status, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -612,7 +612,7 @@ func listThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListThings(req.token, req.page, req.limit)
+		res, err := svc.ListThings(req.token, req.status, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -876,7 +876,7 @@ func listChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListChannels(req.token, req.page, req.limit)
+		res, err := svc.ListChannels(req.token, req.status, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1189,7 +1189,7 @@ func listGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListGroups(req.token, req.page, req.limit)
+		res, err := svc.ListGroups(req.token, req.status, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1556,7 +1556,7 @@ func listDomainsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListDomains(req.token, req.page, req.limit)
+		res, err := svc.ListDomains(req.token, req.status, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}

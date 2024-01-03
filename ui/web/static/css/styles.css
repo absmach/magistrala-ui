@@ -579,7 +579,20 @@ button.edit-btn {
 
 .relation-pill {
 	background: var(--pill-color-3);
+}
 
+.enabled-pill {
+	background: #f0f0f0;
+	color: var(--main-color);
+	padding: 0.5rem;
+	border: var(--main-color) 1px solid;
+}
+
+.disabled-pill {
+	background: #f0f0f0;
+	color: #c20707;
+	padding: 0.5rem;
+	border: #c20707 1px solid;
 }
 
 .modal-title {
@@ -711,7 +724,7 @@ button.edit-btn {
 		display: none;
 	}
 
-	body .body-button{
+	body .body-button {
 		margin-left: 0.2rem;
 	}
 }
