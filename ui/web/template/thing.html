@@ -17,10 +17,10 @@ SPDX-License-Identifier: Apache-2.0 -->
               {{ template "breadcrumb" . }}
               <div class="row">
                 <div class="buttons mb-3">
-                  <a class="btn body-button" href="/things/{{ .Thing.ID }}/channels" role="button">
+                  <a class="btn body-button" href="/things/{{ .Entity.ID }}/channels" role="button">
                     Connect
                   </a>
-                  <a class="btn body-button" href="/things/{{ .Thing.ID }}/users" role="button">
+                  <a class="btn body-button" href="/things/{{ .Entity.ID }}/users" role="button">
                     Share
                   </a>
                 </div>
@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <tr>
                         <th>Name</th>
                         <td class="editable name-field" contenteditable="false" data-field="name">
-                          {{ .Thing.Name }}
+                          {{ .Entity.Name }}
                         </td>
                         <td>
                           <button
@@ -57,7 +57,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                       <tr>
                         <th>ID</th>
-                        <td>{{ .Thing.ID }}</td>
+                        <td>{{ .Entity.ID }}</td>
                         <td></td>
                       </tr>
                       <tr>
@@ -67,7 +67,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           contenteditable="false"
                           data-field="secret"
                         >
-                          {{ .Thing.Credentials.Secret }}
+                          {{ .Entity.Credentials.Secret }}
                         </td>
                         <td>
                           <button
@@ -86,7 +86,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <tr>
                         <th>Tags</th>
                         <td class="editable tags-field" contenteditable="false" data-field="tags">
-                          {{ toSlice .Thing.Tags }}
+                          {{ toSlice .Entity.Tags }}
                         </td>
                         <td>
                           <button
@@ -105,7 +105,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <tr>
                         <th>Owner</th>
                         <td>
-                          {{ .Thing.Owner }}
+                          {{ .Entity.Owner }}
                         </td>
                         <td></td>
                       </tr>
@@ -132,25 +132,40 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </table>
                   <div id="error-message" class="text-danger"></div>
                   <div class="row-mb-3 mt-3">
-                    <form action="/things/disabled" method="post">
-                      <input type="hidden" name="thingID" id="thingID" value="{{ .Thing.ID }}" />
+                    {{ if eq .Entity.Status "enabled" }}
                       <button
-                        type="submit"
+                        type="button"
                         class="btn body-button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#disableEntityModal"
                         {{ if not (hasPermission .Permissions "delete") }}disabled{{ end }}
                       >
                         Disable Thing
                       </button>
-                    </form>
+                    {{ else }}
+                      <button
+                        type="button"
+                        class="btn body-button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#enableEntityModal"
+                        {{ if not (hasPermission .Permissions "delete") }}disabled{{ end }}
+                      >
+                        Enable Thing
+                      </button>
+                    {{ end }}
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- status update modals -->
+        {{ template "statusupdate" . }}
+
       </div>
       <script>
-        var metadata = "{{ toJSON .Thing.Metadata }}";
+        var metadata = "{{ toJSON .Entity.Metadata }}";
         var parsedMetadata = JSON.parse(metadata);
 
         attachFormatJsonWithPrettifyListener({
@@ -163,14 +178,13 @@ SPDX-License-Identifier: Apache-2.0 -->
           button: "save-metadata",
           value: parsedMetadata,
         });
-      </script>      
-      <script type="module">
+      </script>      <script type="module">
       import { attachEditRowListener, updateName, updateSecret, updateTags, updateMetadata} from "/js/update.js";
 
       attachEditRowListener(
         {
           entity: "things",
-          id: "{{ .Thing.ID }}",
+          id: "{{ .Entity.ID }}",
           rows: {
             name:updateName,
             secret: updateSecret,
@@ -189,7 +203,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           field:"metadata",
           alertDiv: "metadataError",
           fieldName: "metadata-field",
-          id: "{{ .Thing.ID }}",
+          id: "{{ .Entity.ID }}",
           entity: "things",
           button: "save-metadata",
         });

@@ -37,7 +37,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <tr>
                         <th>Domain Name</th>
                         <td class="editable name-field" contenteditable="false" data-field="name">
-                          {{ .Domain.Name }}
+                          {{ .Entity.Name }}
                         </td>
                         <td>
                           <button
@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <tr>
                         <th>Domain Tags</th>
                         <td class="editable tags-field" contenteditable="false" data-field="tags">
-                          {{ toSlice .Domain.Tags }}
+                          {{ toSlice .Entity.Tags }}
                         </td>
                         <td>
                           <button
@@ -76,7 +76,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <tr>
                         <th>Domain Alias</th>
                         <td class="editable alias-field" contenteditable="false" data-field="alias">
-                          {{ .Domain.Alias }}
+                          {{ .Entity.Alias }}
                         </td>
                         <td>
                           <button
@@ -113,27 +113,39 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                       <tr>
                         <th class="text-muted">Created By</th>
-                        <td>{{ .Domain.CreatedBy }}</td>
+                        <td>{{ .Entity.CreatedBy }}</td>
                         <td></td>
                       </tr>
                       <tr>
                         <th class="text-muted">Created At</th>
-                        <td>{{ .Domain.CreatedAt }}</td>
+                        <td>{{ .Entity.CreatedAt }}</td>
                         <td></td>
                       </tr>
                     </tbody>
                   </table>
                   <div id="error-message" class="text-danger"></div>
                   <div class="row-mb-3 mt-3">
-                    <button
-                      type="button"
-                      class="btn body-button"
-                      data-bs-toggle="modal"
-                      data-bs-target="#deleteDomainModal"
-                      {{ if not (hasPermission .Permissions "admin") }}disabled{{ end }}
-                    >
-                      Disable Domain
-                    </button>
+                    {{ if eq .Entity.Status "enabled" }}
+                      <button
+                        type="button"
+                        class="btn body-button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#disableEntityModal"
+                        {{ if not (hasPermission .Permissions "admin") }}disabled{{ end }}
+                      >
+                        Disable Domain
+                      </button>
+                    {{ else }}
+                      <button
+                        type="button"
+                        class="btn body-button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#enableEntityModal"
+                        {{ if not (hasPermission .Permissions "admin") }}disabled{{ end }}
+                      >
+                        Enable Domain
+                      </button>
+                    {{ end }}
                   </div>
                 </div>
               </div>
@@ -141,48 +153,12 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </div>
 
-        <!-- Delete Domain Modal -->
-        <div
-          class="modal fade"
-          id="deleteDomainModal"
-          tabindex="-1"
-          role="dialog"
-          aria-labelledby="deleteDomainModalLabel"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-              <div class="modal-header">
-                <div class="modal-title" id="deleteDomainModalLabel">Disable Domain</div>
-                <button
-                  type="button"
-                  class="btn-close"
-                  data-bs-dismiss="modal"
-                  aria-label="Close"
-                ></button>
-              </div>
-              <form action="/domains/disable" method="post">
-                <div class="modal-body">
-                  <span>
-                    Are You sure you want to
-                    <span class="fw-bold text-danger">disable</span>
-                    this domain?
-                  </span>
-                  <input type="hidden" name="domainID" id="domainID" value="{{ .Domain.ID }}" />
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    Cancel
-                  </button>
-                  <button type="submit" class="btn btn-danger">Disable</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
+        <!-- status update modals -->
+        {{ template "statusupdate" . }}
+
       </div>
       <script>
-        var metadata = "{{ toJSON .Domain.Metadata }}";
+        var metadata = "{{ toJSON .Entity.Metadata }}";
         var parsedMetadata = JSON.parse(metadata);
 
         attachFormatJsonWithPrettifyListener({
@@ -195,14 +171,13 @@ SPDX-License-Identifier: Apache-2.0 -->
           button: "save-metadata",
           value: parsedMetadata,
         });
-      </script>      
-      <script type="module">
+      </script>      <script type="module">
         import { attachEditRowListener, updateName, updateMetadata, updateTags, updateDescription } from "/js/update.js";
 
         attachEditRowListener(
           {
             entity: "domains",
-            id: "{{ .Domain.ID }}",
+            id: "{{ .Entity.ID }}",
             rows: {
               name:updateName,
               tags:updateTags,
@@ -222,7 +197,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       field:"metadata",
       alertDiv: "metadataError",
       fieldName: "metadata-field",
-      id: "{{ .Domain.ID }}",
+      id: "{{ .Entity.ID }}",
       entity: "domains",
       button: "save-metadata",
     });

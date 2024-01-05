@@ -9,14 +9,24 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       var selectedLimit = localStorage.getItem("selectedLimit");
-      if (selectedLimit) {
-        var paginationLinks = document.querySelectorAll(".pagination a");
+      var selectedStatus = localStorage.getItem("selectedStatus");
 
-        paginationLinks.forEach(function (link) {
-          var href = link.getAttribute("href");
-          link.setAttribute("href", href + "&limit=" + selectedLimit);
-        });
-      }
+      var paginationLinks = document.querySelectorAll(".pagination a");
+
+      paginationLinks.forEach(function (link) {
+        var href = link.getAttribute("href");
+
+        if (selectedLimit) {
+          href = href + "&limit=" + selectedLimit;
+          console.log(href);
+        }
+
+        if (selectedStatus) {
+          href = href + "&status=" + selectedStatus;
+        }
+
+        link.setAttribute("href", href);
+      });
     });
   </script>
   <nav class="border-top" aria-label="Page navigation example">

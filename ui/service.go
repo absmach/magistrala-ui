@@ -13,6 +13,7 @@ import (
 	"html/template"
 	"log"
 	"math"
+	"reflect"
 	"strings"
 	"sync"
 	"time"
@@ -34,9 +35,13 @@ const (
 	statusAll               = "all"
 	dashboardActive         = "dashboard"
 	usersActive             = "users"
+	userActive              = "user"
 	thingsActive            = "things"
+	thingActive             = "thing"
 	groupsActive            = "groups"
+	groupActive             = "group"
 	channelsActive          = "channels"
+	channelActive           = "channel"
 	readMessagesActive      = "readmessages"
 	bootstrapsActive        = "bootstraps"
 	domainActive            = "domain"
@@ -75,6 +80,7 @@ var (
 		"error",
 		"breadcrumb",
 		"metadatamodal",
+		"statusupdate",
 
 		"bootstrap",
 		"bootstraps",
@@ -138,6 +144,7 @@ var (
 	emptyData               = struct{}{}
 	groupRelations          = []string{"administrator", "editor", "viewer", "member"}
 	thingRelations          = []string{"administrator"}
+	statusOptions           = []string{"all", "enabled", "disabled"}
 )
 
 // Service specifies service API.
@@ -170,7 +177,7 @@ type Service interface {
 	// CreateUsers creates new users.
 	CreateUsers(token string, users ...sdk.User) error
 	// ListUsers retrieves users owned/shared by a user.
-	ListUsers(token string, page, limit uint64) ([]byte, error)
+	ListUsers(token, status string, page, limit uint64) ([]byte, error)
 	// ViewUser retrieves information about the user with the given ID.
 	ViewUser(token, userID string) ([]byte, error)
 	// UpdateUser updates the user with the given ID.
@@ -193,7 +200,7 @@ type Service interface {
 	// CreateThings creates new things.
 	CreateThings(token string, things ...sdk.Thing) error
 	// ListThings retrieves things owned/shared by a user.
-	ListThings(token string, page, limit uint64) ([]byte, error)
+	ListThings(token, status string, page, limit uint64) ([]byte, error)
 	// ViewThing retrieves information about the thing with the given ID.
 	ViewThing(token, id string) ([]byte, error)
 	// UpdateThing updates the thing with the given ID.
@@ -220,7 +227,7 @@ type Service interface {
 	// CreateChannels creates new channels.
 	CreateChannels(token string, channels ...sdk.Channel) error
 	// ListChannels retrieves channels owned/shared by a user.
-	ListChannels(token string, page, limit uint64) ([]byte, error)
+	ListChannels(token, status string, page, limit uint64) ([]byte, error)
 	// ViewChannel retrievs information about the channel with the given ID.
 	ViewChannel(token, id string) ([]byte, error)
 	// UpdateChannel updates the channel with the given ID.
@@ -265,7 +272,7 @@ type Service interface {
 	// UpdateGroup updates the group with the given ID.
 	UpdateGroup(token, id string, group sdk.Group) error
 	// ListGroups retrieves the groups owned/shared by a user.
-	ListGroups(token string, page, limit uint64) ([]byte, error)
+	ListGroups(token, status string, page, limit uint64) ([]byte, error)
 	// EnableGroup updates the status of the group to enabled.
 	EnableGroup(token, id string) error
 	// DisableGroup updates the status of the group to disabled.
@@ -302,7 +309,7 @@ type Service interface {
 	ErrorPage(errMsg string) ([]byte, error)
 
 	// ListDomains retrieves domains owned/shared by a user.
-	ListDomains(token string, page, limit uint64) ([]byte, error)
+	ListDomains(token, status string, page, limit uint64) ([]byte, error)
 	// CreateDomain creates a new domain.
 	CreateDomain(token string, domain sdk.Domain) error
 	// UpdateDomain updates the domain with the given ID.
@@ -548,12 +555,13 @@ func (us *uiService) CreateUsers(token string, users ...sdk.User) error {
 	return nil
 }
 
-func (us *uiService) ListUsers(token string, page, limit uint64) ([]byte, error) {
+func (us *uiService) ListUsers(token, status string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 
 	pgm := sdk.PageMetadata{
 		Offset: offset,
 		Limit:  limit,
+		Status: status,
 	}
 	users, err := us.sdk.Users(pgm, token)
 	if err != nil {
@@ -575,6 +583,8 @@ func (us *uiService) ListUsers(token string, page, limit uint64) ([]byte, error)
 		CurrentPage    int
 		Pages          int
 		Limit          int
+		StatusOptions  []string
+		Status         string
 	}{
 		usersActive,
 		usersActive,
@@ -583,6 +593,8 @@ func (us *uiService) ListUsers(token string, page, limit uint64) ([]byte, error)
 		int(page),
 		noOfPages,
 		int(limit),
+		statusOptions,
+		status,
 	}
 
 	var btpl bytes.Buffer
@@ -607,13 +619,15 @@ func (us *uiService) ViewUser(token, userID string) (b []byte, err error) {
 	data := struct {
 		NavbarActive   string
 		CollapseActive string
-		User           sdk.User
+		Entity         sdk.User
 		Breadcrumb     breadcrumb
+		Path           string
 	}{
 		usersActive,
-		usersActive,
+		userActive,
 		user,
 		crumb,
+		usersActive,
 	}
 
 	var btpl bytes.Buffer
@@ -700,13 +714,13 @@ func (us *uiService) CreateThings(token string, things ...sdk.Thing) error {
 	return nil
 }
 
-func (us *uiService) ListThings(token string, page, limit uint64) ([]byte, error) {
+func (us *uiService) ListThings(token, status string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 
 	pgm := sdk.PageMetadata{
-		Offset:     offset,
-		Limit:      limit,
-		Visibility: statusAll,
+		Offset: offset,
+		Limit:  limit,
+		Status: status,
 	}
 	things, err := us.sdk.Things(pgm, token)
 	if err != nil {
@@ -728,6 +742,8 @@ func (us *uiService) ListThings(token string, page, limit uint64) ([]byte, error
 		CurrentPage    int
 		Pages          int
 		Limit          int
+		StatusOptions  []string
+		Status         string
 	}{
 		thingsActive,
 		thingsActive,
@@ -736,6 +752,8 @@ func (us *uiService) ListThings(token string, page, limit uint64) ([]byte, error
 		int(page),
 		noOfPages,
 		int(limit),
+		statusOptions,
+		status,
 	}
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "things", data); err != nil {
@@ -764,16 +782,18 @@ func (us *uiService) ViewThing(token, thingID string) (b []byte, err error) {
 		NavbarActive   string
 		CollapseActive string
 		ID             string
-		Thing          sdk.Thing
+		Entity         sdk.Thing
 		Permissions    []string
 		Breadcrumb     breadcrumb
+		Path           string
 	}{
 		thingsActive,
-		thingsActive,
+		thingActive,
 		thingID,
 		thing,
 		permissions.Permissions,
 		crumb,
+		thingsActive,
 	}
 
 	var btpl bytes.Buffer
@@ -971,13 +991,13 @@ func (us *uiService) CreateChannels(token string, channels ...sdk.Channel) error
 	return nil
 }
 
-func (us *uiService) ListChannels(token string, page, limit uint64) ([]byte, error) {
+func (us *uiService) ListChannels(token, status string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 
 	pgm := sdk.PageMetadata{
-		Offset:     offset,
-		Limit:      limit,
-		Visibility: statusAll,
+		Offset: offset,
+		Limit:  limit,
+		Status: status,
 	}
 	chsPage, err := us.sdk.Channels(pgm, token)
 	if err != nil {
@@ -999,6 +1019,8 @@ func (us *uiService) ListChannels(token string, page, limit uint64) ([]byte, err
 		Pages          int
 		Limit          int
 		Breadcrumb     breadcrumb
+		StatusOptions  []string
+		Status         string
 	}{
 		channelsActive,
 		channelsActive,
@@ -1007,6 +1029,8 @@ func (us *uiService) ListChannels(token string, page, limit uint64) ([]byte, err
 		noOfPages,
 		int(limit),
 		crumb,
+		statusOptions,
+		status,
 	}
 
 	var btpl bytes.Buffer
@@ -1037,16 +1061,18 @@ func (us *uiService) ViewChannel(token, channelID string) (b []byte, err error) 
 		NavbarActive   string
 		CollapseActive string
 		ID             string
-		Channel        sdk.Channel
+		Entity         sdk.Channel
 		Permissions    []string
 		Breadcrumb     breadcrumb
+		Path           string
 	}{
 		channelsActive,
-		channelsActive,
+		channelActive,
 		channelID,
 		channel,
 		permissions.Permissions,
 		crumb,
+		channelsActive,
 	}
 
 	var btpl bytes.Buffer
@@ -1424,19 +1450,19 @@ func (us *uiService) ViewGroup(token, groupID string) (b []byte, err error) {
 	data := struct {
 		NavbarActive   string
 		CollapseActive string
-		ID             string
-		Group          sdk.Group
+		Entity         sdk.Group
 		Parent         string
 		Permissions    []string
 		Breadcrumb     breadcrumb
+		Path           string
 	}{
 		groupsActive,
-		groupsActive,
-		groupID,
+		groupActive,
 		group,
 		parent.Name,
 		permissions.Permissions,
 		crumb,
+		groupsActive,
 	}
 
 	var btpl bytes.Buffer
@@ -1455,13 +1481,13 @@ func (us *uiService) UpdateGroup(token, id string, group sdk.Group) error {
 	return nil
 }
 
-func (us *uiService) ListGroups(token string, page, limit uint64) ([]byte, error) {
+func (us *uiService) ListGroups(token, status string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 
 	pgm := sdk.PageMetadata{
-		Offset:     offset,
-		Limit:      limit,
-		Visibility: statusAll,
+		Offset: offset,
+		Limit:  limit,
+		Status: status,
 	}
 	grpPage, err := us.sdk.Groups(pgm, token)
 	if err != nil {
@@ -1483,6 +1509,8 @@ func (us *uiService) ListGroups(token string, page, limit uint64) ([]byte, error
 		Pages          int
 		Limit          int
 		Breadcrumb     breadcrumb
+		StatusOptions  []string
+		Status         string
 	}{
 		groupsActive,
 		groupsActive,
@@ -1491,6 +1519,8 @@ func (us *uiService) ListGroups(token string, page, limit uint64) ([]byte, error
 		noOfPages,
 		int(limit),
 		crumb,
+		statusOptions,
+		status,
 	}
 
 	var btpl bytes.Buffer
@@ -1959,12 +1989,13 @@ func (us *uiService) ErrorPage(errMsg string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) ListDomains(token string, page, limit uint64) ([]byte, error) {
+func (us *uiService) ListDomains(token, status string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 
 	pgm := sdk.PageMetadata{
 		Offset: offset,
 		Limit:  limit,
+		Status: status,
 	}
 
 	domainsPage, err := us.sdk.Domains(pgm, token)
@@ -1988,6 +2019,8 @@ func (us *uiService) ListDomains(token string, page, limit uint64) ([]byte, erro
 		Pages          int
 		Limit          int
 		Breadcrumb     breadcrumb
+		StatusOptions  []string
+		Status         string
 	}{
 		domainsActive,
 		domainsActive,
@@ -1997,6 +2030,8 @@ func (us *uiService) ListDomains(token string, page, limit uint64) ([]byte, erro
 		noOfPages,
 		int(limit),
 		crumb,
+		statusOptions,
+		status,
 	}
 
 	var btpl bytes.Buffer
@@ -2036,15 +2071,17 @@ func (us *uiService) Domain(token, domainID string) ([]byte, error) {
 	data := struct {
 		NavbarActive   string
 		CollapseActive string
-		Domain         sdk.Domain
+		Entity         sdk.Domain
 		Breadcrumb     breadcrumb
 		Permissions    []string
+		Path           string
 	}{
 		domainActive,
 		domainActive,
 		domain,
 		crumb,
 		permissions.Permissions,
+		domainsActive,
 	}
 
 	var btpl bytes.Buffer
@@ -2318,6 +2355,18 @@ func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, 
 		},
 		"hasPermission": func(permissions []string, permission string) bool {
 			return slices.Contains(permissions, permission)
+		},
+		"isset": func(name string, data interface{}) bool {
+			v := reflect.ValueOf(data)
+			if v.Kind() == reflect.Ptr {
+				v = v.Elem()
+			}
+
+			if v.Kind() != reflect.Struct {
+				return false
+			}
+
+			return v.FieldByName(name).IsValid()
 		},
 	})
 

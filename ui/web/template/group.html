@@ -17,10 +17,10 @@ SPDX-License-Identifier: Apache-2.0 -->
               {{ template "breadcrumb" . }}
               <div class="row">
                 <div class="buttons mb-3">
-                  <a class="btn body-button" href="/groups/{{ .Group.ID }}/users" role="button">
+                  <a class="btn body-button" href="/groups/{{ .Entity.ID }}/users" role="button">
                     Assign Users
                   </a>
-                  <a class="btn body-button" href="/groups/{{ .Group.ID }}/channels" role="button">
+                  <a class="btn body-button" href="/groups/{{ .Entity.ID }}/channels" role="button">
                     Assign Channels
                   </a>
                 </div>
@@ -39,7 +39,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <tr>
                         <th>NAME</th>
                         <td class="editable name-field" contenteditable="false" data-field="name">
-                          {{ .Group.Name }}
+                          {{ .Entity.Name }}
                         </td>
                         <td>
                           <button
@@ -57,18 +57,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                       <tr>
                         <th>ID</th>
-                        <td>{{ .Group.ID }}</td>
+                        <td>{{ .Entity.ID }}</td>
                         <td></td>
                       </tr>
                       <tr>
                         <th>Parent Group</th>
-                        <td><a href="/groups/{{ .Group.ParentID }}">{{ .Parent }}</a></td>
+                        <td><a href="/groups/{{ .Entity.ParentID }}">{{ .Parent }}</a></td>
                         <td></td>
                       </tr>
                       <tr>
                         <th>Description</th>
                         <td class="editable" contenteditable="false" data-field="description">
-                          {{ .Group.Description }}
+                          {{ .Entity.Description }}
                         </td>
                         <td>
                           <button
@@ -107,25 +107,39 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </table>
                   <div id="error-message" class="text-danger"></div>
                   <div class="row-mb-3 mt-3">
-                    <form action="/groups/disabled" method="post">
-                      <input type="hidden" name="groupID" id="groupID" value="{{ .Group.ID }}" />
+                    {{ if eq .Entity.Status "enabled" }}
                       <button
-                        type="submit"
+                        type="button"
                         class="btn body-button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#disableEntityModal"
                         {{ if not (hasPermission .Permissions "delete") }}disabled{{ end }}
                       >
                         Disable Group
                       </button>
-                    </form>
+                    {{ else }}
+                      <button
+                        type="button"
+                        class="btn body-button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#enableEntityModal"
+                        {{ if not (hasPermission .Permissions "delete") }}disabled{{ end }}
+                      >
+                        Enable Group
+                      </button>
+                    {{ end }}
                   </div>
                 </div>
               </div>
             </div>
           </div>
+
+          <!-- status update modals -->
+          {{ template "statusupdate" . }}
         </div>
       </div>
       <script>
-        var metadata = "{{ toJSON .Group.Metadata }}";
+        var metadata = "{{ toJSON .Entity.Metadata }}";
         var parsedMetadata = JSON.parse(metadata);
 
         attachFormatJsonWithPrettifyListener({
@@ -138,14 +152,13 @@ SPDX-License-Identifier: Apache-2.0 -->
           button: "save-metadata",
           value: parsedMetadata,
         });
-      </script>      
-      <script type="module">
+      </script>      <script type="module">
       import { attachEditRowListener, updateName, updateDescription, updateMetadata} from "/js/update.js";
 
       attachEditRowListener(
 			{
 				entity: "groups",
-				id: "{{ .Group.ID }}",
+				id: "{{ .Entity.ID }}",
 				rows: {
 					name:updateName,
 					description: updateDescription,
@@ -161,7 +174,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       field:"metadata",
       alertDiv: "metadataError",
       fieldName: "metadata-field",
-      id: "{{ .Group.ID }}",
+      id: "{{ .Entity.ID }}",
       entity: "groups",
       button: "save-metadata",
     });

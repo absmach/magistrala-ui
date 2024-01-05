@@ -27,7 +27,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <tr>
                         <th>Name</th>
                         <td class="editable name-field" contenteditable="false" data-field="name">
-                          {{ .User.Name }}
+                          {{ .Entity.Name }}
                         </td>
                         <td>
                           <button class="edit-btn" id="edit-name">
@@ -41,12 +41,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                       <tr>
                         <th>ID</th>
-                        <td>{{ .User.ID }}</td>
+                        <td>{{ .Entity.ID }}</td>
                         <td></td>
                       </tr>
                       <tr>
                         <th>Owner</th>
-                        <td>{{ .User.Owner }}</td>
+                        <td>{{ .Entity.Owner }}</td>
                         <td></td>
                       </tr>
                       <tr>
@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           contenteditable="false"
                           data-field="identity"
                         >
-                          {{ .User.Credentials.Identity }}
+                          {{ .Entity.Credentials.Identity }}
                         </td>
                         <td>
                           <button class="edit-btn" id="edit-identity">
@@ -71,7 +71,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <tr>
                         <th>Tags</th>
                         <td class="editable tags-field" contenteditable="false" data-field="tags">
-                          {{ toSlice .User.Tags }}
+                          {{ toSlice .Entity.Tags }}
                         </td>
                         <td>
                           <button class="edit-btn" id="edit-tags">
@@ -103,17 +103,32 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                       <tr>
                         <th>Role</th>
-                        <td>{{ .User.Role }}</td>
+                        <td>{{ .Entity.Role }}</td>
                         <td></td>
                       </tr>
                     </tbody>
                   </table>
                   <div id="error-message" class="text-danger"></div>
                   <div class="row-mb-3 d-flex flex-row gap-2 mt-3">
-                    <form action="/users/disabled" method="post">
-                      <input type="hidden" name="userID" id="userID" value="{{ .User.ID }}" />
-                      <button type="submit" class="btn body-button">Disable User</button>
-                    </form>
+                    {{ if eq .Entity.Status "enabled" }}
+                      <button
+                        type="button"
+                        class="btn body-button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#disableEntityModal"
+                      >
+                        Disable User
+                      </button>
+                    {{ else }}
+                      <button
+                        type="button"
+                        class="btn body-button"
+                        data-bs-toggle="modal"
+                        data-bs-target="#enableEntityModal"
+                      >
+                        Enable User
+                      </button>
+                    {{ end }}
                     <button
                       type="button"
                       class="btn body-button"
@@ -128,6 +143,10 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
         </div>
+
+        <!-- status update modals -->
+        {{ template "statusupdate" . }}
+
 
         <!-- Update Role Modal -->
         <div
@@ -149,15 +168,15 @@ SPDX-License-Identifier: Apache-2.0 -->
                   aria-label="Close"
                 ></button>
               </div>
-              <form action="/users/{{ .User.ID }}/role" method="post">
+              <form action="/users/{{ .Entity.ID }}/role" method="post">
                 <div class="modal-body">
                   <span>
                     Are you sure you want to update the role of
-                    <span class="badge text-bg-info">{{ .User.Name }}</span>
+                    <span class="badge text-bg-info">{{ .Entity.Name }}</span>
                     to
                   </span>
                   <div class="mb-3 ">
-                    {{ if eq .User.Role "admin" }}
+                    {{ if eq .Entity.Role "admin" }}
 
                       <div class="form-check">
                         <input
@@ -191,7 +210,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </div>
                     {{ end }}
                   </div>
-                  <input type="hidden" name="userID" id="userID" value="{{ .User.ID }}" />
+                  <input type="hidden" name="userID" id="userID" value="{{ .Entity.ID }}" />
                   <div id="error-message" class="text-danger"></div>
                 </div>
                 <div class="modal-footer">
@@ -206,7 +225,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
       </div>
       <script>
-        var metadata = "{{ toJSON .User.Metadata }}";
+        var metadata = "{{ toJSON .Entity.Metadata }}";
         var parsedMetadata = JSON.parse(metadata);
 
         attachFormatJsonWithPrettifyListener({
@@ -219,14 +238,13 @@ SPDX-License-Identifier: Apache-2.0 -->
           button: "save-metadata",
           value: parsedMetadata,
         });
-      </script>      
-      <script type="module">
+      </script>      <script type="module">
         import { attachEditRowListener, updateName, updateIdentity, updateTags, updateMetadata} from "/js/update.js";
 
         attachEditRowListener(
           {
             entity: "users",
-            id: "{{ .User.ID }}",
+            id: "{{ .Entity.ID }}",
             rows: {
               name:updateName,
               identity:updateIdentity,
@@ -245,7 +263,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           field:"metadata",
           alertDiv: "metadataError",
           fieldName: "metadata-field",
-          id: "{{ .User.ID }}",
+          id: "{{ .Entity.ID }}",
           entity: "users",
           button: "save-metadata",
         });
