@@ -2321,43 +2321,43 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 			}
 			return
 		}
-	}
-	switch err {
-	case errMissingSecret,
-		errMissingIdentity,
-		errLimitSize,
-		errPageSize,
-		errMissingConfigID,
-		errMissingMetadata,
-		errMissingEmail,
-		errMissingName,
-		errMissingChannel,
-		errMissingPayload,
-		errMissingPassword,
-		errMissingError,
-		errMissingRefreshToken,
-		errMissingRef,
-		errMissingConfirmPassword,
-		errNameSize,
-		errBearerKey,
-		errMissingOwner,
-		errMissingItem,
-		errMissingThingID,
-		errMissingChannelID,
-		errMissingDomainID,
-		errMissingUserID,
-		errMissingRelation,
-		errMissingGroupID,
-		errMissingParentID,
-		errMissingDescription,
-		errMissingThingKey,
-		errMissingExternalID,
-		errMissingRole,
-		errMissingValue,
-		errMissingExternalKey:
-		w.Header().Set("X-Error-Message", err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-	default:
-		w.WriteHeader(http.StatusBadRequest)
+		switch err {
+		case errMissingSecret,
+			errMissingIdentity,
+			errLimitSize,
+			errPageSize,
+			errMissingConfigID,
+			errMissingMetadata,
+			errMissingEmail,
+			errMissingName,
+			errMissingChannel,
+			errMissingPayload,
+			errMissingPassword,
+			errMissingError,
+			errMissingRefreshToken,
+			errMissingRef,
+			errMissingConfirmPassword,
+			errNameSize,
+			errBearerKey,
+			errMissingOwner,
+			errMissingItem,
+			errMissingThingID,
+			errMissingChannelID,
+			errMissingDomainID,
+			errMissingUserID,
+			errMissingRelation,
+			errMissingGroupID,
+			errMissingParentID,
+			errMissingDescription,
+			errMissingThingKey,
+			errMissingExternalID,
+			errMissingRole,
+			errMissingValue,
+			errMissingExternalKey:
+			w.Header().Set("X-Error-Message", err.Error())
+			w.WriteHeader(http.StatusBadRequest)
+		default:
+			w.WriteHeader(http.StatusBadRequest)
+		}
 	}
 }
