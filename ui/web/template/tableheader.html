@@ -3,6 +3,22 @@ SPDX-License-Identifier: Apache-2.0 -->
 
 {{ define "tableheader" }}
   {{ $currentPage := .CurrentPage }}
+  <script>
+    localStorage.setItem("selectedLimit", "{{.Limit}}");
+    var selectedStatus = localStorage.getItem("selectedStatus");
+    var selectedLimit = localStorage.getItem("selectedLimit");
+    var itemsPerPage = document.querySelectorAll(".itemsPerPage a");
+    itemsPerPage.forEach(function (item) {
+      var href = item.getAttribute("href");
+      if (selectedStatus) {
+        href = href + "&status=" + selectedStatus;
+      }
+      item.setAttribute("href", href);
+      item.addEventListener("click", function () {
+      localStorage.setItem("selectedLimit", item.textContent);
+      });
+    });
+  </script>
   <div class="row-mb-3 d-flex flex-row justify-content-between mb-3">
     <div class="d-flex flex-row justify-content-start mb-2">
       <div class="dropdown border">
@@ -74,23 +90,4 @@ SPDX-License-Identifier: Apache-2.0 -->
       </script>
     {{ end }}
   </div>
-
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    localStorage.setItem("selectedLimit", "{{.Limit}}");
-    var selectedStatus = localStorage.getItem("selectedStatus");
-    var selectedLimit = localStorage.getItem("selectedLimit");
-    var itemsPerPage = document.querySelectorAll(".itemsPerPage a");
-    itemsPerPage.forEach(function (item) {
-      var href = item.getAttribute("href");
-      if (selectedStatus) {
-        href = href + "&status=" + selectedStatus;
-      }
-      item.setAttribute("href", href);
-      item.addEventListener("click", function () {
-      localStorage.setItem("selectedLimit", item.textContent);
-      });
-    });
-  });
-</script>
 {{ end }}
