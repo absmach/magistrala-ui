@@ -58,25 +58,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                         <td></td>
                       </tr>
                       <tr>
-                        <th>Content</th>
-                        <td
-                          class="editable content-field"
-                          contenteditable="false"
-                          data-field="content"
-                        >
-                          {{ .Bootstrap.Content }}
-                        </td>
-                        <td>
-                          <button class="edit-btn" id="edit-content">
-                            <i class="fas fa-pencil-alt"></i>
-                          </button>
-                          <div class="save-cancel-buttons" style="display: none">
-                            <button class="save-btn" id="save-content">Save</button>
-                            <button class="cancel-btn" id="cancel-content">Cancel</button>
-                          </div>
-                        </td>
-                      </tr>
-                      <tr>
                         <th>Channels</th>
                         <td>
                           {{ range $i, $c := .Bootstrap.Channels }}
@@ -152,6 +133,24 @@ SPDX-License-Identifier: Apache-2.0 -->
                             <button class="save-btn" id="save-CACert">Save</button>
                             <button class="cancel-btn" id="cancel-CACert">Cancel</button>
                           </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <th>Content</th>
+                        <td>
+                          <div>
+                            <pre id="content"></pre>
+                          </div>
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            class="edit-btn"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editContentModal"
+                          >
+                            <i class="fas fa-pencil-alt"></i>
+                          </button>
                         </td>
                       </tr>
                       <tr>
@@ -238,6 +237,45 @@ SPDX-License-Identifier: Apache-2.0 -->
                       Cancel
                     </button>
                     <button type="submit" class="btn body-button" id="add-channel">Update</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Content Modal -->
+          `
+          <div
+            class="modal fade"
+            id="editContentModal"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="editContentModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="editContentModalLabel">Edit Content</h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <form action="">
+                  <div class="modal-body">
+                    <div class="content-field">
+                      <textarea name="content" id="contentTextArea"></textarea>
+                    </div>
+                    <div id="contentError" class="text-danger"></div>
+                  </div>
+                  <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">
+                      Cancel
+                    </button>
+                    <button class="btn body-button" id="save-content" type="submit">Update</button>
                   </div>
                 </form>
               </div>
@@ -355,6 +393,20 @@ SPDX-License-Identifier: Apache-2.0 -->
           });
         })
 
+        var content = "{{ .Bootstrap.Content }}";
+        var parsedContent = JSON.parse(content);
+
+        attachFormatJsonWithPrettifyListener({
+          id: "content",
+          data: content,
+        });
+
+        codeMirrorEditor({
+          textArea: "contentTextArea",
+          button: "save-content",
+          value: parsedContent,
+        });
+
       </script>    <script type="module">
       import { attachEditRowListener, updateName, updateContent, updateClientCerts } from "/js/update.js";
       import { fetchIndividualEntity } from "/js/infinitescroll.js";
@@ -364,7 +416,6 @@ SPDX-License-Identifier: Apache-2.0 -->
         id: "{{ .Bootstrap.ThingID }}",
         rows: {
           name:updateName,
-          content:updateContent,
           clientCert:updateClientCerts,
           clientKey:updateClientCerts,
           CACert:updateClientCerts,
@@ -372,11 +423,20 @@ SPDX-License-Identifier: Apache-2.0 -->
         errorDiv: "error-message",
         fields: {
           name: "name-field",
-          content: "content-field",
           clientCert: "clientCert-field",
           clientKey: "clientKey-field",
           CACert: "CACert-field",
         }
+      });
+
+      updateContent({
+        textArea: "contentTextArea",
+        field:"content",
+        alertDiv: "contentError",
+        fieldName: "content-field",
+        id: "{{ .Bootstrap.ThingID }}",
+        entity: "bootstraps",
+        button: "save-content",
       });
 
       fetchIndividualEntity({

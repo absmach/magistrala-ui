@@ -153,13 +153,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                             </div>
                             <div class="mb-3">
                               <label for="content" class="form-label">Content</label>
-                              <input
-                                type="text"
-                                class="form-control"
-                                name="content"
-                                id="content"
-                                value="{}"
-                              />
+                              <div class="content-field">
+                                <textarea name="content" id="content"></textarea>
+                              </div>
                               <div id="contentHelp" class="form-text">
                                 Enter content in JSON format.
                               </div>
@@ -231,6 +227,12 @@ SPDX-License-Identifier: Apache-2.0 -->
         function openModal() {
           bootstrapsModal.show();
         }
+
+        codeMirrorEditor({
+          textArea: "content",
+          button: "create-bootstrap-button",
+          value: {},
+        });
       </script>
       <script type="module">
         import {

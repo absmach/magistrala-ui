@@ -124,18 +124,20 @@ function updateDescription(config) {
 // Bootstrap update functions
 function updateContent(config) {
   const button = document.getElementById(config.button);
+  button.addEventListener("click", function (event) {
+    event.preventDefault();
+    const updatedValue = document.getElementById(config.textArea).value;
+    if (validateJSON(updatedValue, config.alertDiv, config.fieldName, event)) {
+      const url = `/${config.entity}/${config.id}`;
+      const data = { [config.field]: updatedValue };
 
-  button.addEventListener("click", function () {
-    const updatedValue = config.cell.textContent.trim();
-    const url = `/${config.entity}/${config.id}`;
-    const data = { [config.field]: updatedValue };
-
-    submitUpdateForm({
-      url: url,
-      data: data,
-      alertDiv: config.alertDiv,
-      field: config.field,
-    });
+      submitUpdateForm({
+        url: url,
+        data: data,
+        alertDiv: config.alertDiv,
+        field: config.field,
+      });
+    }
   });
 }
 
