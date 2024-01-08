@@ -1766,6 +1766,11 @@ func (us *uiService) ViewBootstrap(token, thingID string) ([]byte, error) {
 		return nil, errors.Wrap(errors.New("invalid channels"), ErrFailedRetreive)
 	}
 
+	thing, err := us.sdk.Thing(thingID, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
 	crumb := breadcrumb{
 		Previous: bootstrapsActive,
 		Current:  thingID,
@@ -1775,11 +1780,13 @@ func (us *uiService) ViewBootstrap(token, thingID string) ([]byte, error) {
 		NavbarActive   string
 		CollapseActive string
 		Bootstrap      sdk.BootstrapConfig
+		Thing          sdk.Thing
 		Breadcrumb     breadcrumb
 	}{
 		bootstrapsActive,
 		bootstrapsActive,
 		bootstrap,
+		thing,
 		crumb,
 	}
 

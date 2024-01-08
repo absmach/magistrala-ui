@@ -1796,16 +1796,17 @@ func decodeUpdateBootstrapConnections(_ context.Context, r *http.Request) (inter
 		return nil, err
 	}
 
-	var data updateBootstrapConnReq
-	err = json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
+	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
 
-	data.id = chi.URLParam(r, "id")
-	data.token = token
+	req := updateBootstrapConnReq{
+		token:    token,
+		id:       chi.URLParam(r, "id"),
+		Channels: r.PostForm["channelID"],
+	}
 
-	return data, nil
+	return req, nil
 }
 
 func decodeListEntityRequest(_ context.Context, r *http.Request) (interface{}, error) {

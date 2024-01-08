@@ -52,9 +52,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                         <th>Thing</th>
                         <td>
                           <a href="/things/{{ .Bootstrap.ThingID }}">
-                            {{ .Bootstrap.ThingID }}
+                            {{ .Thing.Name }}
                           </a>
                         </td>
+                        <td></td>
                       </tr>
                       <tr>
                         <th>Content</th>
@@ -77,21 +78,23 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                       <tr>
                         <th>Channels</th>
-                        <td
-                          class="editable channels-field"
-                          contenteditable="false"
-                          data-field="channels"
-                        >
-                          {{ toSlice .Bootstrap.Channels }}
+                        <td>
+                          {{ range $i, $c := .Bootstrap.Channels }}
+                            <span class="badge rounded-pill enabled-pill">
+                              <a href="/channels/{{ $c }}">{{ $c }}</a>
+                            </span>
+                          {{ end }}
                         </td>
                         <td>
-                          <button class="edit-btn" id="edit-channels">
+                          <button
+                            type="button"
+                            id="edit-channels"
+                            class="edit-btn"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editChannelsModal"
+                          >
                             <i class="fas fa-pencil-alt"></i>
                           </button>
-                          <div class="save-cancel-buttons" style="display: none">
-                            <button class="save-btn" id="save-channels">Save</button>
-                            <button class="cancel-btn" id="cancel-channels">Cancel</button>
-                          </div>
                         </td>
                       </tr>
                       <tr>
@@ -184,6 +187,59 @@ SPDX-License-Identifier: Apache-2.0 -->
                     </button>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Channels Modal -->
+          <div
+            class="modal fade"
+            id="editChannelsModal"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="editChannelsModalLabel"
+            aria-hidden="true"
+          >
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="editChannelsModalLabel">Edit Channels</h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <form action="/bootstraps/{{ .Bootstrap.ThingID }}/connections" method="post">
+                  <div class="modal-body">
+                    <div class="mb-3">
+                      <label for="channels-select" class="form-label">Channels</label>
+                      <input
+                        type="text"
+                        class="itemsFilter"
+                        name="channelFilter"
+                        id="channelFilter"
+                        placeholder="Filter by channel name"
+                      />
+                      <select
+                        class="form-select"
+                        name="channelID"
+                        id="channels-select"
+                        size="5"
+                        multiple
+                      >
+                        <option disabled>select a channel</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                      Cancel
+                    </button>
+                    <button type="submit" class="btn body-button" id="add-channel">Update</button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
@@ -283,17 +339,32 @@ SPDX-License-Identifier: Apache-2.0 -->
               </div>
             </div>
           </div>
+          <!-- Modals End -->
         </div>
       </div>
-    <script type="module">
-      import { attachEditRowListener, updateName, updateContent, updateConnections, updateClientCerts } from "/js/update.js";
+      <script>
+        var editChannelButton = document.getElementById("edit-channels");
+        editChannelButton.addEventListener("click", () => {
+          var selectElement = document.getElementById("channels-select");
+          var channelsOptions = selectElement.querySelectorAll("option");
+          var channels = JSON.parse("{{ toSlice .Bootstrap.Channels }}");
+          channelsOptions.forEach((option) => {
+            if (channels.includes(option.value)) {
+              option.selected = true;
+            }
+          });
+        })
+
+      </script>    <script type="module">
+      import { attachEditRowListener, updateName, updateContent, updateClientCerts } from "/js/update.js";
+      import { fetchIndividualEntity } from "/js/infinitescroll.js";
+
       attachEditRowListener({
         entity: "bootstraps",
         id: "{{ .Bootstrap.ThingID }}",
         rows: {
           name:updateName,
           content:updateContent,
-          channels:updateConnections,
           clientCert:updateClientCerts,
           clientKey:updateClientCerts,
           CACert:updateClientCerts,
@@ -302,12 +373,17 @@ SPDX-License-Identifier: Apache-2.0 -->
         fields: {
           name: "name-field",
           content: "content-field",
-          channels: "channels-field",
           clientCert: "clientCert-field",
           clientKey: "clientKey-field",
           CACert: "CACert-field",
         }
       });
+
+      fetchIndividualEntity({
+          input: "channelFilter",
+          itemSelect: "channels-select",
+          item: "channels",
+        });
     </script>
     </body>
   </html>

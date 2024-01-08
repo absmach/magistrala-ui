@@ -155,25 +155,6 @@ function updateClientCerts(config) {
   });
 }
 
-function updateConnections(config) {
-  const button = document.getElementById(config.button);
-
-  button.addEventListener("click", function (event) {
-    const updatedValue = config.cell.textContent.trim();
-
-    if (validateStringArray(updatedValue, config.alertDiv, config.fieldName, event)) {
-      const url = `/${config.entity}/${config.id}/connections`;
-      const data = { [config.field]: JSON.parse(updatedValue) };
-
-      submitUpdateForm({
-        url: url,
-        data: data,
-        alertDiv: config.alertDiv,
-      });
-    }
-  });
-}
-
 // make a cell editable.
 function makeEditable(cell) {
   cell.setAttribute("contenteditable", "true");
@@ -264,6 +245,5 @@ export {
   updateDescription,
   updateContent,
   updateClientCerts,
-  updateConnections,
   attachEditRowListener,
 };
