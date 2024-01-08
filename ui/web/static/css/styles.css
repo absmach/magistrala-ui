@@ -596,6 +596,20 @@ button.edit-btn {
 	border: #c20707 1px solid;
 }
 
+.enabled-pill {
+	background: #f0f0f0;
+	color: var(--main-color);
+	padding: 0.5rem;
+	border: var(--main-color) 1px solid;
+}
+
+.disabled-pill {
+	background: #f0f0f0;
+	color: #c20707;
+	padding: 0.5rem;
+	border: #c20707 1px solid;
+}
+
 .modal-title {
 	font-weight: 700;
 	font-size: 1.25rem;
