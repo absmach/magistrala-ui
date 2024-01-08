@@ -124,18 +124,20 @@ function updateDescription(config) {
 // Bootstrap update functions
 function updateContent(config) {
   const button = document.getElementById(config.button);
+  button.addEventListener("click", function (event) {
+    event.preventDefault();
+    const updatedValue = document.getElementById(config.textArea).value;
+    if (validateJSON(updatedValue, config.alertDiv, config.fieldName, event)) {
+      const url = `/${config.entity}/${config.id}`;
+      const data = { [config.field]: updatedValue };
 
-  button.addEventListener("click", function () {
-    const updatedValue = config.cell.textContent.trim();
-    const url = `/${config.entity}/${config.id}`;
-    const data = { [config.field]: updatedValue };
-
-    submitUpdateForm({
-      url: url,
-      data: data,
-      alertDiv: config.alertDiv,
-      field: config.field,
-    });
+      submitUpdateForm({
+        url: url,
+        data: data,
+        alertDiv: config.alertDiv,
+        field: config.field,
+      });
+    }
   });
 }
 
@@ -152,25 +154,6 @@ function updateClientCerts(config) {
       data: data,
       alertDiv: config.alertDiv,
     });
-  });
-}
-
-function updateConnections(config) {
-  const button = document.getElementById(config.button);
-
-  button.addEventListener("click", function (event) {
-    const updatedValue = config.cell.textContent.trim();
-
-    if (validateStringArray(updatedValue, config.alertDiv, config.fieldName, event)) {
-      const url = `/${config.entity}/${config.id}/connections`;
-      const data = { [config.field]: JSON.parse(updatedValue) };
-
-      submitUpdateForm({
-        url: url,
-        data: data,
-        alertDiv: config.alertDiv,
-      });
-    }
   });
 }
 
@@ -264,6 +247,5 @@ export {
   updateDescription,
   updateContent,
   updateClientCerts,
-  updateConnections,
   attachEditRowListener,
 };

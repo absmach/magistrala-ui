@@ -25,7 +25,7 @@ function syntaxHighlight(json) {
 
 function attachFormatJsonWithPrettifyListener(config) {
   document.addEventListener("DOMContentLoaded", function () {
-    var meta = JSON.parse(config.metadata);
+    var meta = JSON.parse(config.data);
     document.getElementById(config.id).innerHTML = syntaxHighlight(JSON.stringify(meta, null, 2));
   });
 }
