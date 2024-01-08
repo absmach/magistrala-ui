@@ -19,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <div class="buttons mb-3">
                   <button type="button" class="btn body-button" onclick="openModal()">Add</button>
 
-                  <!-- Modal -->
+                  <!-- Add Bootstrap Modal -->
                   <div
                     class="modal fade"
                     id="addBootstrapModal"
@@ -54,8 +54,32 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 placeholder="Name"
                               />
                             </div>
+                            <div class="row mb-3">
+                              <div class="col-md-6">
+                                <label for="externalID" class="form-label">External ID</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  name="externalID"
+                                  id="externalID"
+                                  placeholder="External ID"
+                                  required
+                                />
+                              </div>
+                              <div class="col-md-6">
+                                <label for="externalKey" class="form-label">External Key</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  name="externalKey"
+                                  id="externalKey"
+                                  placeholder="External Key"
+                                  required
+                                />
+                              </div>
+                            </div>
                             <div class="mb-3">
-                              <label for="infiniteScroll" class="form-label">Thing</label>
+                              <label for="things-select" class="form-label">Thing</label>
                               <input
                                 type="text"
                                 class="itemsFilter"
@@ -66,50 +90,67 @@ SPDX-License-Identifier: Apache-2.0 -->
                               <select
                                 class="form-select"
                                 name="thingID"
-                                id="infiniteScroll"
+                                id="things-select"
+                                size="5"
                                 required
                               >
-                                <option disabled>select a group</option>
+                                <option disabled>select a thing</option>
                               </select>
                             </div>
                             <div class="mb-3">
-                              <label for="externalID" class="form-label">External ID</label>
+                              <label for="channels-select" class="form-label">Channels</label>
                               <input
                                 type="text"
-                                class="form-control"
-                                name="externalID"
-                                id="externalID"
-                                placeholder="External ID"
-                                required
+                                class="itemsFilter"
+                                name="channelFilter"
+                                id="channelFilter"
+                                placeholder="Filter by channel name"
                               />
+                              <select
+                                class="form-select"
+                                name="channelID"
+                                id="channels-select"
+                                size="5"
+                                multiple
+                              >
+                                <option disabled>select a channel</option>
+                              </select>
                             </div>
-                            <div class="mb-3">
-                              <label for="externalKey" class="form-label">External Key</label>
-                              <input
-                                type="text"
-                                class="form-control"
-                                name="externalKey"
-                                id="externalKey"
-                                placeholder="External Key"
-                                required
-                              />
-                            </div>
-                            <div class="mb-3">
-                              <label for="channels" class="form-label">Channels</label>
-                              <input
-                                type="text"
-                                class="form-control"
-                                name="channels"
-                                id="channels"
-                                value="[]"
-                                required
-                              />
-                              <div id="channelsHelp" class="form-text">
-                                Enter channels as a string slice.
+                            <div class="row mb-3">
+                              <div class="col-md-6">
+                                <label for="clientCert" class="form-label">Client Cert</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  name="clientCert"
+                                  id="clientCert"
+                                  aria-describedby="tagHelp"
+                                  placeholder="clientCert"
+                                />
                               </div>
-                              <div id="channelsError" class="text-danger"></div>
+                              <div class="col-md-6">
+                                <label for="clientKey" class="form-label">Client Key</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  name="clientKey"
+                                  id="clientKey"
+                                  aria-describedby="tagHelp"
+                                  placeholder="clientKey"
+                                />
+                              </div>
                             </div>
-
+                            <div class="mb-3">
+                              <label for="CACert" class="form-label">CA Cert</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                name="CACert"
+                                id="CACert"
+                                aria-describedby="tagHelp"
+                                placeholder="CACert"
+                              />
+                            </div>
                             <div class="mb-3">
                               <label for="content" class="form-label">Content</label>
                               <input
@@ -123,39 +164,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 Enter content in JSON format.
                               </div>
                               <div id="contentError" class="text-danger"></div>
-                            </div>
-                            <div class="mb-3">
-                              <label for="clientCert" class="form-label">Client Cert</label>
-                              <input
-                                type="text"
-                                class="form-control"
-                                name="clientCert"
-                                id="clientCert"
-                                aria-describedby="tagHelp"
-                                value="clientCert"
-                              />
-                            </div>
-                            <div class="mb-3">
-                              <label for="clientKey" class="form-label">Client Key</label>
-                              <input
-                                type="text"
-                                class="form-control"
-                                name="clientKey"
-                                id="clientKey"
-                                aria-describedby="tagHelp"
-                                value="clientKey"
-                              />
-                            </div>
-                            <div class="mb-3">
-                              <label for="CACert" class="form-label">CA Cert</label>
-                              <input
-                                type="text"
-                                class="form-control"
-                                name="CACert"
-                                id="CACert"
-                                aria-describedby="tagHelp"
-                                value="CACert"
-                              />
                             </div>
                           </div>
                           <div class="modal-footer">
@@ -184,6 +192,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <th scope="col">Name</th>
                           <th scope="col">Thing ID</th>
                           <th scope="col">External ID</th>
+                          <th scope="col">State</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -197,6 +206,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                               {{ $t.ThingID }}
                             </td>
                             <td>{{ $t.ExternalID }}</td>
+                            <td>
+                              {{ if eq $t.State 0 }}
+                                <span class="badge rounded-pill disabled-pill">Disabled</span>
+                              {{ else }}
+                                <span class="badge rounded-pill enabled-pill">Enabled</span>
+                              {{ end }}
+                            </td>
                           </tr>
                         {{ end }}
                       </tbody>
@@ -238,8 +254,14 @@ SPDX-License-Identifier: Apache-2.0 -->
 
         fetchIndividualEntity({
           input: "thingFilter",
-          itemSelect: "infiniteScroll",
+          itemSelect: "things-select",
           item: "things",
+        });
+
+        fetchIndividualEntity({
+          input: "channelFilter",
+          itemSelect: "channels-select",
+          item: "channels",
         });
       </script>
     </body>
