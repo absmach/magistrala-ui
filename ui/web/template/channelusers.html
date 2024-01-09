@@ -222,15 +222,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   {{ end }}
                                 </td>
                                 <td class="meta-col">
-                                  {{ range $k, $v := $u.Metadata }}
-                                    <span class="badge bg-success">
-                                      {{ $k }}:
-                                      {{ $v }}
-                                    </span>
-                                  {{ end }}
+                                  <div class="meta-div">
+                                    <pre id="all-meta-{{ $i }}"></pre>
+                                  </div>
                                 </td>
                                 <td class="created-col">{{ $u.CreatedAt }}</td>
                               </tr>
+                              <script>
+                                attachFormatJsonWithPrettifyListener({
+                                  metadata: '{{ toJSON $u.Metadata }}',
+                                  id: "all-meta-{{ $i }}",
+                                })
+                              </script>
                             {{ end }}
                           </tbody>
                         </table>
@@ -273,12 +276,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   {{ end }}
                                 </td>
                                 <td class="meta-col">
-                                  {{ range $k, $v := $u.Metadata }}
-                                    <span class="badge bg-success">
-                                      {{ $k }}:
-                                      {{ $v }}
-                                    </span>
-                                  {{ end }}
+                                  <div class="meta-div">
+                                    <pre id="admin-meta-{{ $i }}"></pre>
+                                  </div>
                                 </td>
                                 <td class="created-col">{{ $u.CreatedAt }}</td>
                                 <td class="text-center">
@@ -304,6 +304,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   </form>
                                 </td>
                               </tr>
+                              <script>
+                                attachFormatJsonWithPrettifyListener({
+                                  metadata: '{{ toJSON $u.Metadata }}',
+                                  id: "admin-meta-{{ $i }}",
+                                })
+                              </script>
                             {{ end }}
                           </tbody>
                         </table>
@@ -346,12 +352,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   {{ end }}
                                 </td>
                                 <td class="meta-col">
-                                  {{ range $k, $v := $u.Metadata }}
-                                    <span class="badge bg-success">
-                                      {{ $k }}:
-                                      {{ $v }}
-                                    </span>
-                                  {{ end }}
+                                  <div class="meta-div">
+                                    <pre id="editor-meta-{{ $i }}"></pre>
+                                  </div>
                                 </td>
                                 <td class="created-col">{{ $u.CreatedAt }}</td>
                                 <td class="text-center">
@@ -377,6 +380,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   </form>
                                 </td>
                               </tr>
+                              <script>
+                                attachFormatJsonWithPrettifyListener({
+                                  metadata: '{{ toJSON $u.Metadata }}',
+                                  id: "editor-meta-{{ $i }}",
+                                })
+                              </script>
                             {{ end }}
                           </tbody>
                         </table>
@@ -419,12 +428,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   {{ end }}
                                 </td>
                                 <td class="meta-col">
-                                  {{ range $k, $v := $u.Metadata }}
-                                    <span class="badge bg-success">
-                                      {{ $k }}:
-                                      {{ $v }}
-                                    </span>
-                                  {{ end }}
+                                  <div class="meta-div">
+                                    <pre id="viewer-meta-{{ $i }}"></pre>
+                                  </div>
                                 </td>
                                 <td class="created-col">{{ $u.CreatedAt }}</td>
                                 <td class="text-center">
@@ -450,6 +456,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   </form>
                                 </td>
                               </tr>
+                              <script>
+                                attachFormatJsonWithPrettifyListener({
+                                  metadata: '{{ toJSON $u.Metadata }}',
+                                  id: "viewer-meta-{{ $i }}",
+                                })
+                              </script>
                             {{ end }}
                           </tbody>
                         </table>
