@@ -5,12 +5,10 @@ package api
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"time"
 
 	"github.com/absmach/magistrala-ui/ui"
-	"github.com/absmach/magistrala/pkg/messaging"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 )
 
@@ -1130,15 +1128,11 @@ func (lm *loggingMiddleware) ListUserGroupChannels(token, groupID string, page, 
 }
 
 // Publish adds logging middleware to publish method.
-func (lm *loggingMiddleware) Publish(token, thKey string, msg *messaging.Message) (err error) {
+func (lm *loggingMiddleware) Publish(token, chID, thKey, baseUnit, name, unit string, baseTime, value float64) (err error) {
 	defer func(begin time.Time) {
-		destChannel := msg.Channel
-		if msg.Subtopic != "" {
-			destChannel = fmt.Sprintf("%s.%s", destChannel, msg.Subtopic)
-		}
 		args := []interface{}{
 			slog.String("duration", time.Since(begin).String()),
-			slog.String("channel_id", destChannel),
+			slog.String("channel_id", chID),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
@@ -1148,11 +1142,11 @@ func (lm *loggingMiddleware) Publish(token, thKey string, msg *messaging.Message
 		lm.logger.Info("Publish message completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.Publish(token, thKey, msg)
+	return lm.svc.Publish(token, chID, thKey, baseUnit, name, unit, baseTime, value)
 }
 
-// ReadMessage adds logging middleware to read message method.
-func (lm *loggingMiddleware) ReadMessage(token, chID, thKey string, page, limit uint64) (b []byte, err error) {
+// ReadMessages adds logging middleware to messages method.
+func (lm *loggingMiddleware) ReadMessages(token, chID, thKey string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []interface{}{
 			slog.String("duration", time.Since(begin).String()),
@@ -1168,7 +1162,7 @@ func (lm *loggingMiddleware) ReadMessage(token, chID, thKey string, page, limit 
 		lm.logger.Info("Read messages completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ReadMessage(token, chID, thKey, page, limit)
+	return lm.svc.ReadMessages(token, chID, thKey, page, limit)
 }
 
 // CreateBootstrap adds logging middleware to create bootstrap method.

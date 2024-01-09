@@ -4,7 +4,6 @@
 package api
 
 import (
-	"github.com/absmach/magistrala/pkg/messaging"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 )
 
@@ -624,9 +623,14 @@ func (req updateGroupStatusReq) validate() error {
 }
 
 type publishReq struct {
-	thingKey string
 	token    string
-	Msg      *messaging.Message
+	ThingKey string  `json:"thing_key,omitempty"`
+	ChanID   string  `json:"chan_id,omitempty"`
+	BaseTime float64 `json:"bt"`
+	BaseUnit string  `json:"bu"`
+	Name     string  `json:"n"`
+	Unit     string  `json:"u"`
+	Value    float64 `json:"v"`
 }
 
 func (req publishReq) validate() error {
@@ -634,19 +638,16 @@ func (req publishReq) validate() error {
 		return errAuthorization
 	}
 
-	if req.thingKey == "" {
+	if req.ThingKey == "" {
 		return errMissingThingKey
 	}
-	if req.Msg.Channel == "" {
+	if req.ChanID == "" {
 		return errMissingChannel
-	}
-	if req.Msg.Payload == nil {
-		return errMissingPayload
 	}
 	return nil
 }
 
-type readMessageReq struct {
+type readMessagesReq struct {
 	token    string
 	ChanID   string `json:"chan_id,omitempty"`
 	ThingKey string `json:"thing_key,omitempty"`
@@ -654,10 +655,23 @@ type readMessageReq struct {
 	Limit    uint64
 }
 
-func (req readMessageReq) validate() error {
+func (req readMessagesReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
+	if req.ChanID == "" {
+		return errMissingChannelID
+	}
+	if req.ThingKey == "" {
+		return errMissingThingKey
+	}
+	if req.Page == 0 {
+		return errPageSize
+	}
+	if req.Limit == 0 {
+		return errLimitSize
+	}
+
 	return nil
 }
 

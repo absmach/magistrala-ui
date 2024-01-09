@@ -1,0 +1,162 @@
+<!-- Copyright (c) Abstract Machines
+SPDX-License-Identifier: Apache-2.0 -->
+
+{{ define "readmessages" }}
+  <!doctype html>
+  <html lang="en">
+    <head>
+      <title>Read Messages</title>
+      {{ template "header" }}
+    </head>
+    <body>
+      {{ template "navbar" . }}
+      <div class="main-content pt-3">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-12 mx-auto py-3">
+              {{ template "breadcrumb" . }}
+              <div class="row-mb-3 mb-3">
+                <button
+                  type="button"
+                  class="btn body-button"
+                  data-bs-toggle="modal"
+                  data-bs-target="#sendMessageModal"
+                  title="Send a test message across the channel"
+                >
+                  Test Channel
+                </button>
+              </div>
+              <div class="table-responsive table-container">
+                {{ template "tableheader" . }}
+                <table id="itemsTable" class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Subtopic</th>
+                      <th scope="col">Publisher</th>
+                      <th scope="col">Protocol</th>
+                      <th scope="col">Name</th>
+                      <th scope="col">Unit</th>
+                      <th scope="col">Value</th>
+                      <th scope="col">StringValue</th>
+                      <th scope="col">BoolValue</th>
+                      <th scope="col">DataValue</th>
+                      <th scope="col">Sum</th>
+                      <th scope="col">Sent At</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {{ range $i, $c := .Msg }}
+                      <tr>
+                        <td>{{ $c.Subtopic }}</td>
+                        <td>{{ $c.Publisher }}</td>
+                        <td>{{ $c.Protocol }}</td>
+                        <td>{{ $c.Name }}</td>
+                        <td>{{ $c.Unit }}</td>
+                        <td>
+                          {{ if $c.Value }}
+                            <span class="badge rounded-pill enabled-pill">{{ $c.Value }}</span>
+                          {{ end }}
+                        </td>
+                        <td>
+                          {{ if $c.StringValue }}
+                            <span class="badge rounded-pill enabled-pill">
+                              {{ $c.StringValue }}
+                            </span>
+                          {{ end }}
+                        </td>
+                        <td>
+                          {{ if $c.BoolValue }}
+                            <span class="badge rounded-pill enabled-pill">{{ $c.BoolValue }}</span>
+                          {{ end }}
+                        </td>
+                        <td>
+                          {{ if $c.DataValue }}
+                            <span class="badge rounded-pill enabled-pill">{{ $c.DataValue }}</span>
+                          {{ end }}
+                        </td>
+                        <td>{{ if $c.Sum }}{{ $c.Sum }}{{ end }}</td>
+                        <td>{{ unixTimeToHumanTime $c.Time }}</td>
+                      </tr>
+                    {{ end }}
+                  </tbody>
+                </table>
+                {{ template "tablefooter" . }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- send message modal -->
+        <div
+          class="modal fade"
+          id="sendMessageModal"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby="sendMessageModalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title" id="sendMessageModalLabel">Send Message</h1>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <form action="/messages" method="post">
+                <div class="modal-body">
+                  <input type="hidden" name="thingKey" value="{{ .ThKey }}" />
+                  <input type="hidden" name="channelID" value="{{ .ChID }}" />
+                  <div class="mb-3">
+                    <label for="name" class="form-label">Name *</label>
+                    <input type="text" class="form-control name-field" name="name" id="name" />
+                    <div id="nameError" class="text-danger"></div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="unit" class="form-label">Unit</label>
+                    <input type="text" class="form-control" name="unit" id="unit" />
+                  </div>
+                  <div class="mb-3">
+                    <label for="value" class="form-label">Value *</label>
+                    <input type="text" class="form-control value-field" name="value" id="value" />
+                    <div id="valueError" class="text-danger"></div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Cancel
+                  </button>
+                  <button type="submit" class="btn body-button" id="send-message-button">
+                    Send
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script type="module">
+        import { validateName, validateFloat, attachValidationListener } from "/js/validation.js";
+
+        attachValidationListener({
+          buttonId: "send-message-button",
+          errorDivs: {
+            name: "nameError",
+            value: "valueError",
+          },
+          validations: {
+            name: validateName,
+            value: validateFloat,
+          },
+          fields: {
+            name: "name-field",
+            value: "value-field",
+          },
+        });
+      </script>
+    </body>
+  </html>
+{{ end }}

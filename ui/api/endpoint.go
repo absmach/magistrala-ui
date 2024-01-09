@@ -1259,24 +1259,25 @@ func publishMessageEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		if err := svc.Publish(req.token, req.thingKey, req.Msg); err != nil {
+		if err := svc.Publish(req.token, req.ChanID, req.ThingKey, req.BaseUnit, req.Name, req.Unit, req.BaseTime, req.Value); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": channelsAPIEndpoint + "/" + req.Msg.Channel + thingsAPIEndpoint},
+			headers: map[string]string{"Location": "/messages?thing=" + req.ThingKey + "&channel=" + req.ChanID},
 		}, nil
 	}
 }
 
-func readMessageEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(readMessageReq)
+func readMessagesEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(readMessagesReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.ReadMessage(req.token, req.ChanID, req.ThingKey, req.Page, req.Limit)
+
+		res, err := svc.ReadMessages(req.token, req.ChanID, req.ThingKey, req.Page, req.Limit)
 		if err != nil {
 			return nil, err
 		}

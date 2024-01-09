@@ -6,29 +6,6 @@ SPDX-License-Identifier: Apache-2.0 -->
   {{ $totalPages :=
     .Pages
   }}
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      var selectedLimit = localStorage.getItem("selectedLimit");
-      var selectedStatus = localStorage.getItem("selectedStatus");
-
-      var paginationLinks = document.querySelectorAll(".pagination a");
-
-      paginationLinks.forEach(function (link) {
-        var href = link.getAttribute("href");
-
-        if (selectedLimit) {
-          href = href + "&limit=" + selectedLimit;
-          console.log(href);
-        }
-
-        if (selectedStatus) {
-          href = href + "&status=" + selectedStatus;
-        }
-
-        link.setAttribute("href", href);
-      });
-    });
-  </script>
   <nav class="border-top" aria-label="Page navigation example">
     <ul class="pagination justify-content-end mt-3">
       {{ $prevPage := sub $currentPage 1 }}
@@ -70,4 +47,94 @@ SPDX-License-Identifier: Apache-2.0 -->
       {{ end }}
     </ul>
   </nav>
+  <script>
+    localStorage.setItem("selectedLimit", "{{.Limit}}");
+    var currentPage = '{{ .CurrentPage }}';
+    var isset = ' {{isset "StatusOptions" . }}';
+    var selectedStatus;
+    if (isset){
+      selectedStatus = localStorage.getItem("selectedStatus");
+    }
+    var selectedLimit = localStorage.getItem("selectedLimit");
+
+    var itemsPerPage = document.querySelectorAll(".itemsPerPage a");
+    itemsPerPage.forEach(function (item) {
+      var href = item.getAttribute("href");
+      var hrefParams = new URLSearchParams(href);
+      var limit = hrefParams.get("limit");
+      var newParams = { page:currentPage,limit: item.textContent};
+      if (selectedStatus) {
+        newParams.status = selectedStatus;
+      }
+      updateQueryParameters(newParams, item);
+      item.addEventListener("click", function () {
+        localStorage.setItem("selectedLimit", item.textContent);
+      });
+    });
+
+    var paginationLinks = document.querySelectorAll(".pagination a");
+    paginationLinks.forEach(function (item) {
+      var href = item.getAttribute("href");
+      var hrefParams = new URLSearchParams(href);
+      var page = hrefParams.get("page");
+      var newParams = { page: page };
+      if (selectedLimit) {
+        newParams.limit = selectedLimit;
+      }
+      if (selectedStatus) {
+        newParams.status = selectedStatus;
+      }
+
+      updateQueryParameters(newParams, item);
+    });
+
+
+    function updateQueryParameters(newParams, element) {
+      var params = new URLSearchParams(window.location.search);
+
+      // Add or update parameters from the newParams object
+      for (var key in newParams) {
+        if (Object.prototype.hasOwnProperty.call(newParams, key)) {
+          params.set(key, newParams[key]);
+        }
+      }
+
+      // Generate the updated query string
+      var newQueryStr = params.toString();
+      var href = `?${newQueryStr}`;
+
+      // Update element href with new query parameters
+      element.setAttribute("href", href);
+    }
+  </script> {{ if isset "StatusOptions" . }}
+    <script>
+      var statusOptions = JSON.parse('{{ toSlice .StatusOptions }}');
+      statusOptions.forEach(status => {
+        var statusElement = document.getElementById(status + "Status");
+        var newParams = { page:currentPage,limit: selectedLimit,status: status };
+        updateQueryParameters(newParams, statusElement);
+        statusElement.addEventListener("click", function () {
+          localStorage.setItem("selectedStatus", status);
+        });
+      });
+
+      function updateQueryParameters(newParams, element) {
+        var params = new URLSearchParams(window.location.search);
+
+        // Add or update parameters from the newParams object
+        for (var key in newParams) {
+          if (Object.prototype.hasOwnProperty.call(newParams, key)) {
+            params.set(key, newParams[key]);
+          }
+        }
+
+        // Generate the updated query string
+        var newQueryStr = params.toString();
+        var href = `?${newQueryStr}`;
+
+        // Update element href with new query parameters
+        element.setAttribute("href", href);
+      }
+    </script>
+  {{ end }}
 {{ end }}

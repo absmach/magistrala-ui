@@ -20,7 +20,6 @@ import (
 
 	"github.com/absmach/agent/pkg/bootstrap"
 	"github.com/absmach/magistrala/pkg/errors"
-	"github.com/absmach/magistrala/pkg/messaging"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/absmach/magistrala/pkg/transformers/senml"
 	mgsenml "github.com/absmach/senml"
@@ -108,7 +107,7 @@ var (
 		"resetpassword",
 		"updatepassword",
 
-		"messagesread",
+		"readmessages",
 
 		"thing",
 		"thingchannels",
@@ -286,9 +285,10 @@ type Service interface {
 	ListUserGroupChannels(token, groupID string, page, limit uint64) (b []byte, err error)
 
 	// Publish facilitates a thing publishin messages to a channel.
-	Publish(token, thKey string, msg *messaging.Message) error
-	// ReadMessage facilitates a thing reading messages published in a channel.
-	ReadMessage(token, chID, thKey string, page, limit uint64) ([]byte, error)
+	Publish(token, chID, thKey, baseUnit, name, unit string, baseTime, value float64) error
+	// ReadMessages retrieves messages published in a channel.
+	ReadMessages(token, chID, thKey string, page, limit uint64) ([]byte, error)
+
 	// CreateBootstrap creates a new bootstrap config.
 	CreateBootstrap(token string, config ...sdk.BootstrapConfig) error
 	// ListBootstrap retrieves all bootstrap configs.
@@ -942,6 +942,11 @@ func (us *uiService) ListChannelsByThing(token, thingID string, page, limit uint
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
+	thing, err := us.sdk.Thing(thingID, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
 	noOfPages := int(math.Ceil(float64(chsPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumb{
@@ -953,7 +958,7 @@ func (us *uiService) ListChannelsByThing(token, thingID string, page, limit uint
 	data := struct {
 		NavbarActive   string
 		CollapseActive string
-		ThingID        string
+		Thing          sdk.Thing
 		Channels       []sdk.Channel
 		CurrentPage    int
 		Pages          int
@@ -963,7 +968,7 @@ func (us *uiService) ListChannelsByThing(token, thingID string, page, limit uint
 	}{
 		thingsActive,
 		thingsActive,
-		thingID,
+		thing,
 		chsPage.Channels,
 		int(page),
 		noOfPages,
@@ -1612,27 +1617,15 @@ func (us *uiService) ListUserGroupChannels(token, groupID string, page, limit ui
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) Publish(token, thKey string, msg *messaging.Message) error {
-	if err := gs.sdk.SendMessage(msg.Channel, string(msg.Payload), thKey); err != nil {
-		return errors.Wrap(err, ErrFailedPublish)
+func (us *uiService) ReadMessages(token, chID, thKey string, page, limit uint64) ([]byte, error) {
+	offset := (page - 1) * limit
+	pgm := sdk.PageMetadata{
+		Offset: offset,
+		Limit:  limit,
 	}
-
-	return nil
-}
-
-func (us *uiService) ReadMessage(token, chID, thKey string, page, limit uint64) ([]byte, error) {
-	var msg sdk.MessagesPage
-
-	user, err := us.sdk.UserProfile(token)
+	msg, err := us.sdk.ReadMessages(pgm, chID, token)
 	if err != nil {
 		return []byte{}, err
-	}
-
-	if chID != "" {
-		msg, err = us.sdk.ReadMessages(chID, thKey)
-		if err != nil {
-			return []byte{}, err
-		}
 	}
 
 	noOfPages := int(math.Ceil(float64(msg.Total) / float64(limit)))
@@ -1644,19 +1637,19 @@ func (us *uiService) ReadMessage(token, chID, thKey string, page, limit uint64) 
 	data := struct {
 		NavbarActive   string
 		CollapseActive string
-		ChanID         string
+		ChID           string
+		ThKey          string
 		Msg            []senml.Message
-		User           sdk.User
 		CurrentPage    int
 		Pages          int
 		Limit          int
 		Breadcrumbs    []breadcrumb
 	}{
-		readMessagesActive,
+		thingsActive,
 		readMessagesActive,
 		chID,
+		thKey,
 		msg.Messages,
-		user,
 		int(page),
 		noOfPages,
 		int(limit),
@@ -1664,11 +1657,40 @@ func (us *uiService) ReadMessage(token, chID, thKey string, page, limit uint64) 
 	}
 
 	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "messagesread", data); err != nil {
+	if err := us.tpls.ExecuteTemplate(&btpl, "readmessages", data); err != nil {
 		return []byte{}, errors.Wrap(err, ErrExecTemplate)
 	}
 
 	return btpl.Bytes(), nil
+}
+
+func (us *uiService) Publish(token, chID, thKey, baseUnit, name, unit string, baseTime, value float64) error {
+	message := struct {
+		BaseTime float64 `json:"bt"`
+		BaseUnit string  `json:"bu"`
+		Name     string  `json:"n"`
+		Unit     string  `json:"u"`
+		Value    float64 `json:"v"`
+	}{
+		BaseTime: baseTime,
+		BaseUnit: baseUnit,
+		Name:     name,
+		Unit:     unit,
+		Value:    value,
+	}
+
+	jsonMessage, err := json.Marshal(message)
+	if err != nil {
+		return errors.Wrap(err, ErrFailedPublish)
+	}
+
+	messageArray := "[" + string(jsonMessage) + "]"
+
+	if err := us.sdk.SendMessage(chID, messageArray, thKey); err != nil {
+		return errors.Wrap(err, ErrFailedPublish)
+	}
+
+	return nil
 }
 
 func (us *uiService) CreateBootstrap(token string, configs ...sdk.BootstrapConfig) error {

@@ -81,6 +81,23 @@ function validateStringArray(tags, errorDiv, fieldName, event) {
   return true;
 }
 
+function validateFloat(value, errorDiv, fieldName, event) {
+  removeErrorMessage(errorDiv, fieldName);
+  if (value.trim() === "") {
+    event.preventDefault();
+    displayErrorMessage("Value is required", errorDiv, fieldName);
+    return false;
+  }
+
+  const floatValue = parseFloat(value);
+  if (isNaN(floatValue)) {
+    event.preventDefault();
+    displayErrorMessage("must be a number", errorDiv, fieldName);
+    return false;
+  }
+  return true;
+}
+
 function attachValidationListener(config) {
   const button = document.getElementById(config.buttonId);
 
@@ -101,5 +118,6 @@ export {
   validatePassword,
   validateJSON,
   validateStringArray,
+  validateFloat,
   attachValidationListener,
 };

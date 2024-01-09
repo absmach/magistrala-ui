@@ -18,7 +18,6 @@ import (
 	"github.com/absmach/magistrala"
 	"github.com/absmach/magistrala-ui/ui"
 	"github.com/absmach/magistrala/pkg/errors"
-	"github.com/absmach/magistrala/pkg/messaging"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/go-chi/chi/v5"
 	kithttp "github.com/go-kit/kit/transport/http"
@@ -565,9 +564,9 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				opts...,
 			).ServeHTTP)
 
-			r.Get("/read", kithttp.NewServer(
-				readMessageEndpoint(svc),
-				decodeReadMessageRequest,
+			r.Get("/", kithttp.NewServer(
+				readMessagesEndpoint(svc),
+				decodeReadMessagesRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
@@ -1622,45 +1621,39 @@ func decodeGroupStatusUpdate(_ context.Context, r *http.Request) (interface{}, e
 }
 
 func decodePublishRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	if err := r.ParseForm(); err != nil {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
 		return nil, err
 	}
 
-	msg := messaging.Message{
-		Protocol: protocol,
-		Channel:  r.Form.Get("channelID"),
-		Subtopic: "",
-		Payload:  []byte(r.Form.Get("message")),
-		Created:  time.Now().UnixNano(),
-	}
-
-	token, err := tokenFromCookie(r, "token")
+	currentTime := float64(time.Now().Unix())
+	floatValue, err := strconv.ParseFloat(r.PostFormValue("value"), 64)
 	if err != nil {
 		return nil, err
 	}
 
 	req := publishReq{
-		Msg:      &msg,
-		thingKey: r.Form.Get("thingKey"),
 		token:    token,
+		ThingKey: r.PostFormValue("thingKey"),
+		ChanID:   r.PostFormValue("channelID"),
+		BaseTime: currentTime,
+		BaseUnit: r.PostFormValue("unit"),
+		Name:     r.PostFormValue("name"),
+		Unit:     r.PostFormValue("unit"),
+		Value:    floatValue,
 	}
 
 	return req, nil
 }
 
-func decodeReadMessageRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	if err := r.ParseForm(); err != nil {
-		return nil, err
-	}
+func decodeReadMessagesRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
 	}
 
-	thKey := r.Form.Get("thingKey")
-
-	if !strings.Contains(thKey, "Thing") {
-		thKey = "Thing " + thKey
+	if err := r.ParseForm(); err != nil {
+		return nil, err
 	}
 
 	page, err := readNumQuery[uint64](r, pageKey, defPage)
@@ -1673,10 +1666,10 @@ func decodeReadMessageRequest(_ context.Context, r *http.Request) (interface{}, 
 		return nil, err
 	}
 
-	req := readMessageReq{
+	req := readMessagesReq{
 		token:    token,
-		ChanID:   r.Form.Get("chanID"),
-		ThingKey: thKey,
+		ChanID:   r.Form.Get("channel"),
+		ThingKey: r.Form.Get("thing"),
 		Page:     page,
 		Limit:    limit,
 	}
