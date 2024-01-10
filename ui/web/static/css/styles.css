@@ -639,6 +639,10 @@ button.edit-btn {
 	max-width: 50vh;
 }
 
+.table-container .entityMeta-col {
+	max-width: 50vh;
+}
+
 .metadata-field span {
 	font-family: var(--codemirror-font) !important;
 }
