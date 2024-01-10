@@ -3,59 +3,91 @@ SPDX-License-Identifier: Apache-2.0 -->
 
 {{ define "tableheader" }}
   {{ $currentPage := .CurrentPage }}
-  <div class="d-flex flex-row justify-content-start mb-2">
-    <div class="dropdown border">
+  <script>
+    localStorage.setItem("selectedLimit", "{{.Limit}}");
+    var selectedStatus = localStorage.getItem("selectedStatus");
+    var selectedLimit = localStorage.getItem("selectedLimit");
+    var itemsPerPage = document.querySelectorAll(".itemsPerPage a");
+    itemsPerPage.forEach(function (item) {
+      var href = item.getAttribute("href");
+      if (selectedStatus) {
+        href = href + "&status=" + selectedStatus;
+      }
+      item.setAttribute("href", href);
+      item.addEventListener("click", function () {
+      localStorage.setItem("selectedLimit", item.textContent);
+      });
+    });
+  </script>
+  <div class="row-mb-3 d-flex flex-row justify-content-between mb-3">
+    <div class="d-flex flex-row justify-content-start mb-2">
+      <div class="dropdown border">
+        <button
+          class="btn btn-light dropdown-toggle"
+          type="button"
+          id="itemsPerPageDropdown"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          {{ .Limit }}
+        </button>
+        <ul class="dropdown-menu itemsPerPage" aria-labelledby="itemsPerPageDropdown">
+          <li>
+            <a class="dropdown-item" href="?page={{ $currentPage }}&limit=5" id="limit5">5</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="?page={{ $currentPage }}&limit=10" id="limit10">10</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="?page={{ $currentPage }}&limit=20" id="limit20">20</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="?page={{ $currentPage }}&limit=50" id="limit50">50</a>
+          </li>
+        </ul>
+      </div>
+      <span class="align-self-center mx-2">Items per page</span>
+    </div>
+    {{ if isset "StatusOptions" . }}
       <button
         class="btn btn-light dropdown-toggle"
         type="button"
-        id="itemsPerPageDropdown"
         data-bs-toggle="dropdown"
         aria-expanded="false"
+        id="statusDropdown"
       >
-        {{ .Limit }}
+        <i class="fas fa-filter"></i>
+        Status
+        {{ if .Status }}
+          :
+          {{ .Status }}
+        {{ else }}
+          : enabled
+        {{ end }}
       </button>
-      <ul class="dropdown-menu" aria-labelledby="itemsPerPageDropdown">
-        <li>
-          <a class="dropdown-item" href="?page={{ $currentPage }}&limit=5" id="limit5">5</a>
-        </li>
-        <li>
-          <a class="dropdown-item" href="?page={{ $currentPage }}&limit=10" id="limit10">10</a>
-        </li>
-        <li>
-          <a class="dropdown-item" href="?page={{ $currentPage }}&limit=20" id="limit20">20</a>
-        </li>
-        <li>
-          <a class="dropdown-item" href="?page={{ $currentPage }}&limit=50" id="limit50">50</a>
-        </li>
+      <ul class="dropdown-menu" aria-labelledby="statusDropdown">
+        {{ range .StatusOptions }}
+          <li>
+            <a class="dropdown-item " id="{{ . }}Status">
+              {{ . }}
+            </a>
+          </li>
+        {{ end }}
       </ul>
-    </div>
-    <span class="align-self-center mx-2">Items per page</span>
+      <script>
+        var currentPage = '{{ .CurrentPage }}';
+        var selectedStatus = localStorage.getItem("selectedStatus");
+        var selectedLimit = localStorage.getItem("selectedLimit");
+        var statusOptions = JSON.parse('{{ toSlice .StatusOptions }}');
+          statusOptions.forEach(status => {
+            var statusElement = document.getElementById(status + "Status");
+            var href = "?page=" + currentPage + "&limit=" + selectedLimit + "&status=" + status ;
+            statusElement.setAttribute("href", href);
+            statusElement.addEventListener("click", function () {
+              localStorage.setItem("selectedStatus", status);
+          });
+        });
+      </script>
+    {{ end }}
   </div>
-<script>
-  document.addEventListener("DOMContentLoaded", function () {
-    // Get the dropdown items
-    var limit5 = document.getElementById("limit5");
-    var limit10 = document.getElementById("limit10");
-    var limit20 = document.getElementById("limit20");
-    var limit50 = document.getElementById("limit50");
-    localStorage.setItem("selectedLimit", "{{.Limit}}");
-
-    // Add event listeners to each dropdown item
-    limit5.addEventListener("click", function () {
-      localStorage.setItem("selectedLimit", "5");
-    });
-
-    limit10.addEventListener("click", function () {
-      localStorage.setItem("selectedLimit", "10");
-    });
-
-    limit20.addEventListener("click", function () {
-      localStorage.setItem("selectedLimit", "20");
-    });
-
-    limit50.addEventListener("click", function () {
-      localStorage.setItem("selectedLimit", "50");
-    });
-  });
-</script>
 {{ end }}

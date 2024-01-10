@@ -43,6 +43,7 @@ const (
 	domainKey               = "domain"
 	permissionKey           = "permission"
 	identityKey             = "identity"
+	statusKey               = "status"
 	defPage                 = 1
 	defLimit                = 10
 	defKey                  = ""
@@ -193,14 +194,14 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				opts...,
 			).ServeHTTP)
 
-			r.Post("/enabled", kithttp.NewServer(
+			r.Post("/enable", kithttp.NewServer(
 				enableUserEndpoint(svc),
 				decodeUserStatusUpdate,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
 
-			r.Post("/disabled", kithttp.NewServer(
+			r.Post("/disable", kithttp.NewServer(
 				disableUserEndpoint(svc),
 				decodeUserStatusUpdate,
 				encodeResponse,
@@ -265,14 +266,14 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				opts...,
 			).ServeHTTP)
 
-			r.Post("/enabled", kithttp.NewServer(
+			r.Post("/enable", kithttp.NewServer(
 				enableThingEndpoint(svc),
 				decodeThingStatusUpdate,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
 
-			r.Post("/disabled", kithttp.NewServer(
+			r.Post("/disable", kithttp.NewServer(
 				disableThingEndpoint(svc),
 				decodeThingStatusUpdate,
 				encodeResponse,
@@ -372,14 +373,14 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				opts...,
 			).ServeHTTP)
 
-			r.Post("/enabled", kithttp.NewServer(
+			r.Post("/enable", kithttp.NewServer(
 				enableChannelEndpoint(svc),
 				decodeChannelStatusUpdate,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
 
-			r.Post("/disabled", kithttp.NewServer(
+			r.Post("/disable", kithttp.NewServer(
 				disableChannelEndpoint(svc),
 				decodeChannelStatusUpdate,
 				encodeResponse,
@@ -486,14 +487,14 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				opts...,
 			).ServeHTTP)
 
-			r.Post("/enabled", kithttp.NewServer(
+			r.Post("/enable", kithttp.NewServer(
 				enableGroupEndpoint(svc),
 				decodeGroupStatusUpdate,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
 
-			r.Post("/disabled", kithttp.NewServer(
+			r.Post("/disable", kithttp.NewServer(
 				disableGroupEndpoint(svc),
 				decodeGroupStatusUpdate,
 				encodeResponse,
@@ -1041,7 +1042,7 @@ func decodeUserStatusUpdate(_ context.Context, r *http.Request) (interface{}, er
 
 	req := updateUserStatusReq{
 		token:  token,
-		UserID: r.PostFormValue("userID"),
+		UserID: r.PostFormValue("entityID"),
 	}
 
 	return req, nil
@@ -1220,7 +1221,7 @@ func decodeThingStatusUpdate(_ context.Context, r *http.Request) (interface{}, e
 
 	req := updateThingStatusReq{
 		token:   token,
-		ThingID: r.PostFormValue("thingID"),
+		ThingID: r.PostFormValue("entityID"),
 	}
 
 	return req, nil
@@ -1450,7 +1451,7 @@ func decodeChannelStatusUpdate(_ context.Context, r *http.Request) (interface{},
 
 	req := updateChannelStatusReq{
 		token:     token,
-		ChannelID: r.PostFormValue("channelID"),
+		ChannelID: r.PostFormValue("entityID"),
 	}
 
 	return req, nil
@@ -1600,7 +1601,7 @@ func decodeGroupStatusUpdate(_ context.Context, r *http.Request) (interface{}, e
 
 	req := updateGroupStatusReq{
 		token:   token,
-		GroupID: r.PostFormValue("groupID"),
+		GroupID: r.PostFormValue("entityID"),
 	}
 
 	return req, nil
@@ -1776,10 +1777,16 @@ func decodeListEntityRequest(_ context.Context, r *http.Request) (interface{}, e
 		return nil, err
 	}
 
+	status, err := readStringQuery(r, statusKey, defKey)
+	if err != nil {
+		return nil, err
+	}
+
 	req := listEntityReq{
-		token: token,
-		page:  page,
-		limit: limit,
+		token:  token,
+		status: status,
+		page:   page,
+		limit:  limit,
 	}
 
 	return req, nil
@@ -1959,7 +1966,7 @@ func decodeDomainStatusUpdate(_ context.Context, r *http.Request) (interface{}, 
 
 	req := updateDomainStatusReq{
 		token:    token,
-		DomainID: r.PostFormValue("domainID"),
+		DomainID: r.PostFormValue("entityID"),
 	}
 
 	return req, nil
