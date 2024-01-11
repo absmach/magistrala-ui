@@ -49,6 +49,11 @@ const (
 	membersActive           = "members"
 	invitationsActive       = "invitations"
 	domainInvitationsActive = "domaininvitations"
+	usersEndpoint           = "/users"
+	thingsEndpoint          = "/things"
+	channelsEndpoint        = "/channels"
+	groupsEndpoint          = "/groups"
+	bootstrapEndpoint       = "/bootstraps"
 )
 
 type dataSummary struct {
@@ -611,7 +616,7 @@ func (us *uiService) ViewUser(token, userID string) (b []byte, err error) {
 	}
 
 	crumbs := []breadcrumbs{
-		{Name: usersActive, URL: "/users"},
+		{Name: usersActive, URL: usersEndpoint},
 		{Name: user.Name},
 	}
 
@@ -772,7 +777,7 @@ func (us *uiService) ViewThing(token, thingID string) (b []byte, err error) {
 	}
 
 	crumbs := []breadcrumbs{
-		{Name: thingsActive, URL: "/things"},
+		{Name: thingsActive, URL: thingsEndpoint},
 		{Name: thing.Name},
 	}
 
@@ -878,8 +883,8 @@ func (us *uiService) ListThingUsers(token, thingID, relation string, page, limit
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumbs{
-		{Name: thingsActive, URL: "/things"},
-		{Name: thingID, URL: "/things/" + thingID},
+		{Name: thingsActive, URL: thingsEndpoint},
+		{Name: thingID, URL: thingsEndpoint + "/" + thingID},
 		{Name: "Share"},
 	}
 
@@ -938,8 +943,8 @@ func (us *uiService) ListChannelsByThing(token, thingID string, page, limit uint
 	noOfPages := int(math.Ceil(float64(chsPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumbs{
-		{Name: thingsActive, URL: "/things"},
-		{Name: thingID, URL: "/things/" + thingID},
+		{Name: thingsActive, URL: thingsEndpoint},
+		{Name: thingID, URL: thingsEndpoint + "/" + thingID},
 		{Name: "Connect"},
 	}
 
@@ -1052,7 +1057,7 @@ func (us *uiService) ViewChannel(token, channelID string) (b []byte, err error) 
 	}
 
 	crumbs := []breadcrumbs{
-		{Name: channelsActive, URL: "/channels"},
+		{Name: channelsActive, URL: channelsEndpoint},
 		{Name: channel.Name},
 	}
 
@@ -1111,8 +1116,8 @@ func (us *uiService) ListThingsByChannel(token, channelID string, page, limit ui
 	noOfPages := int(math.Ceil(float64(thsPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumbs{
-		{Name: channelsActive, URL: "/channels"},
-		{Name: channelID, URL: "/channels/" + channelID},
+		{Name: channelsActive, URL: channelsEndpoint},
+		{Name: channelID, URL: channelsEndpoint + "/" + channelID},
 		{Name: "Connect"},
 	}
 
@@ -1231,8 +1236,8 @@ func (us *uiService) ListChannelUsers(token, channelID, relation string, page, l
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumbs{
-		{Name: channelsActive, URL: "/channels"},
-		{Name: channelID, URL: "/channels/" + channelID},
+		{Name: channelsActive, URL: channelsEndpoint},
+		{Name: channelID, URL: channelsEndpoint + "/" + channelID},
 		{Name: "Assign Users"},
 	}
 
@@ -1304,8 +1309,8 @@ func (us *uiService) ListChannelUserGroups(token, channelID string, page, limit 
 	noOfPages := int(math.Ceil(float64(groupsPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumbs{
-		{Name: channelsActive, URL: "/channels"},
-		{Name: channelID, URL: "/channels/" + channelID},
+		{Name: channelsActive, URL: channelsEndpoint},
+		{Name: channelID, URL: channelsEndpoint + "/" + channelID},
 		{Name: "Assign Groups"},
 	}
 
@@ -1375,8 +1380,8 @@ func (us *uiService) ListGroupUsers(token, groupID, relation string, page, limit
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumbs{
-		{Name: groupsActive, URL: "/groups"},
-		{Name: groupID, URL: "/groups/" + groupID},
+		{Name: groupsActive, URL: groupsEndpoint},
+		{Name: groupID, URL: groupsEndpoint + "/" + groupID},
 		{Name: "Assign Users"},
 	}
 
@@ -1446,7 +1451,7 @@ func (us *uiService) ViewGroup(token, groupID string) (b []byte, err error) {
 	}
 
 	crumbs := []breadcrumbs{
-		{Name: groupsActive, URL: "/groups"},
+		{Name: groupsActive, URL: groupsEndpoint},
 		{Name: group.Name},
 	}
 
@@ -1568,8 +1573,8 @@ func (us *uiService) ListUserGroupChannels(token, groupID string, page, limit ui
 	noOfPages := int(math.Ceil(float64(channelsPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumbs{
-		{Name: groupsActive, URL: "/groups"},
-		{Name: groupID, URL: "/groups/" + groupID},
+		{Name: groupsActive, URL: groupsEndpoint},
+		{Name: groupID, URL: groupsEndpoint + "/" + groupID},
 		{Name: "Assign Channels"},
 	}
 
@@ -1788,7 +1793,7 @@ func (us *uiService) ViewBootstrap(token, thingID string) ([]byte, error) {
 	}
 
 	crumbs := []breadcrumbs{
-		{Name: bootstrapsActive, URL: "/bootstraps"},
+		{Name: bootstrapsActive, URL: bootstrapEndpoint},
 		{Name: thingID},
 	}
 
@@ -1814,8 +1819,8 @@ func (us *uiService) ViewBootstrap(token, thingID string) ([]byte, error) {
 
 func (us *uiService) GetRemoteTerminal(thingID, token string) ([]byte, error) {
 	crumbs := []breadcrumbs{
-		{Name: bootstrapsActive, URL: "/bootstraps"},
-		{Name: thingID, URL: "/bootstraps/" + thingID},
+		{Name: bootstrapsActive, URL: bootstrapEndpoint},
+		{Name: thingID, URL: bootstrapEndpoint + "/" + thingID},
 		{Name: "Remote Terminal"},
 	}
 
