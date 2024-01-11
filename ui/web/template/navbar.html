@@ -369,13 +369,15 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div class="row mb-3">
               <div class="col-md-12">
                 <label for="domain-tags" class="form-label">Tags</label>
+                <div id="tagsList" onclick="deleteItem(event)"></div>
                 <input
                   type="text"
                   class="form-control"
                   name="tags"
                   id="domain-tags"
                   aria-describedby="tagHelp"
-                  value="[]"
+                  onkeydown="addItem(event, 'domain-tags', 'tagsList')"
+                  placeholder="Add a tag"
                 />
                 <div id="tagHelp" class="form-text">Enter Domain tags as a string slice.</div>
                 <div id="domainTagsError" class="error-message text-danger"></div>
@@ -394,13 +396,14 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" id="create-domain-button" class="btn body-button">Create</button>
+            <button type="submit" id="create-domain-button" class="btn body-button" onclick="submitItemList('domain-tags', 'tagsList')">Create</button>
           </div>
         </form>
       </div>
     </div>
   </div>
 
+  <script src="/js/listUtils.js"></script>
   <script defer>
     var loginStatus = localStorage.getItem("loginStatus");
     var name = localStorage.getItem("userName");

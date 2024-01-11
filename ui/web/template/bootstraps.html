@@ -96,12 +96,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                             </div>
                             <div class="mb-3">
                               <label for="channels" class="form-label">Channels</label>
+                              <div id="channelsList" onclick="deleteItem(event)"></div>
                               <input
                                 type="text"
                                 class="form-control"
                                 name="channels"
                                 id="channels"
-                                value="[]"
+                                placeholder="Enter a channel"
+                                onkeydown="addItem(event, 'channels', 'channelsList')"
                                 required
                               />
                               <div id="channelsHelp" class="form-text">
@@ -166,6 +168,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                               type="submit"
                               id="create-bootstrap-button"
                               class="btn body-button"
+                              onclick="submitItemList('channels', 'channelsList')"
                             >
                               Submit
                             </button>
