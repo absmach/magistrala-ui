@@ -1233,7 +1233,7 @@ func (us *uiService) ListChannelUsers(token, channelID, relation string, page, l
 	crumbs := []breadcrumbs{
 		{Name: channelsActive, URL: "/channels"},
 		{Name: channelID, URL: "/channels/" + channelID},
-		{Name: "Share-Users"},
+		{Name: "Assign Users"},
 	}
 
 	data := struct {
@@ -1306,7 +1306,7 @@ func (us *uiService) ListChannelUserGroups(token, channelID string, page, limit 
 	crumbs := []breadcrumbs{
 		{Name: channelsActive, URL: "/channels"},
 		{Name: channelID, URL: "/channels/" + channelID},
-		{Name: "Share-Groups"},
+		{Name: "Assign Groups"},
 	}
 
 	data := struct {
@@ -1377,7 +1377,7 @@ func (us *uiService) ListGroupUsers(token, groupID, relation string, page, limit
 	crumbs := []breadcrumbs{
 		{Name: groupsActive, URL: "/groups"},
 		{Name: groupID, URL: "/groups/" + groupID},
-		{Name: "Share-Users"},
+		{Name: "Assign Users"},
 	}
 
 	data := struct {
@@ -1570,7 +1570,7 @@ func (us *uiService) ListUserGroupChannels(token, groupID string, page, limit ui
 	crumbs := []breadcrumbs{
 		{Name: groupsActive, URL: "/groups"},
 		{Name: groupID, URL: "/groups/" + groupID},
-		{Name: "Connect"},
+		{Name: "Assign Channels"},
 	}
 
 	data := struct {
@@ -1631,7 +1631,7 @@ func (us *uiService) ReadMessage(token, chID, thKey string, page, limit uint64) 
 	noOfPages := int(math.Ceil(float64(msg.Total) / float64(limit)))
 
 	crumbs := []breadcrumbs{
-		{Name: readMessagesActive},
+		{Name: "Read Messages"},
 	}
 
 	data := struct {
@@ -2065,7 +2065,6 @@ func (us *uiService) Domain(token, domainID string) ([]byte, error) {
 	}
 
 	crumbs := []breadcrumbs{
-		{Name: domainsActive, URL: "/domains"},
 		{Name: domain.Name},
 	}
 
