@@ -71,7 +71,7 @@ type dataSummary struct {
 	TotalChannels    int
 }
 
-type breadcrumbs struct {
+type breadcrumb struct {
 	Name string
 	URL  string
 }
@@ -575,7 +575,7 @@ func (us *uiService) ListUsers(token, status string, page, limit uint64) ([]byte
 
 	noOfPages := int(math.Ceil(float64(users.Total) / float64(limit)))
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: usersActive},
 	}
 
@@ -583,7 +583,7 @@ func (us *uiService) ListUsers(token, status string, page, limit uint64) ([]byte
 		NavbarActive   string
 		CollapseActive string
 		Users          []sdk.User
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 		CurrentPage    int
 		Pages          int
 		Limit          int
@@ -615,7 +615,7 @@ func (us *uiService) ViewUser(token, userID string) (b []byte, err error) {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: usersActive, URL: usersEndpoint},
 		{Name: user.Name},
 	}
@@ -624,7 +624,7 @@ func (us *uiService) ViewUser(token, userID string) (b []byte, err error) {
 		NavbarActive   string
 		CollapseActive string
 		Entity         sdk.User
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 		Path           string
 	}{
 		usersActive,
@@ -733,7 +733,7 @@ func (us *uiService) ListThings(token, status string, page, limit uint64) ([]byt
 
 	noOfPages := int(math.Ceil(float64(things.Total) / float64(limit)))
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: thingsActive},
 	}
 
@@ -741,7 +741,7 @@ func (us *uiService) ListThings(token, status string, page, limit uint64) ([]byt
 		NavbarActive   string
 		CollapseActive string
 		Things         []sdk.Thing
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 		CurrentPage    int
 		Pages          int
 		Limit          int
@@ -776,7 +776,7 @@ func (us *uiService) ViewThing(token, thingID string) (b []byte, err error) {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: thingsActive, URL: thingsEndpoint},
 		{Name: thing.Name},
 	}
@@ -787,7 +787,7 @@ func (us *uiService) ViewThing(token, thingID string) (b []byte, err error) {
 		ID             string
 		Entity         sdk.Thing
 		Permissions    []string
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 		Path           string
 	}{
 		thingsActive,
@@ -882,7 +882,7 @@ func (us *uiService) ListThingUsers(token, thingID, relation string, page, limit
 
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: thingsActive, URL: thingsEndpoint},
 		{Name: thingID, URL: thingsEndpoint + "/" + thingID},
 		{Name: "Share"},
@@ -899,7 +899,7 @@ func (us *uiService) ListThingUsers(token, thingID, relation string, page, limit
 		Limit          int
 		TabActive      string
 		Permissions    []string
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 	}{
 		thingsActive,
 		thingsActive,
@@ -942,7 +942,7 @@ func (us *uiService) ListChannelsByThing(token, thingID string, page, limit uint
 
 	noOfPages := int(math.Ceil(float64(chsPage.Total) / float64(limit)))
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: thingsActive, URL: thingsEndpoint},
 		{Name: thingID, URL: thingsEndpoint + "/" + thingID},
 		{Name: "Connect"},
@@ -957,7 +957,7 @@ func (us *uiService) ListChannelsByThing(token, thingID string, page, limit uint
 		Pages          int
 		Limit          int
 		Permissions    []string
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 	}{
 		thingsActive,
 		thingsActive,
@@ -1011,7 +1011,7 @@ func (us *uiService) ListChannels(token, status string, page, limit uint64) ([]b
 
 	noOfPages := int(math.Ceil(float64(chsPage.Total) / float64(limit)))
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: channelsActive},
 	}
 
@@ -1022,7 +1022,7 @@ func (us *uiService) ListChannels(token, status string, page, limit uint64) ([]b
 		CurrentPage    int
 		Pages          int
 		Limit          int
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 		StatusOptions  []string
 		Status         string
 	}{
@@ -1056,7 +1056,7 @@ func (us *uiService) ViewChannel(token, channelID string) (b []byte, err error) 
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: channelsActive, URL: channelsEndpoint},
 		{Name: channel.Name},
 	}
@@ -1067,7 +1067,7 @@ func (us *uiService) ViewChannel(token, channelID string) (b []byte, err error) 
 		ID             string
 		Entity         sdk.Channel
 		Permissions    []string
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 		Path           string
 	}{
 		channelsActive,
@@ -1115,7 +1115,7 @@ func (us *uiService) ListThingsByChannel(token, channelID string, page, limit ui
 
 	noOfPages := int(math.Ceil(float64(thsPage.Total) / float64(limit)))
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: channelsActive, URL: channelsEndpoint},
 		{Name: channelID, URL: channelsEndpoint + "/" + channelID},
 		{Name: "Connect"},
@@ -1130,7 +1130,7 @@ func (us *uiService) ListThingsByChannel(token, channelID string, page, limit ui
 		Pages          int
 		Limit          int
 		Permissions    []string
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 	}{
 		channelsActive,
 		channelsActive,
@@ -1235,7 +1235,7 @@ func (us *uiService) ListChannelUsers(token, channelID, relation string, page, l
 
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: channelsActive, URL: channelsEndpoint},
 		{Name: channelID, URL: channelsEndpoint + "/" + channelID},
 		{Name: "Assign Users"},
@@ -1252,7 +1252,7 @@ func (us *uiService) ListChannelUsers(token, channelID, relation string, page, l
 		Limit          int
 		TabActive      string
 		Permissions    []string
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 	}{
 		channelsActive,
 		channelsActive,
@@ -1308,7 +1308,7 @@ func (us *uiService) ListChannelUserGroups(token, channelID string, page, limit 
 
 	noOfPages := int(math.Ceil(float64(groupsPage.Total) / float64(limit)))
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: channelsActive, URL: channelsEndpoint},
 		{Name: channelID, URL: channelsEndpoint + "/" + channelID},
 		{Name: "Assign Groups"},
@@ -1324,7 +1324,7 @@ func (us *uiService) ListChannelUserGroups(token, channelID string, page, limit 
 		Pages          int
 		Limit          int
 		Permissions    []string
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 	}{
 		channelsActive,
 		channelsActive,
@@ -1379,7 +1379,7 @@ func (us *uiService) ListGroupUsers(token, groupID, relation string, page, limit
 
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: groupsActive, URL: groupsEndpoint},
 		{Name: groupID, URL: groupsEndpoint + "/" + groupID},
 		{Name: "Assign Users"},
@@ -1396,7 +1396,7 @@ func (us *uiService) ListGroupUsers(token, groupID, relation string, page, limit
 		Limit          int
 		TabActive      string
 		Permissions    []string
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 	}{
 		groupsActive,
 		groupsActive,
@@ -1450,7 +1450,7 @@ func (us *uiService) ViewGroup(token, groupID string) (b []byte, err error) {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: groupsActive, URL: groupsEndpoint},
 		{Name: group.Name},
 	}
@@ -1461,7 +1461,7 @@ func (us *uiService) ViewGroup(token, groupID string) (b []byte, err error) {
 		Entity         sdk.Group
 		Parent         string
 		Permissions    []string
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 		Path           string
 	}{
 		groupsActive,
@@ -1504,7 +1504,7 @@ func (us *uiService) ListGroups(token, status string, page, limit uint64) ([]byt
 
 	noOfPages := int(math.Ceil(float64(grpPage.Total) / float64(limit)))
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: groupsActive},
 	}
 
@@ -1515,7 +1515,7 @@ func (us *uiService) ListGroups(token, status string, page, limit uint64) ([]byt
 		CurrentPage    int
 		Pages          int
 		Limit          int
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 		StatusOptions  []string
 		Status         string
 	}{
@@ -1572,7 +1572,7 @@ func (us *uiService) ListUserGroupChannels(token, groupID string, page, limit ui
 
 	noOfPages := int(math.Ceil(float64(channelsPage.Total) / float64(limit)))
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: groupsActive, URL: groupsEndpoint},
 		{Name: groupID, URL: groupsEndpoint + "/" + groupID},
 		{Name: "Assign Channels"},
@@ -1588,7 +1588,7 @@ func (us *uiService) ListUserGroupChannels(token, groupID string, page, limit ui
 		Pages          int
 		Limit          int
 		Permissions    []string
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 	}{
 		groupsActive,
 		groupsActive,
@@ -1635,7 +1635,7 @@ func (us *uiService) ReadMessage(token, chID, thKey string, page, limit uint64) 
 
 	noOfPages := int(math.Ceil(float64(msg.Total) / float64(limit)))
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: "Read Messages"},
 	}
 
@@ -1648,7 +1648,7 @@ func (us *uiService) ReadMessage(token, chID, thKey string, page, limit uint64) 
 		CurrentPage    int
 		Pages          int
 		Limit          int
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 	}{
 		readMessagesActive,
 		readMessagesActive,
@@ -1706,7 +1706,7 @@ func (us *uiService) ListBootstrap(token string, page, limit uint64) ([]byte, er
 
 	noOfPages := int(math.Ceil(float64(bootstraps.Total) / float64(limit)))
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: bootstrapsActive},
 	}
 
@@ -1718,7 +1718,7 @@ func (us *uiService) ListBootstrap(token string, page, limit uint64) ([]byte, er
 		CurrentPage    int
 		Pages          int
 		Limit          int
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 	}{
 		bootstrapsActive,
 		bootstrapsActive,
@@ -1792,7 +1792,7 @@ func (us *uiService) ViewBootstrap(token, thingID string) ([]byte, error) {
 		return nil, errors.Wrap(errors.New("invalid channels"), ErrFailedRetreive)
 	}
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: bootstrapsActive, URL: bootstrapEndpoint},
 		{Name: thingID},
 	}
@@ -1801,7 +1801,7 @@ func (us *uiService) ViewBootstrap(token, thingID string) ([]byte, error) {
 		NavbarActive   string
 		CollapseActive string
 		Bootstrap      sdk.BootstrapConfig
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 	}{
 		bootstrapsActive,
 		bootstrapsActive,
@@ -1818,7 +1818,7 @@ func (us *uiService) ViewBootstrap(token, thingID string) ([]byte, error) {
 }
 
 func (us *uiService) GetRemoteTerminal(thingID, token string) ([]byte, error) {
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: bootstrapsActive, URL: bootstrapEndpoint},
 		{Name: thingID, URL: bootstrapEndpoint + "/" + thingID},
 		{Name: "Remote Terminal"},
@@ -1828,7 +1828,7 @@ func (us *uiService) GetRemoteTerminal(thingID, token string) ([]byte, error) {
 		NavbarActive   string
 		CollapseActive string
 		ThingID        string
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 	}{
 		bootstrapsActive,
 		bootstrapsActive,
@@ -2012,7 +2012,7 @@ func (us *uiService) ListDomains(token, status string, page, limit uint64) ([]by
 
 	noOfPages := int(math.Ceil(float64(domainsPage.Total) / float64(limit)))
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: domainsActive},
 	}
 
@@ -2024,7 +2024,7 @@ func (us *uiService) ListDomains(token, status string, page, limit uint64) ([]by
 		CurrentPage    int
 		Pages          int
 		Limit          int
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 		StatusOptions  []string
 		Status         string
 	}{
@@ -2069,7 +2069,7 @@ func (us *uiService) Domain(token, domainID string) ([]byte, error) {
 		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: domain.Name},
 	}
 
@@ -2077,7 +2077,7 @@ func (us *uiService) Domain(token, domainID string) ([]byte, error) {
 		NavbarActive   string
 		CollapseActive string
 		Entity         sdk.Domain
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 		Permissions    []string
 		Path           string
 	}{
@@ -2138,7 +2138,7 @@ func (us *uiService) ViewMember(token, userIdentity string) (b []byte, err error
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: membersActive, URL: "/members"},
 		{Name: usersPage.Users[0].Name},
 	}
@@ -2147,7 +2147,7 @@ func (us *uiService) ViewMember(token, userIdentity string) (b []byte, err error
 		NavbarActive   string
 		CollapseActive string
 		User           sdk.User
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 	}{
 		membersActive,
 		domainActive,
@@ -2178,7 +2178,7 @@ func (us *uiService) Members(token, domainID string, page, limit uint64) ([]byte
 
 	noOfPages := int(math.Ceil(float64(membersPage.Total) / float64(limit)))
 
-	crumbs := []breadcrumbs{
+	crumbs := []breadcrumb{
 		{Name: membersActive},
 	}
 
@@ -2191,7 +2191,7 @@ func (us *uiService) Members(token, domainID string, page, limit uint64) ([]byte
 		CurrentPage    int
 		Pages          int
 		Limit          int
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 	}{
 		membersActive,
 		domainActive,
@@ -2232,19 +2232,19 @@ func (us *uiService) Invitations(token, domainID string, page, limit uint64) ([]
 
 	noOfPages := int(math.Ceil(float64(invitationsPage.Total) / float64(limit)))
 
-	var crumbs []breadcrumbs
+	var crumbs []breadcrumb
 	var collapseActive, navbarActive string
 
 	switch domainID {
 	case "":
-		crumbs = []breadcrumbs{
+		crumbs = []breadcrumb{
 			{Name: invitationsActive},
 		}
 		collapseActive = domainsActive
 		navbarActive = invitationsActive
 
 	default:
-		crumbs = []breadcrumbs{
+		crumbs = []breadcrumb{
 			{Name: "Domain-Invitations"},
 		}
 		collapseActive = domainActive
@@ -2260,7 +2260,7 @@ func (us *uiService) Invitations(token, domainID string, page, limit uint64) ([]
 		CurrentPage    int
 		Pages          int
 		Limit          int
-		Breadcrumbs    []breadcrumbs
+		Breadcrumbs    []breadcrumb
 	}{
 		navbarActive,
 		collapseActive,
