@@ -61,7 +61,6 @@ const (
 	groupsItem              = "groups"
 	accessTokenKey          = "token"
 	refreshTokenKey         = "refresh_token"
-	entityKey               = "entity"
 )
 
 var (
