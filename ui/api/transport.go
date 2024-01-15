@@ -350,13 +350,6 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
-
-			r.Get("/{id}/events", kithttp.NewServer(
-				listThingEventsEndpoint(svc),
-				decodeListEntityEventsRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
 		})
 
 		r.Route("/channels", func(r chi.Router) {
@@ -746,6 +739,13 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				opts...,
 			).ServeHTTP)
 		})
+
+		r.Get("/events/{id}/{entity}", kithttp.NewServer(
+			listEntityEventsEndpoint(svc),
+			decodeListEntityEventsRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
 	})
 
 	r.Get("/health", magistrala.Health("ui", instanceID))
@@ -1852,15 +1852,10 @@ func decodeListEntityEventsRequest(_ context.Context, r *http.Request) (interfac
 		return nil, err
 	}
 
-	entity, err := readStringQuery(r, entityKey, defKey)
-	if err != nil {
-		return nil, err
-	}
-
 	req := listEntityEventsReq{
 		token:      token,
 		entityID:   chi.URLParam(r, "id"),
-		entityType: entity,
+		entityType: chi.URLParam(r, "entity"),
 		page:       page,
 		limit:      limit,
 	}

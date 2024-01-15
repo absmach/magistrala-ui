@@ -756,14 +756,14 @@ func listThingMembersEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func listThingEventsEndpoint(svc ui.Service) endpoint.Endpoint {
+func listEntityEventsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(listEntityEventsReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.ListEvents(req.token, req.entityType, req.entityID, req.page, req.limit)
+		res, err := svc.ListEntityEvents(req.token, req.entityType, req.entityID, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}

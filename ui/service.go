@@ -228,7 +228,7 @@ type Service interface {
 	// ListChannelsByThing retrieves a list of channels based on the given thing ID.
 	ListChannelsByThing(token, thingID string, page, limit uint64) ([]byte, error)
 	// ListEvents retrieves a list of events based on the given ID.
-	ListEvents(token, entityType, entityID string, page, limit uint64) ([]byte, error)
+	ListEntityEvents(token, entityType, entityID string, page, limit uint64) ([]byte, error)
 
 	// CreateChannel creates a new channel.
 	CreateChannel(channel sdk.Channel, token string) error
@@ -977,53 +977,6 @@ func (us *uiService) ListChannelsByThing(token, thingID string, page, limit uint
 	if err := us.tpls.ExecuteTemplate(&btpl, "thingchannels", data); err != nil {
 		return []byte{}, errors.Wrap(err, ErrExecTemplate)
 	}
-	return btpl.Bytes(), nil
-}
-
-func (us *uiService) ListEvents(token, entityType, entityID string, page, limit uint64) ([]byte, error) {
-	offset := (page - 1) * limit
-	pgm := sdk.PageMetadata{
-		Offset:      offset,
-		Limit:       limit,
-		Direction:   "desc",
-		WithPayload: true,
-	}
-
-	eventsPage, err := us.sdk.Events(pgm, entityID, entityType, token)
-	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
-	}
-
-	noOfPages := int(math.Ceil(float64(eventsPage.Total) / float64(limit)))
-
-	crumb := breadcrumb{
-		Previous: thingsActive,
-		Current:  entityID,
-	}
-
-	data := struct {
-		NavbarActive   string
-		CollapseActive string
-		Events         []sdk.Event
-		CurrentPage    int
-		Pages          int
-		Limit          int
-		Breadcrumb     breadcrumb
-	}{
-		thingsActive,
-		thingsActive,
-		eventsPage.Events,
-		int(page),
-		noOfPages,
-		int(limit),
-		crumb,
-	}
-
-	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "events", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
-	}
-
 	return btpl.Bytes(), nil
 }
 
@@ -2339,6 +2292,53 @@ func (us *uiService) AcceptInvitation(token, domainID string) error {
 
 func (us *uiService) DeleteInvitation(token, userID, domainID string) error {
 	return us.sdk.DeleteInvitation(userID, domainID, token)
+}
+
+func (us *uiService) ListEntityEvents(token, entityType, entityID string, page, limit uint64) ([]byte, error) {
+	offset := (page - 1) * limit
+	pgm := sdk.PageMetadata{
+		Offset:      offset,
+		Limit:       limit,
+		Direction:   "desc",
+		WithPayload: true,
+	}
+
+	eventsPage, err := us.sdk.Events(pgm, entityID, entityType, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	noOfPages := int(math.Ceil(float64(eventsPage.Total) / float64(limit)))
+
+	crumb := breadcrumb{
+		Previous: thingsActive,
+		Current:  entityID,
+	}
+
+	data := struct {
+		NavbarActive   string
+		CollapseActive string
+		Events         []sdk.Event
+		CurrentPage    int
+		Pages          int
+		Limit          int
+		Breadcrumb     breadcrumb
+	}{
+		thingsActive,
+		thingsActive,
+		eventsPage.Events,
+		int(page),
+		noOfPages,
+		int(limit),
+		crumb,
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "events", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+
+	return btpl.Bytes(), nil
 }
 
 func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, err error) {
