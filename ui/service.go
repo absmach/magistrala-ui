@@ -2303,17 +2303,41 @@ func (us *uiService) ListEntityEvents(token, entityType, entityID string, page, 
 		WithPayload: true,
 	}
 
+	var crumbs []breadcrumb
+	switch entityType {
+	case "thing":
+		crumbs = []breadcrumb{
+			{Name: thingsActive, URL: thingsEndpoint},
+			{Name: entityID, URL: thingsEndpoint + "/" + entityID},
+			{Name: "Events"},
+		}
+	case "channel":
+		crumbs = []breadcrumb{
+			{Name: channelsActive, URL: channelsEndpoint},
+			{Name: entityID, URL: channelsEndpoint + "/" + entityID},
+			{Name: "Events"},
+		}
+		entityType = "group"
+	case "user":
+		crumbs = []breadcrumb{
+			{Name: usersActive, URL: usersEndpoint},
+			{Name: entityID, URL: usersEndpoint + "/" + entityID},
+			{Name: "Events"},
+		}
+	case "group":
+		crumbs = []breadcrumb{
+			{Name: groupsActive, URL: groupsEndpoint},
+			{Name: entityID, URL: groupsEndpoint + "/" + entityID},
+			{Name: "Events"},
+		}
+	}
+
 	eventsPage, err := us.sdk.Events(pgm, entityID, entityType, token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
 	noOfPages := int(math.Ceil(float64(eventsPage.Total) / float64(limit)))
-
-	crumb := breadcrumb{
-		Previous: thingsActive,
-		Current:  entityID,
-	}
 
 	data := struct {
 		NavbarActive   string
@@ -2322,7 +2346,7 @@ func (us *uiService) ListEntityEvents(token, entityType, entityID string, page, 
 		CurrentPage    int
 		Pages          int
 		Limit          int
-		Breadcrumb     breadcrumb
+		Breadcrumbs    []breadcrumb
 	}{
 		thingsActive,
 		thingsActive,
@@ -2330,7 +2354,7 @@ func (us *uiService) ListEntityEvents(token, entityType, entityID string, page, 
 		int(page),
 		noOfPages,
 		int(limit),
-		crumb,
+		crumbs,
 	}
 
 	var btpl bytes.Buffer
