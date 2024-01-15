@@ -113,7 +113,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                               Cancel
                             </button>
-                            <button type="submit" class="btn body-button" id="create-user-button" onclick="submitItemList('userTags', 'usersTagsList')">
+                            <button
+                              type="submit"
+                              class="btn body-button"
+                              id="create-user-button"
+                              onclick="submitItemList('userTags', 'usersTagsList')"
+                            >
                               Submit
                             </button>
                           </div>
@@ -205,7 +210,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                               {{ end }}
                             </td>
                             <td class="meta-col">
-                              <div class="meta-div">
+                              <div class="json-div">
                                 <pre id="meta-{{ $i }}"></pre>
                               </div>
                             </td>
@@ -222,7 +227,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           </tr>
                           <script>
                             attachFormatJsonWithPrettifyListener({
-                              metadata: '{{ toJSON $u.Metadata }}',
+                              data: '{{ toJSON $u.Metadata }}',
                               id: "meta-{{ $i }}",
                             })
                           </script>

@@ -45,3 +45,5 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20231030173426-d783a09b4405 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 )
+
+replace github.com/absmach/magistrala => /home/ian/work/Rodney/magistrala

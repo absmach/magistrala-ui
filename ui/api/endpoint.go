@@ -756,6 +756,22 @@ func listThingMembersEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
+func listThingEventsEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(listEntityByIDReq)
+
+		res, err := svc.ListThingEvents(req.token, req.id, req.page, req.limit)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			html: res,
+			code: http.StatusOK,
+		}, nil
+	}
+}
+
 func listChannelsByThingEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(listEntityByIDReq)

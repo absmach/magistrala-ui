@@ -349,6 +349,13 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
+
+			r.Get("/{id}/events", kithttp.NewServer(
+				listThingEventsEndpoint(svc),
+				decodeListEntityByIDRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
 		})
 
 		r.Route("/channels", func(r chi.Router) {

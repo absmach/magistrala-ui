@@ -1,0 +1,56 @@
+<!-- Copyright (c) Abstract Machines
+SPDX-License-Identifier: Apache-2.0 -->
+
+{{ define "thingevents" }}
+  <!doctype html>
+  <html lang="en">
+    <head>
+      <title>Thing Events</title>
+      {{ template "header" }}
+    </head>
+    <body>
+      {{ template "navbar" . }}
+      <div class="main-content pt-3">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-12 mx-auto py-3">
+              {{ template "breadcrumb" . }}
+              <div class="table-responsive table-container">
+                {{ template "tableheader" . }}
+                <table id="itemsTable" class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">TimeStamp</th>
+                      <th scope="col">Operation</th>
+                      <th scope="col">Payload</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {{ range $i,$e := .Events }}
+                      <tr>
+                        <td>{{ .OccurredAt }}</td>
+                        <td>{{ .Operation }}</td>
+                        <td>
+                          <div class="json-div">
+                            <pre id="payload-{{ $i }}"></pre>
+                          </div>
+                        </td>
+                      </tr>
+                      <script>
+                        attachFormatJsonWithPrettifyListener({
+                          data: '{{ toJSON .Payload }}',
+                          id: "payload-{{ $i }}",
+                        })
+                      </script>
+                    {{ end }}
+                  </tbody>
+                </table>
+                {{ template "tablefooter" . }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </body>
+  </html>
+{{ end }}

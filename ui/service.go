@@ -114,6 +114,7 @@ var (
 		"thingchannels",
 		"things",
 		"thingusers",
+		"thingEvents",
 
 		"users",
 		"user",
@@ -226,6 +227,8 @@ type Service interface {
 	ListThingUsers(token, thingID, relation string, page, limit uint64) (b []byte, err error)
 	// ListChannelsByThing retrieves a list of channels based on the given thing ID.
 	ListChannelsByThing(token, thingID string, page, limit uint64) ([]byte, error)
+	// ListThingEvents retrieves a list of events based on the given thing ID.
+	ListThingEvents(token, thingID string, page, limit uint64) ([]byte, error)
 
 	// CreateChannel creates a new channel.
 	CreateChannel(channel sdk.Channel, token string) error
@@ -974,6 +977,53 @@ func (us *uiService) ListChannelsByThing(token, thingID string, page, limit uint
 	if err := us.tpls.ExecuteTemplate(&btpl, "thingchannels", data); err != nil {
 		return []byte{}, errors.Wrap(err, ErrExecTemplate)
 	}
+	return btpl.Bytes(), nil
+}
+
+func (us *uiService) ListThingEvents(token, thingID string, page, limit uint64) ([]byte, error) {
+	offset := (page - 1) * limit
+	pgm := sdk.PageMetadata{
+		Offset: offset,
+		Limit:  limit,
+	}
+
+	eventsPage, err := us.sdk.Events(pgm, thingID, "thing", token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	noOfPages := int(math.Ceil(float64(eventsPage.Total) / float64(limit)))
+
+	crumb := breadcrumb{
+		Previous: thingsActive,
+		Current:  thingID,
+	}
+
+	data := struct {
+		NavbarActive   string
+		CollapseActive string
+		Events         []sdk.Event
+		ThingID        string
+		CurrentPage    int
+		Pages          int
+		Limit          int
+		Breadcrumb     breadcrumb
+	}{
+		thingsActive,
+		thingsActive,
+		eventsPage.Events,
+		thingID,
+		int(page),
+		noOfPages,
+		int(limit),
+		crumb,
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "thingevents", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+
 	return btpl.Bytes(), nil
 }
 
