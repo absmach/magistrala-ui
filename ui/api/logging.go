@@ -498,17 +498,17 @@ func (lm *loggingMiddleware) ListChannelsByThing(token, thingID string, page, li
 	return lm.svc.ListChannelsByThing(token, thingID, page, limit)
 }
 
-// ListThingEvents adds logging middleware to list thing events method.
-func (lm *loggingMiddleware) ListThingEvents(token, thingID string, page, limit uint64) (b []byte, err error) {
+// ListEvents adds logging middleware to list events method.
+func (lm *loggingMiddleware) ListEvents(token, entityType, entityID string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
-		message := fmt.Sprintf("Method list_thing_events for thing %s took %s to complete", thingID, time.Since(begin))
+		message := fmt.Sprintf("Method list_events for thing %s took %s to complete", entityID, time.Since(begin))
 		if err != nil {
 			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
 			return
 		}
 		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
 	}(time.Now())
-	return lm.svc.ListThingEvents(token, thingID, page, limit)
+	return lm.svc.ListEvents(token, entityType, entityID, page, limit)
 }
 
 // CreateChannel adds logging middleware to create channel method.

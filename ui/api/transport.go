@@ -61,6 +61,7 @@ const (
 	groupsItem              = "groups"
 	accessTokenKey          = "token"
 	refreshTokenKey         = "refresh_token"
+	entityKey               = "entity"
 )
 
 var (
@@ -352,7 +353,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 
 			r.Get("/{id}/events", kithttp.NewServer(
 				listThingEventsEndpoint(svc),
-				decodeListEntityByIDRequest,
+				decodeListEntityEventsRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
@@ -1831,6 +1832,37 @@ func decodeListEntityByIDRequest(_ context.Context, r *http.Request) (interface{
 		limit:    limit,
 		relation: relation,
 		name:     name,
+	}
+
+	return req, nil
+}
+
+func decodeListEntityEventsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+	page, err := readNumQuery[uint64](r, pageKey, defPage)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	entity, err := readStringQuery(r, entityKey, defKey)
+	if err != nil {
+		return nil, err
+	}
+
+	req := listEntityEventsReq{
+		token:      token,
+		entityID:   chi.URLParam(r, "id"),
+		entityType: entity,
+		page:       page,
+		limit:      limit,
 	}
 
 	return req, nil

@@ -370,14 +370,14 @@ func (mm *metricsMiddleware) ListChannelsByThing(token, thingID string, page, li
 	return mm.svc.ListChannelsByThing(token, thingID, page, limit)
 }
 
-// ListThingEvents adds metrics middleware to list thing events method.
-func (lm *metricsMiddleware) ListThingEvents(token, thingID string, page, limit uint64) (b []byte, err error) {
+// ListEvents adds metrics middleware to list events method.
+func (lm *metricsMiddleware) ListEvents(token, entityType, entityID string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		lm.counter.With("method", "list_thing_events").Add(1)
 		lm.latency.With("method", "list_thing_events").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return lm.svc.ListThingEvents(token, thingID, page, limit)
+	return lm.svc.ListEvents(token, entityType, entityID, page, limit)
 }
 
 // CreateChannel adds metrics middleware to create channel method.
