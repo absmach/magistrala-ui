@@ -2181,8 +2181,7 @@ func TokenMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			expirationTime := time.Unix(int64(claims["exp"].(float64)), 0)
-			if expirationTime.Before(time.Now()) {
+			if !claims.VerifyExpiresAt(time.Now().Unix(), true) {
 				http.Redirect(w, r, "/token/refresh?referer_url="+url.QueryEscape(r.URL.String()), http.StatusSeeOther)
 				return
 			}
