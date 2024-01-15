@@ -134,7 +134,7 @@ func (lm *loggingMiddleware) UpdatePassword(token, oldPass, newPass string) (err
 }
 
 // Toke adds logging middleware to token method.
-func (lm *loggingMiddleware) Token(login sdk.Login) (token sdk.Token, err error) {
+func (lm *loggingMiddleware) Token(login sdk.Login) (tokenDetails ui.TokenDetails, err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
@@ -148,7 +148,7 @@ func (lm *loggingMiddleware) Token(login sdk.Login) (token sdk.Token, err error)
 }
 
 // RefreshToken adds logging middleware to refresh token method.
-func (lm *loggingMiddleware) RefreshToken(refreshToken string) (token sdk.Token, err error) {
+func (lm *loggingMiddleware) RefreshToken(refreshToken string) (token ui.TokenDetails, err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
@@ -1385,7 +1385,7 @@ func (lm *loggingMiddleware) ErrorPage(errMsg string) (b []byte, err error) {
 }
 
 // DomainLogin adds logging middleware to domain login method.
-func (lm *loggingMiddleware) DomainLogin(login sdk.Login, refreshToken string) (token sdk.Token, err error) {
+func (lm *loggingMiddleware) DomainLogin(login sdk.Login, refreshToken string) (token ui.TokenDetails, err error) {
 	defer func(begin time.Time) {
 		args := []interface{}{
 			slog.String("duration", time.Since(begin).String()),

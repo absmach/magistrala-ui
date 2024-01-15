@@ -69,9 +69,14 @@ func main() {
 		}
 	}
 
+	svcConfig := ui.Config{}
+	if err := env.Parse(&svcConfig); err != nil {
+		log.Fatalf("failed to load service config: %v", err)
+	}
+
 	sdk := sdk.NewSDK(sdkConfig)
 
-	svc, err := ui.New(sdk)
+	svc, err := ui.New(sdk, svcConfig)
 	if err != nil {
 		log.Fatalf(err.Error())
 	}

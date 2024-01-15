@@ -202,7 +202,7 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		token, err := svc.Token(
+		tokenDetails, err := svc.Token(
 			sdk.Login{
 				Identity: req.Identity,
 				Secret:   req.Secret,
@@ -211,7 +211,7 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		user, err := svc.UserProfile(token.AccessToken)
+		user, err := svc.UserProfile(tokenDetails.Token.AccessToken)
 		if err != nil {
 			return nil, err
 		}
@@ -222,15 +222,17 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			cookies: []*http.Cookie{
 				{
 					Name:     accessTokenKey,
-					Value:    token.AccessToken,
+					Value:    tokenDetails.Token.AccessToken,
 					Path:     "/",
 					HttpOnly: true,
+					MaxAge:   60,
 				},
 				{
 					Name:     refreshTokenKey,
-					Value:    token.RefreshToken,
+					Value:    tokenDetails.Token.RefreshToken,
 					Path:     domainsAPIEndpoint,
 					HttpOnly: true,
+					MaxAge:   tokenDetails.RefreshTokenTTL,
 				},
 			},
 		}
@@ -246,7 +248,7 @@ func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		token, err := svc.RefreshToken(req.refreshToken)
+		tokenDetails, err := svc.RefreshToken(req.refreshToken)
 		if err != nil {
 			return nil, err
 		}
@@ -257,21 +259,24 @@ func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			cookies: []*http.Cookie{
 				{
 					Name:     accessTokenKey,
-					Value:    token.AccessToken,
+					Value:    tokenDetails.Token.AccessToken,
 					Path:     "/",
 					HttpOnly: true,
+					MaxAge:   tokenDetails.AccessTokenTTL,
 				},
 				{
 					Name:     refreshTokenKey,
-					Value:    token.RefreshToken,
+					Value:    tokenDetails.Token.RefreshToken,
 					Path:     tokenRefreshAPIEndpoint,
 					HttpOnly: true,
+					MaxAge:   tokenDetails.RefreshTokenTTL,
 				},
 				{
 					Name:     refreshTokenKey,
-					Value:    token.RefreshToken,
+					Value:    tokenDetails.Token.RefreshToken,
 					Path:     domainsAPIEndpoint,
 					HttpOnly: true,
+					MaxAge:   tokenDetails.RefreshTokenTTL,
 				},
 			},
 		}
@@ -1554,7 +1559,7 @@ func domainLoginEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		token, err := svc.DomainLogin(
+		tokenDetails, err := svc.DomainLogin(
 			sdk.Login{
 				DomainID: req.DomainID,
 			},
@@ -1569,21 +1574,24 @@ func domainLoginEndpoint(svc ui.Service) endpoint.Endpoint {
 			cookies: []*http.Cookie{
 				{
 					Name:     accessTokenKey,
-					Value:    token.AccessToken,
+					Value:    tokenDetails.Token.AccessToken,
 					Path:     "/",
 					HttpOnly: true,
+					MaxAge:   tokenDetails.AccessTokenTTL,
 				},
 				{
 					Name:     refreshTokenKey,
-					Value:    token.RefreshToken,
+					Value:    tokenDetails.Token.RefreshToken,
 					Path:     domainsAPIEndpoint,
 					HttpOnly: true,
+					MaxAge:   tokenDetails.RefreshTokenTTL,
 				},
 				{
 					Name:     refreshTokenKey,
-					Value:    token.RefreshToken,
+					Value:    tokenDetails.Token.RefreshToken,
 					Path:     tokenRefreshAPIEndpoint,
 					HttpOnly: true,
+					MaxAge:   tokenDetails.RefreshTokenTTL,
 				},
 			},
 			headers: map[string]string{"Location": "/?domain=" + req.DomainID},
