@@ -370,6 +370,16 @@ func (mm *metricsMiddleware) ListChannelsByThing(token, thingID string, page, li
 	return mm.svc.ListChannelsByThing(token, thingID, page, limit)
 }
 
+// ListEntityEvents adds metrics middleware to list entity events method.
+func (lm *metricsMiddleware) ListEntityEvents(token, entityType, entityID string, page, limit uint64) (b []byte, err error) {
+	defer func(begin time.Time) {
+		lm.counter.With("method", "list_entity_events").Add(1)
+		lm.latency.With("method", "list_entity_events").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return lm.svc.ListEntityEvents(token, entityType, entityID, page, limit)
+}
+
 // CreateChannel adds metrics middleware to create channel method.
 func (mm *metricsMiddleware) CreateChannel(channel sdk.Channel, token string) (err error) {
 	defer func(begin time.Time) {

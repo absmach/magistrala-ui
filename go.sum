@@ -34,8 +34,6 @@ github.com/VividCortex/gohistogram v1.0.0 h1:6+hBz+qvs0JOrrNhhmR7lFxo5sINxBCGXrd
 github.com/VividCortex/gohistogram v1.0.0/go.mod h1:Pf5mBqqDxYaXu3hDrrU+w6nw50o/4+TcAqDqk/vUH7g=
 github.com/absmach/agent v0.0.0-20231107115142-c8b509f24d50 h1:RyDGAkOtIuN34HEJ/UDTc0r7qZFO5jBx5cB3wmUtPJE=
 github.com/absmach/agent v0.0.0-20231107115142-c8b509f24d50/go.mod h1:/S3WufAqHTSU6MEq6cN0g6m21RhPX8dxqubYh08vbU8=
-github.com/absmach/magistrala v0.11.1-0.20240103120656-b3e206321c9d h1:Q0HIBP9SSnp41CgGT1cmkd63mvf2/uqGCbaOZbIlSvI=
-github.com/absmach/magistrala v0.11.1-0.20240103120656-b3e206321c9d/go.mod h1:7D+27TxXQwMqTmlerdulb0QtvXpMcSgeGoyvzhxr8MQ=
 github.com/absmach/mproxy v0.3.1-0.20231221215510-0ffbc4fc2337 h1:OW2WIn094hQCwrkXZ2KHgoOzsKAwqPaxZvRZ94VTc5U=
 github.com/absmach/mproxy v0.3.1-0.20231221215510-0ffbc4fc2337/go.mod h1:HmXsnuSWIN0OKrcscIxBzDO/GRjvqYxUTnd6vpuo+MQ=
 github.com/absmach/senml v1.0.5 h1:zNPRYpGr2Wsb8brAusz8DIfFqemy1a2dNbmMnegY3GE=

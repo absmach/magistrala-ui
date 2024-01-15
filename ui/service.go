@@ -86,6 +86,7 @@ var (
 		"breadcrumb",
 		"metadatamodal",
 		"statusupdate",
+		"events",
 
 		"bootstrap",
 		"bootstraps",
@@ -223,9 +224,11 @@ type Service interface {
 	// UnshareThing unshares a thing with a user.
 	UnshareThing(token, thingID string, req sdk.UsersRelationRequest) error
 	// ListThingUsers retrieves users that share a thing.
-	ListThingUsers(token, thingID, relation string, page, limit uint64) (b []byte, err error)
+	ListThingUsers(token, thingID, relation string, page, limit uint64) ([]byte, error)
 	// ListChannelsByThing retrieves a list of channels based on the given thing ID.
 	ListChannelsByThing(token, thingID string, page, limit uint64) ([]byte, error)
+	// ListEvents retrieves a list of events based on the given ID.
+	ListEntityEvents(token, entityType, entityID string, page, limit uint64) ([]byte, error)
 
 	// CreateChannel creates a new channel.
 	CreateChannel(channel sdk.Channel, token string) error
@@ -256,13 +259,13 @@ type Service interface {
 	// RemoveUserFromChannel removes a user from a channel.
 	RemoveUserFromChannel(token, channelID string, req sdk.UsersRelationRequest) error
 	// ListChannelUsers retrieves a list of users that are connected to a channel.
-	ListChannelUsers(token, channelID, relation string, page, limit uint64) (b []byte, err error)
+	ListChannelUsers(token, channelID, relation string, page, limit uint64) ([]byte, error)
 	// AddUserGroupToChannel adds a userGroup to a channel.
 	AddUserGroupToChannel(token, channelID string, req sdk.UserGroupsRequest) error
 	// RemoveGroupFromChannel removes a userGroup from a channel.
 	RemoveUserGroupFromChannel(token, channelID string, req sdk.UserGroupsRequest) error
 	// ListChannelUserGroups retrieves a list of userGroups connected to a channel.
-	ListChannelUserGroups(token, channelID string, page, limit uint64) (b []byte, err error)
+	ListChannelUserGroups(token, channelID string, page, limit uint64) ([]byte, error)
 
 	// CreateGroups creates new groups.
 	CreateGroups(token string, groups ...sdk.Group) error
@@ -283,7 +286,7 @@ type Service interface {
 	// DisableGroup updates the status of the group to disabled.
 	DisableGroup(token, id string) error
 	// ListUserGroupChannels retrieves a list of channels that a userGroup is connected to.
-	ListUserGroupChannels(token, groupID string, page, limit uint64) (b []byte, err error)
+	ListUserGroupChannels(token, groupID string, page, limit uint64) ([]byte, error)
 
 	// Publish facilitates a thing publishin messages to a channel.
 	Publish(token, thKey string, msg *messaging.Message) error
@@ -1621,13 +1624,15 @@ func (gs *uiService) Publish(token, thKey string, msg *messaging.Message) error 
 func (us *uiService) ReadMessage(token, chID, thKey string, page, limit uint64) ([]byte, error) {
 	var msg sdk.MessagesPage
 
+	pgm := sdk.PageMetadata{}
+
 	user, err := us.sdk.UserProfile(token)
 	if err != nil {
 		return []byte{}, err
 	}
 
 	if chID != "" {
-		msg, err = us.sdk.ReadMessages(chID, thKey)
+		msg, err = us.sdk.ReadMessages(pgm, chID, thKey)
 		if err != nil {
 			return []byte{}, err
 		}
@@ -2287,6 +2292,77 @@ func (us *uiService) AcceptInvitation(token, domainID string) error {
 
 func (us *uiService) DeleteInvitation(token, userID, domainID string) error {
 	return us.sdk.DeleteInvitation(userID, domainID, token)
+}
+
+func (us *uiService) ListEntityEvents(token, entityType, entityID string, page, limit uint64) ([]byte, error) {
+	offset := (page - 1) * limit
+	pgm := sdk.PageMetadata{
+		Offset:      offset,
+		Limit:       limit,
+		Direction:   "desc",
+		WithPayload: true,
+	}
+
+	var crumbs []breadcrumb
+	switch entityType {
+	case "thing":
+		crumbs = []breadcrumb{
+			{Name: thingsActive, URL: thingsEndpoint},
+			{Name: entityID, URL: thingsEndpoint + "/" + entityID},
+			{Name: "Events"},
+		}
+	case "channel":
+		crumbs = []breadcrumb{
+			{Name: channelsActive, URL: channelsEndpoint},
+			{Name: entityID, URL: channelsEndpoint + "/" + entityID},
+			{Name: "Events"},
+		}
+		entityType = "group"
+	case "user":
+		crumbs = []breadcrumb{
+			{Name: usersActive, URL: usersEndpoint},
+			{Name: entityID, URL: usersEndpoint + "/" + entityID},
+			{Name: "Events"},
+		}
+	case "group":
+		crumbs = []breadcrumb{
+			{Name: groupsActive, URL: groupsEndpoint},
+			{Name: entityID, URL: groupsEndpoint + "/" + entityID},
+			{Name: "Events"},
+		}
+	}
+
+	eventsPage, err := us.sdk.Events(pgm, entityID, entityType, token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	noOfPages := int(math.Ceil(float64(eventsPage.Total) / float64(limit)))
+
+	data := struct {
+		NavbarActive   string
+		CollapseActive string
+		Events         []sdk.Event
+		CurrentPage    int
+		Pages          int
+		Limit          int
+		Breadcrumbs    []breadcrumb
+	}{
+		thingsActive,
+		thingsActive,
+		eventsPage.Events,
+		int(page),
+		noOfPages,
+		int(limit),
+		crumbs,
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "events", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+
+	return btpl.Bytes(), nil
 }
 
 func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, err error) {

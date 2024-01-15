@@ -135,6 +135,33 @@ func (req listEntityByIDReq) validate() error {
 	return nil
 }
 
+type listEntityEventsReq struct {
+	token      string
+	entityID   string
+	entityType string
+	page       uint64
+	limit      uint64
+}
+
+func (req listEntityEventsReq) validate() error {
+	if req.token == "" {
+		return errAuthorization
+	}
+	if req.entityID == "" {
+		return errMissingID
+	}
+	if req.entityType == "" {
+		return errMissingType
+	}
+	if req.page == 0 {
+		return errPageSize
+	}
+	if req.limit == 0 {
+		return errLimitSize
+	}
+	return nil
+}
+
 type viewResourceReq struct {
 	token string
 	id    string
