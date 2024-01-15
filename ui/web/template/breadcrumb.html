@@ -5,12 +5,16 @@ SPDX-License-Identifier: Apache-2.0 -->
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
-      {{ if (ne .Breadcrumb.Previous "") }}
+      {{ $length := len .Breadcrumbs }}
+      {{ range $i, $b:=  .Breadcrumbs }}
         <li class="breadcrumb-item">
-          <a href="/{{ .Breadcrumb.Previous }}">{{ .Breadcrumb.Previous }}</a>
+          {{ if eq $i (sub $length 1) }}
+            {{ .Name }}
+          {{ else }}
+            <a href="{{ .URL }}">{{ .Name }}</a>
+          {{ end }}
         </li>
       {{ end }}
-      <li class="breadcrumb-item active" aria-current="page">{{ .Breadcrumb.Current }}</li>
     </ol>
   </nav>
 {{ end }}

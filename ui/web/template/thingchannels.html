@@ -16,12 +16,6 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div class="col-lg-12 mx-auto py-3">
               {{ template "breadcrumb" . }}
               <div class="row">
-                <div class="buttons mb-3">
-                  <a class="btn body-button" href="/things/{{ .ThingID }}" role="button">Thing</a>
-                  <a class="btn body-button" href="/things/{{ .ThingID }}/users" role="button">
-                    Share
-                  </a>
-                </div>
                 <div class="table-responsive table-container">
                   {{ $shareButton := false }}
                   {{ if (hasPermission .Permissions "share") }}

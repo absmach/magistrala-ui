@@ -19,6 +19,8 @@ SPDX-License-Identifier: Apache-2.0 */
 	--pill-color-3: #8390a2;
 
 	--codemirror-font: 'Inconsolata', monospace;
+
+	--bs-breadcrumb-divider: '>';
 }
 
 * {
