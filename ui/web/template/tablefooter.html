@@ -1,140 +1,93 @@
 <!-- Copyright (c) Abstract Machines
 SPDX-License-Identifier: Apache-2.0 -->
 
-{{ define "tablefooter" }}
+{{ define "tableheader" }}
   {{ $currentPage := .CurrentPage }}
-  {{ $totalPages :=
-    .Pages
-  }}
-  <nav class="border-top" aria-label="Page navigation example">
-    <ul class="pagination justify-content-end mt-3">
-      {{ $prevPage := sub $currentPage 1 }}
-      {{ if le $prevPage 0 }}
-        <li class="page-item disabled">
-          <span class="page-link">Previous</span>
-        </li>
-      {{ else }}
-        <li class="page-item">
-          <a class="page-link" href="?page={{ $prevPage }}">Previous</a>
-        </li>
-      {{ end }}
-      {{ $startPage := max 1 (sub $currentPage 2) }}
-      {{ $endPage := min
-        $totalPages (add $currentPage 2)
-      }}
-      {{ range fromTo $startPage $endPage }}
-        {{ if eq . $currentPage }}
-          <li class="page-item active">
-            <span class="page-link">{{ . }}</span>
-          </li>
-        {{ else }}
-          <li class="page-item">
-            <a class="page-link" href="?page={{ . }}">{{ . }}</a>
-          </li>
-        {{ end }}
-      {{ end }}
-      {{ $nextPage := add $currentPage 1 }}
-      {{ if ge $nextPage
-        $totalPages
-      }}
-        <li class="page-item disabled">
-          <span class="page-link">Next</span>
-        </li>
-      {{ else }}
-        <li class="page-item">
-          <a class="page-link" href="?page={{ $nextPage }}">Next</a>
-        </li>
-      {{ end }}
-    </ul>
-  </nav>
   <script>
     localStorage.setItem("selectedLimit", "{{.Limit}}");
-    var currentPage = '{{ .CurrentPage }}';
-    var isset = ' {{isset "StatusOptions" . }}';
-    var selectedStatus;
-    if (isset){
-      selectedStatus = localStorage.getItem("selectedStatus");
-    }
+    var selectedStatus = localStorage.getItem("selectedStatus");
     var selectedLimit = localStorage.getItem("selectedLimit");
-
     var itemsPerPage = document.querySelectorAll(".itemsPerPage a");
     itemsPerPage.forEach(function (item) {
       var href = item.getAttribute("href");
-      var hrefParams = new URLSearchParams(href);
-      var limit = hrefParams.get("limit");
-      var newParams = { page:currentPage,limit: item.textContent};
       if (selectedStatus) {
-        newParams.status = selectedStatus;
+        href = href + "&status=" + selectedStatus;
       }
-      updateQueryParameters(newParams, item);
+      item.setAttribute("href", href);
       item.addEventListener("click", function () {
-        localStorage.setItem("selectedLimit", item.textContent);
+      localStorage.setItem("selectedLimit", item.textContent);
       });
     });
-
-    var paginationLinks = document.querySelectorAll(".pagination a");
-    paginationLinks.forEach(function (item) {
-      var href = item.getAttribute("href");
-      var hrefParams = new URLSearchParams(href);
-      var page = hrefParams.get("page");
-      var newParams = { page: page };
-      if (selectedLimit) {
-        newParams.limit = selectedLimit;
-      }
-      if (selectedStatus) {
-        newParams.status = selectedStatus;
-      }
-
-      updateQueryParameters(newParams, item);
-    });
-
-
-    function updateQueryParameters(newParams, element) {
-      var params = new URLSearchParams(window.location.search);
-
-      // Add or update parameters from the newParams object
-      for (var key in newParams) {
-        if (Object.prototype.hasOwnProperty.call(newParams, key)) {
-          params.set(key, newParams[key]);
-        }
-      }
-
-      // Generate the updated query string
-      var newQueryStr = params.toString();
-      var href = `?${newQueryStr}`;
-
-      // Update element href with new query parameters
-      element.setAttribute("href", href);
-    }
-  </script> {{ if isset "StatusOptions" . }}
-    <script>
-      var statusOptions = JSON.parse('{{ toSlice .StatusOptions }}');
-      statusOptions.forEach(status => {
-        var statusElement = document.getElementById(status + "Status");
-        var newParams = { page:currentPage,limit: selectedLimit,status: status };
-        updateQueryParameters(newParams, statusElement);
-        statusElement.addEventListener("click", function () {
-          localStorage.setItem("selectedStatus", status);
+  </script>
+  <div class="row-mb-3 d-flex flex-row justify-content-between mb-3">
+    <div class="d-flex flex-row justify-content-start mb-2">
+      <div class="dropdown border">
+        <button
+          class="btn btn-light dropdown-toggle"
+          type="button"
+          id="itemsPerPageDropdown"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
+        >
+          {{ .Limit }}
+        </button>
+        <ul class="dropdown-menu itemsPerPage" aria-labelledby="itemsPerPageDropdown">
+          <li>
+            <a class="dropdown-item" href="?page={{ $currentPage }}&limit=5" id="limit5">5</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="?page={{ $currentPage }}&limit=10" id="limit10">10</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="?page={{ $currentPage }}&limit=20" id="limit20">20</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="?page={{ $currentPage }}&limit=50" id="limit50">50</a>
+          </li>
+        </ul>
+      </div>
+      <span class="align-self-center mx-2">Items per page</span>
+    </div>
+    {{ if isset "StatusOptions" . }}
+      <button
+        class="btn btn-light dropdown-toggle"
+        type="button"
+        data-bs-toggle="dropdown"
+        aria-expanded="false"
+        id="statusDropdown"
+      >
+        <i class="fas fa-filter"></i>
+        Status
+        {{ if .Status }}
+          :
+          {{ .Status }}
+        {{ else }}
+          : enabled
+        {{ end }}
+      </button>
+      <ul class="dropdown-menu" aria-labelledby="statusDropdown">
+        {{ range .StatusOptions }}
+          <li>
+            <a class="dropdown-item " id="{{ . }}Status">
+              {{ . }}
+            </a>
+          </li>
+        {{ end }}
+      </ul>
+      <script>
+        var currentPage = '{{ .CurrentPage }}';
+        var selectedStatus = localStorage.getItem("selectedStatus");
+        var selectedLimit = localStorage.getItem("selectedLimit");
+        var statusOptions = JSON.parse('{{ toSlice .StatusOptions }}');
+          statusOptions.forEach(status => {
+            var statusElement = document.getElementById(status + "Status");
+            var href = "?page=" + currentPage + "&limit=" + selectedLimit + "&status=" + status ;
+            statusElement.setAttribute("href", href);
+            statusElement.addEventListener("click", function () {
+              localStorage.setItem("selectedStatus", status);
+          });
         });
-      });
-
-      function updateQueryParameters(newParams, element) {
-        var params = new URLSearchParams(window.location.search);
-
-        // Add or update parameters from the newParams object
-        for (var key in newParams) {
-          if (Object.prototype.hasOwnProperty.call(newParams, key)) {
-            params.set(key, newParams[key]);
-          }
-        }
-
-        // Generate the updated query string
-        var newQueryStr = params.toString();
-        var href = `?${newQueryStr}`;
-
-        // Update element href with new query parameters
-        element.setAttribute("href", href);
-      }
-    </script>
-  {{ end }}
+      </script>
+    {{ end }}
+  </div>
 {{ end }}
