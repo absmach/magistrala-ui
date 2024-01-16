@@ -6,14 +6,15 @@ package main
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/absmach/magistrala-ui/ui"
 	"github.com/absmach/magistrala-ui/ui/api"
-	"github.com/absmach/magistrala/logger"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/absmach/magistrala/pkg/uuid"
 	"github.com/caarlos0/env/v9"
@@ -23,7 +24,7 @@ import (
 )
 
 type config struct {
-	LogLevel        string          `env:"MG_UI_LOG_LEVEL"        envDefault:"info"`
+	LogLevel        string          `env:"MG_UI_LOG_LEVEL"        envDefault:"debug"`
 	Port            string          `env:"MG_UI_PORT"             envDefault:"9095"`
 	InstanceID      string          `env:"MG_UI_INSTANCE_ID"      envDefault:""`
 	HTTPAdapterURL  string          `env:"MG_HTTP_ADAPTER_URL"    envDefault:"http://localhost:8008"`
@@ -57,7 +58,7 @@ func main() {
 		InvitationsURL:  cfg.InvitationsURL,
 	}
 
-	logger, err := logger.New(os.Stdout, cfg.LogLevel)
+	logger, err := initLogger(cfg.LogLevel)
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
@@ -98,7 +99,7 @@ func main() {
 
 	go func() {
 		p := fmt.Sprintf(":%s", cfg.Port)
-		logger.Info(fmt.Sprintf("GUI service started on port %s", cfg.Port))
+		logger.Info("GUI service started", slog.String("port", p))
 		errs <- http.ListenAndServe(p, api.MakeHandler(svc, mux, cfg.InstanceID))
 	}()
 
@@ -109,5 +110,18 @@ func main() {
 	}()
 
 	err = <-errs
-	logger.Error(fmt.Sprintf("GUI service terminated: %s", err))
+	logger.Error("GUI service terminated", slog.String("err", err.Error()))
+}
+
+func initLogger(levelText string) (*slog.Logger, error) {
+	var level slog.Level
+	if err := level.UnmarshalText([]byte(levelText)); err != nil {
+		return &slog.Logger{}, fmt.Errorf(`{"level":"error","message":"%s: %s","ts":"%s"}`, err, levelText, time.RFC3339Nano)
+	}
+
+	logHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: level,
+	})
+
+	return slog.New(logHandler), nil
 }
