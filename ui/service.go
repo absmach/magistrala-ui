@@ -361,7 +361,7 @@ type uiService struct {
 }
 
 type Config struct {
-	AccessTokenTTL  time.Duration `env:"MG_ACCESS_TOKEN_TTL" envDefault:"1m"`
+	AccessTokenTTL  time.Duration `env:"MG_ACCESS_TOKEN_TTL" envDefault:"24h"`
 	RefreshTokenTTL time.Duration `env:"MG_REFRESH_TOKEN_TTL" envDefault:"24h"`
 }
 
