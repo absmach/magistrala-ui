@@ -110,7 +110,7 @@ func (mm *metricsMiddleware) UpdatePassword(token, oldPass, newPass string) (err
 }
 
 // Token adds metrics middleware to token method.
-func (mm *metricsMiddleware) Token(login sdk.Login) (ui.TokenDetails, error) {
+func (mm *metricsMiddleware) Token(login sdk.Login) (sdk.Token, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "token").Add(1)
 		mm.latency.With("method", "token").Observe(time.Since(begin).Seconds())
@@ -120,7 +120,7 @@ func (mm *metricsMiddleware) Token(login sdk.Login) (ui.TokenDetails, error) {
 }
 
 // RefreshToken adds metrics middleware to refresh token method.
-func (mm *metricsMiddleware) RefreshToken(refreshToken string) (ui.TokenDetails, error) {
+func (mm *metricsMiddleware) RefreshToken(refreshToken string) (sdk.Token, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "refresh_token").Add(1)
 		mm.latency.With("method", "refresh_token").Observe(time.Since(begin).Seconds())
@@ -790,7 +790,7 @@ func (mm *metricsMiddleware) ErrorPage(errMsg string) ([]byte, error) {
 }
 
 // DomainLogin adds metrics middleware to domain login method.
-func (mm *metricsMiddleware) DomainLogin(login sdk.Login, refreshToken string) (ui.TokenDetails, error) {
+func (mm *metricsMiddleware) DomainLogin(login sdk.Login, refreshToken string) (sdk.Token, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "domain_login").Add(1)
 		mm.latency.With("method", "domain_login").Observe(time.Since(begin).Seconds())

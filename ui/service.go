@@ -176,11 +176,11 @@ type Service interface {
 	// UpdatePassword updates the user's old password to the new password.
 	UpdatePassword(token, oldPass, newPass string) error
 	// Token provides a user with an access token and a refresh token.
-	Token(login sdk.Login) (TokenDetails, error)
+	Token(login sdk.Login) (sdk.Token, error)
 	// RefreshToken retrieves a new access token and refresh token from the provided refresh token.
-	RefreshToken(refreshToken string) (TokenDetails, error)
+	RefreshToken(refreshToken string) (sdk.Token, error)
 	// DomainLogin provides a user with an domain level access token and a refresh token.
-	DomainLogin(login sdk.Login, refreshToken string) (TokenDetails, error)
+	DomainLogin(login sdk.Login, refreshToken string) (sdk.Token, error)
 	// UserProfile displays the user profile page.
 	UserProfile(token string) ([]byte, error)
 
@@ -357,16 +357,10 @@ var _ Service = (*uiService)(nil)
 type uiService struct {
 	sdk  sdk.SDK
 	tpls *template.Template
-	cfg  Config
-}
-
-type Config struct {
-	AccessTokenTTL  time.Duration `env:"MG_ACCESS_TOKEN_TTL" envDefault:"24h"`
-	RefreshTokenTTL time.Duration `env:"MG_REFRESH_TOKEN_TTL" envDefault:"24h"`
 }
 
 // New instantiates the HTTP adapter implementation.
-func New(sdk sdk.SDK, cfg Config) (Service, error) {
+func New(sdk sdk.SDK) (Service, error) {
 	tpl, err := parseTemplates(sdk, templates)
 	if err != nil {
 		return nil, err
@@ -374,7 +368,6 @@ func New(sdk sdk.SDK, cfg Config) (Service, error) {
 	return &uiService{
 		sdk:  sdk,
 		tpls: tpl,
-		cfg:  cfg,
 	}, nil
 }
 
@@ -524,51 +517,31 @@ func (us *uiService) UpdatePassword(token, oldPass, newPass string) error {
 	return nil
 }
 
-func (us *uiService) Token(login sdk.Login) (TokenDetails, error) {
-	accessTokenTTL := us.cfg.AccessTokenTTL
-	refreshTokenTTL := us.cfg.RefreshTokenTTL
-
+func (us *uiService) Token(login sdk.Login) (sdk.Token, error) {
 	token, err := us.sdk.CreateToken(login)
 	if err != nil {
-		return TokenDetails{}, errors.Wrap(err, ErrToken)
+		return sdk.Token{}, errors.Wrap(err, ErrToken)
 	}
 
-	tokenDetails := TokenDetails{
-		Token:           token,
-		AccessTokenTTL:  int(accessTokenTTL.Seconds()),
-		RefreshTokenTTL: int(refreshTokenTTL.Seconds()),
-	}
-	return tokenDetails, nil
+	return token, nil
 }
 
-func (us *uiService) RefreshToken(refreshToken string) (TokenDetails, error) {
+func (us *uiService) RefreshToken(refreshToken string) (sdk.Token, error) {
 	token, err := us.sdk.RefreshToken(sdk.Login{}, refreshToken)
 	if err != nil {
-		return TokenDetails{}, errors.Wrap(err, ErrTokenRefresh)
+		return sdk.Token{}, errors.Wrap(err, ErrTokenRefresh)
 	}
 
-	tokenDetails := TokenDetails{
-		Token:           token,
-		AccessTokenTTL:  int(us.cfg.AccessTokenTTL.Seconds()),
-		RefreshTokenTTL: int(us.cfg.RefreshTokenTTL.Seconds()),
-	}
-
-	return tokenDetails, nil
+	return token, nil
 }
 
-func (us *uiService) DomainLogin(login sdk.Login, refreshToken string) (TokenDetails, error) {
+func (us *uiService) DomainLogin(login sdk.Login, refreshToken string) (sdk.Token, error) {
 	token, err := us.sdk.RefreshToken(login, refreshToken)
 	if err != nil {
-		return TokenDetails{}, err
+		return sdk.Token{}, err
 	}
 
-	tokenDetails := TokenDetails{
-		Token:           token,
-		AccessTokenTTL:  int(us.cfg.AccessTokenTTL),
-		RefreshTokenTTL: int(us.cfg.RefreshTokenTTL),
-	}
-
-	return tokenDetails, nil
+	return token, nil
 }
 
 func (us *uiService) UserProfile(token string) (b []byte, err error) {

@@ -6,10 +6,12 @@ package api
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/absmach/magistrala-ui/ui"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/go-kit/kit/endpoint"
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -195,6 +197,18 @@ func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
+func extractTokenExpiry(token string) (int, error) {
+	jwtToken, _, err := new(jwt.Parser).ParseUnverified(token, jwt.MapClaims{})
+	if err != nil {
+		return 0, err
+	}
+	var exp int
+	if claims, ok := jwtToken.Claims.(jwt.MapClaims); ok {
+		exp = int(int64(claims["exp"].(float64)) - time.Now().Unix())
+	}
+	return exp, nil
+}
+
 func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(tokenReq)
@@ -202,7 +216,7 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		tokenDetails, err := svc.Token(
+		token, err := svc.Token(
 			sdk.Login{
 				Identity: req.Identity,
 				Secret:   req.Secret,
@@ -211,7 +225,12 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		user, err := svc.UserProfile(tokenDetails.Token.AccessToken)
+		user, err := svc.UserProfile(token.AccessToken)
+		if err != nil {
+			return nil, err
+		}
+
+		exp, err := extractTokenExpiry(token.RefreshToken)
 		if err != nil {
 			return nil, err
 		}
@@ -222,17 +241,17 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			cookies: []*http.Cookie{
 				{
 					Name:     accessTokenKey,
-					Value:    tokenDetails.Token.AccessToken,
+					Value:    token.AccessToken,
 					Path:     "/",
 					HttpOnly: true,
-					MaxAge:   60,
+					MaxAge:   exp,
 				},
 				{
 					Name:     refreshTokenKey,
-					Value:    tokenDetails.Token.RefreshToken,
+					Value:    token.RefreshToken,
 					Path:     domainsAPIEndpoint,
 					HttpOnly: true,
-					MaxAge:   tokenDetails.RefreshTokenTTL,
+					MaxAge:   exp,
 				},
 			},
 		}
@@ -248,7 +267,12 @@ func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		tokenDetails, err := svc.RefreshToken(req.refreshToken)
+		token, err := svc.RefreshToken(req.refreshToken)
+		if err != nil {
+			return nil, err
+		}
+
+		exp, err := extractTokenExpiry(token.RefreshToken)
 		if err != nil {
 			return nil, err
 		}
@@ -259,24 +283,24 @@ func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			cookies: []*http.Cookie{
 				{
 					Name:     accessTokenKey,
-					Value:    tokenDetails.Token.AccessToken,
+					Value:    token.AccessToken,
 					Path:     "/",
 					HttpOnly: true,
-					MaxAge:   tokenDetails.AccessTokenTTL,
+					MaxAge:   exp,
 				},
 				{
 					Name:     refreshTokenKey,
-					Value:    tokenDetails.Token.RefreshToken,
+					Value:    token.RefreshToken,
 					Path:     tokenRefreshAPIEndpoint,
 					HttpOnly: true,
-					MaxAge:   tokenDetails.RefreshTokenTTL,
+					MaxAge:   exp,
 				},
 				{
 					Name:     refreshTokenKey,
-					Value:    tokenDetails.Token.RefreshToken,
+					Value:    token.RefreshToken,
 					Path:     domainsAPIEndpoint,
 					HttpOnly: true,
-					MaxAge:   tokenDetails.RefreshTokenTTL,
+					MaxAge:   exp,
 				},
 			},
 		}
@@ -1559,7 +1583,7 @@ func domainLoginEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		tokenDetails, err := svc.DomainLogin(
+		token, err := svc.DomainLogin(
 			sdk.Login{
 				DomainID: req.DomainID,
 			},
@@ -1569,29 +1593,34 @@ func domainLoginEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
+		exp, err := extractTokenExpiry(token.RefreshToken)
+		if err != nil {
+			return nil, err
+		}
+
 		return uiRes{
 			code: http.StatusSeeOther,
 			cookies: []*http.Cookie{
 				{
 					Name:     accessTokenKey,
-					Value:    tokenDetails.Token.AccessToken,
+					Value:    token.AccessToken,
 					Path:     "/",
 					HttpOnly: true,
-					MaxAge:   tokenDetails.AccessTokenTTL,
+					MaxAge:   exp,
 				},
 				{
 					Name:     refreshTokenKey,
-					Value:    tokenDetails.Token.RefreshToken,
+					Value:    token.RefreshToken,
 					Path:     domainsAPIEndpoint,
 					HttpOnly: true,
-					MaxAge:   tokenDetails.RefreshTokenTTL,
+					MaxAge:   exp,
 				},
 				{
 					Name:     refreshTokenKey,
-					Value:    tokenDetails.Token.RefreshToken,
+					Value:    token.RefreshToken,
 					Path:     tokenRefreshAPIEndpoint,
 					HttpOnly: true,
-					MaxAge:   tokenDetails.RefreshTokenTTL,
+					MaxAge:   exp,
 				},
 			},
 			headers: map[string]string{"Location": "/?domain=" + req.DomainID},
