@@ -75,12 +75,6 @@ type breadcrumb struct {
 	URL  string
 }
 
-type TokenDetails struct {
-	Token           sdk.Token
-	AccessTokenTTL  int
-	RefreshTokenTTL int
-}
-
 var (
 	templates = []string{
 		"header",
@@ -522,7 +516,6 @@ func (us *uiService) Token(login sdk.Login) (sdk.Token, error) {
 	if err != nil {
 		return sdk.Token{}, errors.Wrap(err, ErrToken)
 	}
-
 	return token, nil
 }
 
