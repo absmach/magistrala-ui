@@ -232,11 +232,11 @@ func (lm *loggingMiddleware) ViewUser(token, id string) (b []byte, err error) {
 }
 
 // UpdateUser adds logging middleware to update user method.
-func (lm *loggingMiddleware) UpdateUser(token, id string, user sdk.User) (err error) {
+func (lm *loggingMiddleware) UpdateUser(token string, user sdk.User) (err error) {
 	defer func(begin time.Time) {
 		args := []interface{}{
 			slog.String("duration", time.Since(begin).String()),
-			slog.Group("user", slog.String("id", id), slog.String("name", user.Name), slog.Any("metadata", user.Metadata)),
+			slog.Group("user", slog.String("id", user.ID), slog.String("name", user.Name), slog.Any("metadata", user.Metadata)),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
@@ -246,15 +246,15 @@ func (lm *loggingMiddleware) UpdateUser(token, id string, user sdk.User) (err er
 		lm.logger.Info("Update user completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.UpdateUser(token, id, user)
+	return lm.svc.UpdateUser(token, user)
 }
 
 // UpdateUserTags adds logging middleware to update user tags method.
-func (lm *loggingMiddleware) UpdateUserTags(token, id string, user sdk.User) (err error) {
+func (lm *loggingMiddleware) UpdateUserTags(token string, user sdk.User) (err error) {
 	defer func(begin time.Time) {
 		args := []interface{}{
 			slog.String("duration", time.Since(begin).String()),
-			slog.Group("user", slog.String("id", id), slog.Any("tags", user.Tags)),
+			slog.Group("user", slog.String("id", user.ID), slog.Any("tags", user.Tags)),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
@@ -264,15 +264,15 @@ func (lm *loggingMiddleware) UpdateUserTags(token, id string, user sdk.User) (er
 		lm.logger.Info("Update user tags completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.UpdateUserTags(token, id, user)
+	return lm.svc.UpdateUserTags(token, user)
 }
 
 // UpdateUserIdentity adds logging middleware to update user identity method.
-func (lm *loggingMiddleware) UpdateUserIdentity(token, id string, user sdk.User) (err error) {
+func (lm *loggingMiddleware) UpdateUserIdentity(token string, user sdk.User) (err error) {
 	defer func(begin time.Time) {
 		args := []interface{}{
 			slog.String("duration", time.Since(begin).String()),
-			slog.String("user_id", id),
+			slog.String("user_id", user.ID),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
@@ -282,15 +282,15 @@ func (lm *loggingMiddleware) UpdateUserIdentity(token, id string, user sdk.User)
 		lm.logger.Info("Update user identity completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.UpdateUserIdentity(token, id, user)
+	return lm.svc.UpdateUserIdentity(token, user)
 }
 
 // UpdateUserOwner adds logging middleware to update user owner method.
-func (lm *loggingMiddleware) UpdateUserOwner(token, id string, user sdk.User) (err error) {
+func (lm *loggingMiddleware) UpdateUserOwner(token string, user sdk.User) (err error) {
 	defer func(begin time.Time) {
 		args := []interface{}{
 			slog.String("duration", time.Since(begin).String()),
-			slog.Group("user", slog.String("id", id), slog.String("owner", user.Owner)),
+			slog.Group("user", slog.String("id", user.ID), slog.String("owner", user.Owner)),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
@@ -300,7 +300,7 @@ func (lm *loggingMiddleware) UpdateUserOwner(token, id string, user sdk.User) (e
 		lm.logger.Info("Update user owner completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.UpdateUserOwner(token, id, user)
+	return lm.svc.UpdateUserOwner(token, user)
 }
 
 // UpdateUserRole adds logging middleware to update user role method.
@@ -427,11 +427,11 @@ func (lm *loggingMiddleware) ViewThing(token, id string) (b []byte, err error) {
 }
 
 // UpdateThing adds logging middleware to update thing method.
-func (lm *loggingMiddleware) UpdateThing(token, id string, thing sdk.Thing) (err error) {
+func (lm *loggingMiddleware) UpdateThing(token string, thing sdk.Thing) (err error) {
 	defer func(begin time.Time) {
 		args := []interface{}{
 			slog.String("duration", time.Since(begin).String()),
-			slog.Group("thing", slog.String("id", id), slog.String("name", thing.Name), slog.Any("metadata", thing.Metadata)),
+			slog.Group("thing", slog.String("id", thing.ID), slog.String("name", thing.Name), slog.Any("metadata", thing.Metadata)),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
@@ -441,15 +441,15 @@ func (lm *loggingMiddleware) UpdateThing(token, id string, thing sdk.Thing) (err
 		lm.logger.Info("Update thing completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.UpdateThing(token, id, thing)
+	return lm.svc.UpdateThing(token, thing)
 }
 
 // UpdateThingTags adds logging middleware to update thing tags method.
-func (lm *loggingMiddleware) UpdateThingTags(token, id string, thing sdk.Thing) (err error) {
+func (lm *loggingMiddleware) UpdateThingTags(token string, thing sdk.Thing) (err error) {
 	defer func(begin time.Time) {
 		args := []interface{}{
 			slog.String("duration", time.Since(begin).String()),
-			slog.Group("thing", slog.String("id", id), slog.Any("tags", thing.Tags)),
+			slog.Group("thing", slog.String("id", thing.ID), slog.Any("tags", thing.Tags)),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
@@ -459,7 +459,7 @@ func (lm *loggingMiddleware) UpdateThingTags(token, id string, thing sdk.Thing) 
 		lm.logger.Info("Update thing tags completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.UpdateThingTags(token, id, thing)
+	return lm.svc.UpdateThingTags(token, thing)
 }
 
 // UpdateThingSecret adds logging middleware to update thing secret method.
@@ -668,11 +668,11 @@ func (lm *loggingMiddleware) ViewChannel(token, id string) (b []byte, err error)
 }
 
 // UpdateChannel adds logging middleware to update channel method.
-func (lm *loggingMiddleware) UpdateChannel(token, id string, channel sdk.Channel) (err error) {
+func (lm *loggingMiddleware) UpdateChannel(token string, channel sdk.Channel) (err error) {
 	defer func(begin time.Time) {
 		args := []interface{}{
 			slog.String("duration", time.Since(begin).String()),
-			slog.Group("channel", slog.String("id", id), slog.String("name", channel.Name), slog.String("description", channel.Description), slog.Any("metadata", channel.Metadata)),
+			slog.Group("channel", slog.String("id", channel.ID), slog.String("name", channel.Name), slog.String("description", channel.Description), slog.Any("metadata", channel.Metadata)),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
@@ -682,7 +682,7 @@ func (lm *loggingMiddleware) UpdateChannel(token, id string, channel sdk.Channel
 		lm.logger.Info("Update channel completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.UpdateChannel(token, id, channel)
+	return lm.svc.UpdateChannel(token, channel)
 }
 
 // ListThingsByChannel adds logging middleware to list things by channel method.
@@ -1034,11 +1034,11 @@ func (lm *loggingMiddleware) ViewGroup(token, id string) (b []byte, err error) {
 }
 
 // UpdateGroup adds logging middleware to update group method.
-func (lm *loggingMiddleware) UpdateGroup(token, id string, group sdk.Group) (err error) {
+func (lm *loggingMiddleware) UpdateGroup(token string, group sdk.Group) (err error) {
 	defer func(begin time.Time) {
 		args := []interface{}{
 			slog.String("duration", time.Since(begin).String()),
-			slog.Group("group", slog.String("id", id), slog.String("name", group.Name), slog.String("description", group.Description), slog.Any("metadata", group.Metadata)),
+			slog.Group("group", slog.String("id", group.ID), slog.String("name", group.Name), slog.String("description", group.Description), slog.Any("metadata", group.Metadata)),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
@@ -1048,7 +1048,7 @@ func (lm *loggingMiddleware) UpdateGroup(token, id string, group sdk.Group) (err
 		lm.logger.Info("Update group completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.UpdateGroup(token, id, group)
+	return lm.svc.UpdateGroup(token, group)
 }
 
 // ListGroups adds logging middleware to list groups method.

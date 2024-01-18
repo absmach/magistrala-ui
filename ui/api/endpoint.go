@@ -390,7 +390,7 @@ func updateUserEndpoint(svc ui.Service) endpoint.Endpoint {
 			Metadata: req.Metadata,
 		}
 
-		if err := svc.UpdateUser(req.token, req.id, user); err != nil {
+		if err := svc.UpdateUser(req.token, user); err != nil {
 			return nil, err
 		}
 
@@ -411,7 +411,7 @@ func updateUserTagsEndpoint(svc ui.Service) endpoint.Endpoint {
 			ID:   req.id,
 			Tags: req.Tags,
 		}
-		if err := svc.UpdateUserTags(req.token, req.id, user); err != nil {
+		if err := svc.UpdateUserTags(req.token, user); err != nil {
 			return nil, err
 		}
 
@@ -435,7 +435,7 @@ func updateUserIdentityEndpoint(svc ui.Service) endpoint.Endpoint {
 			ID:          req.id,
 			Credentials: credential,
 		}
-		if err := svc.UpdateUserIdentity(req.token, req.id, user); err != nil {
+		if err := svc.UpdateUserIdentity(req.token, user); err != nil {
 			return nil, err
 		}
 
@@ -681,7 +681,7 @@ func updateThingEndpoint(svc ui.Service) endpoint.Endpoint {
 			Metadata: req.Metadata,
 		}
 
-		if err := svc.UpdateThing(req.token, req.id, uth); err != nil {
+		if err := svc.UpdateThing(req.token, uth); err != nil {
 			return nil, err
 		}
 
@@ -702,7 +702,7 @@ func updateThingTagsEndpoint(svc ui.Service) endpoint.Endpoint {
 			ID:   req.id,
 			Tags: req.Tags,
 		}
-		if err := svc.UpdateThingTags(req.token, req.id, thing); err != nil {
+		if err := svc.UpdateThingTags(req.token, thing); err != nil {
 			return nil, err
 		}
 
@@ -946,7 +946,7 @@ func updateChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 			Description: req.Description,
 		}
 
-		if err := svc.UpdateChannel(req.token, req.id, uch); err != nil {
+		if err := svc.UpdateChannel(req.token, uch); err != nil {
 			return nil, err
 		}
 
@@ -1197,7 +1197,7 @@ func updateGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 			Description: req.Description,
 		}
 
-		if err := svc.UpdateGroup(req.token, req.id, ugr); err != nil {
+		if err := svc.UpdateGroup(req.token, ugr); err != nil {
 			return nil, err
 		}
 

@@ -185,13 +185,13 @@ type Service interface {
 	// ViewUser retrieves information about the user with the given ID.
 	ViewUser(token, userID string) ([]byte, error)
 	// UpdateUser updates the user with the given ID.
-	UpdateUser(token, userID string, user sdk.User) error
+	UpdateUser(token string, user sdk.User) error
 	// UpdateUserTags updates the tags of the user with the given ID.
-	UpdateUserTags(token, userID string, user sdk.User) error
+	UpdateUserTags(token string, user sdk.User) error
 	// UpdateUserIdentity updates the identity of the user with the given ID.
-	UpdateUserIdentity(token, userID string, user sdk.User) error
+	UpdateUserIdentity(token string, user sdk.User) error
 	// UpdateUserOwner updates the owner of the user with the given ID.
-	UpdateUserOwner(token, userID string, user sdk.User) error
+	UpdateUserOwner(token string, user sdk.User) error
 	// UpdateUserRole updates the roles of the user with the given ID.
 	UpdateUserRole(token string, user sdk.User) error
 	// EnableUser updates the status of a user with the given ID to enabled.
@@ -206,17 +206,17 @@ type Service interface {
 	// ListThings retrieves things owned/shared by a user.
 	ListThings(token, status string, page, limit uint64) ([]byte, error)
 	// ViewThing retrieves information about the thing with the given ID.
-	ViewThing(token, id string) ([]byte, error)
+	ViewThing(token, thingID string) ([]byte, error)
 	// UpdateThing updates the thing with the given ID.
-	UpdateThing(token, id string, thing sdk.Thing) error
+	UpdateThing(token string, thing sdk.Thing) error
 	// UpdateThingTags updates the tags of the thing with the given ID.
-	UpdateThingTags(token, id string, thing sdk.Thing) error
+	UpdateThingTags(token string, thing sdk.Thing) error
 	// UpdateThingSecret updates the secret of the thing with the given ID.
-	UpdateThingSecret(token, id, secret string) error
+	UpdateThingSecret(token, thingID, secret string) error
 	// EnableThing updates the status of the thing with the given ID to enabled.
-	EnableThing(token, id string) error
+	EnableThing(token, thingID string) error
 	// DisableThing updates the status of the thing with the given ID to disabled.
-	DisableThing(token, id string) error
+	DisableThing(token, thingID string) error
 	// ShareThing shares a thing with a user.
 	ShareThing(token, thingID string, req sdk.UsersRelationRequest) error
 	// UnshareThing unshares a thing with a user.
@@ -235,21 +235,21 @@ type Service interface {
 	// ViewChannel retrievs information about the channel with the given ID.
 	ViewChannel(token, id string) ([]byte, error)
 	// UpdateChannel updates the channel with the given ID.
-	UpdateChannel(token, id string, channel sdk.Channel) error
+	UpdateChannel(token string, channel sdk.Channel) error
 	// ListThingsByChannel retrieves a list of things based on the given channel ID.
 	ListThingsByChannel(token, channelID string, page, limit uint64) ([]byte, error)
 	// EnableChannel updates the status of the channel with the given ID to enabled.
-	EnableChannel(token, id string) error
+	EnableChannel(token, channelID string) error
 	// DisableChannel updates the status of the channel with the given ID to disabled.
-	DisableChannel(token, id string) error
+	DisableChannel(token, channelID string) error
 	// Connect bulk connects things to channel(s) specified by ID.
 	Connect(token string, connIDs sdk.Connection) error
 	// Disconnect bulk disconnects thinfs to channel(s) specified by ID.
 	Disconnect(token string, connIDs sdk.Connection) error
 	// ConnectThing connects a thing to a channel specified by ID.
-	ConnectThing(thingID, chanID, token string) error
+	ConnectThing(thingID, channelID, token string) error
 	// DisconnectThing disconnects a thing from a channel specified by ID.
-	DisconnectThing(thID, chID, token string) error
+	DisconnectThing(thID, channelID, token string) error
 	// AddUserToChannel adds a user to a channel.
 	AddUserToChannel(token, channelID string, req sdk.UsersRelationRequest) error
 	// RemoveUserFromChannel removes a user from a channel.
@@ -266,7 +266,7 @@ type Service interface {
 	// CreateGroups creates new groups.
 	CreateGroups(token string, groups ...sdk.Group) error
 	// ListGroupUsers retrieves the members of a group with a given ID.
-	ListGroupUsers(token, id, relation string, page, limit uint64) ([]byte, error)
+	ListGroupUsers(token, groupID, relation string, page, limit uint64) ([]byte, error)
 	// Assign adds a user to a group.
 	Assign(token, groupID string, userRelation sdk.UsersRelationRequest) error
 	// Unassign removes a user from a group.
@@ -274,13 +274,13 @@ type Service interface {
 	// ViewGroup retrieves information about a group with a given ID.
 	ViewGroup(token, id string) ([]byte, error)
 	// UpdateGroup updates the group with the given ID.
-	UpdateGroup(token, id string, group sdk.Group) error
+	UpdateGroup(token string, group sdk.Group) error
 	// ListGroups retrieves the groups owned/shared by a user.
 	ListGroups(token, status string, page, limit uint64) ([]byte, error)
 	// EnableGroup updates the status of the group to enabled.
-	EnableGroup(token, id string) error
+	EnableGroup(token, groupID string) error
 	// DisableGroup updates the status of the group to disabled.
-	DisableGroup(token, id string) error
+	DisableGroup(token, groupID string) error
 	// ListUserGroupChannels retrieves a list of channels that a userGroup is connected to.
 	ListUserGroupChannels(token, groupID string, page, limit uint64) (b []byte, err error)
 
@@ -304,14 +304,14 @@ type Service interface {
 	// UpdateBootstrapState updates bootstrap configuration state.
 	UpdateBootstrapState(token string, config sdk.BootstrapConfig) error
 	// ViewBootstrap retrieves a bootstrap config by thing id.
-	ViewBootstrap(token, id string) ([]byte, error)
+	ViewBootstrap(token, thingID string) ([]byte, error)
 	// GetRemoteTerminal returns remote terminal for a bootstrap config with mainflux agent installed.
-	GetRemoteTerminal(id, token string) ([]byte, error)
+	GetRemoteTerminal(thingID, token string) ([]byte, error)
 	// ProcessTerminalCommand sends mqtt command to agent and retrieves a response asynchronously.
-	ProcessTerminalCommand(ctx context.Context, id, token, command string, res chan string) error
+	ProcessTerminalCommand(ctx context.Context, thingID, token, command string, res chan string) error
 
 	// GetEntities retrieves all entities.
-	GetEntities(token, item, name, domainID, permission string, page, limit uint64) ([]byte, error)
+	GetEntities(token, entity, entityName, domainID, permission string, page, limit uint64) ([]byte, error)
 	// ErrorPage displays an error page.
 	ErrorPage(errMsg string) ([]byte, error)
 
@@ -644,7 +644,7 @@ func (us *uiService) ViewUser(token, userID string) (b []byte, err error) {
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) UpdateUser(token, userID string, user sdk.User) error {
+func (us *uiService) UpdateUser(token string, user sdk.User) error {
 	if _, err := us.sdk.UpdateUser(user, token); err != nil {
 		return errors.Wrap(err, ErrFailedUpdate)
 	}
@@ -652,7 +652,7 @@ func (us *uiService) UpdateUser(token, userID string, user sdk.User) error {
 	return nil
 }
 
-func (us *uiService) UpdateUserTags(token, userID string, user sdk.User) error {
+func (us *uiService) UpdateUserTags(token string, user sdk.User) error {
 	if _, err := us.sdk.UpdateUserTags(user, token); err != nil {
 		return errors.Wrap(err, ErrFailedUpdate)
 	}
@@ -660,7 +660,7 @@ func (us *uiService) UpdateUserTags(token, userID string, user sdk.User) error {
 	return nil
 }
 
-func (us *uiService) UpdateUserIdentity(token, userID string, user sdk.User) error {
+func (us *uiService) UpdateUserIdentity(token string, user sdk.User) error {
 	if _, err := us.sdk.UpdateUserIdentity(user, token); err != nil {
 		return errors.Wrap(err, ErrFailedUpdate)
 	}
@@ -668,7 +668,7 @@ func (us *uiService) UpdateUserIdentity(token, userID string, user sdk.User) err
 	return nil
 }
 
-func (us *uiService) UpdateUserOwner(token, userID string, user sdk.User) error {
+func (us *uiService) UpdateUserOwner(token string, user sdk.User) error {
 	if _, err := us.sdk.UpdateUserIdentity(user, token); err != nil {
 		return errors.Wrap(err, ErrFailedUpdate)
 	}
@@ -809,7 +809,7 @@ func (us *uiService) ViewThing(token, thingID string) (b []byte, err error) {
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) UpdateThing(token, id string, thing sdk.Thing) error {
+func (us *uiService) UpdateThing(token string, thing sdk.Thing) error {
 	if _, err := us.sdk.UpdateThing(thing, token); err != nil {
 		return errors.Wrap(err, ErrFailedUpdate)
 	}
@@ -817,7 +817,7 @@ func (us *uiService) UpdateThing(token, id string, thing sdk.Thing) error {
 	return nil
 }
 
-func (us *uiService) UpdateThingTags(token, id string, thing sdk.Thing) error {
+func (us *uiService) UpdateThingTags(token string, thing sdk.Thing) error {
 	if _, err := us.sdk.UpdateThingTags(thing, token); err != nil {
 		return errors.Wrap(err, ErrFailedUpdate)
 	}
@@ -825,24 +825,24 @@ func (us *uiService) UpdateThingTags(token, id string, thing sdk.Thing) error {
 	return nil
 }
 
-func (us *uiService) UpdateThingSecret(token, id, secret string) error {
-	if _, err := us.sdk.UpdateThingSecret(id, secret, token); err != nil {
+func (us *uiService) UpdateThingSecret(token, thingID, secret string) error {
+	if _, err := us.sdk.UpdateThingSecret(thingID, secret, token); err != nil {
 		return errors.Wrap(err, ErrFailedUpdate)
 	}
 
 	return nil
 }
 
-func (us *uiService) EnableThing(token, id string) error {
-	if _, err := us.sdk.EnableThing(id, token); err != nil {
+func (us *uiService) EnableThing(token, thingID string) error {
+	if _, err := us.sdk.EnableThing(thingID, token); err != nil {
 		return errors.Wrap(err, ErrFailedEnable)
 	}
 
 	return nil
 }
 
-func (us *uiService) DisableThing(token, id string) error {
-	if _, err := us.sdk.DisableThing(id, token); err != nil {
+func (us *uiService) DisableThing(token, thingID string) error {
+	if _, err := us.sdk.DisableThing(thingID, token); err != nil {
 		return errors.Wrap(err, ErrFailedDisable)
 	}
 
@@ -1093,7 +1093,7 @@ func (us *uiService) ViewChannel(token, channelID string) (b []byte, err error) 
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) UpdateChannel(token, id string, channel sdk.Channel) error {
+func (us *uiService) UpdateChannel(token string, channel sdk.Channel) error {
 	if _, err := us.sdk.UpdateChannel(channel, token); err != nil {
 		return errors.Wrap(err, ErrFailedUpdate)
 	}
@@ -1157,8 +1157,8 @@ func (us *uiService) ListThingsByChannel(token, channelID string, page, limit ui
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) EnableChannel(token, id string) error {
-	_, err := us.sdk.EnableChannel(id, token)
+func (us *uiService) EnableChannel(token, channelID string) error {
+	_, err := us.sdk.EnableChannel(channelID, token)
 	if err != nil {
 		return errors.Wrap(err, ErrFailedEnable)
 	}
@@ -1166,8 +1166,8 @@ func (us *uiService) EnableChannel(token, id string) error {
 	return nil
 }
 
-func (us *uiService) DisableChannel(token, id string) error {
-	_, err := us.sdk.DisableChannel(id, token)
+func (us *uiService) DisableChannel(token, channelID string) error {
+	_, err := us.sdk.DisableChannel(channelID, token)
 	if err != nil {
 		return errors.Wrap(err, ErrFailedDisable)
 	}
@@ -1191,16 +1191,16 @@ func (us *uiService) Disconnect(token string, connIDs sdk.Connection) error {
 	return nil
 }
 
-func (us *uiService) ConnectThing(thingID, chanID, token string) error {
-	if err := us.sdk.ConnectThing(thingID, chanID, token); err != nil {
+func (us *uiService) ConnectThing(thingID, channelID, token string) error {
+	if err := us.sdk.ConnectThing(thingID, channelID, token); err != nil {
 		return errors.Wrap(err, ErrFailedConnect)
 	}
 
 	return nil
 }
 
-func (us *uiService) DisconnectThing(thID, chID, token string) error {
-	if err := us.sdk.DisconnectThing(thID, chID, token); err != nil {
+func (us *uiService) DisconnectThing(thID, channelID, token string) error {
+	if err := us.sdk.DisconnectThing(thID, channelID, token); err != nil {
 		return errors.Wrap(err, ErrFailedDisconnect)
 	}
 
@@ -1487,7 +1487,7 @@ func (us *uiService) ViewGroup(token, groupID string) (b []byte, err error) {
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) UpdateGroup(token, id string, group sdk.Group) error {
+func (us *uiService) UpdateGroup(token string, group sdk.Group) error {
 	_, err := us.sdk.UpdateGroup(group, token)
 	if err != nil {
 		return errors.Wrap(err, ErrFailedUpdate)
@@ -1545,16 +1545,16 @@ func (us *uiService) ListGroups(token, status string, page, limit uint64) ([]byt
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) EnableGroup(token, id string) error {
-	if _, err := us.sdk.EnableGroup(id, token); err != nil {
+func (us *uiService) EnableGroup(token, groupID string) error {
+	if _, err := us.sdk.EnableGroup(groupID, token); err != nil {
 		return errors.Wrap(err, ErrFailedEnable)
 	}
 
 	return nil
 }
 
-func (us *uiService) DisableGroup(token, id string) error {
-	if _, err := us.sdk.DisableGroup(id, token); err != nil {
+func (us *uiService) DisableGroup(token, groupID string) error {
+	if _, err := us.sdk.DisableGroup(groupID, token); err != nil {
 		return errors.Wrap(err, ErrFailedDisable)
 	}
 
@@ -1787,8 +1787,8 @@ func (us *uiService) UpdateBootstrapCerts(token string, config sdk.BootstrapConf
 	return nil
 }
 
-func (us *uiService) DeleteBootstrap(token, id string) error {
-	if err := us.sdk.RemoveBootstrap(id, token); err != nil {
+func (us *uiService) DeleteBootstrap(token, thingID string) error {
+	if err := us.sdk.RemoveBootstrap(thingID, token); err != nil {
 		return errors.Wrap(err, ErrFailedDelete)
 	}
 
@@ -1882,8 +1882,8 @@ func (us *uiService) GetRemoteTerminal(thingID, token string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) ProcessTerminalCommand(ctx context.Context, id, tkn, command string, res chan string) error {
-	cfg, err := us.sdk.ViewBootstrap(id, tkn)
+func (us *uiService) ProcessTerminalCommand(ctx context.Context, thingID, tkn, command string, res chan string) error {
+	cfg, err := us.sdk.ViewBootstrap(thingID, tkn)
 	if err != nil {
 		return errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -1964,17 +1964,17 @@ func (us *uiService) ProcessTerminalCommand(ctx context.Context, id, tkn, comman
 	return nil
 }
 
-func (us *uiService) GetEntities(token, item, name, domainID, permission string, page, limit uint64) ([]byte, error) {
+func (us *uiService) GetEntities(token, entity, entityName, domainID, permission string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 	pgm := sdk.PageMetadata{
 		Offset:     offset,
 		Limit:      limit,
-		Name:       name,
+		Name:       entityName,
 		Permission: permission,
 	}
 
 	items := make(map[string]interface{})
-	switch item {
+	switch entity {
 	case "groups":
 		groups, err := us.sdk.Groups(pgm, token)
 		if err != nil {
@@ -2152,8 +2152,8 @@ func (us *uiService) DisableDomain(token, domainID string) error {
 	return nil
 }
 
-func (us *uiService) AssignMember(token, orgID string, req sdk.UsersRelationRequest) error {
-	if err := us.sdk.AddUserToDomain(orgID, req, token); err != nil {
+func (us *uiService) AssignMember(token, domainID string, req sdk.UsersRelationRequest) error {
+	if err := us.sdk.AddUserToDomain(domainID, req, token); err != nil {
 		return errors.Wrap(ErrFailedAssign, err)
 	}
 
