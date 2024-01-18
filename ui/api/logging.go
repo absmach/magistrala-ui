@@ -134,7 +134,7 @@ func (lm *loggingMiddleware) UpdatePassword(token, oldPass, newPass string) (err
 }
 
 // Toke adds logging middleware to token method.
-func (lm *loggingMiddleware) Token(login sdk.Login) (tokenDetails sdk.Token, err error) {
+func (lm *loggingMiddleware) Token(login sdk.Login) (token sdk.Token, err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
