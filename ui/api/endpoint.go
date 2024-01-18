@@ -197,16 +197,17 @@ func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func extractTokenExpiry(token string) (int, error) {
+func extractTokenExpiry(token string) (time.Time, error) {
 	jwtToken, _, err := new(jwt.Parser).ParseUnverified(token, jwt.MapClaims{})
 	if err != nil {
-		return 0, err
+		return time.Time{}, err
 	}
-	var exp int
+	var expTime time.Time
 	if claims, ok := jwtToken.Claims.(jwt.MapClaims); ok {
-		exp = int(int64(claims["exp"].(float64)) - time.Now().Unix())
+		expUnix := int64(claims["exp"].(float64))
+		expTime = time.Unix(expUnix, 0)
 	}
-	return exp, nil
+	return expTime, nil
 }
 
 func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
@@ -244,14 +245,14 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 					Value:    token.AccessToken,
 					Path:     "/",
 					HttpOnly: true,
-					MaxAge:   exp,
+					Expires:  exp,
 				},
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
 					Path:     domainsAPIEndpoint,
 					HttpOnly: true,
-					MaxAge:   exp,
+					Expires:  exp,
 				},
 			},
 		}
@@ -286,21 +287,21 @@ func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 					Value:    token.AccessToken,
 					Path:     "/",
 					HttpOnly: true,
-					MaxAge:   exp,
+					Expires:  exp,
 				},
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
 					Path:     tokenRefreshAPIEndpoint,
 					HttpOnly: true,
-					MaxAge:   exp,
+					Expires:  exp,
 				},
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
 					Path:     domainsAPIEndpoint,
 					HttpOnly: true,
-					MaxAge:   exp,
+					Expires:  exp,
 				},
 			},
 		}
@@ -1606,21 +1607,21 @@ func domainLoginEndpoint(svc ui.Service) endpoint.Endpoint {
 					Value:    token.AccessToken,
 					Path:     "/",
 					HttpOnly: true,
-					MaxAge:   exp,
+					Expires:  exp,
 				},
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
 					Path:     domainsAPIEndpoint,
 					HttpOnly: true,
-					MaxAge:   exp,
+					Expires:  exp,
 				},
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
 					Path:     tokenRefreshAPIEndpoint,
 					HttpOnly: true,
-					MaxAge:   exp,
+					Expires:  exp,
 				},
 			},
 			headers: map[string]string{"Location": "/?domain=" + req.DomainID},
