@@ -636,7 +636,11 @@ button.edit-btn {
 }
 
 .table-container .meta-col {
-	max-width: 50%;
+	max-width: 50vh;
+}
+
+.table-container .entityMeta-col {
+	max-width: 50vh;
 }
 
 .metadata-field span {
