@@ -308,8 +308,6 @@ type Service interface {
 	UpdateBootstrapCerts(token string, config sdk.BootstrapConfig) error
 	// DeleteBootstrap deletes bootstrap config given an id.
 	DeleteBootstrap(token, id string) error
-	// UpdateBootstrapState updates bootstrap configuration state.
-	UpdateBootstrapState(token string, config sdk.BootstrapConfig) error
 	// ViewBootstrap retrieves a bootstrap config by thing id.
 	ViewBootstrap(token, id string) ([]byte, error)
 	// GetRemoteTerminal returns remote terminal for a bootstrap config with mainflux agent installed.
@@ -1674,11 +1672,8 @@ func (us *uiService) ReadMessages(token, chID, thKey string, page, limit uint64)
 func (us *uiService) FetchReaderData(token, channelID, thingID string, to, from float64, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 	pgm := sdk.PageMetadata{
-		Offset:    offset,
-		Limit:     limit,
-		To:        to,
-		From:      from,
-		Publisher: thingID,
+		Offset: offset,
+		Limit:  limit,
 	}
 	msg, err := us.sdk.ReadMessages(pgm, channelID, token)
 	if err != nil {
@@ -1854,14 +1849,6 @@ func (us *uiService) DeleteBootstrap(token, id string) error {
 	return nil
 }
 
-func (us *uiService) UpdateBootstrapState(token string, config sdk.BootstrapConfig) error {
-	if err := us.sdk.Whitelist(config, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdate)
-	}
-
-	return nil
-}
-
 func (us *uiService) ViewBootstrap(token, thingID string) ([]byte, error) {
 	bootstrap, err := us.sdk.ViewBootstrap(thingID, token)
 	if err != nil {
@@ -1883,11 +1870,6 @@ func (us *uiService) ViewBootstrap(token, thingID string) ([]byte, error) {
 		return nil, errors.Wrap(errors.New("invalid channels"), ErrFailedRetreive)
 	}
 
-	thing, err := us.sdk.Thing(thingID, token)
-	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
-	}
-
 	crumbs := []breadcrumb{
 		{Name: bootstrapsActive, URL: bootstrapEndpoint},
 		{Name: thingID},
@@ -1897,13 +1879,11 @@ func (us *uiService) ViewBootstrap(token, thingID string) ([]byte, error) {
 		NavbarActive   string
 		CollapseActive string
 		Bootstrap      sdk.BootstrapConfig
-		Thing          sdk.Thing
 		Breadcrumbs    []breadcrumb
 	}{
 		bootstrapsActive,
 		bootstrapsActive,
 		bootstrap,
-		thing,
 		crumbs,
 	}
 

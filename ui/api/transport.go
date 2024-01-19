@@ -588,63 +588,63 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 			).ServeHTTP)
 		})
 
-		// r.Route("/bootstraps", func(r chi.Router) {
-		// 	r.Get("/", kithttp.NewServer(
-		// 		listBootstrap(svc),
-		// 		decodeListEntityRequest,
-		// 		encodeResponse,
-		// 		opts...,
-		// 	).ServeHTTP)
+		r.Route("/bootstraps", func(r chi.Router) {
+			r.Get("/", kithttp.NewServer(
+				listBootstrap(svc),
+				decodeListEntityRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
 
-		// 	r.Post("/", kithttp.NewServer(
-		// 		createBootstrap(svc),
-		// 		decodeCreateBootstrapRequest,
-		// 		encodeResponse,
-		// 		opts...,
-		// 	).ServeHTTP)
+			r.Post("/", kithttp.NewServer(
+				createBootstrap(svc),
+				decodeCreateBootstrapRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
 
-		// 	r.Get("/{id}", kithttp.NewServer(
-		// 		viewBootstrap(svc),
-		// 		decodeView,
-		// 		encodeResponse,
-		// 		opts...,
-		// 	).ServeHTTP)
+			r.Get("/{id}", kithttp.NewServer(
+				viewBootstrap(svc),
+				decodeView,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
 
-		// 	r.Post("/{id}", kithttp.NewServer(
-		// 		updateBootstrap(svc),
-		// 		decodeUpdateBootstrap,
-		// 		encodeResponse,
-		// 		opts...,
-		// 	).ServeHTTP)
+			r.Post("/{id}", kithttp.NewServer(
+				updateBootstrap(svc),
+				decodeUpdateBootstrap,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
 
-		// 	r.Post("/{id}/certs", kithttp.NewServer(
-		// 		updateBootstrapCerts(svc),
-		// 		decodeUpdateBootstrapCerts,
-		// 		encodeResponse,
-		// 		opts...,
-		// 	).ServeHTTP)
+			r.Post("/{id}/certs", kithttp.NewServer(
+				updateBootstrapCerts(svc),
+				decodeUpdateBootstrapCerts,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
 
-		// 	r.Post("/{id}/connections", kithttp.NewServer(
-		// 		updateBootstrapConnections(svc),
-		// 		decodeUpdateBootstrapConnections,
-		// 		encodeResponse,
-		// 		opts...,
-		// 	).ServeHTTP)
+			r.Post("/{id}/connections", kithttp.NewServer(
+				updateBootstrapConnections(svc),
+				decodeUpdateBootstrapConnections,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
 
-		// 	r.Get("/{id}/terminal", kithttp.NewServer(
-		// 		getTerminalEndpoint(svc),
-		// 		decodeView,
-		// 		encodeResponse,
-		// 		opts...,
-		// 	).ServeHTTP)
+			r.Get("/{id}/terminal", kithttp.NewServer(
+				getTerminalEndpoint(svc),
+				decodeView,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
 
-		// 	r.Post("/{id}/terminal/input", kithttp.NewServer(
-		// 		handleTerminalInputEndpoint(svc),
-		// 		decodeTerminalCommandRequest,
-		// 		encodeJSONResponse,
-		// 		opts...,
-		// 	).ServeHTTP)
-		// })
+			r.Post("/{id}/terminal/input", kithttp.NewServer(
+				handleTerminalInputEndpoint(svc),
+				decodeTerminalCommandRequest,
+				encodeJSONResponse,
+				opts...,
+			).ServeHTTP)
+		})
 		r.Route("/domains", func(r chi.Router) {
 			r.Post("/", kithttp.NewServer(
 				createDomainEndpoint(svc),

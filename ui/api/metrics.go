@@ -4,6 +4,7 @@
 package api
 
 import (
+	"context"
 	"time"
 
 	"github.com/absmach/magistrala-ui/ui"
@@ -687,95 +688,95 @@ func (mm *metricsMiddleware) FetchReaderData(token, channelID, thingID string, t
 	return mm.svc.FetchReaderData(token, channelID, thingID, to, from, page, limit)
 }
 
-// // CreateBootstrap adds metrics middleware to create bootstrap method.
-// func (mm *metricsMiddleware) CreateBootstrap(token string, config ...sdk.BootstrapConfig) error {
-// 	defer func(begin time.Time) {
-// 		mm.counter.With("method", "create_bootstrap").Add(1)
-// 		mm.latency.With("method", "create_bootstrap").Observe(time.Since(begin).Seconds())
-// 	}(time.Now())
+// CreateBootstrap adds metrics middleware to create bootstrap method.
+func (mm *metricsMiddleware) CreateBootstrap(token string, config ...sdk.BootstrapConfig) error {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "create_bootstrap").Add(1)
+		mm.latency.With("method", "create_bootstrap").Observe(time.Since(begin).Seconds())
+	}(time.Now())
 
-// 	return mm.svc.CreateBootstrap(token, config...)
-// }
+	return mm.svc.CreateBootstrap(token, config...)
+}
 
-// // ListBootstrap adds metrics middleware to list bootstrap method.
-// func (mm *metricsMiddleware) ListBootstrap(token string, page, limit uint64) ([]byte, error) {
-// 	defer func(begin time.Time) {
-// 		mm.counter.With("method", "list_bootstrap").Add(1)
-// 		mm.latency.With("method", "list_bootstrap").Observe(time.Since(begin).Seconds())
-// 	}(time.Now())
+// ListBootstrap adds metrics middleware to list bootstrap method.
+func (mm *metricsMiddleware) ListBootstrap(token string, page, limit uint64) ([]byte, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "list_bootstrap").Add(1)
+		mm.latency.With("method", "list_bootstrap").Observe(time.Since(begin).Seconds())
+	}(time.Now())
 
-// 	return mm.svc.ListBootstrap(token, page, limit)
-// }
+	return mm.svc.ListBootstrap(token, page, limit)
+}
 
-// // UpdateBootstrap adds metrics middleware to update bootstrap method.
-// func (mm *metricsMiddleware) UpdateBootstrap(token string, config sdk.BootstrapConfig) error {
-// 	defer func(begin time.Time) {
-// 		mm.counter.With("method", "update_bootstrap").Add(1)
-// 		mm.latency.With("method", "update_bootstrap").Observe(time.Since(begin).Seconds())
-// 	}(time.Now())
+// UpdateBootstrap adds metrics middleware to update bootstrap method.
+func (mm *metricsMiddleware) UpdateBootstrap(token string, config sdk.BootstrapConfig) error {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "update_bootstrap").Add(1)
+		mm.latency.With("method", "update_bootstrap").Observe(time.Since(begin).Seconds())
+	}(time.Now())
 
-// 	return mm.svc.UpdateBootstrap(token, config)
-// }
+	return mm.svc.UpdateBootstrap(token, config)
+}
 
-// // UpdateBootstrapConnections adds metrics middleware to  update bootstrap connections method.
-// func (mm *metricsMiddleware) UpdateBootstrapConnections(token string, config sdk.BootstrapConfig) error {
-// 	defer func(begin time.Time) {
-// 		mm.counter.With("method", "update_bootstrap_connections").Add(1)
-// 		mm.latency.With("method", "update_bootstrap_connections").Observe(time.Since(begin).Seconds())
-// 	}(time.Now())
+// UpdateBootstrapConnections adds metrics middleware to  update bootstrap connections method.
+func (mm *metricsMiddleware) UpdateBootstrapConnections(token string, config sdk.BootstrapConfig) error {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "update_bootstrap_connections").Add(1)
+		mm.latency.With("method", "update_bootstrap_connections").Observe(time.Since(begin).Seconds())
+	}(time.Now())
 
-// 	return mm.svc.UpdateBootstrapConnections(token, config)
-// }
+	return mm.svc.UpdateBootstrapConnections(token, config)
+}
 
-// // UpdateBootstrapCerts adds metrics middleware to update bootstrap certs method.
-// func (mm *metricsMiddleware) UpdateBootstrapCerts(token string, config sdk.BootstrapConfig) error {
-// 	defer func(begin time.Time) {
-// 		mm.counter.With("method", "update_bootstrap_certs").Add(1)
-// 		mm.latency.With("method", "update_bootstrap_certs").Observe(time.Since(begin).Seconds())
-// 	}(time.Now())
+// UpdateBootstrapCerts adds metrics middleware to update bootstrap certs method.
+func (mm *metricsMiddleware) UpdateBootstrapCerts(token string, config sdk.BootstrapConfig) error {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "update_bootstrap_certs").Add(1)
+		mm.latency.With("method", "update_bootstrap_certs").Observe(time.Since(begin).Seconds())
+	}(time.Now())
 
-// 	return mm.svc.UpdateBootstrapCerts(token, config)
-// }
+	return mm.svc.UpdateBootstrapCerts(token, config)
+}
 
-// // DeleteBootstrap adds metrics middleware to delete bootstrap method.
-// func (mm *metricsMiddleware) DeleteBootstrap(token string, id string) error {
-// 	defer func(begin time.Time) {
-// 		mm.counter.With("method", "delete_bootstrap").Add(1)
-// 		mm.latency.With("method", "delete_bootstrap").Observe(time.Since(begin).Seconds())
-// 	}(time.Now())
+// DeleteBootstrap adds metrics middleware to delete bootstrap method.
+func (mm *metricsMiddleware) DeleteBootstrap(token string, id string) error {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "delete_bootstrap").Add(1)
+		mm.latency.With("method", "delete_bootstrap").Observe(time.Since(begin).Seconds())
+	}(time.Now())
 
-// 	return mm.svc.DeleteBootstrap(token, id)
-// }
+	return mm.svc.DeleteBootstrap(token, id)
+}
 
-// // ViewBootstrap adds metrics middleware to view bootstrap method.
-// func (mm *metricsMiddleware) ViewBootstrap(token string, id string) ([]byte, error) {
-// 	defer func(begin time.Time) {
-// 		mm.counter.With("method", "view_bootstrap").Add(1)
-// 		mm.latency.With("method", "view_bootstrap").Observe(time.Since(begin).Seconds())
-// 	}(time.Now())
+// ViewBootstrap adds metrics middleware to view bootstrap method.
+func (mm *metricsMiddleware) ViewBootstrap(token string, id string) ([]byte, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "view_bootstrap").Add(1)
+		mm.latency.With("method", "view_bootstrap").Observe(time.Since(begin).Seconds())
+	}(time.Now())
 
-// 	return mm.svc.ViewBootstrap(token, id)
-// }
+	return mm.svc.ViewBootstrap(token, id)
+}
 
-// // GetRemoteTerminal adds metrics middleware to get remote terminal method.
-// func (mm *metricsMiddleware) GetRemoteTerminal(id, token string) ([]byte, error) {
-// 	defer func(begin time.Time) {
-// 		mm.counter.With("method", "remote_terminal").Add(1)
-// 		mm.latency.With("method", "remote_terminal").Observe(time.Since(begin).Seconds())
-// 	}(time.Now())
+// GetRemoteTerminal adds metrics middleware to get remote terminal method.
+func (mm *metricsMiddleware) GetRemoteTerminal(id, token string) ([]byte, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "remote_terminal").Add(1)
+		mm.latency.With("method", "remote_terminal").Observe(time.Since(begin).Seconds())
+	}(time.Now())
 
-// 	return mm.svc.GetRemoteTerminal(id, token)
-// }
+	return mm.svc.GetRemoteTerminal(id, token)
+}
 
-// // ProcessTerminalCommand adds metrics middleware to process terminal command method.
-// func (mm *metricsMiddleware) ProcessTerminalCommand(ctx context.Context, id, token, command string, res chan string) error {
-// 	defer func(begin time.Time) {
-// 		mm.counter.With("method", "remote_terminal").Add(1)
-// 		mm.latency.With("method", "remote_terminal").Observe(time.Since(begin).Seconds())
-// 	}(time.Now())
+// ProcessTerminalCommand adds metrics middleware to process terminal command method.
+func (mm *metricsMiddleware) ProcessTerminalCommand(ctx context.Context, id, token, command string, res chan string) error {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "remote_terminal").Add(1)
+		mm.latency.With("method", "remote_terminal").Observe(time.Since(begin).Seconds())
+	}(time.Now())
 
-// 	return mm.svc.ProcessTerminalCommand(ctx, id, token, command, res)
-// }
+	return mm.svc.ProcessTerminalCommand(ctx, id, token, command, res)
+}
 
 // GetEntities adds metrics middleware to get entities method.
 func (mm *metricsMiddleware) GetEntities(token, item, name, domainID, permission string, page, limit uint64) ([]byte, error) {
