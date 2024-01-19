@@ -150,6 +150,13 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 			opts...,
 		).ServeHTTP))
 
+		r.Get("/dashboards", kithttp.NewServer(
+			dashboardsEndpoint(svc),
+			decodeDashboardsRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
+
 		r.Get("/entities", kithttp.NewServer(
 			getEntitiesEndpoint(svc),
 			decodeGetEntitiesRequest,
@@ -1672,6 +1679,19 @@ func decodeReadMessagesRequest(_ context.Context, r *http.Request) (interface{},
 		ThingKey: r.Form.Get("thing"),
 		Page:     page,
 		Limit:    limit,
+	}
+
+	return req, nil
+}
+
+func decodeDashboardsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	req := dashboardsReq{
+		token: token,
 	}
 
 	return req, nil

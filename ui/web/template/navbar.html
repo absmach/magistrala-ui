@@ -14,13 +14,24 @@ SPDX-License-Identifier: Apache-2.0 -->
 
     <div id="index-nav-items">
       <li class="nav-item mb-2 mx-2">
-        {{ $navbarActive := "dashboard" }}
+        {{ $navbarActive := "homepage" }}
         <a
           href="/"
           id="index"
           class="nav-link sidebar-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
         >
           <i class="fas fa-home"></i>
+          <span>Home Page</span>
+        </a>
+      </li>
+      <li class="nav-item mb-2 mx-2">
+        {{ $navbarActive := "dashboard" }}
+        <a
+          href="/dashboards"
+          id="dashboard"
+          class="nav-link sidebar-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
+        >
+          <i class="fas fa-chart-line"></i>
           <span>Dashboard</span>
         </a>
       </li>
@@ -383,7 +394,14 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="submit" id="create-domain-button" class="btn body-button" onclick="submitItemList('domain-tags', 'tagsList')">Create</button>
+            <button
+              type="submit"
+              id="create-domain-button"
+              class="btn body-button"
+              onclick="submitItemList('domain-tags', 'tagsList')"
+            >
+              Create
+            </button>
           </div>
         </form>
       </div>

@@ -675,6 +675,10 @@ func (req readMessagesReq) validate() error {
 	return nil
 }
 
+type dashboardsReq struct {
+	token string
+}
+
 type bootstrapCommandReq struct {
 	token   string
 	command string

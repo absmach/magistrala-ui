@@ -32,7 +32,8 @@ const (
 	enabled                 = "enabled"
 	statePending            = "pending"
 	statusAll               = "all"
-	dashboardActive         = "dashboard"
+	homepageActive          = "homepage"
+	dashboardsActive        = "dashboards"
 	usersActive             = "users"
 	userActive              = "user"
 	thingsActive            = "things"
@@ -85,6 +86,7 @@ var (
 		"breadcrumb",
 		"metadatamodal",
 		"statusupdate",
+		"dashboards",
 
 		"bootstrap",
 		"bootstraps",
@@ -288,6 +290,8 @@ type Service interface {
 	Publish(token, chID, thKey, baseUnit, name, unit string, baseTime, value float64) error
 	// ReadMessages retrieves messages published in a channel.
 	ReadMessages(token, chID, thKey string, page, limit uint64) ([]byte, error)
+	// Dashboards displays the dashboards page.
+	Dashboards(token string) ([]byte, error)
 
 	// CreateBootstrap creates a new bootstrap config.
 	CreateBootstrap(token string, config ...sdk.BootstrapConfig) error
@@ -436,8 +440,8 @@ func (us *uiService) Index(token string) (b []byte, err error) {
 		CollapseActive string
 		Summary        dataSummary
 	}{
-		dashboardActive,
-		dashboardActive,
+		homepageActive,
+		homepageActive,
 		summary,
 	}
 
@@ -1658,6 +1662,23 @@ func (us *uiService) ReadMessages(token, chID, thKey string, page, limit uint64)
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "readmessages", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+
+	return btpl.Bytes(), nil
+}
+
+func (us *uiService) Dashboards(token string) ([]byte, error) {
+	data := struct {
+		NavbarActive   string
+		CollapseActive string
+	}{
+		dashboardsActive,
+		dashboardsActive,
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "dashboards", data); err != nil {
 		return []byte{}, errors.Wrap(err, ErrExecTemplate)
 	}
 

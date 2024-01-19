@@ -669,6 +669,16 @@ func (mm *metricsMiddleware) ReadMessages(token, chID, thKey string, page, limit
 	return mm.svc.ReadMessages(token, chID, thKey, page, limit)
 }
 
+// Dashboards adds metrics middleware to dashboards method.
+func (mm *metricsMiddleware) Dashboards(token string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "dashboards").Add(1)
+		mm.latency.With("method", "dashboards").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.Dashboards(token)
+}
+
 // CreateBootstrap adds metrics middleware to create bootstrap method.
 func (mm *metricsMiddleware) CreateBootstrap(token string, config ...sdk.BootstrapConfig) error {
 	defer func(begin time.Time) {

@@ -1165,6 +1165,19 @@ func (lm *loggingMiddleware) ReadMessages(token, chID, thKey string, page, limit
 	return lm.svc.ReadMessages(token, chID, thKey, page, limit)
 }
 
+// Dashboards adds logging middleware to dashboards method.
+func (lm *loggingMiddleware) Dashboards(token string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method dashboards took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+		}
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.Dashboards(token)
+}
+
 // CreateBootstrap adds logging middleware to create bootstrap method.
 func (lm *loggingMiddleware) CreateBootstrap(token string, config ...sdk.BootstrapConfig) (err error) {
 	defer func(begin time.Time) {
