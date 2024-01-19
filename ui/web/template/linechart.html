@@ -1,0 +1,71 @@
+{{ define "linechart" }}
+  <div id="line-chart" style="width: 700px;height:400px;"></div>
+  <script type="text/javascript">
+    // Initialize the echarts instance based on the prepared dom
+    var lineChart = echarts.init(document.getElementById("line-chart"));
+
+    // Specify the configuration items and data for the chart
+    var option = {
+      title: {
+        text: "Temperature",
+      },
+
+      xAxis: {
+        type: "category",
+        data: [],
+      },
+      yAxis: {
+        type: "value",
+      },
+      series: [
+        {
+          data: [],
+          type: "line",
+        },
+      ],
+    };
+
+    // Display the chart using the configuration items and data just specified.
+    lineChart.setOption(option);
+    async function getData() {
+      try {
+        const response = await fetch("/data?channel=7623ab4a-318b-4b33-970f-fc8631ae919c");
+        if (response.ok) {
+          const data = await response.json();
+
+          lineChart.setOption({
+            title: {
+              text: "Temperature",
+            },
+
+            xAxis: {
+              type: "category",
+              data: data.xaxis,
+            },
+            yAxis: {
+              type: "value",
+            },
+            series: [
+              {
+                data: data.yaxis,
+                type: "line",
+              },
+            ],
+          });
+        } else {
+          // Handle errors
+          console.error("HTTP request failed with status:", response.status);
+        }
+
+        // Poll again after a couple of seconds
+        setTimeout(getData, 2000);
+      } catch (error) {
+        // Handle fetch or other errors
+        console.error("Error:", error);
+        // Retry after a couple of seconds
+        setTimeout(getData, 2000);
+      }
+    }
+    getData();
+  </script>
+{{ end }}

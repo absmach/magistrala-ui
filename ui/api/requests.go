@@ -679,6 +679,16 @@ type dashboardsReq struct {
 	token string
 }
 
+type fetchDataReq struct {
+	token   string
+	ThingID string  `json:"thing_id,omitempty"`
+	ChanID  string  `json:"chan_id,omitempty"`
+	Page    uint64  `json:"page"`
+	Limit   uint64  `json:"limit"`
+	To      float64 `json:"to"`
+	From    float64 `json:"from"`
+}
+
 type bootstrapCommandReq struct {
 	token   string
 	command string

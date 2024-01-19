@@ -60,6 +60,8 @@ const (
 	groupsItem              = "groups"
 	accessTokenKey          = "token"
 	refreshTokenKey         = "refresh_token"
+	channelKey              = "channel"
+	thingKey                = "thing"
 )
 
 var (
@@ -153,6 +155,13 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 		r.Get("/dashboards", kithttp.NewServer(
 			dashboardsEndpoint(svc),
 			decodeDashboardsRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
+
+		r.Get("/data", kithttp.NewServer(
+			fetchDataEndpoint(svc),
+			decodeFetchDataRequest,
 			encodeResponse,
 			opts...,
 		).ServeHTTP)
@@ -579,77 +588,63 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 			).ServeHTTP)
 		})
 
-		r.Route("/bootstraps", func(r chi.Router) {
-			r.Get("/", kithttp.NewServer(
-				listBootstrap(svc),
-				decodeListEntityRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
+		// r.Route("/bootstraps", func(r chi.Router) {
+		// 	r.Get("/", kithttp.NewServer(
+		// 		listBootstrap(svc),
+		// 		decodeListEntityRequest,
+		// 		encodeResponse,
+		// 		opts...,
+		// 	).ServeHTTP)
 
-			r.Post("/", kithttp.NewServer(
-				createBootstrap(svc),
-				decodeCreateBootstrapRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
+		// 	r.Post("/", kithttp.NewServer(
+		// 		createBootstrap(svc),
+		// 		decodeCreateBootstrapRequest,
+		// 		encodeResponse,
+		// 		opts...,
+		// 	).ServeHTTP)
 
-			r.Get("/{id}", kithttp.NewServer(
-				viewBootstrap(svc),
-				decodeView,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
+		// 	r.Get("/{id}", kithttp.NewServer(
+		// 		viewBootstrap(svc),
+		// 		decodeView,
+		// 		encodeResponse,
+		// 		opts...,
+		// 	).ServeHTTP)
 
-			r.Post("/{id}", kithttp.NewServer(
-				updateBootstrap(svc),
-				decodeUpdateBootstrap,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
+		// 	r.Post("/{id}", kithttp.NewServer(
+		// 		updateBootstrap(svc),
+		// 		decodeUpdateBootstrap,
+		// 		encodeResponse,
+		// 		opts...,
+		// 	).ServeHTTP)
 
-			r.Post("/{id}/delete", kithttp.NewServer(
-				deleteBootstrapEndpoint(svc),
-				decodeDeleteBootstrap,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
+		// 	r.Post("/{id}/certs", kithttp.NewServer(
+		// 		updateBootstrapCerts(svc),
+		// 		decodeUpdateBootstrapCerts,
+		// 		encodeResponse,
+		// 		opts...,
+		// 	).ServeHTTP)
 
-			r.Post("/{id}/state", kithttp.NewServer(
-				updateBootstrapStateEndpoint(svc),
-				decodeUpdateBootstrapState,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
+		// 	r.Post("/{id}/connections", kithttp.NewServer(
+		// 		updateBootstrapConnections(svc),
+		// 		decodeUpdateBootstrapConnections,
+		// 		encodeResponse,
+		// 		opts...,
+		// 	).ServeHTTP)
 
-			r.Post("/{id}/certs", kithttp.NewServer(
-				updateBootstrapCerts(svc),
-				decodeUpdateBootstrapCerts,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
+		// 	r.Get("/{id}/terminal", kithttp.NewServer(
+		// 		getTerminalEndpoint(svc),
+		// 		decodeView,
+		// 		encodeResponse,
+		// 		opts...,
+		// 	).ServeHTTP)
 
-			r.Post("/{id}/connections", kithttp.NewServer(
-				updateBootstrapConnections(svc),
-				decodeUpdateBootstrapConnections,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/{id}/terminal", kithttp.NewServer(
-				getTerminalEndpoint(svc),
-				decodeView,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/terminal/input", kithttp.NewServer(
-				handleTerminalInputEndpoint(svc),
-				decodeTerminalCommandRequest,
-				encodeJSONResponse,
-				opts...,
-			).ServeHTTP)
-		})
+		// 	r.Post("/{id}/terminal/input", kithttp.NewServer(
+		// 		handleTerminalInputEndpoint(svc),
+		// 		decodeTerminalCommandRequest,
+		// 		encodeJSONResponse,
+		// 		opts...,
+		// 	).ServeHTTP)
+		// })
 		r.Route("/domains", func(r chi.Router) {
 			r.Post("/", kithttp.NewServer(
 				createDomainEndpoint(svc),
@@ -1692,6 +1687,39 @@ func decodeDashboardsRequest(_ context.Context, r *http.Request) (interface{}, e
 
 	req := dashboardsReq{
 		token: token,
+	}
+
+	return req, nil
+}
+
+func decodeFetchDataRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	page, err := readNumQuery[uint64](r, pageKey, defPage)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	channel, err := readStringQuery(r, channelKey, defKey)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println(channel)
+
+	req := fetchDataReq{
+		token:  token,
+		ChanID: channel,
+		Page:   page,
+		Limit:  limit,
 	}
 
 	return req, nil

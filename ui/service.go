@@ -22,7 +22,6 @@ import (
 	"github.com/absmach/magistrala/pkg/errors"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/absmach/magistrala/pkg/transformers/senml"
-	mgsenml "github.com/absmach/senml"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"golang.org/x/exp/slices"
 )
@@ -86,7 +85,10 @@ var (
 		"breadcrumb",
 		"metadatamodal",
 		"statusupdate",
+
 		"dashboards",
+		"linechart",
+		"guage",
 
 		"bootstrap",
 		"bootstraps",
@@ -292,6 +294,7 @@ type Service interface {
 	ReadMessages(token, chID, thKey string, page, limit uint64) ([]byte, error)
 	// Dashboards displays the dashboards page.
 	Dashboards(token string) ([]byte, error)
+	FetchReaderData(token, channelID, thingID string, to, from float64, page, limit uint64) ([]byte, error)
 
 	// CreateBootstrap creates a new bootstrap config.
 	CreateBootstrap(token string, config ...sdk.BootstrapConfig) error
@@ -1666,6 +1669,41 @@ func (us *uiService) ReadMessages(token, chID, thKey string, page, limit uint64)
 	}
 
 	return btpl.Bytes(), nil
+}
+
+func (us *uiService) FetchReaderData(token, channelID, thingID string, to, from float64, page, limit uint64) ([]byte, error) {
+	offset := (page - 1) * limit
+	pgm := sdk.PageMetadata{
+		Offset:    offset,
+		Limit:     limit,
+		To:        to,
+		From:      from,
+		Publisher: thingID,
+	}
+	msg, err := us.sdk.ReadMessages(pgm, channelID, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	data := make(map[string]interface{})
+
+	var yaxisValues []int
+	var xaxisValues []string
+
+	for _, m := range msg.Messages {
+		yaxisValues = append(yaxisValues, int(*m.Value))
+		xaxisValues = append(xaxisValues, time.Unix(int64(m.Time), 0).Format("15:04"))
+	}
+
+	data["yaxis"] = yaxisValues
+	data["xaxis"] = xaxisValues
+
+	jsonData, jsonErr := json.Marshal(data)
+	if jsonErr != nil {
+		return []byte{}, jsonErr
+	}
+
+	return jsonData, nil
 }
 
 func (us *uiService) Dashboards(token string) ([]byte, error) {
