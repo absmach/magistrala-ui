@@ -1006,6 +1006,21 @@ func (lm *loggingMiddleware) DeleteBootstrap(token string, id string) (err error
 	return lm.svc.DeleteBootstrap(token, id)
 }
 
+// UpdateBootstrapState adds logging middleware to update bootstrap state method.
+func (lm *loggingMiddleware) UpdateBootstrapState(token string, config sdk.BootstrapConfig) (err error) {
+	defer func(begin time.Time) {
+		message := fmt.Sprintf("Method update_bootstrap_state took %s to complete", time.Since(begin))
+		if err != nil {
+			lm.logger.Warn(fmt.Sprintf("%s with error: %s.", message, err))
+			return
+		}
+
+		lm.logger.Info(fmt.Sprintf("%s without errors.", message))
+	}(time.Now())
+
+	return lm.svc.UpdateBootstrapState(token, config)
+}
+
 // ViewBootstrap adds logging middleware to view bootstrap method.
 func (lm *loggingMiddleware) ViewBootstrap(token string, id string) (b []byte, err error) {
 	defer func(begin time.Time) {

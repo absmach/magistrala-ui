@@ -602,6 +602,20 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				opts...,
 			).ServeHTTP)
 
+			r.Post("/{id}/delete", kithttp.NewServer(
+				deleteBootstrapEndpoint(svc),
+				decodeDeleteBootstrap,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/state", kithttp.NewServer(
+				updateBootstrapStateEndpoint(svc),
+				decodeUpdateBootstrapState,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
 			r.Post("/{id}/certs", kithttp.NewServer(
 				updateBootstrapCerts(svc),
 				decodeUpdateBootstrapCerts,
@@ -1689,8 +1703,7 @@ func decodeCreateBootstrapRequest(_ context.Context, r *http.Request) (interface
 		return nil, err
 	}
 
-	var channels []string
-	if err := json.Unmarshal([]byte(r.FormValue("channels")), &channels); err != nil {
+	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
 
@@ -1699,7 +1712,7 @@ func decodeCreateBootstrapRequest(_ context.Context, r *http.Request) (interface
 		ThingID:     r.FormValue("thingID"),
 		ExternalID:  r.FormValue("externalID"),
 		ExternalKey: r.FormValue("externalKey"),
-		Channels:    channels,
+		Channels:    r.PostForm["channelID"],
 		Name:        r.FormValue("name"),
 		Content:     r.FormValue("content"),
 		ClientCert:  r.FormValue("clientCert"),
@@ -1727,6 +1740,40 @@ func decodeUpdateBootstrap(_ context.Context, r *http.Request) (interface{}, err
 	return data, nil
 }
 
+func decodeDeleteBootstrap(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	req := deleteBootstrapReq{
+		token: token,
+		id:    chi.URLParam(r, "id"),
+	}
+
+	return req, nil
+}
+
+func decodeUpdateBootstrapState(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	state, err := strconv.Atoi(r.FormValue("state"))
+	if err != nil {
+		return nil, err
+	}
+
+	req := updateBootstrapStateReq{
+		token: token,
+		id:    chi.URLParam(r, "id"),
+		State: state,
+	}
+
+	return req, nil
+}
+
 func decodeUpdateBootstrapCerts(_ context.Context, r *http.Request) (interface{}, error) {
 	token, err := tokenFromCookie(r, "token")
 	if err != nil {
@@ -1750,16 +1797,17 @@ func decodeUpdateBootstrapConnections(_ context.Context, r *http.Request) (inter
 		return nil, err
 	}
 
-	var data updateBootstrapConnReq
-	err = json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
+	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
 
-	data.id = chi.URLParam(r, "id")
-	data.token = token
+	req := updateBootstrapConnReq{
+		token:    token,
+		id:       chi.URLParam(r, "id"),
+		Channels: r.PostForm["channelID"],
+	}
 
-	return data, nil
+	return req, nil
 }
 
 func decodeListEntityRequest(_ context.Context, r *http.Request) (interface{}, error) {

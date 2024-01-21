@@ -695,6 +695,37 @@ func (req updateBootstrapReq) validate() error {
 	return nil
 }
 
+type deleteBootstrapReq struct {
+	token string
+	id    string
+}
+
+func (req deleteBootstrapReq) validate() error {
+	if req.token == "" {
+		return errAuthorization
+	}
+	if req.id == "" {
+		return errMissingConfigID
+	}
+	return nil
+}
+
+type updateBootstrapStateReq struct {
+	token string
+	id    string
+	State int `json:"state"`
+}
+
+func (req updateBootstrapStateReq) validate() error {
+	if req.token == "" {
+		return errAuthorization
+	}
+	if req.id == "" {
+		return errMissingConfigID
+	}
+	return nil
+}
+
 type updateBootstrapCertReq struct {
 	token      string
 	thingID    string
