@@ -1290,7 +1290,7 @@ func (lm *loggingMiddleware) UpdateBootstrapState(token string, config sdk.Boots
 			return
 		}
 
-		lm.logger.Info("Update bootstrap completed successfully", args...)
+		lm.logger.Info("Update bootstrap state completed successfully", args...)
 	}(time.Now())
 
 	return lm.svc.UpdateBootstrapState(token, config)
