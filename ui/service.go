@@ -22,6 +22,7 @@ import (
 	"github.com/absmach/magistrala/pkg/errors"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/absmach/magistrala/pkg/transformers/senml"
+	mgsenml "github.com/absmach/senml"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"golang.org/x/exp/slices"
 )

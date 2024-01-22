@@ -1347,43 +1347,25 @@ func fetchDataEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-// func createBootstrap(svc ui.Service) endpoint.Endpoint {
-// 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
-// 		req := request.(createBootstrapReq)
-// 		if err := req.validate(); err != nil {
-// 			return nil, err
-// 		}
-
-// 		cfg := sdk.BootstrapConfig{
-// 			ThingID:     req.ThingID,
-// 			Channels:    req.Channels,
-// 			ExternalID:  req.ExternalID,
-// 			ExternalKey: req.ExternalKey,
-// 			Name:        req.Name,
-// 			ClientCert:  req.ClientCert,
-// 			ClientKey:   req.ClientKey,
-// 			CACert:      req.CACert,
-// 			Content:     req.Content,
-// 		}
-// 		if err := svc.CreateBootstrap(req.token, cfg); err != nil {
-// 			return nil, err
-// 		}
-
-// 		return uiRes{
-// 			code:    http.StatusSeeOther,
-// 			headers: map[string]string{"Location": bootstrapAPIEndpoint},
-// 		}, nil
-// 	}
-// }
-
-func deleteBootstrapEndpoint(svc ui.Service) endpoint.Endpoint {
+func createBootstrap(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
-		req := request.(deleteBootstrapReq)
+		req := request.(createBootstrapReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		if err := svc.DeleteBootstrap(req.token, req.id); err != nil {
+		cfg := sdk.BootstrapConfig{
+			ThingID:     req.ThingID,
+			Channels:    req.Channels,
+			ExternalID:  req.ExternalID,
+			ExternalKey: req.ExternalKey,
+			Name:        req.Name,
+			ClientCert:  req.ClientCert,
+			ClientKey:   req.ClientKey,
+			CACert:      req.CACert,
+			Content:     req.Content,
+		}
+		if err := svc.CreateBootstrap(req.token, cfg); err != nil {
 			return nil, err
 		}
 
@@ -1394,24 +1376,43 @@ func deleteBootstrapEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func updateBootstrapStateEndpoint(svc ui.Service) endpoint.Endpoint {
+func listBootstrap(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
-		req := request.(updateBootstrapStateReq)
+		req := request.(listEntityReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.ListBootstrap(req.token, req.page, req.limit)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code: http.StatusOK,
+			html: res,
+		}, nil
+	}
+}
+
+func updateBootstrap(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(updateBootstrapReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
 		cfg := sdk.BootstrapConfig{
 			ThingID: req.id,
-			State:   req.State,
+			Name:    req.Name,
+			Content: req.Content,
 		}
-		if err := svc.UpdateBootstrapState(req.token, cfg); err != nil {
+		if err := svc.UpdateBootstrap(req.token, cfg); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": bootstrapAPIEndpoint + "/" + req.id},
+			code: http.StatusOK,
 		}, nil
 	}
 }
@@ -1423,149 +1424,108 @@ func updateBootstrapConnections(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-// 		res, err := svc.ListBootstrap(req.token, req.page, req.limit)
-// 		if err != nil {
-// 			return nil, err
-// 		}
+		cfg := sdk.BootstrapConfig{
+			ThingID:  req.id,
+			Channels: req.Channels,
+		}
+		if err := svc.UpdateBootstrapConnections(req.token, cfg); err != nil {
+			return nil, err
+		}
 
-// 		return uiRes{
-// 			code: http.StatusOK,
-// 			html: res,
-// 		}, nil
-// 	}
-// }
+		return uiRes{
+			code: http.StatusOK,
+		}, nil
+	}
+}
 
-// func updateBootstrap(svc ui.Service) endpoint.Endpoint {
-// 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
-// 		req := request.(updateBootstrapReq)
-// 		if err := req.validate(); err != nil {
-// 			return nil, err
-// 		}
+func updateBootstrapCerts(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(updateBootstrapCertReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
-// 		cfg := sdk.BootstrapConfig{
-// 			ThingID: req.id,
-// 			Name:    req.Name,
-// 			Content: req.Content,
-// 		}
-// 		if err := svc.UpdateBootstrap(req.token, cfg); err != nil {
-// 			return nil, err
-// 		}
+		cfg := sdk.BootstrapConfig{
+			ThingID:    req.thingID,
+			ClientCert: req.ClientCert,
+			ClientKey:  req.ClientKey,
+			CACert:     req.CACert,
+		}
+		if err := svc.UpdateBootstrapCerts(req.token, cfg); err != nil {
+			return nil, err
+		}
 
-// 		return uiRes{
-// 			code: http.StatusOK,
-// 		}, nil
-// 	}
-// }
+		return uiRes{
+			code: http.StatusOK,
+		}, nil
+	}
+}
 
-// func updateBootstrapConnections(svc ui.Service) endpoint.Endpoint {
-// 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
-// 		req := request.(updateBootstrapConnReq)
-// 		if err := req.validate(); err != nil {
-// 			return nil, err
-// 		}
+func viewBootstrap(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(viewResourceReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
-// 		cfg := sdk.BootstrapConfig{
-// 			ThingID:  req.id,
-// 			Channels: req.Channels,
-// 		}
-// 		if err := svc.UpdateBootstrapConnections(req.token, cfg); err != nil {
-// 			return nil, err
-// 		}
+		res, err := svc.ViewBootstrap(req.token, req.id)
+		if err != nil {
+			return nil, err
+		}
 
-// 		return uiRes{
-// 			code: http.StatusOK,
-// 		}, nil
-// 	}
-// }
+		return uiRes{
+			code: http.StatusOK,
+			html: res,
+		}, nil
+	}
+}
 
-// func updateBootstrapCerts(svc ui.Service) endpoint.Endpoint {
-// 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
-// 		req := request.(updateBootstrapCertReq)
-// 		if err := req.validate(); err != nil {
-// 			return nil, err
-// 		}
+func getTerminalEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(viewResourceReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		res, err := svc.GetRemoteTerminal(req.id, req.token)
+		if err != nil {
+			return nil, err
+		}
+		return uiRes{
+			html: res,
+		}, nil
+	}
+}
 
-// 		cfg := sdk.BootstrapConfig{
-// 			ThingID:    req.thingID,
-// 			ClientCert: req.ClientCert,
-// 			ClientKey:  req.ClientKey,
-// 			CACert:     req.CACert,
-// 		}
-// 		if err := svc.UpdateBootstrapCerts(req.token, cfg); err != nil {
-// 			return nil, err
-// 		}
+func handleTerminalInputEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(bootstrapCommandReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
 
-// 		return uiRes{
-// 			code: http.StatusOK,
-// 		}, nil
-// 	}
-// }
+		// Create a channel to receive the command result
+		ch := make(chan string)
 
-// func viewBootstrap(svc ui.Service) endpoint.Endpoint {
-// 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
-// 		req := request.(viewResourceReq)
-// 		if err := req.validate(); err != nil {
-// 			return nil, err
-// 		}
+		g, ctx := errgroup.WithContext(ctx)
 
-// 		res, err := svc.ViewBootstrap(req.token, req.id)
-// 		if err != nil {
-// 			return nil, err
-// 		}
+		// Start a goroutine to process the command asynchronously
+		g.Go(func() error {
+			return svc.ProcessTerminalCommand(ctx, req.id, req.token, req.command, ch)
+		})
 
-// 		return uiRes{
-// 			code: http.StatusOK,
-// 			html: res,
-// 		}, nil
-// 	}
-// }
+		if err := g.Wait(); err != nil {
+			return nil, err
+		}
 
-// func getTerminalEndpoint(svc ui.Service) endpoint.Endpoint {
-// 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
-// 		req := request.(viewResourceReq)
-// 		if err := req.validate(); err != nil {
-// 			return nil, err
-// 		}
-// 		res, err := svc.GetRemoteTerminal(req.id, req.token)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		return uiRes{
-// 			html: res,
-// 		}, nil
-// 	}
-// }
+		// Receive the command result from the channel
+		result := <-ch
 
-// func handleTerminalInputEndpoint(svc ui.Service) endpoint.Endpoint {
-// 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
-// 		req := request.(bootstrapCommandReq)
-// 		if err := req.validate(); err != nil {
-// 			return nil, err
-// 		}
-
-// 		// Create a channel to receive the command result
-// 		ch := make(chan string)
-
-// 		g, ctx := errgroup.WithContext(ctx)
-
-// 		// Start a goroutine to process the command asynchronously
-// 		g.Go(func() error {
-// 			return svc.ProcessTerminalCommand(ctx, req.id, req.token, req.command, ch)
-// 		})
-
-// 		if err := g.Wait(); err != nil {
-// 			return nil, err
-// 		}
-
-// 		// Receive the command result from the channel
-// 		result := <-ch
-
-// 		return terminalResponse{
-// 			Command: req.command,
-// 			Result:  result,
-// 		}, nil
-// 	}
-// }
+		return terminalResponse{
+			Command: req.command,
+			Result:  result,
+		}, nil
+	}
+}
 
 func getEntitiesEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (response interface{}, err error) {

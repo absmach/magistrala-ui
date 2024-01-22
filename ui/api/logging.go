@@ -10,18 +10,19 @@ import (
 	"time"
 
 	"github.com/absmach/magistrala-ui/ui"
+	"github.com/absmach/magistrala/logger"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 )
 
 var _ ui.Service = (*loggingMiddleware)(nil)
 
 type loggingMiddleware struct {
-	logger *slog.Logger
+	logger logger.Logger
 	svc    ui.Service
 }
 
 // LoggingMiddleware adds logging facilities to the adapter.
-func LoggingMiddleware(svc ui.Service, logger *slog.Logger) ui.Service {
+func LoggingMiddleware(svc ui.Service, logger logger.Logger) ui.Service {
 	return &loggingMiddleware{logger, svc}
 }
 
