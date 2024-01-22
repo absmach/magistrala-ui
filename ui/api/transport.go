@@ -1713,8 +1713,6 @@ func decodeFetchDataRequest(_ context.Context, r *http.Request) (interface{}, er
 		return nil, err
 	}
 
-	fmt.Println(channel)
-
 	req := fetchDataReq{
 		token:  token,
 		ChanID: channel,
