@@ -1,54 +1,68 @@
 {{ define "linechart" }}
-  <div id="line-chart" style="width: 700px;height:400px;"></div>
+  <div id="chart-container" class="chart-container" style="display: flex; flex-wrap: wrap;"></div>
   <script type="text/javascript">
-    // Initialize the echarts instance based on the prepared dom
-    var lineChart = echarts.init(document.getElementById("line-chart"));
+    // Load any charts that may have been stored on local storage
+    var existingChartData = JSON.parse(localStorage.getItem("chartData")) || [];
 
-    // Specify the configuration items and data for the chart
-    var option = {
-      title: {
-        text: "Temperature",
-      },
+    // Get the chart container element
+    var chartContainer = document.getElementById("chart-container");
 
-      xAxis: {
-        type: "category",
-        data: [],
-      },
-      yAxis: {
-        type: "value",
-      },
-      series: [
-        {
-          data: [],
-          type: "line",
+    // Loop through the array of chart data and create a chart for each
+    existingChartData.forEach(function (data, index) {
+      // Create a unique ID for each chart container
+      var chartContainerId = "chart-container-" + index;
+
+      // Create a new chart container div
+      var newChartContainer = document.createElement("div");
+      newChartContainer.id = chartContainerId;
+      newChartContainer.className = "chart-container-item";
+      newChartContainer.style.width = "700px";
+      newChartContainer.style.height = "400px";
+
+      // Append the new chart container to the main chart container
+      chartContainer.appendChild(newChartContainer);
+
+      // Initialize the echarts instance based on the prepared dom
+      var chart = echarts.init(newChartContainer);
+
+      // Specify the configuration items and data for the chart
+      var option = {
+        title: {
+          text: data.title || "Chart " + (index + 1),
         },
-      ],
-    };
+        xAxis: {
+          type: data.xAxisType || "category",
+          data: data.xaxis || [],
+        },
+        yAxis: {
+          type: data.yAxisType || "value",
+        },
+        series: [
+          {
+            data: [],
+            type: "line",
+          },
+        ],
+      };
 
-    // Display the chart using the configuration items and data just specified.
-    lineChart.setOption(option);
-    async function getData() {
+      // Display the chart using the configuration items and data just specified.
+      chart.setOption(option);
+      getData(chart, data.channel);
+    });
+
+    async function getData(lineChart, channel) {
       try {
-        const response = await fetch("/data?channel=7623ab4a-318b-4b33-970f-fc8631ae919c");
+        const response = await fetch("/data?channel=" + channel);
         if (response.ok) {
           const data = await response.json();
 
           lineChart.setOption({
-            title: {
-              text: "Temperature",
-            },
-
             xAxis: {
-              type: "category",
               data: data.xaxis,
-            },
-            yAxis: {
-              type: "value",
             },
             series: [
               {
                 data: data.yaxis,
-                type: "line",
               },
             ],
           });
@@ -58,14 +72,17 @@
         }
 
         // Poll again after a couple of seconds
-        setTimeout(getData, 2000);
+        setTimeout(function () {
+          getData(lineChart, channel);
+        }, 20000);
       } catch (error) {
         // Handle fetch or other errors
         console.error("Error:", error);
         // Retry after a couple of seconds
-        setTimeout(getData, 2000);
+        setTimeout(function () {
+          getData(lineChart, channel);
+        }, 20000);
       }
     }
-    getData();
   </script>
 {{ end }}
