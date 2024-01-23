@@ -32,10 +32,10 @@ github.com/Shopify/sarama v1.19.0/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWX
 github.com/Shopify/toxiproxy v2.1.4+incompatible/go.mod h1:OXgGpZ6Cli1/URJOF1DMxUHB2q5Ap20/P/eIdh4G0pI=
 github.com/VividCortex/gohistogram v1.0.0 h1:6+hBz+qvs0JOrrNhhmR7lFxo5sINxBCGXrdtl/UvroE=
 github.com/VividCortex/gohistogram v1.0.0/go.mod h1:Pf5mBqqDxYaXu3hDrrU+w6nw50o/4+TcAqDqk/vUH7g=
-github.com/absmach/agent v0.0.0-20231107115142-c8b509f24d50 h1:RyDGAkOtIuN34HEJ/UDTc0r7qZFO5jBx5cB3wmUtPJE=
-github.com/absmach/agent v0.0.0-20231107115142-c8b509f24d50/go.mod h1:/S3WufAqHTSU6MEq6cN0g6m21RhPX8dxqubYh08vbU8=
-github.com/absmach/magistrala v0.11.1-0.20240103120656-b3e206321c9d h1:Q0HIBP9SSnp41CgGT1cmkd63mvf2/uqGCbaOZbIlSvI=
-github.com/absmach/magistrala v0.11.1-0.20240103120656-b3e206321c9d/go.mod h1:7D+27TxXQwMqTmlerdulb0QtvXpMcSgeGoyvzhxr8MQ=
+github.com/absmach/agent v0.0.0-20240112151723-2e9676fadd46 h1:7LtattxXMpJDNXAwloeejVW9qiaMUbqGP8fRiLg0yeE=
+github.com/absmach/agent v0.0.0-20240112151723-2e9676fadd46/go.mod h1:cwOoE0P4Yyj4TT8zI45k6WtwYXdVTuIIR/uvGYyoBik=
+github.com/absmach/magistrala v0.0.0-20240110171157-9f573850fc4b h1:5dwCCLImHebX52aVApF15ruZ/b0MB9Y4zECr3pmF0A4=
+github.com/absmach/magistrala v0.0.0-20240110171157-9f573850fc4b/go.mod h1:7D+27TxXQwMqTmlerdulb0QtvXpMcSgeGoyvzhxr8MQ=
 github.com/absmach/mproxy v0.3.1-0.20231221215510-0ffbc4fc2337 h1:OW2WIn094hQCwrkXZ2KHgoOzsKAwqPaxZvRZ94VTc5U=
 github.com/absmach/mproxy v0.3.1-0.20231221215510-0ffbc4fc2337/go.mod h1:HmXsnuSWIN0OKrcscIxBzDO/GRjvqYxUTnd6vpuo+MQ=
 github.com/absmach/senml v1.0.5 h1:zNPRYpGr2Wsb8brAusz8DIfFqemy1a2dNbmMnegY3GE=
@@ -481,7 +481,6 @@ github.com/mainflux/mproxy v0.2.1-0.20200603122422-b08e1fa2cf5c/go.mod h1:lFD56b
 github.com/mainflux/mproxy v0.2.2/go.mod h1:+T8h6ZupYPl6Lx9A0hqpcUQtcLyOBdzm/lfkjvPfGXo=
 github.com/mainflux/senml v1.0.0/go.mod h1:g9i8pj4WMs29KkUpXivbe/PP0qJd1kt3b1CF77S8A3s=
 github.com/mainflux/senml v1.0.1/go.mod h1:SMX76mM5yenjLVjZOM27+njCGkP+AA64O46nRQiBRlE=
-github.com/mainflux/senml v1.5.0 h1:GAd1y1eMohfa6sVYcr2iQfVfkkh9l/q7B1TWF5L68xs=
 github.com/mainflux/senml v1.5.0/go.mod h1:SMX76mM5yenjLVjZOM27+njCGkP+AA64O46nRQiBRlE=
 github.com/markbates/oncer v0.0.0-20181203154359-bf2de49a0be2/go.mod h1:Ld9puTsIW75CHf65OeIOkyKbteujpZVXDpWK6YGZbxE=
 github.com/markbates/safe v1.0.1/go.mod h1:nAqgmRi7cY2nqMc92/bSEeQA+R4OheNU2T1kNSCBdG0=

@@ -3,8 +3,8 @@ module github.com/absmach/magistrala-ui
 go 1.21.0
 
 require (
-	github.com/absmach/agent v0.0.0-20231107115142-c8b509f24d50
-	github.com/absmach/magistrala v0.11.1-0.20240103120656-b3e206321c9d
+	github.com/absmach/agent v0.0.0-20240112151723-2e9676fadd46
+	github.com/absmach/magistrala v0.0.0-20240110171157-9f573850fc4b
 	github.com/absmach/senml v1.0.5
 	github.com/caarlos0/env/v9 v9.0.0
 	github.com/eclipse/paho.mqtt.golang v1.4.3
@@ -32,7 +32,6 @@ require (
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/mainflux/export v0.1.1-0.20230724124847-67d0bc7f38cb // indirect
 	github.com/mainflux/mainflux v0.12.0 // indirect
-	github.com/mainflux/senml v1.5.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect

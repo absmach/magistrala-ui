@@ -201,19 +201,6 @@ SPDX-License-Identifier: Apache-2.0 -->
         </a>
       </li>
       <li class="nav-item mb-2 mx-2">
-        {{ $navbarActive = "readmessages" }}
-        <a
-          href="/messages/read"
-          id="readmessages"
-          class="nav-link sidebar-link {{ if (serviceUnavailable "things") }}
-            disabled-item
-          {{ end }} {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
-        >
-          <i class="fas fa-envelope-open"></i>
-          <span>Messages</span>
-        </a>
-      </li>
-      <li class="nav-item mb-2 mx-2">
         {{ $navbarActive = "bootstraps" }}
         <a
           href="/bootstraps"
