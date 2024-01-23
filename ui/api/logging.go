@@ -1145,7 +1145,7 @@ func (lm *loggingMiddleware) Publish(token, chID, thKey, baseUnit, name, unit st
 	return lm.svc.Publish(token, chID, thKey, baseUnit, name, unit, baseTime, value)
 }
 
-// ReadMessages adds logging middleware to messages method.
+// ReadMessages adds logging middleware to read messages method.
 func (lm *loggingMiddleware) ReadMessages(token, chID, thKey string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []interface{}{
