@@ -6,10 +6,12 @@ package api
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/absmach/magistrala-ui/ui"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/go-kit/kit/endpoint"
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -216,6 +218,15 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
+		accessExp, err := extractTokenExpiry(token.AccessToken)
+		if err != nil {
+			return nil, err
+		}
+		refreshExp, err := extractTokenExpiry(token.RefreshToken)
+		if err != nil {
+			return nil, err
+		}
+
 		tkr := uiRes{
 			code: http.StatusCreated,
 			html: user,
@@ -225,12 +236,14 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 					Value:    token.AccessToken,
 					Path:     "/",
 					HttpOnly: true,
+					Expires:  accessExp,
 				},
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
 					Path:     domainsAPIEndpoint,
 					HttpOnly: true,
+					Expires:  refreshExp,
 				},
 			},
 		}
@@ -251,6 +264,15 @@ func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
+		accessExp, err := extractTokenExpiry(token.AccessToken)
+		if err != nil {
+			return nil, err
+		}
+		refreshExp, err := extractTokenExpiry(token.RefreshToken)
+		if err != nil {
+			return nil, err
+		}
+
 		tkr := uiRes{
 			code:    http.StatusSeeOther,
 			headers: map[string]string{"Location": req.ref},
@@ -260,18 +282,21 @@ func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 					Value:    token.AccessToken,
 					Path:     "/",
 					HttpOnly: true,
+					Expires:  accessExp,
 				},
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
 					Path:     tokenRefreshAPIEndpoint,
 					HttpOnly: true,
+					Expires:  refreshExp,
 				},
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
 					Path:     domainsAPIEndpoint,
 					HttpOnly: true,
+					Expires:  refreshExp,
 				},
 			},
 		}
@@ -1564,6 +1589,15 @@ func domainLoginEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
+		accessExp, err := extractTokenExpiry(token.AccessToken)
+		if err != nil {
+			return nil, err
+		}
+		refreshExp, err := extractTokenExpiry(token.RefreshToken)
+		if err != nil {
+			return nil, err
+		}
+
 		return uiRes{
 			code: http.StatusSeeOther,
 			cookies: []*http.Cookie{
@@ -1572,18 +1606,21 @@ func domainLoginEndpoint(svc ui.Service) endpoint.Endpoint {
 					Value:    token.AccessToken,
 					Path:     "/",
 					HttpOnly: true,
+					Expires:  accessExp,
 				},
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
 					Path:     domainsAPIEndpoint,
 					HttpOnly: true,
+					Expires:  refreshExp,
 				},
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
 					Path:     tokenRefreshAPIEndpoint,
 					HttpOnly: true,
+					Expires:  refreshExp,
 				},
 			},
 			headers: map[string]string{"Location": "/?domain=" + req.DomainID},
@@ -1975,4 +2012,17 @@ func deleteInvitationEndpoint(svc ui.Service) endpoint.Endpoint {
 			}, nil
 		}
 	}
+}
+
+func extractTokenExpiry(token string) (time.Time, error) {
+	jwtToken, _, err := new(jwt.Parser).ParseUnverified(token, jwt.MapClaims{})
+	if err != nil {
+		return time.Time{}, err
+	}
+	var expTime time.Time
+	if claims, ok := jwtToken.Claims.(jwt.MapClaims); ok {
+		expUnix := int64(claims["exp"].(float64))
+		expTime = time.Unix(expUnix, 0)
+	}
+	return expTime, nil
 }
