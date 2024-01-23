@@ -1,0 +1,193 @@
+{{ define "dashboard" }}
+  <!doctype html>
+  <html lang="en">
+    <head>
+      {{ template "header" }}
+      <title>Dashboard</title>
+      <script src="https://cdn.jsdelivr.net/npm/muuri@0.9.5/dist/muuri.min.js"></script>
+    </head>
+    <style>
+      .grid {
+        position: relative;
+      }
+      .item {
+        display: block;
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        margin: 5px;
+        z-index: 1;
+        background: #000;
+        color: #fff;
+      }
+
+      .item.muuri-item-dragging {
+        z-index: 3;
+      }
+      .item.muuri-item-releasing {
+        z-index: 2;
+      }
+      .item.muuri-item-hidden {
+        z-index: 0;
+      }
+      .item-content {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+    <body>
+      {{ template "navbar" . }}
+      <div class="main-content pt-3">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-12 mx-auto py-3">
+              <div class="row">
+                <div class="row-mb-3">
+                  <button
+                    type="button"
+                    class="btn body-button"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#widgetsCanvas"
+                    aria-controls="widgetsCanvas"
+                  >
+                    Widgets
+                  </button>
+                </div>
+                <div class="row">
+                  <div class="grid"></div>
+                </div>
+                <div
+                  class="offcanvas offcanvas-end"
+                  data-bs-scroll="true"
+                  data-bs-backdrop="false"
+                  tabindex="-1"
+                  id="widgetsCanvas"
+                  aria-labelledby="widgetsCanvasLabel"
+                >
+                  <div class="offcanvas-header">
+                    <h5 id="widgetsCanvasLabel">Widgets</h5>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="offcanvas"
+                      aria-label="Close"
+                    ></button>
+                  </div>
+                  <div class="offcanvas-body">
+                    <button type="button" class="btn body-button" onclick="addWidget();">
+                      Add widget
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script>
+        initGrid();
+        var grid;
+
+        function initGrid() {
+          var savedLayout = window.localStorage.getItem("gridState");
+          if (savedLayout) {
+            loadLayout(savedLayout);
+          } else {
+            grid = new Muuri(".grid", {
+              dragEnabled: true,
+            }).on("layoutEnd", function () {
+              saveLayout(grid);
+            });
+          }
+        }
+
+        function saveLayout(grid) {
+          const itemData = grid.getItems().map((item) => ({
+            innerHTML: item.getElement().innerHTML,
+            position: {
+              left: item._left,
+              top: item._top,
+              width: item._width,
+              height: item._height,
+              translateX: item._translateX,
+              translateY: item._translateY,
+            },
+          }));
+
+          const gridState = {
+            items: itemData,
+            layout: grid._layout,
+            settings: {
+              dragEnabled: grid._settings.dragEnabled,
+              // Add other relevant settings if needed
+            },
+          };
+
+          // Convert the gridState to a JSON string
+          const jsonString = JSON.stringify(gridState, function (key, value) {
+            // Exclude circular references
+            if (key === "_item" || key === "_grid" || key === "_layout") {
+              return undefined;
+            }
+            return value;
+          });
+
+          localStorage.setItem("gridState", jsonString);
+        }
+
+        function loadLayout(savedLayout) {
+          try {
+            const gridState = JSON.parse(savedLayout);
+            // Clear the existing grid
+            if (grid) {
+              grid.destroy(true);
+            }
+
+            grid = new Muuri(".grid", {
+              dragEnabled: gridState.settings.dragEnabled,
+              // Add any other relevant settings
+            }).on("layoutEnd", function () {
+              saveLayout(grid);
+            });
+
+            // Add items to the grid based on the saved state
+            gridState.items.forEach((itemData) => {
+              const newItem = document.createElement("div");
+              newItem.className = "item";
+              newItem.innerHTML = itemData.innerHTML.trim();
+              const item = grid.add(newItem);
+
+              // Apply position details
+              item._left = itemData.position.left;
+              item._top = itemData.position.top;
+              item._width = itemData.position.width;
+              item._height = itemData.position.height;
+              item._translateX = itemData.position.translateX;
+              item._translateY = itemData.position.translateY;
+            });
+
+            // Layout the grid
+            grid.layout(gridState.layout);
+          } catch (error) {
+            console.error("Error loading grid state:", error);
+          }
+        }
+
+        function addWidget() {
+          // Create a new grid item
+          const newItem = document.createElement("div");
+          newItem.className = "item";
+          newItem.innerHTML = `
+            <div class="item-content">
+              <!-- Safe zone, enter your custom markup -->
+              This can be anything New item.
+              <!-- Safe zone ends -->
+            </div>`;
+
+          grid.add(newItem);
+        }
+      </script>
+    </body>
+  </html>
+{{ end }}

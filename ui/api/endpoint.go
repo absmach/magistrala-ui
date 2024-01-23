@@ -33,6 +33,22 @@ func indexEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
+func dashboardsEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(dashboardsReq)
+
+		res, err := svc.Dashboards(req.token)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code: http.StatusOK,
+			html: res,
+		}, nil
+	}
+}
+
 func loginEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, _ interface{}) (interface{}, error) {
 		res, err := svc.Login()
