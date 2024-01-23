@@ -1128,11 +1128,11 @@ func (lm *loggingMiddleware) ListUserGroupChannels(token, groupID string, page, 
 }
 
 // Publish adds logging middleware to publish method.
-func (lm *loggingMiddleware) Publish(token, chID, thKey, baseUnit, name, unit string, baseTime, value float64) (err error) {
+func (lm *loggingMiddleware) Publish(token, channelID, thingKey, baseUnit, name, unit string, baseTime, value float64) (err error) {
 	defer func(begin time.Time) {
 		args := []interface{}{
 			slog.String("duration", time.Since(begin).String()),
-			slog.String("channel_id", chID),
+			slog.String("channel_id", channelID),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
@@ -1142,15 +1142,15 @@ func (lm *loggingMiddleware) Publish(token, chID, thKey, baseUnit, name, unit st
 		lm.logger.Info("Publish message completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.Publish(token, chID, thKey, baseUnit, name, unit, baseTime, value)
+	return lm.svc.Publish(token, channelID, thingKey, baseUnit, name, unit, baseTime, value)
 }
 
 // ReadMessages adds logging middleware to read messages method.
-func (lm *loggingMiddleware) ReadMessages(token, chID, thKey string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ReadMessages(token, channelID, thingKey string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []interface{}{
 			slog.String("duration", time.Since(begin).String()),
-			slog.String("channel_id", chID),
+			slog.String("channel_id", channelID),
 			slog.Uint64("page", page),
 			slog.Uint64("limit", limit),
 		}
@@ -1162,7 +1162,7 @@ func (lm *loggingMiddleware) ReadMessages(token, chID, thKey string, page, limit
 		lm.logger.Info("Read messages completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ReadMessages(token, chID, thKey, page, limit)
+	return lm.svc.ReadMessages(token, channelID, thingKey, page, limit)
 }
 
 // CreateBootstrap adds logging middleware to create bootstrap method.
