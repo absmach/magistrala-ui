@@ -1473,7 +1473,8 @@ func updateBootstrapConnections(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code: http.StatusOK,
+			code:    http.StatusSeeOther,
+			headers: map[string]string{"Location": bootstrapAPIEndpoint + "/" + req.id},
 		}, nil
 	}
 }
