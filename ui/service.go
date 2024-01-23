@@ -1688,7 +1688,8 @@ func (us *uiService) FetchReaderData(token, channelID, thingID string, to, from 
 	var yaxisValues []int
 	var xaxisValues []string
 
-	for _, m := range msg.Messages {
+	for i := len(msg.Messages) - 1; i >= 0; i-- {
+		m := msg.Messages[i]
 		yaxisValues = append(yaxisValues, int(*m.Value))
 		xaxisValues = append(xaxisValues, time.Unix(int64(m.Time), 0).Format("15:04"))
 	}
