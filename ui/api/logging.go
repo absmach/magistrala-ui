@@ -31,7 +31,7 @@ func (lm *loggingMiddleware) Index(token string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
-			lm.logger.Error("View index page failed to complete successfully", slog.Any("error", err), duration)
+			lm.logger.Warn("View index page failed to complete successfully", slog.Any("error", err), duration)
 			return
 		}
 		lm.logger.Info("View index page completed successfully", duration)
@@ -45,7 +45,7 @@ func (lm *loggingMiddleware) Login() (b []byte, err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
-			lm.logger.Error("View login page failed to complete successfully", slog.Any("error", err), duration)
+			lm.logger.Warn("View login page failed to complete successfully", slog.Any("error", err), duration)
 			return
 		}
 		lm.logger.Info("View login page completed successfully", duration)
@@ -59,7 +59,7 @@ func (lm *loggingMiddleware) Logout() (err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
-			lm.logger.Error("Logout failed to complete successfully", slog.Any("error", err), duration)
+			lm.logger.Warn("Logout failed to complete successfully", slog.Any("error", err), duration)
 			return
 		}
 		lm.logger.Info("Logout completed successfully", duration)
@@ -73,7 +73,7 @@ func (lm *loggingMiddleware) PasswordResetRequest(email string) (err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
-			lm.logger.Error("Send password reset request failed to complete successfully", slog.Any("error", err), duration)
+			lm.logger.Warn("Send password reset request failed to complete successfully", slog.Any("error", err), duration)
 		}
 		lm.logger.Info("Send password reset request completed successfully", duration)
 	}(time.Now())
@@ -86,7 +86,7 @@ func (lm *loggingMiddleware) PasswordReset(token, password, confPassword string)
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
-			lm.logger.Error("Password reset failed to complete successfully", slog.Any("error", err), duration)
+			lm.logger.Warn("Password reset failed to complete successfully", slog.Any("error", err), duration)
 		}
 		lm.logger.Info("Password reset completed successfully", duration)
 	}(time.Now())
@@ -99,7 +99,7 @@ func (lm *loggingMiddleware) ShowPasswordReset() (b []byte, err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
-			lm.logger.Error("View password reset page failed to complete successfully", slog.Any("error", err), duration)
+			lm.logger.Warn("View password reset page failed to complete successfully", slog.Any("error", err), duration)
 		}
 		lm.logger.Info("View password reset page completed successfully", duration)
 	}(time.Now())
@@ -112,7 +112,7 @@ func (lm *loggingMiddleware) PasswordUpdate(token string) (b []byte, err error) 
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
-			lm.logger.Error("View password update page failed to complete successfully", slog.Any("error", err), duration)
+			lm.logger.Warn("View password update page failed to complete successfully", slog.Any("error", err), duration)
 			return
 		}
 		lm.logger.Info("View password update page completed successfully", duration)
@@ -126,7 +126,7 @@ func (lm *loggingMiddleware) UpdatePassword(token, oldPass, newPass string) (err
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
-			lm.logger.Error("Password update failed to complete successfully", slog.Any("error", err), duration)
+			lm.logger.Warn("Password update failed to complete successfully", slog.Any("error", err), duration)
 			return
 		}
 		lm.logger.Info("Password update completed successfully", duration)
@@ -140,7 +140,7 @@ func (lm *loggingMiddleware) Token(login sdk.Login) (token sdk.Token, err error)
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
-			lm.logger.Error("Token request failed to complete successfully", slog.Any("error", err), duration)
+			lm.logger.Warn("Token request failed to complete successfully", slog.Any("error", err), duration)
 			return
 		}
 		lm.logger.Info("Token request completed successfully", duration)
@@ -154,7 +154,7 @@ func (lm *loggingMiddleware) RefreshToken(refreshToken string) (token sdk.Token,
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
-			lm.logger.Error("Token refresh failed to complete successfully", slog.Any("error", err), duration)
+			lm.logger.Warn("Token refresh failed to complete successfully", slog.Any("error", err), duration)
 			return
 		}
 		lm.logger.Info("Token refresh completed successfully", duration)
@@ -168,7 +168,7 @@ func (lm *loggingMiddleware) UserProfile(token string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
-			lm.logger.Error("View user profile page failed to complete successfully", slog.Any("error", err), duration)
+			lm.logger.Warn("View user profile page failed to complete successfully", slog.Any("error", err), duration)
 			return
 		}
 		lm.logger.Info("View user profile page completed successfully", duration)
@@ -186,7 +186,7 @@ func (lm *loggingMiddleware) CreateUsers(token string, users ...sdk.User) (err e
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Create users failed to complete successfully", args...)
+			lm.logger.Warn("Create users failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Create users completed successfully", args...)
@@ -206,7 +206,7 @@ func (lm *loggingMiddleware) ListUsers(token, status string, page, limit uint64)
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("List users failed to complete successfully", args...)
+			lm.logger.Warn("List users failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("List users completed successfully", args...)
@@ -224,7 +224,7 @@ func (lm *loggingMiddleware) ViewUser(token, id string) (b []byte, err error) {
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("View user failed to complete successfully", args...)
+			lm.logger.Warn("View user failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("View user completed successfully", args...)
@@ -242,7 +242,7 @@ func (lm *loggingMiddleware) UpdateUser(token, id string, user sdk.User) (err er
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Update user failed to complete successfully", args...)
+			lm.logger.Warn("Update user failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Update user completed successfully", args...)
@@ -260,7 +260,7 @@ func (lm *loggingMiddleware) UpdateUserTags(token, id string, user sdk.User) (er
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Update user tags failed to complete successfully", args...)
+			lm.logger.Warn("Update user tags failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Update user tags completed successfully", args...)
@@ -278,7 +278,7 @@ func (lm *loggingMiddleware) UpdateUserIdentity(token, id string, user sdk.User)
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Update user identity failed to complete successfully", args...)
+			lm.logger.Warn("Update user identity failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Update user identity completed successfully", args...)
@@ -296,7 +296,7 @@ func (lm *loggingMiddleware) UpdateUserOwner(token, id string, user sdk.User) (e
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Update user owner failed to complete successfully", args...)
+			lm.logger.Warn("Update user owner failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Update user owner completed successfully", args...)
@@ -314,7 +314,7 @@ func (lm *loggingMiddleware) UpdateUserRole(token string, user sdk.User) (err er
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Update user role failed to complete successfully", args...)
+			lm.logger.Warn("Update user role failed to complete successfully", args...)
 		}
 		lm.logger.Info("Update user role completed successfully", args...)
 	}(time.Now())
@@ -331,7 +331,7 @@ func (lm *loggingMiddleware) EnableUser(token, id string) (err error) {
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Enable user failed to complete successfully", args...)
+			lm.logger.Warn("Enable user failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Enable user completed successfully", args...)
@@ -349,7 +349,7 @@ func (lm *loggingMiddleware) DisableUser(token, id string) (err error) {
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Disable user failed to complete successfully", args...)
+			lm.logger.Warn("Disable user failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Disable user completed successfully", args...)
@@ -363,7 +363,7 @@ func (lm *loggingMiddleware) CreateThing(thing sdk.Thing, token string) (err err
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
-			lm.logger.Error("Create thing failed to complete successfully", slog.Any("error", err), duration)
+			lm.logger.Warn("Create thing failed to complete successfully", slog.Any("error", err), duration)
 			return
 		}
 		lm.logger.Info("Create thing completed successfully", duration)
@@ -381,7 +381,7 @@ func (lm *loggingMiddleware) CreateThings(token string, things ...sdk.Thing) (er
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Create things failed to complete successfully", args...)
+			lm.logger.Warn("Create things failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Create things completed successfully", args...)
@@ -401,7 +401,7 @@ func (lm *loggingMiddleware) ListThings(token, status string, page, limit uint64
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("List things failed to complete successfully", args...)
+			lm.logger.Warn("List things failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("List things completed successfully", args...)
@@ -419,7 +419,7 @@ func (lm *loggingMiddleware) ViewThing(token, id string) (b []byte, err error) {
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("View thing failed to complete successfully", args...)
+			lm.logger.Warn("View thing failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("View thing completed successfully", args...)
@@ -437,7 +437,7 @@ func (lm *loggingMiddleware) UpdateThing(token, id string, thing sdk.Thing) (err
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Update thing failed to complete successfully", args...)
+			lm.logger.Warn("Update thing failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Update thing completed successfully", args...)
@@ -455,7 +455,7 @@ func (lm *loggingMiddleware) UpdateThingTags(token, id string, thing sdk.Thing) 
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Update thing tags failed to complete successfully", args...)
+			lm.logger.Warn("Update thing tags failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Update thing tags completed successfully", args...)
@@ -473,7 +473,7 @@ func (lm *loggingMiddleware) UpdateThingSecret(token, id, secret string) (err er
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Update thing secret failed to complete successfully", args...)
+			lm.logger.Warn("Update thing secret failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Update thing secret completed successfully", args...)
@@ -491,7 +491,7 @@ func (lm *loggingMiddleware) EnableThing(token, id string) (err error) {
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Enable thing failed to complete successfully", args...)
+			lm.logger.Warn("Enable thing failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Enable thing completed successfully", args...)
@@ -509,7 +509,7 @@ func (lm *loggingMiddleware) DisableThing(token, id string) (err error) {
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Disable thing failed to complete successfully", args...)
+			lm.logger.Warn("Disable thing failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Disable thing completed successfully", args...)
@@ -529,7 +529,7 @@ func (lm *loggingMiddleware) ShareThing(token, thingID string, req sdk.UsersRela
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Share thing failed to complete successfully", args...)
+			lm.logger.Warn("Share thing failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Share thing completed successfully", args...)
@@ -549,7 +549,7 @@ func (lm *loggingMiddleware) UnshareThing(token, thingID string, req sdk.UsersRe
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Unshare thing failed to complete successfully", args...)
+			lm.logger.Warn("Unshare thing failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Unshare thing completed successfully", args...)
@@ -570,7 +570,7 @@ func (lm *loggingMiddleware) ListThingUsers(token, thingID, relation string, pag
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("List thing users failed to complete successfully", args...)
+			lm.logger.Warn("List thing users failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("List thing users completed successfully", args...)
@@ -590,7 +590,7 @@ func (lm *loggingMiddleware) ListChannelsByThing(token, thingID string, page, li
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("List channels by thing failed to complete successfully", args...)
+			lm.logger.Warn("List channels by thing failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("List channels by thing completed successfully", args...)
@@ -604,7 +604,7 @@ func (lm *loggingMiddleware) CreateChannel(channel sdk.Channel, token string) (e
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
-			lm.logger.Error("Create channel failed to complete successfully", slog.Any("error", err), duration)
+			lm.logger.Warn("Create channel failed to complete successfully", slog.Any("error", err), duration)
 			return
 		}
 		lm.logger.Info("Create channel completed successfully", duration)
@@ -622,7 +622,7 @@ func (lm *loggingMiddleware) CreateChannels(token string, channels ...sdk.Channe
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Create channels failed to complete successfully", args...)
+			lm.logger.Warn("Create channels failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Create channels completed successfully", args...)
@@ -642,7 +642,7 @@ func (lm *loggingMiddleware) ListChannels(token, status string, page, limit uint
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("List channels failed to complete successfully", args...)
+			lm.logger.Warn("List channels failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("List channels completed successfully", args...)
@@ -660,7 +660,7 @@ func (lm *loggingMiddleware) ViewChannel(token, id string) (b []byte, err error)
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("View channel failed to complete successfully", args...)
+			lm.logger.Warn("View channel failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("View channel completed successfully", args...)
@@ -678,7 +678,7 @@ func (lm *loggingMiddleware) UpdateChannel(token, id string, channel sdk.Channel
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Update channel failed to complete successfully", args...)
+			lm.logger.Warn("Update channel failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Update channel completed successfully", args...)
@@ -698,7 +698,7 @@ func (lm *loggingMiddleware) ListThingsByChannel(token, channelID string, page, 
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("List things by channel failed to complete successfully", args...)
+			lm.logger.Warn("List things by channel failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("List things by channel completed successfully", args...)
@@ -716,7 +716,7 @@ func (lm *loggingMiddleware) EnableChannel(token, id string) (err error) {
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Enable channel failed to complete successfully", args...)
+			lm.logger.Warn("Enable channel failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Enable channel completed successfully", args...)
@@ -734,7 +734,7 @@ func (lm *loggingMiddleware) DisableChannel(token, id string) (err error) {
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Disable channel failed to complete successfully", args...)
+			lm.logger.Warn("Disable channel failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Disable channel completed successfully", args...)
@@ -753,7 +753,7 @@ func (lm *loggingMiddleware) Connect(token string, connIDs sdk.Connection) (err 
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Method connect failed to complete successfully", args...)
+			lm.logger.Warn("Method connect failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Method connect completed successfully", args...)
@@ -772,7 +772,7 @@ func (lm *loggingMiddleware) Disconnect(token string, connIDs sdk.Connection) (e
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Method disconnect failed to complete successfully", args...)
+			lm.logger.Warn("Method disconnect failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Method disconnect completed successfully", args...)
@@ -791,7 +791,7 @@ func (lm *loggingMiddleware) ConnectThing(thingID, chanID, token string) (err er
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Connect thing failed to complete successfully", args...)
+			lm.logger.Warn("Connect thing failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Connect thing completed successfully", args...)
@@ -810,7 +810,7 @@ func (lm *loggingMiddleware) DisconnectThing(thingID, chanID, token string) (err
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Disconnect thing failed to complete successfully", args...)
+			lm.logger.Warn("Disconnect thing failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Disconnect thing completed successfully", args...)
@@ -830,7 +830,7 @@ func (lm *loggingMiddleware) AddUserToChannel(token, channelID string, req sdk.U
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Add user to channel failed to complete successfully", args...)
+			lm.logger.Warn("Add user to channel failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Add user to channel completed successfully", args...)
@@ -850,7 +850,7 @@ func (lm *loggingMiddleware) RemoveUserFromChannel(token, channelID string, req 
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Remove user from channel failed to complete successfully", args...)
+			lm.logger.Warn("Remove user from channel failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Remove user from channel completed successfully", args...)
@@ -871,7 +871,7 @@ func (lm *loggingMiddleware) ListChannelUsers(token, channelID, relation string,
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("List channel users failed to complete successfully", args...)
+			lm.logger.Warn("List channel users failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("List channel users completed successfully", args...)
@@ -890,7 +890,7 @@ func (lm *loggingMiddleware) AddUserGroupToChannel(token, channelID string, req 
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Add usergroup to channel failed to complete successfully", args...)
+			lm.logger.Warn("Add usergroup to channel failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Add usergroup to channel completed successfully", args...)
@@ -909,7 +909,7 @@ func (lm *loggingMiddleware) RemoveUserGroupFromChannel(token, channelID string,
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Remove usergroup from channel failed to complete successfully", args...)
+			lm.logger.Warn("Remove usergroup from channel failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Remove usergroup from channel completed successfully", args...)
@@ -929,7 +929,7 @@ func (lm *loggingMiddleware) ListChannelUserGroups(token, channelID string, page
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("List channel usergroups failed to complete successfully", args...)
+			lm.logger.Warn("List channel usergroups failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("List channel usergroups completed successfully", args...)
@@ -947,7 +947,7 @@ func (lm *loggingMiddleware) CreateGroups(token string, groups ...sdk.Group) (er
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Create groups failed to complete successfully", args...)
+			lm.logger.Warn("Create groups failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Create groups completed successfully", args...)
@@ -968,7 +968,7 @@ func (lm *loggingMiddleware) ListGroupUsers(token, id, relation string, page, li
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("List group users failed to complete successfully", args...)
+			lm.logger.Warn("List group users failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("List group users completed successfully", args...)
@@ -988,7 +988,7 @@ func (lm *loggingMiddleware) Assign(token, groupID string, userRelation sdk.User
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Assign user to group failed to complete successfully", args...)
+			lm.logger.Warn("Assign user to group failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Assign user to group completed successfully", args...)
@@ -1008,7 +1008,7 @@ func (lm *loggingMiddleware) Unassign(token, groupID string, userRelation sdk.Us
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Unassign user from group failed to complete successfully", args...)
+			lm.logger.Warn("Unassign user from group failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Unassign user from group completed successfully", args...)
@@ -1026,7 +1026,7 @@ func (lm *loggingMiddleware) ViewGroup(token, id string) (b []byte, err error) {
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("View group failed to complete successfully", args...)
+			lm.logger.Warn("View group failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("View group completed successfully", args...)
@@ -1044,7 +1044,7 @@ func (lm *loggingMiddleware) UpdateGroup(token, id string, group sdk.Group) (err
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Update group failed to complete successfully", args...)
+			lm.logger.Warn("Update group failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Update group completed successfully", args...)
@@ -1064,7 +1064,7 @@ func (lm *loggingMiddleware) ListGroups(token, status string, page, limit uint64
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("List groups failed to complete successfully", args...)
+			lm.logger.Warn("List groups failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("List groups completed successfully", args...)
@@ -1082,7 +1082,7 @@ func (lm *loggingMiddleware) EnableGroup(token, id string) (err error) {
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Enable group failed to complete successfully", args...)
+			lm.logger.Warn("Enable group failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Enable group completed successfully", args...)
@@ -1100,7 +1100,7 @@ func (lm *loggingMiddleware) DisableGroup(token, id string) (err error) {
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Disable group failed to complete successfully", args...)
+			lm.logger.Warn("Disable group failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Disable group completed successfully", args...)
@@ -1120,7 +1120,7 @@ func (lm *loggingMiddleware) ListUserGroupChannels(token, groupID string, page, 
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("List usergroup channels failed to complete successfully", args...)
+			lm.logger.Warn("List usergroup channels failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("List usergroup channels completed successfully", args...)
@@ -1142,7 +1142,7 @@ func (lm *loggingMiddleware) Publish(token, thKey string, msg *messaging.Message
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Publish message failed to complete successfully", args...)
+			lm.logger.Warn("Publish message failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Publish message completed successfully", args...)
@@ -1162,7 +1162,7 @@ func (lm *loggingMiddleware) ReadMessage(token, chID, thKey string, page, limit 
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Read messages failed to complete successfully", args...)
+			lm.logger.Warn("Read messages failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Read messages completed successfully", args...)
@@ -1176,7 +1176,7 @@ func (lm *loggingMiddleware) CreateBootstrap(token string, config ...sdk.Bootstr
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
-			lm.logger.Error("Create bootstrap failed to complete successfully", slog.Any("error", err), duration)
+			lm.logger.Warn("Create bootstrap failed to complete successfully", slog.Any("error", err), duration)
 			return
 		}
 		lm.logger.Info("Create bootstrap completed successfully", duration)
@@ -1195,7 +1195,7 @@ func (lm *loggingMiddleware) ListBootstrap(token string, page, limit uint64) (b 
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("List bootstraps failed to complete successfully", args...)
+			lm.logger.Warn("List bootstraps failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("List bootstraps completed successfully", args...)
@@ -1214,7 +1214,7 @@ func (lm *loggingMiddleware) UpdateBootstrap(token string, config sdk.BootstrapC
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Update bootstrap failed to complete successfully", args...)
+			lm.logger.Warn("Update bootstrap failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Update bootstrap completed successfully", args...)
@@ -1232,7 +1232,7 @@ func (lm *loggingMiddleware) UpdateBootstrapConnections(token string, config sdk
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Update bootstrap connections failed to complete successfully", args...)
+			lm.logger.Warn("Update bootstrap connections failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Update bootstrap connections completed successfully", args...)
@@ -1250,7 +1250,7 @@ func (lm *loggingMiddleware) UpdateBootstrapCerts(token string, config sdk.Boots
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Update bootstrap certs failed to complete successfully", args...)
+			lm.logger.Warn("Update bootstrap certs failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Update bootstrap certs completed successfully", args...)
@@ -1268,7 +1268,7 @@ func (lm *loggingMiddleware) DeleteBootstrap(token string, id string) (err error
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Delete bootstrap failed to complete successfully", args...)
+			lm.logger.Warn("Delete bootstrap failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Delete bootstrap completed successfully", args...)
@@ -1286,7 +1286,7 @@ func (lm *loggingMiddleware) UpdateBootstrapState(token string, config sdk.Boots
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Update bootstrap state failed to complete successfully", args...)
+			lm.logger.Warn("Update bootstrap state failed to complete successfully", args...)
 			return
 		}
 
@@ -1305,7 +1305,7 @@ func (lm *loggingMiddleware) ViewBootstrap(token string, id string) (b []byte, e
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("View bootstrap failed to complete successfully", args...)
+			lm.logger.Warn("View bootstrap failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("View bootstrap completed successfully", args...)
@@ -1323,7 +1323,7 @@ func (lm *loggingMiddleware) GetRemoteTerminal(id, token string) (res []byte, er
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("View remote terminal failed to complete successfully", args...)
+			lm.logger.Warn("View remote terminal failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("View remote terminal completed successfully", args...)
@@ -1342,7 +1342,7 @@ func (lm *loggingMiddleware) ProcessTerminalCommand(ctx context.Context, id, tok
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Process terminal command failed to complete successfully", args...)
+			lm.logger.Warn("Process terminal command failed to complete successfully", args...)
 		}
 		lm.logger.Info("Process terminal command completed successfully", args...)
 	}(time.Now())
@@ -1363,7 +1363,7 @@ func (lm *loggingMiddleware) GetEntities(token, entityType, entityName, domainID
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Get entities failed to complete successfully", args...)
+			lm.logger.Warn("Get entities failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Get entities completed successfully", args...)
@@ -1381,7 +1381,7 @@ func (lm *loggingMiddleware) ErrorPage(errMsg string) (b []byte, err error) {
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Error page failed to complete successfully", args...)
+			lm.logger.Warn("Error page failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Error page completed successfully", args...)
@@ -1399,7 +1399,7 @@ func (lm *loggingMiddleware) DomainLogin(login sdk.Login, refreshToken string) (
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Domain login failed to complete successfully", args...)
+			lm.logger.Warn("Domain login failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Domain login completed successfully", args...)
@@ -1419,7 +1419,7 @@ func (lm *loggingMiddleware) ListDomains(token, status string, page, limit uint6
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("List domains failed to complete successfully", args...)
+			lm.logger.Warn("List domains failed to complete successfully", args...)
 		}
 		lm.logger.Info("List domains completed successfully", args...)
 	}(time.Now())
@@ -1432,7 +1432,7 @@ func (lm *loggingMiddleware) CreateDomain(token string, domain sdk.Domain) (err 
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
-			lm.logger.Error("Create domain failed to complete successfully", slog.Any("error", err), duration)
+			lm.logger.Warn("Create domain failed to complete successfully", slog.Any("error", err), duration)
 		}
 		lm.logger.Info("Create domain completed successfully", duration)
 	}(time.Now())
@@ -1449,7 +1449,7 @@ func (lm *loggingMiddleware) UpdateDomain(token string, domain sdk.Domain) (err 
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Update domain failed to complete successfully", args...)
+			lm.logger.Warn("Update domain failed to complete successfully", args...)
 		}
 		lm.logger.Info("Update domain completed successfully", args...)
 	}(time.Now())
@@ -1466,7 +1466,7 @@ func (lm *loggingMiddleware) Domain(token, domainID string) (b []byte, err error
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("View domain failed to complete successfully", args...)
+			lm.logger.Warn("View domain failed to complete successfully", args...)
 		}
 		lm.logger.Info("View domain completed successfully", args...)
 	}(time.Now())
@@ -1483,7 +1483,7 @@ func (lm *loggingMiddleware) EnableDomain(token, domainID string) (err error) {
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Enable domain failed to complete successfully", args...)
+			lm.logger.Warn("Enable domain failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Enable domain completed successfully", args...)
@@ -1501,7 +1501,7 @@ func (lm *loggingMiddleware) DisableDomain(token, domainID string) (err error) {
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Disable domain failed to complete successfully", args...)
+			lm.logger.Warn("Disable domain failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Disable domain completed successfully", args...)
@@ -1521,7 +1521,7 @@ func (lm *loggingMiddleware) AssignMember(token, domainID string, req sdk.UsersR
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Assign member failed to complete successfully", args...)
+			lm.logger.Warn("Assign member failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Assign member completed successfully", args...)
@@ -1541,7 +1541,7 @@ func (lm *loggingMiddleware) UnassignMember(token, domainID string, req sdk.User
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Unassign member failed to complete successfully", args...)
+			lm.logger.Warn("Unassign member failed to complete successfully", args...)
 			return
 		}
 		lm.logger.Info("Unassign member completed successfully", args...)
@@ -1555,7 +1555,7 @@ func (lm *loggingMiddleware) ViewMember(token, identity string) (b []byte, err e
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
-			lm.logger.Error("View member failed to complete successfully", slog.Any("error", err), duration)
+			lm.logger.Warn("View member failed to complete successfully", slog.Any("error", err), duration)
 			return
 		}
 		lm.logger.Info("View member completed successfully", duration)
@@ -1575,7 +1575,7 @@ func (lm *loggingMiddleware) Members(token, domainID string, page, limit uint64)
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Members failed to complete successfully", args...)
+			lm.logger.Warn("Members failed to complete successfully", args...)
 		}
 		lm.logger.Info("Members completed successfully", args...)
 	}(time.Now())
@@ -1595,7 +1595,7 @@ func (lm *loggingMiddleware) SendInvitation(token string, invitation sdk.Invitat
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Send invitation failed to complete successfully", args...)
+			lm.logger.Warn("Send invitation failed to complete successfully", args...)
 		}
 		lm.logger.Info("Send invitation completed successfully", args...)
 	}(time.Now())
@@ -1614,7 +1614,7 @@ func (lm *loggingMiddleware) Invitations(token, domainID string, page, limit uin
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Invitations failed to complete successfully", args...)
+			lm.logger.Warn("Invitations failed to complete successfully", args...)
 		}
 		lm.logger.Info("Invitations completed successfully", args...)
 	}(time.Now())
@@ -1631,7 +1631,7 @@ func (lm *loggingMiddleware) AcceptInvitation(token, domainID string) (err error
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Accept invitation failed to complete successfully", args...)
+			lm.logger.Warn("Accept invitation failed to complete successfully", args...)
 		}
 		lm.logger.Info("Accept invitation completed successfully", args...)
 	}(time.Now())
@@ -1649,7 +1649,7 @@ func (lm *loggingMiddleware) DeleteInvitation(token, userID, domainID string) (e
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Error("Delete invitation failed to complete successfully", args...)
+			lm.logger.Warn("Delete invitation failed to complete successfully", args...)
 		}
 		lm.logger.Info("Delete invitation completed successfully", args...)
 	}(time.Now())
