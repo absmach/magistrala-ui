@@ -89,7 +89,7 @@ var (
 
 		"dashboards",
 		"linechart",
-		"guage",
+		"gauge",
 
 		"bootstrap",
 		"bootstraps",

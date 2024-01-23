@@ -1,10 +1,10 @@
 <!-- Copyright (c) Abstract Machines
 SPDX-License-Identifier: Apache-2.0 -->
 
-{{ define "guage" }}
-  <div id="guage-chart"></div>
+{{ define "gauge" }}
+  <div id="gauge-chart"></div>
   <script type="text/javascript">
-    var guageChart = echarts.init(document.getElementById("guage-chart"), null, {
+    var gaugeChart = echarts.init(document.getElementById("gauge-chart"), null, {
       width: 700,
       height: 400,
     });
@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       ],
     };
 
-    guageChart.setOption(option);
+    gaugeChart.setOption(option);
 
     // will implement web socket for data fetching
   </script>
