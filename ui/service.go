@@ -272,7 +272,7 @@ type Service interface {
 	// Unassign removes a user from a group.
 	Unassign(token, groupID string, userRelation sdk.UsersRelationRequest) error
 	// ViewGroup retrieves information about a group with a given ID.
-	ViewGroup(token, id string) ([]byte, error)
+	ViewGroup(token, groupID string) ([]byte, error)
 	// UpdateGroup updates the group with the given ID.
 	UpdateGroup(token string, group sdk.Group) error
 	// ListGroups retrieves the groups owned/shared by a user.
@@ -285,9 +285,9 @@ type Service interface {
 	ListUserGroupChannels(token, groupID string, page, limit uint64) (b []byte, err error)
 
 	// Publish facilitates a thing publishin messages to a channel.
-	Publish(token, chID, thKey, baseUnit, name, unit string, baseTime, value float64) error
+	Publish(token, channelID, thingKey, baseUnit, name, unit string, baseTime, value float64) error
 	// ReadMessages retrieves messages published in a channel.
-	ReadMessages(token, chID, thKey string, page, limit uint64) ([]byte, error)
+	ReadMessages(token, channelID, thingKey string, page, limit uint64) ([]byte, error)
 
 	// CreateBootstrap creates a new bootstrap config.
 	CreateBootstrap(token string, config ...sdk.BootstrapConfig) error
@@ -300,7 +300,7 @@ type Service interface {
 	// UpdateBootstrapCerts updates bootstrap certs.
 	UpdateBootstrapCerts(token string, config sdk.BootstrapConfig) error
 	// DeleteBootstrap deletes bootstrap config given an id.
-	DeleteBootstrap(token, id string) error
+	DeleteBootstrap(token, thingID string) error
 	// UpdateBootstrapState updates bootstrap configuration state.
 	UpdateBootstrapState(token string, config sdk.BootstrapConfig) error
 	// ViewBootstrap retrieves a bootstrap config by thing id.
@@ -1617,13 +1617,13 @@ func (us *uiService) ListUserGroupChannels(token, groupID string, page, limit ui
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) ReadMessages(token, chID, thKey string, page, limit uint64) ([]byte, error) {
+func (us *uiService) ReadMessages(token, channelID, thingKey string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 	pgm := sdk.PageMetadata{
 		Offset: offset,
 		Limit:  limit,
 	}
-	msg, err := us.sdk.ReadMessages(pgm, chID, token)
+	msg, err := us.sdk.ReadMessages(pgm, channelID, token)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -1647,8 +1647,8 @@ func (us *uiService) ReadMessages(token, chID, thKey string, page, limit uint64)
 	}{
 		thingsActive,
 		readMessagesActive,
-		chID,
-		thKey,
+		channelID,
+		thingKey,
 		msg.Messages,
 		int(page),
 		noOfPages,
@@ -1664,7 +1664,7 @@ func (us *uiService) ReadMessages(token, chID, thKey string, page, limit uint64)
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) Publish(token, chID, thKey, baseUnit, name, unit string, baseTime, value float64) error {
+func (us *uiService) Publish(token, channelID, thingKey, baseUnit, name, unit string, baseTime, value float64) error {
 	message := struct {
 		BaseTime float64 `json:"bt"`
 		BaseUnit string  `json:"bu"`
@@ -1686,7 +1686,7 @@ func (us *uiService) Publish(token, chID, thKey, baseUnit, name, unit string, ba
 
 	messageArray := "[" + string(jsonMessage) + "]"
 
-	if err := us.sdk.SendMessage(chID, messageArray, thKey); err != nil {
+	if err := us.sdk.SendMessage(channelID, messageArray, thingKey); err != nil {
 		return errors.Wrap(err, ErrFailedPublish)
 	}
 

@@ -650,23 +650,23 @@ func (mm *metricsMiddleware) ListUserGroupChannels(token, userID string, page, l
 }
 
 // Publish adds metrics middleware to publish method.
-func (mm *metricsMiddleware) Publish(token, chID, thKey, baseUnit, name, unit string, baseTime, value float64) error {
+func (mm *metricsMiddleware) Publish(token, channelID, thingKey, baseUnit, name, unit string, baseTime, value float64) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "publish").Add(1)
 		mm.latency.With("method", "publish").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.Publish(token, chID, thKey, baseUnit, name, unit, baseTime, value)
+	return mm.svc.Publish(token, channelID, thingKey, baseUnit, name, unit, baseTime, value)
 }
 
 // ReadMessages adds metrics middleware to read messages method.
-func (mm *metricsMiddleware) ReadMessages(token, chID, thKey string, page, limit uint64) ([]byte, error) {
+func (mm *metricsMiddleware) ReadMessages(token, channelID, thingKey string, page, limit uint64) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "read_messages").Add(1)
 		mm.latency.With("method", "read_messages").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ReadMessages(token, chID, thKey, page, limit)
+	return mm.svc.ReadMessages(token, channelID, thingKey, page, limit)
 }
 
 // CreateBootstrap adds metrics middleware to create bootstrap method.
