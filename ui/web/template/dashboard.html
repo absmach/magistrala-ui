@@ -13,12 +13,13 @@
       .item {
         display: block;
         position: absolute;
-        width: 100px;
-        height: 100px;
+        /* width: 100px;
+        height: 100px; */
         margin: 5px;
         z-index: 1;
-        background: #000;
-        color: #fff;
+        background: #d2cece;
+        color: #1d14c7;
+        padding: 1rem;
       }
 
       .item.muuri-item-dragging {
@@ -179,6 +180,7 @@
           const newItem = document.createElement("div");
           newItem.className = "item";
           newItem.innerHTML = `
+          <button type="button" class="btn-close" onclick="removeGridItem(this.parentNode);"></button>
             <div class="item-content">
               <!-- Safe zone, enter your custom markup -->
               This can be anything New item.
@@ -186,6 +188,10 @@
             </div>`;
 
           grid.add(newItem);
+        }
+
+        function removeGridItem(item) {
+          grid.remove(grid.getItems(item), { removeElements: true });
         }
       </script>
     </body>
