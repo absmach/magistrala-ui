@@ -27,42 +27,9 @@ SPDX-License-Identifier: Apache-2.0 -->
           <li class="page-item active">
             <span class="page-link">{{ . }}</span>
           </li>
-          <li>
-            <a class="dropdown-item" href="?page={{ $currentPage }}&limit=10" id="limit10">10</a>
-          </li>
-          <li>
-            <a class="dropdown-item" href="?page={{ $currentPage }}&limit=20" id="limit20">20</a>
-          </li>
-          <li>
-            <a class="dropdown-item" href="?page={{ $currentPage }}&limit=50" id="limit50">50</a>
-          </li>
-        </ul>
-      </div>
-      <span class="align-self-center mx-2">Items per page</span>
-    </div>
-    {{ if isset "StatusOptions" . }}
-      <button
-        class="btn btn-light dropdown-toggle"
-        type="button"
-        data-bs-toggle="dropdown"
-        aria-expanded="false"
-        id="statusDropdown"
-      >
-        <i class="fas fa-filter"></i>
-        Status
-        {{ if .Status }}
-          :
-          {{ .Status }}
         {{ else }}
-          : enabled
-        {{ end }}
-      </button>
-      <ul class="dropdown-menu" aria-labelledby="statusDropdown">
-        {{ range .StatusOptions }}
-          <li>
-            <a class="dropdown-item " id="{{ . }}Status">
-              {{ . }}
-            </a>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ . }}">{{ . }}</a>
           </li>
         {{ end }}
       {{ end }}
