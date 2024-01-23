@@ -748,6 +748,16 @@ func (mm *metricsMiddleware) DeleteBootstrap(token string, id string) error {
 	return mm.svc.DeleteBootstrap(token, id)
 }
 
+// UpdateBootstrapState adds metrics middleware to update bootstrap state method.
+func (mm *metricsMiddleware) UpdateBootstrapState(token string, config sdk.BootstrapConfig) error {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "update_bootstrap_state").Add(1)
+		mm.latency.With("method", "update_bootstrap_state").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.UpdateBootstrapState(token, config)
+}
+
 // ViewBootstrap adds metrics middleware to view bootstrap method.
 func (mm *metricsMiddleware) ViewBootstrap(token string, id string) ([]byte, error) {
 	defer func(begin time.Time) {

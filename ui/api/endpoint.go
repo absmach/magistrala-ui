@@ -1417,6 +1417,46 @@ func updateBootstrap(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
+func deleteBootstrapEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(deleteBootstrapReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		if err := svc.DeleteBootstrap(req.token, req.id); err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code:    http.StatusSeeOther,
+			headers: map[string]string{"Location": bootstrapAPIEndpoint},
+		}, nil
+	}
+}
+
+func updateBootstrapStateEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(updateBootstrapStateReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		cfg := sdk.BootstrapConfig{
+			ThingID: req.id,
+			State:   req.State,
+		}
+		if err := svc.UpdateBootstrapState(req.token, cfg); err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code:    http.StatusSeeOther,
+			headers: map[string]string{"Location": bootstrapAPIEndpoint + "/" + req.id},
+		}, nil
+	}
+}
+
 func updateBootstrapConnections(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(updateBootstrapConnReq)

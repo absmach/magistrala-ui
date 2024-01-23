@@ -309,6 +309,8 @@ type Service interface {
 	UpdateBootstrapCerts(token string, config sdk.BootstrapConfig) error
 	// DeleteBootstrap deletes bootstrap config given an id.
 	DeleteBootstrap(token, id string) error
+	// UpdateBootstrapState updates bootstrap configuration state.
+	UpdateBootstrapState(token string, config sdk.BootstrapConfig) error
 	// ViewBootstrap retrieves a bootstrap config by thing id.
 	ViewBootstrap(token, id string) ([]byte, error)
 	// GetRemoteTerminal returns remote terminal for a bootstrap config with mainflux agent installed.
@@ -1845,6 +1847,14 @@ func (us *uiService) UpdateBootstrapCerts(token string, config sdk.BootstrapConf
 func (us *uiService) DeleteBootstrap(token, id string) error {
 	if err := us.sdk.RemoveBootstrap(id, token); err != nil {
 		return errors.Wrap(err, ErrFailedDelete)
+	}
+
+	return nil
+}
+
+func (us *uiService) UpdateBootstrapState(token string, config sdk.BootstrapConfig) error {
+	if err := us.sdk.Whitelist(config, token); err != nil {
+		return errors.Wrap(err, ErrFailedUpdate)
 	}
 
 	return nil

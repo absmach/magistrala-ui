@@ -617,6 +617,20 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				opts...,
 			).ServeHTTP)
 
+			r.Post("/{id}/delete", kithttp.NewServer(
+				deleteBootstrapEndpoint(svc),
+				decodeDeleteBootstrap,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
+			r.Post("/{id}/state", kithttp.NewServer(
+				updateBootstrapStateEndpoint(svc),
+				decodeUpdateBootstrapState,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+
 			r.Post("/{id}/certs", kithttp.NewServer(
 				updateBootstrapCerts(svc),
 				decodeUpdateBootstrapCerts,
