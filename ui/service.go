@@ -125,6 +125,10 @@ var (
 		"invitations",
 
 		"dashboard",
+
+		// Modals
+		"linechartmodal",
+		"gaugemodal",
 	}
 	ErrToken                = errors.New("failed to create token")
 	ErrTokenRefresh         = errors.New("failed to refresh token")
@@ -2335,12 +2339,15 @@ func (us *uiService) DeleteInvitation(token, userID, domainID string) error {
 }
 
 func (us *uiService) Dashboards(token string) ([]byte, error) {
+	charts := CreateItem()
 	data := struct {
 		NavbarActive   string
 		CollapseActive string
+		Charts         []Item
 	}{
 		dashboardsActive,
 		dashboardsActive,
+		charts,
 	}
 
 	var btpl bytes.Buffer

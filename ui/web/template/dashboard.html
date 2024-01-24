@@ -16,8 +16,6 @@ SPDX-License-Identifier: Apache-2.0 -->
       .item {
         display: block;
         position: absolute;
-        /* width: 100px;
-        height: 100px; */
         margin: 5px;
         z-index: 1;
         background: #d2cece;
@@ -79,98 +77,29 @@ SPDX-License-Identifier: Apache-2.0 -->
                     ></button>
                   </div>
                   <div class="offcanvas-body">
-                    <button type="button" class="btn body-button" onclick="addWidget();">
-                      Add widget
-                    </button>
-                    <div
-                      class="card"
-                      style="width: 18rem; cursor: pointer;"
-                      onclick="openLineChartModal()"
-                    >
-                      <div class="card-body">
-                        <div class="card-title">Time series line charts</div>
-                        <div class="card-text">simple line charts</div>
+                    {{ range $chart := .Charts }}
+                      <div
+                        class="card mb-3"
+                        style="width: 18rem; cursor: pointer;"
+                        onclick="openWidgetModal('{{ $chart.Widget }}')"
+                      >
+                        <div class="card-body">
+                          <div class="card-title">
+                            {{ $chart.Title }}
+                          </div>
+                          <div class="card-text">
+                            {{ $chart.Content }}
+                          </div>
+                          <img src="{{ $chart.Image }}" class="card-img" alt="" />
+                        </div>
                       </div>
-                    </div>
+                    {{ end }}
                   </div>
                 </div>
               </div>
 
-              <!-- Modal -->
-              <div
-                class="modal fade"
-                id="lineChartModal"
-                tabindex="-1"
-                role="dialog"
-                aria-labelledby="lineChartModalLabel"
-                aria-hidden="true"
-              >
-                <div class="modal-dialog modal-dialog-centered">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title" id="lineChartModalLabel">Time series line charts</h5>
-                      <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                      ></button>
-                    </div>
-                    <form id="create-lineChart-form">
-                      <div class="modal-body">
-                        <div class="mb-3">
-                          <label for="title" class="form-label">Title</label>
-                          <input
-                            type="text"
-                            class="form-control"
-                            name="title"
-                            id="title"
-                            placeholder="Enter the chart title"
-                          />
-                        </div>
-                        <div class="mb-3">
-                          <label for="channel-id" class="form-label">Channel ID</label>
-                          <input
-                            type="text"
-                            class="form-control mb-3"
-                            name="channel"
-                            id="channel-id"
-                            placeholder="Enter channel ID"
-                          />
-                        </div>
-                        <div class="mb-3">
-                          <label for="x-axis" class="form-label">Select x-axis Type</label>
-                          <select class="form-select mb-3" name="xAxisType" id="x-axis">
-                            <option value="" disabled>Select x-axis Type</option>
-                            <option value="value">Value</option>
-                            <option value="category">Category</option>
-                            <option value="time">Time</option>
-                            <option value="log">Log</option>
-                          </select>
-                        </div>
-                        <div class="mb-3">
-                          <label for="y-axis" class="form-label">Select y-axis Type</label>
-                          <select class="form-select mb-3" name="yAxisType" id="y-axis">
-                            <option value="" disabled>Select y-axis Type</option>
-                            <option value="value">Value</option>
-                            <option value="category">Category</option>
-                            <option value="time">Time</option>
-                            <option value="log">Log</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                          Close
-                        </button>
-                        <button type="submit" class="btn body-button" id="create-lineChart-button">
-                          Create Chart
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              </div>
+              {{ template "gaugemodal" . }}
+              {{ template "linechartmodal" . }}
             </div>
           </div>
         </div>
@@ -281,33 +210,10 @@ SPDX-License-Identifier: Apache-2.0 -->
           grid.remove(grid.getItems(item), { removeElements: true });
         }
 
-        // card buttons to open modals
-
-        const lineChartModal = new bootstrap.Modal(document.getElementById("lineChartModal"));
-        // const guageChartModal = new bootstrap.Modal(document.getElementById("guageChartModal"));
-        function openLineChartModal() {
-          lineChartModal.show();
+        function openWidgetModal(widget) {
+          const widgetModal = new bootstrap.Modal(document.getElementById(`${widget}Modal`));
+          widgetModal.show();
         }
-        // function openGuageChartModal() {
-        //   guageChartModal.show();
-        // }
-
-        // line chart form
-        document.getElementById("create-lineChart-button").addEventListener("click", function () {
-          var form = document.getElementById("create-lineChart-form");
-          // Create an object to store the form data
-          var formData = {};
-
-          // Serialize the form data into the object
-          for (var i = 0; i < form.elements.length; i++) {
-            var e = form.elements[i];
-            if (e.type !== "submit" && e.type !== "button") {
-              formData[e.name] = e.value;
-            }
-          }
-
-          addWidget(JSON.stringify(formData));
-        });
       </script>
     </body>
   </html>

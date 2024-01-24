@@ -60,6 +60,8 @@ const (
 	groupsItem              = "groups"
 	accessTokenKey          = "token"
 	refreshTokenKey         = "refresh_token"
+	channelKey              = "channel"
+	thingKey                = "thing"
 )
 
 var (
