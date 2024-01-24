@@ -220,23 +220,23 @@ func (mm *metricsMiddleware) UpdateUserRole(token string, user sdk.User) error {
 }
 
 // EnableUser adds metrics middleware to enable user method.
-func (mm *metricsMiddleware) EnableUser(token, userID string) error {
+func (mm *metricsMiddleware) EnableUser(token, id string) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "enable_user").Add(1)
 		mm.latency.With("method", "enable_user").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.EnableUser(token, userID)
+	return mm.svc.EnableUser(token, id)
 }
 
 // DisableUser adds metrics middleware to disable user method.
-func (mm *metricsMiddleware) DisableUser(token, userID string) error {
+func (mm *metricsMiddleware) DisableUser(token, id string) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "disable_user").Add(1)
 		mm.latency.With("method", "disable_user").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.DisableUser(token, userID)
+	return mm.svc.DisableUser(token, id)
 }
 
 // CreateThing adds metrics middleware to create things method.
@@ -270,13 +270,13 @@ func (mm *metricsMiddleware) ListThings(token, status string, page, limit uint64
 }
 
 // viewThing adds metrics middleware to view thing method.
-func (mm *metricsMiddleware) ViewThing(token, thingID string) ([]byte, error) {
+func (mm *metricsMiddleware) ViewThing(token, id string) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "view_thing").Add(1)
 		mm.latency.With("method", "view_thing").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ViewThing(token, thingID)
+	return mm.svc.ViewThing(token, id)
 }
 
 // UpdateThing adds metrics middleware to update thing method.
@@ -300,33 +300,33 @@ func (mm *metricsMiddleware) UpdateThingTags(token string, thing sdk.Thing) erro
 }
 
 // UpdateThingSecret adds metrics middleware to update thing secret method.
-func (mm *metricsMiddleware) UpdateThingSecret(token, thingID, secret string) error {
+func (mm *metricsMiddleware) UpdateThingSecret(token, id, secret string) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "update_thing_secret").Add(1)
 		mm.latency.With("method", "update_thing_secret").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.UpdateThingSecret(token, thingID, secret)
+	return mm.svc.UpdateThingSecret(token, id, secret)
 }
 
 // EnableThing adds metrics middleware to enable thing method.
-func (mm *metricsMiddleware) EnableThing(token, thingID string) error {
+func (mm *metricsMiddleware) EnableThing(token, id string) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "enable_thing").Add(1)
 		mm.latency.With("method", "enable_thing").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.EnableThing(token, thingID)
+	return mm.svc.EnableThing(token, id)
 }
 
 // DisableThing adds metrics middleware to disable thing method.
-func (mm *metricsMiddleware) DisableThing(token, thingID string) error {
+func (mm *metricsMiddleware) DisableThing(token, id string) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "disable_thing").Add(1)
 		mm.latency.With("method", "disable_thing").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.DisableThing(token, thingID)
+	return mm.svc.DisableThing(token, id)
 }
 
 // ShareThing adds metrics middleware to share thing method.
@@ -350,23 +350,23 @@ func (mm *metricsMiddleware) UnshareThing(token, thingID string, req sdk.UsersRe
 }
 
 // ListThingUsers adds metrics middleware to list thing users method.
-func (mm *metricsMiddleware) ListThingUsers(token, thingID, relation string, page, limit uint64) ([]byte, error) {
+func (mm *metricsMiddleware) ListThingUsers(token, id, relation string, page, limit uint64) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "list_thing_users").Add(1)
 		mm.latency.With("method", "list_thing_users").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ListThingUsers(token, thingID, relation, page, limit)
+	return mm.svc.ListThingUsers(token, id, relation, page, limit)
 }
 
 // ListChannelsByThing adds metrics middleware to list channels by thing method.
-func (mm *metricsMiddleware) ListChannelsByThing(token, thingID string, page, limit uint64) ([]byte, error) {
+func (mm *metricsMiddleware) ListChannelsByThing(token, id string, page, limit uint64) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "list_channels_by_thing").Add(1)
 		mm.latency.With("method", "list_channels_by_thing").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ListChannelsByThing(token, thingID, page, limit)
+	return mm.svc.ListChannelsByThing(token, id, page, limit)
 }
 
 // CreateChannel adds metrics middleware to create channel method.
@@ -400,13 +400,13 @@ func (mm *metricsMiddleware) ListChannels(token, status string, page, limit uint
 }
 
 // ViewChannel adds metrics middleware to view channels method.
-func (mm *metricsMiddleware) ViewChannel(token, channelID string) ([]byte, error) {
+func (mm *metricsMiddleware) ViewChannel(token, id string) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "view_channel").Add(1)
 		mm.latency.With("method", "view_channel").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ViewChannel(token, channelID)
+	return mm.svc.ViewChannel(token, id)
 }
 
 // UpdateChannel adds metrics middleware to update channel method.
@@ -420,33 +420,33 @@ func (mm *metricsMiddleware) UpdateChannel(token string, channel sdk.Channel) er
 }
 
 // ListThingsByChannel adds metrics middleware to list things by channel method.
-func (mm *metricsMiddleware) ListThingsByChannel(token, channelID string, page, limit uint64) ([]byte, error) {
+func (mm *metricsMiddleware) ListThingsByChannel(token, id string, page, limit uint64) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "list_things_by_channel").Add(1)
 		mm.latency.With("method", "list_things_by_channel").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ListThingsByChannel(token, channelID, page, limit)
+	return mm.svc.ListThingsByChannel(token, id, page, limit)
 }
 
 // EnableChannel adds metrics middleware to enable channel method.
-func (mm *metricsMiddleware) EnableChannel(token, channelID string) error {
+func (mm *metricsMiddleware) EnableChannel(token, id string) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "enable_channel").Add(1)
 		mm.latency.With("method", "enable_channel").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.EnableChannel(token, channelID)
+	return mm.svc.EnableChannel(token, id)
 }
 
 // DisableChannel adds metrics middleware to disable channel method.
-func (mm *metricsMiddleware) DisableChannel(token, channelID string) error {
+func (mm *metricsMiddleware) DisableChannel(token, id string) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "disable_channel").Add(1)
 		mm.latency.With("method", "disable_channel").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.DisableChannel(token, channelID)
+	return mm.svc.DisableChannel(token, id)
 }
 
 // Connect adds metrics middleware to connect method.
@@ -510,13 +510,13 @@ func (mm *metricsMiddleware) RemoveUserFromChannel(token, channelID string, req 
 }
 
 // ListChannelUsers adds metrics middleware to list channel users method.
-func (mm *metricsMiddleware) ListChannelUsers(token, channelID, relation string, page, limit uint64) ([]byte, error) {
+func (mm *metricsMiddleware) ListChannelUsers(token, id, relation string, page, limit uint64) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "list_channel_users").Add(1)
 		mm.latency.With("method", "list_channel_users").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ListChannelUsers(token, channelID, relation, page, limit)
+	return mm.svc.ListChannelUsers(token, id, relation, page, limit)
 }
 
 // AddUserGroupToChannel adds metrics middleware to add usergroup to channel method.
@@ -540,13 +540,13 @@ func (mm *metricsMiddleware) RemoveUserGroupFromChannel(token, channelID string,
 }
 
 // ListChannelUserGroups adds metrics middleware to list channel usergroups method.
-func (mm *metricsMiddleware) ListChannelUserGroups(token, channelID string, page, limit uint64) ([]byte, error) {
+func (mm *metricsMiddleware) ListChannelUserGroups(token, id string, page, limit uint64) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "list_channel_usergroups").Add(1)
 		mm.latency.With("method", "list_channel_usergroups").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ListChannelUserGroups(token, channelID, page, limit)
+	return mm.svc.ListChannelUserGroups(token, id, page, limit)
 }
 
 // CreateGroups adds metrics middleware to create groups method.
@@ -560,13 +560,13 @@ func (mm *metricsMiddleware) CreateGroups(token string, groups ...sdk.Group) err
 }
 
 // ListGroupUsers adds metrics middleware to list group users method.
-func (mm *metricsMiddleware) ListGroupUsers(token, groupID, relation string, page, limit uint64) ([]byte, error) {
+func (mm *metricsMiddleware) ListGroupUsers(token, id, relation string, page, limit uint64) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "list_group_users").Add(1)
 		mm.latency.With("method", "list_group_users").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ListGroupUsers(token, groupID, relation, page, limit)
+	return mm.svc.ListGroupUsers(token, id, relation, page, limit)
 }
 
 // Assign adds metrics middleware to assign method.
@@ -590,13 +590,13 @@ func (mm *metricsMiddleware) Unassign(token, groupID string, userRelation sdk.Us
 }
 
 // ViewGroup adds metrics middleware to view group method.
-func (mm *metricsMiddleware) ViewGroup(token, groupID string) ([]byte, error) {
+func (mm *metricsMiddleware) ViewGroup(token, id string) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "view_group").Add(1)
 		mm.latency.With("method", "view_group").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ViewGroup(token, groupID)
+	return mm.svc.ViewGroup(token, id)
 }
 
 // UpdateGroup adds metrics middleware to update group method.
@@ -620,33 +620,33 @@ func (mm *metricsMiddleware) ListGroups(token, status string, page, limit uint64
 }
 
 // Enable group adds metrics middleware to enable group method.
-func (mm *metricsMiddleware) EnableGroup(token, groupID string) error {
+func (mm *metricsMiddleware) EnableGroup(token, id string) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "enable_group").Add(1)
 		mm.latency.With("method", "enable_group").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.EnableGroup(token, groupID)
+	return mm.svc.EnableGroup(token, id)
 }
 
 // DisableGroup adds metrics middleware to disable group method.
-func (mm *metricsMiddleware) DisableGroup(token, groupID string) error {
+func (mm *metricsMiddleware) DisableGroup(token, id string) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "disable_group").Add(1)
 		mm.latency.With("method", "disable_group").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.DisableGroup(token, groupID)
+	return mm.svc.DisableGroup(token, id)
 }
 
 // ListUSerGroupChannels adds metrics middleware to list usergroup channels method.
-func (mm *metricsMiddleware) ListUserGroupChannels(token, userID string, page, limit uint64) ([]byte, error) {
+func (mm *metricsMiddleware) ListUserGroupChannels(token, id string, page, limit uint64) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "list_usergroup_channels").Add(1)
 		mm.latency.With("method", "list_usergroup_channels").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ListUserGroupChannels(token, userID, page, limit)
+	return mm.svc.ListUserGroupChannels(token, id, page, limit)
 }
 
 // Publish adds metrics middleware to publish method.
@@ -830,33 +830,33 @@ func (mm *metricsMiddleware) UpdateDomain(token string, domain sdk.Domain) error
 }
 
 // Domain adds metrics middleware to domain method.
-func (mm *metricsMiddleware) Domain(token, domainID string) ([]byte, error) {
+func (mm *metricsMiddleware) Domain(token, id string) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "domain").Add(1)
 		mm.latency.With("method", "domain").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.Domain(token, domainID)
+	return mm.svc.Domain(token, id)
 }
 
 // EnableDomain adds metrics middleware to enable domain method.
-func (mm *metricsMiddleware) EnableDomain(token, domainID string) error {
+func (mm *metricsMiddleware) EnableDomain(token, id string) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "enable_domain").Add(1)
 		mm.latency.With("method", "enable_domain").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.EnableDomain(token, domainID)
+	return mm.svc.EnableDomain(token, id)
 }
 
 // DisableDomain adds metrics middleware to disable domain method.
-func (mm *metricsMiddleware) DisableDomain(token, domainID string) error {
+func (mm *metricsMiddleware) DisableDomain(token, id string) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "disable_domain").Add(1)
 		mm.latency.With("method", "disable_domain").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.DisableDomain(token, domainID)
+	return mm.svc.DisableDomain(token, id)
 }
 
 // AssignMember adds metrics middleware to assign member method.
