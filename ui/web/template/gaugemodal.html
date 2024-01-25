@@ -67,7 +67,12 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="submit" class="btn body-button" id="create-gauge-button">
+            <button
+              type="button"
+              class="btn body-button"
+              data-bs-dismiss="modal"
+              id="create-gauge-button"
+            >
               Create Chart
             </button>
           </div>
@@ -89,7 +94,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           formData[e.name] = e.value;
         }
       }
-
+      form.reset();
       addWidget(JSON.stringify(formData, "gauge"));
     });
   </script>
