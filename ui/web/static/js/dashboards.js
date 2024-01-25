@@ -17,7 +17,7 @@ function initGrid() {
   return grid;
 }
 
-function saveLayout(grid, localStorageKey) {
+function saveLayout() {
   const itemData = grid.getItems().map((item) => ({
     innerHTML: item.getElement().innerHTML,
   }));
