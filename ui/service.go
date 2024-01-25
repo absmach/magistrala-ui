@@ -266,7 +266,7 @@ type Service interface {
 	// CreateGroups creates new groups.
 	CreateGroups(token string, groups ...sdk.Group) error
 	// ListGroupUsers retrieves the members of a group with a given ID.
-	ListGroupUsers(token, groupID, relation string, page, limit uint64) ([]byte, error)
+	ListGroupUsers(token, id, relation string, page, limit uint64) ([]byte, error)
 	// Assign adds a user to a group.
 	Assign(token, groupID string, userRelation sdk.UsersRelationRequest) error
 	// Unassign removes a user from a group.
