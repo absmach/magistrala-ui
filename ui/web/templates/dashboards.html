@@ -1,0 +1,151 @@
+<!-- Copyright (c) Abstract Machines
+SPDX-License-Identifier: Apache-2.0 -->
+
+{{ define "dashboards" }}
+  <!doctype html>
+  <html lang="en">
+    <head>
+      {{ template "header" }}
+      <link rel="stylesheet" href="/css/dashboards.css" />
+      <title>Dashboards</title>
+    </head>
+    <body>
+      {{ template "navbar" . }}
+      <div class="main-content pt-3">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-12 mx-auto py-3">
+              {{ template "breadcrumb" . }}
+              <div id="dashboard-alert"></div>
+              <div class="row-mb-3 mb-3">
+                <button class="btn body-button" type="button" onclick="newDashboard()">
+                  New Dashboard
+                </button>
+              </div>
+              <div class="row" id="dashboard-cards-container"></div>
+              <div id="dashboard-loader" class="row justify-content-center">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+              <div class="card-actions">
+                <span>
+                  Showing
+                  <span id="cards-count"></span>
+                  of
+                  <span id="cards-total"></span>
+                  cards
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Create Dashboard modal -->
+      <div
+        class="modal fade"
+        id="createDashboardModal"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="createDashboardModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="createDashboardModalLabel">Create Dashboard</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <form id="create-dashboard-form" method="post">
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label for="dashboard-name" class="form-label">Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="name"
+                    id="dashboard-name"
+                    placeholder="Enter the dashboard name"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="dashboard-description" class="form-label">Description</label>
+                  <textarea
+                    class="form-control"
+                    name="description"
+                    id="dashboard-description"
+                    placeholder="Enter the dashboard description"
+                  ></textarea>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn body-button" data-bs-dismiss="modal">
+                  Create
+                </button>
+                <button type="button" class="btn body-button" data-bs-dismiss="modal">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- update dashboard modal -->
+      <div
+        class="modal fade"
+        id="updateDashboardModal"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="updateDashboardModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="updateDashboardModalLabel">Update Dashboard</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <form id="update-dashboard-form">
+              <div class="modal-body">
+                <input type="hidden" name="id" id="id" />
+                <div class="mb-3">
+                  <label for="dashboard-name" class="form-label">Name</label>
+                  <input type="text" class="form-control" name="name" id="dashboard-name" />
+                </div>
+                <div class="mb-3">
+                  <label for="dashboard-description" class="form-label">Description</label>
+                  <textarea
+                    class="form-control"
+                    name="description"
+                    id="dashboard-description"
+                  ></textarea>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn body-button" id="update-dashboard-button">
+                  Update
+                </button>
+                <button type="button" class="btn body-button" data-bs-dismiss="modal">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <script src="/js/dashboards.js"></script>
+    </body>
+  </html>
+{{ end }}

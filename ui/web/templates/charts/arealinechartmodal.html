@@ -1,0 +1,182 @@
+<!-- Copyright (c) Abstract Machines
+SPDX-License-Identifier: Apache-2.0 -->
+
+{{ define "arealinechartmodal" }}
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="areaLineChartModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="areaLineChartModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="areaLineChartModalLabel">Area line charts</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <form id="create-areaLineChart-form">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="title" class="form-label">Title</label>
+              <input
+                type="text"
+                class="form-control"
+                name="title"
+                id="title"
+                placeholder="Enter the chart title"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="channel-id" class="form-label">Channel ID</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="channel"
+                id="channel-id"
+                placeholder="Enter channel ID"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="x-axis" class="form-label">Select x-axis Type</label>
+              <select class="form-select mb-3" name="xAxisType" id="x-axis">
+                <option value="" disabled>Select x-axis Type</option>
+                <option value="value">Value</option>
+                <option value="category">Category</option>
+                <option value="time">Time</option>
+                <option value="log">Log</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="y-axis" class="form-label">Select y-axis Type</label>
+              <select class="form-select mb-3" name="yAxisType" id="y-axis">
+                <option value="" disabled>Select y-axis Type</option>
+                <option value="value">Value</option>
+                <option value="category">Category</option>
+                <option value="time">Time</option>
+                <option value="log">Log</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button
+              type="button"
+              class="btn body-button"
+              id="create-areaLineChart-button"
+              data-bs-dismiss="modal"
+            >
+              Create Chart
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+    // area line chart form
+    document.getElementById("create-areaLineChart-button").addEventListener("click", function () {
+      var form = document.getElementById("create-areaLineChart-form");
+      // Create an object to store the form data
+      var formData = {};
+
+      // Serialize the form data into the object
+      for (var i = 0; i < form.elements.length; i++) {
+        var e = form.elements[i];
+        if (e.type !== "submit" && e.type !== "button") {
+          formData[e.name] = e.value;
+        }
+      }
+      form.reset();
+
+      var widgetID = "arealinechart-" + Date.now();
+      var widgetScript = `
+        var areaLineChart = echarts.init(document.getElementById("${widgetID}"));
+        var option = {
+            tooltip: {
+              trigger: 'axis',
+              axisPointer: {
+                type: 'cross',
+                label: {
+                  backgroundColor: '#6a7985'
+                }
+              }
+            },
+            legend: {
+              data: ['voltage', 'current', 'temperature', 'pressue']
+            },
+            grid: {
+              left: '3%',
+              right: '4%',
+              bottom: '3%',
+              containLabel: true
+            },
+            xAxis: [
+              {
+                type: 'category',
+                boundaryGap: false,
+                data: ['thing1', 'thing2', 'thing3', 'thing4', 'thing5', 'thing6', 'thing7']
+              }
+            ],
+            yAxis: [
+              {
+                type: 'value'
+              }
+            ],
+            series: [
+              {
+                name: 'voltage',
+                type: 'line',
+                stack: 'Total',
+                areaStyle: {},
+                emphasis: {
+                  focus: 'series'
+                },
+                data: [120, 132, 101, 134, 90, 230, 210]
+              },
+              {
+                name: 'current',
+                type: 'line',
+                stack: 'Total',
+                areaStyle: {},
+                emphasis: {
+                  focus: 'series'
+                },
+                data: [220, 182, 191, 234, 290, 330, 310]
+              },
+              {
+                name: 'temperature',
+                type: 'line',
+                stack: 'Total',
+                areaStyle: {},
+                emphasis: {
+                  focus: 'series'
+                },
+                data: [150, 232, 201, 154, 190, 330, 410]
+              },
+              {
+                name: 'pressure',
+                type: 'line',
+                stack: 'Total',
+                areaStyle: {},
+                emphasis: {
+                  focus: 'series'
+                },
+                data: [320, 332, 301, 334, 390, 330, 320]
+              },
+            ]
+          };
+
+        areaLineChart.setOption(option);`;
+
+      addWidget(widgetID, widgetScript);
+    });
+  </script>
+{{ end }}
