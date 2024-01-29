@@ -127,14 +127,12 @@ const resizeObserver = new ResizeObserver((entries) => {
     var item = grid.getItems(target)[0];
     var el = item.getElement();
     grid = item.getGrid();
-    console.log("Previous width: " + previousSize.width + " height: " + previousSize.height);
-    console.log("width: " + target.clientWidth + " height: " + target.clientHeight);
 
     // Calculate the change in width and height
-    const widthChange = target.clientWidth - previousSize.width;
-    const heightChange = target.clientHeight - previousSize.height;
-
-    console.log("Change in width: " + widthChange + " height: " + heightChange);
+    var widthChange = target.clientWidth - previousSize.width;
+    var heightChange = target.clientHeight - previousSize.height;
+    var itemContentWidth = parseInt(el.querySelector(".item-content").style.width) + widthChange;
+    var itemContentHeight = parseInt(el.querySelector(".item-content").style.height) + heightChange;
 
     // Update the previous size for the next callback
     previousSizes.set(target, {
@@ -144,11 +142,6 @@ const resizeObserver = new ResizeObserver((entries) => {
 
     el.style.width = target.clientWidth + "px";
     el.style.height = target.clientHeight + "px";
-    var itemContentWidth = parseInt(el.querySelector(".item-content").style.width) + widthChange;
-    var itemContentHeight = parseInt(el.querySelector(".item-content").style.height) + heightChange;
-    console.log(
-      "itemContentWidth: " + itemContentWidth + " itemContentHeight: " + itemContentHeight,
-    );
     el.querySelector(".item-content").style.width = itemContentWidth + "px";
     el.querySelector(".item-content").style.height = itemContentHeight + "px";
     grid.refreshItems();
