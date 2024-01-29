@@ -32,7 +32,8 @@ const (
 	enabled                 = "enabled"
 	statePending            = "pending"
 	statusAll               = "all"
-	dashboardActive         = "dashboard"
+	homepageActive          = "homepage"
+	dashboardsActive        = "dashboards"
 	usersActive             = "users"
 	userActive              = "user"
 	thingsActive            = "things"
@@ -122,6 +123,12 @@ var (
 		"member",
 		"members",
 		"invitations",
+
+		"dashboard",
+
+		// Modals
+		"linechartmodal",
+		"gaugemodal",
 	}
 	ErrToken                = errors.New("failed to create token")
 	ErrTokenRefresh         = errors.New("failed to refresh token")
@@ -342,6 +349,9 @@ type Service interface {
 	AcceptInvitation(token, domainID string) error
 	// DeleteInvitation deletes an invitation.
 	DeleteInvitation(token, userID, domainID string) error
+
+	// Dashboards displays the dashboards page.
+	Dashboards(token string) ([]byte, error)
 }
 
 var _ Service = (*uiService)(nil)
@@ -434,8 +444,8 @@ func (us *uiService) Index(token string) (b []byte, err error) {
 		CollapseActive string
 		Summary        dataSummary
 	}{
-		dashboardActive,
-		dashboardActive,
+		homepageActive,
+		homepageActive,
 		summary,
 	}
 
@@ -2316,6 +2326,26 @@ func (us *uiService) AcceptInvitation(token, domainID string) error {
 
 func (us *uiService) DeleteInvitation(token, userID, domainID string) error {
 	return us.sdk.DeleteInvitation(userID, domainID, token)
+}
+
+func (us *uiService) Dashboards(token string) ([]byte, error) {
+	charts := CreateItem()
+	data := struct {
+		NavbarActive   string
+		CollapseActive string
+		Charts         []Item
+	}{
+		dashboardsActive,
+		dashboardsActive,
+		charts,
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "dashboard", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+
+	return btpl.Bytes(), nil
 }
 
 func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, err error) {

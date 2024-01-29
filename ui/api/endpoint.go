@@ -2014,6 +2014,25 @@ func deleteInvitationEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
+func dashboardsEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(dashboardsReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.Dashboards(req.token)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code: http.StatusOK,
+			html: res,
+		}, nil
+	}
+}
+
 func extractTokenExpiry(token string) (time.Time, error) {
 	jwtToken, _, err := new(jwt.Parser).ParseUnverified(token, jwt.MapClaims{})
 	if err != nil {

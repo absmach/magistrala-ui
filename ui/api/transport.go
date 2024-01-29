@@ -60,6 +60,8 @@ const (
 	groupsItem              = "groups"
 	accessTokenKey          = "token"
 	refreshTokenKey         = "refresh_token"
+	channelKey              = "channel"
+	thingKey                = "thing"
 )
 
 var (
@@ -149,6 +151,12 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 			encodeResponse,
 			opts...,
 		).ServeHTTP))
+		r.Get("/dashboards", kithttp.NewServer(
+			dashboardsEndpoint(svc),
+			decodeDashboardsRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
 
 		r.Get("/entities", kithttp.NewServer(
 			getEntitiesEndpoint(svc),
@@ -775,6 +783,19 @@ func decodeIndexRequest(_ context.Context, r *http.Request) (interface{}, error)
 	}
 
 	req := indexReq{
+		token: token,
+	}
+
+	return req, nil
+}
+
+func decodeDashboardsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	req := dashboardsReq{
 		token: token,
 	}
 
