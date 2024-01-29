@@ -11,6 +11,7 @@ function initGrid() {
   } else {
     grid = new Muuri(gridClass, {
       dragEnabled: true,
+      dragHandle: ".item-content",
     });
   }
 
@@ -53,6 +54,7 @@ function loadLayout(savedLayout) {
 
     grid = new Muuri(gridClass, {
       dragEnabled: gridState.settings.dragEnabled,
+      dragHandle: ".item-content",
       // Add any other relevant settings
     });
 
@@ -82,7 +84,9 @@ function editGrid(grid) {
     }
     grid = new Muuri(gridClass, {
       dragEnabled: true,
+      dragHandle: ".item-content",
     });
+
     if (gridState) {
       gridState.items.forEach((itemData) => {
         const newItem = document.createElement("div");
@@ -102,12 +106,55 @@ function editGrid(grid) {
     item.classList.remove("no-opacity");
     item.disabled = false;
   });
+
   document.querySelectorAll(".item").forEach((item) => {
     item.classList.add("item-editable");
+    resizeObserver.observe(item);
   });
 
   return grid;
 }
+
+const previousSizes = new Map();
+
+const resizeObserver = new ResizeObserver((entries) => {
+  for (let entry of entries) {
+    const { target } = entry;
+    const previousSize = previousSizes.get(target) || {
+      width: target.clientWidth,
+      height: target.clientHeight,
+    };
+    var item = grid.getItems(target)[0];
+    var el = item.getElement();
+    grid = item.getGrid();
+    console.log("Previous width: " + previousSize.width + " height: " + previousSize.height);
+    console.log("width: " + target.clientWidth + " height: " + target.clientHeight);
+
+    // Calculate the change in width and height
+    const widthChange = target.clientWidth - previousSize.width;
+    const heightChange = target.clientHeight - previousSize.height;
+
+    console.log("Change in width: " + widthChange + " height: " + heightChange);
+
+    // Update the previous size for the next callback
+    previousSizes.set(target, {
+      width: target.clientWidth,
+      height: target.clientHeight,
+    });
+
+    el.style.width = target.clientWidth + "px";
+    el.style.height = target.clientHeight + "px";
+    var itemContentWidth = parseInt(el.querySelector(".item-content").style.width) + widthChange;
+    var itemContentHeight = parseInt(el.querySelector(".item-content").style.height) + heightChange;
+    console.log(
+      "itemContentWidth: " + itemContentWidth + " itemContentHeight: " + itemContentHeight,
+    );
+    el.querySelector(".item-content").style.width = itemContentWidth + "px";
+    el.querySelector(".item-content").style.height = itemContentHeight + "px";
+    grid.refreshItems();
+    grid.layout(true);
+  }
+});
 
 // Save the grid layout
 function saveGrid(grid) {
