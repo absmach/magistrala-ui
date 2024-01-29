@@ -19,19 +19,24 @@ import (
 	"time"
 
 	"github.com/absmach/agent/pkg/bootstrap"
+	"github.com/absmach/magistrala"
 	"github.com/absmach/magistrala/pkg/errors"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/absmach/magistrala/pkg/transformers/senml"
 	mgsenml "github.com/absmach/senml"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/exp/slices"
 )
 
 const (
-	templateDir             = "ui/web/templates"
+	templatesDir            = "ui/web/templates"
+	chartTemplatesDir       = "ui/web/templates/charts"
 	enabled                 = "enabled"
 	statePending            = "pending"
 	statusAll               = "all"
+	homepageActive          = "homepage"
+	dashboardsActive        = "dashboards"
 	dashboardActive         = "dashboard"
 	usersActive             = "users"
 	userActive              = "user"
@@ -131,7 +136,25 @@ var (
 		"member",
 		"members",
 		"invitations",
+
+		"dashboard",
+		"dashboards",
 	}
+
+	chartTemplates = []string{
+		"linechartmodal",
+		"gaugemodal",
+		"barchartmodal",
+		"piechartmodal",
+		"donutmodal",
+		"speedgaugemodal",
+		"tempgaugemodal",
+		"stackedlinechartmodal",
+		"arealinechartmodal",
+		"horizontalbarchartmodal",
+		"dynamicdatachartmodal",
+	}
+
 	ErrToken                = errors.New("failed to create token")
 	ErrTokenRefresh         = errors.New("failed to refresh token")
 	ErrFailedCreate         = errors.New("failed to create entity")
@@ -155,10 +178,19 @@ var (
 	ErrFailedShare          = errors.New("failed to share entity")
 	ErrFailedUnshare        = errors.New("failed to unshare entity")
 	ErrConflict             = errors.New("entity already exists")
-	emptyData               = struct{}{}
-	groupRelations          = []string{"administrator", "editor", "viewer", "member"}
-	thingRelations          = []string{"administrator"}
-	statusOptions           = []string{"all", "enabled", "disabled"}
+
+	ErrFailedViewDashboard     = errors.New("failed to view dashboard")
+	ErrFailedDashboardSave     = errors.New("failed to save dashboard")
+	ErrFailedRetrieveUserID    = errors.New("failed to retrieve user id")
+	ErrFailedGenerateID        = errors.New("failed to generate id")
+	ErrFailedDashboardRetrieve = errors.New("failed to retrieve dashboard")
+	ErrFailedDashboardUpdate   = errors.New("failed to update dashboard")
+	ErrFailedDashboardDelete   = errors.New("failed to delete dashboard")
+
+	emptyData      = struct{}{}
+	groupRelations = []string{"administrator", "editor", "viewer", "member"}
+	thingRelations = []string{"administrator"}
+	statusOptions  = []string{"all", "enabled", "disabled"}
 )
 
 // Service specifies service API.
@@ -356,24 +388,41 @@ type Service interface {
 	AcceptInvitation(token, domainID string) error
 	// DeleteInvitation deletes an invitation.
 	DeleteInvitation(token, userID, domainID string) error
+
+	// Create a dashboard for a user.
+	CreateDashboard(token string, dashboardReq DashboardReq) ([]byte, error)
+	// View a dashboard for a user.
+	ViewDashboard(token, dashboardID string) ([]byte, error)
+	// List Dashboards retrieves all dashboards for a user.
+	ListDashboards(token string, page, limit uint64) ([]byte, error)
+	// Dashboards displays the dashboards page.
+	Dashboards(token string) ([]byte, error)
+	// Update a dashboard for a user.
+	UpdateDashboard(token, dashboardID string, dashboardReq DashboardReq) error
+	// Delete a dashboard for a user.
+	DeleteDashboard(token, dashboardID string) error
 }
 
 var _ Service = (*uiService)(nil)
 
 type uiService struct {
-	sdk  sdk.SDK
-	tpls *template.Template
+	sdk        sdk.SDK
+	tpls       *template.Template
+	drepo      DashboardRepository
+	idProvider magistrala.IDProvider
 }
 
 // New instantiates the HTTP adapter implementation.
-func New(sdk sdk.SDK) (Service, error) {
+func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider) (Service, error) {
 	tpl, err := parseTemplates(sdk, templates)
 	if err != nil {
 		return nil, err
 	}
 	return &uiService{
-		sdk:  sdk,
-		tpls: tpl,
+		sdk:        sdk,
+		tpls:       tpl,
+		drepo:      db,
+		idProvider: idp,
 	}, nil
 }
 
@@ -448,8 +497,8 @@ func (us *uiService) Index(token string) (b []byte, err error) {
 		CollapseActive string
 		Summary        dataSummary
 	}{
-		dashboardActive,
-		dashboardActive,
+		homepageActive,
+		homepageActive,
 		summary,
 	}
 
@@ -2343,6 +2392,163 @@ func (us *uiService) DeleteInvitation(token, userID, domainID string) error {
 	return us.sdk.DeleteInvitation(userID, domainID, token)
 }
 
+func (us *uiService) CreateDashboard(token string, dashboardReq DashboardReq) ([]byte, error) {
+	userID, err := getUserID(token)
+	if err != nil {
+		return []byte{}, errors.Wrap(ErrFailedRetrieveUserID, err)
+	}
+
+	dashboardID, err := us.idProvider.ID()
+	if err != nil {
+		return []byte{}, errors.Wrap(ErrFailedGenerateID, err)
+	}
+	dashboard := Dashboard{
+		ID:          dashboardID,
+		CreatedBy:   userID,
+		Name:        dashboardReq.Name,
+		Description: dashboardReq.Description,
+		Layout:      dashboardReq.Layout,
+		CreatedAt:   time.Now(),
+	}
+
+	ds, err := us.drepo.Create(context.Background(), dashboard)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedDashboardSave)
+	}
+
+	item := make(map[string]interface{})
+	item["dashboard"] = ds
+	jsonData, err := json.Marshal(item)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return jsonData, nil
+}
+
+func (us *uiService) ViewDashboard(token, dashboardID string) ([]byte, error) {
+	var btpl bytes.Buffer
+	charts := CreateItem()
+
+	userID, err := getUserID(token)
+	if err != nil {
+		return btpl.Bytes(), errors.Wrap(ErrFailedRetrieveUserID, err)
+	}
+
+	dashboard, err := us.drepo.Retrieve(context.Background(), dashboardID, userID)
+	if err != nil {
+		return btpl.Bytes(), errors.Wrap(ErrFailedDashboardRetrieve, err)
+	}
+
+	crumbs := []breadcrumb{
+		{Name: dashboardsActive, URL: "/dashboards"},
+		{Name: dashboard.Name},
+	}
+
+	data := struct {
+		NavbarActive   string
+		CollapseActive string
+		Charts         []Item
+		Dashboard      Dashboard
+		Breadcrumbs    []breadcrumb
+	}{
+		dashboardsActive,
+		dashboardsActive,
+		charts,
+		dashboard,
+		crumbs,
+	}
+
+	if err := us.tpls.ExecuteTemplate(&btpl, "dashboard", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+
+	return btpl.Bytes(), nil
+}
+
+func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, error) {
+	offset := (page - 1) * limit
+
+	userID, err := getUserID(token)
+	if err != nil {
+		return []byte{}, errors.Wrap(ErrFailedRetrieveUserID, err)
+	}
+
+	pgm := DashboardPageMeta{
+		Offset:    offset,
+		Limit:     limit,
+		CreatedBy: userID,
+	}
+	dashboardsPage, err := us.drepo.RetrieveAll(context.Background(), pgm)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	noOfPages := int(math.Ceil(float64(dashboardsPage.Total) / float64(limit)))
+
+	items := make(map[string]interface{})
+	items["dashboards"] = dashboardsPage.Dashboards
+	items["total"] = dashboardsPage.Total
+	items["limit"] = limit
+	items["current_page"] = page
+	items["pages"] = noOfPages
+	jsonData, err := json.Marshal(items)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return jsonData, nil
+}
+
+func (us *uiService) Dashboards(token string) ([]byte, error) {
+	crumbs := []breadcrumb{
+		{Name: dashboardsActive},
+	}
+
+	data := struct {
+		NavbarActive   string
+		CollapseActive string
+		Breadcrumbs    []breadcrumb
+	}{
+		dashboardsActive,
+		dashboardsActive,
+		crumbs,
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "dashboards", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+
+	return btpl.Bytes(), nil
+}
+
+func (us *uiService) UpdateDashboard(token, dashboardID string, dashboardReq DashboardReq) error {
+	userID, err := getUserID(token)
+	if err != nil {
+		return errors.Wrap(ErrFailedRetrieveUserID, err)
+	}
+
+	if err = us.drepo.Update(context.Background(), dashboardID, userID, dashboardReq); err != nil {
+		return errors.Wrap(ErrFailedDashboardUpdate, err)
+	}
+
+	return nil
+}
+
+func (us *uiService) DeleteDashboard(token, dashboardID string) error {
+	userID, err := getUserID(token)
+	if err != nil {
+		return errors.Wrap(ErrFailedRetrieveUserID, err)
+	}
+
+	if err = us.drepo.Delete(context.Background(), dashboardID, userID); err != nil {
+		return errors.Wrap(ErrFailedDashboardDelete, err)
+	}
+
+	return nil
+}
+
 func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, err error) {
 	tpl = template.New("mainflux")
 	tpl = tpl.Funcs(template.FuncMap{
@@ -2428,7 +2634,10 @@ func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, 
 
 	var tmplFiles []string
 	for _, value := range templates {
-		tmplFiles = append(tmplFiles, templateDir+"/"+value+".html")
+		tmplFiles = append(tmplFiles, templatesDir+"/"+value+".html")
+	}
+	for _, value := range chartTemplates {
+		tmplFiles = append(tmplFiles, chartTemplatesDir+"/"+value+".html")
 	}
 	tpl, err = tpl.ParseFiles(tmplFiles...)
 	if err != nil {
@@ -2436,4 +2645,16 @@ func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, 
 	}
 
 	return tpl, nil
+}
+
+func getUserID(token string) (string, error) {
+	tkn, _, err := new(jwt.Parser).ParseUnverified(token, jwt.MapClaims{})
+	if err != nil {
+		return "", err
+	}
+	claims, ok := tkn.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", err
+	}
+	return claims["user"].(string), nil
 }
