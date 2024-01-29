@@ -1089,3 +1089,14 @@ func (req listInvitationsReq) validate() error {
 
 	return nil
 }
+
+type dashboardsReq struct {
+	token string
+}
+
+func (req dashboardsReq) validate() error {
+	if req.token == "" {
+		return errAuthorization
+	}
+	return nil
+}

@@ -938,3 +938,13 @@ func (mm *metricsMiddleware) DeleteInvitation(token, userID, domainID string) (e
 
 	return mm.svc.DeleteInvitation(token, userID, domainID)
 }
+
+// Dashboards adds metrics middleware to dashboards method.
+func (mm *metricsMiddleware) Dashboards(token string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "dashboards").Add(1)
+		mm.latency.With("method", "dashboards").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.Dashboards(token)
+}

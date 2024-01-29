@@ -1650,3 +1650,17 @@ func (lm *loggingMiddleware) DeleteInvitation(token, userID, domainID string) (e
 
 	return lm.svc.DeleteInvitation(token, userID, domainID)
 }
+
+// Dashboards adds logging middleware to dashboards method.
+func (lm *loggingMiddleware) Dashboards(token string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		duration := slog.String("duration", time.Since(begin).String())
+		if err != nil {
+			lm.logger.Warn("View dashboards failed to complete successfully", slog.Any("error", err), duration)
+			return
+		}
+		lm.logger.Info("View dashboards completed successfully", duration)
+	}(time.Now())
+
+	return lm.svc.Dashboards(token)
+}
