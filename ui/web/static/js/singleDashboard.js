@@ -1,7 +1,6 @@
 // Copyright (c) Abstract Machines
 // SPDX-License-Identifier: Apache-2.0
 var gridClass = ".grid";
-var localStorageKey = "gridState";
 var grid = initGrid(layout);
 
 // Editable canvas is used to make the canvas editable allowing the user to add widgets and be able to move the
