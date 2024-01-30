@@ -13,6 +13,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/absmach/magistrala-ui/internal/postgres"
+	repo "github.com/absmach/magistrala-ui/postgres"
 	"github.com/absmach/magistrala-ui/ui"
 	"github.com/absmach/magistrala-ui/ui/api"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
@@ -38,6 +40,8 @@ type config struct {
 	MsgContentType  sdk.ContentType `env:"MG_UI_CONTENT_TYPE"     envDefault:"application/senml+json"`
 	TLSVerification bool            `env:"MG_UI_VERIFICATION_TLS" envDefault:"false"`
 }
+
+const envPrefix = "MG_UI_DB_"
 
 func main() {
 	cfg := config{}
@@ -71,7 +75,15 @@ func main() {
 
 	sdk := sdk.NewSDK(sdkConfig)
 
-	svc, err := ui.New(sdk)
+	db, err := postgres.Setup(envPrefix, *repo.Migration())
+	if err != nil {
+		log.Fatalf("failed to setup postgres db : %s", err)
+	} else {
+		logger.Info("postgres db setup successfully")
+	}
+	dbs := repo.New(db)
+
+	svc, err := ui.New(sdk, dbs)
 	if err != nil {
 		log.Fatalf(err.Error())
 	}

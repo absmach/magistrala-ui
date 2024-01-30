@@ -2014,21 +2014,34 @@ func deleteInvitationEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func dashboardsEndpoint(svc ui.Service) endpoint.Endpoint {
+func viewDashboardsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(dashboardsReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-
-		res, err := svc.Dashboards(req.token)
+		res, err := svc.ViewDashboards(req.token)
 		if err != nil {
 			return nil, err
 		}
-
 		return uiRes{
 			code: http.StatusOK,
 			html: res,
+		}, nil
+	}
+}
+
+func saveDashboardsEndPoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(saveDashboardsReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		if err := svc.SaveDashboards(req.token, req.Metadata); err != nil {
+			return nil, err
+		}
+		return uiRes{
+			code: http.StatusOK,
 		}, nil
 	}
 }

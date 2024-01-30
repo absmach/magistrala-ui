@@ -939,12 +939,22 @@ func (mm *metricsMiddleware) DeleteInvitation(token, userID, domainID string) er
 	return mm.svc.DeleteInvitation(token, userID, domainID)
 }
 
-// Dashboards adds metrics middleware to dashboards method.
-func (mm *metricsMiddleware) Dashboards(token string) (b []byte, err error) {
+// Dashboards adds metrics middleware to view dashboards method.
+func (mm *metricsMiddleware) ViewDashboards(token string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		mm.counter.With("method", "dashboards").Add(1)
-		mm.latency.With("method", "dashboards").Observe(time.Since(begin).Seconds())
+		mm.counter.With("method", "viewdashboards").Add(1)
+		mm.latency.With("method", "viewdashboards").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.Dashboards(token)
+	return mm.svc.ViewDashboards(token)
+}
+
+// Dashboards adds metrics middleware to save dashboards method.
+func (mm *metricsMiddleware) SaveDashboards(token string, dashboard string) (err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "viewdashboards").Add(1)
+		mm.latency.With("method", "viewdashboards").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.SaveDashboards(token, dashboard)
 }

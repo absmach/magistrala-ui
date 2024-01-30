@@ -164,6 +164,8 @@ var (
 	ErrFailedDelete         = errors.New("failed to delete entity")
 	ErrFailedShare          = errors.New("failed to share entity")
 	ErrFailedUnshare        = errors.New("failed to unshare entity")
+	ErrFailedViewDashboard  = errors.New("failed to view dashboard")
+	ErrFailedDashboardSave  = errors.New("failed to save dashboard")
 	emptyData               = struct{}{}
 	groupRelations          = []string{"administrator", "editor", "viewer", "member"}
 	thingRelations          = []string{"administrator"}
@@ -365,25 +367,30 @@ type Service interface {
 	DeleteInvitation(token, userID, domainID string) error
 
 	// Dashboards displays the dashboards page.
-	Dashboards(token string) ([]byte, error)
+	ViewDashboards(token string) ([]byte, error)
+
+	// SaveDashboard saves the dashboard layout for a user.
+	SaveDashboards(token string, dashboard string) error
 }
 
 var _ Service = (*uiService)(nil)
 
 type uiService struct {
-	sdk  sdk.SDK
-	tpls *template.Template
+	sdk   sdk.SDK
+	tpls  *template.Template
+	drepo DashboardRepository
 }
 
 // New instantiates the HTTP adapter implementation.
-func New(sdk sdk.SDK) (Service, error) {
+func New(sdk sdk.SDK, db DashboardRepository) (Service, error) {
 	tpl, err := parseTemplates(sdk, templates)
 	if err != nil {
 		return nil, err
 	}
 	return &uiService{
-		sdk:  sdk,
-		tpls: tpl,
+		sdk:   sdk,
+		tpls:  tpl,
+		drepo: db,
 	}, nil
 }
 
@@ -2350,16 +2357,29 @@ func (us *uiService) DeleteInvitation(token, userID, domainID string) error {
 	return us.sdk.DeleteInvitation(userID, domainID, token)
 }
 
-func (us *uiService) Dashboards(token string) ([]byte, error) {
+func (us *uiService) ViewDashboards(token string) ([]byte, error) {
 	charts := CreateItem()
+
+	userID, err := getUserID(token)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	layout, err := us.drepo.Get(context.Background(), userID)
+	if err != nil {
+		layout.Metadata = ""
+	}
+
 	data := struct {
 		NavbarActive   string
 		CollapseActive string
 		Charts         []Item
+		Layout         string
 	}{
 		dashboardsActive,
 		dashboardsActive,
 		charts,
+		layout.Metadata,
 	}
 
 	var btpl bytes.Buffer
@@ -2368,6 +2388,23 @@ func (us *uiService) Dashboards(token string) ([]byte, error) {
 	}
 
 	return btpl.Bytes(), nil
+}
+
+func (us *uiService) SaveDashboards(token string, dashboardMetadata string) error {
+	userID, err := getUserID(token)
+	if err != nil {
+		return errors.Wrap(err, ErrFailedRetreive)
+	}
+	ds := Dashboard{
+		UserID:   userID,
+		Metadata: dashboardMetadata,
+	}
+	err = us.drepo.Save(context.Background(), ds)
+	if err != nil {
+		return errors.Wrap(err, ErrFailedDashboardSave)
+	}
+
+	return nil
 }
 
 func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, err error) {
@@ -2466,4 +2503,12 @@ func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, 
 	}
 
 	return tpl, nil
+}
+
+func getUserID(token string) (string, error) {
+	// TO DO: get user ID from token
+	if token == "" {
+		return "", errors.New("token is empty")
+	}
+	return "123456789", nil
 }

@@ -12,14 +12,25 @@ require (
 	github.com/go-kit/kit v0.13.0
 	github.com/go-zoo/bone v1.3.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/jmoiron/sqlx v1.3.5
 	github.com/prometheus/client_golang v1.18.0
+	github.com/rubenv/sql-migrate v1.5.2
 	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
 	golang.org/x/sync v0.6.0
 	google.golang.org/grpc v1.61.0
 )
 
 require (
+	github.com/go-gorp/gorp/v3 v3.1.0 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
+	github.com/jackc/puddle/v2 v2.2.1 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
+)
+
+require (
 	github.com/beorn7/perks v1.0.1 // indirect
+	github.com/caarlos0/env/v7 v7.1.0
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/creack/pty v1.1.18 // indirect
 	github.com/edgexfoundry/go-mod-core-contracts v0.1.70 // indirect
@@ -30,10 +41,12 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/jackc/pgx/v5 v5.5.2
 	github.com/mainflux/export v0.1.1-0.20230724124847-67d0bc7f38cb // indirect
 	github.com/mainflux/mainflux v0.12.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
+	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.45.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect

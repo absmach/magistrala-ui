@@ -151,12 +151,18 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 			encodeResponse,
 			opts...,
 		).ServeHTTP))
-		r.Get("/dashboards", kithttp.NewServer(
-			dashboardsEndpoint(svc),
-			decodeDashboardsRequest,
+		r.Get("/dashboards", http.HandlerFunc(kithttp.NewServer(
+			viewDashboardsEndpoint(svc),
+			decodeViewDashboardsRequest,
 			encodeResponse,
 			opts...,
-		).ServeHTTP)
+		).ServeHTTP))
+		r.Post("/dashboards", http.HandlerFunc(kithttp.NewServer(
+			saveDashboardsEndPoint(svc),
+			decodeSaveDashboardsRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP))
 
 		r.Get("/entities", kithttp.NewServer(
 			getEntitiesEndpoint(svc),
@@ -789,7 +795,7 @@ func decodeIndexRequest(_ context.Context, r *http.Request) (interface{}, error)
 	return req, nil
 }
 
-func decodeDashboardsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+func decodeViewDashboardsRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	token, err := tokenFromCookie(r, "token")
 	if err != nil {
 		return nil, err
@@ -799,6 +805,25 @@ func decodeDashboardsRequest(_ context.Context, r *http.Request) (interface{}, e
 		token: token,
 	}
 
+	return req, nil
+}
+
+func decodeSaveDashboardsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	var data saveDashboardsReq
+	err = json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		return nil, err
+	}
+
+	req := saveDashboardsReq{
+		token:    token,
+		Metadata: data.Metadata,
+	}
 	return req, nil
 }
 
