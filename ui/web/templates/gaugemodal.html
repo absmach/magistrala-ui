@@ -95,7 +95,38 @@ SPDX-License-Identifier: Apache-2.0 -->
         }
       }
       form.reset();
-      addWidget(JSON.stringify(formData, "gauge"));
+
+      var widgetID = "gauge-" + Date.now();
+      var widgetScript = `
+      var gaugeChart = echarts.init(document.getElementById("${widgetID}"), null, {
+              width: 300,
+              height: 300,
+            });
+            var option = {
+              tooltip: {
+                formatter: "{a} <br/>{b} : {c}%",
+              },
+              series: [
+                {
+                  name: "",
+                  type: "gauge",
+                  progress: {
+                    show: true,
+                  },
+                  detail: { valueAnimation: true, formatter: "{value}" },
+                  data: [
+                    {
+                      value: 55,
+                      name: "Temperature",
+                    },
+                  ],
+                },
+              ],
+            };
+
+            gaugeChart.setOption(option);`;
+
+      addWidget(widgetID, widgetScript);
     });
   </script>
 {{ end }}

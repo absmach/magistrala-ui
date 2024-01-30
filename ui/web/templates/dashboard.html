@@ -8,6 +8,12 @@ SPDX-License-Identifier: Apache-2.0 -->
       {{ template "header" }}
       <title>Dashboard</title>
       <link rel="stylesheet" href="/css/dashboards.css" />
+      <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"
+        integrity="sha512-EmNxF3E6bM0Xg1zvmkeYD3HDBeGxtsG92IxFt1myNZhXdCav9MzvuH/zNMBU1DmIPN6njrhX1VTbqdJxQ2wHDg=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+      ></script>
     </head>
     <body>
       {{ template "navbar" . }}
@@ -94,18 +100,24 @@ SPDX-License-Identifier: Apache-2.0 -->
       <script>
         var grid = initGrid();
 
-        function addWidget(data) {
+        function addWidget(widgetID, widgetScript) {
           // Create a new grid item
           const newItem = document.createElement("div");
           newItem.className = "item";
-          newItem.classList.add("item-editable");
+          //newItem.classList.add("item-editable");
           newItem.innerHTML = `
             <button type="button" class="btn btn-sm" id="removeItem" onclick="removeGridItem(this.parentNode);">
               <i class="fas fa-trash-can"></i>
             </button>
             <div class="item-content">
-              ${data}
-            </div>`;
+              <div id="${widgetID}"></div>
+            </div>
+            `;
+          var scriptTag = document.createElement("script");
+          scriptTag.type = "text/javascript";
+          scriptTag.defer = true;
+          scriptTag.innerHTML = widgetScript;
+          newItem.appendChild(scriptTag);
 
           grid.add(newItem);
         }
