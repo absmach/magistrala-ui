@@ -1,3 +1,6 @@
+// Copyright (c) Abstract Machines
+// SPDX-License-Identifier: Apache-2.0
+
 // To be Deleted. This is simulating the charts that we are going to get from the backend.
 package ui
 
@@ -24,8 +27,8 @@ func CreateItem() []Item {
 			Widget:  "lineChart",
 		},
 		{
-			Title:   "Guage",
-			Content: "This is a small sentence about a guage",
+			Title:   "Gauge",
+			Content: "This is a small sentence about a gauge",
 			Image:   "https://example.com/image3.jpg",
 			Widget:  "gauge",
 		},
@@ -42,8 +45,8 @@ func CreateItem() []Item {
 			Widget:  "lineChart",
 		},
 		{
-			Title:   "Guage",
-			Content: "This is a small sentence about a guage",
+			Title:   "Gauge",
+			Content: "This is a small sentence about a gauge",
 			Image:   "https://example.com/image6.jpg",
 			Widget:  "gauge",
 		},
@@ -60,7 +63,7 @@ func CreateItem() []Item {
 			Widget:  "lineChart",
 		},
 		{
-			Title:   "Guage",
+			Title:   "Gauge",
 			Content: "This is a small sentence about a line chart",
 			Image:   "https://example.com/image9.jpg",
 			Widget:  "gauge",
