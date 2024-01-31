@@ -131,8 +131,14 @@ const resizeObserver = new ResizeObserver((entries) => {
     // Calculate the change in width and height
     var widthChange = target.clientWidth - previousSize.width;
     var heightChange = target.clientHeight - previousSize.height;
-    var itemContentWidth = parseInt(el.querySelector(".item-content").style.width) + widthChange;
-    var itemContentHeight = parseInt(el.querySelector(".item-content").style.height) + heightChange;
+    const contentEl = el.querySelector(".item-content");
+    var itemContentWidth =
+      parseInt(window.getComputedStyle(contentEl).getPropertyValue("width")) + widthChange;
+    var itemContentHeight =
+      parseInt(window.getComputedStyle(contentEl).getPropertyValue("height")) + heightChange;
+
+    console.log("itemContentWidth: " + itemContentWidth);
+    console.log("itemContentHeight: " + itemContentHeight);
 
     // Update the previous size for the next callback
     previousSizes.set(target, {
