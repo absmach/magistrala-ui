@@ -190,8 +190,6 @@ type Service interface {
 	UpdateUserTags(token string, user sdk.User) error
 	// UpdateUserIdentity updates the identity of the user with the given ID.
 	UpdateUserIdentity(token string, user sdk.User) error
-	// UpdateUserOwner updates the owner of the user with the given ID.
-	UpdateUserOwner(token string, user sdk.User) error
 	// UpdateUserRole updates the roles of the user with the given ID.
 	UpdateUserRole(token string, user sdk.User) error
 	// EnableUser updates the status of a user with the given ID to enabled.
@@ -661,14 +659,6 @@ func (us *uiService) UpdateUserTags(token string, user sdk.User) error {
 }
 
 func (us *uiService) UpdateUserIdentity(token string, user sdk.User) error {
-	if _, err := us.sdk.UpdateUserIdentity(user, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdate)
-	}
-
-	return nil
-}
-
-func (us *uiService) UpdateUserOwner(token string, user sdk.User) error {
 	if _, err := us.sdk.UpdateUserIdentity(user, token); err != nil {
 		return errors.Wrap(err, ErrFailedUpdate)
 	}

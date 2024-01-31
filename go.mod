@@ -1,10 +1,10 @@
 module github.com/absmach/magistrala-ui
 
-go 1.21.0
+go 1.21.5
 
 require (
 	github.com/absmach/agent v0.0.0-20240112151723-2e9676fadd46
-	github.com/absmach/magistrala v0.0.0-20240110171157-9f573850fc4b
+	github.com/absmach/magistrala v0.14.0
 	github.com/absmach/senml v1.0.5
 	github.com/caarlos0/env/v9 v9.0.0
 	github.com/eclipse/paho.mqtt.golang v1.4.3
@@ -13,7 +13,7 @@ require (
 	github.com/go-zoo/bone v1.3.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/prometheus/client_golang v1.18.0
-	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
+	golang.org/x/exp v0.0.0-20240119083558-1b970713d09a
 	golang.org/x/sync v0.6.0
 	google.golang.org/grpc v1.61.0
 )
@@ -28,19 +28,18 @@ require (
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
 	github.com/gofrs/uuid v4.4.0+incompatible // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
-	github.com/google/uuid v1.4.0 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/google/uuid v1.5.0 // indirect
+	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/mainflux/export v0.1.1-0.20230724124847-67d0bc7f38cb // indirect
 	github.com/mainflux/mainflux v0.12.0 // indirect
-	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
-	github.com/prometheus/common v0.45.0 // indirect
+	github.com/prometheus/common v0.46.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
-	golang.org/x/net v0.18.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/net v0.20.0 // indirect
+	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20231106174013-bbf56f31fb17 // indirect
-	google.golang.org/protobuf v1.31.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240116215550-a9fa1716bcac // indirect
+	google.golang.org/protobuf v1.32.0 // indirect
 )
