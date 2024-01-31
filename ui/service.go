@@ -28,7 +28,7 @@ import (
 )
 
 const (
-	templateDir             = "ui/web/template"
+	templateDir             = "ui/web/templates"
 	enabled                 = "enabled"
 	statePending            = "pending"
 	statusAll               = "all"
