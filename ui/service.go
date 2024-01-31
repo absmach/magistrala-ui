@@ -129,6 +129,14 @@ var (
 		// Modals
 		"linechartmodal",
 		"gaugemodal",
+		"barchartmodal",
+		"piechartmodal",
+		"donutmodal",
+		"speedgaugemodal",
+		"tempgaugemodal",
+		"stackedlinechartmodal",
+		"arealinechartmodal",
+		"horizontalbarchartmodal",
 	}
 	ErrToken                = errors.New("failed to create token")
 	ErrTokenRefresh         = errors.New("failed to refresh token")
