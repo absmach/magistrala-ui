@@ -32,10 +32,16 @@ SPDX-License-Identifier: Apache-2.0 */
   height: 100%;
 }
 
+.item-editable .item-content {
+  cursor: pointer;
+}
+
 .no-opacity {
   opacity: 0 !important;
 }
 
 .item-editable {
-  border: 1px solid #000000;
+  resize: both;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
