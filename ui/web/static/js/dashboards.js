@@ -137,9 +137,6 @@ const resizeObserver = new ResizeObserver((entries) => {
     var itemContentHeight =
       parseInt(window.getComputedStyle(contentEl).getPropertyValue("height")) + heightChange;
 
-    console.log("itemContentWidth: " + itemContentWidth);
-    console.log("itemContentHeight: " + itemContentHeight);
-
     // Update the previous size for the next callback
     previousSizes.set(target, {
       width: target.clientWidth,
