@@ -105,7 +105,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 height: 600,
                 });
                 var app = {};
-                const categories = (function () {
+                var categories = (function () {
                     let now = new Date();
                     let res = [];
                     let len = 10;
@@ -115,7 +115,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     }
                     return res;
                 })();
-                const categories2 = (function () {
+                var categories2 = (function () {
                     let res = [];
                     let len = 10;
                     while (len--) {
@@ -123,7 +123,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                     }
                     return res;
                 })();
-                const data = (function () {
+                var data = (function () {
+                    
                     let res = [];
                     let len = 10;
                     while (len--) {
@@ -131,7 +132,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     }
                     return res;
                 })();
-                const data2 = (function () {
+                var data2 = (function () {
                     let res = [];
                     let len = 0;
                     while (len < 10) {

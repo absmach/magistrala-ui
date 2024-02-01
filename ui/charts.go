@@ -58,13 +58,13 @@ func CreateItem() []Item {
 		{
 			Title:   "Area Line Chart",
 			Content: "This is a stacked area line chart",
-			Image:   "https://miro.medium.com/v2/resize:fit:657/1*q-EATOYjVUdgaFxnGlddpg.png",
+			Image:   "https://i.stack.imgur.com/vTgJy.gif",
 			Widget:  "areaLineChart",
 		},
 		{
 			Title:   "Temperature Gauge",
 			Content: "This is an analogue temperature gauge",
-			Image:   "https://screenshots.codesandbox.io/0s27xi/0.png",
+			Image:   "https://storage.googleapis.com/support-forums-api/attachment/thread-7015968-5764838897040940014.png",
 			Widget:  "tempGauge",
 		},
 		{
