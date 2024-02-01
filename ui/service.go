@@ -28,8 +28,8 @@ import (
 )
 
 const (
-	templatesDir             = "ui/web/templates"
-	chartTemplatesDir        = "ui/web/templates/charts"
+	templatesDir            = "ui/web/templates"
+	chartTemplatesDir       = "ui/web/templates/charts"
 	enabled                 = "enabled"
 	statePending            = "pending"
 	statusAll               = "all"
@@ -129,7 +129,6 @@ var (
 	}
 
 	chartTemplates = []string{
-
 		"linechartmodal",
 		"gaugemodal",
 		"barchartmodal",
@@ -2458,7 +2457,7 @@ func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, 
 	for _, value := range templates {
 		tmplFiles = append(tmplFiles, templatesDir+"/"+value+".html")
 	}
-	for _, value := range chartTemplates{
+	for _, value := range chartTemplates {
 		tmplFiles = append(tmplFiles, chartTemplatesDir+"/"+value+".html")
 	}
 	tpl, err = tpl.ParseFiles(tmplFiles...)
