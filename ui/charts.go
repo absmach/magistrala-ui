@@ -1,7 +1,6 @@
 // Copyright (c) Abstract Machines
 // SPDX-License-Identifier: Apache-2.0
 
-// To be Deleted. This is simulating the charts that we are going to get from the backend.
 package ui
 
 type Item struct {
@@ -15,7 +14,7 @@ type Item struct {
 func CreateItem() []Item {
 	items := []Item{
 		{
-			Title:   "Line Chart",
+			Title:   "Time Series Line Chart",
 			Content: "This is a small sentence about a line chart",
 			Image:   "https://example.com/image1.jpg",
 			Widget:  "lineChart",
@@ -40,7 +39,7 @@ func CreateItem() []Item {
 		},
 		{
 			Title:   "Donut Chart",
-			Content: "This is a small sentence about a line chart",
+			Content: "This is a small sentence about a donut chart",
 			Image:   "https://example.com/image5.jpg",
 			Widget:  "donut",
 		},
@@ -52,27 +51,27 @@ func CreateItem() []Item {
 		},
 		{
 			Title:   "Range Chart",
-			Content: "This is a small sentence about a line chart",
+			Content: "This is a small sentence about a range chart",
 			Image:   "https://example.com/image7.jpg",
 			Widget:  "stackedLineChart",
 		},
 		{
 			Title:   "Area Line Chart",
-			Content: "This is a small sentence about a line chart",
+			Content: "This is a small sentence about an area line chart",
 			Image:   "https://example.com/image8.jpg",
 			Widget:  "areaLineChart",
 		},
 		{
 			Title:   "Temperature Gauge",
-			Content: "This is a small sentence about a line chart",
+			Content: "This is a small sentence about a temperature gauge",
 			Image:   "https://example.com/image9.jpg",
 			Widget:  "tempGauge",
 		},
 		{
-			Title:   "Line Chart",
-			Content: "This is a small sentence about a line chart",
+			Title:   "Bar and Line Chart",
+			Content: "This is a small sentence about a bar and line chart",
 			Image:   "https://example.com/image10.jpg",
-			Widget:  "lineChart",
+			Widget:  "dynamicDataChart",
 		},
 		{
 			Title:   "Horizontal Bar Chart",

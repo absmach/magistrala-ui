@@ -140,6 +140,7 @@ var (
 		"stackedlinechartmodal",
 		"arealinechartmodal",
 		"horizontalbarchartmodal",
+		"dynamicdatachartmodal",
 	}
 
 	ErrToken                = errors.New("failed to create token")
