@@ -27,8 +27,8 @@ func CreateItem() []Item {
 			Widget:  "barChart",
 		},
 		{
-			Title:   "Temperature Guage",
-			Content: "This is a small sentence about a guage",
+			Title:   "Simple Analogue Gauge",
+			Content: "This is a small sentence about a gauge",
 			Image:   "https://example.com/image3.jpg",
 			Widget:  "gauge",
 		},
@@ -45,8 +45,8 @@ func CreateItem() []Item {
 			Widget:  "donut",
 		},
 		{
-			Title:   "Speed Guage",
-			Content: "This is a small sentence about a speed guage",
+			Title:   "Speed Gauge",
+			Content: "This is a small sentence about a speed gauge",
 			Image:   "https://example.com/image6.jpg",
 			Widget:  "speedGauge",
 		},
@@ -63,7 +63,7 @@ func CreateItem() []Item {
 			Widget:  "areaLineChart",
 		},
 		{
-			Title:   "Temperature Guage",
+			Title:   "Temperature Gauge",
 			Content: "This is a small sentence about a line chart",
 			Image:   "https://example.com/image9.jpg",
 			Widget:  "tempGauge",

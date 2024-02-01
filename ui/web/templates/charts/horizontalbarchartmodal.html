@@ -1,7 +1,7 @@
 <!-- Copyright (c) Abstract Machines
 SPDX-License-Identifier: Apache-2.0 -->
 
-{{ define "horizontalBarchartmodal" }}
+{{ define "horizontalbarchartmodal" }}
   <!-- Modal -->
   <div
     class="modal fade"
@@ -101,8 +101,8 @@ SPDX-License-Identifier: Apache-2.0 -->
         var widgetID = "horizontalBarchart-" + Date.now();
         var widgetScript = `
       var horizontalBarChart = echarts.init(document.getElementById("${widgetID}"), null, {
-              width: 500,
-              height: 200,
+              width: 600,
+              height: 400,
             });
             var option = {
                 dataset: {
@@ -135,9 +135,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   {
                     type: 'bar',
                     encode: {
-                      // Map the "amount" column to X axis.
                       x: 'amount',
-                      // Map the "product" column to Y axis
                       y: 'product'
                     }
                   }
