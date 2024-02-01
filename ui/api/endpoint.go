@@ -2040,7 +2040,7 @@ func createDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.CreateDashboard(req.token, req.Description, req.Metadata, req.Layout)
+		res, err := svc.CreateDashboard(req.token, req.DashboardName, req.Description, req.Metadata, req.Layout)
 		if err != nil {
 			return nil, err
 		}
@@ -2077,7 +2077,7 @@ func updateDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.UpdateDashboard(req.token, req.DashboardID, req.Description, req.Metadata, req.Layout)
+		res, err := svc.UpdateDashboard(req.token, req.DashboardID, req.DashboardName, req.Description, req.Metadata, req.Layout)
 		if err != nil {
 			return nil, err
 		}

@@ -25,6 +25,7 @@ import (
 	"github.com/absmach/magistrala/pkg/transformers/senml"
 	mgsenml "github.com/absmach/senml"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/golang-jwt/jwt"
 	"github.com/oklog/ulid/v2"
 	"golang.org/x/exp/slices"
 )
@@ -369,13 +370,13 @@ type Service interface {
 	DeleteInvitation(token, userID, domainID string) error
 
 	// Create a dashboard for a user.
-	CreateDashboard(token, description, metadata, layout string) ([]byte, error)
+	CreateDashboard(token, dashboardName, description, metadata, layout string) ([]byte, error)
 	// View a dashboard for a user.
 	ViewDashboard(token, dashboardID string) ([]byte, error)
 	// List Dashboards retrieves all dashboards for a user.
 	ListDashboards(token string, page, limit uint64) ([]byte, error)
 	// Update a dashboard for a user.
-	UpdateDashboard(token, dashboardID, description, metadata, layout string) ([]byte, error)
+	UpdateDashboard(token, dashboardID, dashboardName, description, metadata, layout string) ([]byte, error)
 	// Delete a dashboard for a user.
 	DeleteDashboard(token, dashboardID string) error
 }
@@ -2364,7 +2365,7 @@ func (us *uiService) DeleteInvitation(token, userID, domainID string) error {
 	return us.sdk.DeleteInvitation(userID, domainID, token)
 }
 
-func (us *uiService) CreateDashboard(token, description, metadata, layout string) ([]byte, error) {
+func (us *uiService) CreateDashboard(token, dashboardName, description, metadata, layout string) ([]byte, error) {
 	var btpl bytes.Buffer
 	charts := CreateItem()
 
@@ -2380,11 +2381,12 @@ func (us *uiService) CreateDashboard(token, description, metadata, layout string
 		return btpl.Bytes(), errors.Wrap(ErrFailedGenerateID, err)
 	}
 	dashboard := Dashboard{
-		DashboardID: dashboardID.String(),
-		UserID:      userID,
-		Description: description,
-		Metadata:    metadata,
-		Layout:      layout,
+		DashboardID:   dashboardID.String(),
+		UserID:        userID,
+		DashboardName: dashboardName,
+		Description:   description,
+		Metadata:      metadata,
+		Layout:        layout,
 	}
 	err = us.drepo.Create(context.Background(), dashboard)
 	if err != nil {
@@ -2493,7 +2495,7 @@ func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, e
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) UpdateDashboard(token, dashboardID, description, metadata, layout string) ([]byte, error) {
+func (us *uiService) UpdateDashboard(token, dashboardID, dashboardName, description, metadata, layout string) ([]byte, error) {
 	var btpl bytes.Buffer
 	charts := CreateItem()
 
@@ -2503,11 +2505,12 @@ func (us *uiService) UpdateDashboard(token, dashboardID, description, metadata, 
 	}
 
 	dashboard := Dashboard{
-		DashboardID: dashboardID,
-		UserID:      userID,
-		Description: description,
-		Metadata:    metadata,
-		Layout:      layout,
+		DashboardID:   dashboardID,
+		UserID:        userID,
+		DashboardName: dashboardName,
+		Description:   description,
+		Metadata:      metadata,
+		Layout:        layout,
 	}
 	err = us.drepo.Update(context.Background(), dashboard)
 	if err != nil {
@@ -2646,9 +2649,13 @@ func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, 
 }
 
 func getUserID(token string) (string, error) {
-	// TO DO: get user ID from token
-	if token == "" {
-		return "", errors.New("token is empty")
+	tkn, _, err := new(jwt.Parser).ParseUnverified(token, jwt.MapClaims{})
+	if err != nil {
+		return "", err
 	}
-	return "123456789", nil
+	claims, ok := tkn.Claims.(jwt.MapClaims)
+	if !ok {
+		return "", err
+	}
+	return claims["user"].(string), nil
 }

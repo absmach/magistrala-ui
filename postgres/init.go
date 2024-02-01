@@ -18,6 +18,7 @@ func Migration() *migrate.MemoryMigrationSource {
 					`CREATE TABLE IF NOT EXISTS dashboards (
 						dashboard_id VARCHAR(36) NOT NULL
 						user_id VARCHAR(36) NOT NULL,
+						dashboard_name VARCHAR(255) NOT NULL,
 						description TEXT,
 						metadata TEXT,
 						layout JSONB,

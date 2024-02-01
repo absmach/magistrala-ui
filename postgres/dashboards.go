@@ -21,10 +21,10 @@ func New(db *sqlx.DB) ui.DashboardRepository {
 }
 
 // Create a non-existing dashboard for a user.
-func (r *repo) Create(ctx context.Context, dashboard ui.Dashboard) (Dashboard error) {
+func (r *repo) Create(ctx context.Context, dashboard ui.Dashboard) error {
 	q := `
-    INSERT INTO dashboards (dashboard_id, user_id, description, metadata, layout)
-    VALUES (:user_id, :user_id, :description, :metadata, :layout)`
+    INSERT INTO dashboards (dashboard_id, user_id, dashboard_name, description, metadata, layout)
+    VALUES (:dashboard_id, :user_id, :dashboard_name, :description, :metadata, :layout)`
 
 	dbDs, err := toDBDashboard(dashboard)
 	if err != nil {
@@ -36,9 +36,9 @@ func (r *repo) Create(ctx context.Context, dashboard ui.Dashboard) (Dashboard er
 	return nil
 }
 
-// Retreive a dashboard using a dashboard id and user id.
+// Retrieve a dashboard using a dashboard id and user id.
 func (r *repo) Retrieve(ctx context.Context, dashboardID, userID string) (ui.Dashboard, error) {
-	q := `SELECT dashboard_id, user_id, description, metadata, layout FROM dashboards WHERE dashboard_id = :dashboard_id AND user_id = :user_id`
+	q := `SELECT dashboard_id, user_id,dashboard_name, description, metadata, layout FROM dashboards WHERE dashboard_id = :dashboard_id AND user_id = :user_id`
 
 	tmp := ui.Dashboard{
 		DashboardID: dashboardID,
@@ -61,9 +61,9 @@ func (r *repo) Retrieve(ctx context.Context, dashboardID, userID string) (ui.Das
 	return ui.Dashboard{}, ErrNotFound
 }
 
-// Retreive all dashboards for a user using a user id.
+// Retrieve all dashboards for a user using a user id.
 func (r *repo) RetrieveAll(ctx context.Context, userID string, page ui.DashboardPageMeta) (ui.DashboardPage, error) {
-	q := `SELECT dashboard_id, user_id, description, metadata, layout FROM dashboards WHERE user_id = :user_id`
+	q := `SELECT dashboard_id, user_id,dashboard_name, description, metadata, layout FROM dashboards WHERE user_id = :user_id`
 
 	tmp := ui.Dashboard{
 		UserID: userID,
@@ -103,7 +103,7 @@ func (r *repo) RetrieveAll(ctx context.Context, userID string, page ui.Dashboard
 // Update an existing dashboard for a user.
 func (r *repo) Update(ctx context.Context, dashboard ui.Dashboard) error {
 	q := `
-	UPDATE dashboards SET description = :description, metadata = :metadata, layout = :layout
+	UPDATE dashboards SET dashboard_name = :dashboard_name, description = :description, metadata = :metadata, layout = :layout
 	WHERE dashboard_id = :dashboard_id AND user_id = :user_id`
 
 	dbDs, err := toDBDashboard(dashboard)
@@ -139,11 +139,12 @@ func (r *repo) Delete(ctx context.Context, dashboardID, userID string) error {
 }
 
 type dbDashboard struct {
-	DashboardID string `db:"dashboard_id"`
-	UserID      string `db:"user_id"`
-	Description string `db:"description"`
-	Metadata    string `db:"metadata"`
-	Layout      []byte `db:"layout"`
+	DashboardID   string `db:"dashboard_id"`
+	UserID        string `db:"user_id"`
+	DashboardName string `db:"dashboard_name"`
+	Description   string `db:"description"`
+	Metadata      string `db:"metadata"`
+	Layout        []byte `db:"layout"`
 }
 
 func toDBDashboard(ds ui.Dashboard) (dbDashboard, error) {
@@ -152,11 +153,12 @@ func toDBDashboard(ds ui.Dashboard) (dbDashboard, error) {
 		return dbDashboard{}, errors.Wrap(ErrJSONMarshal, err)
 	}
 	return dbDashboard{
-		DashboardID: ds.DashboardID,
-		UserID:      ds.UserID,
-		Description: ds.Description,
-		Metadata:    ds.Metadata,
-		Layout:      lt,
+		DashboardID:   ds.DashboardID,
+		UserID:        ds.UserID,
+		DashboardName: ds.DashboardName,
+		Description:   ds.Description,
+		Metadata:      ds.Metadata,
+		Layout:        lt,
 	}, nil
 }
 
@@ -167,10 +169,11 @@ func toDashboard(dsDB dbDashboard) (ui.Dashboard, error) {
 		return ui.Dashboard{}, errors.Wrap(ErrJSONUnmarshal, err)
 	}
 	return ui.Dashboard{
-		DashboardID: dsDB.DashboardID,
-		UserID:      dsDB.UserID,
-		Description: dsDB.Description,
-		Metadata:    dsDB.Metadata,
-		Layout:      lt,
+		DashboardID:   dsDB.DashboardID,
+		UserID:        dsDB.UserID,
+		DashboardName: dsDB.DashboardName,
+		Description:   dsDB.Description,
+		Metadata:      dsDB.Metadata,
+		Layout:        lt,
 	}, nil
 }

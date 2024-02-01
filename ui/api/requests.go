@@ -1103,10 +1103,11 @@ func (req viewDashboardReq) validate() error {
 }
 
 type createDashboardReq struct {
-	token       string
-	Description string `json:"description"`
-	Metadata    string `json:"metadata"`
-	Layout      string `json:"layout"`
+	token         string
+	DashboardName string `json:"dashboard_name"`
+	Description   string `json:"description"`
+	Metadata      string `json:"metadata"`
+	Layout        string `json:"layout"`
 }
 
 func (req createDashboardReq) validate() error {
@@ -1133,11 +1134,12 @@ func (req listDashboardsReq) validate() error {
 }
 
 type updateDashboardReq struct {
-	token       string
-	DashboardID string `json:"dashboard_id"`
-	Description string `json:"description"`
-	Metadata    string `json:"metadata"`
-	Layout      string `json:"layout"`
+	token         string
+	DashboardID   string `json:"dashboard_id"`
+	DashboardName string `json:"dashboard_name"`
+	Description   string `json:"description"`
+	Metadata      string `json:"metadata"`
+	Layout        string `json:"layout"`
 }
 
 func (req updateDashboardReq) validate() error {

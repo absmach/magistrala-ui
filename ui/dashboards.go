@@ -8,11 +8,12 @@ import (
 )
 
 type Dashboard struct {
-	DashboardID string `json:"dashboard_id,omitempty" db:"dashboard_id"`
-	UserID      string `json:"user_id,omitempty" db:"user_id"`
-	Description string `json:"description,omitempty" db:"description"`
-	Metadata    string `json:"metadata,omitempty" db:"metadata"`
-	Layout      string `json:"layout,omitempty" db:"layout"`
+	DashboardID   string `json:"dashboard_id,omitempty" db:"dashboard_id"`
+	UserID        string `json:"user_id,omitempty" db:"user_id"`
+	DashboardName string `json:"dashboard_name,omitempty" db:"dashboard_name"`
+	Description   string `json:"description,omitempty" db:"description"`
+	Metadata      string `json:"metadata,omitempty" db:"metadata"`
+	Layout        string `json:"layout,omitempty" db:"layout"`
 }
 
 type DashboardPage struct {
