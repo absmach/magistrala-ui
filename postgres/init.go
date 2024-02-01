@@ -16,12 +16,14 @@ func Migration() *migrate.MemoryMigrationSource {
 				Id: "dashboard_01",
 				Up: []string{
 					`CREATE TABLE IF NOT EXISTS dashboards (
-						user_id			VARCHAR(36) NOT NULL,
-						metadata		TEXT,
-						UNIQUE (user_id),
-						PRIMARY KEY (user_id)
-					);
-					INSERT INTO dashboards (user_id, metadata) VALUES ('admin', '');`,
+						dashboard_id VARCHAR(36) NOT NULL
+						user_id VARCHAR(36) NOT NULL,
+						description TEXT,
+						metadata TEXT,
+						layout JSONB,
+						UNIQUE (dashboard_id),
+						PRIMARY KEY (dashboard_id)
+					);`,
 				},
 				Down: []string{
 					`DROP TABLE IF EXISTS dashboards`,

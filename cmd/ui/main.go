@@ -41,7 +41,7 @@ type config struct {
 	TLSVerification bool            `env:"MG_UI_VERIFICATION_TLS" envDefault:"false"`
 }
 
-const envPrefix = "MG_UI_DB_"
+const envDBPrefix = "MG_UI_DB_"
 
 func main() {
 	cfg := config{}
@@ -75,7 +75,7 @@ func main() {
 
 	sdk := sdk.NewSDK(sdkConfig)
 
-	db, err := postgres.Setup(envPrefix, *repo.Migration())
+	db, err := postgres.Setup(envDBPrefix, *repo.Migration())
 	if err != nil {
 		log.Fatalf("failed to setup postgres db : %s", err)
 	} else {

@@ -2014,16 +2014,18 @@ func deleteInvitationEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func viewDashboardsEndpoint(svc ui.Service) endpoint.Endpoint {
+func viewDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(dashboardsReq)
+		req := request.(viewDashboardReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.ViewDashboards(req.token)
+
+		res, err := svc.ViewDashboard(req.token, req.DashboardID)
 		if err != nil {
 			return nil, err
 		}
+
 		return uiRes{
 			code: http.StatusOK,
 			html: res,
@@ -2031,15 +2033,73 @@ func viewDashboardsEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func saveDashboardsEndPoint(svc ui.Service) endpoint.Endpoint {
+func createDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(saveDashboardsReq)
+		req := request.(createDashboardReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		if err := svc.SaveDashboards(req.token, req.Metadata); err != nil {
+
+		res, err := svc.CreateDashboard(req.token, req.Description, req.Metadata, req.Layout)
+		if err != nil {
 			return nil, err
 		}
+		return uiRes{
+			code: http.StatusCreated,
+			html: res,
+		}, nil
+	}
+}
+
+func listDashboardsEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(listDashboardsReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.ListDashboards(req.token, req.page, req.limit)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code: http.StatusOK,
+			html: res,
+		}, nil
+	}
+}
+
+func updateDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(updateDashboardReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.UpdateDashboard(req.token, req.DashboardID, req.Description, req.Metadata, req.Layout)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code: http.StatusOK,
+			html: res,
+		}, nil
+	}
+}
+
+func deleteDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(deleteDashboardReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		if err := svc.DeleteDashboard(req.token, req.DashboardID); err != nil {
+			return nil, err
+		}
+
 		return uiRes{
 			code: http.StatusOK,
 		}, nil

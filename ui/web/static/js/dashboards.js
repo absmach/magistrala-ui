@@ -4,16 +4,17 @@ var grid;
 var gridClass = ".grid";
 var localStorageKey = "gridState";
 
-function initGrid(fllayout) {
-  // var savedLayout = window.localStorage.getItem(localStorageKey);
-  if (fllayout) {
-    loadLayout(fllayout);
+function initGrid() {
+  var savedLayout = window.localStorage.getItem(localStorageKey);
+  if (savedLayout) {
+    loadLayout(savedLayout);
   } else {
     grid = new Muuri(gridClass, {
       dragEnabled: true,
       dragHandle: ".item-content",
     });
   }
+
   return grid;
 }
 
@@ -41,8 +42,8 @@ function saveLayout() {
     }
     return value;
   });
-  localStorage.setItem(localStorageKey, jsonString);
 
+  localStorage.setItem(localStorageKey, jsonString);
 }
 
 function loadLayout(savedLayout) {
@@ -177,43 +178,5 @@ function saveGrid(grid) {
 // Cancel the grid layout
 function cancelEditGrid(grid) {
   grid._settings.dragEnabled = false;
-  // window.location.reload();
+  window.location.reload();
 }
-
-document.getElementById("postButton").addEventListener("click", function() {
-  const itemData = grid.getItems().map((item) => ({
-    innerHTML: item.getElement().innerHTML,
-  }));
-
-  const gridState = {
-    items: itemData,
-    layout: grid._layout,
-    settings: {
-      dragEnabled: grid._settings.dragEnabled,
-      // Add other relevant settings if needed
-    },
-  };
-
-  // Convert the gridState to a JSON string
-  const jsonString = JSON.stringify(gridState, function (key, value) {
-    // Exclude circular references
-    if (key === "_item" || key === "_grid" || key === "_layout") {
-      return undefined;
-    }
-    return value;
-  });
-  fetch('http://localhost:9096/dashboards', {
-      method: 'POST',
-      headers: {
-          "Content-Type": "application/json",
-      },
-      body: JSON.stringify({"metadata": jsonString})
-  })
-  .then(response => response.json())
-  .then(data => {
-      console.log('Success:', data);
-  })
-  .catch((error) => {
-      console.error('Error:', error);
-  });
-});

@@ -13,6 +13,7 @@ import (
 	"html/template"
 	"log"
 	"math"
+	"math/rand"
 	"reflect"
 	"strings"
 	"sync"
@@ -24,6 +25,7 @@ import (
 	"github.com/absmach/magistrala/pkg/transformers/senml"
 	mgsenml "github.com/absmach/senml"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/oklog/ulid/v2"
 	"golang.org/x/exp/slices"
 )
 
@@ -366,11 +368,16 @@ type Service interface {
 	// DeleteInvitation deletes an invitation.
 	DeleteInvitation(token, userID, domainID string) error
 
-	// Dashboards displays the dashboards page.
-	ViewDashboards(token string) ([]byte, error)
-
-	// SaveDashboard saves the dashboard layout for a user.
-	SaveDashboards(token string, dashboard string) error
+	// Create a dashboard for a user.
+	CreateDashboard(token, description, metadata, layout string) ([]byte, error)
+	// View a dashboard for a user.
+	ViewDashboard(token, dashboardID string) ([]byte, error)
+	// List Dashboards retrieves all dashboards for a user.
+	ListDashboards(token string, page, limit uint64) ([]byte, error)
+	// Update a dashboard for a user.
+	UpdateDashboard(token, dashboardID, description, metadata, layout string) ([]byte, error)
+	// Delete a dashboard for a user.
+	DeleteDashboard(token, dashboardID string) error
 }
 
 var _ Service = (*uiService)(nil)
@@ -2357,17 +2364,31 @@ func (us *uiService) DeleteInvitation(token, userID, domainID string) error {
 	return us.sdk.DeleteInvitation(userID, domainID, token)
 }
 
-func (us *uiService) ViewDashboards(token string) ([]byte, error) {
+func (us *uiService) CreateDashboard(token, description, metadata, layout string) ([]byte, error) {
+	var btpl bytes.Buffer
 	charts := CreateItem()
 
 	userID, err := getUserID(token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return btpl.Bytes(), errors.Wrap(ErrFailedRetrieveUserID, err)
 	}
 
-	layout, err := us.drepo.Get(context.Background(), userID)
+	entropy := rand.New(rand.NewSource(time.Now().UnixNano()))
+	ms := ulid.Timestamp(time.Now())
+	dashboardID, err := ulid.New(ms, entropy)
 	if err != nil {
-		layout.Metadata = ""
+		return btpl.Bytes(), errors.Wrap(ErrFailedGenerateID, err)
+	}
+	dashboard := Dashboard{
+		DashboardID: dashboardID.String(),
+		UserID:      userID,
+		Description: description,
+		Metadata:    metadata,
+		Layout:      layout,
+	}
+	err = us.drepo.Create(context.Background(), dashboard)
+	if err != nil {
+		return btpl.Bytes(), errors.Wrap(err, ErrFailedDashboardSave)
 	}
 
 	data := struct {
@@ -2379,10 +2400,9 @@ func (us *uiService) ViewDashboards(token string) ([]byte, error) {
 		dashboardsActive,
 		dashboardsActive,
 		charts,
-		layout.Metadata,
+		layout,
 	}
 
-	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "dashboard", data); err != nil {
 		return []byte{}, errors.Wrap(err, ErrExecTemplate)
 	}
@@ -2390,18 +2410,138 @@ func (us *uiService) ViewDashboards(token string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) SaveDashboards(token string, dashboardMetadata string) error {
+func (us *uiService) ViewDashboard(token, dashboardID string) ([]byte, error) {
+	var btpl bytes.Buffer
+	charts := CreateItem()
+
 	userID, err := getUserID(token)
 	if err != nil {
-		return errors.Wrap(err, ErrFailedRetreive)
+		return btpl.Bytes(), errors.Wrap(ErrFailedRetrieveUserID, err)
 	}
-	ds := Dashboard{
-		UserID:   userID,
-		Metadata: dashboardMetadata,
-	}
-	err = us.drepo.Save(context.Background(), ds)
+
+	dashboard, err := us.drepo.Retrieve(context.Background(), dashboardID, userID)
 	if err != nil {
-		return errors.Wrap(err, ErrFailedDashboardSave)
+		return btpl.Bytes(), errors.Wrap(ErrFailedDashboardRetrieve, err)
+	}
+
+	data := struct {
+		NavbarActive   string
+		CollapseActive string
+		Charts         []Item
+		Layout         string
+	}{
+		dashboardsActive,
+		dashboardsActive,
+		charts,
+		dashboard.Layout,
+	}
+
+	if err := us.tpls.ExecuteTemplate(&btpl, "dashboard", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+
+	return btpl.Bytes(), nil
+}
+
+func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, error) {
+	var btpl bytes.Buffer
+	offset := (page - 1) * limit
+
+	pgm := DashboardPageMeta{
+		Offset: offset,
+		Limit:  limit,
+	}
+
+	userID, err := getUserID(token)
+	if err != nil {
+		return btpl.Bytes(), errors.Wrap(ErrFailedRetrieveUserID, err)
+	}
+
+	dashboardsPage, err := us.drepo.RetrieveAll(context.Background(), userID, pgm)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+	}
+
+	noOfPages := int(math.Ceil(float64(dashboardsPage.Total) / float64(limit)))
+
+	crumbs := []breadcrumb{
+		{Name: dashboardsActive},
+	}
+
+	data := struct {
+		NavbarActive   string
+		CollapseActive string
+		Dashboards     []Dashboard
+		CurrentPage    int
+		Pages          int
+		Limit          int
+		Breadcrumbs    []breadcrumb
+	}{
+		dashboardsActive,
+		dashboardsActive,
+		dashboardsPage.Dashboards,
+		int(page),
+		noOfPages,
+		int(limit),
+		crumbs,
+	}
+
+	if err := us.tpls.ExecuteTemplate(&btpl, "dashboards", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+
+	return btpl.Bytes(), nil
+}
+
+func (us *uiService) UpdateDashboard(token, dashboardID, description, metadata, layout string) ([]byte, error) {
+	var btpl bytes.Buffer
+	charts := CreateItem()
+
+	userID, err := getUserID(token)
+	if err != nil {
+		return btpl.Bytes(), errors.Wrap(ErrFailedRetrieveUserID, err)
+	}
+
+	dashboard := Dashboard{
+		DashboardID: dashboardID,
+		UserID:      userID,
+		Description: description,
+		Metadata:    metadata,
+		Layout:      layout,
+	}
+	err = us.drepo.Update(context.Background(), dashboard)
+	if err != nil {
+		return btpl.Bytes(), errors.Wrap(ErrFailedDashboardUpdate, err)
+	}
+
+	data := struct {
+		NavbarActive   string
+		CollapseActive string
+		Charts         []Item
+		Layout         string
+	}{
+		dashboardsActive,
+		dashboardsActive,
+		charts,
+		layout,
+	}
+
+	if err := us.tpls.ExecuteTemplate(&btpl, "dashboard", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+
+	return btpl.Bytes(), nil
+}
+
+func (us *uiService) DeleteDashboard(token, dashboardID string) error {
+	userID, err := getUserID(token)
+	if err != nil {
+		return errors.Wrap(ErrFailedRetrieveUserID, err)
+	}
+
+	err = us.drepo.Delete(context.Background(), dashboardID, userID)
+	if err != nil {
+		return errors.Wrap(ErrFailedDashboardDelete, err)
 	}
 
 	return nil

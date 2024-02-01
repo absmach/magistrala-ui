@@ -1090,23 +1090,69 @@ func (req listInvitationsReq) validate() error {
 	return nil
 }
 
-type dashboardsReq struct {
-	token string
+type viewDashboardReq struct {
+	token       string
+	DashboardID string `json:"dashboard_id"`
 }
 
-func (req dashboardsReq) validate() error {
+func (req viewDashboardReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
 	return nil
 }
 
-type saveDashboardsReq struct {
-	token    string
-	Metadata string `json:"metadata"`
+type createDashboardReq struct {
+	token       string
+	Description string `json:"description"`
+	Metadata    string `json:"metadata"`
+	Layout      string `json:"layout"`
 }
 
-func (req saveDashboardsReq) validate() error {
+func (req createDashboardReq) validate() error {
+	if req.token == "" {
+		return errAuthorization
+	}
+	return nil
+}
+
+type listDashboardsReq struct {
+	token string
+	page  uint64
+	limit uint64
+}
+
+func (req listDashboardsReq) validate() error {
+	if req.token == "" {
+		return errAuthorization
+	}
+	if req.page == 0 {
+		return errPageSize
+	}
+	return nil
+}
+
+type updateDashboardReq struct {
+	token       string
+	DashboardID string `json:"dashboard_id"`
+	Description string `json:"description"`
+	Metadata    string `json:"metadata"`
+	Layout      string `json:"layout"`
+}
+
+func (req updateDashboardReq) validate() error {
+	if req.token == "" {
+		return errAuthorization
+	}
+	return nil
+}
+
+type deleteDashboardReq struct {
+	token       string
+	DashboardID string `json:"dashboard_id"`
+}
+
+func (req deleteDashboardReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}

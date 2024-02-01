@@ -32,7 +32,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   >
                     Add Widgets
                   </button>
-                  <button type="button" id="postButton" class="btn body-button" onclick="saveCanvas()">
+                  <button type="button" class="btn body-button" onclick="saveCanvas()">
                     Save Layout
                   </button>
                   <button type="button" class="btn body-button" onclick="cancelEdit()">
@@ -107,7 +107,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       <script src="https://cdn.jsdelivr.net/npm/muuri@0.9.5/dist/muuri.min.js"></script>
       <script src="/js/dashboards.js"></script>
       <script>
-        var grid = initGrid('{{ .Layout }}');
+        var grid = initGrid();
 
         function addWidget(widgetID, widgetScript) {
           // Create a new grid item

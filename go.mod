@@ -45,6 +45,7 @@ require (
 	github.com/mainflux/export v0.1.1-0.20230724124847-67d0bc7f38cb // indirect
 	github.com/mainflux/mainflux v0.12.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
+	github.com/oklog/ulid/v2 v2.1.0
 	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_model v0.5.0 // indirect

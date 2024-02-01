@@ -25,6 +25,8 @@ var (
 	ErrMalformedEntity = errors.New("malformed entity specification")
 	ErrViewEntity      = errors.New("view entity failed")
 	ErrNotFound        = errors.New("entity not found")
+	ErrJSONMarshal     = errors.New("failed to marshal entity to json")
+	ErrJSONUnmarshal   = errors.New("failed to unmarshal entity from json")
 )
 
 func HandleError(err, wrapper error) error {
