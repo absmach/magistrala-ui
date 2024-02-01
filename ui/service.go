@@ -28,7 +28,8 @@ import (
 )
 
 const (
-	templateDir             = "ui/web/templates"
+	templatesDir             = "ui/web/templates"
+	chartTemplatesDir        = "ui/web/templates/charts"
 	enabled                 = "enabled"
 	statePending            = "pending"
 	statusAll               = "all"
@@ -125,8 +126,10 @@ var (
 		"invitations",
 
 		"dashboard",
+	}
 
-		// Modals
+	chartTemplates = []string{
+
 		"linechartmodal",
 		"gaugemodal",
 		"barchartmodal",
@@ -138,6 +141,7 @@ var (
 		"arealinechartmodal",
 		"horizontalbarchartmodal",
 	}
+
 	ErrToken                = errors.New("failed to create token")
 	ErrTokenRefresh         = errors.New("failed to refresh token")
 	ErrFailedCreate         = errors.New("failed to create entity")
@@ -2451,7 +2455,10 @@ func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, 
 
 	var tmplFiles []string
 	for _, value := range templates {
-		tmplFiles = append(tmplFiles, templateDir+"/"+value+".html")
+		tmplFiles = append(tmplFiles, templatesDir+"/"+value+".html")
+	}
+	for _, value := range chartTemplates{
+		tmplFiles = append(tmplFiles, chartTemplatesDir+"/"+value+".html")
 	}
 	tpl, err = tpl.ParseFiles(tmplFiles...)
 	if err != nil {
