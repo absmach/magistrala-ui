@@ -37,6 +37,7 @@ const (
 	statusAll               = "all"
 	homepageActive          = "homepage"
 	dashboardsActive        = "dashboards"
+	dashboardActive         = "dashboard"
 	usersActive             = "users"
 	userActive              = "user"
 	thingsActive            = "things"
@@ -128,6 +129,7 @@ var (
 		"invitations",
 
 		"dashboard",
+		"dashboards",
 	}
 
 	chartTemplates = []string{
@@ -2044,6 +2046,23 @@ func (us *uiService) GetEntities(token, entity, entityName, domainID, permission
 			return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 		}
 		items["data"] = domains.Domains
+	case "dashboards":
+		type Dashboard struct {
+			ID          int
+			Name        string
+			Description string
+		}
+
+		// Dummy data for dashboards (replace with your actual data retrieval logic)
+		dashboards := make([]Dashboard, 0)
+		for i := 1; i <= 28; i++ {
+			dashboards = append(dashboards, Dashboard{
+				ID:          i,
+				Name:        fmt.Sprintf("Dashboard %d", i),
+				Description: fmt.Sprintf("Description for Dashboard %d", i),
+			})
+		}
+		items["data"] = dashboards
 	}
 
 	jsonData, err := json.Marshal(items)

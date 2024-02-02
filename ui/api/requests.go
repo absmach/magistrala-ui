@@ -1159,3 +1159,14 @@ func (req deleteDashboardReq) validate() error {
 	}
 	return nil
 }
+
+type viewDashboardReq struct {
+	token string
+}
+
+func (req viewDashboardReq) validate() error {
+	if req.token == "" {
+		return errAuthorization
+	}
+	return nil
+}

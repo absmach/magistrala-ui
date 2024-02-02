@@ -1,0 +1,131 @@
+<!-- Copyright (c) Abstract Machines
+SPDX-License-Identifier: Apache-2.0 -->
+
+{{ define "dashboards" }}
+  <!doctype html>
+  <html lang="en">
+    <head>
+      {{ template "header" }}
+      <title>Dashboards</title>
+    </head>
+    <style>
+      .card {
+        transition: all 0.3s;
+      }
+      .card:hover {
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        transform: scale(1.02);
+      }
+
+      .card-actions {
+        margin: 8px;
+        padding: 16px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .card-link {
+        text-decoration: none !important;
+        color: #1d2231;
+      }
+    </style>
+    <body>
+      {{ template "navbar" . }}
+      <div class="main-content pt-3">
+        <div class="container">
+          <div class="row">
+            <div class="col-lg-12 mx-auto py-3">
+              <div class="row-mb-3">
+                <a class="btn body-button" type="button" href="/dashboard">New Dashboard</a>
+              </div>
+              <div class="row" id="dashboard-cards-container"></div>
+              <div id="dashboard-loader" class="row justify-content-center">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+              <div class="card-actions">
+                <span>
+                  Showing
+                  <span id="cards-count"></span>
+                  of
+                  <span id="cards-total"></span>
+                  cards
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <script>
+        const cardsRow = document.getElementById("dashboard-cards-container");
+        const cardCountElem = document.getElementById("cards-count");
+        const cardTotalElem = document.getElementById("cards-total");
+        const cardLimit = 200;
+        cardTotalElem.innerHTML = cardLimit;
+        const cardIncrease = 28;
+        const pageCount = Math.ceil(cardLimit / cardIncrease);
+        let currentPage = 1;
+
+        const addCards = (pageIndex) => {
+          currentPage = pageIndex;
+          const endRange = currentPage == pageCount ? cardLimit : pageIndex * cardIncrease;
+          cardCountElem.innerHTML = endRange;
+
+          fetch(`/entities?item=dashboards`, {
+            method: "GET",
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              createCard(data);
+            })
+            .catch((error) => console.error("Error:", error));
+        };
+
+        window.onload = () => {
+          addCards(currentPage);
+        };
+
+        function createCard(data) {
+          setTimeout(() => {
+            data.data.forEach((dashboard) => {
+              const newDiv = document.createElement("div");
+              newDiv.className = "col-12 col-md-6 col-lg-4 mb-3";
+              newDiv.innerHTML = `
+                <a href="/dashboard" class="card-link">
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">${dashboard.Name}</h5>
+                      <h6 class="card-subtitle mb-2 text-body-secondary">${dashboard.ID}</h6>
+                      <p class="card-text">
+                        ${dashboard.Description}
+                      </p>
+                    </div>
+                  </div>
+                </a>`;
+              cardsRow.appendChild(newDiv);
+            });
+          }, 1000);
+        }
+
+        const handleInfiniteScroll = () => {
+          let { clientHeight, scrollHeight, scrollTop } = document.documentElement;
+          if (clientHeight + scrollTop + 1 >= scrollHeight) {
+            addCards(currentPage + 1);
+          }
+          if (currentPage === pageCount) {
+            removeInfiniteScroll();
+          }
+        };
+
+        window.addEventListener("scroll", handleInfiniteScroll);
+
+        const removeInfiniteScroll = () => {
+          document.getElementById("dashboard-loader").remove();
+          window.removeEventListener("scroll", handleInfiniteScroll);
+        };
+      </script>
+    </body>
+  </html>
+{{ end }}

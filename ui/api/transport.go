@@ -814,20 +814,6 @@ func decodeIndexRequest(_ context.Context, r *http.Request) (interface{}, error)
 	return req, nil
 }
 
-func decodeViewDashboardRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-
-	req := viewDashboardReq{
-		token: token,
-		ID:    chi.URLParam(r, "id"),
-	}
-
-	return req, nil
-}
-
 func decodeCreateDashboardRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	token, err := tokenFromCookie(r, "token")
 	if err != nil {
@@ -908,6 +894,18 @@ func decodeDeleteDashboardRequest(_ context.Context, r *http.Request) (interface
 	req := deleteDashboardReq{
 		token: token,
 		ID:    data.ID,
+	}
+
+	return req, nil
+}
+
+func decodeViewDashboardRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+	req := viewDashboardReq{
+		token: token,
 	}
 
 	return req, nil
