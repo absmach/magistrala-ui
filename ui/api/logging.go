@@ -1660,10 +1660,10 @@ func (lm *loggingMiddleware) ViewDashboard(token, dashboardID string) (b []byte,
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Warn("View dashboards failed to complete successfully", args...)
+			lm.logger.Warn("View dashboard failed to complete successfully", args...)
 			return
 		}
-		lm.logger.Info("View dashboards completed successfully", args...)
+		lm.logger.Info("View dashboard completed successfully", args...)
 	}(time.Now())
 
 	return lm.svc.ViewDashboard(token, dashboardID)
@@ -1679,10 +1679,10 @@ func (lm *loggingMiddleware) CreateDashboard(token, dashboardName, description, 
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Warn("Save dashboards failed to complete successfully", args...)
+			lm.logger.Warn("Create dashboard failed to complete successfully", args...)
 			return
 		}
-		lm.logger.Info("Save dashboards completed successfully", args...)
+		lm.logger.Info("Create dashboard completed successfully", args...)
 	}(time.Now())
 
 	return lm.svc.CreateDashboard(token, dashboardName, description, metadata, layout)
@@ -1693,7 +1693,6 @@ func (lm *loggingMiddleware) ListDashboards(token string, page, limit uint64) (b
 	defer func(begin time.Time) {
 		args := []interface{}{
 			slog.String("duration", time.Since(begin).String()),
-			slog.String("token", token),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
@@ -1707,7 +1706,7 @@ func (lm *loggingMiddleware) ListDashboards(token string, page, limit uint64) (b
 }
 
 // Update Dashboard adds logging middleware to update dashboard method.
-func (lm *loggingMiddleware) UpdateDashboard(token, dashboardID, dashboardName, description, metadata, layout string) (b []byte, err error) {
+func (lm *loggingMiddleware) UpdateDashboard(token, dashboardID, dashboardName, description, metadata, layout string) (err error) {
 	defer func(begin time.Time) {
 		args := []interface{}{
 			slog.String("duration", time.Since(begin).String()),
@@ -1717,10 +1716,10 @@ func (lm *loggingMiddleware) UpdateDashboard(token, dashboardID, dashboardName, 
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Warn("Update dashboards failed to complete successfully", args...)
+			lm.logger.Warn("Update dashboard failed to complete successfully", args...)
 			return
 		}
-		lm.logger.Info("Update dashboards completed successfully", args...)
+		lm.logger.Info("Update dashboard completed successfully", args...)
 	}(time.Now())
 
 	return lm.svc.UpdateDashboard(token, dashboardID, dashboardName, description, metadata, layout)

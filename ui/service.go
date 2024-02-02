@@ -381,7 +381,7 @@ type Service interface {
 	// List Dashboards retrieves all dashboards for a user.
 	ListDashboards(token string, page, limit uint64) ([]byte, error)
 	// Update a dashboard for a user.
-	UpdateDashboard(token, dashboardID, dashboardName, description, metadata, layout string) ([]byte, error)
+	UpdateDashboard(token, dashboardID, dashboardName, description, metadata, layout string) error
 	// Delete a dashboard for a user.
 	DeleteDashboard(token, dashboardID string) error
 }
@@ -2393,8 +2393,7 @@ func (us *uiService) CreateDashboard(token, dashboardName, description, metadata
 		Metadata:      metadata,
 		Layout:        layout,
 	}
-	err = us.drepo.Create(context.Background(), dashboard)
-	if err != nil {
+	if err = us.drepo.Create(context.Background(), dashboard); err != nil {
 		return btpl.Bytes(), errors.Wrap(err, ErrFailedDashboardSave)
 	}
 
@@ -2402,12 +2401,12 @@ func (us *uiService) CreateDashboard(token, dashboardName, description, metadata
 		NavbarActive   string
 		CollapseActive string
 		Charts         []Item
-		Layout         string
+		Dashboard      Dashboard
 	}{
 		dashboardsActive,
 		dashboardsActive,
 		charts,
-		layout,
+		dashboard,
 	}
 
 	if err := us.tpls.ExecuteTemplate(&btpl, "dashboard", data); err != nil {
@@ -2435,12 +2434,12 @@ func (us *uiService) ViewDashboard(token, dashboardID string) ([]byte, error) {
 		NavbarActive   string
 		CollapseActive string
 		Charts         []Item
-		Layout         string
+		Dashboard      Dashboard
 	}{
 		dashboardsActive,
 		dashboardsActive,
 		charts,
-		dashboard.Layout,
+		dashboard,
 	}
 
 	if err := us.tpls.ExecuteTemplate(&btpl, "dashboard", data); err != nil {
@@ -2451,8 +2450,6 @@ func (us *uiService) ViewDashboard(token, dashboardID string) ([]byte, error) {
 }
 
 func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, error) {
-	var btpl bytes.Buffer
-	charts := CreateItem()
 	offset := (page - 1) * limit
 
 	pgm := DashboardPageMeta{
@@ -2462,7 +2459,7 @@ func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, e
 
 	userID, err := getUserID(token)
 	if err != nil {
-		return btpl.Bytes(), errors.Wrap(ErrFailedRetrieveUserID, err)
+		return []byte{}, errors.Wrap(ErrFailedRetrieveUserID, err)
 	}
 
 	dashboardsPage, err := us.drepo.RetrieveAll(context.Background(), userID, pgm)
@@ -2470,46 +2467,20 @@ func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, e
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	noOfPages := int(math.Ceil(float64(dashboardsPage.Total) / float64(limit)))
-
-	crumbs := []breadcrumb{
-		{Name: dashboardsActive},
+	items := make(map[string]interface{})
+	items["data"] = dashboardsPage.Dashboards
+	jsonData, err := json.Marshal(items)
+	if err != nil {
+		return []byte{}, err
 	}
 
-	data := struct {
-		NavbarActive   string
-		CollapseActive string
-		Charts         []Item
-		Dashboards     []Dashboard
-		CurrentPage    int
-		Pages          int
-		Limit          int
-		Breadcrumbs    []breadcrumb
-	}{
-		dashboardsActive,
-		dashboardsActive,
-		charts,
-		dashboardsPage.Dashboards,
-		int(page),
-		noOfPages,
-		int(limit),
-		crumbs,
-	}
-
-	if err := us.tpls.ExecuteTemplate(&btpl, "dashboard", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
-	}
-
-	return btpl.Bytes(), nil
+	return jsonData, nil
 }
 
-func (us *uiService) UpdateDashboard(token, dashboardID, dashboardName, description, metadata, layout string) ([]byte, error) {
-	var btpl bytes.Buffer
-	charts := CreateItem()
-
+func (us *uiService) UpdateDashboard(token, dashboardID, dashboardName, description, metadata, layout string) error {
 	userID, err := getUserID(token)
 	if err != nil {
-		return btpl.Bytes(), errors.Wrap(ErrFailedRetrieveUserID, err)
+		return errors.Wrap(ErrFailedRetrieveUserID, err)
 	}
 
 	dashboard := Dashboard{
@@ -2520,28 +2491,12 @@ func (us *uiService) UpdateDashboard(token, dashboardID, dashboardName, descript
 		Metadata:      metadata,
 		Layout:        layout,
 	}
-	err = us.drepo.Update(context.Background(), dashboard)
-	if err != nil {
-		return btpl.Bytes(), errors.Wrap(ErrFailedDashboardUpdate, err)
+
+	if err = us.drepo.Update(context.Background(), dashboard); err != nil {
+		return errors.Wrap(ErrFailedDashboardUpdate, err)
 	}
 
-	data := struct {
-		NavbarActive   string
-		CollapseActive string
-		Charts         []Item
-		Layout         string
-	}{
-		dashboardsActive,
-		dashboardsActive,
-		charts,
-		layout,
-	}
-
-	if err := us.tpls.ExecuteTemplate(&btpl, "dashboard", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
-	}
-
-	return btpl.Bytes(), nil
+	return nil
 }
 
 func (us *uiService) DeleteDashboard(token, dashboardID string) error {
@@ -2550,8 +2505,7 @@ func (us *uiService) DeleteDashboard(token, dashboardID string) error {
 		return errors.Wrap(ErrFailedRetrieveUserID, err)
 	}
 
-	err = us.drepo.Delete(context.Background(), dashboardID, userID)
-	if err != nil {
+	if err = us.drepo.Delete(context.Background(), dashboardID, userID); err != nil {
 		return errors.Wrap(ErrFailedDashboardDelete, err)
 	}
 

@@ -2064,8 +2064,9 @@ func listDashboardsEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			html:    res,
+			code:    http.StatusOK,
+			headers: map[string]string{"Content-Type": jsonContentType},
 		}, nil
 	}
 }
@@ -2077,14 +2078,12 @@ func updateDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.UpdateDashboard(req.token, req.DashboardID, req.DashboardName, req.Description, req.Metadata, req.Layout)
-		if err != nil {
+		if err := svc.UpdateDashboard(req.token, req.DashboardID, req.DashboardName, req.Description, req.Metadata, req.Layout); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
 			code: http.StatusOK,
-			html: res,
 		}, nil
 	}
 }
