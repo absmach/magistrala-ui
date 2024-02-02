@@ -1,0 +1,252 @@
+<!-- Copyright (c) Abstract Machines
+SPDX-License-Identifier: Apache-2.0 -->
+
+{{ define "dynamicdatachartmodal" }}
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="dynamicDataChartModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="dynamicDataChartModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="dynamicDataChartModalLabel">Dynamic Data chart</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <form id="create-dynamicDataChart-form">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="title" class="form-label">Title</label>
+              <input
+                type="text"
+                class="form-control"
+                name="title"
+                id="title"
+                placeholder="Enter the chart title"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="channel-id" class="form-label">Channel ID</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="channel"
+                id="channel-id"
+                placeholder="Enter channel ID"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="x-axis" class="form-label">Select x-axis Type</label>
+              <select class="form-select mb-3" name="xAxisType" id="x-axis">
+                <option value="" disabled>Select x-axis Type</option>
+                <option value="value">Value</option>
+                <option value="category">Category</option>
+                <option value="time">Time</option>
+                <option value="log">Log</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="y-axis" class="form-label">Select y-axis Type</label>
+              <select class="form-select mb-3" name="yAxisType" id="y-axis">
+                <option value="" disabled>Select y-axis Type</option>
+                <option value="value">Value</option>
+                <option value="category">Category</option>
+                <option value="time">Time</option>
+                <option value="log">Log</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button
+              type="button"
+              class="btn body-button"
+              id="create-dynamicDataChart-button"
+              data-bs-dismiss="modal"
+            >
+              Create Chart
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+    // horizontal bar chart form
+    document
+      .getElementById("create-dynamicDataChart-button")
+      .addEventListener("click", function () {
+        var form = document.getElementById("create-dynamicDataChart-form");
+        // Create an object to store the form data
+        var formData = {};
+
+        // Serialize the form data into the object
+        for (var i = 0; i < form.elements.length; i++) {
+          var e = form.elements[i];
+          if (e.type !== "submit" && e.type !== "button") {
+            formData[e.name] = e.value;
+          }
+        }
+        form.reset();
+
+        var widgetID = "dynamicDatachart-" + Date.now();
+        var widgetScript = `
+        var dynamicDataChart = echarts.init(document.getElementById("${widgetID}"), null, {
+                width: 600,
+                height: 600,
+                });
+                var app = {};
+                var categories = (function () {
+                    let now = new Date();
+                    let res = [];
+                    let len = 10;
+                    while (len--) {
+                        res.unshift(now.toLocaleTimeString().replace(/^\D*/, ''));
+                        now = new Date(+now - 2000);
+                    }
+                    return res;
+                })();
+                var categories2 = (function () {
+                    let res = [];
+                    let len = 10;
+                    while (len--) {
+                        res.push(10 - len - 1);
+                    }
+                    return res;
+                })();
+                var data = (function () {
+                    
+                    let res = [];
+                    let len = 10;
+                    while (len--) {
+                        res.push(Math.round(Math.random() * 1000));
+                    }
+                    return res;
+                })();
+                var data2 = (function () {
+                    let res = [];
+                    let len = 0;
+                    while (len < 10) {
+                        res.push(+(Math.random() * 10 + 5).toFixed(1));
+                        len++;
+                    }
+                    return res;
+                })();
+                var option = {
+                    title: {
+                        text: 'Dynamic Data'
+                    },
+                    tooltip: {
+                        trigger: 'axis',
+                        axisPointer: {
+                                type: 'cross',
+                            label: {
+                                backgroundColor: '#283b56'
+                            }
+                    }
+                    },
+                    legend: {},
+                    toolbox: {
+                        show: true,
+                    feature: {
+                        dataView: { readOnly: false },
+                        restore: {},
+                        saveAsImage: {}
+                    }
+                    },
+                    dataZoom: {
+                        show: false,
+                        start: 0,
+                        end: 100
+                    },
+                    xAxis: [
+                        {
+                            type: 'category',
+                            boundaryGap: true,
+                            data: categories
+                        },
+                        {
+                            type: 'category',
+                            boundaryGap: true,
+                            data: categories2
+                        }
+                    ],
+                    yAxis: [
+                        {
+                            type: 'value',
+                            scale: true,
+                            name: 'Price',
+                            max: 30,
+                            min: 0,
+                            boundaryGap: [0.2, 0.2]
+                        },
+                        {
+                            type: 'value',
+                            scale: true,
+                            name: 'Order',
+                            max: 1200,
+                            min: 0,
+                            boundaryGap: [0.2, 0.2]
+                        }
+                    ],
+                    series: [
+                        {
+                            name: 'Dynamic Bar',
+                            type: 'bar',
+                            xAxisIndex: 1,
+                            yAxisIndex: 1,
+                            data: data
+                        },
+                        {
+                            name: 'Dynamic Line',
+                            type: 'line',
+                            data: data2
+                        }
+                    ]
+                };
+                app.count = 11;
+                setInterval(function () {
+                    let axisData = new Date().toLocaleTimeString().replace(/^\D*/, '');
+                    data.shift();
+                    data.push(Math.round(Math.random() * 1000));
+                    data2.shift();
+                    data2.push(+(Math.random() * 10 + 5).toFixed(1));
+                    categories.shift();
+                    categories.push(axisData);
+                    categories2.shift();
+                    categories2.push(app.count++);
+                    dynamicDataChart.setOption({
+                        xAxis: [
+                            {
+                                data: categories
+                            },
+                            {
+                                data: categories2
+                            }
+                        ],
+                        series: [
+                            {
+                                data: data
+                            },
+                            {
+                                data: data2
+                            }
+                        ]
+                    });
+                }, 2100);
+
+                dynamicDataChart.setOption(option);`;
+
+        addWidget(widgetID, widgetScript);
+      });
+  </script>
+{{ end }}
