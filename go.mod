@@ -3,7 +3,7 @@ module github.com/absmach/magistrala-ui
 go 1.21.5
 
 require (
-	github.com/absmach/agent v0.0.0-20240112151723-2e9676fadd46
+	github.com/absmach/agent v0.0.0-20240202075640-cc619e6685c8
 	github.com/absmach/magistrala v0.14.0
 	github.com/absmach/senml v1.0.5
 	github.com/caarlos0/env/v9 v9.0.0
