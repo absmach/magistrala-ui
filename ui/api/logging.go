@@ -285,24 +285,6 @@ func (lm *loggingMiddleware) UpdateUserIdentity(token string, user sdk.User) (er
 	return lm.svc.UpdateUserIdentity(token, user)
 }
 
-// UpdateUserOwner adds logging middleware to update user owner method.
-func (lm *loggingMiddleware) UpdateUserOwner(token string, user sdk.User) (err error) {
-	defer func(begin time.Time) {
-		args := []any{
-			slog.String("duration", time.Since(begin).String()),
-			slog.Group("user", slog.String("id", user.ID), slog.String("owner", user.Owner)),
-		}
-		if err != nil {
-			args = append(args, slog.Any("error", err))
-			lm.logger.Warn("Update user owner failed to complete successfully", args...)
-			return
-		}
-		lm.logger.Info("Update user owner completed successfully", args...)
-	}(time.Now())
-
-	return lm.svc.UpdateUserOwner(token, user)
-}
-
 // UpdateUserRole adds logging middleware to update user role method.
 func (lm *loggingMiddleware) UpdateUserRole(token string, user sdk.User) (err error) {
 	defer func(begin time.Time) {

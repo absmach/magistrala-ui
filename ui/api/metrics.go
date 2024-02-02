@@ -199,16 +199,6 @@ func (mm *metricsMiddleware) UpdateUserIdentity(token string, user sdk.User) err
 	return mm.svc.UpdateUserIdentity(token, user)
 }
 
-// UpdateUserOwner adds metrics middleware to update user owner method.
-func (mm *metricsMiddleware) UpdateUserOwner(token string, user sdk.User) error {
-	defer func(begin time.Time) {
-		mm.counter.With("method", "update_user_owner").Add(1)
-		mm.latency.With("method", "update_user_owner").Observe(time.Since(begin).Seconds())
-	}(time.Now())
-
-	return mm.svc.UpdateUserOwner(token, user)
-}
-
 // UpdateUserRole adds metrics middleware to update user role method.
 func (mm *metricsMiddleware) UpdateUserRole(token string, user sdk.User) error {
 	defer func(begin time.Time) {
