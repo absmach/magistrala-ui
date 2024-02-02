@@ -129,6 +129,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           newItem.appendChild(scriptTag);
 
           grid.add(newItem);
+          resizeObserver.observe(newItem);
         }
 
         function removeGridItem(item) {
