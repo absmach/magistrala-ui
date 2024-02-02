@@ -63,7 +63,7 @@ func (r *repo) Retrieve(ctx context.Context, dashboardID, userID string) (ui.Das
 
 // Retrieve all dashboards for a user using a user id.
 func (r *repo) RetrieveAll(ctx context.Context, userID string, page ui.DashboardPageMeta) (ui.DashboardPage, error) {
-	q := `SELECT dashboard_id, user_id,dashboard_name, description, metadata, layout FROM dashboards WHERE user_id = :user_id`
+	q := `SELECT dashboard_id, user_id, dashboard_name, description, metadata, layout FROM dashboards WHERE user_id = :user_id`
 
 	tmp := ui.Dashboard{
 		UserID: userID,
@@ -86,10 +86,10 @@ func (r *repo) RetrieveAll(ctx context.Context, userID string, page ui.Dashboard
 		}
 		dashboards = append(dashboards, ds)
 	}
-	cq := `SELECT COUNT(*) FROM dashboards WHERE user_id = :user_id`
+	cq := `SELECT COUNT(*) FROM dashboards WHERE user_id = $1`
 	var total uint64
-	if err := r.db.GetContext(ctx, &total, cq, tmp); err != nil {
-		return ui.DashboardPage{}, HandleError(err, ErrViewEntity)
+	if err := r.db.GetContext(ctx, &total, cq, tmp.UserID); err != nil {
+		return ui.DashboardPage{}, HandleError(err, errors.New("felix"))
 	}
 
 	return ui.DashboardPage{

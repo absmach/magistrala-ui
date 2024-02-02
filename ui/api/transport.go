@@ -2490,7 +2490,11 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		errors.Contains(err, ui.ErrExecTemplate),
 		errors.Contains(err, ui.ErrFailedDelete),
 		errors.Contains(err, ui.ErrFailedShare),
-		errors.Contains(err, ui.ErrFailedUnshare):
+		errors.Contains(err, ui.ErrFailedUnshare),
+		errors.Contains(err, ui.ErrFailedDashboardSave),
+		errors.Contains(err, ui.ErrFailedDashboardDelete),
+		errors.Contains(err, ui.ErrFailedDashboardUpdate),
+		errors.Contains(err, ui.ErrFailedDashboardRetrieve):
 		w.Header().Set("Location", "/error?error="+url.QueryEscape(displayError.Error()))
 		w.WriteHeader(http.StatusSeeOther)
 	default:

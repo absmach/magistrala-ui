@@ -145,34 +145,39 @@ var (
 		"dynamicdatachartmodal",
 	}
 
-	ErrToken                = errors.New("failed to create token")
-	ErrTokenRefresh         = errors.New("failed to refresh token")
-	ErrFailedCreate         = errors.New("failed to create entity")
-	ErrFailedRetreive       = errors.New("failed to retrieve entity")
-	ErrFailedUpdate         = errors.New("failed to update entity")
-	ErrFailedEnable         = errors.New("failed to enable entity")
-	ErrFailedDisable        = errors.New("failed to disable entity")
-	ErrFailedAssign         = errors.New("failed to assign entity")
-	ErrFailedUnassign       = errors.New("failed to unassign entity")
-	ErrFailedConnect        = errors.New("failed to connect entity")
-	ErrFailedDisconnect     = errors.New("failed to disconnect entity")
-	ErrFailedCreatePolicy   = errors.New("failed to create policy")
-	ErrFailedUpdatePolicy   = errors.New("failed to update policy")
-	ErrFailedDeletePolicy   = errors.New("failed to delete policy")
-	ErrExecTemplate         = errors.New("failed to execute template")
-	ErrFailedReset          = errors.New("failed to reset password")
-	ErrFailedUpdatePassword = errors.New("failed to update password")
-	ErrFailedResetRequest   = errors.New("failed to send reset request email")
-	ErrFailedPublish        = errors.New("failed to publish message")
-	ErrFailedDelete         = errors.New("failed to delete entity")
-	ErrFailedShare          = errors.New("failed to share entity")
-	ErrFailedUnshare        = errors.New("failed to unshare entity")
-	ErrFailedViewDashboard  = errors.New("failed to view dashboard")
-	ErrFailedDashboardSave  = errors.New("failed to save dashboard")
-	emptyData               = struct{}{}
-	groupRelations          = []string{"administrator", "editor", "viewer", "member"}
-	thingRelations          = []string{"administrator"}
-	statusOptions           = []string{"all", "enabled", "disabled"}
+	ErrToken                   = errors.New("failed to create token")
+	ErrTokenRefresh            = errors.New("failed to refresh token")
+	ErrFailedCreate            = errors.New("failed to create entity")
+	ErrFailedRetreive          = errors.New("failed to retrieve entity")
+	ErrFailedUpdate            = errors.New("failed to update entity")
+	ErrFailedEnable            = errors.New("failed to enable entity")
+	ErrFailedDisable           = errors.New("failed to disable entity")
+	ErrFailedAssign            = errors.New("failed to assign entity")
+	ErrFailedUnassign          = errors.New("failed to unassign entity")
+	ErrFailedConnect           = errors.New("failed to connect entity")
+	ErrFailedDisconnect        = errors.New("failed to disconnect entity")
+	ErrFailedCreatePolicy      = errors.New("failed to create policy")
+	ErrFailedUpdatePolicy      = errors.New("failed to update policy")
+	ErrFailedDeletePolicy      = errors.New("failed to delete policy")
+	ErrExecTemplate            = errors.New("failed to execute template")
+	ErrFailedReset             = errors.New("failed to reset password")
+	ErrFailedUpdatePassword    = errors.New("failed to update password")
+	ErrFailedResetRequest      = errors.New("failed to send reset request email")
+	ErrFailedPublish           = errors.New("failed to publish message")
+	ErrFailedDelete            = errors.New("failed to delete entity")
+	ErrFailedShare             = errors.New("failed to share entity")
+	ErrFailedUnshare           = errors.New("failed to unshare entity")
+	ErrFailedViewDashboard     = errors.New("failed to view dashboard")
+	ErrFailedDashboardSave     = errors.New("failed to save dashboard")
+	ErrFailedRetrieveUserID    = errors.New("failed to retrieve user id")
+	ErrFailedGenerateID        = errors.New("failed to generate id")
+	ErrFailedDashboardRetrieve = errors.New("failed to retrieve dashboard")
+	ErrFailedDashboardUpdate   = errors.New("failed to update dashboard")
+	ErrFailedDashboardDelete   = errors.New("failed to delete dashboard")
+	emptyData                  = struct{}{}
+	groupRelations             = []string{"administrator", "editor", "viewer", "member"}
+	thingRelations             = []string{"administrator"}
+	statusOptions              = []string{"all", "enabled", "disabled"}
 )
 
 // Service specifies service API.
@@ -2447,6 +2452,7 @@ func (us *uiService) ViewDashboard(token, dashboardID string) ([]byte, error) {
 
 func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, error) {
 	var btpl bytes.Buffer
+	charts := CreateItem()
 	offset := (page - 1) * limit
 
 	pgm := DashboardPageMeta{
@@ -2473,6 +2479,7 @@ func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, e
 	data := struct {
 		NavbarActive   string
 		CollapseActive string
+		Charts         []Item
 		Dashboards     []Dashboard
 		CurrentPage    int
 		Pages          int
@@ -2481,6 +2488,7 @@ func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, e
 	}{
 		dashboardsActive,
 		dashboardsActive,
+		charts,
 		dashboardsPage.Dashboards,
 		int(page),
 		noOfPages,
@@ -2488,7 +2496,7 @@ func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, e
 		crumbs,
 	}
 
-	if err := us.tpls.ExecuteTemplate(&btpl, "dashboards", data); err != nil {
+	if err := us.tpls.ExecuteTemplate(&btpl, "dashboard", data); err != nil {
 		return []byte{}, errors.Wrap(err, ErrExecTemplate)
 	}
 
