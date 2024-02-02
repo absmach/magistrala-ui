@@ -20,7 +20,9 @@ function initGrid() {
 
 function saveLayout() {
   const itemData = grid.getItems().map((item) => ({
-    innerHTML: item.getElement().innerHTML,
+    innerHTML: item._element.innerHTML,
+    widgetID: item._element.children[1].children[0].id,
+    widgetScript: item._element.children[2].innerHTML,
   }));
 
   const gridState = {
@@ -63,6 +65,11 @@ function loadLayout(savedLayout) {
       const newItem = document.createElement("div");
       newItem.className = "item";
       newItem.innerHTML = itemData.innerHTML.trim();
+      var scriptTag = document.createElement("script");
+      scriptTag.type = "text/javascript";
+      scriptTag.defer = true;
+      scriptTag.innerHTML = itemData.widgetScript;
+      newItem.appendChild(scriptTag);
       const item = grid.add(newItem);
     });
 
@@ -92,6 +99,11 @@ function editGrid(grid) {
         const newItem = document.createElement("div");
         newItem.className = "item";
         newItem.innerHTML = itemData.innerHTML.trim();
+        var scriptTag = document.createElement("script");
+        scriptTag.type = "text/javascript";
+        scriptTag.defer = true;
+        scriptTag.innerHTML = itemData.widgetScript;
+        newItem.appendChild(scriptTag);
         const item = grid.add(newItem);
       });
       grid.layout(gridState.layout);
