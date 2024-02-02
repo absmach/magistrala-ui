@@ -98,50 +98,47 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var widgetID = "donut-" + Date.now();
       var widgetScript = `
-      var donut = echarts.init(document.getElementById("${widgetID}"), null, {
-              width: 500,
-              height: 200,
-            });
-            var option = {
-                tooltip: {
-                  trigger: 'item'
+        var donut = echarts.init(document.getElementById("${widgetID}"));
+        var option = {
+            tooltip: {
+              trigger: 'item'
+            },
+            legend: {
+              top: '5%',
+              left: 'center'
+            },
+            series: [
+              {
+                name: 'Access From',
+                type: 'pie',
+                radius: ['40%', '70%'],
+                avoidLabelOverlap: false,
+                label: {
+                  show: false,
+                  position: 'center'
                 },
-                legend: {
-                  top: '5%',
-                  left: 'center'
-                },
-                series: [
-                  {
-                    name: 'Access From',
-                    type: 'pie',
-                    radius: ['40%', '70%'],
-                    avoidLabelOverlap: false,
-                    label: {
-                      show: false,
-                      position: 'center'
-                    },
-                    emphasis: {
-                      label: {
-                        show: true,
-                        fontSize: 40,
-                        fontWeight: 'bold'
-                      }
-                    },
-                    labelLine: {
-                      show: false
-                    },
-                    data: [
-                      { value: 1048, name: 'Thing1' },
-                      { value: 735, name: 'Thing2' },
-                      { value: 580, name: 'Thing3' },
-                      { value: 484, name: 'Thing4' },
-                      { value: 300, name: 'Thing5' }
-                    ]
+                emphasis: {
+                  label: {
+                    show: true,
+                    fontSize: 40,
+                    fontWeight: 'bold'
                   }
+                },
+                labelLine: {
+                  show: false
+                },
+                data: [
+                  { value: 1048, name: 'Thing1' },
+                  { value: 735, name: 'Thing2' },
+                  { value: 580, name: 'Thing3' },
+                  { value: 484, name: 'Thing4' },
+                  { value: 300, name: 'Thing5' }
                 ]
-            };
+              }
+            ]
+        };
 
-            donut.setOption(option);`;
+        donut.setOption(option);`;
 
       addWidget(widgetID, widgetScript);
     });

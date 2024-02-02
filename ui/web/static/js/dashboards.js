@@ -98,6 +98,7 @@ function editGrid(grid) {
       gridState.items.forEach((itemData) => {
         const newItem = document.createElement("div");
         newItem.className = "item";
+        newItem.classList.add("item-editable");
         newItem.innerHTML = itemData.innerHTML.trim();
         var scriptTag = document.createElement("script");
         scriptTag.type = "text/javascript";
@@ -105,6 +106,8 @@ function editGrid(grid) {
         scriptTag.innerHTML = itemData.widgetScript;
         newItem.appendChild(scriptTag);
         const item = grid.add(newItem);
+        var widgetID = itemData.widgetID;
+        resizeObserver.observe(newItem);
       });
       grid.layout(gridState.layout);
     }
@@ -117,11 +120,6 @@ function editGrid(grid) {
   document.querySelectorAll("#removeItem").forEach((item) => {
     item.classList.remove("no-opacity");
     item.disabled = false;
-  });
-
-  document.querySelectorAll(".item").forEach((item) => {
-    item.classList.add("item-editable");
-    resizeObserver.observe(item);
   });
 
   return grid;
@@ -140,10 +138,12 @@ const resizeObserver = new ResizeObserver((entries) => {
     var el = item.getElement();
     grid = item.getGrid();
 
+    const contentEl = el.querySelector(".item-content");
+    var chart = echarts.getInstanceByDom(contentEl);
+
     // Calculate the change in width and height
     var widthChange = target.clientWidth - previousSize.width;
     var heightChange = target.clientHeight - previousSize.height;
-    const contentEl = el.querySelector(".item-content");
     var itemContentWidth =
       parseInt(window.getComputedStyle(contentEl).getPropertyValue("width")) + widthChange;
     var itemContentHeight =
@@ -159,6 +159,10 @@ const resizeObserver = new ResizeObserver((entries) => {
     el.style.height = target.clientHeight + "px";
     el.querySelector(".item-content").style.width = itemContentWidth + "px";
     el.querySelector(".item-content").style.height = itemContentHeight + "px";
+    chart.resize({
+      width: itemContentWidth,
+      height: itemContentHeight,
+    });
     grid.refreshItems();
     grid.layout(true);
   }

@@ -118,8 +118,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <button type="button" class="btn btn-sm" id="removeItem" onclick="removeGridItem(this.parentNode);">
               <i class="fas fa-trash-can"></i>
             </button>
-            <div class="item-content">
-              <div id="${widgetID}"></div>
+            <div class="item-content" id="${widgetID}" style="width: 500px;height:400px;">
             </div>
             `;
           var scriptTag = document.createElement("script");
@@ -129,6 +128,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           newItem.appendChild(scriptTag);
 
           grid.add(newItem);
+          resizeObserver.observe(newItem);
         }
 
         function removeGridItem(item) {

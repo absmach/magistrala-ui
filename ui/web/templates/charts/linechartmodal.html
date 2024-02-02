@@ -98,27 +98,24 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var widgetID = "linechart-" + Date.now();
       var widgetScript = `
-      var lineChart = echarts.init(document.getElementById("${widgetID}"), null, {
-              width: 500,
-              height: 200,
-            });
-            var option = {
-              xAxis: {
-                type: 'category',
-                data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-              },
-              yAxis: {
-                type: 'value'
-              },
-              series: [
-                {
-                  data: [150, 230, 224, 218, 135, 147, 260],
-                  type: 'line'
-                }
-              ]
-            };
+        var lineChart = echarts.init(document.getElementById("${widgetID}"));
+        var option = {
+          xAxis: {
+            type: 'category',
+            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+          },
+          yAxis: {
+            type: 'value'
+          },
+          series: [
+            {
+              data: [150, 230, 224, 218, 135, 147, 260],
+              type: 'line'
+            }
+          ]
+        };
 
-            lineChart.setOption(option);`;
+        lineChart.setOption(option);`;
 
       addWidget(widgetID, widgetScript);
     });
