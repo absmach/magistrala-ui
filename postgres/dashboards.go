@@ -63,7 +63,7 @@ func (r *repo) Retrieve(ctx context.Context, dashboardID, userID string) (ui.Das
 
 // Retrieve all dashboards for a user using a user id.
 func (r *repo) RetrieveAll(ctx context.Context, userID string, page ui.DashboardPageMeta) (ui.DashboardPage, error) {
-	q := `SELECT dashboard_id, user_id, dashboard_name, description  FROM dashboards WHERE user_id = :user_id`
+	q := `SELECT dashboard_id, user_id, dashboard_name, description, metadata FROM dashboards WHERE user_id = :user_id`
 
 	tmp := ui.Dashboard{
 		UserID: userID,

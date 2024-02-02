@@ -2468,7 +2468,7 @@ func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, e
 	}
 
 	items := make(map[string]interface{})
-	items["data"] = dashboardsPage.Dashboards
+	items["dashboards"] = dashboardsPage.Dashboards
 	jsonData, err := json.Marshal(items)
 	if err != nil {
 		return []byte{}, err

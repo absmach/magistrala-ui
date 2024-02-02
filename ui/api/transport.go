@@ -841,10 +841,11 @@ func decodeCreateDashboardRequest(_ context.Context, r *http.Request) (interface
 	}
 
 	req := createDashboardReq{
-		token:       token,
-		Description: data.Description,
-		Metadata:    data.Metadata,
-		Layout:      data.Layout,
+		token:         token,
+		DashboardName: data.DashboardName,
+		Description:   data.Description,
+		Metadata:      data.Metadata,
+		Layout:        data.Layout,
 	}
 
 	return req, nil
@@ -884,11 +885,12 @@ func decodeUpdateDashboardRequest(_ context.Context, r *http.Request) (interface
 		return nil, err
 	}
 	req := updateDashboardReq{
-		token:       token,
-		DashboardID: data.DashboardID,
-		Description: data.Description,
-		Metadata:    data.Metadata,
-		Layout:      data.Layout,
+		token:         token,
+		DashboardID:   data.DashboardID,
+		DashboardName: data.DashboardName,
+		Description:   data.Description,
+		Metadata:      data.Metadata,
+		Layout:        data.Layout,
 	}
 
 	return req, nil

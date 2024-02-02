@@ -939,7 +939,7 @@ func (mm *metricsMiddleware) DeleteInvitation(token, userID, domainID string) er
 	return mm.svc.DeleteInvitation(token, userID, domainID)
 }
 
-// View Dashboards adds metrics middleware to view dashboards method.
+// View Dashboard adds metrics middleware to view dashboard method.
 func (mm *metricsMiddleware) ViewDashboard(token string, dashboardID string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "view_dashboard").Add(1)
@@ -949,7 +949,7 @@ func (mm *metricsMiddleware) ViewDashboard(token string, dashboardID string) (b 
 	return mm.svc.ViewDashboard(token, dashboardID)
 }
 
-// Create Dashboards adds metrics middleware to create dashboards method.
+// Create Dashboard adds metrics middleware to create dashboard method.
 func (mm *metricsMiddleware) CreateDashboard(token, dashboardName, description, metadata, layout string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "create_dashboard").Add(1)
@@ -969,7 +969,7 @@ func (mm *metricsMiddleware) ListDashboards(token string, page uint64, limit uin
 	return mm.svc.ListDashboards(token, page, limit)
 }
 
-// Update Dashboards adds metrics middleware to update dashboards method.
+// Update Dashboard adds metrics middleware to update dashboard method.
 func (mm *metricsMiddleware) UpdateDashboard(token, dashboardID, dashboardName, description, metadata, layout string) (err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "update_dashboard").Add(1)
@@ -979,7 +979,7 @@ func (mm *metricsMiddleware) UpdateDashboard(token, dashboardID, dashboardName, 
 	return mm.svc.UpdateDashboard(token, dashboardID, dashboardName, description, metadata, layout)
 }
 
-// Delete Dashboards adds metrics middleware to delete dashboards method.
+// Delete Dashboard adds metrics middleware to delete dashboard method.
 func (mm *metricsMiddleware) DeleteDashboard(token string, dashboardID string) (err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "delete_dashboard").Add(1)

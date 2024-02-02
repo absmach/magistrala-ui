@@ -1651,7 +1651,7 @@ func (lm *loggingMiddleware) DeleteInvitation(token, userID, domainID string) (e
 	return lm.svc.DeleteInvitation(token, userID, domainID)
 }
 
-// View Dashboards adds logging middleware to dashboards method.
+// View Dashboards adds logging middleware to view dashboard method.
 func (lm *loggingMiddleware) ViewDashboard(token, dashboardID string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []interface{}{
@@ -1674,6 +1674,7 @@ func (lm *loggingMiddleware) CreateDashboard(token, dashboardName, description, 
 	defer func(begin time.Time) {
 		args := []interface{}{
 			slog.String("duration", time.Since(begin).String()),
+			slog.String("dashboard_name", dashboardName),
 			slog.String("description", description),
 			slog.String("metadata", metadata),
 		}
@@ -1711,6 +1712,7 @@ func (lm *loggingMiddleware) UpdateDashboard(token, dashboardID, dashboardName, 
 		args := []interface{}{
 			slog.String("duration", time.Since(begin).String()),
 			slog.String("dashboard_id", dashboardID),
+			slog.String("dashboard_name", dashboardName),
 			slog.String("description", description),
 			slog.String("metadata", metadata),
 		}
