@@ -970,13 +970,13 @@ func (mm *metricsMiddleware) ListDashboards(token string, page uint64, limit uin
 }
 
 // Update Dashboard adds metrics middleware to update dashboard method.
-func (mm *metricsMiddleware) UpdateDashboard(token, dashboardID, dashboardName, description, metadata, layout string) (err error) {
+func (mm *metricsMiddleware) UpdateDashboard(token, dashboardID string, dashboardReq ui.DashboardReq)  (err error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "update_dashboard").Add(1)
 		mm.latency.With("method", "update_dashboard").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.UpdateDashboard(token, dashboardID, dashboardName, description, metadata, layout)
+	return mm.svc.UpdateDashboard(token, dashboardID, dashboardReq)
 }
 
 // Delete Dashboard adds metrics middleware to delete dashboard method.

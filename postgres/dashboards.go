@@ -6,6 +6,8 @@ package postgres
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"strings"
 
 	"github.com/absmach/magistrala-ui/ui"
 	"github.com/absmach/magistrala/pkg/errors"
@@ -101,12 +103,37 @@ func (r *repo) RetrieveAll(ctx context.Context, userID string, page ui.Dashboard
 }
 
 // Update an existing dashboard for a user.
-func (r *repo) Update(ctx context.Context, dashboard ui.Dashboard) error {
-	q := `
-	UPDATE dashboards SET dashboard_name = :dashboard_name, description = :description, metadata = :metadata, layout = :layout
-	WHERE dashboard_id = :dashboard_id AND user_id = :user_id`
+func (r *repo) Update(ctx context.Context, dashboardID, userID string, dr ui.DashboardReq) error {
+	var query []string
+	var upq string
 
-	dbDs, err := toDBDashboard(dashboard)
+	d := ui.Dashboard{
+		DashboardID: dashboardID,
+		UserID:      userID,
+	}
+	if dr.DashboardName != "" {
+		query = append(query, "dashboard_name = :dashboard_name, ")
+		d.DashboardName = dr.DashboardName
+	}
+	if dr.Description != "" {
+		query = append(query, "description = :description, ")
+		d.Description = dr.Description
+	}
+	if dr.Metadata != "" {
+		query = append(query, "metadata = :metadata, ")
+		d.Metadata = dr.Metadata
+	}
+	if dr.Layout != "" {
+		query = append(query, "layout = :layout")
+		d.Layout = dr.Layout
+	}
+	if len(query) > 0 {
+		upq = strings.Join(query, " ")
+	}
+
+	q := fmt.Sprintf(`UPDATE dashboards SET %s WHERE dashboard_id = :dashboard_id AND user_id = :user_id`, upq)
+
+	dbDs, err := toDBDashboard(d)
 	if err != nil {
 		return err
 	}

@@ -381,7 +381,7 @@ type Service interface {
 	// List Dashboards retrieves all dashboards for a user.
 	ListDashboards(token string, page, limit uint64) ([]byte, error)
 	// Update a dashboard for a user.
-	UpdateDashboard(token, dashboardID, dashboardName, description, metadata, layout string) error
+	UpdateDashboard(token, dashboardID string, dashboardReq DashboardReq) error
 	// Delete a dashboard for a user.
 	DeleteDashboard(token, dashboardID string) error
 }
@@ -2477,22 +2477,13 @@ func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, e
 	return jsonData, nil
 }
 
-func (us *uiService) UpdateDashboard(token, dashboardID, dashboardName, description, metadata, layout string) error {
+func (us *uiService) UpdateDashboard(token, dashboardID string, dashboardReq DashboardReq) error {
 	userID, err := getUserID(token)
 	if err != nil {
 		return errors.Wrap(ErrFailedRetrieveUserID, err)
 	}
 
-	dashboard := Dashboard{
-		DashboardID:   dashboardID,
-		UserID:        userID,
-		DashboardName: dashboardName,
-		Description:   description,
-		Metadata:      metadata,
-		Layout:        layout,
-	}
-
-	if err = us.drepo.Update(context.Background(), dashboard); err != nil {
+	if err = us.drepo.Update(context.Background(), dashboardID, userID, dashboardReq); err != nil {
 		return errors.Wrap(ErrFailedDashboardUpdate, err)
 	}
 

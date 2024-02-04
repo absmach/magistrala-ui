@@ -22,7 +22,7 @@ var (
 // Config defines the options that are used when connecting to the PostgresSQL instance.
 type Config struct {
 	Host        string `env:"HOST"           envDefault:"localhost"`
-	Port        string `env:"PORT"           envDefault:"5432"`
+	Port        string `env:"PORT"           envDefault:"6042"`
 	User        string `env:"USER"           envDefault:"magistrala-ui"`
 	Pass        string `env:"PASS"           envDefault:"magistrala-ui"`
 	Name        string `env:"NAME"           envDefault:"dashboards"`

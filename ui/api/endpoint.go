@@ -2078,7 +2078,13 @@ func updateDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		if err := svc.UpdateDashboard(req.token, req.DashboardID, req.DashboardName, req.Description, req.Metadata, req.Layout); err != nil {
+		d := ui.DashboardReq{
+			DashboardName: req.DashboardName,
+			Description:   req.Description,
+			Metadata:      req.Metadata,
+			Layout:        req.Layout,
+		}
+		if err := svc.UpdateDashboard(req.token, req.DashboardID, d); err != nil {
 			return nil, err
 		}
 

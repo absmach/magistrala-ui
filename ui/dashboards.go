@@ -29,6 +29,13 @@ type DashboardPageMeta struct {
 	Limit  uint64 `json:"limit"`
 }
 
+type DashboardReq struct {
+	DashboardName string `json:"dashboard_name,omitempty"`
+	Description   string `json:"description,omitempty"`
+	Metadata      string `json:"metadata,omitempty"`
+	Layout        string `json:"layout,omitempty"`
+}
+
 type DashboardRepository interface {
 	// Persists dashboard  for a user. A non-nil error is returned to indicate
 	// a failure to persist.
@@ -44,7 +51,7 @@ type DashboardRepository interface {
 
 	// Updates a dashboard for a user. A non-nil error is returned to indicate
 	// a failure to update.
-	Update(ctx context.Context, dashboard Dashboard) error
+	Update(ctx context.Context, dashboardID string, userID string, dr DashboardReq) error
 
 	// Deletes a dashboard for a user. A non-nil error is returned to indicate
 	// a failure to delete.
