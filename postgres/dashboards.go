@@ -28,7 +28,7 @@ func (r *repo) Create(ctx context.Context, dashboard ui.Dashboard) (ui.Dashboard
 	q := `
     INSERT INTO dashboards (dashboard_id, created_by, dashboard_name, description, metadata, layout, created_at, updated_at)
     VALUES (:dashboard_id, :created_by, :dashboard_name, :description, :metadata, :layout, :created_at, :updated_at)
-	RETURNING dashboard_id, created_by, dashboard_name, description, metadata, layout, created_at, updated_at`
+	RETURNING dashboard_id, created_by, dashboard_name, description, metadata, layout, created_at`
 
 	dbDs, err := toDBDashboard(dashboard)
 	if err != nil {
