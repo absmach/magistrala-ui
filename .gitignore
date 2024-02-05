@@ -52,3 +52,6 @@ web_modules/
 
 # Optional REPL history
 .node_repl_history
+
+# vscode project settings
+.vscode
