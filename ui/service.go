@@ -2387,11 +2387,13 @@ func (us *uiService) CreateDashboard(token string, dashboardReq DashboardReq) ([
 	}
 	dashboard := Dashboard{
 		DashboardID:   dashboardID.String(),
-		UserID:        userID,
+		CreatedBy:     userID,
 		DashboardName: dashboardReq.DashboardName,
 		Description:   dashboardReq.Description,
 		Metadata:      dashboardReq.Metadata,
 		Layout:        dashboardReq.Layout,
+		CreatedAt:     time.Now(),
+		UpdatedAt:     time.Now(),
 	}
 
 	if err = us.drepo.Create(context.Background(), dashboard); err != nil {
@@ -2459,9 +2461,9 @@ func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, e
 	}
 
 	pgm := DashboardPageMeta{
-		Offset: offset,
-		Limit:  limit,
-		UserID: userID,
+		Offset:    offset,
+		Limit:     limit,
+		CreatedBy: userID,
 	}
 	dashboardsPage, err := us.drepo.RetrieveAll(context.Background(), pgm)
 	if err != nil {

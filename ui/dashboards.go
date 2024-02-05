@@ -5,15 +5,18 @@ package ui
 
 import (
 	"context"
+	"time"
 )
 
 type Dashboard struct {
-	DashboardID   string `json:"dashboard_id,omitempty" db:"dashboard_id"`
-	UserID        string `json:"user_id,omitempty" db:"user_id"`
-	DashboardName string `json:"dashboard_name,omitempty" db:"dashboard_name"`
-	Description   string `json:"description,omitempty" db:"description"`
-	Metadata      string `json:"metadata,omitempty" db:"metadata"`
-	Layout        string `json:"layout,omitempty" db:"layout"`
+	DashboardID   string    `json:"dashboard_id,omitempty" db:"dashboard_id"`
+	CreatedBy     string    `json:"created_by,omitempty" db:"created_by"`
+	DashboardName string    `json:"dashboard_name,omitempty" db:"dashboard_name"`
+	Description   string    `json:"description,omitempty" db:"description"`
+	Metadata      string    `json:"metadata,omitempty" db:"metadata"`
+	Layout        string    `json:"layout,omitempty" db:"layout"`
+	CreatedAt     time.Time `json:"created_at,omitempty" db:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at,omitempty" db:"updated_at"`
 }
 
 type DashboardPage struct {
@@ -24,10 +27,10 @@ type DashboardPage struct {
 }
 
 type DashboardPageMeta struct {
-	Total  uint64 `json:"total" db:"total"`
-	Offset uint64 `json:"offset" db:"offset"`
-	Limit  uint64 `json:"limit" db:"limit"`
-	UserID string `json:"user_id" db:"user_id"`
+	Total     uint64 `json:"total" db:"total"`
+	Offset    uint64 `json:"offset" db:"offset"`
+	Limit     uint64 `json:"limit" db:"limit"`
+	CreatedBy string `json:"created_by" db:"created_by"`
 }
 
 type DashboardReq struct {

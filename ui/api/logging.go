@@ -1651,10 +1651,10 @@ func (lm *loggingMiddleware) DeleteInvitation(token, userID, domainID string) (e
 	return lm.svc.DeleteInvitation(token, userID, domainID)
 }
 
-// View Dashboards adds logging middleware to view dashboard method.
+// View Dashboard adds logging middleware to view dashboard method.
 func (lm *loggingMiddleware) ViewDashboard(token, dashboardID string) (b []byte, err error) {
 	defer func(begin time.Time) {
-		args := []interface{}{
+		args := []any{
 			slog.String("duration", time.Since(begin).String()),
 			slog.String("dashboard_id", dashboardID),
 		}
@@ -1672,7 +1672,7 @@ func (lm *loggingMiddleware) ViewDashboard(token, dashboardID string) (b []byte,
 // Create Dashboard adds logging middleware to create dashboard method.
 func (lm *loggingMiddleware) CreateDashboard(token string, dashboardReq ui.DashboardReq) (b []byte, err error) {
 	defer func(begin time.Time) {
-		args := []interface{}{
+		args := []any{
 			slog.String("duration", time.Since(begin).String()),
 			slog.String("dashboard_name", dashboardReq.DashboardName),
 			slog.String("description", dashboardReq.Description),
@@ -1692,8 +1692,10 @@ func (lm *loggingMiddleware) CreateDashboard(token string, dashboardReq ui.Dashb
 // List Dashboards adds logging middleware to list dashboards method.
 func (lm *loggingMiddleware) ListDashboards(token string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
-		args := []interface{}{
+		args := []any{
 			slog.String("duration", time.Since(begin).String()),
+			slog.Uint64("page", page),
+			slog.Uint64("limit", limit),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
@@ -1709,7 +1711,7 @@ func (lm *loggingMiddleware) ListDashboards(token string, page, limit uint64) (b
 // Update Dashboard adds logging middleware to update dashboard method.
 func (lm *loggingMiddleware) UpdateDashboard(token, dashboardID string, dashboardReq ui.DashboardReq) (err error) {
 	defer func(begin time.Time) {
-		args := []interface{}{
+		args := []any{
 			slog.String("duration", time.Since(begin).String()),
 			slog.String("dashboard_id", dashboardID),
 			slog.String("dashboard_name", dashboardReq.DashboardName),
@@ -1730,7 +1732,7 @@ func (lm *loggingMiddleware) UpdateDashboard(token, dashboardID string, dashboar
 // Delete Dashboard adds logging middleware to delete dashboard method.
 func (lm *loggingMiddleware) DeleteDashboard(token, dashboardID string) (err error) {
 	defer func(begin time.Time) {
-		args := []interface{}{
+		args := []any{
 			slog.String("duration", time.Since(begin).String()),
 			slog.String("dashboard_id", dashboardID),
 		}
