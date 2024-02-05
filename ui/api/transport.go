@@ -1956,10 +1956,6 @@ func decodeCreateDomainRequest(_ context.Context, r *http.Request) (interface{},
 		Metadata: meta,
 	}
 
-	if err != nil {
-		return nil, err
-	}
-
 	return req, nil
 }
 
