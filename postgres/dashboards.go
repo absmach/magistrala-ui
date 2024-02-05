@@ -64,13 +64,10 @@ func (r *repo) Retrieve(ctx context.Context, dashboardID, userID string) (ui.Das
 }
 
 // Retrieve all dashboards for a user using a user id.
-func (r *repo) RetrieveAll(ctx context.Context, userID string, page ui.DashboardPageMeta) (ui.DashboardPage, error) {
-	q := `SELECT dashboard_id, user_id, dashboard_name, description, metadata FROM dashboards WHERE user_id = :user_id`
+func (r *repo) RetrieveAll(ctx context.Context, page ui.DashboardPageMeta) (ui.DashboardPage, error) {
+	q := `SELECT dashboard_id, user_id, dashboard_name, description, metadata FROM dashboards WHERE user_id = :user_id LIMIT :limit OFFSET :offset`
 
-	tmp := ui.Dashboard{
-		UserID: userID,
-	}
-	rows, err := r.db.NamedQueryContext(ctx, q, tmp)
+	rows, err := r.db.NamedQueryContext(ctx, q, page)
 	if err != nil {
 		return ui.DashboardPage{}, HandleError(err, ErrViewEntity)
 	}
@@ -90,8 +87,8 @@ func (r *repo) RetrieveAll(ctx context.Context, userID string, page ui.Dashboard
 	}
 	cq := `SELECT COUNT(*) FROM dashboards WHERE user_id = $1`
 	var total uint64
-	if err := r.db.GetContext(ctx, &total, cq, tmp.UserID); err != nil {
-		return ui.DashboardPage{}, HandleError(err, errors.New("felix"))
+	if err := r.db.GetContext(ctx, &total, cq, page.UserID); err != nil {
+		return ui.DashboardPage{}, HandleError(err, ErrViewEntity)
 	}
 
 	return ui.DashboardPage{
@@ -112,15 +109,15 @@ func (r *repo) Update(ctx context.Context, dashboardID, userID string, dr ui.Das
 		UserID:      userID,
 	}
 	if dr.DashboardName != "" {
-		query = append(query, "dashboard_name = :dashboard_name, ")
+		query = append(query, "dashboard_name = :dashboard_name")
 		d.DashboardName = dr.DashboardName
 	}
 	if dr.Description != "" {
-		query = append(query, "description = :description, ")
+		query = append(query, "description = :description")
 		d.Description = dr.Description
 	}
 	if dr.Metadata != "" {
-		query = append(query, "metadata = :metadata, ")
+		query = append(query, "metadata = :metadata")
 		d.Metadata = dr.Metadata
 	}
 	if dr.Layout != "" {
@@ -128,7 +125,7 @@ func (r *repo) Update(ctx context.Context, dashboardID, userID string, dr ui.Das
 		d.Layout = dr.Layout
 	}
 	if len(query) > 0 {
-		upq = strings.Join(query, " ")
+		upq = strings.Join(query, ",")
 	}
 
 	q := fmt.Sprintf(`UPDATE dashboards SET %s WHERE dashboard_id = :dashboard_id AND user_id = :user_id`, upq)

@@ -1670,13 +1670,13 @@ func (lm *loggingMiddleware) ViewDashboard(token, dashboardID string) (b []byte,
 }
 
 // Create Dashboard adds logging middleware to create dashboard method.
-func (lm *loggingMiddleware) CreateDashboard(token, dashboardName, description, metadata, layout string) (b []byte, err error) {
+func (lm *loggingMiddleware) CreateDashboard(token string, dashboardReq ui.DashboardReq) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []interface{}{
 			slog.String("duration", time.Since(begin).String()),
-			slog.String("dashboard_name", dashboardName),
-			slog.String("description", description),
-			slog.String("metadata", metadata),
+			slog.String("dashboard_name", dashboardReq.DashboardName),
+			slog.String("description", dashboardReq.Description),
+			slog.String("metadata", dashboardReq.Metadata),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
@@ -1686,7 +1686,7 @@ func (lm *loggingMiddleware) CreateDashboard(token, dashboardName, description, 
 		lm.logger.Info("Create dashboard completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.CreateDashboard(token, dashboardName, description, metadata, layout)
+	return lm.svc.CreateDashboard(token, dashboardReq)
 }
 
 // List Dashboards adds logging middleware to list dashboards method.

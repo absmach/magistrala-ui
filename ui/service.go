@@ -375,7 +375,7 @@ type Service interface {
 	DeleteInvitation(token, userID, domainID string) error
 
 	// Create a dashboard for a user.
-	CreateDashboard(token, dashboardName, description, metadata, layout string) ([]byte, error)
+	CreateDashboard(token string, dashboardReq DashboardReq) ([]byte, error)
 	// View a dashboard for a user.
 	ViewDashboard(token, dashboardID string) ([]byte, error)
 	// List Dashboards retrieves all dashboards for a user.
@@ -2370,7 +2370,7 @@ func (us *uiService) DeleteInvitation(token, userID, domainID string) error {
 	return us.sdk.DeleteInvitation(userID, domainID, token)
 }
 
-func (us *uiService) CreateDashboard(token, dashboardName, description, metadata, layout string) ([]byte, error) {
+func (us *uiService) CreateDashboard(token string, dashboardReq DashboardReq) ([]byte, error) {
 	var btpl bytes.Buffer
 	charts := CreateItem()
 
@@ -2388,11 +2388,12 @@ func (us *uiService) CreateDashboard(token, dashboardName, description, metadata
 	dashboard := Dashboard{
 		DashboardID:   dashboardID.String(),
 		UserID:        userID,
-		DashboardName: dashboardName,
-		Description:   description,
-		Metadata:      metadata,
-		Layout:        layout,
+		DashboardName: dashboardReq.DashboardName,
+		Description:   dashboardReq.Description,
+		Metadata:      dashboardReq.Metadata,
+		Layout:        dashboardReq.Layout,
 	}
+
 	if err = us.drepo.Create(context.Background(), dashboard); err != nil {
 		return btpl.Bytes(), errors.Wrap(err, ErrFailedDashboardSave)
 	}
@@ -2452,17 +2453,17 @@ func (us *uiService) ViewDashboard(token, dashboardID string) ([]byte, error) {
 func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 
-	pgm := DashboardPageMeta{
-		Offset: offset,
-		Limit:  limit,
-	}
-
 	userID, err := getUserID(token)
 	if err != nil {
 		return []byte{}, errors.Wrap(ErrFailedRetrieveUserID, err)
 	}
 
-	dashboardsPage, err := us.drepo.RetrieveAll(context.Background(), userID, pgm)
+	pgm := DashboardPageMeta{
+		Offset: offset,
+		Limit:  limit,
+		UserID: userID,
+	}
+	dashboardsPage, err := us.drepo.RetrieveAll(context.Background(), pgm)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}

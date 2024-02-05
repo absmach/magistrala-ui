@@ -4,18 +4,21 @@
 version: "3.7"
 
 networks:
-  magistrala-base-net:
+  magistrala-ui-net:
     driver: bridge
+
+volumes:
+  magistrala-ui-db-volume:
 
 services:
   ui:
     image: magistrala/ui:${MG_RELEASE_TAG}
-    container_name: magistrala-ui
+    container_name: magistrala-ui-standalone
     restart: on-failure
     ports:
       - ${MG_UI_PORT}:${MG_UI_PORT}
     networks:
-      - magistrala-base-net
+      - magistrala-ui-net
     environment:
       MG_UI_LOG_LEVEL: ${MG_UI_LOG_LEVEL}
       MG_UI_PORT: ${MG_UI_PORT}
@@ -30,4 +33,22 @@ services:
       MG_UI_VERIFICATION_TLS: ${MG_UI_VERIFICATION_TLS}
       MG_UI_CONTENT_TYPE: ${MG_UI_CONTENT_TYPE}
       MG_UI_INSTANCE_ID: ${MG_UI_INSTANCE_ID}
+      MG_UI_DB_HOST: ${MG_UI_DB_HOST}
+      MG_UI_DB_PORT: ${MG_UI_DB_PORT}
 
+  ui-db:
+      image: postgres:16.1-alpine
+      container_name: magistrala-ui-standalone-db
+      restart: on-failure
+      command: postgres -c "max_connections=${MG_POSTGRES_MAX_CONNECTIONS}"
+      ports:
+        - 6044:5432
+      networks:
+        - magistrala-ui-net
+      volumes:
+        - magistrala-ui-db-volume:/var/lib/postgresql/data
+      environment:
+        POSTGRES_USER: ${MG_UI_DB_USER}
+        POSTGRES_PASSWORD: ${MG_UI_DB_PASSWORD}
+        POSTGRES_DB: ${MG_UI_DB_NAME}
+        MG_POSTGRES_MAX_CONNECTIONS: ${MG_POSTGRES_MAX_CONNECTIONS}

@@ -24,9 +24,10 @@ type DashboardPage struct {
 }
 
 type DashboardPageMeta struct {
-	Total  uint64 `json:"total"`
-	Offset uint64 `json:"offset"`
-	Limit  uint64 `json:"limit"`
+	Total  uint64 `json:"total" db:"total"`
+	Offset uint64 `json:"offset" db:"offset"`
+	Limit  uint64 `json:"limit" db:"limit"`
+	UserID string `json:"user_id" db:"user_id"`
 }
 
 type DashboardReq struct {
@@ -47,7 +48,7 @@ type DashboardRepository interface {
 
 	// Retrieves all dashboards for a user. A non-nil error is returned to indicate
 	// a failure to retrieve all.
-	RetrieveAll(ctx context.Context, userID string, page DashboardPageMeta) (DashboardPage, error)
+	RetrieveAll(ctx context.Context, page DashboardPageMeta) (DashboardPage, error)
 
 	// Updates a dashboard for a user. A non-nil error is returned to indicate
 	// a failure to update.

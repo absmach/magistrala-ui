@@ -2039,8 +2039,14 @@ func createDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
+		dr := ui.DashboardReq{
+			DashboardName: req.DashboardName,
+			Description:   req.Description,
+			Metadata:      req.Metadata,
+			Layout:        req.Layout,
+		}
 
-		res, err := svc.CreateDashboard(req.token, req.DashboardName, req.Description, req.Metadata, req.Layout)
+		res, err := svc.CreateDashboard(req.token, dr)
 		if err != nil {
 			return nil, err
 		}

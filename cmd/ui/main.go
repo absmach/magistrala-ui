@@ -27,13 +27,13 @@ import (
 
 type config struct {
 	LogLevel        string          `env:"MG_UI_LOG_LEVEL"        envDefault:"debug"`
-	Port            string          `env:"MG_UI_PORT"             envDefault:"9096"`
+	Port            string          `env:"MG_UI_PORT"             envDefault:"9095"`
 	InstanceID      string          `env:"MG_UI_INSTANCE_ID"      envDefault:""`
 	HTTPAdapterURL  string          `env:"MG_HTTP_ADAPTER_URL"    envDefault:"http://localhost:8008"`
 	ReaderURL       string          `env:"MG_READER_URL"          envDefault:"http://localhost:9007"`
 	ThingsURL       string          `env:"MG_THINGS_URL"          envDefault:"http://localhost:9000"`
 	UsersURL        string          `env:"MG_USERS_URL"           envDefault:"http://localhost:9002"`
-	HostURL         string          `env:"MG_UI_HOST_URL"         envDefault:"http://localhost:9096"`
+	HostURL         string          `env:"MG_UI_HOST_URL"         envDefault:"http://localhost:9095"`
 	BootstrapURL    string          `env:"MG_BOOTSTRAP_URL"       envDefault:"http://localhost:9013"`
 	DomainsURL      string          `env:"MG_DOMAINS_URL"         envDefault:"http://localhost:8189"`
 	InvitationsURL  string          `env:"MG_INVITATIONS_URL"     envDefault:"http://localhost:9020"`
@@ -77,10 +77,11 @@ func main() {
 
 	db, err := postgres.Setup(envDBPrefix, *repo.Migration())
 	if err != nil {
-		log.Fatalf("failed to setup postgres db : %s", err)
+		log.Fatalf("Failed to setup postgres db : %s", err)
 	} else {
-		logger.Info("postgres db setup successfully")
+		logger.Info("Postgres db setup successfully")
 	}
+
 	dbs := repo.New(db)
 
 	svc, err := ui.New(sdk, dbs)
