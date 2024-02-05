@@ -79,6 +79,18 @@ func CreateItem() []Item {
 			Image:   "https://datavizproject.com/wp-content/uploads/types/Bar-Chart-Horizontal.png",
 			Widget:  "horizontalBarChart",
 		},
+		{
+			Title:   "two Bar Chart",
+			Content: "This is a horizontal bar chart",
+			Image:   "https://datavizproject.com/wp-content/uploads/types/Bar-Chart-Horizontal.png",
+			Widget:  "twoChart",
+		},
+		{
+			Title:   "three Chart",
+			Content: "This is a horizontal bar chart",
+			Image:   "https://datavizproject.com/wp-content/uploads/types/Bar-Chart-Horizontal.png",
+			Widget:  "threeChart",
+		},
 	}
 
 	return items
