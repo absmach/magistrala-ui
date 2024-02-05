@@ -1,0 +1,125 @@
+<!-- Copyright (c) Abstract Machines
+SPDX-License-Identifier: Apache-2.0 -->
+
+{{ define "stepchartmodal" }}
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="stepChartModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="stepChartModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="stepChartModalLabel">Time series line charts</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <form id="create-stepChart-form">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="title" class="form-label">Title</label>
+              <input
+                type="text"
+                class="form-control"
+                name="title"
+                id="title"
+                placeholder="Enter the chart title"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="channel-id" class="form-label">Channel ID</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="channel"
+                id="channel-id"
+                placeholder="Enter channel ID"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="x-axis" class="form-label">Select x-axis Type</label>
+              <select class="form-select mb-3" name="xAxisType" id="x-axis">
+                <option value="" disabled>Select x-axis Type</option>
+                <option value="value">Value</option>
+                <option value="category">Category</option>
+                <option value="time">Time</option>
+                <option value="log">Log</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="y-axis" class="form-label">Select y-axis Type</label>
+              <select class="form-select mb-3" name="yAxisType" id="y-axis">
+                <option value="" disabled>Select y-axis Type</option>
+                <option value="value">Value</option>
+                <option value="category">Category</option>
+                <option value="time">Time</option>
+                <option value="log">Log</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button
+              type="button"
+              class="btn body-button"
+              id="create-stepChart-button"
+              data-bs-dismiss="modal"
+            >
+              Create Chart
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+    // line chart form
+    document.getElementById("create-stepChart-button").addEventListener("click", function () {
+      var form = document.getElementById("create-stepChart-form");
+      // Create an object to store the form data
+      var formData = {};
+
+      // Serialize the form data into the object
+      for (var i = 0; i < form.elements.length; i++) {
+        var e = form.elements[i];
+        if (e.type !== "submit" && e.type !== "button") {
+          formData[e.name] = e.value;
+        }
+      }
+      form.reset();
+
+      var widgetID = "stepchart-" + Date.now();
+      var widgetScript = `
+      var stepChart = bb.generate({
+        size : {
+          height: 240,
+          width: 480
+        },
+        title: {
+          text: "digital temperature"
+        },
+        data: {
+          columns: [
+          ["data1", 300, 350, 300, 20, 240, 100],
+          ["data2", 130, 100, 140, 200, 150, 50]
+          ],
+          types: {
+            data1: "step",
+            data2: "area-step",
+          }
+        },
+        bindto: "#${widgetID}"
+      });
+      `;
+      addWidget(widgetID, widgetScript);
+    });
+  </script>
+{{ end }}

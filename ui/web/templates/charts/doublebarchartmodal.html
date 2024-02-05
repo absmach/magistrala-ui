@@ -1,20 +1,20 @@
 <!-- Copyright (c) Abstract Machines
 SPDX-License-Identifier: Apache-2.0 -->
 
-{{ define "threechartmodal" }}
+{{ define "doublebarchartmodal" }}
   <!-- Modal -->
   <div
     class="modal fade"
-    id="threeChartModal"
+    id="doubleBarChartModal"
     tabindex="-1"
     role="dialog"
-    aria-labelledby="threeChartModalLabel"
+    aria-labelledby="doubleBarChartModalLabel"
     aria-hidden="true"
   >
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="threeChartModalLabel">Time series line charts</h5>
+          <h5 class="modal-title" id="doubleBarChartModalLabel">Time series bar chart</h5>
           <button
             type="button"
             class="btn-close"
@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form id="create-threeChart-form">
+        <form id="create-doubleBarChart-form">
           <div class="modal-body">
             <div class="mb-3">
               <label for="title" class="form-label">Title</label>
@@ -70,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <button
               type="button"
               class="btn body-button"
-              id="create-threeChart-button"
+              id="create-doubleBarChart-button"
               data-bs-dismiss="modal"
             >
               Create Chart
@@ -81,9 +81,9 @@ SPDX-License-Identifier: Apache-2.0 -->
     </div>
   </div>
   <script>
-    // line chart form
-    document.getElementById("create-threeChart-button").addEventListener("click", function () {
-      var form = document.getElementById("create-threeChart-form");
+    // two chart form
+    document.getElementById("create-doubleBarChart-button").addEventListener("click", function () {
+      var form = document.getElementById("create-doubleBarChart-form");
       // Create an object to store the form data
       var formData = {};
 
@@ -96,30 +96,40 @@ SPDX-License-Identifier: Apache-2.0 -->
       }
       form.reset();
 
-      var widgetID = "threechart-" + Date.now();
+      var widgetID = "doubleBarchart-" + Date.now();
       var widgetScript = `
-      var threeChart = echarts.init(document.getElementById("${widgetID}"), null, {
-              width: 500,
-              height: 200,
-            });
-            var option = {
-              xAxis: {
-                type: 'category',
-                data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+      var doubleBarChart = bb.generate({
+        size: {
+          height: 300,
+          width: 600
+        },
+        data: {
+          x: "x",
+          columns: [
+              ["x", "thing1", "thing2", "thing3", "thing4"],
+              ["download", 30, 200, 100, 400],
+              ["upload", 90, 100, 140, 200]
+          ],
+          groups: [
+            [
+              "download",
+              "loading"
+            ]
+          ],
+              colors: {
+                download: "blue",
+                upload: "green"
               },
-              yAxis: {
-                type: 'value'
-              },
-              series: [
-                {
-                  data: [150, 230, 224, 218, 135, 147, 260],
-                  type: 'line'
-                }
-              ]
-            };
-
-            threeChart.setOption(option);`;
-
+          type: "bar",
+        },
+        axis: {
+          x: {
+            type: "category"
+          }
+        },
+        bindto: "#${widgetID}",
+      });
+      `;
       addWidget(widgetID, widgetScript);
     });
   </script>

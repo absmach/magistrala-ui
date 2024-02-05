@@ -1,20 +1,20 @@
 <!-- Copyright (c) Abstract Machines
 SPDX-License-Identifier: Apache-2.0 -->
 
-{{ define "twochartmodal" }}
+{{ define "multiplelinechartmodal" }}
   <!-- Modal -->
   <div
     class="modal fade"
-    id="twoChartModal"
+    id="multipleLineChartModal"
     tabindex="-1"
     role="dialog"
-    aria-labelledby="twoChartModalLabel"
+    aria-labelledby="multipleLineChartModalLabel"
     aria-hidden="true"
   >
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="twoChartModalLabel">Time series bar chart</h5>
+          <h5 class="modal-title" id="multipleLineChartModalLabel">Time series line charts</h5>
           <button
             type="button"
             class="btn-close"
@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form id="create-twoChart-form">
+        <form id="create-multipleLineChart-form">
           <div class="modal-body">
             <div class="mb-3">
               <label for="title" class="form-label">Title</label>
@@ -70,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <button
               type="button"
               class="btn body-button"
-              id="create-twoChart-button"
+              id="create-multipleLineChart-button"
               data-bs-dismiss="modal"
             >
               Create Chart
@@ -81,9 +81,9 @@ SPDX-License-Identifier: Apache-2.0 -->
     </div>
   </div>
   <script>
-    // two chart form
-    document.getElementById("create-twoChart-button").addEventListener("click", function () {
-      var form = document.getElementById("create-twoChart-form");
+    // line chart form
+    document.getElementById("create-multipleLineChart-button").addEventListener("click", function () {
+      var form = document.getElementById("create-multipleLineChart-form");
       // Create an object to store the form data
       var formData = {};
 
@@ -96,41 +96,29 @@ SPDX-License-Identifier: Apache-2.0 -->
       }
       form.reset();
 
-      var widgetID = "twochart-" + Date.now();
+      var widgetID = "multipleLinechart-" + Date.now();
       var widgetScript = `
-      var twoChart = bb.generate({
+      var multipleLineChart = bb.generate({
         size: {
-          height: 500,
-          width: 300
+          height: 300,
+          width: 500,
         },
         data: {
-          x: "x",
+          xs: {
+            data1: "x1",
+            data2: "x2"
+          },
           columns: [
-              ["x", "thing1", "thing2", "thing3", "thing4"],
-              ["download", 30, 200, 100, 400],
-              ["upload", 90, 100, 140, 200]
+          ["x1", 10, 30, 45, 50, 70, 100],
+          ["x2", 30, 50, 75, 100, 120],
+          ["data1", 30, 200, 100, 400, 150, 250],
+          ["data2", 20, 180, 240, 100, 190]
           ],
-          groups: [
-            [
-              "download",
-              "loading"
-            ]
-          ],
-              colors: {
-                download: "blue",
-                upload: "green"
-              },
-          type: "bar",
+          type: "line", // for ESM specify as: line()
         },
-        axis: {
-          x: {
-            type: "category"
-          }
-        },
-        bindto: "#categoryData"
+        bindto: "#${widgetID}",
       });
       `;
-
       addWidget(widgetID, widgetScript);
     });
   </script>
