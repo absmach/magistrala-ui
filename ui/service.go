@@ -13,20 +13,19 @@ import (
 	"html/template"
 	"log"
 	"math"
-	"math/rand"
 	"reflect"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/absmach/agent/pkg/bootstrap"
+	"github.com/absmach/magistrala"
 	"github.com/absmach/magistrala/pkg/errors"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/absmach/magistrala/pkg/transformers/senml"
 	mgsenml "github.com/absmach/senml"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/golang-jwt/jwt"
-	"github.com/oklog/ulid/v2"
 	"golang.org/x/exp/slices"
 )
 
@@ -389,21 +388,23 @@ type Service interface {
 var _ Service = (*uiService)(nil)
 
 type uiService struct {
-	sdk   sdk.SDK
-	tpls  *template.Template
-	drepo DashboardRepository
+	sdk        sdk.SDK
+	tpls       *template.Template
+	drepo      DashboardRepository
+	idProvider magistrala.IDProvider
 }
 
 // New instantiates the HTTP adapter implementation.
-func New(sdk sdk.SDK, db DashboardRepository) (Service, error) {
+func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider) (Service, error) {
 	tpl, err := parseTemplates(sdk, templates)
 	if err != nil {
 		return nil, err
 	}
 	return &uiService{
-		sdk:   sdk,
-		tpls:  tpl,
-		drepo: db,
+		sdk:        sdk,
+		tpls:       tpl,
+		drepo:      db,
+		idProvider: idp,
 	}, nil
 }
 
@@ -2379,14 +2380,12 @@ func (us *uiService) CreateDashboard(token string, dashboardReq DashboardReq) ([
 		return btpl.Bytes(), errors.Wrap(ErrFailedRetrieveUserID, err)
 	}
 
-	entropy := rand.New(rand.NewSource(time.Now().UnixNano()))
-	ms := ulid.Timestamp(time.Now())
-	dashboardID, err := ulid.New(ms, entropy)
+	dashboardID, err := us.idProvider.ID()
 	if err != nil {
 		return btpl.Bytes(), errors.Wrap(ErrFailedGenerateID, err)
 	}
 	dashboard := Dashboard{
-		DashboardID:   dashboardID.String(),
+		DashboardID:   dashboardID,
 		CreatedBy:     userID,
 		DashboardName: dashboardReq.DashboardName,
 		Description:   dashboardReq.Description,

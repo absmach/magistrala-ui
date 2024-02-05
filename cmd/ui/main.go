@@ -83,7 +83,9 @@ func main() {
 
 	dbs := repo.New(db)
 
-	svc, err := ui.New(sdk, dbs)
+	idp := uuid.New()
+
+	svc, err := ui.New(sdk, dbs, idp)
 	if err != nil {
 		log.Fatalf(err.Error())
 	}

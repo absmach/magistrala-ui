@@ -41,7 +41,8 @@ func (r *repo) Create(ctx context.Context, dashboard ui.Dashboard) error {
 
 // Retrieve a dashboard using a dashboard id and user id.
 func (r *repo) Retrieve(ctx context.Context, dashboardID, userID string) (ui.Dashboard, error) {
-	q := `SELECT dashboard_id, created_by,dashboard_name, description, metadata, layout, created_at, updated_at FROM dashboards WHERE dashboard_id = :dashboard_id AND created_by = :created_by`
+	q := `SELECT dashboard_id, created_by,dashboard_name, description, metadata, layout, created_at, updated_at
+	FROM dashboards WHERE dashboard_id = :dashboard_id AND created_by = :created_by`
 
 	tmp := ui.Dashboard{
 		DashboardID: dashboardID,
@@ -66,7 +67,11 @@ func (r *repo) Retrieve(ctx context.Context, dashboardID, userID string) (ui.Das
 
 // Retrieve all dashboards for a user using a user id.
 func (r *repo) RetrieveAll(ctx context.Context, page ui.DashboardPageMeta) (ui.DashboardPage, error) {
-	q := `SELECT dashboard_id, created_by, dashboard_name, description, metadata, created_at, updated_at FROM dashboards WHERE created_by = :created_by LIMIT :limit OFFSET :offset`
+	q := `SELECT dashboard_id, created_by, dashboard_name, description, metadata, created_at, updated_at FROM dashboards
+	WHERE created_by = :created_by
+	ORDER BY created_at DESC
+	LIMIT :limit
+	OFFSET :offset`
 
 	rows, err := r.db.NamedQueryContext(ctx, q, page)
 	if err != nil {
