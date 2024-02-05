@@ -9,14 +9,13 @@ import (
 )
 
 type Dashboard struct {
-	DashboardID   string    `json:"dashboard_id" db:"dashboard_id"`
-	CreatedBy     string    `json:"created_by" db:"created_by"`
-	DashboardName string    `json:"dashboard_name" db:"dashboard_name"`
-	Description   string    `json:"description,omitempty" db:"description"`
-	Metadata      string    `json:"metadata,omitempty" db:"metadata"`
-	Layout        string    `json:"layout" db:"layout"`
-	CreatedAt     time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at,omitempty" db:"updated_at"`
+	ID          string    `json:"id" db:"id"`
+	CreatedBy   string    `json:"created_by" db:"created_by"`
+	Name        string    `json:"name" db:"name"`
+	Description string    `json:"description,omitempty" db:"description"`
+	Layout      string    `json:"layout" db:"layout"`
+	CreatedAt   time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at,omitempty" db:"updated_at"`
 }
 
 type DashboardPage struct {
@@ -34,10 +33,9 @@ type DashboardPageMeta struct {
 }
 
 type DashboardReq struct {
-	DashboardName string `json:"dashboard_name"`
-	Description   string `json:"description,omitempty"`
-	Metadata      string `json:"metadata,omitempty"`
-	Layout        string `json:"layout"`
+	Name        string `json:"name"`
+	Description string `json:"description,omitempty"`
+	Layout      string `json:"layout"`
 }
 
 type DashboardRepository interface {

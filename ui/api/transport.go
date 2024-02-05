@@ -821,8 +821,8 @@ func decodeViewDashboardRequest(_ context.Context, r *http.Request) (interface{}
 	}
 
 	req := viewDashboardReq{
-		token:       token,
-		DashboardID: chi.URLParam(r, "id"),
+		token: token,
+		ID:    chi.URLParam(r, "id"),
 	}
 
 	return req, nil
@@ -841,11 +841,10 @@ func decodeCreateDashboardRequest(_ context.Context, r *http.Request) (interface
 	}
 
 	req := createDashboardReq{
-		token:         token,
-		DashboardName: data.DashboardName,
-		Description:   data.Description,
-		Metadata:      data.Metadata,
-		Layout:        data.Layout,
+		token:       token,
+		Name:        data.Name,
+		Description: data.Description,
+		Layout:      data.Layout,
 	}
 
 	return req, nil
@@ -885,12 +884,12 @@ func decodeUpdateDashboardRequest(_ context.Context, r *http.Request) (interface
 		return nil, err
 	}
 	req := updateDashboardReq{
-		token:         token,
-		DashboardID:   data.DashboardID,
-		DashboardName: data.DashboardName,
-		Description:   data.Description,
-		Metadata:      data.Metadata,
-		Layout:        data.Layout,
+		token:       token,
+		ID:          data.ID,
+		Name:        data.Name,
+		Description: data.Description,
+		Metadata:    data.Metadata,
+		Layout:      data.Layout,
 	}
 
 	return req, nil
@@ -907,8 +906,8 @@ func decodeDeleteDashboardRequest(_ context.Context, r *http.Request) (interface
 		return nil, err
 	}
 	req := deleteDashboardReq{
-		token:       token,
-		DashboardID: data.DashboardID,
+		token: token,
+		ID:    data.ID,
 	}
 
 	return req, nil

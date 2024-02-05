@@ -1091,8 +1091,8 @@ func (req listInvitationsReq) validate() error {
 }
 
 type viewDashboardReq struct {
-	token       string
-	DashboardID string `json:"dashboard_id"`
+	token string
+	ID    string `json:"id"`
 }
 
 func (req viewDashboardReq) validate() error {
@@ -1103,11 +1103,10 @@ func (req viewDashboardReq) validate() error {
 }
 
 type createDashboardReq struct {
-	token         string
-	DashboardName string `json:"dashboard_name"`
-	Description   string `json:"description"`
-	Metadata      string `json:"metadata"`
-	Layout        string `json:"layout"`
+	token       string
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Layout      string `json:"layout"`
 }
 
 func (req createDashboardReq) validate() error {
@@ -1134,12 +1133,12 @@ func (req listDashboardsReq) validate() error {
 }
 
 type updateDashboardReq struct {
-	token         string
-	DashboardID   string `json:"dashboard_id"`
-	DashboardName string `json:"dashboard_name"`
-	Description   string `json:"description"`
-	Metadata      string `json:"metadata"`
-	Layout        string `json:"layout"`
+	token       string
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Metadata    string `json:"metadata"`
+	Layout      string `json:"layout"`
 }
 
 func (req updateDashboardReq) validate() error {
@@ -1150,8 +1149,8 @@ func (req updateDashboardReq) validate() error {
 }
 
 type deleteDashboardReq struct {
-	token       string
-	DashboardID string `json:"dashboard_id"`
+	token string
+	ID    string `json:"id"`
 }
 
 func (req deleteDashboardReq) validate() error {

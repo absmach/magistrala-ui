@@ -2021,7 +2021,7 @@ func viewDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ViewDashboard(req.token, req.DashboardID)
+		res, err := svc.ViewDashboard(req.token, req.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -2040,10 +2040,9 @@ func createDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 		dr := ui.DashboardReq{
-			DashboardName: req.DashboardName,
-			Description:   req.Description,
-			Metadata:      req.Metadata,
-			Layout:        req.Layout,
+			Name:        req.Name,
+			Description: req.Description,
+			Layout:      req.Layout,
 		}
 
 		res, err := svc.CreateDashboard(req.token, dr)
@@ -2085,12 +2084,11 @@ func updateDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		d := ui.DashboardReq{
-			DashboardName: req.DashboardName,
-			Description:   req.Description,
-			Metadata:      req.Metadata,
-			Layout:        req.Layout,
+			Name:        req.Name,
+			Description: req.Description,
+			Layout:      req.Layout,
 		}
-		if err := svc.UpdateDashboard(req.token, req.DashboardID, d); err != nil {
+		if err := svc.UpdateDashboard(req.token, req.ID, d); err != nil {
 			return nil, err
 		}
 
@@ -2107,12 +2105,12 @@ func deleteDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		if err := svc.DeleteDashboard(req.token, req.DashboardID); err != nil {
+		if err := svc.DeleteDashboard(req.token, req.ID); err != nil {
 			return nil, err
 		}
 
 		return uiRes{
-			code: http.StatusOK,
+			code: http.StatusNoContent,
 		}, nil
 	}
 }

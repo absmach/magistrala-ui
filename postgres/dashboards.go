@@ -26,9 +26,9 @@ func New(db *sqlx.DB) ui.DashboardRepository {
 // Create a non-existing dashboard for a user.
 func (r *repo) Create(ctx context.Context, dashboard ui.Dashboard) (ui.Dashboard, error) {
 	q := `
-    INSERT INTO dashboards (dashboard_id, created_by, dashboard_name, description, metadata, layout, created_at, updated_at)
-    VALUES (:dashboard_id, :created_by, :dashboard_name, :description, :metadata, :layout, :created_at, :updated_at)
-	RETURNING dashboard_id, created_by, dashboard_name, description, metadata, layout, created_at`
+    INSERT INTO dashboards (id, created_by, name, description, layout, created_at, updated_at)
+    VALUES (:id, :created_by, :name, :description, :layout, :created_at, :updated_at)
+	RETURNING id, created_by, name, description, layout, created_at`
 
 	dbDs, err := toDBDashboard(dashboard)
 	if err != nil {
@@ -54,12 +54,12 @@ func (r *repo) Create(ctx context.Context, dashboard ui.Dashboard) (ui.Dashboard
 
 // Retrieve a dashboard using a dashboard id and user id.
 func (r *repo) Retrieve(ctx context.Context, dashboardID, userID string) (ui.Dashboard, error) {
-	q := `SELECT dashboard_id, created_by,dashboard_name, description, metadata, layout, created_at, updated_at
-	FROM dashboards WHERE dashboard_id = :dashboard_id AND created_by = :created_by`
+	q := `SELECT id, created_by, name, description, layout, created_at, updated_at
+	FROM dashboards WHERE id = :id AND created_by = :created_by`
 
 	tmp := ui.Dashboard{
-		DashboardID: dashboardID,
-		CreatedBy:   userID,
+		ID:        dashboardID,
+		CreatedBy: userID,
 	}
 	rows, err := r.db.NamedQueryContext(ctx, q, tmp)
 	if err != nil {
@@ -80,7 +80,7 @@ func (r *repo) Retrieve(ctx context.Context, dashboardID, userID string) (ui.Das
 
 // Retrieve all dashboards for a user using a user id.
 func (r *repo) RetrieveAll(ctx context.Context, page ui.DashboardPageMeta) (ui.DashboardPage, error) {
-	q := `SELECT dashboard_id, created_by, dashboard_name, description, metadata, created_at, updated_at FROM dashboards
+	q := `SELECT id, created_by, name, description, created_at, updated_at FROM dashboards
 	WHERE created_by = :created_by
 	ORDER BY created_at DESC
 	LIMIT :limit
@@ -124,20 +124,16 @@ func (r *repo) Update(ctx context.Context, dashboardID, userID string, dr ui.Das
 	var upq string
 
 	d := ui.Dashboard{
-		DashboardID: dashboardID,
-		CreatedBy:   userID,
+		ID:        dashboardID,
+		CreatedBy: userID,
 	}
-	if dr.DashboardName != "" {
-		query = append(query, "dashboard_name = :dashboard_name")
-		d.DashboardName = dr.DashboardName
+	if dr.Name != "" {
+		query = append(query, "name = :name")
+		d.Name = dr.Name
 	}
 	if dr.Description != "" {
 		query = append(query, "description = :description")
 		d.Description = dr.Description
-	}
-	if dr.Metadata != "" {
-		query = append(query, "metadata = :metadata")
-		d.Metadata = dr.Metadata
 	}
 	if dr.Layout != "" {
 		query = append(query, "layout = :layout")
@@ -149,7 +145,7 @@ func (r *repo) Update(ctx context.Context, dashboardID, userID string, dr ui.Das
 
 	d.UpdatedAt = time.Now()
 
-	q := fmt.Sprintf(`UPDATE dashboards SET %s, updated_at= :updated_at WHERE dashboard_id = :dashboard_id AND created_by = :created_by`, upq)
+	q := fmt.Sprintf(`UPDATE dashboards SET %s, updated_at= :updated_at WHERE id = :id AND created_by = :created_by`, upq)
 
 	dbDs, err := toDBDashboard(d)
 	if err != nil {
@@ -167,11 +163,11 @@ func (r *repo) Update(ctx context.Context, dashboardID, userID string, dr ui.Das
 
 // Delete an existing dashboard for a user.
 func (r *repo) Delete(ctx context.Context, dashboardID, userID string) error {
-	q := `DELETE FROM dashboards WHERE dashboard_id = :dashboard_id AND created_by = :created_by`
+	q := `DELETE FROM dashboards WHERE id = :id AND created_by = :created_by`
 
 	tmp := ui.Dashboard{
-		DashboardID: dashboardID,
-		CreatedBy:   userID,
+		ID:        dashboardID,
+		CreatedBy: userID,
 	}
 	res, err := r.db.NamedExecContext(ctx, q, tmp)
 	if err != nil {
@@ -184,14 +180,13 @@ func (r *repo) Delete(ctx context.Context, dashboardID, userID string) error {
 }
 
 type dbDashboard struct {
-	DashboardID   string    `db:"dashboard_id"`
-	CreatedBy     string    `db:"created_by"`
-	DashboardName string    `db:"dashboard_name"`
-	Description   string    `db:"description"`
-	Metadata      string    `db:"metadata"`
-	Layout        []byte    `db:"layout"`
-	CreatedAt     time.Time `db:"created_at"`
-	UpdatedAt     time.Time `db:"updated_at"`
+	ID          string    `db:"id"`
+	CreatedBy   string    `db:"created_by"`
+	Name        string    `db:"name"`
+	Description string    `db:"description"`
+	Layout      []byte    `db:"layout"`
+	CreatedAt   time.Time `db:"created_at"`
+	UpdatedAt   time.Time `db:"updated_at"`
 }
 
 func toDBDashboard(ds ui.Dashboard) (dbDashboard, error) {
@@ -200,14 +195,13 @@ func toDBDashboard(ds ui.Dashboard) (dbDashboard, error) {
 		return dbDashboard{}, errors.Wrap(ErrJSONMarshal, err)
 	}
 	return dbDashboard{
-		DashboardID:   ds.DashboardID,
-		CreatedBy:     ds.CreatedBy,
-		DashboardName: ds.DashboardName,
-		Description:   ds.Description,
-		Metadata:      ds.Metadata,
-		Layout:        lt,
-		CreatedAt:     ds.CreatedAt,
-		UpdatedAt:     ds.UpdatedAt,
+		ID:          ds.ID,
+		CreatedBy:   ds.CreatedBy,
+		Name:        ds.Name,
+		Description: ds.Description,
+		Layout:      lt,
+		CreatedAt:   ds.CreatedAt,
+		UpdatedAt:   ds.UpdatedAt,
 	}, nil
 }
 
@@ -220,13 +214,12 @@ func toDashboard(dsDB dbDashboard) (ui.Dashboard, error) {
 	}
 
 	return ui.Dashboard{
-		DashboardID:   dsDB.DashboardID,
-		CreatedBy:     dsDB.CreatedBy,
-		DashboardName: dsDB.DashboardName,
-		Description:   dsDB.Description,
-		Metadata:      dsDB.Metadata,
-		Layout:        lt,
-		CreatedAt:     dsDB.CreatedAt,
-		UpdatedAt:     dsDB.UpdatedAt,
+		ID:          dsDB.ID,
+		CreatedBy:   dsDB.CreatedBy,
+		Name:        dsDB.Name,
+		Description: dsDB.Description,
+		Layout:      lt,
+		CreatedAt:   dsDB.CreatedAt,
+		UpdatedAt:   dsDB.UpdatedAt,
 	}, nil
 }

@@ -1674,9 +1674,8 @@ func (lm *loggingMiddleware) CreateDashboard(token string, dashboardReq ui.Dashb
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
-			slog.String("dashboard_name", dashboardReq.DashboardName),
+			slog.String("dashboard_name", dashboardReq.Name),
 			slog.String("description", dashboardReq.Description),
-			slog.String("metadata", dashboardReq.Metadata),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
@@ -1714,9 +1713,8 @@ func (lm *loggingMiddleware) UpdateDashboard(token, dashboardID string, dashboar
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
 			slog.String("dashboard_id", dashboardID),
-			slog.String("dashboard_name", dashboardReq.DashboardName),
+			slog.String("dashboard_name", dashboardReq.Name),
 			slog.String("description", dashboardReq.Description),
-			slog.String("metadata", dashboardReq.Metadata),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))

@@ -2385,13 +2385,12 @@ func (us *uiService) CreateDashboard(token string, dashboardReq DashboardReq) ([
 		return btpl.Bytes(), errors.Wrap(ErrFailedGenerateID, err)
 	}
 	dashboard := Dashboard{
-		DashboardID:   dashboardID,
-		CreatedBy:     userID,
-		DashboardName: dashboardReq.DashboardName,
-		Description:   dashboardReq.Description,
-		Metadata:      dashboardReq.Metadata,
-		Layout:        dashboardReq.Layout,
-		CreatedAt:     time.Now(),
+		ID:          dashboardID,
+		CreatedBy:   userID,
+		Name:        dashboardReq.Name,
+		Description: dashboardReq.Description,
+		Layout:      dashboardReq.Layout,
+		CreatedAt:   time.Now(),
 	}
 
 	ds, err := us.drepo.Create(context.Background(), dashboard)
