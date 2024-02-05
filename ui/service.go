@@ -2393,7 +2393,6 @@ func (us *uiService) CreateDashboard(token string, dashboardReq DashboardReq) ([
 		Metadata:      dashboardReq.Metadata,
 		Layout:        dashboardReq.Layout,
 		CreatedAt:     time.Now(),
-		UpdatedAt:     time.Now(),
 	}
 
 	if err = us.drepo.Create(context.Background(), dashboard); err != nil {
