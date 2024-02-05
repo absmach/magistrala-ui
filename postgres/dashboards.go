@@ -24,19 +24,32 @@ func New(db *sqlx.DB) ui.DashboardRepository {
 }
 
 // Create a non-existing dashboard for a user.
-func (r *repo) Create(ctx context.Context, dashboard ui.Dashboard) error {
+func (r *repo) Create(ctx context.Context, dashboard ui.Dashboard) (ui.Dashboard, error) {
 	q := `
     INSERT INTO dashboards (dashboard_id, created_by, dashboard_name, description, metadata, layout, created_at, updated_at)
-    VALUES (:dashboard_id, :created_by, :dashboard_name, :description, :metadata, :layout, :created_at, :updated_at)`
+    VALUES (:dashboard_id, :created_by, :dashboard_name, :description, :metadata, :layout, :created_at, :updated_at)
+	RETURNING dashboard_id, created_by, dashboard_name, description, metadata, layout, created_at, updated_at`
 
 	dbDs, err := toDBDashboard(dashboard)
 	if err != nil {
-		return err
+		return ui.Dashboard{}, HandleError(err, ErrCreateEntity)
 	}
-	if _, err := r.db.NamedQueryContext(ctx, q, dbDs); err != nil {
-		return HandleError(err, ErrCreateEntity)
+	row, err := r.db.NamedQueryContext(ctx, q, dbDs)
+	if err != nil {
+		return ui.Dashboard{}, HandleError(err, ErrCreateEntity)
 	}
-	return nil
+	defer row.Close()
+	row.Next()
+	dbDs = dbDashboard{}
+	if err = row.StructScan(&dbDs); err != nil {
+		return ui.Dashboard{}, HandleError(err, ErrCreateEntity)
+	}
+	ds, err := toDashboard(dbDs)
+	if err != nil {
+		return ui.Dashboard{}, HandleError(err, ErrCreateEntity)
+	}
+
+	return ds, nil
 }
 
 // Retrieve a dashboard using a dashboard id and user id.

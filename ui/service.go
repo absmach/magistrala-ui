@@ -2394,7 +2394,8 @@ func (us *uiService) CreateDashboard(token string, dashboardReq DashboardReq) ([
 		CreatedAt:     time.Now(),
 	}
 
-	if err = us.drepo.Create(context.Background(), dashboard); err != nil {
+	ds, err := us.drepo.Create(context.Background(), dashboard)
+	if err != nil {
 		return btpl.Bytes(), errors.Wrap(err, ErrFailedDashboardSave)
 	}
 
@@ -2407,7 +2408,7 @@ func (us *uiService) CreateDashboard(token string, dashboardReq DashboardReq) ([
 		dashboardsActive,
 		dashboardsActive,
 		charts,
-		dashboard,
+		ds,
 	}
 
 	if err := us.tpls.ExecuteTemplate(&btpl, "dashboard", data); err != nil {

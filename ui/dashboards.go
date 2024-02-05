@@ -43,7 +43,7 @@ type DashboardReq struct {
 type DashboardRepository interface {
 	// Persists dashboard  for a user. A non-nil error is returned to indicate
 	// a failure to persist.
-	Create(ctx context.Context, dashboard Dashboard) error
+	Create(ctx context.Context, dashboard Dashboard) (Dashboard, error)
 
 	// Retrieves dashboard for a user. A non-nil error is returned to indicate
 	// a failure to retrieve.
