@@ -105,6 +105,7 @@ function editGrid(grid) {
         scriptTag.defer = true;
         scriptTag.innerHTML = itemData.widgetScript;
         newItem.appendChild(scriptTag);
+        grid.add(newItem);
         resizeObserver.observe(newItem);
       });
       grid.layout(gridState.layout);
