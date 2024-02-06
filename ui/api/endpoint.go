@@ -2021,7 +2021,7 @@ func viewDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ViewDashboard(req.token, req.ID)
+		res, err := svc.ViewDashboard(req.token, req.DashboardID)
 		if err != nil {
 			return nil, err
 		}

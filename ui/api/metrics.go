@@ -978,13 +978,3 @@ func (mm *metricsMiddleware) DeleteDashboard(token string, dashboardID string) (
 
 	return mm.svc.DeleteDashboard(token, dashboardID)
 }
-
-// ViewDashboard adds metrics middleware to view dashboard method.
-func (mm *metricsMiddleware) ViewDashboard(token string) (b []byte, err error) {
-	defer func(begin time.Time) {
-		mm.counter.With("method", "view_dashboard").Add(1)
-		mm.latency.With("method", "view_dashboard").Observe(time.Since(begin).Seconds())
-	}(time.Now())
-
-	return mm.svc.ViewDashboard(token)
-}

@@ -1726,17 +1726,3 @@ func (lm *loggingMiddleware) DeleteDashboard(token, dashboardID string) (err err
 
 	return lm.svc.DeleteDashboard(token, dashboardID)
 }
-
-// ViewDashboard adds logging middleware to view dashboard method.
-func (lm *loggingMiddleware) ViewDashboard(token string) (b []byte, err error) {
-	defer func(begin time.Time) {
-		duration := slog.String("duration", time.Since(begin).String())
-		if err != nil {
-			lm.logger.Warn("View dashboard failed to complete successfully", slog.Any("error", err), duration)
-			return
-		}
-		lm.logger.Info("View dashboard completed successfully", duration)
-	}(time.Now())
-
-	return lm.svc.ViewDashboard(token)
-}
