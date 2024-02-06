@@ -65,7 +65,7 @@ SPDX-License-Identifier: Apache-2.0 */
   font-family: "Inconsolata", monospace;
 }
 
-.card .card-body {
+.card .dashboard-card-body {
   height: 6rem;
   max-height: 6rem;
   overflow: auto;

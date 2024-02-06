@@ -2406,16 +2406,23 @@ func (us *uiService) ViewDashboard(token, dashboardID string) ([]byte, error) {
 		return btpl.Bytes(), errors.Wrap(ErrFailedDashboardRetrieve, err)
 	}
 
+	crumbs := []breadcrumb{
+		{Name: dashboardsActive, URL: "/dashboards"},
+		{Name: dashboard.Name},
+	}
+
 	data := struct {
 		NavbarActive   string
 		CollapseActive string
 		Charts         []Item
 		Dashboard      Dashboard
+		Breadcrumbs    []breadcrumb
 	}{
 		dashboardsActive,
 		dashboardsActive,
 		charts,
 		dashboard,
+		crumbs,
 	}
 
 	if err := us.tpls.ExecuteTemplate(&btpl, "dashboard", data); err != nil {
@@ -2460,12 +2467,18 @@ func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, e
 }
 
 func (us *uiService) Dashboards(token string) ([]byte, error) {
+	crumbs := []breadcrumb{
+		{Name: dashboardsActive},
+	}
+
 	data := struct {
 		NavbarActive   string
 		CollapseActive string
+		Breadcrumbs    []breadcrumb
 	}{
 		dashboardsActive,
 		dashboardsActive,
+		crumbs,
 	}
 
 	var btpl bytes.Buffer

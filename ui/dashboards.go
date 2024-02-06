@@ -12,7 +12,7 @@ type Dashboard struct {
 	ID          string    `json:"id" db:"id"`
 	CreatedBy   string    `json:"created_by" db:"created_by"`
 	Name        string    `json:"name" db:"name"`
-	Description string    `json:"description,omitempty" db:"description"`
+	Description string    `json:"description" db:"description"`
 	Layout      string    `json:"layout" db:"layout"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty" db:"updated_at"`

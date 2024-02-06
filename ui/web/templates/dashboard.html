@@ -21,30 +21,38 @@ SPDX-License-Identifier: Apache-2.0 -->
         <div class="container">
           <div class="row">
             <div class="col-lg-12 mx-auto py-3">
+              {{ template "breadcrumb" . }}
               <div class="row">
-                <div class="row-mb-3 display-none" id="CanvasButtons">
-                  <button
-                    type="button"
-                    class="btn body-button"
-                    data-bs-toggle="offcanvas"
-                    data-bs-target="#widgetsCanvas"
-                    aria-controls="widgetsCanvas"
-                  >
-                    Add Widgets
-                  </button>
-                  <button type="button" class="btn body-button" onclick="saveCanvas()">
-                    Save Layout
-                  </button>
-                  <button type="button" class="btn body-button" onclick="cancelEdit()">
-                    Cancel
-                  </button>
+                <div class="row-mb-3 mb-3 d-flex justify-content-between">
+                  <div class="dashboard-details">
+                    <span class="fs-2 fw-bold">{{ .Dashboard.Name }}</span>
+                    <span class="fs-6 fw-lighter font-monospace">{{ .Dashboard.ID }}</span>
+                  </div>
+                  <div class="row-mb-3 display-none" id="CanvasButtons">
+                    <button
+                      type="button"
+                      class="btn body-button"
+                      data-bs-toggle="offcanvas"
+                      data-bs-target="#widgetsCanvas"
+                      aria-controls="widgetsCanvas"
+                    >
+                      Add Widgets
+                    </button>
+                    <button type="button" class="btn body-button" onclick="saveCanvas()">
+                      Save Layout
+                    </button>
+                    <button type="button" class="btn body-button" onclick="cancelEdit()">
+                      Cancel
+                    </button>
+                  </div>
+                  <div id="editableCanvasButton">
+                    <button type="button" class="btn body-button" onclick="editableCanvas()">
+                      Edit Canvas
+                    </button>
+                  </div>
                 </div>
-                <div class="row-mb-3" id="editableCanvasButton">
-                  <button type="button" class="btn body-button" onclick="editableCanvas()">
-                    Edit Canvas
-                  </button>
-                </div>
-                <div class="row">
+                <div class="row p-3 bg-white">
+                  <div class="no-grid"></div>
                   <div class="grid"></div>
                 </div>
 
@@ -105,7 +113,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       </div>
 
       <script src="https://cdn.jsdelivr.net/npm/muuri@0.9.5/dist/muuri.min.js"></script>
-      <script src="/js/dashboards.js"></script>
+      <script src="/js/singleDashboard.js"></script>
       <script>
         const layout = '{{ .Dashboard.Layout }}';
         const dashboardID = '{{ .Dashboard.ID }}';
