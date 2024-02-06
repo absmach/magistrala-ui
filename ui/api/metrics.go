@@ -39,6 +39,26 @@ func (mm *metricsMiddleware) Index(token string) ([]byte, error) {
 	return mm.svc.Index(token)
 }
 
+// ViewRegistration adds metrics middleware to view registration method.
+func (mm *metricsMiddleware) ViewRegistration() ([]byte, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "view_registration").Add(1)
+		mm.latency.With("method", "view_registration").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.ViewRegistration()
+}
+
+// RegisterUser adds metrics middleware to register user method.
+func (mm *metricsMiddleware) RegisterUser(user sdk.User) (sdk.Token, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "register_user").Add(1)
+		mm.latency.With("method", "register_user").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.RegisterUser(user)
+}
+
 // Login adds metrics middleware to login method.
 func (mm *metricsMiddleware) Login() ([]byte, error) {
 	defer func(begin time.Time) {
