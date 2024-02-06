@@ -42,27 +42,62 @@ SPDX-License-Identifier: Apache-2.0 -->
                 name="channel"
                 id="channel-id"
                 placeholder="Enter channel ID"
+                required
               />
             </div>
             <div class="mb-3">
-              <label for="x-axis" class="form-label">Select x-axis Type</label>
-              <select class="form-select mb-3" name="xAxisType" id="x-axis">
-                <option value="" disabled>Select x-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
+              <label for="thing-id" class="form-label">Thing ID</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="thing"
+                id="thing-id"
+                placeholder="Enter thing ID"
+                required
+              />
             </div>
             <div class="mb-3">
-              <label for="y-axis" class="form-label">Select y-axis Type</label>
-              <select class="form-select mb-3" name="yAxisType" id="y-axis">
-                <option value="" disabled>Select y-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
+              <label for="value-name" class="form-label">Value name</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="dataSeries"
+                id="data-series"
+                placeholder="Enter data series name, e.g temperature"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="min-value" class="form-label">Min value</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="minValue"
+                id="min-value"
+                placeholder="Enter the minimum data value"
+                value="0"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="max-value" class="form-label">Max value</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="maxValue"
+                id="max-value"
+                placeholder="Enter the maximum data value"
+                value="100"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="gauge-label" class="form-label">Gauge Label</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="gaugeLabel"
+                id="gauge-label"
+                placeholder="Enter gauge label"
+              />
             </div>
           </div>
           <div class="modal-footer">
@@ -98,30 +133,51 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var widgetID = "gauge-" + Date.now();
       var widgetScript = `
-        var gaugeChart = echarts.init(document.getElementById("${widgetID}"));
-        var option = {
-          tooltip: {
-            formatter: "{a} <br/>{b} : {c}%",
-          },
-          series: [
-            {
-              name: "",
-              type: "gauge",
-              progress: {
-                show: true,
-              },
-              detail: { valueAnimation: true, formatter: "{value}" },
-              data: [
-                {
-                  value: 55,
-                  name: "Pressure",
-                },
-              ],
+        (function() {
+          var gaugeChart = echarts.init(document.getElementById("${widgetID}"));
+          var option = {
+            tooltip: {
+              formatter: "{a} <br/>{b} : {c}%",
             },
-          ],
-        };
+            series: [
+              {
+                name: "${formData.title}",
+                type: "gauge",
+                min: ${formData.minValue},
+                max: ${formData.maxValue},
+                progress: {
+                  show: true,
+                },
+                detail: { valueAnimation: true, formatter: "{value}" },
+                data: [
+                  { 
+                    value: 50
+                    name: "${formData.gaugeLabel}",
+                  },
+                ],
+              },
+            ],
+          };
 
-        gaugeChart.setOption(option);`;
+          gaugeChart.setOption(option);
+
+          function updateGauge() {
+              const randomValue = Math.floor(Math.random() * (${formData.maxValue} - ${formData.minValue} + 1)) + ${formData.minValue};
+              gaugeChart.setOption({
+                series: [
+                  {
+                    data: [
+                      {
+                        value: randomValue,
+                        name: "${formData.gaugeLabel}",
+                      },
+                    ],
+                  },
+                ],
+              });
+          }
+          setInterval(updateGauge, 2000); // Corrected setInterval usage
+        })();`;
 
       var config = {
         ID: widgetID,

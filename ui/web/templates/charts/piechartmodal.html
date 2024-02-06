@@ -45,23 +45,34 @@ SPDX-License-Identifier: Apache-2.0 -->
               />
             </div>
             <div class="mb-3">
-              <label for="x-axis" class="form-label">Select x-axis Type</label>
-              <select class="form-select mb-3" name="xAxisType" id="x-axis">
-                <option value="" disabled>Select x-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
+              <label for="thing-id" class="form-label">Thing IDs</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="thing"
+                id="thing-id"
+                placeholder="Enter thing IDs"
+              />
             </div>
             <div class="mb-3">
-              <label for="y-axis" class="form-label">Select y-axis Type</label>
-              <select class="form-select mb-3" name="yAxisType" id="y-axis">
-                <option value="" disabled>Select y-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
+              <label for="value-name" class="form-label">Enter value name</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="valueName"
+                id="value-name"
+                placeholder="Enter the value name eg. temperature"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="data-type" class="form-label">Select data type to plot</label>
+              <select class="form-select mb-3" name="dataType" id="data-type">
+                <option value="" disabled>data type</option>
+                <option rawValue="rawValue">Raw value</option>
+                <option sum="sum">sum</option>
+                <option average="average">average</option>
+                <option median="median">median</option>
               </select>
             </div>
           </div>

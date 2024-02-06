@@ -45,24 +45,48 @@ SPDX-License-Identifier: Apache-2.0 -->
               />
             </div>
             <div class="mb-3">
-              <label for="x-axis" class="form-label">Select x-axis Type</label>
-              <select class="form-select mb-3" name="xAxisType" id="x-axis">
-                <option value="" disabled>Select x-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
+              <label for="thing-id" class="form-label">Thing ID</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="thing"
+                id="thing-id"
+                placeholder="Enter thing ID"
+                required
+              />
             </div>
             <div class="mb-3">
-              <label for="y-axis" class="form-label">Select y-axis Type</label>
-              <select class="form-select mb-3" name="yAxisType" id="y-axis">
-                <option value="" disabled>Select y-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
+              <label for="value-name" class="form-label">Value name</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="dataSeries"
+                id="data-series"
+                placeholder="Enter data series name, e.g temperature"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="min-value" class="form-label">Min value</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="minValue"
+                id="min-value"
+                placeholder="Enter the minimum data value"
+                value="0"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="max-value" class="form-label">Max value</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="maxValue"
+                id="max-value"
+                placeholder="Enter the maximum data value"
+                value="100"
+              />
             </div>
           </div>
           <div class="modal-footer">

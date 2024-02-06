@@ -45,9 +45,30 @@ SPDX-License-Identifier: Apache-2.0 -->
               />
             </div>
             <div class="mb-3">
-              <label for="x-axis" class="form-label">Select x-axis Type</label>
-              <select class="form-select mb-3" name="xAxisType" id="x-axis">
-                <option value="" disabled>Select x-axis Type</option>
+              <label for="thing-id" class="form-label">Thing ID</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="thing"
+                id="thing-id"
+                placeholder="Enter the thing IDs"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="x-axis-label" class="form-label">Enter x axis label</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="xAxisLabel"
+                id="x-axis-label"
+                placeholder="Enter x axis label"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="y-axis-type" class="form-label">Select y-axis Type</label>
+              <select class="form-select mb-3" name="yAxisType" id="y-axis-typr">
+                <option value="" disabled>Select y-axis Type</option>
                 <option value="value">Value</option>
                 <option value="category">Category</option>
                 <option value="time">Time</option>
@@ -55,14 +76,57 @@ SPDX-License-Identifier: Apache-2.0 -->
               </select>
             </div>
             <div class="mb-3">
-              <label for="y-axis" class="form-label">Select y-axis Type</label>
-              <select class="form-select mb-3" name="yAxisType" id="y-axis">
-                <option value="" disabled>Select y-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
+              <label for="y-axis-label" class="form-label">Enter y axis label</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="yAxisLabel"
+                id="y-axis-label"
+                placeholder="Enter y axis label"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="value-name" class="form-label">Enter value name</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="valueName"
+                id="value-name"
+                placeholder="Enter the value names eg. temperature"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="start-time" class="form-label">Enter the start time</label>
+              <input
+                type="datetime-local"
+                class="form-control mb-3"
+                name="startTime"
+                id="start-name"
+                placeholder="Enter the start time."
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="stop-time" class="form-label">Enter the stop time</label>
+              <input
+                type="datetime-local"
+                class="form-control mb-3"
+                name="stopTime"
+                id="stop-name"
+                placeholder="Enter the stop time."
+              />
+            </div>
+            <div class="mb-3">
+              <label for="time-interval" class="form-label">Enter the time internal</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="timeInterval"
+                id="time-interval"
+                placeholder="Enter the time interval in seconds"
+                required
+              />
             </div>
           </div>
           <div class="modal-footer">
