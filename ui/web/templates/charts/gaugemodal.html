@@ -98,33 +98,30 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var widgetID = "gauge-" + Date.now();
       var widgetScript = `
-      var gaugeChart = echarts.init(document.getElementById("${widgetID}"), null, {
-              width: 300,
-              height: 300,
-            });
-            var option = {
-              tooltip: {
-                formatter: "{a} <br/>{b} : {c}%",
+        var gaugeChart = echarts.init(document.getElementById("${widgetID}"));
+        var option = {
+          tooltip: {
+            formatter: "{a} <br/>{b} : {c}%",
+          },
+          series: [
+            {
+              name: "",
+              type: "gauge",
+              progress: {
+                show: true,
               },
-              series: [
+              detail: { valueAnimation: true, formatter: "{value}" },
+              data: [
                 {
-                  name: "",
-                  type: "gauge",
-                  progress: {
-                    show: true,
-                  },
-                  detail: { valueAnimation: true, formatter: "{value}" },
-                  data: [
-                    {
-                      value: 55,
-                      name: "Pressure",
-                    },
-                  ],
+                  value: 55,
+                  name: "Pressure",
                 },
               ],
-            };
+            },
+          ],
+        };
 
-            gaugeChart.setOption(option);`;
+        gaugeChart.setOption(option);`;
 
       addWidget(widgetID, widgetScript);
     });
