@@ -61,8 +61,6 @@ function saveLayout(grid, dashboardID) {
       window.location.reload();
     }
   });
-
-  // localStorage.setItem(localStorageKey, jsonString);
 }
 
 function loadLayout(savedLayout) {

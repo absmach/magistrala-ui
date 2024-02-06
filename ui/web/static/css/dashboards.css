@@ -1,5 +1,6 @@
 /* Copyright (c) Abstract Machines
 SPDX-License-Identifier: Apache-2.0 */
+@import url("https://fonts.googleapis.com/css2?family=Inconsolata&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap");
 
 .grid {
   position: relative;
@@ -44,4 +45,41 @@ SPDX-License-Identifier: Apache-2.0 */
   resize: both;
   overflow-x: auto;
   overflow-y: hidden;
+}
+
+.card {
+  transition: all 0.3s;
+  font-family: "Roboto", sans-serif;
+}
+
+.card:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transform: scale(1.02);
+}
+
+.card-body:hover {
+  cursor: pointer;
+}
+
+.dashboard-card-id {
+  font-family: "Inconsolata", monospace;
+}
+
+.card .card-body {
+  height: 6rem;
+  max-height: 6rem;
+  overflow: auto;
+}
+
+.card-actions {
+  margin: 8px;
+  padding: 16px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-link {
+  text-decoration: none !important;
+  color: #1d2231;
 }
