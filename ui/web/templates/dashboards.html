@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </button>
               </div>
               <div class="row" id="dashboard-cards-container"></div>
-              <!-- <div id="dashboard-loader" class="row justify-content-center">
+              <div id="dashboard-loader" class="row justify-content-center">
                 <div class="spinner-border text-primary" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
@@ -55,7 +55,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <span id="cards-total"></span>
                   cards
                 </span>
-              </div> -->
+              </div>
             </div>
           </div>
         </div>
@@ -118,31 +118,35 @@ SPDX-License-Identifier: Apache-2.0 -->
           modal.show();
         };
         const cardsRow = document.getElementById("dashboard-cards-container");
-        // const cardCountElem = document.getElementById("cards-count");
-        // const cardTotalElem = document.getElementById("cards-total");
-        // const cardLimit = 200;
-        // cardTotalElem.innerHTML = cardLimit;
-        // const cardIncrease = 28;
-        // const pageCount = Math.ceil(cardLimit / cardIncrease);
+        const cardCountElem = document.getElementById("cards-count");
+        const cardTotalElem = document.getElementById("cards-total");
         let currentPage = 1;
+        let limit = 30;
+        var total, pageCount;
 
         const addCards = (pageIndex) => {
-          // currentPage = pageIndex;
-          // const endRange = currentPage == pageCount ? cardLimit : pageIndex * cardIncrease;
-          // cardCountElem.innerHTML = endRange;
-
-          fetch(`/dashboards/list`, {
+          currentPage = pageIndex;
+          fetch(`/dashboards/list?page=${pageIndex}&limit=${limit}`, {
             method: "GET",
           })
             .then((response) => response.json())
             .then((data) => {
               createCard(data);
+              total = data.total;
+              cardTotalElem.innerHTML = total;
+              limit = data.limit;
+              pageCount = data.pages;
+              const endRange = currentPage == pageCount ? total : pageIndex * limit;
+              cardCountElem.innerHTML = endRange;
             })
             .catch((error) => console.error("Error:", error));
         };
 
         window.onload = () => {
           addCards(currentPage);
+          if (currentPage === pageCount) {
+            document.getElementById("dashboard-loader").remove();
+          }
         };
 
         function createCard(data) {
@@ -180,7 +184,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         window.addEventListener("scroll", handleInfiniteScroll);
 
         const removeInfiniteScroll = () => {
-          // document.getElementById("dashboard-loader").remove();
+          document.getElementById("dashboard-loader").remove();
           window.removeEventListener("scroll", handleInfiniteScroll);
         };
       </script>

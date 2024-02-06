@@ -2443,8 +2443,14 @@ func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, e
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
+	noOfPages := int(math.Ceil(float64(dashboardsPage.Total) / float64(limit)))
+
 	items := make(map[string]interface{})
 	items["dashboards"] = dashboardsPage.Dashboards
+	items["total"] = dashboardsPage.Total
+	items["limit"] = limit
+	items["current_page"] = page
+	items["pages"] = noOfPages
 	jsonData, err := json.Marshal(items)
 	if err != nil {
 		return []byte{}, err
