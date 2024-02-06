@@ -5,9 +5,9 @@ name: Continuous Integration
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   ci:
@@ -48,12 +48,12 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: latest
-        
+
       - name: Build Binaries
         run: |
           go mod vendor
           make all -j $(nproc)
-      
+
       - name: Build Docker images
         if: github.event_name == 'pull_request'
         run: |
