@@ -4,10 +4,9 @@ var grid;
 var gridClass = ".grid";
 var localStorageKey = "gridState";
 
-function initGrid() {
-  var savedLayout = window.localStorage.getItem(localStorageKey);
-  if (savedLayout) {
-    loadLayout(savedLayout);
+function initGrid(layout) {
+  if (layout) {
+    loadLayout(layout);
   } else {
     grid = new Muuri(gridClass, {
       dragEnabled: true,
@@ -18,7 +17,7 @@ function initGrid() {
   return grid;
 }
 
-function saveLayout() {
+function saveLayout(grid, dashboardID) {
   const itemData = grid.getItems().map((item) => ({
     innerHTML: item._element.innerHTML,
     widgetID: item._element.children[1].children[0].id,
@@ -43,7 +42,27 @@ function saveLayout() {
     return value;
   });
 
-  localStorage.setItem(localStorageKey, jsonString);
+  const dashboard = {
+    id: dashboardID,
+    layout: jsonString,
+  };
+
+  fetch("/dashboards", {
+    method: "PATCH",
+    body: JSON.stringify(dashboard),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }).then((response) => {
+    if (!response.ok) {
+      const errorMessage = response.headers.get("X-Error-Message");
+      console.log("Error: ", errorMessage);
+    } else {
+      window.location.reload();
+    }
+  });
+
+  // localStorage.setItem(localStorageKey, jsonString);
 }
 
 function loadLayout(savedLayout) {
@@ -82,10 +101,8 @@ function loadLayout(savedLayout) {
 
 // Editable canvas is used to make the canvas editable allowing the user to add widgets and be able to move the
 // widgets around the canvas
-function editGrid(grid) {
-  var savedLayout = window.localStorage.getItem(localStorageKey);
+function editGrid(grid, layout) {
   try {
-    const gridState = JSON.parse(savedLayout);
     if (grid) {
       grid.destroy(true);
     }
@@ -93,22 +110,25 @@ function editGrid(grid) {
       dragEnabled: true,
       dragHandle: ".item-content",
     });
+    if (layout) {
+      const gridState = JSON.parse(layout);
 
-    if (gridState) {
-      gridState.items.forEach((itemData) => {
-        const newItem = document.createElement("div");
-        newItem.className = "item";
-        newItem.classList.add("item-editable");
-        newItem.innerHTML = itemData.innerHTML.trim();
-        var scriptTag = document.createElement("script");
-        scriptTag.type = "text/javascript";
-        scriptTag.defer = true;
-        scriptTag.innerHTML = itemData.widgetScript;
-        newItem.appendChild(scriptTag);
-        grid.add(newItem);
-        resizeObserver.observe(newItem);
-      });
-      grid.layout(gridState.layout);
+      if (gridState) {
+        gridState.items.forEach((itemData) => {
+          const newItem = document.createElement("div");
+          newItem.className = "item";
+          newItem.classList.add("item-editable");
+          newItem.innerHTML = itemData.innerHTML.trim();
+          var scriptTag = document.createElement("script");
+          scriptTag.type = "text/javascript";
+          scriptTag.defer = true;
+          scriptTag.innerHTML = itemData.widgetScript;
+          newItem.appendChild(scriptTag);
+          grid.add(newItem);
+          resizeObserver.observe(newItem);
+        });
+        grid.layout(gridState.layout);
+      }
     }
   } catch (error) {
     console.error("Error loading grid state:", error);
@@ -168,14 +188,13 @@ const resizeObserver = new ResizeObserver((entries) => {
 });
 
 // Save the grid layout
-function saveGrid(grid) {
+function saveGrid(grid, dashboardID) {
   grid._settings.dragEnabled = false;
   document.querySelectorAll("#removeItem").forEach((item) => {
     item.classList.add("no-opacity");
     item.disabled = true;
   });
-  saveLayout(grid, localStorageKey);
-  window.location.reload();
+  saveLayout(grid, dashboardID);
 }
 
 // Cancel the grid layout

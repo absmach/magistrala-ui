@@ -107,7 +107,9 @@ SPDX-License-Identifier: Apache-2.0 -->
       <script src="https://cdn.jsdelivr.net/npm/muuri@0.9.5/dist/muuri.min.js"></script>
       <script src="/js/dashboards.js"></script>
       <script>
-        var grid = initGrid();
+        const layout = '{{ .Dashboard.Layout }}';
+        const dashboardID = '{{ .Dashboard.ID }}';
+        var grid = initGrid(layout);
 
         function addWidget(widgetID, widgetScript) {
           // Create a new grid item
@@ -143,11 +145,11 @@ SPDX-License-Identifier: Apache-2.0 -->
         // Editable canvas is used to make the canvas editable allowing the user to add widgets and be able to move the
         // widgets around the canvas
         function editableCanvas() {
-          grid = editGrid(grid);
+          grid = editGrid(grid, layout);
         }
 
         function saveCanvas() {
-          saveGrid(grid);
+          saveGrid(grid, dashboardID);
         }
 
         function cancelEdit() {

@@ -170,9 +170,15 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
-			r.Get("/", kithttp.NewServer(
+			r.Get("/list", kithttp.NewServer(
 				listDashboardsEndpoint(svc),
 				decodelistDashboardsRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+			r.Get("/", kithttp.NewServer(
+				dashboardsEndpoint(svc),
+				decodeDashboardRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
@@ -820,17 +826,11 @@ func decodeCreateDashboardRequest(_ context.Context, r *http.Request) (interface
 		return nil, err
 	}
 
-	var data createDashboardReq
-	err = json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
-		return nil, err
-	}
-
 	req := createDashboardReq{
 		token:       token,
-		Name:        data.Name,
-		Description: data.Description,
-		Layout:      data.Layout,
+		Name:        r.PostFormValue("name"),
+		Description: r.PostFormValue("description"),
+		Layout:      r.PostFormValue("layout"),
 	}
 
 	return req, nil
@@ -854,6 +854,19 @@ func decodelistDashboardsRequest(_ context.Context, r *http.Request) (interface{
 		token: token,
 		page:  page,
 		limit: limit,
+	}
+
+	return req, nil
+}
+
+func decodeDashboardRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	req := dashboardsReq{
+		token: token,
 	}
 
 	return req, nil
@@ -905,7 +918,8 @@ func decodeViewDashboardRequest(_ context.Context, r *http.Request) (interface{}
 		return nil, err
 	}
 	req := viewDashboardReq{
-		token: token,
+		token:       token,
+		DashboardID: chi.URLParam(r, "id"),
 	}
 
 	return req, nil

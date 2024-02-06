@@ -1633,7 +1633,7 @@ func (lm *loggingMiddleware) DeleteInvitation(token, userID, domainID string) (e
 	return lm.svc.DeleteInvitation(token, userID, domainID)
 }
 
-// View Dashboard adds logging middleware to view dashboard method.
+// ViewDashboard adds logging middleware to view dashboard method.
 func (lm *loggingMiddleware) ViewDashboard(token, dashboardID string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
@@ -1651,7 +1651,7 @@ func (lm *loggingMiddleware) ViewDashboard(token, dashboardID string) (b []byte,
 	return lm.svc.ViewDashboard(token, dashboardID)
 }
 
-// Create Dashboard adds logging middleware to create dashboard method.
+// CreateDashboard adds logging middleware to create dashboard method.
 func (lm *loggingMiddleware) CreateDashboard(token string, dashboardReq ui.DashboardReq) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
@@ -1670,7 +1670,7 @@ func (lm *loggingMiddleware) CreateDashboard(token string, dashboardReq ui.Dashb
 	return lm.svc.CreateDashboard(token, dashboardReq)
 }
 
-// List Dashboards adds logging middleware to list dashboards method.
+// ListDashboards adds logging middleware to list dashboards method.
 func (lm *loggingMiddleware) ListDashboards(token string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
@@ -1689,7 +1689,21 @@ func (lm *loggingMiddleware) ListDashboards(token string, page, limit uint64) (b
 	return lm.svc.ListDashboards(token, page, limit)
 }
 
-// Update Dashboard adds logging middleware to update dashboard method.
+// Dashboards adds logging middleware to dashboards method.
+func (lm *loggingMiddleware) Dashboards(token string) (b []byte, err error) {
+	defer func(begin time.Time) {
+		duration := slog.String("duration", time.Since(begin).String())
+		if err != nil {
+			lm.logger.Warn("Dashboards failed to complete successfully", slog.Any("error", err), duration)
+			return
+		}
+		lm.logger.Info("Dashboards completed successfully", duration)
+	}(time.Now())
+
+	return lm.svc.Dashboards(token)
+}
+
+// UpdateDashboard adds logging middleware to update dashboard method.
 func (lm *loggingMiddleware) UpdateDashboard(token, dashboardID string, dashboardReq ui.DashboardReq) (err error) {
 	defer func(begin time.Time) {
 		args := []any{
@@ -1709,7 +1723,7 @@ func (lm *loggingMiddleware) UpdateDashboard(token, dashboardID string, dashboar
 	return lm.svc.UpdateDashboard(token, dashboardID, dashboardReq)
 }
 
-// Delete Dashboard adds logging middleware to delete dashboard method.
+// DeleteDashboard adds logging middleware to delete dashboard method.
 func (lm *loggingMiddleware) DeleteDashboard(token, dashboardID string) (err error) {
 	defer func(begin time.Time) {
 		args := []any{

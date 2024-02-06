@@ -37,10 +37,12 @@ SPDX-License-Identifier: Apache-2.0 -->
           <div class="row">
             <div class="col-lg-12 mx-auto py-3">
               <div class="row-mb-3">
-                <a class="btn body-button" type="button" href="/dashboard">New Dashboard</a>
+                <button class="btn body-button" type="button" onclick="newDashboard()">
+                  New Dashboard
+                </button>
               </div>
               <div class="row" id="dashboard-cards-container"></div>
-              <div id="dashboard-loader" class="row justify-content-center">
+              <!-- <div id="dashboard-loader" class="row justify-content-center">
                 <div class="spinner-border text-primary" role="status">
                   <span class="visually-hidden">Loading...</span>
                 </div>
@@ -53,27 +55,83 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <span id="cards-total"></span>
                   cards
                 </span>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
       </div>
+      <!-- Create Dashboard modal -->
+      <div
+        class="modal fade"
+        id="createDashboardModal"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="createDashboardModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="createDashboardModalLabel">Create Dashboard</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <form action="/dashboards" method="post">
+              <div class="modal-body">
+                <div class="mb-3">
+                  <label for="dashboard-name" class="form-label">Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="name"
+                    id="dashboard-name"
+                    placeholder="Enter the dashboard name"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="dashboard-description" class="form-label">Description</label>
+                  <textarea
+                    class="form-control"
+                    name="description"
+                    id="dashboard-description"
+                    placeholder="Enter the dashboard description"
+                  ></textarea>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn body-button">Create</button>
+                <button type="button" class="btn body-button" data-bs-dismiss="modal">
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
       <script>
+        const newDashboard = () => {
+          const modal = new bootstrap.Modal(document.getElementById("createDashboardModal"));
+          modal.show();
+        };
         const cardsRow = document.getElementById("dashboard-cards-container");
-        const cardCountElem = document.getElementById("cards-count");
-        const cardTotalElem = document.getElementById("cards-total");
-        const cardLimit = 200;
-        cardTotalElem.innerHTML = cardLimit;
-        const cardIncrease = 28;
-        const pageCount = Math.ceil(cardLimit / cardIncrease);
+        // const cardCountElem = document.getElementById("cards-count");
+        // const cardTotalElem = document.getElementById("cards-total");
+        // const cardLimit = 200;
+        // cardTotalElem.innerHTML = cardLimit;
+        // const cardIncrease = 28;
+        // const pageCount = Math.ceil(cardLimit / cardIncrease);
         let currentPage = 1;
 
         const addCards = (pageIndex) => {
-          currentPage = pageIndex;
-          const endRange = currentPage == pageCount ? cardLimit : pageIndex * cardIncrease;
-          cardCountElem.innerHTML = endRange;
+          // currentPage = pageIndex;
+          // const endRange = currentPage == pageCount ? cardLimit : pageIndex * cardIncrease;
+          // cardCountElem.innerHTML = endRange;
 
-          fetch(`/entities?item=dashboards`, {
+          fetch(`/dashboards/list`, {
             method: "GET",
           })
             .then((response) => response.json())
@@ -89,17 +147,17 @@ SPDX-License-Identifier: Apache-2.0 -->
 
         function createCard(data) {
           setTimeout(() => {
-            data.data.forEach((dashboard) => {
+            data.dashboards.forEach((dashboard) => {
               const newDiv = document.createElement("div");
               newDiv.className = "col-12 col-md-6 col-lg-4 mb-3";
               newDiv.innerHTML = `
-                <a href="/dashboard" class="card-link">
+                <a href="/dashboards/${dashboard.id}" class="card-link">
                   <div class="card">
                     <div class="card-body">
-                      <h5 class="card-title">${dashboard.Name}</h5>
-                      <h6 class="card-subtitle mb-2 text-body-secondary">${dashboard.ID}</h6>
+                      <h5 class="card-title">${dashboard.name}</h5>
+                      <h6 class="card-subtitle mb-2 text-body-secondary">${dashboard.id}</h6>
                       <p class="card-text">
-                        ${dashboard.Description}
+                        ${dashboard.description}
                       </p>
                     </div>
                   </div>
@@ -122,7 +180,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         window.addEventListener("scroll", handleInfiniteScroll);
 
         const removeInfiniteScroll = () => {
-          document.getElementById("dashboard-loader").remove();
+          // document.getElementById("dashboard-loader").remove();
           window.removeEventListener("scroll", handleInfiniteScroll);
         };
       </script>

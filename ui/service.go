@@ -379,6 +379,8 @@ type Service interface {
 	ViewDashboard(token, dashboardID string) ([]byte, error)
 	// List Dashboards retrieves all dashboards for a user.
 	ListDashboards(token string, page, limit uint64) ([]byte, error)
+	// Dashboards displays the dashboards page.
+	Dashboards(token string) ([]byte, error)
 	// Update a dashboard for a user.
 	UpdateDashboard(token, dashboardID string, dashboardReq DashboardReq) error
 	// Delete a dashboard for a user.
@@ -2046,23 +2048,6 @@ func (us *uiService) GetEntities(token, entity, entityName, domainID, permission
 			return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 		}
 		items["data"] = domains.Domains
-	case "dashboards":
-		type Dashboard struct {
-			ID          int
-			Name        string
-			Description string
-		}
-
-		// Dummy data for dashboards (replace with your actual data retrieval logic)
-		dashboards := make([]Dashboard, 0)
-		for i := 1; i <= 28; i++ {
-			dashboards = append(dashboards, Dashboard{
-				ID:          i,
-				Name:        fmt.Sprintf("Dashboard %d", i),
-				Description: fmt.Sprintf("Description for Dashboard %d", i),
-			})
-		}
-		items["data"] = dashboards
 	}
 
 	jsonData, err := json.Marshal(items)
@@ -2381,17 +2366,14 @@ func (us *uiService) DeleteInvitation(token, userID, domainID string) error {
 }
 
 func (us *uiService) CreateDashboard(token string, dashboardReq DashboardReq) ([]byte, error) {
-	var btpl bytes.Buffer
-	charts := CreateItem()
-
 	userID, err := getUserID(token)
 	if err != nil {
-		return btpl.Bytes(), errors.Wrap(ErrFailedRetrieveUserID, err)
+		return []byte{}, errors.Wrap(ErrFailedRetrieveUserID, err)
 	}
 
 	dashboardID, err := us.idProvider.ID()
 	if err != nil {
-		return btpl.Bytes(), errors.Wrap(ErrFailedGenerateID, err)
+		return []byte{}, errors.Wrap(ErrFailedGenerateID, err)
 	}
 	dashboard := Dashboard{
 		ID:          dashboardID,
@@ -2404,26 +2386,10 @@ func (us *uiService) CreateDashboard(token string, dashboardReq DashboardReq) ([
 
 	ds, err := us.drepo.Create(context.Background(), dashboard)
 	if err != nil {
-		return btpl.Bytes(), errors.Wrap(err, ErrFailedDashboardSave)
+		return []byte{}, errors.Wrap(err, ErrFailedDashboardSave)
 	}
 
-	data := struct {
-		NavbarActive   string
-		CollapseActive string
-		Charts         []Item
-		Dashboard      Dashboard
-	}{
-		dashboardsActive,
-		dashboardsActive,
-		charts,
-		ds,
-	}
-
-	if err := us.tpls.ExecuteTemplate(&btpl, "dashboard", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
-	}
-
-	return btpl.Bytes(), nil
+	return us.ViewDashboard(token, ds.ID)
 }
 
 func (us *uiService) ViewDashboard(token, dashboardID string) ([]byte, error) {
@@ -2485,6 +2451,23 @@ func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, e
 	}
 
 	return jsonData, nil
+}
+
+func (us *uiService) Dashboards(token string) ([]byte, error) {
+	data := struct {
+		NavbarActive   string
+		CollapseActive string
+	}{
+		dashboardsActive,
+		dashboardsActive,
+	}
+
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "dashboards", data); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+
+	return btpl.Bytes(), nil
 }
 
 func (us *uiService) UpdateDashboard(token, dashboardID string, dashboardReq DashboardReq) error {
