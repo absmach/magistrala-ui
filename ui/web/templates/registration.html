@@ -126,23 +126,14 @@ SPDX-License-Identifier: Apache-2.0 -->
             body: new FormData(form),
           })
             .then((response) => {
-              switch (response.status) {
-                case 401:
-                  passwordField.classList.add("border-red");
-                  emailField.classList.add("border-red");
-                  errorMessage = "invalid name or email or password. Please try again!";
-                  showAlert(errorMessage);
-                  break;
-                default:
-                  response.json().then((data) => {
-                    localStorage.setItem("userName", data.name);
-                    localStorage.setItem("userIdentity", data.credentials.identity);
-                    localStorage.setItem("userRole", data.role);
-                    localStorage.setItem("userID", data.id);
-                  });
-                  localStorage.setItem("loginStatus", "general");
-                  window.location.href = "/domains";
-              }
+                response.json().then((data) => {
+                  localStorage.setItem("userName", data.name);
+                  localStorage.setItem("userIdentity", data.credentials.identity);
+                  localStorage.setItem("userRole", data.role);
+                  localStorage.setItem("userID", data.id);
+                });
+                localStorage.setItem("loginStatus", "general");
+                window.location.href = "/domains";
             })
             .catch((error) => {
               console.error("error submitting login form: ", error);
