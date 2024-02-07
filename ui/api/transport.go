@@ -78,6 +78,20 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 		kithttp.ServerErrorEncoder(encodeError),
 	}
 
+	r.Get("/register", kithttp.NewServer(
+		viewRegistrationEndpoint(svc),
+		decodeViewRegistrationRequest,
+		encodeResponse,
+		opts...,
+	).ServeHTTP)
+
+	r.Post("/register", kithttp.NewServer(
+		registerUserEndpoint(svc),
+		decodeRegisterUserRequest,
+		encodeResponse,
+		opts...,
+	).ServeHTTP)
+
 	r.Get("/login", kithttp.NewServer(
 		loginEndpoint(svc),
 		decodeLoginRequest,
@@ -781,6 +795,10 @@ func decodeIndexRequest(_ context.Context, r *http.Request) (interface{}, error)
 	return req, nil
 }
 
+func decodeViewRegistrationRequest(_ context.Context, _ *http.Request) (interface{}, error) {
+	return nil, nil
+}
+
 func decodeLoginRequest(_ context.Context, _ *http.Request) (interface{}, error) {
 	return nil, nil
 }
@@ -830,6 +848,20 @@ func decodePasswordReset(_ context.Context, r *http.Request) (interface{}, error
 
 func decodeShowPasswordReset(_ context.Context, _ *http.Request) (interface{}, error) {
 	return nil, nil
+}
+
+func decodeRegisterUserRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	req := registerUserReq{
+		User: sdk.User{
+			Name: r.PostFormValue("name"),
+			Credentials: sdk.Credentials{
+				Identity: r.PostFormValue("email"),
+				Secret:   r.PostFormValue("password"),
+			},
+		},
+	}
+
+	return req, nil
 }
 
 func decodeTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -2328,7 +2360,7 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		w.WriteHeader(http.StatusSeeOther)
 	case errors.Contains(err, ui.ErrToken):
 		w.WriteHeader(http.StatusUnauthorized)
-	case errors.Contains(err, errConflict):
+	case errors.Contains(err, ui.ErrConflict):
 		w.Header().Set("X-Error-Message", err.Error())
 		w.WriteHeader(http.StatusConflict)
 	case errors.Contains(err, errInvalidFile):

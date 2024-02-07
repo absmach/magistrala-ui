@@ -1,11 +1,11 @@
 <!-- Copyright (c) Abstract Machines
 SPDX-License-Identifier: Apache-2.0 -->
 
-{{ define "login" }}
+{{ define "registration" }}
   <!doctype html>
   <html lang="en">
     <head>
-      <title>Login</title>
+      <title>Register</title>
       {{ template "header" }}
     </head>
     <body class="login-body">
@@ -19,15 +19,28 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </div>
               </div>
               <div class="login-header mb-4">
-                <h2>Login</h2>
+                <h2>Register</h2>
               </div>
               <form
                 method="post"
                 id="form"
                 class="row border-bottom pb-3 mb-3"
-                onsubmit="submitLoginForm()"
+                onsubmit="submitRegistrationForm()"
               >
                 <div class="col-md-12">
+                  <div class="row mb-3">
+                    <div class="col-md-12 input-field name-field">
+                      <i class="fas fa-solid fa-user"></i>
+                      <input
+                        class="p-3 w-100"
+                        type="name"
+                        name="name"
+                        id="name"
+                        placeholder="Name"
+                      />
+                    </div>
+                    <div id="nameError" class="text-danger"></div>
+                  </div>
                   <div class="row mb-3">
                     <div class="col-md-12 input-field email-field">
                       <i class="fas fa-solid fa-envelope"></i>
@@ -54,60 +67,19 @@ SPDX-License-Identifier: Apache-2.0 -->
                     </div>
                     <div id="passwordError" class="text-danger"></div>
                   </div>
-                  <div id="loginError" class="text-danger"></div>
-                </div>
-                <div class="forgot-password">
-                  <button
-                    type="button"
-                    id="fp-button"
-                    class="btn btn-link text-light"
-                    data-bs-toggle="modal"
-                    data-bs-target="#forgotPasswordModal"
-                  >
-                    Forgot Password?
-                  </button>
+                  <div id="registrationError" class="text-danger"></div>
                 </div>
                 <div class="col-md-12 d-grid py-3">
-                  <button type="submit" class="login-btn py-3" id="login-button">Log In</button>
+                  <button type="submit" class="login-btn py-3" id="register-button">
+                    Register
+                  </button>
                 </div>
               </form>
               <div class="col-md-12">
                 <p class="text-center text-light">
-                  Don't have an account?
-                  <a href="/register" class="text-light">Sign Up</a>
+                  Already have an account?
+                  <a href="/login" class="text-light">Log In</a>
                 </p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          class="modal fade"
-          id="forgotPasswordModal"
-          tabindex="-1"
-          role="dialog"
-          aria-labelledby="forgotPasswordModalLabel"
-          aria-hidden="true"
-        >
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="forgotPasswordModalLabel">Enter email</h5>
-              </div>
-              <div class="modal-body">
-                <form method="post" action="/reset-request" class="reset-pw-form">
-                  <div class="mb-3">
-                    <label for="reset-email" class="form-label">Email</label>
-                    <input
-                      type="email"
-                      class="form-control"
-                      name="email"
-                      id="reset-email"
-                      placeholder="Email"
-                      required
-                    />
-                  </div>
-                  <button type="submit" class="btn submit-button">Submit</button>
-                </form>
               </div>
             </div>
           </div>
@@ -116,44 +88,52 @@ SPDX-License-Identifier: Apache-2.0 -->
       <script type="module">
         import {
           attachValidationListener,
+          validateName,
           validateEmail,
           validatePassword,
         } from "/js/validation.js";
 
         attachValidationListener({
-          buttonId: "login-button",
+          buttonId: "register-button",
           validations: {
+            name: validateName,
             email: validateEmail,
             password: validatePassword,
           },
           errorDivs: {
+            name: "nameError",
             email: "emailError",
             password: "passwordError",
           },
           fields: {
+            name: "name-field",
             email: "email-field",
             password: "password-field",
           },
         });
       </script>
       <script>
+        const nameField = document.querySelector(".name-field");
         const passwordField = document.querySelector(".password-field");
         const emailField = document.querySelector(".email-field");
-        const loginError = document.getElementById("loginError");
+        const registrationError = document.getElementById("registrationError");
 
-        function submitLoginForm() {
+        document.getElementById("register-button").addEventListener("click", () => {
+          registrationError.innerHTML = "";
+        });
+
+        function submitRegistrationForm() {
           event.preventDefault();
           var form = event.target;
-          fetch("/login", {
+          fetch("/register", {
             method: "POST",
             body: new FormData(form),
           })
             .then((response) => {
               switch (response.status) {
-                case 401:
-                  passwordField.classList.add("border-red");
+                case 409:
                   emailField.classList.add("border-red");
-                  errorMessage = "invalid email or password. Please try again!";
+                  errorMessage = "User with this email already exists";
                   showError(errorMessage);
                   break;
                 default:
@@ -173,7 +153,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         }
 
         function showError(errorMessage) {
-          loginError.innerHTML = errorMessage;
+          registrationError.innerHTML = errorMessage;
         }
       </script>
     </body>

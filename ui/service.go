@@ -103,6 +103,7 @@ var (
 
 		"index",
 
+		"registration",
 		"login",
 		"resetpassword",
 		"updatepassword",
@@ -145,6 +146,7 @@ var (
 	ErrFailedDelete         = errors.New("failed to delete entity")
 	ErrFailedShare          = errors.New("failed to share entity")
 	ErrFailedUnshare        = errors.New("failed to unshare entity")
+	ErrConflict             = errors.New("entity already exists")
 	emptyData               = struct{}{}
 	groupRelations          = []string{"administrator", "editor", "viewer", "member"}
 	thingRelations          = []string{"administrator"}
@@ -155,6 +157,10 @@ var (
 type Service interface {
 	// Index displays the landing page of the UI.
 	Index(token string) ([]byte, error)
+	// ViewRegistration displays the registration page.
+	ViewRegistration() ([]byte, error)
+	// RegisterUser registers a new user and logs them in.
+	RegisterUser(user sdk.User) (sdk.Token, error)
 	// Login displays the login page.
 	Login() ([]byte, error)
 	// Logout deletes the access token and refresh token from the cookies and logs the user out of the UI.
@@ -445,6 +451,31 @@ func (us *uiService) Index(token string) (b []byte, err error) {
 	}
 
 	return btpl.Bytes(), nil
+}
+
+func (us *uiService) ViewRegistration() ([]byte, error) {
+	var btpl bytes.Buffer
+	if err := us.tpls.ExecuteTemplate(&btpl, "registration", emptyData); err != nil {
+		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+	}
+
+	return btpl.Bytes(), nil
+}
+
+func (us *uiService) RegisterUser(user sdk.User) (sdk.Token, error) {
+	_, err := us.sdk.CreateUser(user, "")
+	if err != nil {
+		if errors.Contains(err, ErrConflict) {
+			return sdk.Token{}, errors.Wrap(err, ErrConflict)
+		}
+		return sdk.Token{}, errors.Wrap(err, ErrFailedCreate)
+	}
+
+	login := sdk.Login{
+		Identity: user.Credentials.Identity,
+		Secret:   user.Credentials.Secret,
+	}
+	return us.Token(login)
 }
 
 func (us *uiService) Login() ([]byte, error) {

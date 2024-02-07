@@ -20,6 +20,23 @@ func (req indexReq) validate() error {
 	return nil
 }
 
+type registerUserReq struct {
+	sdk.User
+}
+
+func (req registerUserReq) validate() error {
+	if req.User.Name == "" {
+		return errMissingName
+	}
+	if req.User.Credentials.Identity == "" {
+		return errMissingIdentity
+	}
+	if req.User.Credentials.Secret == "" {
+		return errMissingSecret
+	}
+	return nil
+}
+
 type tokenReq struct {
 	Identity string `json:"identity"`
 	Secret   string `json:"secret"`

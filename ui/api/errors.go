@@ -37,7 +37,6 @@ var (
 	errMissingError           = errors.New("missing error")
 	errMissingRefreshToken    = errors.New("missing refresh token")
 	errMissingRef             = errors.New("missing ref")
-	errConflict               = errors.New("entity already exists")
 	errInvalidQueryParams     = errors.New("invalid query parameters")
 	errFileFormat             = errors.New("invalid file format")
 	errInvalidFile            = errors.New("unsupported file type")

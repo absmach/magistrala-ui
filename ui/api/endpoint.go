@@ -33,6 +33,71 @@ func indexEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
+func viewRegistrationEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, _ interface{}) (interface{}, error) {
+		res, err := svc.ViewRegistration()
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code: http.StatusOK,
+			html: res,
+		}, nil
+	}
+}
+
+func registerUserEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(registerUserReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		token, err := svc.RegisterUser(req.User)
+		if err != nil {
+			return nil, err
+		}
+
+		userPage, err := svc.UserProfile(token.AccessToken)
+		if err != nil {
+			return nil, err
+		}
+
+		accessExp, err := extractTokenExpiry(token.AccessToken)
+		if err != nil {
+			return nil, err
+		}
+		refreshExp, err := extractTokenExpiry(token.RefreshToken)
+		if err != nil {
+			return nil, err
+		}
+
+		tkr := uiRes{
+			code: http.StatusCreated,
+			html: userPage,
+			cookies: []*http.Cookie{
+				{
+					Name:     accessTokenKey,
+					Value:    token.AccessToken,
+					Path:     "/",
+					HttpOnly: true,
+					Expires:  accessExp,
+				},
+				{
+					Name:     refreshTokenKey,
+					Value:    token.RefreshToken,
+					Path:     domainsAPIEndpoint,
+					HttpOnly: true,
+					Expires:  refreshExp,
+				},
+			},
+		}
+
+		return tkr, nil
+	}
+}
+
 func loginEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, _ interface{}) (interface{}, error) {
 		res, err := svc.Login()

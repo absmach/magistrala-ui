@@ -38,6 +38,34 @@ func (lm *loggingMiddleware) Index(token string) (b []byte, err error) {
 	return lm.svc.Index(token)
 }
 
+// ViewRegistration adds logging middleware to view registration method.
+func (lm *loggingMiddleware) ViewRegistration() (b []byte, err error) {
+	defer func(begin time.Time) {
+		duration := slog.String("duration", time.Since(begin).String())
+		if err != nil {
+			lm.logger.Warn("View registration page failed to complete successfully", slog.Any("error", err), duration)
+			return
+		}
+		lm.logger.Info("View registration page completed successfully", duration)
+	}(time.Now())
+
+	return lm.svc.ViewRegistration()
+}
+
+// Register adds logging middleware to register method.
+func (lm *loggingMiddleware) RegisterUser(user sdk.User) (token sdk.Token, err error) {
+	defer func(begin time.Time) {
+		duration := slog.String("duration", time.Since(begin).String())
+		if err != nil {
+			lm.logger.Warn("Register user failed to complete successfully", slog.Any("error", err), duration)
+			return
+		}
+		lm.logger.Info("Register user completed successfully", duration)
+	}(time.Now())
+
+	return lm.svc.RegisterUser(user)
+}
+
 // Login adds logging middleware to login method.
 func (lm *loggingMiddleware) Login() (b []byte, err error) {
 	defer func(begin time.Time) {
