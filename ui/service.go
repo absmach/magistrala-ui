@@ -172,7 +172,7 @@ type Service interface {
 	// ShowPasswordReset displays the password reset page.
 	ShowPasswordReset() ([]byte, error)
 	// PasswordUpdate displays the password update page.
-	PasswordUpdate(token string) ([]byte, error)
+	PasswordUpdate() ([]byte, error)
 	// UpdatePassword updates the user's old password to the new password.
 	UpdatePassword(token, oldPass, newPass string) error
 	// Token provides a user with an access token and a refresh token.
@@ -289,7 +289,7 @@ type Service interface {
 	ListUserGroupChannels(token, id string, page, limit uint64) (b []byte, err error)
 
 	// Publish facilitates a thing publishin messages to a channel.
-	Publish(token, channelID, thingKey, baseUnit, name, unit string, baseTime, value float64) error
+	Publish(channelID, thingKey, baseUnit, name, unit string, baseTime, value float64) error
 	// ReadMessages retrieves messages published in a channel.
 	ReadMessages(token, channelID, thingKey string, page, limit uint64) ([]byte, error)
 
@@ -310,7 +310,7 @@ type Service interface {
 	// ViewBootstrap retrieves a bootstrap config by thing id.
 	ViewBootstrap(token, thingID string) ([]byte, error)
 	// GetRemoteTerminal returns remote terminal for a bootstrap config with mainflux agent installed.
-	GetRemoteTerminal(thingID, token string) ([]byte, error)
+	GetRemoteTerminal(thingID string) ([]byte, error)
 	// ProcessTerminalCommand sends mqtt command to agent and retrieves a response asynchronously.
 	ProcessTerminalCommand(ctx context.Context, thingID, token, command string, res chan string) error
 
@@ -515,7 +515,7 @@ func (us *uiService) ShowPasswordReset() ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) PasswordUpdate(token string) ([]byte, error) {
+func (us *uiService) PasswordUpdate() ([]byte, error) {
 	data := struct {
 		NavbarActive   string
 		CollapseActive string
@@ -1228,16 +1228,16 @@ func (us *uiService) DisconnectThing(thingID, channelID, token string) error {
 	return nil
 }
 
-func (gs *uiService) AddUserToChannel(token, id string, req sdk.UsersRelationRequest) error {
-	if err := gs.sdk.AddUserToChannel(id, req, token); err != nil {
+func (us *uiService) AddUserToChannel(token, id string, req sdk.UsersRelationRequest) error {
+	if err := us.sdk.AddUserToChannel(id, req, token); err != nil {
 		return errors.Wrap(err, ErrFailedAssign)
 	}
 
 	return nil
 }
 
-func (gs *uiService) RemoveUserFromChannel(token, id string, req sdk.UsersRelationRequest) error {
-	if err := gs.sdk.RemoveUserFromChannel(id, req, token); err != nil {
+func (us *uiService) RemoveUserFromChannel(token, id string, req sdk.UsersRelationRequest) error {
+	if err := us.sdk.RemoveUserFromChannel(id, req, token); err != nil {
 		return errors.Wrap(err, ErrFailedUnassign)
 	}
 
@@ -1302,16 +1302,16 @@ func (us *uiService) ListChannelUsers(token, id, relation string, page, limit ui
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) AddUserGroupToChannel(token, id string, req sdk.UserGroupsRequest) error {
-	if err := gs.sdk.AddUserGroupToChannel(id, req, token); err != nil {
+func (us *uiService) AddUserGroupToChannel(token, id string, req sdk.UserGroupsRequest) error {
+	if err := us.sdk.AddUserGroupToChannel(id, req, token); err != nil {
 		return errors.Wrap(err, ErrFailedAssign)
 	}
 
 	return nil
 }
 
-func (gs *uiService) RemoveUserGroupFromChannel(token, id string, req sdk.UserGroupsRequest) error {
-	if err := gs.sdk.RemoveUserGroupFromChannel(id, req, token); err != nil {
+func (us *uiService) RemoveUserGroupFromChannel(token, id string, req sdk.UserGroupsRequest) error {
+	if err := us.sdk.RemoveUserGroupFromChannel(id, req, token); err != nil {
 		return errors.Wrap(err, ErrFailedUnassign)
 	}
 
@@ -1446,16 +1446,16 @@ func (us *uiService) ListGroupUsers(token, id, relation string, page, limit uint
 	return btpl.Bytes(), nil
 }
 
-func (gs *uiService) Assign(token, groupID string, userRelation sdk.UsersRelationRequest) error {
-	if err := gs.sdk.AddUserToGroup(groupID, userRelation, token); err != nil {
+func (us *uiService) Assign(token, groupID string, userRelation sdk.UsersRelationRequest) error {
+	if err := us.sdk.AddUserToGroup(groupID, userRelation, token); err != nil {
 		return errors.Wrap(err, ErrFailedAssign)
 	}
 
 	return nil
 }
 
-func (gs *uiService) Unassign(token, groupID string, userRelation sdk.UsersRelationRequest) error {
-	if err := gs.sdk.RemoveUserFromGroup(groupID, userRelation, token); err != nil {
+func (us *uiService) Unassign(token, groupID string, userRelation sdk.UsersRelationRequest) error {
+	if err := us.sdk.RemoveUserFromGroup(groupID, userRelation, token); err != nil {
 		return errors.Wrap(err, ErrFailedUnassign)
 	}
 
@@ -1685,7 +1685,7 @@ func (us *uiService) ReadMessages(token, channelID, thingKey string, page, limit
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) Publish(token, channelID, thingKey, baseUnit, name, unit string, baseTime, value float64) error {
+func (us *uiService) Publish(channelID, thingKey, baseUnit, name, unit string, baseTime, value float64) error {
 	message := struct {
 		BaseTime float64 `json:"bt"`
 		BaseUnit string  `json:"bu"`
@@ -1877,7 +1877,7 @@ func (us *uiService) ViewBootstrap(token, thingID string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) GetRemoteTerminal(thingID, token string) ([]byte, error) {
+func (us *uiService) GetRemoteTerminal(thingID string) ([]byte, error) {
 	crumbs := []breadcrumb{
 		{Name: bootstrapsActive, URL: bootstrapEndpoint},
 		{Name: thingID, URL: bootstrapEndpoint + "/" + thingID},

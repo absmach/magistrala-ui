@@ -34,6 +34,12 @@ linters-settings:
     template: |-
       Copyright (c) Abstract Machines
       SPDX-License-Identifier: Apache-2.0
+  unparam:
+    check-exported: true
+  unused:
+    field-writes-are-uses: false
+    generated-is-used: false
+
 
 linters:
   disable-all: true
@@ -73,3 +79,4 @@ linters:
     - mirror
     - nakedret
     - dupword
+    - revive

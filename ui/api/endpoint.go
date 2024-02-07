@@ -206,7 +206,7 @@ func showUpdatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.PasswordUpdate(req.token)
+		res, err := svc.PasswordUpdate()
 		if err != nil {
 			return nil, err
 		}
@@ -1349,7 +1349,7 @@ func publishMessageEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		if err := svc.Publish(req.token, req.ChanID, req.ThingKey, req.BaseUnit, req.Name, req.Unit, req.BaseTime, req.Value); err != nil {
+		if err := svc.Publish(req.ChanID, req.ThingKey, req.BaseUnit, req.Name, req.Unit, req.BaseTime, req.Value); err != nil {
 			return nil, err
 		}
 
@@ -1559,7 +1559,7 @@ func getTerminalEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.GetRemoteTerminal(req.id, req.token)
+		res, err := svc.GetRemoteTerminal(req.id)
 		if err != nil {
 			return nil, err
 		}
@@ -2070,12 +2070,11 @@ func deleteInvitationEndpoint(svc ui.Service) endpoint.Endpoint {
 				code:    http.StatusSeeOther,
 				headers: map[string]string{"Location": "/invitations"},
 			}, nil
-		} else {
-			return uiRes{
-				code:    http.StatusSeeOther,
-				headers: map[string]string{"Location": domainsAPIEndpoint + "/" + req.DomainID + "/invitations"},
-			}, nil
 		}
+		return uiRes{
+			code:    http.StatusSeeOther,
+			headers: map[string]string{"Location": domainsAPIEndpoint + "/" + req.DomainID + "/invitations"},
+		}, nil
 	}
 }
 
