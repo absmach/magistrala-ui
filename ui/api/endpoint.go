@@ -200,12 +200,7 @@ func showPasswordResetEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func showUpdatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(showUpdatePasswordReq)
-		if err := req.validate(); err != nil {
-			return nil, err
-		}
-
+	return func(_ context.Context, _ interface{}) (interface{}, error) {
 		res, err := svc.PasswordUpdate()
 		if err != nil {
 			return nil, err

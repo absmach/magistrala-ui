@@ -259,17 +259,6 @@ func (req updateUserRoleReq) validate() error {
 	return nil
 }
 
-type showUpdatePasswordReq struct {
-	token string
-}
-
-func (req showUpdatePasswordReq) validate() error {
-	if req.token == "" {
-		return errAuthorization
-	}
-	return nil
-}
-
 type updateUserPasswordReq struct {
 	token   string
 	OldPass string `json:"old_pass"`
