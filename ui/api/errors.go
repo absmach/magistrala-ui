@@ -21,7 +21,6 @@ var (
 	errInvalidResetPassword   = errors.New("invalid reset password")
 	errNameSize               = errors.New("invalid name size")
 	errBearerKey              = errors.New("missing or invalid bearer entity key")
-	errMissingOwner           = errors.New("missing owner")
 	errMissingThingID         = errors.New("missing thing id")
 	errMissingItem            = errors.New("missing item")
 	errMissingChannelID       = errors.New("missing channel id")

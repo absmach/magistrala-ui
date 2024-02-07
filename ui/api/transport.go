@@ -2386,7 +2386,6 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 			errMissingConfirmPassword,
 			errNameSize,
 			errBearerKey,
-			errMissingOwner,
 			errMissingItem,
 			errMissingThingID,
 			errMissingChannelID,
