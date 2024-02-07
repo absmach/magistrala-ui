@@ -2,8 +2,7 @@
 SPDX-License-Identifier: Apache-2.0 */
 
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300&family=Roboto:wght@400&family=Montserrat:wght@700&display=swap");
-@import url('https://fonts.googleapis.com/css2?family=Inconsolata&display=swap');
-
+@import url("https://fonts.googleapis.com/css2?family=Inconsolata&display=swap");
 
 :root {
   --main-color: #003366;
@@ -13,14 +12,14 @@ SPDX-License-Identifier: Apache-2.0 */
   --sidebar-min: 7rem;
   --border-radius: 5px;
 
-	/* pills */
-	--pill-color-1: #1d2231;
-	--pill-color-2: #003366;
-	--pill-color-3: #8390a2;
+  /* pills */
+  --pill-color-1: #1d2231;
+  --pill-color-2: #003366;
+  --pill-color-3: #8390a2;
 
-	--codemirror-font: 'Inconsolata', monospace;
+  --codemirror-font: "Inconsolata", monospace;
 
-	--bs-breadcrumb-divider: '>';
+  --bs-breadcrumb-divider: ">";
 }
 
 * {
@@ -227,12 +226,12 @@ body.sidebar-toggled .main-content {
 }
 
 body .body-button {
-	background: var(--main-color);
-	border-radius: var(--border-radius);
-	color: #fff;
-	font-size: 1rem;
-	border: 1px solid var(--main-color);
-	margin-bottom: 0.5rem;
+  background: var(--main-color);
+  border-radius: var(--border-radius);
+  color: #fff;
+  font-size: 1rem;
+  border: 1px solid var(--main-color);
+  margin-bottom: 0.5rem;
 }
 
 .main-content .sendMessage-button {
@@ -243,10 +242,10 @@ body .body-button {
 
 .main-content .sendMessage-button:hover,
 body .body-button:hover {
-	color: #fff;
-	background: var(--main-color);
-	transform: scale(1.03);
-	font-weight: 700;
+  color: #fff;
+  background: var(--main-color);
+  transform: scale(1.03);
+  font-weight: 700;
 }
 
 .doc-button:hover {
@@ -537,11 +536,11 @@ button.edit-btn {
 }
 
 .domains-table .body-button {
-	background: var(--main-color);
-	border-radius: var(--border-radius);
-	color: #fff;
-	font-size: 1rem;
-	border: 1px solid var(--main-color);
+  background: var(--main-color);
+  border-radius: var(--border-radius);
+  color: #fff;
+  font-size: 1rem;
+  border: 1px solid var(--main-color);
 }
 
 .domains-table .body-button:hover {
@@ -579,79 +578,79 @@ button.edit-btn {
 }
 
 .relation-pill {
-	background: var(--pill-color-3);
+  background: var(--pill-color-3);
 }
 
 .enabled-pill {
-	background: #f0f0f0;
-	color: var(--main-color);
-	padding: 0.5rem;
-	border: var(--main-color) 1px solid;
+  background: #f0f0f0;
+  color: var(--main-color);
+  padding: 0.5rem;
+  border: var(--main-color) 1px solid;
 }
 
 .disabled-pill {
-	background: #f0f0f0;
-	color: #c20707;
-	padding: 0.5rem;
-	border: #c20707 1px solid;
+  background: #f0f0f0;
+  color: #c20707;
+  padding: 0.5rem;
+  border: #c20707 1px solid;
 }
 
 .enabled-pill {
-	background: #f0f0f0;
-	color: var(--main-color);
-	padding: 0.5rem;
-	border: var(--main-color) 1px solid;
+  background: #f0f0f0;
+  color: var(--main-color);
+  padding: 0.5rem;
+  border: var(--main-color) 1px solid;
 }
 
 .modal-title {
-	font-weight: 700;
-	font-size: 1.25rem;
+  font-weight: 700;
+  font-size: 1.25rem;
 }
 
 .string,
 .cm-s-default .cm-string {
-	color: var(--main-color);
+  color: var(--main-color);
 }
 
 .key,
 .cm-property {
-	color: red !important;
+  color: red !important;
 }
 
 .number,
 .cm-s-default .cm-number {
-	color: darkorange;
+  color: darkorange;
 }
 
 .boolean,
 .cm-s-default .cm-atom {
-	color: green;
+  color: green;
 }
 
 .null {
-	color: magenta;
+  color: magenta;
 }
 
 .table-container .meta-div {
-	overflow: auto;
-	max-height: 6.8rem;
-	max-width: 100%;
+  overflow: auto;
+  max-height: 6.8rem;
+  max-width: 100%;
 }
 
 .table-container .meta-div pre {
-	margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .table-container .meta-col {
-	max-width: 50vh;
+  max-width: 50vh;
 }
 
 .table-container .entityMeta-col {
-	max-width: 50vh;
+  max-width: 50vh;
 }
 
 .metadata-field span {
-	font-family: var(--codemirror-font) !important;
+  font-family: var(--codemirror-font) !important;
 }
 
 @media (max-width: 768px) {
@@ -727,18 +726,18 @@ button.edit-btn {
     display: none;
   }
 
-	.table-container .tags-col,
-	.table-container .meta-col,
-	.table-container .created-col,
-	.table-container .desc-col,
-	.table-container .alias-col,
-	.doc-button {
-		display: none;
-	}
+  .table-container .tags-col,
+  .table-container .meta-col,
+  .table-container .created-col,
+  .table-container .desc-col,
+  .table-container .alias-col,
+  .doc-button {
+    display: none;
+  }
 
-	body .body-button {
-		margin-left: 0.2rem;
-	}
+  body .body-button {
+    margin-left: 0.2rem;
+  }
 }
 
 .highlight-list-item {

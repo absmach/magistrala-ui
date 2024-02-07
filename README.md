@@ -1,5 +1,7 @@
 # Magistrala-ui
 
+[![Create and publish a Docker image](https://github.com/absmach/magistrala-ui/actions/workflows/build.yml/badge.svg)](https://github.com/absmach/magistrala-ui/actions/workflows/build.yml) [![Continuous Integration](https://github.com/absmach/magistrala-ui/actions/workflows/ci.yaml/badge.svg)](https://github.com/absmach/magistrala-ui/actions/workflows/ci.yaml) [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+
 The Magistrala-ui functions as a Graphical User Interface (GUI) designed to interact with Magistrala services, encompassing both the creation and management aspects of users, things, channels, and groups. It streamlines tasks such as user and thing creation, channel establishment, policy configuration, and HTTP message transmission across various channels.
 
 Magistrala-ui can be obtained as an independent subset of Magistrala; however, it requires integration with the Magistrala core services to function properly.
@@ -94,9 +96,16 @@ To configure bootstrap, provide the Name, Thing ID, External ID, External Key, C
 
 ## Dev Guide
 
-UI code is formatted using [prettier](https://prettier.io/). To install prettier, check the [installation guide](https://github.com/NiklasPor/prettier-plugin-go-template).
+UI code is formatted using [prettier](https://prettier.io/). To install prettier, check the [installation guide](https://github.com/NiklasPor/prettier-plugin-go-template). Node.js and npm are required to install prettier.
 
-run:
+Install prettier and prettier-plugin-go-template using the following command:
+
 ```bash
  npm install -g prettier prettier-plugin-go-template
+```
+
+To format the code, run the following command:
+
+```bash
+prettier --write .
 ```
