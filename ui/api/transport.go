@@ -2360,7 +2360,7 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		w.WriteHeader(http.StatusSeeOther)
 	case errors.Contains(err, ui.ErrToken):
 		w.WriteHeader(http.StatusUnauthorized)
-	case errors.Contains(err, errConflict):
+	case errors.Contains(err, ui.ErrConflict):
 		w.Header().Set("X-Error-Message", err.Error())
 		w.WriteHeader(http.StatusConflict)
 	case errors.Contains(err, errInvalidFile):

@@ -146,6 +146,7 @@ var (
 	ErrFailedDelete         = errors.New("failed to delete entity")
 	ErrFailedShare          = errors.New("failed to share entity")
 	ErrFailedUnshare        = errors.New("failed to unshare entity")
+	ErrConflict             = errors.New("entity already exists")
 	emptyData               = struct{}{}
 	groupRelations          = []string{"administrator", "editor", "viewer", "member"}
 	thingRelations          = []string{"administrator"}
@@ -464,6 +465,9 @@ func (us *uiService) ViewRegistration() ([]byte, error) {
 func (us *uiService) RegisterUser(user sdk.User) (sdk.Token, error) {
 	_, err := us.sdk.CreateUser(user, "")
 	if err != nil {
+		if errors.Contains(err, ErrConflict) {
+			return sdk.Token{}, errors.Wrap(err, ErrConflict)
+		}
 		return sdk.Token{}, errors.Wrap(err, ErrFailedCreate)
 	}
 
