@@ -61,7 +61,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 aria-label="Close"
               ></button>
             </div>
-            <form action="/dashboards" method="post">
+            <form id="create-dashboard-form" method="post">
               <div class="modal-body">
                 <div class="mb-3">
                   <label for="dashboard-name" class="form-label">Name</label>
@@ -85,7 +85,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </div>
               </div>
               <div class="modal-footer">
-                <button type="submit" class="btn body-button">Create</button>
+                <button type="submit" class="btn body-button" data-bs-dismiss="modal">
+                  Create
+                </button>
                 <button type="button" class="btn body-button" data-bs-dismiss="modal">
                   Cancel
                 </button>

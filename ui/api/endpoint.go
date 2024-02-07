@@ -2050,8 +2050,9 @@ func createDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 		return uiRes{
-			code: http.StatusCreated,
-			html: res,
+			code:    http.StatusCreated,
+			html:    res,
+			headers: map[string]string{"Content-Type": jsonContentType},
 		}, nil
 	}
 }

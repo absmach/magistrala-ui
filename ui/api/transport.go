@@ -826,11 +826,16 @@ func decodeCreateDashboardRequest(_ context.Context, r *http.Request) (interface
 		return nil, err
 	}
 
+	var data createDashboardReq
+	err = json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		return nil, err
+	}
+
 	req := createDashboardReq{
 		token:       token,
-		Name:        r.PostFormValue("name"),
-		Description: r.PostFormValue("description"),
-		Layout:      r.PostFormValue("layout"),
+		Name:        data.Name,
+		Description: data.Description,
 	}
 
 	return req, nil

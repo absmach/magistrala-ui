@@ -2389,7 +2389,14 @@ func (us *uiService) CreateDashboard(token string, dashboardReq DashboardReq) ([
 		return []byte{}, errors.Wrap(err, ErrFailedDashboardSave)
 	}
 
-	return us.ViewDashboard(token, ds.ID)
+	item := make(map[string]interface{})
+	item["dashboard"] = ds
+	jsonData, err := json.Marshal(item)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return jsonData, nil
 }
 
 func (us *uiService) ViewDashboard(token, dashboardID string) ([]byte, error) {

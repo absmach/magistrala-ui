@@ -6,6 +6,37 @@ const newDashboard = () => {
   modal.show();
 };
 
+const createDashboardForm = document.getElementById("create-dashboard-form");
+createDashboardForm.addEventListener("submit", function (event) {
+  event.preventDefault();
+  const data = {
+    name: createDashboardForm.name.value,
+    description: createDashboardForm.description.value,
+  };
+  fetch(`/dashboards`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.dashboard) {
+        appendAlert(
+          `Dashboard ${data.dashboard.name} with id ${data.dashboard.id}  created successfully`,
+          "success",
+        );
+        setTimeout(() => {
+          window.location.href = `/dashboards/${data.dashboard.id}`;
+        }, 1000);
+      } else {
+        appendAlert("Failed to create dashboard", "danger");
+      }
+    })
+    .catch((error) => console.error("Error:", error));
+});
+
 // Infinite scroll code start
 const cardsRow = document.getElementById("dashboard-cards-container");
 const cardCountElem = document.getElementById("cards-count");
