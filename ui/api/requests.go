@@ -4,6 +4,7 @@
 package api
 
 import (
+	"github.com/absmach/magistrala-ui/ui"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 )
 
@@ -38,8 +39,7 @@ func (req registerUserReq) validate() error {
 }
 
 type tokenReq struct {
-	Identity string `json:"identity"`
-	Secret   string `json:"secret"`
+	sdk.Login
 }
 
 func (req tokenReq) validate() error {
@@ -168,17 +168,15 @@ func (req viewResourceReq) validate() error {
 }
 
 type updateUserReq struct {
-	token    string
-	id       string
-	Name     string                 `json:"name,omitempty"`
-	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	token string
+	sdk.User
 }
 
 func (req updateUserReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.id == "" {
+	if req.ID == "" {
 		return errMissingUserID
 	}
 	if req.Name == "" && req.Metadata == nil {
@@ -189,15 +187,14 @@ func (req updateUserReq) validate() error {
 
 type updateUserTagsReq struct {
 	token string
-	id    string
-	Tags  []string `json:"tags,omitempty"`
+	sdk.User
 }
 
 func (req updateUserTagsReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.id == "" {
+	if req.ID == "" {
 		return errMissingUserID
 	}
 	return nil
@@ -205,18 +202,17 @@ func (req updateUserTagsReq) validate() error {
 
 type updateUserIdentityReq struct {
 	token    string
-	id       string
-	Identity string `json:"identity"`
+	sdk.User `json:",inline"`
 }
 
 func (req updateUserIdentityReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.id == "" {
+	if req.ID == "" {
 		return errMissingUserID
 	}
-	if req.Identity == "" {
+	if req.Credentials.Identity == "" {
 		return errMissingIdentity
 	}
 
@@ -224,15 +220,15 @@ func (req updateUserIdentityReq) validate() error {
 }
 
 type updateUserStatusReq struct {
-	token  string
-	UserID string `json:"user_id,omitempty"`
+	token string
+	id    string
 }
 
 func (req updateUserStatusReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.UserID == "" {
+	if req.id == "" {
 		return errMissingUserID
 	}
 
@@ -240,16 +236,15 @@ func (req updateUserStatusReq) validate() error {
 }
 
 type updateUserRoleReq struct {
-	token  string
-	UserID string `json:"user_id,omitempty"`
-	Role   string `json:"role,omitempty"`
+	token string
+	sdk.User
 }
 
 func (req updateUserRoleReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.UserID == "" {
+	if req.ID == "" {
 		return errMissingUserID
 	}
 	if req.Role == "" {
@@ -261,29 +256,29 @@ func (req updateUserRoleReq) validate() error {
 
 type updateUserPasswordReq struct {
 	token   string
-	OldPass string `json:"old_pass"`
-	NewPass string `json:"new_pass"`
+	oldPass string
+	newPass string
 }
 
 func (req updateUserPasswordReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.OldPass == "" {
+	if req.oldPass == "" {
 		return errMissingSecret
 	}
-	if req.NewPass == "" {
+	if req.newPass == "" {
 		return errMissingSecret
 	}
 	return nil
 }
 
 type passwordResetRequestReq struct {
-	Email string `json:"email"`
+	email string
 }
 
 func (req passwordResetRequestReq) validate() error {
-	if req.Email == "" {
+	if req.email == "" {
 		return errMissingEmail
 	}
 	return nil
@@ -291,21 +286,21 @@ func (req passwordResetRequestReq) validate() error {
 
 type passwordResetReq struct {
 	token           string
-	Password        string `json:"password"`
-	ConfirmPassword string `json:"confirm_password"`
+	password        string
+	confirmPassword string
 }
 
 func (req passwordResetReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.Password == "" {
+	if req.password == "" {
 		return errMissingPassword
 	}
-	if req.ConfirmPassword == "" {
+	if req.confirmPassword == "" {
 		return errMissingConfirmPassword
 	}
-	if req.Password != req.ConfirmPassword {
+	if req.password != req.confirmPassword {
 		return errInvalidResetPassword
 	}
 	return nil
@@ -313,7 +308,7 @@ func (req passwordResetReq) validate() error {
 
 type createThingReq struct {
 	token string
-	Thing sdk.Thing `json:"thing"`
+	sdk.Thing
 }
 
 func (req createThingReq) validate() error {
@@ -327,17 +322,15 @@ func (req createThingReq) validate() error {
 }
 
 type updateThingReq struct {
-	token    string
-	id       string
-	Name     string                 `json:"name,omitempty"`
-	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	token string
+	sdk.Thing
 }
 
 func (req updateThingReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.id == "" {
+	if req.ID == "" {
 		return errMissingThingID
 	}
 	if req.Name == "" && req.Metadata == nil {
@@ -351,49 +344,47 @@ func (req updateThingReq) validate() error {
 
 type updateThingTagsReq struct {
 	token string
-	id    string
-	Tags  []string `json:"tags,omitempty"`
+	sdk.Thing
 }
 
 func (req updateThingTagsReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.id == "" {
+	if req.ID == "" {
 		return errMissingThingID
 	}
 	return nil
 }
 
 type updateThingSecretReq struct {
-	token  string
-	id     string
-	Secret string `json:"secret"`
+	token string
+	sdk.Thing
 }
 
 func (req updateThingSecretReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.id == "" {
+	if req.ID == "" {
 		return errMissingThingID
 	}
-	if req.Secret == "" {
+	if req.Credentials.Secret == "" {
 		return errBearerKey
 	}
 	return nil
 }
 
 type updateThingStatusReq struct {
-	token   string
-	ThingID string `json:"thing_id,omitempty"`
+	token string
+	id    string
 }
 
 func (req updateThingStatusReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.ThingID == "" {
+	if req.id == "" {
 		return errMissingThingID
 	}
 
@@ -413,8 +404,8 @@ func (req createThingsReq) validate() error {
 }
 
 type createChannelReq struct {
-	token   string
-	Channel sdk.Channel `json:"channel"`
+	token string
+	sdk.Channel
 }
 
 func (req createChannelReq) validate() error {
@@ -445,18 +436,15 @@ func (req createChannelsReq) validate() error {
 }
 
 type updateChannelReq struct {
-	token       string
-	id          string
-	Name        string                 `json:"name,omitempty"`
-	Description string                 `json:"description,omitempty"`
-	Metadata    map[string]interface{} `json:"metadata,omitempty"`
+	token string
+	sdk.Channel
 }
 
 func (req updateChannelReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.id == "" {
+	if req.ID == "" {
 		return errMissingChannelID
 	}
 	if req.Name == "" && req.Description == "" && req.Metadata == nil {
@@ -469,43 +457,42 @@ func (req updateChannelReq) validate() error {
 }
 
 type connectThingReq struct {
-	token   string
-	ThingID string `json:"thing_id,omitempty"`
-	ChanID  string `json:"channel_id,omitempty"`
-	Item    string `json:"item,omitempty"`
+	token     string
+	thingID   string
+	channelID string
+	item      string
 }
 
 func (req connectThingReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.ChanID == "" {
+	if req.channelID == "" {
 		return errMissingChannelID
 	}
-	if req.ThingID == "" {
+	if req.thingID == "" {
 		return errMissingThingID
 	}
-	if req.Item == "" {
+	if req.item == "" {
 		return errMissingItem
 	}
 	return nil
 }
 
 type shareThingReq struct {
-	token    string
-	ThingID  string `json:"thing_id,omitempty"`
-	UserID   string `json:"user_id,omitempty"`
-	Relation string `json:"relation,omitempty"`
+	token string
+	id    string
+	sdk.UsersRelationRequest
 }
 
 func (req shareThingReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.UserID == "" {
+	if len(req.UserIDs) == 0 {
 		return errMissingUserID
 	}
-	if req.ThingID == "" {
+	if req.id == "" {
 		return errMissingThingID
 	}
 	if req.Relation == "" {
@@ -515,15 +502,15 @@ func (req shareThingReq) validate() error {
 }
 
 type updateChannelStatusReq struct {
-	token     string
-	ChannelID string `json:"channel_id,omitempty"`
+	token string
+	id    string
 }
 
 func (req updateChannelStatusReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.ChannelID == "" {
+	if req.id == "" {
 		return errMissingChannelID
 	}
 	return nil
@@ -531,7 +518,7 @@ func (req updateChannelStatusReq) validate() error {
 
 type createGroupReq struct {
 	token string
-	Group sdk.Group
+	sdk.Group
 }
 
 func (req createGroupReq) validate() error {
@@ -564,19 +551,15 @@ func (req createGroupsReq) validate() error {
 }
 
 type updateGroupReq struct {
-	token       string
-	id          string
-	Name        string                 `json:"name,omitempty"`
-	Description string                 `json:"description,omitempty"`
-	ParentID    string                 `json:"parent_id,omitempty"`
-	Metadata    map[string]interface{} `json:"metadata,omitempty"`
+	token string
+	sdk.Group
 }
 
 func (req updateGroupReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.id == "" {
+	if req.ID == "" {
 		return errMissingGroupID
 	}
 	if req.Name == "" && req.Description == "" && req.Metadata == nil {
@@ -589,10 +572,9 @@ func (req updateGroupReq) validate() error {
 }
 
 type assignReq struct {
-	token    string
-	GroupID  string `json:"group_id"`
-	UserID   string `json:"user_id"`
-	Relation string `json:"relation"`
+	token   string
+	groupID string
+	sdk.UsersRelationRequest
 }
 
 func (req assignReq) validate() error {
@@ -600,10 +582,10 @@ func (req assignReq) validate() error {
 		return errAuthorization
 	}
 
-	if req.GroupID == "" {
+	if req.groupID == "" {
 		return errMissingGroupID
 	}
-	if req.UserID == "" {
+	if len(req.UserIDs) == 0 {
 		return errMissingUserID
 	}
 	if req.Relation == "" {
@@ -613,62 +595,58 @@ func (req assignReq) validate() error {
 }
 
 type updateGroupStatusReq struct {
-	token   string
-	GroupID string `json:"group_id"`
+	token string
+	id    string
 }
 
 func (req updateGroupStatusReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.GroupID == "" {
+	if req.id == "" {
 		return errMissingGroupID
 	}
 	return nil
 }
 
 type publishReq struct {
-	ThingKey string  `json:"thing_key,omitempty"`
-	ChanID   string  `json:"chan_id,omitempty"`
-	BaseTime float64 `json:"bt"`
-	BaseUnit string  `json:"bu"`
-	Name     string  `json:"n"`
-	Unit     string  `json:"u"`
-	Value    float64 `json:"v"`
+	thingKey  string
+	channelID string
+	Message   ui.Message
 }
 
 func (req publishReq) validate() error {
-	if req.ThingKey == "" {
+	if req.thingKey == "" {
 		return errMissingThingKey
 	}
-	if req.ChanID == "" {
+	if req.channelID == "" {
 		return errMissingChannel
 	}
 	return nil
 }
 
 type readMessagesReq struct {
-	token    string
-	ChanID   string `json:"chan_id,omitempty"`
-	ThingKey string `json:"thing_key,omitempty"`
-	Page     uint64
-	Limit    uint64
+	token     string
+	channelID string
+	thingKey  string
+	page      uint64
+	limit     uint64
 }
 
 func (req readMessagesReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.ChanID == "" {
+	if req.channelID == "" {
 		return errMissingChannelID
 	}
-	if req.ThingKey == "" {
+	if req.thingKey == "" {
 		return errMissingThingKey
 	}
-	if req.Page == 0 {
+	if req.page == 0 {
 		return errPageSize
 	}
-	if req.Limit == 0 {
+	if req.limit == 0 {
 		return errLimitSize
 	}
 
@@ -692,10 +670,8 @@ func (req bootstrapCommandReq) validate() error {
 }
 
 type updateBootstrapReq struct {
-	token   string
-	id      string
-	Name    string `json:"name"`
-	Content string `json:"content"`
+	token string
+	sdk.BootstrapConfig
 }
 
 func (req updateBootstrapReq) validate() error {
@@ -703,7 +679,7 @@ func (req updateBootstrapReq) validate() error {
 		return errAuthorization
 	}
 
-	if req.id == "" {
+	if req.ThingID == "" {
 		return errMissingConfigID
 	}
 	return nil
@@ -726,65 +702,52 @@ func (req deleteBootstrapReq) validate() error {
 
 type updateBootstrapStateReq struct {
 	token string
-	id    string
-	State int `json:"state"`
+	sdk.BootstrapConfig
 }
 
 func (req updateBootstrapStateReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.id == "" {
+	if req.ThingID == "" {
 		return errMissingConfigID
 	}
 	return nil
 }
 
 type updateBootstrapCertReq struct {
-	token      string
-	thingID    string
-	ClientCert string `json:"client_cert"`
-	ClientKey  string `json:"client_key"`
-	CACert     string `json:"CAcert"`
+	token string
+	sdk.BootstrapConfig
 }
 
 func (req updateBootstrapCertReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.thingID == "" {
+	if req.ThingID == "" {
 		return errMissingThingID
 	}
 	return nil
 }
 
 type updateBootstrapConnReq struct {
-	token    string
-	id       string
-	Channels []string `json:"channels"`
+	token string
+	sdk.BootstrapConfig
 }
 
 func (req updateBootstrapConnReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.id == "" {
+	if req.ThingID == "" {
 		return errMissingConfigID
 	}
 	return nil
 }
 
 type createBootstrapReq struct {
-	token       string
-	ThingID     string   `json:"thing_id"`
-	ExternalID  string   `json:"external_id"`
-	ExternalKey string   `json:"externa_key"`
-	Channels    []string `json:"channels"`
-	Name        string   `json:"name"`
-	Content     string   `json:"content"`
-	ClientCert  string   `json:"client_cert"`
-	ClientKey   string   `json:"client_key"`
-	CACert      string   `json:"CAcert"`
+	token string
+	sdk.BootstrapConfig
 }
 
 func (req createBootstrapReq) validate() error {
@@ -802,25 +765,25 @@ func (req createBootstrapReq) validate() error {
 
 type getEntitiesReq struct {
 	token      string
-	Page       uint64 `json:"page"`
-	Limit      uint64 `json:"limit"`
-	Item       string `json:"item"`
-	Name       string `json:"name"`
-	DomainID   string `json:"domain_id"`
-	Permission string `json:"permission"`
+	page       uint64
+	limit      uint64
+	item       string
+	name       string
+	domainID   string
+	permission string
 }
 
 func (req getEntitiesReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.Page == 0 {
+	if req.page == 0 {
 		return errPageSize
 	}
-	if req.Item == "" {
+	if req.item == "" {
 		return errMissingItem
 	}
-	if req.Limit == 0 {
+	if req.limit == 0 {
 		return errLimitSize
 	}
 	return nil
@@ -840,8 +803,7 @@ func (req errorReq) validate() error {
 type addUserToChannelReq struct {
 	token     string
 	ChannelID string `json:"channel_id"`
-	UserID    string `json:"user_id"`
-	Relation  string `json:"relation"`
+	sdk.UsersRelationRequest
 }
 
 func (req addUserToChannelReq) validate() error {
@@ -851,7 +813,7 @@ func (req addUserToChannelReq) validate() error {
 	if req.ChannelID == "" {
 		return errMissingChannelID
 	}
-	if req.UserID == "" {
+	if len(req.UserIDs) == 0 {
 		return errMissingUserID
 	}
 	if req.Relation == "" {
@@ -862,30 +824,30 @@ func (req addUserToChannelReq) validate() error {
 
 type addUserGroupToChannelReq struct {
 	token     string
-	GroupID   string `json:"group_id"`
-	ChannelID string `json:"channel_id"`
-	Item      string `json:"item"`
+	channelID string
+	item      string
+	sdk.UserGroupsRequest
 }
 
 func (req addUserGroupToChannelReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.ChannelID == "" {
+	if req.channelID == "" {
 		return errMissingChannelID
 	}
-	if req.GroupID == "" {
+	if len(req.UserGroupIDs) == 0 {
 		return errMissingGroupID
 	}
-	if req.Item == "" {
+	if req.item == "" {
 		return errMissingItem
 	}
 	return nil
 }
 
 type domainLoginReq struct {
-	token    string
-	DomainID string `json:"domain_id"`
+	token string
+	sdk.Login
 }
 
 func (req domainLoginReq) validate() error {
@@ -899,11 +861,8 @@ func (req domainLoginReq) validate() error {
 }
 
 type createDomainReq struct {
-	token    string
-	Name     string                 `json:"name,omitempty"`
-	Alias    string                 `json:"alias,omitempty"`
-	Tags     []string               `json:"tags,omitempty"`
-	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	token string
+	sdk.Domain
 }
 
 func (req createDomainReq) validate() error {
@@ -917,19 +876,15 @@ func (req createDomainReq) validate() error {
 }
 
 type updateDomainReq struct {
-	token    string
-	DomainID string                 `json:"domain_id"`
-	Name     string                 `json:"name,omitempty"`
-	Alias    string                 `json:"alias,omitempty"`
-	Tags     []string               `json:"tags,omitempty"`
-	Metadata map[string]interface{} `json:"metadata,omitempty"`
+	token string
+	sdk.Domain
 }
 
 func (req updateDomainReq) validate() error {
 	if req.token == "" {
 		return errAuthentication
 	}
-	if req.DomainID == "" {
+	if req.ID == "" {
 		return errMissingDomainID
 	}
 	if req.Name == "" && req.Alias == "" && req.Metadata == nil {
@@ -939,31 +894,30 @@ func (req updateDomainReq) validate() error {
 }
 
 type updateDomainTagsReq struct {
-	token    string
-	DomainID string   `json:"domain_id"`
-	Tags     []string `json:"tags,omitempty"`
+	token string
+	sdk.Domain
 }
 
 func (req updateDomainTagsReq) validate() error {
 	if req.token == "" {
 		return errAuthentication
 	}
-	if req.DomainID == "" {
+	if req.ID == "" {
 		return errMissingDomainID
 	}
 	return nil
 }
 
 type updateDomainStatusReq struct {
-	token    string
-	DomainID string `json:"domain_id"`
+	token string
+	id    string
 }
 
 func (req updateDomainStatusReq) validate() error {
 	if req.token == "" {
 		return errAuthorization
 	}
-	if req.DomainID == "" {
+	if req.id == "" {
 		return errMissingDomainID
 	}
 
@@ -972,19 +926,18 @@ func (req updateDomainStatusReq) validate() error {
 
 type assignMemberReq struct {
 	token    string
-	DomainID string `json:"domain_id"`
-	UserID   string `json:"user_id"`
-	Relation string `json:"relation"`
+	domainID string
+	sdk.UsersRelationRequest
 }
 
 func (req assignMemberReq) validate() error {
 	if req.token == "" {
 		return errAuthentication
 	}
-	if req.DomainID == "" {
+	if req.domainID == "" {
 		return errMissingDomainID
 	}
-	if req.UserID == "" {
+	if len(req.UserIDs) == 0 {
 		return errMissingUserID
 	}
 	if req.Relation == "" {
@@ -995,24 +948,22 @@ func (req assignMemberReq) validate() error {
 
 type viewMemberReq struct {
 	token        string
-	UserIdentity string `json:"user_identity"`
+	userIdentity string
 }
 
 func (req viewMemberReq) validate() error {
 	if req.token == "" {
 		return errAuthentication
 	}
-	if req.UserIdentity == "" {
+	if req.userIdentity == "" {
 		return errMissingIdentity
 	}
 	return nil
 }
 
 type sendInvitationReq struct {
-	token    string
-	DomainID string `json:"domain_id"`
-	UserID   string `json:"user_id"`
-	Relation string `json:"relation"`
+	token string
+	sdk.Invitation
 }
 
 func (req sendInvitationReq) validate() error {
@@ -1034,14 +985,14 @@ func (req sendInvitationReq) validate() error {
 
 type acceptInvitationReq struct {
 	token    string
-	DomainID string `json:"domain_id"`
+	domainID string
 }
 
 func (req acceptInvitationReq) validate() error {
 	if req.token == "" {
 		return errAuthentication
 	}
-	if req.DomainID == "" {
+	if req.domainID == "" {
 		return errMissingDomainID
 	}
 
@@ -1051,18 +1002,18 @@ func (req acceptInvitationReq) validate() error {
 type deleteInvitationReq struct {
 	token    string
 	domain   string
-	DomainID string `json:"domain_id"`
-	UserID   string `json:"user_id"`
+	domainID string
+	userID   string
 }
 
 func (req deleteInvitationReq) validate() error {
 	if req.token == "" {
 		return errAuthentication
 	}
-	if req.DomainID == "" {
+	if req.domainID == "" {
 		return errMissingDomainID
 	}
-	if req.UserID == "" {
+	if req.userID == "" {
 		return errMissingUserID
 	}
 
@@ -1071,7 +1022,7 @@ func (req deleteInvitationReq) validate() error {
 
 type listInvitationsReq struct {
 	token    string
-	DomainID string `json:"domain_id"`
+	domainID string
 	page     uint64
 	limit    uint64
 }

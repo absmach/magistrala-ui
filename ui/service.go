@@ -75,6 +75,14 @@ type breadcrumb struct {
 	URL  string
 }
 
+type Message struct {
+	BaseTime float64 `json:"bt"`
+	BaseUnit string  `json:"bu"`
+	Name     string  `json:"n"`
+	Unit     string  `json:"u"`
+	Value    float64 `json:"v"`
+}
+
 var (
 	templates = []string{
 		"header",
@@ -289,7 +297,7 @@ type Service interface {
 	ListUserGroupChannels(token, id string, page, limit uint64) (b []byte, err error)
 
 	// Publish facilitates a thing publishin messages to a channel.
-	Publish(channelID, thingKey, baseUnit, name, unit string, baseTime, value float64) error
+	Publish(channelID, thingKey string, message Message) error
 	// ReadMessages retrieves messages published in a channel.
 	ReadMessages(token, channelID, thingKey string, page, limit uint64) ([]byte, error)
 
@@ -1685,21 +1693,7 @@ func (us *uiService) ReadMessages(token, channelID, thingKey string, page, limit
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) Publish(channelID, thingKey, baseUnit, name, unit string, baseTime, value float64) error {
-	message := struct {
-		BaseTime float64 `json:"bt"`
-		BaseUnit string  `json:"bu"`
-		Name     string  `json:"n"`
-		Unit     string  `json:"u"`
-		Value    float64 `json:"v"`
-	}{
-		BaseTime: baseTime,
-		BaseUnit: baseUnit,
-		Name:     name,
-		Unit:     unit,
-		Value:    value,
-	}
-
+func (us *uiService) Publish(channelID, thingKey string, message Message) error {
 	jsonMessage, err := json.Marshal(message)
 	if err != nil {
 		return errors.Wrap(err, ErrFailedPublish)
