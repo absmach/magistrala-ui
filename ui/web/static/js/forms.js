@@ -16,9 +16,9 @@ export function submitCreateForm(config) {
         if (!response.ok) {
           const errorMessage = response.headers.get("X-Error-Message");
           if (errorMessage) {
-            showAlert(errorMessage, config.alertDiv);
+            showError(errorMessage, config.alertDiv);
           } else {
-            showAlert(`Error: ${response.status}`, config.alertDiv);
+            showError(`Error: ${response.status}`, config.alertDiv);
           }
         } else {
           form.reset();
@@ -28,7 +28,7 @@ export function submitCreateForm(config) {
       })
       .catch((error) => {
         console.error("error submitting form: ", error);
-        showAlert(`error submitting form: ${error}`, config.alertDiv);
+        showError(`error submitting form: ${error}`, config.alertDiv);
       });
   });
 }
@@ -46,12 +46,12 @@ export function submitUpdateForm(config) {
         const errorMessage = response.headers.get("X-Error-Message");
         if (errorMessage) {
           if (config.field) {
-            showAlert(errorMessage + ": " + config.field, config.alertDiv);
+            showError(errorMessage + ": " + config.field, config.alertDiv);
           } else {
-            showAlert(errorMessage, config.alertDiv);
+            showError(errorMessage, config.alertDiv);
           }
         } else {
-          showAlert(`Error: ${response.status}`, config.alertDiv);
+          showError(`Error: ${response.status}`, config.alertDiv);
         }
       } else {
         window.location.reload();
@@ -59,11 +59,11 @@ export function submitUpdateForm(config) {
     })
     .catch((error) => {
       console.error("error submitting form: ", error);
-      showAlert(`error submitting form: ${error}`, config.alertDiv);
+      showError(`error submitting form: ${error}`, config.alertDiv);
     });
 }
 
-function showAlert(errorMessage, alertDiv) {
+function showError(errorMessage, alertDiv) {
   const alert = document.getElementById(alertDiv);
   alert.innerHTML = `
 	<div class="alert alert-danger alert-dismissable fade show d-flex flex-row justify-content-between" role="alert">

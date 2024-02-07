@@ -134,7 +134,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 case 409:
                   emailField.classList.add("border-red");
                   errorMessage = "User with this email already exists";
-                  showAlert(errorMessage);
+                  showError(errorMessage);
                   break;
                 default:
                   response.json().then((data) => {
@@ -152,7 +152,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             });
         }
 
-        function showAlert(errorMessage) {
+        function showError(errorMessage) {
           registrationError.innerHTML = errorMessage;
         }
       </script>

@@ -154,7 +154,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   passwordField.classList.add("border-red");
                   emailField.classList.add("border-red");
                   errorMessage = "invalid email or password. Please try again!";
-                  showAlert(errorMessage);
+                  showError(errorMessage);
                   break;
                 default:
                   response.json().then((data) => {
@@ -172,7 +172,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             });
         }
 
-        function showAlert(errorMessage) {
+        function showError(errorMessage) {
           loginError.innerHTML = errorMessage;
         }
       </script>
