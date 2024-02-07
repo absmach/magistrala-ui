@@ -118,6 +118,10 @@ SPDX-License-Identifier: Apache-2.0 -->
         const emailField = document.querySelector(".email-field");
         const registrationError = document.getElementById("registrationError");
 
+        document.getElementById("register-button").addEventListener("click", () => {
+          registrationError.innerHTML = "";
+        });
+
         function submitRegistrationForm() {
           event.preventDefault();
           var form = event.target;
