@@ -2245,7 +2245,13 @@ func handleStaticFiles(m *chi.Mux) {
 	fs := http.FileServer(http.Dir(staticDir))
 	for _, info := range infos {
 		if info.IsDir() {
-			m.Handle(fmt.Sprintf("/%s/*", info.Name()), fs)
+			m.Get(fmt.Sprintf("/%s/*", info.Name()), func(w http.ResponseWriter, r *http.Request) {
+				fs.ServeHTTP(w, r)
+			})
+		} else {
+			m.Get(fmt.Sprintf("/%s", info.Name()), func(w http.ResponseWriter, r *http.Request) {
+				fs.ServeHTTP(w, r)
+			})
 		}
 	}
 }
