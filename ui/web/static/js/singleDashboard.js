@@ -1,17 +1,60 @@
 // Copyright (c) Abstract Machines
 // SPDX-License-Identifier: Apache-2.0
-var grid;
 var gridClass = ".grid";
 var localStorageKey = "gridState";
+
+var grid = initGrid(layout);
+
+// Editable canvas is used to make the canvas editable allowing the user to add widgets and be able to move the
+// widgets around the canvas
+function editableCanvas() {
+  grid = editGrid(grid, layout);
+}
+
+function saveCanvas() {
+  saveGrid(grid, dashboardID);
+}
+
+function cancelEdit() {
+  cancelEditGrid(grid);
+}
+
+function addWidget(widgetID, widgetScript) {
+  // Create a new grid item
+  const newItem = document.createElement("div");
+  newItem.className = "item";
+  newItem.classList.add("item-editable");
+  newItem.innerHTML = `
+    <button type="button" class="btn btn-sm" id="removeItem" onclick="removeGridItem(this.parentNode);">
+      <i class="fas fa-trash-can"></i>
+    </button>
+    <div class="item-content" id="${widgetID}" style="width: 500px;height:400px;">
+    </div>
+    `;
+  var scriptTag = document.createElement("script");
+  scriptTag.type = "text/javascript";
+  scriptTag.defer = true;
+  scriptTag.innerHTML = widgetScript;
+  newItem.appendChild(scriptTag);
+
+  grid.add(newItem);
+  resizeObserver.observe(newItem);
+}
+
+function removeGridItem(item) {
+  grid.remove(grid.getItems(item), { removeElements: true });
+}
+
+function openWidgetModal(widget) {
+  const widgetModal = new bootstrap.Modal(document.getElementById(`${widget}Modal`));
+  widgetModal.show();
+}
 
 function initGrid(layout) {
   if (layout) {
     loadLayout(layout);
   } else {
-    grid = new Muuri(gridClass, {
-      dragEnabled: true,
-      dragHandle: ".item-content",
-    });
+    showNoWidgetPlaceholder();
   }
 
   return grid;
@@ -100,6 +143,7 @@ function loadLayout(savedLayout) {
 // Editable canvas is used to make the canvas editable allowing the user to add widgets and be able to move the
 // widgets around the canvas
 function editGrid(grid, layout) {
+  removeNoWidgetPlaceholder();
   try {
     if (grid) {
       grid.destroy(true);
@@ -199,4 +243,35 @@ function saveGrid(grid, dashboardID) {
 function cancelEditGrid(grid) {
   grid._settings.dragEnabled = false;
   window.location.reload();
+}
+
+// No widget placeholder
+function showNoWidgetPlaceholder() {
+  const noWidgetPlaceholder = document.querySelector(".no-widget-placeholder");
+  noWidgetPlaceholder.classList.add("vh-50");
+  const newPlaceholder = document.createElement("div");
+  newPlaceholder.innerHTML = `
+  <div class="row d-flex justify-content-center">
+    <div class="col-lg-4 no-widget-box text-center fs-2 px-0">
+      <button
+        type="button"
+        class="no-widget-button w-100 p-3"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#widgetsCanvas"
+        aria-controls="widgetsCanvas"
+        onclick="editableCanvas()"
+      >
+        <i class="fas fa-plus"></i>
+        <span>Add Widget</span>
+      </button>
+    </div>
+  </div>
+  `;
+
+  noWidgetPlaceholder.appendChild(newPlaceholder);
+}
+
+function removeNoWidgetPlaceholder() {
+  const noWidgetPlaceholder = document.querySelector(".no-widget-placeholder");
+  noWidgetPlaceholder.remove();
 }
