@@ -98,26 +98,26 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var widgetID = "stepchart-" + Date.now();
       var widgetScript = `
-      var stepChart = bb.generate({
-        size : {
-          height: 240,
-          width: 480
-        },
-        title: {
-          text: "digital temperature"
-        },
-        data: {
-          columns: [
-          ["data1", 300, 350, 300, 20, 240, 100],
-          ["data2", 130, 100, 140, 200, 150, 50]
-          ],
-          types: {
-            data1: "step",
-            data2: "area-step",
-          }
-        },
-        bindto: "#${widgetID}"
-      });
+        var stepChart = bb.generate({
+          size : {
+            height: 240,
+            width: 480
+          },
+          title: {
+            text: "digital temperature"
+          },
+          data: {
+            columns: [
+              ["data1", 300, 350, 300, 20, 240, 100],
+              ["data2", 130, 100, 140, 200, 150, 50]
+            ],
+            types: {
+              data1: "step",
+              data2: "area-step",
+            }
+          },
+          bindto: "#${widgetID}"
+        });
       `;
       addWidget(widgetID, widgetScript);
     });

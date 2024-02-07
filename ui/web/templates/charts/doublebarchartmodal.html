@@ -98,37 +98,37 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var widgetID = "doubleBarchart-" + Date.now();
       var widgetScript = `
-      var doubleBarChart = bb.generate({
-        size: {
-          height: 300,
-          width: 600
-        },
-        data: {
-          x: "x",
-          columns: [
+        var doubleBarChart = bb.generate({
+          size: {
+            height: 300,
+            width: 600
+          },
+          data: {
+            x: "x",
+            columns: [
               ["x", "thing1", "thing2", "thing3", "thing4"],
               ["download", 30, 200, 100, 400],
               ["upload", 90, 100, 140, 200]
-          ],
-          groups: [
-            [
-              "download",
-              "loading"
-            ]
-          ],
-              colors: {
-                download: "blue",
-                upload: "green"
-              },
-          type: "bar",
-        },
-        axis: {
-          x: {
-            type: "category"
-          }
-        },
-        bindto: "#${widgetID}",
-      });
+            ],
+            groups: [
+              [
+                "download",
+                "loading"
+              ]
+            ],
+            colors: {
+              download: "blue",
+              upload: "green"
+            },
+            type: "bar",
+          },
+          axis: {
+            x: {
+              type: "category"
+            }
+          },
+          bindto: "#${widgetID}",
+        });
       `;
       addWidget(widgetID, widgetScript);
     });
