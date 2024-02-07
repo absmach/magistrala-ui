@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 var gridClass = ".grid";
 var localStorageKey = "gridState";
-
 var grid = initGrid(layout);
 
 // Editable canvas is used to make the canvas editable allowing the user to add widgets and be able to move the
@@ -248,7 +247,6 @@ function cancelEditGrid(grid) {
 // No widget placeholder
 function showNoWidgetPlaceholder() {
   const noWidgetPlaceholder = document.querySelector(".no-widget-placeholder");
-  noWidgetPlaceholder.classList.add("vh-50");
   const newPlaceholder = document.createElement("div");
   newPlaceholder.innerHTML = `
   <div class="row d-flex justify-content-center">
