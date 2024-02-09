@@ -2137,13 +2137,8 @@ func listDashboardsEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func dashboardsEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(dashboardsReq)
-		if err := req.validate(); err != nil {
-			return nil, err
-		}
-
-		res, err := svc.Dashboards(req.token)
+	return func(_ context.Context, _ interface{}) (interface{}, error) {
+		res, err := svc.Dashboards()
 		if err != nil {
 			return nil, err
 		}

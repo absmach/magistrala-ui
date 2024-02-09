@@ -1718,7 +1718,7 @@ func (lm *loggingMiddleware) ListDashboards(token string, page, limit uint64) (b
 }
 
 // Dashboards adds logging middleware to dashboards method.
-func (lm *loggingMiddleware) Dashboards(token string) (b []byte, err error) {
+func (lm *loggingMiddleware) Dashboards() (b []byte, err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
@@ -1728,7 +1728,7 @@ func (lm *loggingMiddleware) Dashboards(token string) (b []byte, err error) {
 		lm.logger.Info("Dashboards completed successfully", duration)
 	}(time.Now())
 
-	return lm.svc.Dashboards(token)
+	return lm.svc.Dashboards()
 }
 
 // UpdateDashboard adds logging middleware to update dashboard method.
