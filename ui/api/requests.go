@@ -132,7 +132,6 @@ type listEntityByIDReq struct {
 	page     uint64
 	limit    uint64
 	relation string
-	name     string
 }
 
 func (req listEntityByIDReq) validate() error {
@@ -257,17 +256,6 @@ func (req updateUserRoleReq) validate() error {
 		return errMissingRole
 	}
 
-	return nil
-}
-
-type showUpdatePasswordReq struct {
-	token string
-}
-
-func (req showUpdatePasswordReq) validate() error {
-	if req.token == "" {
-		return errAuthorization
-	}
 	return nil
 }
 
@@ -640,7 +628,6 @@ func (req updateGroupStatusReq) validate() error {
 }
 
 type publishReq struct {
-	token    string
 	ThingKey string  `json:"thing_key,omitempty"`
 	ChanID   string  `json:"chan_id,omitempty"`
 	BaseTime float64 `json:"bt"`
@@ -651,10 +638,6 @@ type publishReq struct {
 }
 
 func (req publishReq) validate() error {
-	if req.token == "" {
-		return errAuthorization
-	}
-
 	if req.ThingKey == "" {
 		return errMissingThingKey
 	}

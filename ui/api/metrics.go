@@ -110,13 +110,13 @@ func (mm *metricsMiddleware) ShowPasswordReset() ([]byte, error) {
 }
 
 // PasswordUpdate adds metrics middleware to password update method.
-func (mm *metricsMiddleware) PasswordUpdate(token string) ([]byte, error) {
+func (mm *metricsMiddleware) PasswordUpdate() ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "password_update").Add(1)
 		mm.latency.With("method", "password_update").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.PasswordUpdate(token)
+	return mm.svc.PasswordUpdate()
 }
 
 // UpdatePassword adds metrics middleware to update password method.
@@ -660,13 +660,13 @@ func (mm *metricsMiddleware) ListUserGroupChannels(token, id string, page, limit
 }
 
 // Publish adds metrics middleware to publish method.
-func (mm *metricsMiddleware) Publish(token, channelID, thingKey, baseUnit, name, unit string, baseTime, value float64) error {
+func (mm *metricsMiddleware) Publish(channelID, thingKey, baseUnit, name, unit string, baseTime, value float64) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "publish").Add(1)
 		mm.latency.With("method", "publish").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.Publish(token, channelID, thingKey, baseUnit, name, unit, baseTime, value)
+	return mm.svc.Publish(channelID, thingKey, baseUnit, name, unit, baseTime, value)
 }
 
 // ReadMessages adds metrics middleware to read messages method.
@@ -760,13 +760,13 @@ func (mm *metricsMiddleware) ViewBootstrap(token, thingID string) ([]byte, error
 }
 
 // GetRemoteTerminal adds metrics middleware to get remote terminal method.
-func (mm *metricsMiddleware) GetRemoteTerminal(thingID, token string) ([]byte, error) {
+func (mm *metricsMiddleware) GetRemoteTerminal(thingID string) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "remote_terminal").Add(1)
 		mm.latency.With("method", "remote_terminal").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.GetRemoteTerminal(thingID, token)
+	return mm.svc.GetRemoteTerminal(thingID)
 }
 
 // ProcessTerminalCommand adds metrics middleware to process terminal command method.

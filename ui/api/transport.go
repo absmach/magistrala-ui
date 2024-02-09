@@ -803,17 +803,8 @@ func decodeLoginRequest(_ context.Context, _ *http.Request) (interface{}, error)
 	return nil, nil
 }
 
-func decodeShowPasswordUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-
-	req := showUpdatePasswordReq{
-		token: token,
-	}
-
-	return req, nil
+func decodeShowPasswordUpdate(_ context.Context, _ *http.Request) (interface{}, error) {
+	return nil, nil
 }
 
 func decodePasswordUpdate(_ context.Context, r *http.Request) (interface{}, error) {
@@ -1653,11 +1644,6 @@ func decodeGroupStatusUpdate(_ context.Context, r *http.Request) (interface{}, e
 }
 
 func decodePublishRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-
 	currentTime := float64(time.Now().Unix())
 	floatValue, err := strconv.ParseFloat(r.PostFormValue("value"), 64)
 	if err != nil {
@@ -1665,7 +1651,6 @@ func decodePublishRequest(_ context.Context, r *http.Request) (interface{}, erro
 	}
 
 	req := publishReq{
-		token:    token,
 		ThingKey: r.PostFormValue("thingKey"),
 		ChanID:   r.PostFormValue("channelID"),
 		BaseTime: currentTime,
@@ -1885,18 +1870,12 @@ func decodeListEntityByIDRequest(_ context.Context, r *http.Request) (interface{
 		return nil, err
 	}
 
-	name, err := readStringQuery(r, nameKey, defKey)
-	if err != nil {
-		return nil, err
-	}
-
 	req := listEntityByIDReq{
 		token:    token,
 		id:       chi.URLParam(r, "id"),
 		page:     page,
 		limit:    limit,
 		relation: relation,
-		name:     name,
 	}
 
 	return req, nil
@@ -2179,7 +2158,7 @@ func decodeError(_ context.Context, r *http.Request) (interface{}, error) {
 	}, nil
 }
 
-func decodePageNotFound(_ context.Context, r *http.Request) (interface{}, error) {
+func decodePageNotFound(_ context.Context, _ *http.Request) (interface{}, error) {
 	return errorReq{
 		err: "Whoops! Page not found",
 	}, nil

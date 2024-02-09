@@ -134,7 +134,7 @@ func (lm *loggingMiddleware) ShowPasswordReset() (b []byte, err error) {
 }
 
 // PasswordUpdate adds logging middleware to password update method.
-func (lm *loggingMiddleware) PasswordUpdate(token string) (b []byte, err error) {
+func (lm *loggingMiddleware) PasswordUpdate() (b []byte, err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
@@ -144,7 +144,7 @@ func (lm *loggingMiddleware) PasswordUpdate(token string) (b []byte, err error) 
 		lm.logger.Info("View password update page completed successfully", duration)
 	}(time.Now())
 
-	return lm.svc.PasswordUpdate(token)
+	return lm.svc.PasswordUpdate()
 }
 
 // UpdatePassword adds logging middleware to update password method.
@@ -1138,7 +1138,7 @@ func (lm *loggingMiddleware) ListUserGroupChannels(token, id string, page, limit
 }
 
 // Publish adds logging middleware to publish method.
-func (lm *loggingMiddleware) Publish(token, channelID, thingKey, baseUnit, name, unit string, baseTime, value float64) (err error) {
+func (lm *loggingMiddleware) Publish(channelID, thingKey, baseUnit, name, unit string, baseTime, value float64) (err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -1152,7 +1152,7 @@ func (lm *loggingMiddleware) Publish(token, channelID, thingKey, baseUnit, name,
 		lm.logger.Info("Publish message completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.Publish(token, channelID, thingKey, baseUnit, name, unit, baseTime, value)
+	return lm.svc.Publish(channelID, thingKey, baseUnit, name, unit, baseTime, value)
 }
 
 // ReadMessages adds logging middleware to read messages method.
@@ -1319,7 +1319,7 @@ func (lm *loggingMiddleware) ViewBootstrap(token string, thingID string) (b []by
 }
 
 // GetRemoteTerminal adds logging middleware to remote terminal.
-func (lm *loggingMiddleware) GetRemoteTerminal(thingID, token string) (res []byte, err error) {
+func (lm *loggingMiddleware) GetRemoteTerminal(thingID string) (res []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -1333,7 +1333,7 @@ func (lm *loggingMiddleware) GetRemoteTerminal(thingID, token string) (res []byt
 		lm.logger.Info("View remote terminal completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.GetRemoteTerminal(thingID, token)
+	return lm.svc.GetRemoteTerminal(thingID)
 }
 
 // ProcessTerminalCommand adds logging middleware to async function ProcessTerminalCommand.
