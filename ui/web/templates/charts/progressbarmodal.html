@@ -1,0 +1,101 @@
+<!-- Copyright (c) Abstract Machines
+SPDX-License-Identifier: Apache-2.0 -->
+
+{{ define "progressbarmodal" }}
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="progressBarModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="progressBarModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="progressBarModalLabel">Value Card</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <form id="create-progressBar-form">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="title" class="form-label">Title</label>
+              <input
+                type="text"
+                class="form-control"
+                name="title"
+                id="title"
+                placeholder="Enter the chart title"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="channel-id" class="form-label">Channel ID</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="channel"
+                id="channel-id"
+                placeholder="Enter channel ID"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="value" class="form-label">Select Value</label>
+              <select class="form-select mb-3" name="Value" id="value">
+                <option value="value">Temperature</option>
+                <option value="time">Time</option>
+                <option value="log">Pressure</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button
+              type="button"
+              class="btn body-button"
+              data-bs-dismiss="modal"
+              id="create-progressBar-button"
+            >
+              Create Chart
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Progress bar form
+    document.getElementById("create-progressBar-button").addEventListener("click", function () {
+      var form = document.getElementById("create-progressBar-form");
+      // Create an object to store the form data
+      var formData = {};
+
+      // Serialize the form data into the object
+      for (var i = 0; i < form.elements.length; i++) {
+        var e = form.elements[i];
+        if (e.type !== "submit" && e.type !== "button") {
+          formData[e.name] = e.value;
+        }
+      }
+      form.reset();
+
+      var widgetID = "progressBar-" + Date.now();
+      var contentType = 'html';
+      var widgetContent = `
+        <div class="card-body">
+          <h5 class="card-title">Progress Bar</h5>
+          <div class="progress">
+            <div class="progress-bar" role="progressbar" style="width: 70%" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </div>
+      `;
+
+      addWidget(widgetID, ``, widgetContent);
+    });
+  </script>
+{{ end }}

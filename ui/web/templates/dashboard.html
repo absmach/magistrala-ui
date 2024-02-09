@@ -119,6 +119,55 @@ SPDX-License-Identifier: Apache-2.0 -->
       <script>
         const layout = '{{ .Dashboard.Layout }}';
         const dashboardID = '{{ .Dashboard.ID }}';
+        var grid = initGrid(layout);
+
+        function addWidget(widgetID, widgetScript, widgetContent) {
+          // Create a new grid item
+          const newItem = document.createElement("div");
+          newItem.className = "item";
+          newItem.classList.add("item-editable");
+          newItem.innerHTML = `
+            <button type="button" class="btn btn-sm" id="removeItem" onclick="removeGridItem(this.parentNode);">
+              <i class="fas fa-trash-can"></i>
+            </button>
+            <div class="item-content" id="${widgetID}" style="width: 500px;height:400px;">
+              ${widgetContent}
+            </div>
+            `;
+          if (widgetScript) {
+            var scriptTag = document.createElement("script");
+            scriptTag.type = "text/javascript";
+            scriptTag.defer = true;
+            scriptTag.innerHTML = widgetScript;
+            newItem.appendChild(scriptTag);
+          }
+
+          grid.add(newItem);
+          resizeObserver.observe(newItem);
+        }
+
+        function removeGridItem(item) {
+          grid.remove(grid.getItems(item), { removeElements: true });
+        }
+
+        function openWidgetModal(widget) {
+          const widgetModal = new bootstrap.Modal(document.getElementById(`${widget}Modal`));
+          widgetModal.show();
+        }
+
+        // Editable canvas is used to make the canvas editable allowing the user to add widgets and be able to move the
+        // widgets around the canvas
+        function editableCanvas() {
+          grid = editGrid(grid, layout);
+        }
+
+        function saveCanvas() {
+          saveGrid(grid, dashboardID);
+        }
+
+        function cancelEdit() {
+          cancelEditGrid(grid);
+        }
       </script>
       <script src="https://cdn.jsdelivr.net/npm/muuri@0.9.5/dist/muuri.min.js"></script>
       <script src="/js/singleDashboard.js"></script>
