@@ -74,7 +74,7 @@ func CreateItem() []Item {
 			Widget:  "doubleBarChart",
 		},
 		{
-			Title:   "mutliple line Chart",
+			Title:   "Mutliple Line Chart",
 			Content: "This is a horizontal bar chart",
 			Widget:  "multipleLineChart",
 		},
