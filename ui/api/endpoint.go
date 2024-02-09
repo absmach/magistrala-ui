@@ -565,7 +565,7 @@ func disableUserEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func AddMemberToChannelEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(addUserToChannelReq)
 		if err := req.validate(); err != nil {
 			return nil, err
@@ -588,7 +588,7 @@ func AddMemberToChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func RemoveMemberFromChannelEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(addUserToChannelReq)
 		if err := req.validate(); err != nil {
 			return nil, err
@@ -826,7 +826,7 @@ func disableThingEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func listThingMembersEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(listEntityByIDReq)
 
 		res, err := svc.ListThingUsers(req.token, req.id, req.relation, req.page, req.limit)
@@ -1072,7 +1072,7 @@ func disableChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func ListChannelMembersEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(listEntityByIDReq)
 
 		res, err := svc.ListChannelUsers(req.token, req.id, req.relation, req.page, req.limit)
@@ -1088,7 +1088,7 @@ func ListChannelMembersEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func addGroupToChannelEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(addUserGroupToChannelReq)
 		if err := req.validate(); err != nil {
 			return nil, err
@@ -1122,7 +1122,7 @@ func addGroupToChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func removeGroupFromChannelEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(addUserGroupToChannelReq)
 		if err := req.validate(); err != nil {
 			return nil, err
@@ -1156,7 +1156,7 @@ func removeGroupFromChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func ListChannelGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(listEntityByIDReq)
 
 		res, err := svc.ListChannelUserGroups(req.token, req.id, req.page, req.limit)
@@ -1322,7 +1322,7 @@ func disableGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func listGroupChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(listEntityByIDReq)
 
 		res, err := svc.ListUserGroupChannels(req.token, req.id, req.page, req.limit)
@@ -1356,7 +1356,7 @@ func publishMessageEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func readMessagesEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(readMessagesReq)
 		if err := req.validate(); err != nil {
 			return nil, err
@@ -1596,7 +1596,7 @@ func handleTerminalInputEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func getEntitiesEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(getEntitiesReq)
 		if err := req.validate(); err != nil {
 			return nil, err
@@ -1615,7 +1615,7 @@ func getEntitiesEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func errorPageEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (response interface{}, err error) {
+	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(errorReq)
 		if err := req.validate(); err != nil {
 			return nil, err
