@@ -120,10 +120,8 @@ function loadLayout(savedLayout) {
     });
 
     if (gridState.items.length === 0) {
-      console.log("No items found in the saved state");
       showNoWidgetPlaceholder();
     } else {
-      console.log("Items found in the saved state", gridState.items);
       // Add items to the grid based on the saved state
       gridState.items.forEach((itemData) => {
         const newItem = document.createElement("div");
