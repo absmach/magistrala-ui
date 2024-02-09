@@ -60,11 +60,15 @@ function initGrid(layout) {
 }
 
 function saveLayout(grid, dashboardID) {
-  const itemData = grid.getItems().map((item) => ({
-    innerHTML: item._element.innerHTML,
-    widgetID: item._element.children[1].children[0].id,
-    widgetScript: item._element.children[2].innerHTML,
-  }));
+  const itemData = grid.getItems().map((item) => {
+    const hasWidgetScript =
+      item._element.children[2] && item._element.children[2].innerHTML.trim() !== "";
+    return {
+      innerHTML: item._element.innerHTML,
+      widgetID: item._element.children[1].children[0].id,
+      ...(hasWidgetScript ? { widgetScript: item._element.children[2].innerHTML } : {}),
+    };
+  });
 
   const gridState = {
     items: itemData,
@@ -201,10 +205,7 @@ const resizeObserver = new ResizeObserver((entries) => {
     var item = grid.getItems(target)[0];
     var el = item.getElement();
     grid = item.getGrid();
-
     const contentEl = el.querySelector(".item-content");
-    var chart = echarts.getInstanceByDom(contentEl);
-
     // Calculate the change in width and height
     var widthChange = target.clientWidth - previousSize.width;
     var heightChange = target.clientHeight - previousSize.height;
@@ -223,10 +224,14 @@ const resizeObserver = new ResizeObserver((entries) => {
     el.style.height = target.clientHeight + "px";
     el.querySelector(".item-content").style.width = itemContentWidth + "px";
     el.querySelector(".item-content").style.height = itemContentHeight + "px";
-    chart.resize({
-      width: itemContentWidth,
-      height: itemContentHeight,
-      });
+
+    var chart = echarts.getInstanceByDom(contentEl);
+    if (chart) {
+      chart.resize({
+        width: itemContentWidth,
+        height: itemContentHeight,
+        });
+    }
     grid.refreshItems();
     grid.layout(true);
   }

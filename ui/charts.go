@@ -98,6 +98,46 @@ func CreateItem() []Item {
 			Content: "This is a multiple dataset chart",
 			Widget:  "sharedDataset",
 		},
+		{
+			Title:   "Value Card",
+			Content: "This is a text value card",
+			Widget:  "valueCard",
+		},
+		{
+			Title:   "Value and Chart Card",
+			Content: "This is a value and chart card",
+			Widget:  "valueChartCard",
+		},
+		{
+			Title:   "Alarm Count Card",
+			Content: "This is an alarm count card",
+			Widget:  "alarmCount",
+		},
+		{
+			Title:   "Alarms Table",
+			Content: "This is an alarms table",
+			Widget:  "alarmsTable",
+		},
+		{
+			Title:   "Entities Table",
+			Content: "This is an entities table",
+			Widget:  "entitiesTable",
+		},
+		{
+			Title:   "Entity Count Card",
+			Content: "This is an entity count card",
+			Widget:  "entityCount",
+		},
+		{
+			Title:   "Label Card",
+			Content: "This is a label card",
+			Widget:  "label",
+		},
+		{
+			Title:   "Progress Bar",
+			Content: "This is a progress bar",
+			Widget:  "progressBar",
+		},
 	}
 
 	return items
