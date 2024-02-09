@@ -119,18 +119,24 @@ function loadLayout(savedLayout) {
       // Add any other relevant settings
     });
 
-    // Add items to the grid based on the saved state
-    gridState.items.forEach((itemData) => {
-      const newItem = document.createElement("div");
-      newItem.className = "item";
-      newItem.innerHTML = itemData.innerHTML.trim();
-      var scriptTag = document.createElement("script");
-      scriptTag.type = "text/javascript";
-      scriptTag.defer = true;
-      scriptTag.innerHTML = itemData.widgetScript;
-      newItem.appendChild(scriptTag);
-      const item = grid.add(newItem);
-    });
+    if (gridState.items.length === 0) {
+      console.log("No items found in the saved state");
+      showNoWidgetPlaceholder();
+    } else {
+      console.log("Items found in the saved state", gridState.items);
+      // Add items to the grid based on the saved state
+      gridState.items.forEach((itemData) => {
+        const newItem = document.createElement("div");
+        newItem.className = "item";
+        newItem.innerHTML = itemData.innerHTML.trim();
+        var scriptTag = document.createElement("script");
+        scriptTag.type = "text/javascript";
+        scriptTag.defer = true;
+        scriptTag.innerHTML = itemData.widgetScript;
+        newItem.appendChild(scriptTag);
+        const item = grid.add(newItem);
+      });
+    }
 
     // Layout the grid
     grid.layout(gridState.layout);
