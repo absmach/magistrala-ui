@@ -17,7 +17,7 @@ function saveCanvas() {
 function cancelEdit() {
   cancelEditGrid(grid);
 }
-
+// Config has the ID, Content and Script parameters
 function addWidget(config) {
   // Create a new grid item
   const newItem = document.createElement("div");
@@ -28,14 +28,16 @@ function addWidget(config) {
       <i class="fas fa-trash-can"></i>
     </button>
     <div class="item-content" id="${config.ID}" style="width: 500px;height:400px;">
+      ${config.Content}
     </div>
-    `;
-  var scriptTag = document.createElement("script");
-  scriptTag.type = "text/javascript";
-  scriptTag.defer = true;
-  scriptTag.innerHTML = config.Script;
-  newItem.appendChild(scriptTag);
-
+  `;
+  if (config.Script) {
+    var scriptTag = document.createElement("script");
+    scriptTag.type = "text/javascript";
+    scriptTag.defer = true;
+    scriptTag.innerHTML = config.Script;
+    newItem.appendChild(scriptTag);
+  }
   grid.add(newItem);
   resizeObserver.observe(newItem);
 }
