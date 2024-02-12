@@ -660,13 +660,13 @@ func (mm *metricsMiddleware) ListUserGroupChannels(token, id string, page, limit
 }
 
 // Publish adds metrics middleware to publish method.
-func (mm *metricsMiddleware) Publish(channelID, thingKey, baseUnit, name, unit string, baseTime, value float64) error {
+func (mm *metricsMiddleware) Publish(channelID, thingKey string, message ui.Message) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "publish").Add(1)
 		mm.latency.With("method", "publish").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.Publish(channelID, thingKey, baseUnit, name, unit, baseTime, value)
+	return mm.svc.Publish(channelID, thingKey, message)
 }
 
 // ReadMessages adds metrics middleware to read messages method.

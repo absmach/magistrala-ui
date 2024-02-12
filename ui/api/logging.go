@@ -1138,7 +1138,7 @@ func (lm *loggingMiddleware) ListUserGroupChannels(token, id string, page, limit
 }
 
 // Publish adds logging middleware to publish method.
-func (lm *loggingMiddleware) Publish(channelID, thingKey, baseUnit, name, unit string, baseTime, value float64) (err error) {
+func (lm *loggingMiddleware) Publish(channelID, thingKey string, message ui.Message) (err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -1152,7 +1152,7 @@ func (lm *loggingMiddleware) Publish(channelID, thingKey, baseUnit, name, unit s
 		lm.logger.Info("Publish message completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.Publish(channelID, thingKey, baseUnit, name, unit, baseTime, value)
+	return lm.svc.Publish(channelID, thingKey, message)
 }
 
 // ReadMessages adds logging middleware to read messages method.

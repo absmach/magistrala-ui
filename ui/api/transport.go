@@ -814,8 +814,8 @@ func decodePasswordUpdate(_ context.Context, r *http.Request) (interface{}, erro
 	}
 	req := updateUserPasswordReq{
 		token:   token,
-		OldPass: r.PostFormValue("oldpass"),
-		NewPass: r.PostFormValue("newpass"),
+		oldPass: r.PostFormValue("oldpass"),
+		newPass: r.PostFormValue("newpass"),
 	}
 
 	return req, nil
@@ -823,7 +823,7 @@ func decodePasswordUpdate(_ context.Context, r *http.Request) (interface{}, erro
 
 func decodePasswordResetRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	req := passwordResetRequestReq{
-		Email: r.PostFormValue("email"),
+		email: r.PostFormValue("email"),
 	}
 	return req, nil
 }
@@ -831,8 +831,8 @@ func decodePasswordResetRequest(_ context.Context, r *http.Request) (interface{}
 func decodePasswordReset(_ context.Context, r *http.Request) (interface{}, error) {
 	req := passwordResetReq{
 		token:           bone.GetQuery(r, "token")[0],
-		Password:        r.PostFormValue("password"),
-		ConfirmPassword: r.PostFormValue("confirmPassword"),
+		password:        r.PostFormValue("password"),
+		confirmPassword: r.PostFormValue("confirmPassword"),
 	}
 	return req, nil
 }
@@ -856,12 +856,11 @@ func decodeRegisterUserRequest(_ context.Context, r *http.Request) (interface{},
 }
 
 func decodeTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	identity := r.PostFormValue("email")
-	secret := r.PostFormValue("password")
-
 	req := tokenReq{
-		Identity: identity,
-		Secret:   secret,
+		sdk.Login{
+			Identity: r.PostFormValue("email"),
+			Secret:   r.PostFormValue("password"),
+		},
 	}
 
 	return req, nil
@@ -1008,17 +1007,15 @@ func decodeUserUpdate(_ context.Context, r *http.Request) (interface{}, error) {
 		return nil, err
 	}
 
-	var data updateUserReq
-	err = json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
+	var user sdk.User
+	if err = json.NewDecoder(r.Body).Decode(&user); err != nil {
 		return nil, err
 	}
+	user.ID = chi.URLParam(r, "id")
 
 	req := updateUserReq{
-		token:    token,
-		id:       chi.URLParam(r, "id"),
-		Name:     data.Name,
-		Metadata: data.Metadata,
+		token: token,
+		User:  user,
 	}
 
 	return req, nil
@@ -1030,18 +1027,15 @@ func decodeUserTagsUpdate(_ context.Context, r *http.Request) (interface{}, erro
 		return nil, err
 	}
 
-	var data struct {
-		Tags []string `json:"tags"`
-	}
-	err = json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
+	var user sdk.User
+	if err = json.NewDecoder(r.Body).Decode(&user); err != nil {
 		return nil, err
 	}
+	user.ID = chi.URLParam(r, "id")
 
 	req := updateUserTagsReq{
 		token: token,
-		id:    chi.URLParam(r, "id"),
-		Tags:  data.Tags,
+		User:  user,
 	}
 
 	return req, nil
@@ -1053,18 +1047,17 @@ func decodeUserIdentityUpdate(_ context.Context, r *http.Request) (interface{}, 
 		return nil, err
 	}
 
-	id := chi.URLParam(r, "id")
-
-	var data updateUserIdentityReq
-	err = json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
+	var credentials sdk.Credentials
+	if err = json.NewDecoder(r.Body).Decode(&credentials); err != nil {
 		return nil, err
 	}
 
 	req := updateUserIdentityReq{
-		token:    token,
-		id:       id,
-		Identity: data.Identity,
+		token: token,
+		User: sdk.User{
+			ID:          chi.URLParam(r, "id"),
+			Credentials: credentials,
+		},
 	}
 
 	return req, nil
@@ -1077,8 +1070,8 @@ func decodeUserStatusUpdate(_ context.Context, r *http.Request) (interface{}, er
 	}
 
 	req := updateUserStatusReq{
-		token:  token,
-		UserID: r.PostFormValue("entityID"),
+		token: token,
+		id:    r.PostFormValue("entityID"),
 	}
 
 	return req, nil
@@ -1091,9 +1084,11 @@ func decodeUserRoleUpdate(_ context.Context, r *http.Request) (interface{}, erro
 	}
 
 	req := updateUserRoleReq{
-		token:  token,
-		UserID: chi.URLParam(r, "id"),
-		Role:   r.PostFormValue("role"),
+		token: token,
+		User: sdk.User{
+			ID:   chi.URLParam(r, "id"),
+			Role: r.PostFormValue("role"),
+		},
 	}
 
 	return req, nil
@@ -1110,10 +1105,12 @@ func decodeAssignGroupRequest(_ context.Context, r *http.Request) (interface{}, 
 	}
 
 	return assignReq{
-		token:    token,
-		GroupID:  chi.URLParam(r, "id"),
-		UserID:   r.Form.Get("userID"),
-		Relation: r.Form.Get("relation"),
+		token:   token,
+		groupID: chi.URLParam(r, "id"),
+		UsersRelationRequest: sdk.UsersRelationRequest{
+			UserIDs:  r.Form["userID"],
+			Relation: r.Form.Get("relation"),
+		},
 	}, nil
 }
 
@@ -1128,10 +1125,12 @@ func decodeShareThingRequest(_ context.Context, r *http.Request) (interface{}, e
 	}
 
 	return shareThingReq{
-		token:    token,
-		ThingID:  chi.URLParam(r, "id"),
-		UserID:   r.Form.Get("userID"),
-		Relation: r.Form.Get("relation"),
+		token: token,
+		id:    chi.URLParam(r, "id"),
+		UsersRelationRequest: sdk.UsersRelationRequest{
+			UserIDs:  r.Form["userID"],
+			Relation: r.Form.Get("relation"),
+		},
 	}, nil
 }
 
@@ -1148,8 +1147,10 @@ func decodeAddMemberToChannelRequest(_ context.Context, r *http.Request) (interf
 	return addUserToChannelReq{
 		token:     token,
 		ChannelID: chi.URLParam(r, "id"),
-		Relation:  r.Form.Get("relation"),
-		UserID:    r.Form.Get("userID"),
+		UsersRelationRequest: sdk.UsersRelationRequest{
+			Relation: r.Form.Get("relation"),
+			UserIDs:  r.Form["userID"],
+		},
 	}, nil
 }
 
@@ -1166,20 +1167,19 @@ func decodeThingCreation(_ context.Context, r *http.Request) (interface{}, error
 	if err != nil {
 		return nil, err
 	}
-	credentials := sdk.Credentials{
-		Identity: r.PostFormValue("identity"),
-		Secret:   r.PostFormValue("secret"),
-	}
-	thing := sdk.Thing{
-		Name:        r.PostFormValue("name"),
-		ID:          r.PostFormValue("thingID"),
-		Credentials: credentials,
-		Tags:        tags,
-		Metadata:    meta,
-	}
+
 	req := createThingReq{
 		token: token,
-		Thing: thing,
+		Thing: sdk.Thing{
+			Name: r.PostFormValue("name"),
+			ID:   r.PostFormValue("thingID"),
+			Credentials: sdk.Credentials{
+				Identity: r.PostFormValue("identity"),
+				Secret:   r.PostFormValue("secret"),
+			},
+			Tags:     tags,
+			Metadata: meta,
+		},
 	}
 
 	return req, nil
@@ -1191,17 +1191,15 @@ func decodeThingUpdate(_ context.Context, r *http.Request) (interface{}, error) 
 		return nil, err
 	}
 
-	var data updateThingReq
-	err = json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
+	var thing sdk.Thing
+	if err = json.NewDecoder(r.Body).Decode(&thing); err != nil {
 		return nil, err
 	}
+	thing.ID = chi.URLParam(r, "id")
 
 	req := updateThingReq{
-		token:    token,
-		id:       chi.URLParam(r, "id"),
-		Name:     data.Name,
-		Metadata: data.Metadata,
+		token: token,
+		Thing: thing,
 	}
 
 	return req, nil
@@ -1213,16 +1211,15 @@ func decodeThingTagsUpdate(_ context.Context, r *http.Request) (interface{}, err
 		return nil, err
 	}
 
-	var data updateThingTagsReq
-	err = json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
+	var thing sdk.Thing
+	if err = json.NewDecoder(r.Body).Decode(&thing); err != nil {
 		return nil, err
 	}
+	thing.ID = chi.URLParam(r, "id")
 
 	req := updateThingTagsReq{
 		token: token,
-		id:    chi.URLParam(r, "id"),
-		Tags:  data.Tags,
+		Thing: thing,
 	}
 
 	return req, nil
@@ -1234,16 +1231,17 @@ func decodeThingSecretUpdate(_ context.Context, r *http.Request) (interface{}, e
 		return nil, err
 	}
 
-	var data updateThingSecretReq
-	err = json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
+	var credentials sdk.Credentials
+	if err = json.NewDecoder(r.Body).Decode(&credentials); err != nil {
 		return nil, err
 	}
 
 	req := updateThingSecretReq{
-		token:  token,
-		id:     chi.URLParam(r, "id"),
-		Secret: data.Secret,
+		token: token,
+		Thing: sdk.Thing{
+			ID:          chi.URLParam(r, "id"),
+			Credentials: credentials,
+		},
 	}
 
 	return req, nil
@@ -1256,8 +1254,8 @@ func decodeThingStatusUpdate(_ context.Context, r *http.Request) (interface{}, e
 	}
 
 	req := updateThingStatusReq{
-		token:   token,
-		ThingID: r.PostFormValue("entityID"),
+		token: token,
+		id:    r.PostFormValue("entityID"),
 	}
 
 	return req, nil
@@ -1425,18 +1423,15 @@ func decodeChannelUpdate(_ context.Context, r *http.Request) (interface{}, error
 		return nil, err
 	}
 
-	var data updateChannelReq
-	err = json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
+	var channel sdk.Channel
+	if err = json.NewDecoder(r.Body).Decode(&channel); err != nil {
 		return nil, err
 	}
+	channel.ID = chi.URLParam(r, "id")
 
 	req := updateChannelReq{
-		token:       token,
-		id:          chi.URLParam(r, "id"),
-		Name:        data.Name,
-		Metadata:    data.Metadata,
-		Description: data.Description,
+		token:   token,
+		Channel: channel,
 	}
 
 	return req, nil
@@ -1462,17 +1457,17 @@ func decodeConnectChannel(_ context.Context, r *http.Request) (interface{}, erro
 	switch item {
 	case thingsItem:
 		req = connectThingReq{
-			token:   token,
-			ChanID:  r.Form.Get("channelID"),
-			ThingID: chi.URLParam(r, "id"),
-			Item:    item,
+			token:     token,
+			channelID: r.Form.Get("channelID"),
+			thingID:   chi.URLParam(r, "id"),
+			item:      item,
 		}
 	case channelsItem:
 		req = connectThingReq{
-			token:   token,
-			ChanID:  chi.URLParam(r, "id"),
-			ThingID: r.Form.Get("thingID"),
-			Item:    item,
+			token:     token,
+			channelID: chi.URLParam(r, "id"),
+			thingID:   r.Form.Get("thingID"),
+			item:      item,
 		}
 	}
 
@@ -1486,8 +1481,8 @@ func decodeChannelStatusUpdate(_ context.Context, r *http.Request) (interface{},
 	}
 
 	req := updateChannelStatusReq{
-		token:     token,
-		ChannelID: r.PostFormValue("entityID"),
+		token: token,
+		id:    r.PostFormValue("entityID"),
 	}
 
 	return req, nil
@@ -1510,16 +1505,16 @@ func decodeAddGroupToChannelRequest(_ context.Context, r *http.Request) (interfa
 
 	req := addUserGroupToChannelReq{
 		token: token,
-		Item:  item,
+		item:  item,
 	}
 
 	switch item {
 	case channelsItem:
-		req.ChannelID = chi.URLParam(r, "id")
-		req.GroupID = r.Form.Get("groupID")
+		req.channelID = chi.URLParam(r, "id")
+		req.UserGroupIDs = r.Form["groupID"]
 	case groupsItem:
-		req.GroupID = chi.URLParam(r, "id")
-		req.ChannelID = r.Form.Get("channelID")
+		req.UserGroupIDs = []string{chi.URLParam(r, "id")}
+		req.channelID = r.Form.Get("channelID")
 	}
 
 	return req, nil
@@ -1613,19 +1608,17 @@ func decodeGroupUpdate(_ context.Context, r *http.Request) (interface{}, error) 
 		return nil, err
 	}
 
-	var data updateGroupReq
-	err = json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
+	var group sdk.Group
+	if err = json.NewDecoder(r.Body).Decode(&group); err != nil {
 		return nil, err
 	}
+	group.ID = chi.URLParam(r, "id")
 
 	req := updateGroupReq{
-		token:       token,
-		id:          chi.URLParam(r, "id"),
-		Name:        data.Name,
-		Metadata:    data.Metadata,
-		Description: data.Description,
+		token: token,
+		Group: group,
 	}
+
 	return req, nil
 }
 
@@ -1636,28 +1629,29 @@ func decodeGroupStatusUpdate(_ context.Context, r *http.Request) (interface{}, e
 	}
 
 	req := updateGroupStatusReq{
-		token:   token,
-		GroupID: r.PostFormValue("entityID"),
+		token: token,
+		id:    r.PostFormValue("entityID"),
 	}
 
 	return req, nil
 }
 
 func decodePublishRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	currentTime := float64(time.Now().Unix())
 	floatValue, err := strconv.ParseFloat(r.PostFormValue("value"), 64)
 	if err != nil {
 		return nil, err
 	}
 
 	req := publishReq{
-		ThingKey: r.PostFormValue("thingKey"),
-		ChanID:   r.PostFormValue("channelID"),
-		BaseTime: currentTime,
-		BaseUnit: r.PostFormValue("unit"),
-		Name:     r.PostFormValue("name"),
-		Unit:     r.PostFormValue("unit"),
-		Value:    floatValue,
+		thingKey:  r.PostFormValue("thingKey"),
+		channelID: r.PostFormValue("channelID"),
+		Message: ui.Message{
+			BaseTime: float64(time.Now().Unix()),
+			BaseUnit: r.PostFormValue("unit"),
+			Name:     r.PostFormValue("name"),
+			Unit:     r.PostFormValue("unit"),
+			Value:    floatValue,
+		},
 	}
 
 	return req, nil
@@ -1684,11 +1678,11 @@ func decodeReadMessagesRequest(_ context.Context, r *http.Request) (interface{},
 	}
 
 	req := readMessagesReq{
-		token:    token,
-		ChanID:   r.Form.Get("channel"),
-		ThingKey: r.Form.Get("thing"),
-		Page:     page,
-		Limit:    limit,
+		token:     token,
+		channelID: r.Form.Get("channel"),
+		thingKey:  r.Form.Get("thing"),
+		page:      page,
+		limit:     limit,
 	}
 
 	return req, nil
@@ -1718,16 +1712,19 @@ func decodeCreateBootstrapRequest(_ context.Context, r *http.Request) (interface
 	}
 
 	req := createBootstrapReq{
-		token:       token,
-		ThingID:     r.FormValue("thingID"),
-		ExternalID:  r.FormValue("externalID"),
-		ExternalKey: r.FormValue("externalKey"),
-		Channels:    r.PostForm["channelID"],
-		Name:        r.FormValue("name"),
-		Content:     r.FormValue("content"),
-		ClientCert:  r.FormValue("clientCert"),
-		ClientKey:   r.FormValue("clientKey"),
-		CACert:      r.FormValue("CACert"),
+		token: token,
+		BootstrapConfig: sdk.BootstrapConfig{
+			ThingID:     r.FormValue("thingID"),
+			ExternalID:  r.FormValue("externalID"),
+			ExternalKey: r.FormValue("externalKey"),
+			Channels:    r.PostForm["channelID"],
+			Name:        r.FormValue("name"),
+			Content:     r.FormValue("content"),
+			ClientCert:  r.FormValue("clientCert"),
+			ClientKey:   r.FormValue("clientKey"),
+			CACert:      r.FormValue("CACert"),
+			State:       1,
+		},
 	}
 
 	return req, nil
@@ -1739,15 +1736,18 @@ func decodeUpdateBootstrap(_ context.Context, r *http.Request) (interface{}, err
 		return nil, err
 	}
 
-	var data updateBootstrapReq
-	err = json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
+	var config sdk.BootstrapConfig
+	if err = json.NewDecoder(r.Body).Decode(&config); err != nil {
 		return nil, err
 	}
-	data.token = token
-	data.id = chi.URLParam(r, "id")
+	config.ThingID = chi.URLParam(r, "id")
 
-	return data, nil
+	req := updateBootstrapReq{
+		token:           token,
+		BootstrapConfig: config,
+	}
+
+	return req, nil
 }
 
 func decodeDeleteBootstrap(_ context.Context, r *http.Request) (interface{}, error) {
@@ -1777,8 +1777,10 @@ func decodeUpdateBootstrapState(_ context.Context, r *http.Request) (interface{}
 
 	req := updateBootstrapStateReq{
 		token: token,
-		id:    chi.URLParam(r, "id"),
-		State: state,
+		BootstrapConfig: sdk.BootstrapConfig{
+			ThingID: chi.URLParam(r, "id"),
+			State:   state,
+		},
 	}
 
 	return req, nil
@@ -1790,15 +1792,18 @@ func decodeUpdateBootstrapCerts(_ context.Context, r *http.Request) (interface{}
 		return nil, err
 	}
 
-	var data updateBootstrapCertReq
-	err = json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
+	var config sdk.BootstrapConfig
+	if err = json.NewDecoder(r.Body).Decode(&config); err != nil {
 		return nil, err
 	}
-	data.thingID = chi.URLParam(r, "id")
-	data.token = token
+	config.ThingID = chi.URLParam(r, "id")
 
-	return data, nil
+	req := updateBootstrapCertReq{
+		token:           token,
+		BootstrapConfig: config,
+	}
+
+	return req, nil
 }
 
 func decodeUpdateBootstrapConnections(_ context.Context, r *http.Request) (interface{}, error) {
@@ -1812,9 +1817,11 @@ func decodeUpdateBootstrapConnections(_ context.Context, r *http.Request) (inter
 	}
 
 	req := updateBootstrapConnReq{
-		token:    token,
-		id:       chi.URLParam(r, "id"),
-		Channels: r.PostForm["channelID"],
+		token: token,
+		BootstrapConfig: sdk.BootstrapConfig{
+			ThingID:  chi.URLParam(r, "id"),
+			Channels: r.PostForm["channelID"],
+		},
 	}
 
 	return req, nil
@@ -1918,12 +1925,12 @@ func decodeGetEntitiesRequest(_ context.Context, r *http.Request) (interface{}, 
 
 	req := getEntitiesReq{
 		token:      token,
-		Item:       item,
-		Page:       page,
-		Name:       name,
-		DomainID:   domainID,
-		Limit:      limit,
-		Permission: permission,
+		item:       item,
+		page:       page,
+		name:       name,
+		domainID:   domainID,
+		limit:      limit,
+		permission: permission,
 	}
 
 	return req, nil
@@ -1936,8 +1943,10 @@ func decodeDomainLoginRequest(_ context.Context, r *http.Request) (interface{}, 
 	}
 
 	req := domainLoginReq{
-		token:    token,
-		DomainID: r.FormValue("domainID"),
+		token: token,
+		Login: sdk.Login{
+			DomainID: r.FormValue("domainID"),
+		},
 	}
 
 	return req, nil
@@ -1960,11 +1969,13 @@ func decodeCreateDomainRequest(_ context.Context, r *http.Request) (interface{},
 	}
 
 	req := createDomainReq{
-		token:    token,
-		Name:     r.FormValue("name"),
-		Alias:    r.FormValue("alias"),
-		Tags:     tags,
-		Metadata: meta,
+		token: token,
+		Domain: sdk.Domain{
+			Name:     r.FormValue("name"),
+			Alias:    r.FormValue("alias"),
+			Tags:     tags,
+			Metadata: meta,
+		},
 	}
 
 	return req, nil
@@ -1976,13 +1987,15 @@ func decodeUpdateDomainRequest(_ context.Context, r *http.Request) (interface{},
 		return nil, err
 	}
 
-	req := updateDomainReq{
-		token:    token,
-		DomainID: chi.URLParam(r, "id"),
-	}
-	err = json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
+	var domain sdk.Domain
+	if err = json.NewDecoder(r.Body).Decode(&domain); err != nil {
 		return nil, err
+	}
+	domain.ID = chi.URLParam(r, "id")
+
+	req := updateDomainReq{
+		token:  token,
+		Domain: domain,
 	}
 
 	return req, nil
@@ -1994,13 +2007,15 @@ func decodeUpdateDomainTagsRequest(_ context.Context, r *http.Request) (interfac
 		return nil, err
 	}
 
-	req := updateDomainTagsReq{
-		token:    token,
-		DomainID: chi.URLParam(r, "id"),
-	}
-	err = json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
+	var domain sdk.Domain
+	if err = json.NewDecoder(r.Body).Decode(&domain); err != nil {
 		return nil, err
+	}
+	domain.ID = chi.URLParam(r, "id")
+
+	req := updateDomainTagsReq{
+		token:  token,
+		Domain: domain,
 	}
 
 	return req, nil
@@ -2013,8 +2028,8 @@ func decodeDomainStatusUpdate(_ context.Context, r *http.Request) (interface{}, 
 	}
 
 	req := updateDomainStatusReq{
-		token:    token,
-		DomainID: r.PostFormValue("entityID"),
+		token: token,
+		id:    r.PostFormValue("entityID"),
 	}
 
 	return req, nil
@@ -2031,9 +2046,11 @@ func decodeAssignMemberRequest(_ context.Context, r *http.Request) (interface{},
 
 	req := assignMemberReq{
 		token:    token,
-		DomainID: chi.URLParam(r, "id"),
-		UserID:   r.Form.Get("userID"),
-		Relation: r.Form.Get("relation"),
+		domainID: chi.URLParam(r, "id"),
+		UsersRelationRequest: sdk.UsersRelationRequest{
+			UserIDs:  r.Form["userID"],
+			Relation: r.Form.Get("relation"),
+		},
 	}
 
 	return req, nil
@@ -2052,7 +2069,7 @@ func decodeViewMemberRequest(_ context.Context, r *http.Request) (interface{}, e
 
 	req := viewMemberReq{
 		token:        token,
-		UserIdentity: identity,
+		userIdentity: identity,
 	}
 
 	return req, nil
@@ -2065,10 +2082,12 @@ func decodeSendInvitationRequest(_ context.Context, r *http.Request) (interface{
 	}
 
 	req := sendInvitationReq{
-		token:    token,
-		DomainID: r.PostFormValue("domainID"),
-		UserID:   r.PostFormValue("userID"),
-		Relation: r.PostFormValue("relation"),
+		token: token,
+		Invitation: sdk.Invitation{
+			DomainID: r.PostFormValue("domainID"),
+			UserID:   r.PostFormValue("userID"),
+			Relation: r.PostFormValue("relation"),
+		},
 	}
 
 	return req, nil
@@ -2097,7 +2116,7 @@ func decodeListInvitationsRequest(_ context.Context, r *http.Request) (interface
 
 	req := listInvitationsReq{
 		token:    token,
-		DomainID: domainID,
+		domainID: domainID,
 		page:     page,
 		limit:    limit,
 	}
@@ -2117,7 +2136,7 @@ func decodeAcceptInvitationRequest(_ context.Context, r *http.Request) (interfac
 
 	req := acceptInvitationReq{
 		token:    token,
-		DomainID: r.Form.Get("domainID"),
+		domainID: r.Form.Get("domainID"),
 	}
 
 	return req, nil
@@ -2141,8 +2160,8 @@ func decodeDeleteInvitationRequest(_ context.Context, r *http.Request) (interfac
 	req := deleteInvitationReq{
 		token:    token,
 		domain:   domain,
-		DomainID: r.Form.Get("domainID"),
-		UserID:   r.Form.Get("userID"),
+		domainID: r.Form.Get("domainID"),
+		userID:   r.Form.Get("userID"),
 	}
 
 	return req, nil
@@ -2304,8 +2323,8 @@ func encodeResponse(_ context.Context, w http.ResponseWriter, response interface
 	if ar.Empty() {
 		return nil
 	}
-	_, err := w.Write(ar.html)
-	if err != nil {
+
+	if _, err := w.Write(ar.html); err != nil {
 		return err
 	}
 
