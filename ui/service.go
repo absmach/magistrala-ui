@@ -396,7 +396,7 @@ type Service interface {
 	// List Dashboards retrieves all dashboards for a user.
 	ListDashboards(token string, page, limit uint64) ([]byte, error)
 	// Dashboards displays the dashboards page.
-	Dashboards(token string) ([]byte, error)
+	Dashboards() ([]byte, error)
 	// Update a dashboard for a user.
 	UpdateDashboard(token, dashboardID string, dashboardReq DashboardReq) error
 	// Delete a dashboard for a user.
@@ -2500,7 +2500,7 @@ func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, e
 	return jsonData, nil
 }
 
-func (us *uiService) Dashboards(token string) ([]byte, error) {
+func (us *uiService) Dashboards() ([]byte, error) {
 	crumbs := []breadcrumb{
 		{Name: dashboardsActive},
 	}
