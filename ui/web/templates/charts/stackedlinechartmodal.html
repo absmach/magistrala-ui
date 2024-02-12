@@ -164,7 +164,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     class="form-control mb-3"
                     name="xAxisLabel"
                     id="x-axis-label"
-                    placeholder="Enter y axis label"
+                    placeholder="Enter x axis label"
                     default="Time"
                   />
                 </div>
@@ -175,20 +175,22 @@ SPDX-License-Identifier: Apache-2.0 -->
                     class="form-control mb-3"
                     name="seriesName"
                     id="series-name"
-                    placeholder="Enter the series name eg. temperature"
+                    placeholder="Enter the series name eg. temperature,voltage"
                     required
                   />
                 </div>
                 <div class="mb-3">
                   <label for="line-width" class="form-label">Line width</label>
-                  <input
-                    type="text"
-                    class="form-control mb-3"
-                    name="lineWidth"
-                    id="line-width"
-                    placeholder="Enter the line width"
-                    default="2"
-                  />
+                  <select class="form-select mb-3" name="lineWidth" id="lie-width">
+                    <option value="" disabled>Select the line width</option>
+                    <option value="0.5">0.5</option>
+                    <option value="1.0">1.0</option>
+                    <option value="1.5">1.5</option>
+                    <option value="2.0">2.0</option>
+                    <option value="2.5">2.5</option>
+                    <option value="3.0">3.0</option>
+                    <option value="3.5">3.5</option>
+                  </select>
                 </div>
               </form>
             </div>
@@ -225,6 +227,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           }
         }
         form.reset();
+        seriesName = formData.seriesName.split(",");
 
         var widgetID = "stackedlinechart-" + Date.now();
         var widgetScript = `
@@ -238,7 +241,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               trigger: 'axis'
             },
             legend: {
-              data: ['current', 'voltage', 'temperature'],
+              data: ['${seriesName[0]}', '${seriesName[1]}', '${seriesName[2]}'],
               left: 'right',
             },
             grid: {
@@ -268,19 +271,19 @@ SPDX-License-Identifier: Apache-2.0 -->
             },
             series: [
               {
-                name: 'current',
+                name: '${seriesName[0]}',
                 type: 'line',
                 stack: 'Total',
                 data: [120, 132, 101, 134, 90, 230, 210]
               },
               {
-                name: 'voltage',
+                name: '${seriesName[1]}',
                 type: 'line',
                 stack: 'Total',
                 data: [220, 182, 191, 234, 290, 330, 310]
               },
               {
-                name: 'temperature',
+                name: '${seriesName[2]}',
                 type: 'line',
                 stack: 'Total',
                 data: [150, 232, 201, 154, 190, 330, 410]
