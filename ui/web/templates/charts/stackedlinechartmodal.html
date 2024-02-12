@@ -87,7 +87,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="value-name" class="form-label">Enter value name</label>
+                  <label for="value-name" class="form-label">Value name</label>
                   <input
                     type="text"
                     class="form-control mb-3"
@@ -98,28 +98,26 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="start-time" class="form-label">Enter the start time</label>
+                  <label for="start-time" class="form-label">Start time</label>
                   <input
                     type="datetime-local"
                     class="form-control mb-3"
                     name="startTime"
                     id="start-name"
-                    placeholder="Enter the start time."
                     required
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="stop-time" class="form-label">Enter the stop time</label>
+                  <label for="stop-time" class="form-label">Stop time</label>
                   <input
                     type="datetime-local"
                     class="form-control mb-3"
                     name="stopTime"
                     id="stop-name"
-                    placeholder="Enter the stop time."
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="time-interval" class="form-label">Enter the time internal</label>
+                  <label for="time-interval" class="form-label">Time interval</label>
                   <input
                     type="text"
                     class="form-control mb-3"
@@ -150,7 +148,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="y-axis-label" class="form-label">Enter y axis label</label>
+                  <label for="y-axis-label" class="form-label">Y axis label</label>
                   <input
                     type="text"
                     class="form-control mb-3"
@@ -160,7 +158,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="x-axis-label" class="form-label">Enter x axis label</label>
+                  <label for="x-axis-label" class="form-label">X axis label</label>
                   <input
                     type="text"
                     class="form-control mb-3"
@@ -171,7 +169,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="series-name" class="form-label">Enter the series name</label>
+                  <label for="series-name" class="form-label">Series name</label>
                   <input
                     type="text"
                     class="form-control mb-3"
@@ -182,7 +180,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="line-width" class="form-label">Enter the line width</label>
+                  <label for="line-width" class="form-label">Line width</label>
                   <input
                     type="text"
                     class="form-control mb-3"
@@ -212,33 +210,36 @@ SPDX-License-Identifier: Apache-2.0 -->
   </div>
   <script>
     // Stacked line chart form
-    document.getElementById("create-stackedLineChart-button").addEventListener("click", function () {
-      var form = document.getElementById("create-stackdeLineChart-appearance-form");
-      // Create an object to store the form data
-      var formData = {};
+    document
+      .getElementById("create-stackedLineChart-button")
+      .addEventListener("click", function () {
+        var form = document.getElementById("create-stackdeLineChart-appearance-form");
+        // Create an object to store the form data
+        var formData = {};
 
-      // Serialize the form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          formData[e.name] = e.value;
+        // Serialize the form data into the object
+        for (var i = 0; i < form.elements.length; i++) {
+          var e = form.elements[i];
+          if (e.type !== "submit" && e.type !== "button") {
+            formData[e.name] = e.value;
+          }
         }
-      }
-      form.reset();
+        form.reset();
 
-      var widgetID = "stackedlinechart-" + Date.now();
-      var widgetScript = `
+        var widgetID = "stackedlinechart-" + Date.now();
+        var widgetScript = `
         var stackedLineChart = echarts.init(document.getElementById("${widgetID}"));
         var option = {
             title: {
               text: "${formData.title}",
-              left: 'center',
+              left: 'left',
             },
             tooltip: {
               trigger: 'axis'
             },
             legend: {
-              data: ['current', 'voltage', 'temperature']
+              data: ['current', 'voltage', 'temperature'],
+              left: 'right',
             },
             grid: {
               left: '3%',

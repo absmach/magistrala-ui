@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="dynamicDataChartModalLabel">Dynamic Data chart</h5>
+          <h5 class="modal-title" id="dynamicDataChartModalLabel">Dynamic Data Chart</h5>
           <button
             type="button"
             class="btn-close"
@@ -87,7 +87,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="value-name" class="form-label">Enter value names</label>
+                  <label for="value-name" class="form-label">Value names</label>
                   <input
                     type="text"
                     class="form-control mb-3"
@@ -98,7 +98,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="y-axis-type" class="form-label">Select y-axis Type</label>
+                  <label for="y-axis-type" class="form-label">Y-axis Type</label>
                   <select class="form-select mb-3" name="yAxisType" id="y-axis-typr">
                     <option value="" disabled>Select y-axis Type</option>
                     <option value="value">Value</option>
@@ -108,7 +108,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </select>
                 </div>
                 <div class="mb-3">
-                  <label for="start-time" class="form-label">Enter the start time</label>
+                  <label for="start-time" class="form-label">Start time</label>
                   <input
                     type="datetime-local"
                     class="form-control mb-3"
@@ -119,7 +119,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="stop-time" class="form-label">Enter the stop time</label>
+                  <label for="stop-time" class="form-label">Stop time</label>
                   <input
                     type="datetime-local"
                     class="form-control mb-3"
@@ -129,7 +129,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="time-interval" class="form-label">Enter the time internal</label>
+                  <label for="time-interval" class="form-label">Time interval</label>
                   <input
                     type="text"
                     class="form-control mb-3"
@@ -160,23 +160,55 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="x-axis-label" class="form-label">Enter x axis label</label>
+                  <label for="x-axis-label" class="form-label">X axis label</label>
                   <input
                     type="text"
                     class="form-control mb-3"
                     name="xAxisLabel"
                     id="x-axis-label"
-                    placeholder="Enter x axis label"
+                    placeholder="Enter the x axis label"
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="y-axis-label" class="form-label">Enter y axis label</label>
+                  <label for="line-y-axis-label" class="form-label">Line Y axis label</label>
                   <input
                     type="text"
                     class="form-control mb-3"
-                    name="yAxisLabel"
-                    id="y-axis-label"
-                    placeholder="Enter y axis label"
+                    name="lineYAxisLabel"
+                    id="line-y-axis-label"
+                    placeholder="Enter the line chart y axis label"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="bar-y-axis-label" class="form-label">Bar Y axis label</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="barYAxisLabel1"
+                    id="bar-y-axis-label"
+                    placeholder="Enter the bar chart y axis label"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="series-name" class="form-label">Line data series name</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="lineDataSeriesName"
+                    id="series-name"
+                    placeholder="Enter the series name eg. temperature"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="series-name" class="form-label">Bar data series name</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="barDataSeriesName"
+                    id="series-name"
+                    placeholder="Enter the series name eg. temperature"
+                    required
                   />
                 </div>
               </form>
@@ -286,7 +318,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                   {
                       type: 'category',
                       boundaryGap: true,
-                      data: categories
+                      data: categories,
+                      name: '${formData.xAxisLabel}',
+                      nameLocation: 'middle',
+                      nameGap: 35
                   },
                   {
                       type: 'category',
@@ -298,7 +333,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                   {
                       type: 'value',
                       scale: true,
-                      name: 'Price',
+                      name: '${formData.lineYAxisLabel}',
+                      nameLocation: 'middle',
+                      nameGap: '35',
                       max: 30,
                       min: 0,
                       boundaryGap: [0.2, 0.2]
@@ -306,7 +343,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                   {
                       type: 'value',
                       scale: true,
-                      name: 'Order',
+                      name: '${formData.barYAxisLabel1}',
+                      nameLocation: 'middle',
+                      nameGap: '35',
                       max: 1200,
                       min: 0,
                       boundaryGap: [0.2, 0.2]
@@ -314,14 +353,14 @@ SPDX-License-Identifier: Apache-2.0 -->
               ],
               series: [
                   {
-                      name: 'Dynamic Bar',
+                      name: '${formData.barDataSeriesName}',
                       type: 'bar',
                       xAxisIndex: 1,
                       yAxisIndex: 1,
                       data: data
                   },
                   {
-                      name: 'Dynamic Line',
+                      name: '${formData.lineDataSeriesName}',
                       type: 'line',
                       data: data2
                   }
