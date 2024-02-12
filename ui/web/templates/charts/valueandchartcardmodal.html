@@ -138,8 +138,11 @@ SPDX-License-Identifier: Apache-2.0 -->
           barChart.setOption(option);
         </script>
       `;
-
-      addWidget(widgetID, ``, widgetContent);
+      var config = {
+        ID: widgetID,
+        Content: widgetContent,
+      };
+      addWidget(config);
     });
   </script>
 {{ end }}

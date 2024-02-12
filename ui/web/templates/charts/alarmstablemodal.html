@@ -123,8 +123,11 @@ SPDX-License-Identifier: Apache-2.0 -->
           </tbody>
         </table>
       `;
-
-      addWidget(widgetID, ``, widgetContent);
+      var config = {
+        ID: widgetID,
+        Content: widgetContent,
+      };;
+      addWidget(config);
     });
   </script>
 {{ end }}

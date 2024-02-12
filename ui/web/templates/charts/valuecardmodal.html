@@ -89,7 +89,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       var channelID = formData.channel || "N/A";
       var value = formData.Value || "N/A";
       var widgetContent = `
-        <div class="card mt-3" style="width: 18rem;">
+        <div class="card mt-3">
           <div class="card-body">
             <h5 class="card-title">${title}</h5>
             <p class="card-text">Channel ID: ${channelID}</p>
@@ -100,7 +100,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         var config = {
           ID: widgetID,
           Content: widgetContent,
-        }
+        };
         addWidget(config);
     });
   </script>
