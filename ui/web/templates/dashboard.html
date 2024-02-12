@@ -46,11 +46,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     </button>
                   </div>
                   <div id="editableCanvasButton">
-                    <button
-                      type="button"
-                      class="btn body-button"
-                      onclick="editableCanvas()"
-                    >
+                    <button type="button" class="btn body-button" onclick="editableCanvas()">
                       Edit Canvas
                     </button>
                   </div>
@@ -81,8 +77,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <div class="offcanvas-body">
                     {{ range $chart := .Charts }}
                       <div
-                        class="card mb-3"
-                        style="width: 18rem; cursor: pointer;"
+                        class="card widget-card mb-3"
                         onclick="openWidgetModal('{{ $chart.Widget }}')"
                       >
                         <div class="card-body">

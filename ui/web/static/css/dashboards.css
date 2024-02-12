@@ -47,17 +47,15 @@ SPDX-License-Identifier: Apache-2.0 */
   overflow-y: hidden;
 }
 
-.card {
+.widget-card {
   transition: all 0.3s;
   font-family: "Roboto", sans-serif;
+  width: 18rem;
 }
 
-.card:hover {
+.widget-card:hover {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
   transform: scale(1.02);
-}
-
-.card-body:hover {
   cursor: pointer;
 }
 
