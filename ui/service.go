@@ -166,7 +166,7 @@ var (
 		"entitycountmodal",
 		"progressbarmodal",
 		"valueandchartcardmodal",
-		// "labelmodal",
+		"labelmodal",
 		// "valuechartcardmodal",
 		// "alarmstablemodal",
 		// "entitycountmodal",

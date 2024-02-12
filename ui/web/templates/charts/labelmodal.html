@@ -93,12 +93,11 @@ SPDX-License-Identifier: Apache-2.0 -->
             <h6 class="card-subtitle mb-2 text-muted">Selected Value: <span class="badge bg-primary">${selectedValue}</span></h6>
             <p class="card-text">Channel ID: ${formData['channel']}</p>
           </div>
-        </div>
-      `;
+        </div>`;
       var config = {
-        ID: widgetID,
-        Content: widgetContent,
-      };
+          ID: widgetID,
+          Content: widgetContent,
+        };
       addWidget(config);
     });
   </script>
