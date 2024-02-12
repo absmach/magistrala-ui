@@ -74,7 +74,7 @@ func CreateItem() []Item {
 			Widget:  "doubleBarChart",
 		},
 		{
-			Title:   "Mutliple Line Chart",
+			Title:   "Multiple Line Chart",
 			Content: "This is a multiple line chart",
 			Widget:  "multipleLineChart",
 		},
@@ -84,12 +84,12 @@ func CreateItem() []Item {
 			Widget:  "stepChart",
 		},
 		{
-			Title:   "Multiple Gauge",
+			Title:   "Multiple Gauge Chart",
 			Content: "This is a multiple gauge chart",
 			Widget:  "multiGauge",
 		},
 		{
-			Title:   "Multiple Bar",
+			Title:   "Multiple Bar Chart",
 			Content: "This is a multiple bar chart",
 			Widget:  "multiBarChart",
 		},
