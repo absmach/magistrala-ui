@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 var gridClass = ".grid";
 var localStorageKey = "gridState";
+var billboardCharts = new Map();
 var grid = initGrid(layout);
 
 // Editable canvas is used to make the canvas editable allowing the user to add widgets and be able to move the
@@ -204,6 +205,7 @@ const resizeObserver = new ResizeObserver((entries) => {
 
     const contentEl = el.querySelector(".item-content");
     var chart = echarts.getInstanceByDom(contentEl);
+    var bbChart = billboardCharts.get(target.querySelector(".item-content"));
 
     // Calculate the change in width and height
     var widthChange = target.clientWidth - previousSize.width;
@@ -223,10 +225,17 @@ const resizeObserver = new ResizeObserver((entries) => {
     el.style.height = target.clientHeight + "px";
     el.querySelector(".item-content").style.width = itemContentWidth + "px";
     el.querySelector(".item-content").style.height = itemContentHeight + "px";
-    chart.resize({
-      width: itemContentWidth,
-      height: itemContentHeight,
-    });
+    if (bbChart) {
+      bbChart.resize({
+        width: itemContentWidth,
+        height: itemContentHeight,
+      });
+    } else if (chart) {
+      chart.resize({
+        width: itemContentWidth,
+        height: itemContentHeight,
+      });
+    }
     grid.refreshItems();
     grid.layout(true);
   }

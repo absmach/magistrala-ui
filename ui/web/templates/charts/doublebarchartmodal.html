@@ -95,7 +95,6 @@ SPDX-License-Identifier: Apache-2.0 -->
         }
       }
       form.reset();
-
       var widgetID = "doubleBarchart-" + Date.now();
       var widgetScript = `
         var doubleBarChart = bb.generate({
@@ -125,6 +124,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           },
           bindto: "#${widgetID}",
         });
+        billboardCharts.set(document.querySelector("#${widgetID}"), doubleBarChart);
       `;
       addWidget(widgetID, widgetScript);
     });

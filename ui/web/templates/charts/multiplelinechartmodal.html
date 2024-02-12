@@ -114,6 +114,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           },
           bindto: "#${widgetID}",
         });
+        billboardCharts.set(document.querySelector("#${widgetID}"), multipleLineChart);
       `;
       addWidget(widgetID, widgetScript);
     });
