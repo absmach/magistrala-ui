@@ -195,6 +195,13 @@ function editGrid(grid, layout) {
   return grid;
 }
 
+if(window.ResizeObserver) {
+  const h1Elem = document.querySelector('h1');
+  const pElem = document.querySelector('p');
+  const divElem = document.querySelector('body > div');
+
+  divElem.style.width = '500px';
+}
 const previousSizes = new Map();
 
 const resizeObserver = new ResizeObserver((entries) => {
