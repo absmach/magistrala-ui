@@ -97,36 +97,83 @@ SPDX-License-Identifier: Apache-2.0 -->
       form.reset();
       var widgetID = "doubleBarchart-" + Date.now();
       var widgetScript = `
-        var doubleBarChart = bb.generate({
-          data: {
-            x: "x",
-            columns: [
-              ["x", "thing1", "thing2", "thing3", "thing4"],
-              ["download", 30, 200, 100, 400],
-              ["upload", 90, 100, 140, 200]
-            ],
-            groups: [
-              [
-                "download",
-                "loading"
-              ]
-            ],
-            colors: {
-              download: "blue",
-              upload: "green"
-            },
-            type: "bar",
+        var doubleBarChart = echarts.init(document.getElementById("${widgetID}"));
+        var option = {
+          title: {
+            text: 'Things vs Channels',
+            subtext: 'Fake Data'
           },
-          axis: {
-            x: {
-              type: "category"
+          tooltip: {
+            trigger: 'axis'
+          },
+          legend: {
+            data: ['Things', 'Channels']
+          },
+          toolbox: {
+            show: true,
+            feature: {
+              dataView: { show: true, readOnly: false },
+              magicType: { show: true, type: ['line', 'bar'] },
+              restore: { show: true },
+              saveAsImage: { show: true }
             }
           },
-          bindto: "#${widgetID}",
-        });
-        billboardCharts.set(document.querySelector("#${widgetID}"), doubleBarChart);
+          calculable: true,
+          xAxis: [
+            {
+              type: 'category',
+              // prettier-ignore
+              data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+            }
+          ],
+          yAxis: [
+            {
+              type: 'value'
+            }
+          ],
+          series: [
+            {
+              name: 'Things',
+              type: 'bar',
+              data: [
+                2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 32.6, 20.0, 6.4, 3.3
+              ],
+              markPoint: {
+                data: [
+                  { type: 'max', name: 'Max' },
+                  { type: 'min', name: 'Min' }
+                ]
+              },
+              markLine: {
+                data: [{ type: 'average', name: 'Avg' }]
+              }
+            },
+            {
+              name: 'Channels',
+              type: 'bar',
+              data: [
+                2.6, 5.9, 9.0, 26.4, 28.7, 70.7, 175.6, 182.2, 48.7, 18.8, 6.0, 2.3
+              ],
+              markPoint: {
+                data: [
+                  { name: 'Max', value: 182.2, xAxis: 7, yAxis: 183 },
+                  { name: 'Min', value: 2.3, xAxis: 11, yAxis: 3 }
+                ]
+              },
+              markLine: {
+                data: [{ type: 'average', name: 'Avg' }]
+              }
+            }
+          ]
+        };
+
+        doubleBarChart.setOption(option);
       `;
-      addWidget(widgetID, widgetScript);
+      var config = {
+        ID: widgetID,
+        Script: widgetScript,
+      }
+      addWidget(config);
     });
   </script>
 {{ end }}

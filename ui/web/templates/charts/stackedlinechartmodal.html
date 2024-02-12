@@ -149,7 +149,11 @@ SPDX-License-Identifier: Apache-2.0 -->
 
         stackedLineChart.setOption(option);`;
 
-      addWidget(widgetID, widgetScript);
+      var config = {
+        ID: widgetID,
+        Script: widgetScript,
+      }
+      addWidget(config);
     });
   </script>
 {{ end }}

@@ -88,6 +88,16 @@ func CreateItem() []Item {
 			Content: "This is a multiple gauge chart",
 			Widget:  "multiGauge",
 		},
+		{
+			Title:   "Multiple Bar",
+			Content: "This is a multiple bar chart",
+			Widget:  "multiBarChart",
+		},
+		{
+			Title:   "Multiple Dataset Chart",
+			Content: "This is a multiple dataset chart",
+			Widget:  "sharedDataset",
+		},
 	}
 
 	return items

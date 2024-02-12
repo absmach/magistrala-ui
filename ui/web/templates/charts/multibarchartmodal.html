@@ -1,0 +1,276 @@
+<!-- Copyright (c) Abstract Machines
+SPDX-License-Identifier: Apache-2.0 -->
+
+{{ define "multibarchartmodal" }}
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="multiBarChartModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="multiBarChartModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="multiBarChartModalLabel">Multi bar chart</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <form id="create-multiBarChart-form">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="title" class="form-label">Title</label>
+              <input
+                type="text"
+                class="form-control"
+                name="title"
+                id="title"
+                placeholder="Enter the chart title"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="channel-id" class="form-label">Channel ID</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="channel"
+                id="channel-id"
+                placeholder="Enter channel ID"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="x-axis" class="form-label">Select x-axis Type</label>
+              <select class="form-select mb-3" name="xAxisType" id="x-axis">
+                <option value="" disabled>Select x-axis Type</option>
+                <option value="value">Value</option>
+                <option value="category">Category</option>
+                <option value="time">Time</option>
+                <option value="log">Log</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="y-axis" class="form-label">Select y-axis Type</label>
+              <select class="form-select mb-3" name="yAxisType" id="y-axis">
+                <option value="" disabled>Select y-axis Type</option>
+                <option value="value">Value</option>
+                <option value="category">Category</option>
+                <option value="time">Time</option>
+                <option value="log">Log</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button
+              type="button"
+              class="btn body-button"
+              id="create-multiBarChart-button"
+              data-bs-dismiss="modal"
+            >
+              Create Chart
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+    // two chart form
+    document.getElementById("create-multiBarChart-button").addEventListener("click", function () {
+      var form = document.getElementById("create-multiBarChart-form");
+      // Create an object to store the form data
+      var formData = {};
+
+      // Serialize the form data into the object
+      for (var i = 0; i < form.elements.length; i++) {
+        var e = form.elements[i];
+        if (e.type !== "submit" && e.type !== "button") {
+          formData[e.name] = e.value;
+        }
+      }
+      form.reset();
+      var widgetID = "multiBarchart-" + Date.now();
+      var widgetScript = `
+        var multiBarChart = echarts.init(document.getElementById("${widgetID}"));
+        var app = {}
+        var posList = [
+            'left',
+            'right',
+            'top',
+            'bottom',
+            'inside',
+            'insideTop',
+            'insideLeft',
+            'insideRight',
+            'insideBottom',
+            'insideTopLeft',
+            'insideTopRight',
+            'insideBottomLeft',
+            'insideBottomRight'
+        ];
+        app.configParameters = {
+                rotate: {
+                min: -90,
+                max: 90
+            },
+            align: {
+            options: {
+                left: 'left',
+                center: 'center',
+                right: 'right'
+            }
+            },
+            verticalAlign: {
+            options: {
+                top: 'top',
+                middle: 'middle',
+                bottom: 'bottom'
+            }
+            },
+            position: {
+            options: posList.reduce(function (map, pos) {
+                map[pos] = pos;
+                return map;
+            }, {})
+            },
+            distance: {
+            min: 0,
+            max: 100
+            }
+        };
+        app.config = {
+            rotate: 90,
+            align: 'left',
+            verticalAlign: 'middle',
+            position: 'insideBottom',
+            distance: 15,
+            onChange: function () {
+            const labelOption = {
+                rotate: app.config.rotate,
+                align: app.config.align,
+                verticalAlign: app.config.verticalAlign,
+                position: app.config.position,
+                distance: app.config.distance
+            };
+            multiBarChart.setOption({
+                series: [
+                {
+                    label: labelOption
+                },
+                {
+                    label: labelOption
+                },
+                {
+                    label: labelOption
+                },
+                {
+                    label: labelOption
+                }
+                ]
+            });
+            }
+        };
+        var labelOption = {
+            show: true,
+            position: app.config.position,
+            distance: app.config.distance,
+            align: app.config.align,
+            verticalAlign: app.config.verticalAlign,
+            rotate: app.config.rotate,
+            formatter: '{c}  {name|{a}}',
+            fontSize: 16,
+            rich: {
+            name: {}
+            }
+        };
+        var option = {
+            tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'shadow'
+            }
+            },
+            legend: {
+            data: ['Things', 'Users', 'Channels', 'Groups']
+            },
+            toolbox: {
+            show: true,
+            orient: 'vertical',
+            left: 'right',
+            top: 'center',
+            feature: {
+                mark: { show: true },
+                dataView: { show: true, readOnly: false },
+                magicType: { show: true, type: ['line', 'bar', 'stack'] },
+                restore: { show: true },
+                saveAsImage: { show: true }
+            }
+            },
+            xAxis: [
+            {
+                type: 'category',
+                axisTick: { show: false },
+                data: ['2012', '2013', '2014', '2015', '2016']
+            }
+            ],
+            yAxis: [
+            {
+                type: 'value'
+            }
+            ],
+            series: [
+            {
+                name: 'Things',
+                type: 'bar',
+                barGap: 0,
+                label: labelOption,
+                emphasis: {
+                focus: 'series'
+                },
+                data: [320, 332, 301, 334, 390]
+            },
+            {
+                name: 'Users',
+                type: 'bar',
+                label: labelOption,
+                emphasis: {
+                focus: 'series'
+                },
+                data: [220, 182, 191, 234, 290]
+            },
+            {
+                name: 'Channels',
+                type: 'bar',
+                label: labelOption,
+                emphasis: {
+                focus: 'series'
+                },
+                data: [150, 232, 201, 154, 190]
+            },
+            {
+                name: 'Groups',
+                type: 'bar',
+                label: labelOption,
+                emphasis: {
+                focus: 'series'
+                },
+                data: [98, 77, 101, 99, 40]
+            }
+            ]
+        };
+        multiBarChart.setOption(option);
+      `;
+    var config = {
+      ID: widgetID,
+      Script: widgetScript,
+    }
+    addWidget(config);
+    });
+  </script>
+{{ end }}

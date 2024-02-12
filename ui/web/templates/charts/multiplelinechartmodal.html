@@ -98,25 +98,38 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var widgetID = "multipleLinechart-" + Date.now();
       var widgetScript = `
-        var multipleLineChart = bb.generate({
-          data: {
-            xs: {
-              data1: "x1",
-              data2: "x2"
-            },
-            columns: [
-              ["x1", 10, 30, 45, 50, 70, 100],
-              ["x2", 30, 50, 75, 100, 120],
-              ["data1", 30, 200, 100, 400, 150, 250],
-              ["data2", 20, 180, 240, 100, 190]
-            ],
-            type: "line",
+      var multipleLineChart = echarts.init(document.getElementById("${widgetID}"));
+      var option = {
+        xAxis: {
+          type: 'category',
+          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [
+          {
+            data: [150, 230, 224, 218, 135, 147, 260],
+            type: 'line'
           },
-          bindto: "#${widgetID}",
-        });
-        billboardCharts.set(document.querySelector("#${widgetID}"), multipleLineChart);
-      `;
-      addWidget(widgetID, widgetScript);
+          {
+            data: [10, 200, 300, 75, 68, 34, 192],
+            type: 'line'
+          },
+          {
+            data: [300, 270, 230, 155, 268, 234, 112],
+            type: 'line'
+          },
+        ]
+      };
+
+      multipleLineChart.setOption(option);`;
+
+    var config = {
+      ID: widgetID,
+      Script: widgetScript,
+    }
+    addWidget(config);
     });
   </script>
 {{ end }}

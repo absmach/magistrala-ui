@@ -98,25 +98,62 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var widgetID = "stepchart-" + Date.now();
       var widgetScript = `
-        var stepChart = bb.generate({
+        var stepChart = echarts.init(document.getElementById("${widgetID}"));
+        var option = {
           title: {
-            text: "digital temperature"
+            text: 'Step Line'
           },
-          data: {
-            columns: [
-              ["data1", 300, 350, 300, 20, 240, 100],
-              ["data2", 130, 100, 140, 200, 150, 50]
-            ],
-            types: {
-              data1: "step",
-              data2: "area-step",
+          tooltip: {
+            trigger: 'axis'
+          },
+          legend: {
+            data: ['Step Start', 'Step Middle', 'Step End']
+          },
+          grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+          },
+          toolbox: {
+            feature: {
+              saveAsImage: {}
             }
           },
-          bindto: "#${widgetID}"
-        });
-        billboardCharts.set(document.querySelector("#${widgetID}"), stepChart);
-      `;
-      addWidget(widgetID, widgetScript);
+          xAxis: {
+            type: 'category',
+            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+          },
+          yAxis: {
+            type: 'value'
+          },
+          series: [
+            {
+              name: 'Step Start',
+              type: 'line',
+              step: 'start',
+              data: [120, 132, 101, 134, 90, 230, 210]
+            },
+            {
+              name: 'Step Middle',
+              type: 'line',
+              step: 'middle',
+              data: [220, 282, 201, 234, 290, 430, 410]
+            },
+            {
+              name: 'Step End',
+              type: 'line',
+              step: 'end',
+              data: [450, 432, 401, 454, 590, 530, 510]
+            }
+          ]
+        };
+        stepChart.setOption(option);`;
+      var config = {
+        ID: widgetID,
+        Script: widgetScript,
+      }
+      addWidget(config);
     });
   </script>
 {{ end }}

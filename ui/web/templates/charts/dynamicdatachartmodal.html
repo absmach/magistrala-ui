@@ -241,9 +241,14 @@ SPDX-License-Identifier: Apache-2.0 -->
               });
           }, 2100);
 
-          dynamicDataChart.setOption(option);`;
+          dynamicDataChart.setOption(option);
+        `;
 
-        addWidget(widgetID, widgetScript);
+      var config = {
+        ID: widgetID,
+        Script: widgetScript,
+      }
+      addWidget(config);
       });
   </script>
 {{ end }}
