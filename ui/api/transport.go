@@ -883,16 +883,7 @@ func decodeListDashboardsRequest(_ context.Context, r *http.Request) (interface{
 }
 
 func decodeDashboardRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "token")
-	if err != nil {
-		return nil, err
-	}
-
-	req := dashboardsReq{
-		token: token,
-	}
-
-	return req, nil
+	return nil, nil
 }
 
 func decodeUpdateDashboardRequest(_ context.Context, r *http.Request) (interface{}, error) {

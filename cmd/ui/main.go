@@ -77,8 +77,6 @@ func main() {
 	db, err := postgres.Setup(dbConfig, *repo.Migration())
 	if err != nil {
 		log.Fatalf("Failed to setup postgres db : %s", err)
-	} else {
-		logger.Info("Postgres db setup successfully")
 	}
 
 	dbs := repo.New(db)

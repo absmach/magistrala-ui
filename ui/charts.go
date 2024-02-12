@@ -4,7 +4,7 @@
 package ui
 
 type Item struct {
-	Id      int    `json:"id"`
+	ID      int    `json:"id"`
 	Title   string `json:"title"`
 	Content string `json:"content"`
 	Image   string `json:"image"`
