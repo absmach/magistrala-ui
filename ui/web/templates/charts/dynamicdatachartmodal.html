@@ -22,125 +22,178 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form id="create-dynamicDataChart-form">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="title" class="form-label">Title</label>
-              <input
-                type="text"
-                class="form-control"
-                name="title"
-                id="title"
-                placeholder="Enter the chart title"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="channel-id" class="form-label">Channel ID</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="channel"
-                id="channel-id"
-                placeholder="Enter channel ID"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="thing-id" class="form-label">Thing IDs</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="thing"
-                id="thing-id"
-                placeholder="Enter the thing IDs"
-                required
-              />
-            </div>
-            <div class="mb-3">
-              <label for="x-axis-label" class="form-label">Enter x axis label</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="xAxisLabel"
-                id="x-axis-label"
-                placeholder="Enter x axis label"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="y-axis-type" class="form-label">Select y-axis Type</label>
-              <select class="form-select mb-3" name="yAxisType" id="y-axis-typr">
-                <option value="" disabled>Select y-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="y-axis-label" class="form-label">Enter y axis label</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="yAxisLabel"
-                id="y-axis-label"
-                placeholder="Enter y axis label"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="value-name" class="form-label">Enter value names</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="valueName"
-                id="value-name"
-                placeholder="Enter the value names eg. temperature,voltage"
-                required
-              />
-            </div>
-            <div class="mb-3">
-              <label for="start-time" class="form-label">Enter the start time</label>
-              <input
-                type="datetime-local"
-                class="form-control mb-3"
-                name="startTime"
-                id="start-name"
-                placeholder="Enter the start time."
-                required
-              />
-            </div>
-            <div class="mb-3">
-              <label for="stop-time" class="form-label">Enter the stop time</label>
-              <input
-                type="datetime-local"
-                class="form-control mb-3"
-                name="stopTime"
-                id="stop-name"
-                placeholder="Enter the stop time."
-              />
-            </div>
-            <div class="mb-3">
-              <label for="time-interval" class="form-label">Enter the time internal</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="timeInterval"
-                id="time-interval"
-                placeholder="Enter the time interval in seconds"
-                required
-              />
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button
-              type="button"
-              class="btn body-button"
-              id="create-dynamicDataChart-button"
-              data-bs-dismiss="modal"
+        <div class="modal-body">
+          <!-- Tab Navs -->
+          <ul class="nav nav-tabs" id="chartTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active"
+                id="data-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#dynamicDataChartData"
+                type="button"
+                role="tab"
+                aria-controls="data"
+                aria-selected="true"
+              >
+                Data
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="appearance-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#dynamicDataChartAppearance"
+                type="button"
+                role="tab"
+                aria-controls="appearance"
+                aria-selected="false"
+              >
+                Appearance
+              </button>
+            </li>
+          </ul>
+          <!-- Tab Content -->
+          <div class="tab-content" id="myTabContent">
+            <!-- Data Tab -->
+            <div
+              class="tab-pane fade show active"
+              id="dynamicDataChartData"
+              role="tabpanel"
+              aria-labelledby="data-tab"
             >
-              Create Chart
-            </button>
+              <form id="create-dynamicDataChart-data-form">
+                <div class="mb-3">
+                  <label for="channel-id" class="form-label">Channel ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="channel"
+                    id="channel-id"
+                    placeholder="Enter channel ID"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="thing-id" class="form-label">Thing IDs</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="thing"
+                    id="thing-id"
+                    placeholder="Enter the thing IDs"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="value-name" class="form-label">Enter value names</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="valueName"
+                    id="value-name"
+                    placeholder="Enter the value names eg. temperature, pressure"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="y-axis-type" class="form-label">Select y-axis Type</label>
+                  <select class="form-select mb-3" name="yAxisType" id="y-axis-typr">
+                    <option value="" disabled>Select y-axis Type</option>
+                    <option value="value">Value</option>
+                    <option value="category">Category</option>
+                    <option value="time">Time</option>
+                    <option value="log">Log</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="start-time" class="form-label">Enter the start time</label>
+                  <input
+                    type="datetime-local"
+                    class="form-control mb-3"
+                    name="startTime"
+                    id="start-name"
+                    placeholder="Enter the start time."
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="stop-time" class="form-label">Enter the stop time</label>
+                  <input
+                    type="datetime-local"
+                    class="form-control mb-3"
+                    name="stopTime"
+                    id="stop-name"
+                    placeholder="Enter the stop time."
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="time-interval" class="form-label">Enter the time internal</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="timeInterval"
+                    id="time-interval"
+                    placeholder="Enter the time interval in seconds"
+                    required
+                  />
+                </div>
+              </form>
+            </div>
+            <!-- Appearance Tab -->
+            <div
+              class="tab-pane fade"
+              id="dynamicDataChartAppearance"
+              role="tabpanel"
+              aria-labelledby="appearance-tab"
+            >
+              <form id="create-dynamicDataChart-appearance-form">
+                <div class="mb-3">
+                  <label for="title" class="form-label">Title</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="title"
+                    id="title"
+                    placeholder="Enter the chart title"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="x-axis-label" class="form-label">Enter x axis label</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="xAxisLabel"
+                    id="x-axis-label"
+                    placeholder="Enter x axis label"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="y-axis-label" class="form-label">Enter y axis label</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="yAxisLabel"
+                    id="y-axis-label"
+                    placeholder="Enter y axis label"
+                  />
+                </div>
+              </form>
+            </div>
           </div>
-        </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button
+            type="button"
+            class="btn body-button"
+            id="create-dynamicDataChart-button"
+            data-bs-dismiss="modal"
+          >
+            Create Chart
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -149,7 +202,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     document
       .getElementById("create-dynamicDataChart-button")
       .addEventListener("click", function () {
-        var form = document.getElementById("create-dynamicDataChart-form");
+        var form = document.getElementById("create-dynamicDataChart-appearance-form");
         // Create an object to store the form data
         var formData = {};
 
@@ -277,7 +330,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           app.count = 11;
           setInterval(function () {
               let axisData = new Date().toLocaleTimeString().replace(/^\D*/, '');
-              data.shift();
+              data.shift();create-areaLineChart-button
               data.push(Math.round(Math.random() * 1000));
               data2.shift();
               data2.push(+(Math.random() * 10 + 5).toFixed(1));

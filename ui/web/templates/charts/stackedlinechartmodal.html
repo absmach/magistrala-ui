@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="stackedLineChartModalLabel">Stacked line charts</h5>
+          <h5 class="modal-title" id="stackedLineChartModalLabel">Stacked Line Charts</h5>
           <button
             type="button"
             class="btn-close"
@@ -22,122 +22,198 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form id="create-stackedLineChart-form">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="title" class="form-label">Title</label>
-              <input
-                type="text"
-                class="form-control"
-                name="title"
-                id="title"
-                placeholder="Enter the chart title"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="thing-id" class="form-label">Thing IDs</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="thing"
-                id="thing-id"
-                placeholder="Enter the thing IDs"
-                required
-              />
-            </div>
-            <div class="mb-3">
-              <label for="x-axis-label" class="form-label">Enter x axis label</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="xAxisLabel"
-                id="x-axis-label"
-                placeholder="Enter x axis label"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="y-axis-type" class="form-label">Select y-axis Type</label>
-              <select class="form-select mb-3" name="yAxisType" id="y-axis-typr">
-                <option value="" disabled>Select y-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="y-axis-label" class="form-label">Enter y axis label</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="yAxisLabel"
-                id="y-axis-label"
-                placeholder="Enter y axis label"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="value-name" class="form-label">Enter value names</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="valueName"
-                id="value-name"
-                placeholder="Enter the value names eg. temperature,voltage"
-                required
-              />
-            </div>
-            <div class="mb-3">
-              <label for="start-time" class="form-label">Enter the start time</label>
-              <input
-                type="datetime-local"
-                class="form-control mb-3"
-                name="startTime"
-                id="start-name"
-                placeholder="Enter the start time."
-                required
-              />
-            </div>
-            <div class="mb-3">
-              <label for="stop-time" class="form-label">Enter the stop time</label>
-              <input
-                type="datetime-local"
-                class="form-control mb-3"
-                name="stopTime"
-                id="stop-name"
-                placeholder="Enter the stop time."
-              />
-            </div>
-            <div class="mb-3">
-              <label for="time-interval" class="form-label">Enter the time internal</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="timeInterval"
-                id="time-interval"
-                placeholder="Enter the time interval in seconds"
-                required
-              />
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button
-              type="button"
-              class="btn body-button"
-              id="create-stackedLineChart-button"
-              data-bs-dismiss="modal"
+        <div class="modal-body">
+          <!-- Tab Navs -->
+          <ul class="nav nav-tabs" id="chartTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active"
+                id="data-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#stackedLineChartData"
+                type="button"
+                role="tab"
+                aria-controls="data"
+                aria-selected="true"
+              >
+                Data
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="appearance-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#stackedLineChartAppearance"
+                type="button"
+                role="tab"
+                aria-controls="appearance"
+                aria-selected="false"
+              >
+                Appearance
+              </button>
+            </li>
+          </ul>
+          <!-- Tab Content -->
+          <div class="tab-content" id="myTabContent">
+            <!-- Data Tab -->
+            <div
+              class="tab-pane fade show active"
+              id="stackedLineChartData"
+              role="tabpanel"
+              aria-labelledby="data-tab"
             >
-              Create Chart
-            </button>
+              <form id="create-stackedLineChart-data-form">
+                <div class="mb-3">
+                  <label for="channel-id" class="form-label">Channel ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="channel"
+                    id="channel-id"
+                    placeholder="Enter channel ID"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="thing-id" class="form-label">Thing ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="thing"
+                    id="thing-id"
+                    placeholder="Enter the thing ID"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="value-name" class="form-label">Enter value name</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="valueName"
+                    id="value-name"
+                    placeholder="Enter the value name eg. temperature"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="start-time" class="form-label">Enter the start time</label>
+                  <input
+                    type="datetime-local"
+                    class="form-control mb-3"
+                    name="startTime"
+                    id="start-name"
+                    placeholder="Enter the start time."
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="stop-time" class="form-label">Enter the stop time</label>
+                  <input
+                    type="datetime-local"
+                    class="form-control mb-3"
+                    name="stopTime"
+                    id="stop-name"
+                    placeholder="Enter the stop time."
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="time-interval" class="form-label">Enter the time internal</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="timeInterval"
+                    id="time-interval"
+                    placeholder="Enter the time interval in seconds"
+                    required
+                  />
+                </div>
+              </form>
+            </div>
+            <!-- Appearance Tab -->
+            <div
+              class="tab-pane fade"
+              id="stackedLineChartAppearance"
+              role="tabpanel"
+              aria-labelledby="appearance-tab"
+            >
+              <form id="create-stackdeLineChart-appearance-form">
+                <div class="mb-3">
+                  <label for="title" class="form-label">Title</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="title"
+                    id="title"
+                    placeholder="Enter the chart title"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="y-axis-label" class="form-label">Enter y axis label</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="yAxisLabel"
+                    id="y-axis-label"
+                    placeholder="Enter y axis label"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="x-axis-label" class="form-label">Enter x axis label</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="xAxisLabel"
+                    id="x-axis-label"
+                    placeholder="Enter y axis label"
+                    default="Time"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="series-name" class="form-label">Enter the series name</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="seriesName"
+                    id="series-name"
+                    placeholder="Enter the series name eg. temperature"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="line-width" class="form-label">Enter the line width</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="lineWidth"
+                    id="line-width"
+                    placeholder="Enter the line width"
+                    default="2"
+                  />
+                </div>
+              </form>
+            </div>
           </div>
-        </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button
+            type="button"
+            class="btn body-button"
+            id="create-stackedLineChart-button"
+            data-bs-dismiss="modal"
+          >
+            Create Chart
+          </button>
+        </div>
       </div>
     </div>
   </div>
   <script>
     // Stacked line chart form
     document.getElementById("create-stackedLineChart-button").addEventListener("click", function () {
-      var form = document.getElementById("create-stackedLineChart-form");
+      var form = document.getElementById("create-stackdeLineChart-appearance-form");
       // Create an object to store the form data
       var formData = {};
 
@@ -154,6 +230,10 @@ SPDX-License-Identifier: Apache-2.0 -->
       var widgetScript = `
         var stackedLineChart = echarts.init(document.getElementById("${widgetID}"));
         var option = {
+            title: {
+              text: "${formData.title}",
+              left: 'center',
+            },
             tooltip: {
               trigger: 'axis'
             },
@@ -174,10 +254,16 @@ SPDX-License-Identifier: Apache-2.0 -->
             xAxis: {
               type: 'category',
               boundaryGap: false,
-              data: ['Thing1', 'Thing2', 'Thing3', 'Thing4', 'Thing5', 'Thing6', 'Thing7']
+              data: ['Thing1', 'Thing2', 'Thing3', 'Thing4', 'Thing5', 'Thing6', 'Thing7'],
+              name: '${formData.xAxisLabel}',
+              nameLocation: 'middle',
+              nameGap: 35,
             },
             yAxis: {
-              type: 'value'
+              type: 'value',
+              name: '${formData.yAxisLabel}',
+              nameLocation: 'middle',
+              nameGap: 35,
             },
             series: [
               {

@@ -44,7 +44,7 @@ func CreateItem() []Item {
 			Widget:  "speedGauge",
 		},
 		{
-			Title:   "Range Chart",
+			Title:   "Stacked Line Charts",
 			Content: "This is a range chart",
 			Widget:  "stackedLineChart",
 		},
@@ -59,7 +59,7 @@ func CreateItem() []Item {
 			Widget:  "tempGauge",
 		},
 		{
-			Title:   "Bar and Line Chart",
+			Title:   "Dynamic Data Chart",
 			Content: "This is a dynamic data bar and line chart",
 			Widget:  "dynamicDataChart",
 		},
