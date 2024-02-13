@@ -234,8 +234,12 @@ type Service interface {
 	ViewRegistration() ([]byte, error)
 	// RegisterUser registers a new user and logs them in.
 	RegisterUser(user sdk.User) (sdk.Token, error)
+	// KratosSignUp redirects the user to the kratos singup page.
+	KratosSignUp() (string, error)
 	// Login displays the login page.
 	Login() ([]byte, error)
+	// KratosSignIn redirects the user to the kratos login page.
+	KratosSignIn() (string, error)
 	// Logout deletes the access token and refresh token from the cookies and logs the user out of the UI.
 	Logout() error
 	// PasswordResetRequest sends an email with a link to the password reset page with a valid request token.
@@ -439,23 +443,25 @@ type Service interface {
 var _ Service = (*uiService)(nil)
 
 type uiService struct {
-	sdk        sdk.SDK
-	tpls       *template.Template
-	drepo      DashboardRepository
-	idProvider magistrala.IDProvider
+	sdk          sdk.SDK
+	tpls         *template.Template
+	drepo        DashboardRepository
+	idProvider   magistrala.IDProvider
+	kratosConfig *KratosConfig
 }
 
 // New instantiates the HTTP adapter implementation.
-func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider) (Service, error) {
+func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider, cfg *KratosConfig) (Service, error) {
 	tpl, err := parseTemplates(sdk, templates)
 	if err != nil {
 		return nil, err
 	}
 	return &uiService{
-		sdk:        sdk,
-		tpls:       tpl,
-		drepo:      db,
-		idProvider: idp,
+		sdk:          sdk,
+		tpls:         tpl,
+		drepo:        db,
+		idProvider:   idp,
+		kratosConfig: cfg,
 	}, nil
 }
 
@@ -575,6 +581,14 @@ func (us *uiService) Login() ([]byte, error) {
 
 func (us *uiService) Logout() error {
 	return nil
+}
+
+func (us *uiService) KratosSignIn() (string, error) {
+	return us.kratosConfig.GenerateSignInURL()
+}
+
+func (us *uiService) KratosSignUp() (string, error) {
+	return us.kratosConfig.GenerateSignUpURL()
 }
 
 func (us *uiService) PasswordResetRequest(email string) error {

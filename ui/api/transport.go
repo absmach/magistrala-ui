@@ -126,6 +126,9 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 		opts...,
 	).ServeHTTP)
 
+	r.HandleFunc("/signup/kratos", kratosSignUpHandler(svc))
+	r.HandleFunc("/signin/kratos", kratosSignInHandler(svc))
+
 	r.Post("/reset-request", kithttp.NewServer(
 		passwordResetRequestEndpoint(svc),
 		decodePasswordResetRequest,
@@ -1039,6 +1042,30 @@ func decodeRefreshTokenRequest(_ context.Context, r *http.Request) (interface{},
 
 func decodeLogoutRequest(_ context.Context, _ *http.Request) (interface{}, error) {
 	return nil, nil
+}
+
+func kratosSignInHandler(svc ui.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		url, err := svc.KratosSignIn()
+		if err != nil {
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			return
+		}
+
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+	}
+}
+
+func kratosSignUpHandler(svc ui.Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		url, err := svc.KratosSignUp()
+		if err != nil {
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			return
+		}
+
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+	}
 }
 
 func decodeUserCreation(_ context.Context, r *http.Request) (interface{}, error) {

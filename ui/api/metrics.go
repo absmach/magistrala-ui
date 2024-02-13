@@ -79,6 +79,26 @@ func (mm *metricsMiddleware) Logout() error {
 	return mm.svc.Logout()
 }
 
+// KratosSignIn adds metrics middleware to kratos signin method.
+func (mm *metricsMiddleware) KratosSignIn() (url string, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "kratos_signin").Add(1)
+		mm.latency.With("method", "kratos_signin").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.KratosSignIn()
+}
+
+// KratosSignUp adds metrics middleware to kratos signup method.
+func (mm *metricsMiddleware) KratosSignUp() (url string, err error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "kratos_signup").Add(1)
+		mm.latency.With("method", "kratos_signup").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.KratosSignUp()
+}
+
 // PasswordResetRequest adds metrics middleware to password reset request method.
 func (mm *metricsMiddleware) PasswordResetRequest(email string) error {
 	defer func(begin time.Time) {
