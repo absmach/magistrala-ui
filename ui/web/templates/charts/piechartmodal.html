@@ -22,68 +22,132 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form id="create-pieChart-form">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="title" class="form-label">Title</label>
-              <input
-                type="text"
-                class="form-control"
-                name="title"
-                id="title"
-                placeholder="Enter the chart title"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="channel-id" class="form-label">Channel ID</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="channel"
-                id="channel-id"
-                placeholder="Enter channel ID"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="x-axis" class="form-label">Select x-axis Type</label>
-              <select class="form-select mb-3" name="xAxisType" id="x-axis">
-                <option value="" disabled>Select x-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="y-axis" class="form-label">Select y-axis Type</label>
-              <select class="form-select mb-3" name="yAxisType" id="y-axis">
-                <option value="" disabled>Select y-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button
-              type="button"
-              class="btn body-button"
-              id="create-pieChart-button"
-              data-bs-dismiss="modal"
+        <div class="modal-body">
+          <!-- Tab Navs -->
+          <ul class="nav nav-tabs mb-3" id="chartTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active"
+                id="data-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#pieChartData"
+                type="button"
+                role="tab"
+                aria-controls="data"
+                aria-selected="true"
+              >
+                Data
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="appearance-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#pieChartappearance"
+                type="button"
+                role="tab"
+                aria-controls="appearance"
+                aria-selected="false"
+              >
+                Appearance
+              </button>
+            </li>
+          </ul>
+          <div class="tab-content" id="myTabContent">
+            <!-- Data Tab -->
+            <div
+              class="tab-pane fade show active"
+              id="pieChartData"
+              role="tabpanel"
+              aria-labelledby="data-tab"
             >
-              Create Chart
-            </button>
+              <form id="create-pieChart-data-form">
+                <div class="mb-3">
+                  <label for="channel-id" class="form-label">Channel ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="channel"
+                    id="channel-id"
+                    placeholder="Enter the channel ID"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="thing-id" class="form-label">Thing IDs</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="thing"
+                    id="thing-id"
+                    placeholder="Enter the thing IDs"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="value-name" class="form-label">Value name</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="valueName"
+                    id="value-name"
+                    placeholder="Enter the value name eg. temperature"
+                    required
+                  />
+                </div>
+              </form>
+            </div>
+            <!-- Appearance Tab -->
+            <div
+              class="tab-pane fade"
+              id="pieChartappearance"
+              role="tabpanel"
+              aria-labelledby="appearance-tab"
+            >
+              <form id="create-pieChart-appearance-form">
+                <div class="mb-3">
+                  <label for="title" class="form-label">Title</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="title"
+                    id="title"
+                    placeholder="Enter the chart title"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="series-name" class="form-label">Series name</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="seriesName"
+                    id="series-name"
+                    placeholder="Enter the series name eg. temperature"
+                    required
+                  />
+                </div>
+              </form>
+            </div>
           </div>
-        </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button
+            type="button"
+            class="btn body-button"
+            id="create-pieChart-button"
+            data-bs-dismiss="modal"
+          >
+            Create Chart
+          </button>
+        </div>
       </div>
     </div>
   </div>
   <script>
     // pie chart form
     document.getElementById("create-pieChart-button").addEventListener("click", function () {
-      var form = document.getElementById("create-pieChart-form");
+      var form = document.getElementById("create-pieChart-appearance-form");
       // Create an object to store the form data
       var formData = {};
 
@@ -101,9 +165,8 @@ SPDX-License-Identifier: Apache-2.0 -->
         var pieChart = echarts.init(document.getElementById("${widgetID}"));
         var option = {
             title: {
-                text: 'active channels per thing',
-                subtext: 'Fake Data',
-                left: 'center'
+                text: '${formData.title}',
+                left: 'center',
             },
             tooltip: {
                 trigger: 'item'
@@ -114,7 +177,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             },
             series: [
                 {
-                name: 'Access From',
+                name: '${formData.seriesName}',
                 type: 'pie',
                 radius: '50%',
                 data: [

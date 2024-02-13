@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="tempGaugeModalLabel">Analogue Gauge</h5>
+          <h5 class="modal-title" id="tempGaugeModalLabel">Analogue Temperature Gauge</h5>
           <button
             type="button"
             class="btn-close"
@@ -22,68 +22,155 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form id="create-tempGauge-form">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="title" class="form-label">Title</label>
-              <input
-                type="text"
-                class="form-control"
-                name="title"
-                id="title"
-                placeholder="Enter the chart title"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="channel-id" class="form-label">Channel ID</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="channel"
-                id="channel-id"
-                placeholder="Enter channel ID"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="x-axis" class="form-label">Select x-axis Type</label>
-              <select class="form-select mb-3" name="xAxisType" id="x-axis">
-                <option value="" disabled>Select x-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="y-axis" class="form-label">Select y-axis Type</label>
-              <select class="form-select mb-3" name="yAxisType" id="y-axis">
-                <option value="" disabled>Select y-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button
-              type="button"
-              class="btn body-button"
-              data-bs-dismiss="modal"
-              id="create-tempGauge-button"
+        <div class="modal-body">
+          <!-- Tab Navs -->
+          <ul class="nav nav-tabs mb-3" id="chartTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active"
+                id="data-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#tempGaugeChartData"
+                type="button"
+                role="tab"
+                aria-controls="data"
+                aria-selected="true"
+              >
+                Data
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="appearance-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#tempGaugeChartAppearance"
+                type="button"
+                role="tab"
+                aria-controls="appearance"
+                aria-selected="false"
+              >
+                Appearance
+              </button>
+            </li>
+          </ul>
+          <!-- Tab Content -->
+          <div class="tab-content" id="myTabContent">
+            <!-- Data Tab -->
+            <div
+              class="tab-pane fade show active"
+              id="tempGaugeChartData"
+              role="tabpanel"
+              aria-labelledby="data-tab"
             >
-              Create Chart
-            </button>
+              <form id="create-tempGaugeChart-data-form">
+                <div class="mb-3">
+                  <label for="channel-id" class="form-label">Channel ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="channel"
+                    id="channel-id"
+                    placeholder="Enter the channel ID"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="thing-id" class="form-label">Thing ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="thing"
+                    id="thing-id"
+                    placeholder="Enter the thing ID"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="value-name" class="form-label">Value name</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="valueName"
+                    id="value-name"
+                    placeholder="Enter the value name eg. temperature"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="min-value" class="form-label">Min value</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="minValue"
+                    id="min-value"
+                    placeholder="Enter the minimum data value"
+                    value="0"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="max-value" class="form-label">Max value</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="maxValue"
+                    id="max-value"
+                    placeholder="Enter the maximum data value"
+                    value="100"
+                  />
+                </div>
+              </form>
+            </div>
+            <!-- Appearance Tab -->
+            <div
+              class="tab-pane fade"
+              id="tempGaugeChartAppearance"
+              role="tabpanel"
+              aria-labelledby="appearance-tab"
+            >
+              <form id="create-tempGaugeChart-appearance-form">
+                <div class="mb-3">
+                  <label for="title" class="form-label">Title</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="title"
+                    id="title"
+                    placeholder="Enter the chart title"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="gauge-label" class="form-label">Gauge Label</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="gaugeLabel"
+                    id="gauge-label"
+                    placeholder="Enter the gauge label"
+                  />
+                </div>
+              </form>
+            </div>
           </div>
-        </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button
+            type="button"
+            class="btn body-button"
+            id="create-tempGauge-button"
+            data-bs-dismiss="modal"
+          >
+            Create Chart
+          </button>
+        </div>
       </div>
     </div>
   </div>
   <script>
     // Temperature gauge form
     document.getElementById("create-tempGauge-button").addEventListener("click", function () {
-      var form = document.getElementById("create-tempGauge-form");
+      var form = document.getElementById("create-tempGaugeChart-appearance-form");
       // Create an object to store the form data
       var formData = {};
 
@@ -100,6 +187,13 @@ SPDX-License-Identifier: Apache-2.0 -->
       var widgetScript = `
         var tempGaugeChart = echarts.init(document.getElementById("${widgetID}"));
         var option = {
+           title: {
+              text: '${formData.title}',
+              left: 'center',
+              textStyle: {
+                color: '#FFAB91'
+              }
+            },
             series: [
               {
                 type: 'gauge',
@@ -202,7 +296,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                 },
                 data: [
                   {
-                    value: 37
+                    value: 37,
+                    name: '${formData.gaugeLabel}'
                   }
                 ]
               }
@@ -222,7 +317,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                 {
                   data: [
                     {
-                      value: random
+                      value: random,
+                      name: '${formData.gaugeLabel}'
                     }
                   ]
                 }
