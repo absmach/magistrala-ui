@@ -89,11 +89,16 @@ SPDX-License-Identifier: Apache-2.0 -->
       var channelID = formData.channel || "N/A";
       var value = formData.Value || "N/A";
       var widgetContent = `
-        <div class="card mt-3">
-          <div class="card-body">
-            <h5 class="card-title">${title}</h5>
-            <p class="card-text">Channel ID: ${channelID}</p>
-            <p class="card-text">Selected Value: ${value}</p>
+        <div class="card mt-3 widgetcard">
+          <div class="card-header text-center">
+            <h5 class="card-title">Temperature</h5>
+          </div>
+          <div class="card-body text-center">
+            <p class="card-text value"> 35</p>
+          </div>
+          <div class="card-footer">
+            <p class="card-text"> Units: °C</p>
+            <p class="card-text text"> ChannelID: </p>
           </div>
         </div>
       `;

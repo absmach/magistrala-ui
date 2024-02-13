@@ -110,39 +110,44 @@ SPDX-License-Identifier: Apache-2.0 -->
       var channelID = formData.channel || "N/A";
       var value = formData.Value || "N/A";
       var widgetContent = `
-        <div class="card mt-3" style="width: 18rem;">
-          <div class="card-body">
-            <h5 class="card-title">${title}</h5>
-            <p class="card-text">Channel ID: ${channelID}</p>
-            <p class="card-text">Selected Value: ${value}</p>
+        <div class="card mt-3 widgetcard" >
+          <div class="card-header text-center">
+            <h5 class="card-title">Temperature</h5>
+          </div>
+          <div class="card-body text-center">
+            <p class="card-text value"> 35</p>
+          </div>
+          <div class="card-footer">
+            <div id="${widgetID}" style="width: 100%; height: 250px;"></div>
           </div>
         </div>
-        <script>
-          var barChart = echarts.init(document.getElementById("${widgetID}"));
-          var option = {
-            xAxis: {
-              type: 'category',
-              data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-            },
-            yAxis: {
-              type: 'value'
-            },
-            series: [
-              {
-                data: [120, 200, 150, 80, 70, 110, 130],
-                type: 'bar'
-              }
-            ]
-          };
-
-          barChart.setOption(option);
-        </script>
       `;
       var config = {
           ID: widgetID,
           Content: widgetContent,
         };
       addWidget(config);
+
+      window.onload = function() {
+        var barChart = echarts.init(document.getElementById(widgetID));
+        var option = {
+          xAxis: {
+            type: 'category',
+            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+          },
+          yAxis: {
+            type: 'value'
+          },
+          series: [
+            {
+              data: [120, 200, 150, 80, 70, 110, 130],
+              type: 'bar'
+            }
+          ]
+        };
+      
+        barChart.setOption(option);
+      };
     });
   </script>
 {{ end }}

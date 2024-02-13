@@ -87,13 +87,18 @@ SPDX-License-Identifier: Apache-2.0 -->
       var widgetID = "label-" + Date.now();
       var contentType = 'html';
       var widgetContent = `
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">${formData['title']}</h5>
-            <h6 class="card-subtitle mb-2 text-muted">Selected Value: <span class="badge bg-primary">${selectedValue}</span></h6>
-            <p class="card-text">Channel ID: ${formData['channel']}</p>
+        <div class="card widgetcard">
+          <div class="card-header text-center">
+            <h5 class="card-title">Label</h5>
           </div>
-        </div>`;
+          <div class="card-body text-center">
+            <p class="card-subtitle mb-2 text-muted">Selected Entity: <span class="badge bg-primary">Thing6</span></p>
+          </div>
+          <div class="card-footer">
+            <p class="card-text text"> ThingID: 666 666 666</p>
+          </div>
+        </div>
+      `;
       var config = {
           ID: widgetID,
           Content: widgetContent,

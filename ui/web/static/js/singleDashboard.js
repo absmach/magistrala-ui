@@ -195,13 +195,6 @@ function editGrid(grid, layout) {
   return grid;
 }
 
-if(window.ResizeObserver) {
-  const h1Elem = document.querySelector('h1');
-  const pElem = document.querySelector('p');
-  const divElem = document.querySelector('body > div');
-
-  divElem.style.width = '500px';
-}
 const previousSizes = new Map();
 
 const resizeObserver = new ResizeObserver((entries) => {
@@ -239,7 +232,30 @@ const resizeObserver = new ResizeObserver((entries) => {
       chart.resize({
         width: itemContentWidth,
         height: itemContentHeight,
-        });
+      });
+    } else {
+      const cardDiv = target.querySelector(".widgetcard");
+      const h5Elem = cardDiv.querySelector("h5");
+      const cardBody = cardDiv.querySelector(".card-body");
+      const cardFooter = cardDiv.querySelector(".card-footer");
+
+      if (entry.contentBoxSize) {
+        // The standard makes contentBoxSize an array...
+        if (entry.contentBoxSize[0]) {
+          h5Elem.style.fontSize = Math.max(1, entry.contentBoxSize[0].inlineSize / 300) + "rem";
+          cardBody.style.fontSize = Math.max(1.5, entry.contentBoxSize[0].inlineSize / 300) + "rem";
+          cardFooter.style.fontSize = Math.max(1, entry.contentBoxSize[0].inlineSize / 600) + "rem";
+        } else {
+          // ...but old versions of Firefox treat it as a single item
+          h5Elem.style.fontSize = Math.max(1, entry.contentBoxSize.inlineSize / 300) + "rem";
+          cardBody.style.fontSize = Math.max(1.5, entry.contentBoxSize.inlineSize / 300) + "rem";
+          cardFooter.style.fontSize = Math.max(1, entry.contentBoxSize.inlineSize / 600) + "rem";
+        }
+      } else {
+        h5Elem.style.fontSize = `${Math.max(1, entry.contentRect.width / 300)}rem`;
+        cardBody.style.fontSize = `${Math.max(1.5, entry.contentRect.width / 300)}rem`;
+        cardFooter.style.fontSize = `${Math.max(1, entry.contentRect.width / 600)}rem`;
+      }
     }
     grid.refreshItems();
     grid.layout(true);

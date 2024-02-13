@@ -43,6 +43,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 id="channel-id"
                 placeholder="Enter channel ID"
               />
+            </div>
             <div class="mb-3">
               <label for="y-axis" class="form-label">Select y-axis Type</label>
               <select class="form-select mb-3" name="yAxisType" id="y-axis">
@@ -87,11 +88,17 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var widgetID = "entityCount-" + Date.now();
       var widgetContent = `
-        <div class="card">
-          <div class="card-body">
-          <h5 class="card-title">Entity Count</h5>
-          <p class="card-text">Displaying dynamic entity count data...</p>
-          <a href="#" class="btn btn-primary">Action</a>
+        <div class="card widgetcard">
+          <div class="card-header text-center">
+            <h5 class="card-title">Entity Count</h5>
+          </div>
+          <div class="card-body text-center">
+            <p class="card-text value"> 35</p>
+          </div>
+          <div class="card-footer text-right">
+            <p class="card-text">
+              Domain Name: D1
+            </p>
           </div>
         </div>
         `;

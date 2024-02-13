@@ -167,10 +167,7 @@ var (
 		"progressbarmodal",
 		"valueandchartcardmodal",
 		"labelmodal",
-		// "valuechartcardmodal",
-		// "alarmstablemodal",
-		// "entitycountmodal",
-		// "entitiestablemodal",
+		"duocardmodal",
 	}
 
 	ErrToken                = errors.New("failed to create token")

@@ -110,7 +110,7 @@ func CreateItem() []Item {
 		},
 		{
 			Title:   "Alarm Count Card",
-			Content: "This is an alarm count card",
+			Content: "This is a card that displays dynamic alarm count data",
 			Widget:  "alarmCount",
 		},
 		{
@@ -125,7 +125,7 @@ func CreateItem() []Item {
 		},
 		{
 			Title:   "Entity Count Card",
-			Content: "This is an entity count card",
+			Content: "This is a card that displays dynamic entity count data",
 			Widget:  "entityCount",
 		},
 		{
