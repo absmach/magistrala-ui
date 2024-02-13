@@ -45,6 +45,8 @@ SPDX-License-Identifier: Apache-2.0 */
   resize: both;
   overflow-x: auto;
   overflow-y: hidden;
+  min-width: 400px;
+  min-height: 400px;
 }
 
 .widget-card {
