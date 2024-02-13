@@ -153,6 +153,12 @@ var (
 		"arealinechartmodal",
 		"horizontalbarchartmodal",
 		"dynamicdatachartmodal",
+		"doublebarchartmodal",
+		"multiplelinechartmodal",
+		"stepchartmodal",
+		"multigaugemodal",
+		"multibarchartmodal",
+		"shareddatasetmodal",
 	}
 
 	ErrToken                = errors.New("failed to create token")

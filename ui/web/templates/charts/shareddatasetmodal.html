@@ -1,20 +1,20 @@
 <!-- Copyright (c) Abstract Machines
 SPDX-License-Identifier: Apache-2.0 -->
 
-{{ define "donutmodal" }}
+{{ define "shareddatasetmodal" }}
   <!-- Modal -->
   <div
     class="modal fade"
-    id="donutModal"
+    id="sharedDatasetModal"
     tabindex="-1"
     role="dialog"
-    aria-labelledby="donutModalLabel"
+    aria-labelledby="sharedDatasetmodalLabel"
     aria-hidden="true"
   >
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="donutModalLabel">Donut chart</h5>
+          <h5 class="modal-title" id="sharedDatasetModalLabel">Pie and Line chart</h5>
           <button
             type="button"
             class="btn-close"
@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form id="create-donut-form">
+        <form id="create-sharedDataset-form">
           <div class="modal-body">
             <div class="mb-3">
               <label for="title" class="form-label">Title</label>
@@ -70,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <button
               type="button"
               class="btn body-button"
-              id="create-donut-button"
+              id="create-sharedDataset-button"
               data-bs-dismiss="modal"
             >
               Create Chart
@@ -81,9 +81,9 @@ SPDX-License-Identifier: Apache-2.0 -->
     </div>
   </div>
   <script>
-    // donut form
-    document.getElementById("create-donut-button").addEventListener("click", function () {
-      var form = document.getElementById("create-donut-form");
+    // Shared dataset chart form
+    document.getElementById("create-sharedDataset-button").addEventListener("click", function () {
+      var form = document.getElementById("create-sharedDataset-form");
       // Create an object to store the form data
       var formData = {};
 
@@ -95,51 +95,91 @@ SPDX-License-Identifier: Apache-2.0 -->
         }
       }
       form.reset();
-
-      var widgetID = "donut-" + Date.now();
+      var widgetID = "sharedDataset-" + Date.now();
       var widgetScript = `
-        var donut = echarts.init(document.getElementById("${widgetID}"));
+        var sharedDataset = echarts.init(document.getElementById("${widgetID}"));
         var option = {
-            tooltip: {
-              trigger: 'item'
-            },
-            legend: {
-              top: '5%',
-              left: 'center'
-            },
-            series: [
-              {
-                name: 'Access From',
-                type: 'pie',
-                radius: ['40%', '70%'],
-                avoidLabelOverlap: false,
-                label: {
-                  show: false,
-                  position: 'center'
-                },
-                emphasis: {
-                  label: {
-                    show: true,
-                    fontSize: 40,
-                    fontWeight: 'bold'
-                  }
-                },
-                labelLine: {
-                  show: false
-                },
-                data: [
-                  { value: 1048, name: 'Thing1' },
-                  { value: 735, name: 'Thing2' },
-                  { value: 580, name: 'Thing3' },
-                  { value: 484, name: 'Thing4' },
-                  { value: 300, name: 'Thing5' }
-                ]
-              }
+          legend: {},
+          tooltip: {
+            trigger: 'axis',
+            showContent: false
+          },
+          dataset: {
+            source: [
+              ['product', '2012', '2013', '2014', '2015', '2016', '2017'],
+              ['Things', 56.5, 82.1, 88.7, 70.1, 53.4, 85.1],
+              ['Users', 51.1, 51.4, 55.1, 53.3, 73.8, 68.7],
+              ['Channels', 40.1, 62.2, 69.5, 36.4, 45.2, 32.5],
+              ['Groups', 25.2, 37.1, 41.2, 18, 33.9, 49.1]
             ]
+          },
+          xAxis: { type: 'category' },
+          yAxis: { gridIndex: 0 },
+          grid: { top: '55%' },
+          series: [
+            {
+              type: 'line',
+              smooth: true,
+              seriesLayoutBy: 'row',
+              emphasis: { focus: 'series' }
+            },
+            {
+              type: 'line',
+              smooth: true,
+              seriesLayoutBy: 'row',
+              emphasis: { focus: 'series' }
+            },
+            {
+              type: 'line',
+              smooth: true,
+              seriesLayoutBy: 'row',
+              emphasis: { focus: 'series' }
+            },
+            {
+              type: 'line',
+              smooth: true,
+              seriesLayoutBy: 'row',
+              emphasis: { focus: 'series' }
+            },
+            {
+              type: 'pie',
+              id: 'pie',
+              radius: '30%',
+              center: ['50%', '25%'],
+              emphasis: {
+                focus: 'self'
+              },
+              label: {
+                formatter: '{b}: {@2012} ({d}%)'
+              },
+              encode: {
+                itemName: 'product',
+                value: '2012',
+                tooltip: '2012'
+              }
+            }
+          ]
         };
-
-        donut.setOption(option);`;
-
+        sharedDataset.on('updateAxisPointer', function (event) {
+          const xAxisInfo = event.axesInfo[0];
+          if (xAxisInfo) {
+            const dimension = xAxisInfo.value + 1;
+            sharedDataset.setOption({
+              series: {
+                id: 'pie',
+                label: {
+                  formatter: '{b}: {@[' + dimension + ']} ({d}%)'
+                },
+                encode: {
+                  value: dimension,
+                  tooltip: dimension
+                }
+              }
+            });
+          }
+        });
+        sharedDataset.setOption(option);
+      `;
       var config = {
         ID: widgetID,
         Script: widgetScript,

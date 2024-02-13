@@ -18,7 +18,7 @@ function cancelEdit() {
   cancelEditGrid(grid);
 }
 
-function addWidget(widgetID, widgetScript) {
+function addWidget(config) {
   // Create a new grid item
   const newItem = document.createElement("div");
   newItem.className = "item";
@@ -27,13 +27,13 @@ function addWidget(widgetID, widgetScript) {
     <button type="button" class="btn btn-sm" id="removeItem" onclick="removeGridItem(this.parentNode);">
       <i class="fas fa-trash-can"></i>
     </button>
-    <div class="item-content" id="${widgetID}" style="width: 500px;height:400px;">
+    <div class="item-content" id="${config.ID}" style="width: 500px;height:400px;">
     </div>
     `;
   var scriptTag = document.createElement("script");
   scriptTag.type = "text/javascript";
   scriptTag.defer = true;
-  scriptTag.innerHTML = widgetScript;
+  scriptTag.innerHTML = config.Script;
   newItem.appendChild(scriptTag);
 
   grid.add(newItem);
@@ -226,7 +226,7 @@ const resizeObserver = new ResizeObserver((entries) => {
     chart.resize({
       width: itemContentWidth,
       height: itemContentHeight,
-    });
+      });
     grid.refreshItems();
     grid.layout(true);
   }

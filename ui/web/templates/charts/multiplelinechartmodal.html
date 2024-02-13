@@ -1,20 +1,20 @@
 <!-- Copyright (c) Abstract Machines
 SPDX-License-Identifier: Apache-2.0 -->
 
-{{ define "donutmodal" }}
+{{ define "multiplelinechartmodal" }}
   <!-- Modal -->
   <div
     class="modal fade"
-    id="donutModal"
+    id="multipleLineChartModal"
     tabindex="-1"
     role="dialog"
-    aria-labelledby="donutModalLabel"
+    aria-labelledby="multipleLineChartModalLabel"
     aria-hidden="true"
   >
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="donutModalLabel">Donut chart</h5>
+          <h5 class="modal-title" id="multipleLineChartModalLabel">Time series line charts</h5>
           <button
             type="button"
             class="btn-close"
@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form id="create-donut-form">
+        <form id="create-multipleLineChart-form">
           <div class="modal-body">
             <div class="mb-3">
               <label for="title" class="form-label">Title</label>
@@ -70,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <button
               type="button"
               class="btn body-button"
-              id="create-donut-button"
+              id="create-multipleLineChart-button"
               data-bs-dismiss="modal"
             >
               Create Chart
@@ -81,9 +81,9 @@ SPDX-License-Identifier: Apache-2.0 -->
     </div>
   </div>
   <script>
-    // donut form
-    document.getElementById("create-donut-button").addEventListener("click", function () {
-      var form = document.getElementById("create-donut-form");
+    // multiple line chart form
+    document.getElementById("create-multipleLineChart-button").addEventListener("click", function () {
+      var form = document.getElementById("create-multipleLineChart-form");
       // Create an object to store the form data
       var formData = {};
 
@@ -96,55 +96,40 @@ SPDX-License-Identifier: Apache-2.0 -->
       }
       form.reset();
 
-      var widgetID = "donut-" + Date.now();
+      var widgetID = "multipleLinechart-" + Date.now();
       var widgetScript = `
-        var donut = echarts.init(document.getElementById("${widgetID}"));
-        var option = {
-            tooltip: {
-              trigger: 'item'
-            },
-            legend: {
-              top: '5%',
-              left: 'center'
-            },
-            series: [
-              {
-                name: 'Access From',
-                type: 'pie',
-                radius: ['40%', '70%'],
-                avoidLabelOverlap: false,
-                label: {
-                  show: false,
-                  position: 'center'
-                },
-                emphasis: {
-                  label: {
-                    show: true,
-                    fontSize: 40,
-                    fontWeight: 'bold'
-                  }
-                },
-                labelLine: {
-                  show: false
-                },
-                data: [
-                  { value: 1048, name: 'Thing1' },
-                  { value: 735, name: 'Thing2' },
-                  { value: 580, name: 'Thing3' },
-                  { value: 484, name: 'Thing4' },
-                  { value: 300, name: 'Thing5' }
-                ]
-              }
-            ]
-        };
+      var multipleLineChart = echarts.init(document.getElementById("${widgetID}"));
+      var option = {
+        xAxis: {
+          type: 'category',
+          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [
+          {
+            data: [150, 230, 224, 218, 135, 147, 260],
+            type: 'line'
+          },
+          {
+            data: [10, 200, 300, 75, 68, 34, 192],
+            type: 'line'
+          },
+          {
+            data: [300, 270, 230, 155, 268, 234, 112],
+            type: 'line'
+          },
+        ]
+      };
 
-        donut.setOption(option);`;
+      multipleLineChart.setOption(option);`;
 
-      var config = {
-        ID: widgetID,
-        Script: widgetScript,
-      }
-      addWidget(config);
+    var config = {
+      ID: widgetID,
+      Script: widgetScript,
+    }
+    addWidget(config);
     });
   </script>
 {{ end }}

@@ -141,7 +141,11 @@ SPDX-License-Identifier: Apache-2.0 -->
 
         horizontalBarChart.setOption(option);`;
 
-        addWidget(widgetID, widgetScript);
+      var config = {
+        ID: widgetID,
+        Script: widgetScript,
+      }
+      addWidget(config);
       });
   </script>
 {{ end }}

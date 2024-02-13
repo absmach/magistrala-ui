@@ -81,7 +81,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     </div>
   </div>
   <script>
-    // horizontal bar chart form
+    // dynamic data chart form
     document
       .getElementById("create-dynamicDataChart-button")
       .addEventListener("click", function () {
@@ -241,9 +241,14 @@ SPDX-License-Identifier: Apache-2.0 -->
               });
           }, 2100);
 
-          dynamicDataChart.setOption(option);`;
+          dynamicDataChart.setOption(option);
+        `;
 
-        addWidget(widgetID, widgetScript);
+      var config = {
+        ID: widgetID,
+        Script: widgetScript,
+      }
+      addWidget(config);
       });
   </script>
 {{ end }}
