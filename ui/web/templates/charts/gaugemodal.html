@@ -24,7 +24,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
         <div class="modal-body">
           <!-- Tab Navs -->
-          <ul class="nav nav-tabs" id="chartTab" role="tablist">
+          <ul class="nav nav-tabs mb-3" id="chartTab" role="tablist">
             <li class="nav-item" role="presentation">
               <button
                 class="nav-link active"
@@ -71,7 +71,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     class="form-control mb-3"
                     name="channel"
                     id="channel-id"
-                    placeholder="Enter channel ID"
+                    placeholder="Enter the channel ID"
                     required
                   />
                 </div>
@@ -146,7 +146,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     class="form-control mb-3"
                     name="gaugeLabel"
                     id="gauge-label"
-                    placeholder="Enter gauge label"
+                    placeholder="Enter the gauge label"
                   />
                 </div>
               </form>
@@ -184,7 +184,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       form.reset();
 
       var form = document.getElementById("create-gaugeChart-data-form");
-      
+
       var dataFormData = {};
       // Serialize the form data into the object
       for (var i = 0; i < form.elements.length; i++) {
