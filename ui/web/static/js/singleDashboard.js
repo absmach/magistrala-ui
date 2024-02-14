@@ -23,11 +23,19 @@ function addWidget(config) {
   const newItem = document.createElement("div");
   newItem.className = "item";
   newItem.classList.add("item-editable");
+  console.log(config);
+  if (config.Style === undefined) {
+    config.Style = {
+      width: "500px",
+      height: "500px",
+    };
+  }
+  var styleString = `width: ${config.Style.width}; height: ${config.Style.height};`;
   newItem.innerHTML = `
     <button type="button" class="btn btn-sm" id="removeItem" onclick="removeGridItem(this.parentNode);">
       <i class="fas fa-trash-can"></i>
     </button>
-    <div class="item-content" id="${config.ID}" style="width: 500px;height:500px;">
+    <div class="item-content" id="${config.ID}" style="${styleString}">
       ${config.Content}
     </div>
   `;
@@ -40,6 +48,7 @@ function addWidget(config) {
   }
   grid.add(newItem);
   resizeObserver.observe(newItem);
+  console.log(newItem);
 }
 
 function removeGridItem(item) {
@@ -243,18 +252,32 @@ const resizeObserver = new ResizeObserver((entries) => {
         // The standard makes contentBoxSize an array...
         if (entry.contentBoxSize[0]) {
           h5Elem.style.fontSize = Math.max(1, entry.contentBoxSize[0].inlineSize / 300) + "rem";
-          cardBody.style.fontSize = Math.max(1.5, entry.contentBoxSize[0].inlineSize / 300) + "rem";
-          cardFooter.style.fontSize = Math.max(1, entry.contentBoxSize[0].inlineSize / 600) + "rem";
+          if (cardBody) {
+            cardBody.style.fontSize =
+              Math.max(1.5, entry.contentBoxSize[0].inlineSize / 300) + "rem";
+          }
+          if (cardFooter) {
+            cardFooter.style.fontSize =
+              Math.max(1, entry.contentBoxSize[0].inlineSize / 600) + "rem";
+          }
         } else {
           // ...but old versions of Firefox treat it as a single item
           h5Elem.style.fontSize = Math.max(1, entry.contentBoxSize.inlineSize / 300) + "rem";
-          cardBody.style.fontSize = Math.max(1.5, entry.contentBoxSize.inlineSize / 300) + "rem";
-          cardFooter.style.fontSize = Math.max(1, entry.contentBoxSize.inlineSize / 600) + "rem";
+          if (cardBody) {
+            cardBody.style.fontSize = Math.max(1.5, entry.contentBoxSize.inlineSize / 300) + "rem";
+          }
+          if (cardFooter) {
+            cardFooter.style.fontSize = Math.max(1, entry.contentBoxSize.inlineSize / 600) + "rem";
+          }
         }
       } else {
         h5Elem.style.fontSize = `${Math.max(1, entry.contentRect.width / 300)}rem`;
-        cardBody.style.fontSize = `${Math.max(1.5, entry.contentRect.width / 300)}rem`;
-        cardFooter.style.fontSize = `${Math.max(1, entry.contentRect.width / 600)}rem`;
+        if (cardBody) {
+          cardBody.style.fontSize = `${Math.max(1.5, entry.contentRect.width / 300)}rem`;
+        }
+        if (cardFooter) {
+          cardFooter.style.fontSize = `${Math.max(1, entry.contentRect.width / 600)}rem`;
+        }
       }
     }
     grid.refreshItems();

@@ -84,15 +84,16 @@ SPDX-License-Identifier: Apache-2.0 -->
       }
       form.reset();
 
-      var widgetID = "progressBar-" + Date.now();
-      var contentType = 'html';
+      var widgetID = "progressBar-" + Date.now();      
       var widgetContent = `
         <div class="card widgetcard">
           <div class="card-header text-center">
             <h5 class="card-title">Progress Bar</h5>
           </div>
-          <div class="progress">
-            <div class="progress-bar" role="progressbar" style="width: 70%" aria-valuemin="0" aria-valuemax="100"></div>
+          <div class="card-body p-2">
+            <div class="progress">
+              <div class="progress-bar" role="progressbar" style="width: 70%" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
           </div>
           <div class="card-footer text-center">
             <p class="card-text">
@@ -104,6 +105,10 @@ SPDX-License-Identifier: Apache-2.0 -->
       var config = {
           ID: widgetID,
           Content: widgetContent,
+          Style:{
+            width: "300px",
+            height: "120px"
+          }
         };
       addWidget(config);
     });

@@ -105,10 +105,6 @@ SPDX-License-Identifier: Apache-2.0 -->
       form.reset();
 
       var widgetID = "valueChartCard-" + Date.now();
-      var contentType = 'html';
-      var title = formData.title || "Default Title";
-      var channelID = formData.channel || "N/A";
-      var value = formData.Value || "N/A";
       var widgetContent = `
         <div class="card mt-3 widgetcard">
           <div class="card-header text-center">
@@ -141,10 +137,14 @@ SPDX-License-Identifier: Apache-2.0 -->
         barChart.setOption(option);
       `;
       var config = {
-          ID: widgetID,
-          Content: widgetContent,
-          Script: widgetScript,
-        };
+        ID: widgetID,
+        Content: widgetContent,
+        Script: widgetScript,
+        Style: {
+          width: "400px",
+          height: "390px",
+        },
+      };
       addWidget(config);
     });
   </script>
