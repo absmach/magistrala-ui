@@ -165,7 +165,6 @@ var (
 		"entitiestablemodal",
 		"entitycountmodal",
 		"progressbarmodal",
-		"valueandchartcardmodal",
 		"labelmodal",
 	}
 

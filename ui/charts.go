@@ -104,11 +104,6 @@ func CreateItem() []Item {
 			Widget:  "valueCard",
 		},
 		{
-			Title:   "Value and Chart Card",
-			Content: "This is a value and chart card",
-			Widget:  "valueChartCard",
-		},
-		{
 			Title:   "Alarm Count Card",
 			Content: "This is a card that displays dynamic alarm count data",
 			Widget:  "alarmCount",

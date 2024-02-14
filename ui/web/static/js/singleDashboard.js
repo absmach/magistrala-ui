@@ -23,7 +23,6 @@ function addWidget(config) {
   const newItem = document.createElement("div");
   newItem.className = "item";
   newItem.classList.add("item-editable");
-  console.log(config);
   if (config.Style === undefined) {
     config.Style = {
       width: "500px",
@@ -48,7 +47,6 @@ function addWidget(config) {
   }
   grid.add(newItem);
   resizeObserver.observe(newItem);
-  console.log(newItem);
 }
 
 function removeGridItem(item) {
@@ -220,6 +218,7 @@ const resizeObserver = new ResizeObserver((entries) => {
     // Calculate the change in width and height
     var widthChange = target.clientWidth - previousSize.width;
     var heightChange = target.clientHeight - previousSize.height;
+
     var itemContentWidth =
       parseInt(window.getComputedStyle(contentEl).getPropertyValue("width")) + widthChange;
     var itemContentHeight =
