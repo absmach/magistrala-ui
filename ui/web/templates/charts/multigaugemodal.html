@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="multiGaugeModalLabel">Multi Gauge chart</h5>
+          <h5 class="modal-title" id="multiGaugeModalLabel">Multi Gauge Chart</h5>
           <button
             type="button"
             class="btn-close"
@@ -22,68 +22,155 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form id="create-multiGauge-form">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="title" class="form-label">Title</label>
-              <input
-                type="text"
-                class="form-control"
-                name="title"
-                id="title"
-                placeholder="Enter the chart title"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="channel-id" class="form-label">Channel ID</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="channel"
-                id="channel-id"
-                placeholder="Enter channel ID"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="x-axis" class="form-label">Select x-axis Type</label>
-              <select class="form-select mb-3" name="xAxisType" id="x-axis">
-                <option value="" disabled>Select x-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="y-axis" class="form-label">Select y-axis Type</label>
-              <select class="form-select mb-3" name="yAxisType" id="y-axis">
-                <option value="" disabled>Select y-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button
-              type="button"
-              class="btn body-button"
-              id="create-multiGauge-button"
-              data-bs-dismiss="modal"
+        <div class="modal-body">
+          <!-- Tab Navs -->
+          <ul class="nav nav-tabs mb-3" id="chartTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active"
+                id="data-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#multiGaugeChartData"
+                type="button"
+                role="tab"
+                aria-controls="data"
+                aria-selected="true"
+              >
+                Data
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="appearance-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#multiGaugeChartAppearance"
+                type="button"
+                role="tab"
+                aria-controls="appearance"
+                aria-selected="false"
+              >
+                Appearance
+              </button>
+            </li>
+          </ul>
+          <!-- Tab Content -->
+          <div class="tab-content" id="myTabContent">
+            <!-- Data Tab -->
+            <div
+              class="tab-pane fade show active"
+              id="multiGaugeChartData"
+              role="tabpanel"
+              aria-labelledby="data-tab"
             >
-              Create Chart
-            </button>
+              <form id="create-multiGaugeChart-data-form">
+                <div class="mb-3">
+                  <label for="channel-id" class="form-label">Channel ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="channel"
+                    id="channel-id"
+                    placeholder="Enter the channel ID"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="thing-id" class="form-label">Thing ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="thing"
+                    id="thing-id"
+                    placeholder="Enter the thing ID"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="value-name" class="form-label">Value names</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="valueName"
+                    id="value-name"
+                    placeholder="Enter the value names eg. temperature,voltage"
+                    required
+                  />
+                </div>
+              </form>
+            </div>
+            <!-- Appearance Tab -->
+            <div
+              class="tab-pane fade"
+              id="multiGaugeChartAppearance"
+              role="tabpanel"
+              aria-labelledby="appearance-tab"
+            >
+              <form id="create-multiGaugeChart-appearance-form">
+                <div class="mb-3">
+                  <label for="title" class="form-label">Title</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="title"
+                    id="title"
+                    placeholder="Enter the chart title"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="gauge-label" class="form-label">Gauge Labels</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="gaugeLabel"
+                    id="gauge-label"
+                    placeholder="Enter the three gauge labels eg temperature,voltage,pressure"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="min-value" class="form-label">Min value</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="minValue"
+                    id="min-value"
+                    placeholder="Enter the minimum data value"
+                    value="0"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="max-value" class="form-label">Max value</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="maxValue"
+                    id="max-value"
+                    placeholder="Enter the maximum data value"
+                    value="100"
+                  />
+                </div>
+              </form>
+            </div>
           </div>
-        </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button
+            type="button"
+            class="btn body-button"
+            id="create-multiGauge-button"
+            data-bs-dismiss="modal"
+          >
+            Create Chart
+          </button>
+        </div>
       </div>
     </div>
   </div>
   <script>
     // multi gauge form
     document.getElementById("create-multiGauge-button").addEventListener("click", function () {
-      var form = document.getElementById("create-multiGauge-form");
+      var form = document.getElementById("create-multiGaugeChart-appearance-form");
       // Create an object to store the form data
       var formData = {};
 
@@ -96,37 +183,39 @@ SPDX-License-Identifier: Apache-2.0 -->
       }
       form.reset();
 
+      gaugeLabel = formData.gaugeLabel.split(",");
+
       var widgetID = "multiGauge-" + Date.now();
       var widgetScript = `
         var multiGaugeChart = echarts.init(document.getElementById("${widgetID}"));
         var gaugeData = [
         {
           value: 20,
-          name: 'Perfect',
+          name: '${gaugeLabel[0]}',
           title: {
             offsetCenter: ['0%', '-30%']
           },
           detail: {
             valueAnimation: true,
-            offsetCenter: ['0%', '-20%']
+            offsetCenter: ['0%', '-18%']
           }
         },
         {
           value: 40,
-          name: 'Good',
+          name: '${gaugeLabel[1]}',
           title: {
             offsetCenter: ['0%', '0%']
           },
           detail: {
             valueAnimation: true,
-            offsetCenter: ['0%', '10%']
+            offsetCenter: ['0%', '12%']
           }
         },
         {
           value: 60,
-          name: 'Commonly',
+          name: '${gaugeLabel[2]}',
           title: {
-            offsetCenter: ['0%', '30%']
+            offsetCenter: ['0%', '28%']
           },
           detail: {
             valueAnimation: true,
@@ -135,11 +224,15 @@ SPDX-License-Identifier: Apache-2.0 -->
         }
       ];
       var option = {
+        title: {
+          text: '${formData.title}',
+          left: 'center'
+        },
         series: [
           {
-            type: 'gauge',
-            startAngle: 90,
-            endAngle: -270,
+            type: "gauge",
+            min: ${formData.minValue},
+            max: ${formData.maxValue},
             pointer: {
               show: false
             },
@@ -189,11 +282,11 @@ SPDX-License-Identifier: Apache-2.0 -->
       };
       multiGaugeChart.setOption(option);
       `;
-    var config = {
-      ID: widgetID,
-      Script: widgetScript,
-    }
-    addWidget(config);
+      var config = {
+        ID: widgetID,
+        Script: widgetScript,
+      };
+      addWidget(config);
     });
   </script>
 {{ end }}

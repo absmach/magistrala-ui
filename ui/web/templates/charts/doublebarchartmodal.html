@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="doubleBarChartModalLabel">Double bar chart</h5>
+          <h5 class="modal-title" id="doubleBarChartModalLabel">Double Bar Chart</h5>
           <button
             type="button"
             class="btn-close"
@@ -22,68 +22,194 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form id="create-doubleBarChart-form">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="title" class="form-label">Title</label>
-              <input
-                type="text"
-                class="form-control"
-                name="title"
-                id="title"
-                placeholder="Enter the chart title"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="channel-id" class="form-label">Channel ID</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="channel"
-                id="channel-id"
-                placeholder="Enter channel ID"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="x-axis" class="form-label">Select x-axis Type</label>
-              <select class="form-select mb-3" name="xAxisType" id="x-axis">
-                <option value="" disabled>Select x-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="y-axis" class="form-label">Select y-axis Type</label>
-              <select class="form-select mb-3" name="yAxisType" id="y-axis">
-                <option value="" disabled>Select y-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button
-              type="button"
-              class="btn body-button"
-              id="create-doubleBarChart-button"
-              data-bs-dismiss="modal"
+        <div class="modal-body">
+          <!-- Tab Navs -->
+          <ul class="nav nav-tabs mb-3" id="chartTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active"
+                id="data-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#doubleBarChartData"
+                type="button"
+                role="tab"
+                aria-controls="data"
+                aria-selected="true"
+              >
+                Data
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="appearance-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#doubleBarChartAppearance"
+                type="button"
+                role="tab"
+                aria-controls="appearance"
+                aria-selected="false"
+              >
+                Appearance
+              </button>
+            </li>
+          </ul>
+          <!-- Tab Content -->
+          <div class="tab-content" id="myTabContent">
+            <!-- Data Tab -->
+            <div
+              class="tab-pane fade show active"
+              id="doubleBarChartData"
+              role="tabpanel"
+              aria-labelledby="data-tab"
             >
-              Create Chart
-            </button>
+              <form id="create-doubleBarChart-data-form">
+                <div class="mb-3">
+                  <label for="channel-id" class="form-label">Channel ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="channel"
+                    id="channel-id"
+                    placeholder="Enter the channel ID"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="thing-id" class="form-label">Thing IDs</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="thing"
+                    id="thing-id"
+                    placeholder="Enter the thing IDs"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="value-name" class="form-label">Value name</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="valueName"
+                    id="value-name"
+                    placeholder="Enter the value names eg. temperature"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="y-axis-type" class="form-label">Y-axis Type</label>
+                  <select class="form-select mb-3" name="yAxisType" id="y-axis-typr">
+                    <option value="" disabled>Select y-axis Type</option>
+                    <option value="value">Value</option>
+                    <option value="category">Category</option>
+                    <option value="time">Time</option>
+                    <option value="log">Log</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="start-time" class="form-label">Start time</label>
+                  <input
+                    type="datetime-local"
+                    class="form-control mb-3"
+                    name="startTime"
+                    id="start-name"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="stop-time" class="form-label">Stop time</label>
+                  <input
+                    type="datetime-local"
+                    class="form-control mb-3"
+                    name="stopTime"
+                    id="stop-name"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="time-interval" class="form-label">Time interval</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="timeInterval"
+                    id="time-interval"
+                    placeholder="Enter the time interval in seconds"
+                    required
+                  />
+                </div>
+              </form>
+            </div>
+            <!-- Appearance Tab -->
+            <div
+              class="tab-pane fade"
+              id="doubleBarChartAppearance"
+              role="tabpanel"
+              aria-labelledby="appearance-tab"
+            >
+              <form id="create-doubleBarChart-appearance-form">
+                <div class="mb-3">
+                  <label for="title" class="form-label">Title</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="title"
+                    id="title"
+                    placeholder="Enter the chart title"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="y-axis-label" class="form-label">Y axis label</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="yAxisLabel"
+                    id="y-axis-label"
+                    placeholder="Enter the y axis label"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="x-axis-label" class="form-label">X axis label</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="xAxisLabel"
+                    id="x-axis-label"
+                    placeholder="Enter the x axis label"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="series-name" class="form-label">Series name</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="seriesName"
+                    id="series-name"
+                    placeholder="Enter the series name eg. thing1, thing2"
+                    required
+                  />
+                </div>
+              </form>
+            </div>
           </div>
-        </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button
+            type="button"
+            class="btn body-button"
+            id="create-doubleBarChart-button"
+            data-bs-dismiss="modal"
+          >
+            Create Chart
+          </button>
+        </div>
       </div>
     </div>
   </div>
   <script>
     // double bar chart form
     document.getElementById("create-doubleBarChart-button").addEventListener("click", function () {
-      var form = document.getElementById("create-doubleBarChart-form");
+      var form = document.getElementById("create-doubleBarChart-appearance-form");
       // Create an object to store the form data
       var formData = {};
 
@@ -95,19 +221,25 @@ SPDX-License-Identifier: Apache-2.0 -->
         }
       }
       form.reset();
+
+      console.log(formData);
+
+      seriesName = formData.seriesName.split(",");
+
       var widgetID = "doubleBarchart-" + Date.now();
       var widgetScript = `
         var doubleBarChart = echarts.init(document.getElementById("${widgetID}"));
         var option = {
           title: {
-            text: 'Things vs Channels',
-            subtext: 'Fake Data'
+            text: '${formData.title}',
+            left: 'left'
           },
           tooltip: {
             trigger: 'axis'
           },
           legend: {
-            data: ['Things', 'Channels']
+            show: true,
+
           },
           toolbox: {
             show: true,
@@ -123,17 +255,23 @@ SPDX-License-Identifier: Apache-2.0 -->
             {
               type: 'category',
               // prettier-ignore
-              data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+              data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+              name: '${formData.xAxisLabel}',
+              nameLocation: 'middle',
+              nameGap: 30
             }
           ],
           yAxis: [
             {
-              type: 'value'
+              type: 'value',
+              name: '${formData.yAxisLabel}',
+              nameLocation: 'middle',
+              nameGap: 40
             }
           ],
           series: [
             {
-              name: 'Things',
+              name: '${seriesName[0]}',
               type: 'bar',
               data: [
                 2.0, 4.9, 7.0, 23.2, 25.6, 76.7, 135.6, 162.2, 32.6, 20.0, 6.4, 3.3
@@ -149,7 +287,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               }
             },
             {
-              name: 'Channels',
+              name: '${seriesName[1]}',
               type: 'bar',
               data: [
                 2.6, 5.9, 9.0, 26.4, 28.7, 70.7, 175.6, 182.2, 48.7, 18.8, 6.0, 2.3
@@ -172,7 +310,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       var config = {
         ID: widgetID,
         Script: widgetScript,
-      }
+      };
       addWidget(config);
     });
   </script>
