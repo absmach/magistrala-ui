@@ -31,7 +31,7 @@ function addWidget(config) {
   var styleString = `width: ${config.Style.width}; height: ${config.Style.height};`;
   newItem.innerHTML = `
   <div class="item-border">
-    <button type="button" class="btn btn-sm" id="removeItem" onclick="removeGridItem(this.parentNode);">
+    <button type="button" class="btn btn-sm" id="removeItem" onclick="removeGridItem(this.parentNode.parentNode);">
       <i class="fas fa-trash-can"></i>
     </button>
     <div class="item-content" id="${config.ID}" style="${styleString}">
