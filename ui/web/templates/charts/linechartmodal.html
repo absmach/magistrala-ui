@@ -228,13 +228,26 @@ SPDX-License-Identifier: Apache-2.0 -->
     document.getElementById("create-lineChart-button").addEventListener("click", function () {
       var form = document.getElementById("create-lineChart-appearance-form");
       // Create an object to store the form data
-      var formData = {};
+      var appFormData = {};
 
       // Serialize the form data into the object
       for (var i = 0; i < form.elements.length; i++) {
         var e = form.elements[i];
         if (e.type !== "submit" && e.type !== "button") {
-          formData[e.name] = e.value;
+          appFormData[e.name] = e.value;
+        }
+      }
+      form.reset();
+
+      form = document.getElementById("create-lineChart-data-form");
+      // Create an object to store the form data
+      var dataFormData = {};
+
+      // Serialize the form data into the object
+      for (var i = 0; i < form.elements.length; i++) {
+        var e = form.elements[i];
+        if (e.type !== "submit" && e.type !== "button") {
+          dataFormData[e.name] = e.value;
         }
       }
       form.reset();
@@ -244,20 +257,20 @@ SPDX-License-Identifier: Apache-2.0 -->
         var lineChart = echarts.init(document.getElementById("${widgetID}")); 
         var option = {
           title: {
-            text: '${formData.title}',
+            text: '${appFormData.title}',
             left: 'center',
             show: true
           },
           xAxis: {
             type: 'category',
             data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            name: '${formData.xAxisLabel}',
+            name: '${appFormData.xAxisLabel}',
             nameLocation: 'middle',
             nameGap: 35
           },
           yAxis: {
             type: 'value',
-            name: '${formData.yAxisLabel}',
+            name: '${appFormData.yAxisLabel}',
             nameLocation: 'middle',
             nameGap: 35
           },
@@ -270,11 +283,11 @@ SPDX-License-Identifier: Apache-2.0 -->
               data: [150, 230, 224, 218, 135, 147, 260],
               type: 'line',
               lineStyle: {
-                width: '${formData.lineWidth}',
+                width: '${appFormData.lineWidth}',
                 type: 'solid',
-                color: '${formData.lineColor}'
+                color: '${appFormData.lineColor}'
               },
-              name: '${formData.seriesName}'
+              name: '${appFormData.seriesName}'
             }
           ]
         };
@@ -284,8 +297,10 @@ SPDX-License-Identifier: Apache-2.0 -->
       var config = {
         ID: widgetID,
         Script: widgetScript,
-      }
+      };
       addWidget(config);
+      // Append chart metadata to dashboard metadata
+      metadata[widgetID] = dataFormData;
     });
   </script>
 {{ end }}

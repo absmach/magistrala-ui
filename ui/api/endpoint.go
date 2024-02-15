@@ -2020,6 +2020,7 @@ func updateDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 			Name:        req.Name,
 			Description: req.Description,
 			Layout:      req.Layout,
+			Metadata:    req.Metadata,
 		}
 		if err := svc.UpdateDashboard(req.token, req.ID, d); err != nil {
 			return nil, err

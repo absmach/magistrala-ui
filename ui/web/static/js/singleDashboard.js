@@ -98,11 +98,12 @@ function saveLayout(grid, dashboardID) {
     return value;
   });
 
-
+  console.log("metadata: ", metadata)
+  
   const dashboard = {
     id: dashboardID,
     layout: jsonString,
-    metadata: metadata,
+    metadata: JSON.stringify(metadata),
   };
 
   fetch("/dashboards", {
@@ -116,7 +117,7 @@ function saveLayout(grid, dashboardID) {
       const errorMessage = response.headers.get("X-Error-Message");
       console.log("Error: ", errorMessage);
     } else {
-      // window.location.reload();
+      window.location.reload();
     }
   });
 }

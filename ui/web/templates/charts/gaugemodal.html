@@ -97,28 +97,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
-                <div class="mb-3">
-                  <label for="min-value" class="form-label">Min value</label>
-                  <input
-                    type="text"
-                    class="form-control mb-3"
-                    name="minValue"
-                    id="min-value"
-                    placeholder="Enter the minimum data value"
-                    value="0"
-                  />
-                </div>
-                <div class="mb-3">
-                  <label for="max-value" class="form-label">Max value</label>
-                  <input
-                    type="text"
-                    class="form-control mb-3"
-                    name="maxValue"
-                    id="max-value"
-                    placeholder="Enter the maximum data value"
-                    value="100"
-                  />
-                </div>
               </form>
             </div>
             <!-- Appearance Tab -->
@@ -147,6 +125,28 @@ SPDX-License-Identifier: Apache-2.0 -->
                     name="gaugeLabel"
                     id="gauge-label"
                     placeholder="Enter the gauge label"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="min-value" class="form-label">Min value</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="minValue"
+                    id="min-value"
+                    placeholder="Enter the minimum plot value"
+                    value="0"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="max-value" class="form-label">Max value</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="maxValue"
+                    id="max-value"
+                    placeholder="Enter the maximum plot value"
+                    value="100"
                   />
                 </div>
               </form>
@@ -183,7 +183,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       }
       form.reset();
 
-      var form = document.getElementById("create-gaugeChart-data-form");
+      form = document.getElementById("create-gaugeChart-data-form");
 
       var dataFormData = {};
       // Serialize the form data into the object
@@ -211,8 +211,8 @@ SPDX-License-Identifier: Apache-2.0 -->
             series: [
               {
                 type: "gauge",
-                min: ${dataFormData.minValue},
-                max: ${dataFormData.maxValue},
+                min: ${appFormData.minValue},
+                max: ${appFormData.maxValue},
                 progress: {
                   show: true,
                 },
@@ -231,7 +231,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           gaugeChart.setOption(option);
 
           function updateGauge() {
-              const randomValue = Math.floor(Math.random() * (${dataFormData.maxValue} - ${dataFormData.minValue} + 1)) + ${dataFormData.minValue};
+              const randomValue = Math.floor(Math.random() * (${appFormData.maxValue} - ${appFormData.minValue} + 1)) + ${appFormData.minValue};
               gaugeChart.setOption({
                 series: [
                   {
@@ -251,8 +251,10 @@ SPDX-License-Identifier: Apache-2.0 -->
       var config = {
         ID: widgetID,
         Script: widgetScript,
-      }
+      };
       addWidget(config);
+      // Append chart metadata to dashboard metadata
+      metadata[widgetID] = dataFormData;
     });
   </script>
 {{ end }}

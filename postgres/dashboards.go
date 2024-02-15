@@ -139,6 +139,10 @@ func (r *repo) Update(ctx context.Context, dashboardID, userID string, dr ui.Das
 		query = append(query, "layout = :layout")
 		d.Layout = dr.Layout
 	}
+	if dr.Metadata != "" {
+		query = append(query, "metadata = :metadata")
+		d.Metadata = dr.Metadata
+	}
 	if len(query) > 0 {
 		upq = strings.Join(query, ",")
 	}
@@ -185,6 +189,7 @@ type dbDashboard struct {
 	Name        string    `db:"name"`
 	Description string    `db:"description"`
 	Layout      []byte    `db:"layout"`
+	Metadata    []byte    `db:"metadata"`
 	CreatedAt   time.Time `db:"created_at"`
 	UpdatedAt   time.Time `db:"updated_at"`
 }
@@ -194,12 +199,17 @@ func toDBDashboard(ds ui.Dashboard) (dbDashboard, error) {
 	if err != nil {
 		return dbDashboard{}, errors.Wrap(ErrJSONMarshal, err)
 	}
+	ma, err := json.Marshal(ds.Metadata)
+	if err != nil {
+		return dbDashboard{}, errors.Wrap(ErrJSONMarshal, err)
+	}
 	return dbDashboard{
 		ID:          ds.ID,
 		CreatedBy:   ds.CreatedBy,
 		Name:        ds.Name,
 		Description: ds.Description,
 		Layout:      lt,
+		Metadata:    ma,
 		CreatedAt:   ds.CreatedAt,
 		UpdatedAt:   ds.UpdatedAt,
 	}, nil
@@ -212,6 +222,12 @@ func toDashboard(dsDB dbDashboard) (ui.Dashboard, error) {
 			return ui.Dashboard{}, errors.Wrap(ErrJSONUnmarshal, err)
 		}
 	}
+	var ma string
+	if dsDB.Metadata != nil {
+		if err := json.Unmarshal(dsDB.Metadata, &ma); err != nil {
+			return ui.Dashboard{}, errors.Wrap(ErrJSONUnmarshal, err)
+		}
+	}
 
 	return ui.Dashboard{
 		ID:          dsDB.ID,
@@ -219,6 +235,7 @@ func toDashboard(dsDB dbDashboard) (ui.Dashboard, error) {
 		Name:        dsDB.Name,
 		Description: dsDB.Description,
 		Layout:      lt,
+		Metadata:    ma,
 		CreatedAt:   dsDB.CreatedAt,
 		UpdatedAt:   dsDB.UpdatedAt,
 	}, nil

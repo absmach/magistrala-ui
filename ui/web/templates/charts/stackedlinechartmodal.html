@@ -217,24 +217,38 @@ SPDX-License-Identifier: Apache-2.0 -->
       .addEventListener("click", function () {
         var form = document.getElementById("create-stackdeLineChart-appearance-form");
         // Create an object to store the form data
-        var formData = {};
+        var appFormData = {};
 
         // Serialize the form data into the object
         for (var i = 0; i < form.elements.length; i++) {
           var e = form.elements[i];
           if (e.type !== "submit" && e.type !== "button") {
-            formData[e.name] = e.value;
+            appFormData[e.name] = e.value;
           }
         }
         form.reset();
-        seriesName = formData.seriesName.split(",");
+
+        form = document.getElementById("create-stackedLineChart-data-form");
+        // Create an object to store the form data
+        var dataFormData = {};
+
+        // Serialize the form data into the object
+        for (var i = 0; i < form.elements.length; i++) {
+          var e = form.elements[i];
+          if (e.type !== "submit" && e.type !== "button") {
+            dataFormData[e.name] = e.value;
+          }
+        }
+        form.reset();
+
+        seriesName = appFormData.seriesName.split(",");
 
         var widgetID = "stackedlinechart-" + Date.now();
         var widgetScript = `
         var stackedLineChart = echarts.init(document.getElementById("${widgetID}"));
         var option = {
             title: {
-              text: "${formData.title}",
+              text: "${appFormData.title}",
               left: 'left',
             },
             tooltip: {
@@ -259,13 +273,13 @@ SPDX-License-Identifier: Apache-2.0 -->
               type: 'category',
               boundaryGap: false,
               data: ['Thing1', 'Thing2', 'Thing3', 'Thing4', 'Thing5', 'Thing6', 'Thing7'],
-              name: '${formData.xAxisLabel}',
+              name: '${appFormData.xAxisLabel}',
               nameLocation: 'middle',
               nameGap: 35,
             },
             yAxis: {
               type: 'value',
-              name: '${formData.yAxisLabel}',
+              name: '${appFormData.yAxisLabel}',
               nameLocation: 'middle',
               nameGap: 35,
             },
@@ -298,6 +312,8 @@ SPDX-License-Identifier: Apache-2.0 -->
         Script: widgetScript,
       }
       addWidget(config);
+      // Append chart metadata to dashboard metadata
+      metadata[widgetID] = dataFormData;
     });
   </script>
 {{ end }}

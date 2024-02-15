@@ -149,13 +149,26 @@ SPDX-License-Identifier: Apache-2.0 -->
     document.getElementById("create-donut-button").addEventListener("click", function () {
       var form = document.getElementById("create-donutChart-appearance-form");
       // Create an object to store the form data
-      var formData = {};
+      var appFormData = {};
 
       // Serialize the form data into the object
       for (var i = 0; i < form.elements.length; i++) {
         var e = form.elements[i];
         if (e.type !== "submit" && e.type !== "button") {
-          formData[e.name] = e.value;
+          appFormData[e.name] = e.value;
+        }
+      }
+      form.reset();
+
+      form = document.getElementById("create-donutChart-data-form");
+      // Create an object to store the form data
+      var dataFormData = {};
+
+      // Serialize the form data into the object
+      for (var i = 0; i < form.elements.length; i++) {
+        var e = form.elements[i];
+        if (e.type !== "submit" && e.type !== "button") {
+          dataFormData[e.name] = e.value;
         }
       }
       form.reset();
@@ -165,7 +178,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         var donut = echarts.init(document.getElementById("${widgetID}"));
         var option = {
             title:{
-              text:'${formData.title}',
+              text:'${appFormData.title}',
               left: 'center',
             },
             tooltip: {
@@ -177,7 +190,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             },
             series: [
               {
-                name: '${formData.seriesName}',
+                name: '${appFormData.seriesName}',
                 type: 'pie',
                 radius: ['40%', '70%'],
                 avoidLabelOverlap: false,
@@ -211,8 +224,10 @@ SPDX-License-Identifier: Apache-2.0 -->
       var config = {
         ID: widgetID,
         Script: widgetScript,
-      }
+      };
       addWidget(config);
+      // Append chart metadata to dashboard metadata
+      metadata[widgetID] = dataFormData;
     });
   </script>
 {{ end }}

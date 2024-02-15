@@ -200,13 +200,26 @@ SPDX-License-Identifier: Apache-2.0 -->
     document.getElementById("create-areaLineChart-button").addEventListener("click", function () {
       var form = document.getElementById("create-areaLineChart-appearance-form");
       // Create an object to store the form data
-      var formData = {};
+      var appFormData = {};
 
       // Serialize the form data into the object
       for (var i = 0; i < form.elements.length; i++) {
         var e = form.elements[i];
         if (e.type !== "submit" && e.type !== "button") {
-          formData[e.name] = e.value;
+          appFormData[e.name] = e.value;
+        }
+      }
+      form.reset();
+
+      form = document.getElementById("create-areaLineChart-data-form");
+      // Create an object to store the form data
+      var dataFormData = {};
+
+      // Serialize the form data into the object
+      for (var i = 0; i < form.elements.length; i++) {
+        var e = form.elements[i];
+        if (e.type !== "submit" && e.type !== "button") {
+          dataFormData[e.name] = e.value;
         }
       }
       form.reset();
@@ -225,7 +238,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               }
             },
             title: {
-              text: '${formData.title}',
+              text: '${appFormData.title}',
             },
             legend: {
               data: ['voltage', 'current', 'temperature', 'pressue']
@@ -241,7 +254,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 type: 'category',
                 boundaryGap: false,
                 data: ['thing1', 'thing2', 'thing3', 'thing4', 'thing5', 'thing6', 'thing7'],
-                name: '${formData.xAxisLabel}',
+                name: '${appFormData.xAxisLabel}',
                 nameLocation: 'middle',
                 nameGap: 25,
               }
@@ -249,7 +262,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             yAxis: [
               {
                 type: 'value',
-                name: '${formData.yAxisLabel}',
+                name: '${appFormData.yAxisLabel}',
                 nameLocation: 'middle',
                 nameGap: 35,
               }
@@ -305,7 +318,8 @@ SPDX-License-Identifier: Apache-2.0 -->
         Script: widgetScript,
       };
       addWidget(config);
-      mydata[widgetID] = formData;
+      // Append chart metadata to dashboard metadata
+      metadata[widgetID] = dataFormData;
     });
   </script>
 {{ end }}

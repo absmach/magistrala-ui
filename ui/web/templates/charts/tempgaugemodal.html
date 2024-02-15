@@ -172,13 +172,26 @@ SPDX-License-Identifier: Apache-2.0 -->
     document.getElementById("create-tempGauge-button").addEventListener("click", function () {
       var form = document.getElementById("create-tempGaugeChart-appearance-form");
       // Create an object to store the form data
-      var formData = {};
+      var appFormData = {};
 
       // Serialize the form data into the object
       for (var i = 0; i < form.elements.length; i++) {
         var e = form.elements[i];
         if (e.type !== "submit" && e.type !== "button") {
-          formData[e.name] = e.value;
+          appFormData[e.name] = e.value;
+        }
+      }
+      form.reset();
+
+      form = document.getElementById("create-tempGaugeChart-data-form");
+      // Create an object to store the form data
+      var dataFormData = {};
+
+      // Serialize the form data into the object
+      for (var i = 0; i < form.elements.length; i++) {
+        var e = form.elements[i];
+        if (e.type !== "submit" && e.type !== "button") {
+          dataFormData[e.name] = e.value;
         }
       }
       form.reset();
@@ -188,7 +201,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         var tempGaugeChart = echarts.init(document.getElementById("${widgetID}"));
         var option = {
            title: {
-              text: '${formData.title}',
+              text: '${appFormData.title}',
               left: 'center',
               textStyle: {
                 color: '#FFAB91'
@@ -297,7 +310,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 data: [
                   {
                     value: 37,
-                    name: '${formData.gaugeLabel}'
+                    name: '${appFormData.gaugeLabel}'
                   }
                 ]
               }
@@ -318,7 +331,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   data: [
                     {
                       value: random,
-                      name: '${formData.gaugeLabel}'
+                      name: '${appFormData.gaugeLabel}'
                     }
                   ]
                 }
@@ -333,6 +346,8 @@ SPDX-License-Identifier: Apache-2.0 -->
         Script: widgetScript,
       }
       addWidget(config);
+      // Append chart metadata to dashboard metadata
+      metadata[widgetID] = dataFormData;
     });
   </script>
 {{ end }}
