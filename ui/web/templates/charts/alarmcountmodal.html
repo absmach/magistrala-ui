@@ -22,18 +22,8 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form id="create-alarmCount-form">
+        <form id="create-alarmCount-data-form">
           <div class="modal-body">
-            <div class="mb-3">
-              <label for="title" class="form-label">Title</label>
-              <input
-                type="text"
-                class="form-control"
-                name="title"
-                id="title"
-                placeholder="Enter the chart title"
-              />
-            </div>
             <div class="mb-3">
               <label for="channel-id" class="form-label">Channel ID</label>
               <input
@@ -41,28 +31,42 @@ SPDX-License-Identifier: Apache-2.0 -->
                 class="form-control mb-3"
                 name="channel"
                 id="channel-id"
-                placeholder="Enter channel ID"
+                placeholder="Enter the channel ID"
+                required
               />
             </div>
             <div class="mb-3">
-              <label for="x-axis" class="form-label">Select x-axis Type</label>
-              <select class="form-select mb-3" name="xAxisType" id="x-axis">
-                <option value="" disabled>Select x-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
+              <label for="thing-id" class="form-label">Thing ID</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="thing"
+                id="thing-id"
+                placeholder="Enter the thing ID"
+                required
+              />
             </div>
             <div class="mb-3">
-              <label for="y-axis" class="form-label">Select y-axis Type</label>
-              <select class="form-select mb-3" name="yAxisType" id="y-axis">
-                <option value="" disabled>Select y-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
+              <label for="value-name" class="form-label">Value name</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="valueName"
+                id="value-name"
+                placeholder="Enter the value name eg. temperature"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="update-interval" class="form-label">Update interval</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="updateInterval"
+                id="update-interval"
+                placeholder="Enter the update interval in seconds"
+                required
+              />
             </div>
           </div>
           <div class="modal-footer">
@@ -83,7 +87,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // alarm count form
     document.getElementById("create-alarmCount-button").addEventListener("click", function () {
-      var form = document.getElementById("create-alarmCount-form");
+      var form = document.getElementById("create-alarmCount-data-form");
       // Create an object to store the form data
       var formData = {};
 
@@ -113,13 +117,13 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
       `;
       var config = {
-          ID: widgetID,
-          Content: widgetContent,
-          Style:{
-            width: "300px",
-            height: "160px"
-          }
-        };
+        ID: widgetID,
+        Content: widgetContent,
+        Style: {
+          width: "300px",
+          height: "160px",
+        },
+      };
       addWidget(config);
     });
   </script>

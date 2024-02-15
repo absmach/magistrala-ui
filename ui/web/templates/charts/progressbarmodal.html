@@ -41,16 +41,28 @@ SPDX-License-Identifier: Apache-2.0 -->
                 class="form-control mb-3"
                 name="channel"
                 id="channel-id"
-                placeholder="Enter channel ID"
+                placeholder="Enter the channel ID"
               />
             </div>
             <div class="mb-3">
-              <label for="value" class="form-label">Select Value</label>
-              <select class="form-select mb-3" name="Value" id="value">
-                <option value="value">Temperature</option>
-                <option value="time">Time</option>
-                <option value="log">Pressure</option>
-              </select>
+              <label for="thing-id" class="form-label">Thing ID</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="thing"
+                id="thing-id"
+                placeholder="Enter the thing ID"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="value-name" class="form-label">Value name</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="valueName"
+                id="value-name"
+                placeholder="Enter the value name eg. temperature"
+              />
             </div>
           </div>
           <div class="modal-footer">
@@ -88,7 +100,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       var widgetContent = `
         <div class="card widgetcard">
           <div class="card-header text-center">
-            <h5 class="card-title">Progress Bar</h5>
+            <h5 class="card-title">${formData.title}</h5>
           </div>
           <div class="card-body p-2">
             <div class="progress">
