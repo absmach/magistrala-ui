@@ -14,6 +14,7 @@ type Dashboard struct {
 	Name        string    `json:"name" db:"name"`
 	Description string    `json:"description" db:"description"`
 	Layout      string    `json:"layout" db:"layout"`
+	Metadata    Metadata  `json:"metadata" db:"metadata"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty" db:"updated_at"`
 }
@@ -33,9 +34,10 @@ type DashboardPageMeta struct {
 }
 
 type DashboardReq struct {
-	Name        string `json:"name"`
-	Description string `json:"description,omitempty"`
-	Layout      string `json:"layout"`
+	Name       	string 	`json:"name"`
+	Description string 	`json:"description,omitempty"`
+	Layout      string 	`json:"layout"`
+	Metadata    Metadata `json:"metadata,omitempty"`
 }
 
 type DashboardRepository interface {
@@ -59,3 +61,5 @@ type DashboardRepository interface {
 	// a failure to delete.
 	Delete(ctx context.Context, dashboardID, userID string) error
 }
+
+type Metadata map[string]interface{}

@@ -26,8 +26,8 @@ func New(db *sqlx.DB) ui.DashboardRepository {
 // Create a non-existing dashboard for a user.
 func (r *repo) Create(ctx context.Context, dashboard ui.Dashboard) (ui.Dashboard, error) {
 	q := `
-    INSERT INTO dashboards (id, created_by, name, description, layout, created_at, updated_at)
-    VALUES (:id, :created_by, :name, :description, :layout, :created_at, :updated_at)
+    INSERT INTO dashboards (id, created_by, name, description, layout, metadata, created_at, updated_at)
+    VALUES (:id, :created_by, :name, :description, :layout, :metadata, :created_at, :updated_at)
 	RETURNING id, created_by, name, description, layout, created_at`
 
 	dbDs, err := toDBDashboard(dashboard)
@@ -54,7 +54,7 @@ func (r *repo) Create(ctx context.Context, dashboard ui.Dashboard) (ui.Dashboard
 
 // Retrieve a dashboard using a dashboard id and user id.
 func (r *repo) Retrieve(ctx context.Context, dashboardID, userID string) (ui.Dashboard, error) {
-	q := `SELECT id, created_by, name, description, layout, created_at, updated_at
+	q := `SELECT id, created_by, name, description, layout, metadata, created_at, updated_at
 	FROM dashboards WHERE id = :id AND created_by = :created_by`
 
 	tmp := ui.Dashboard{
