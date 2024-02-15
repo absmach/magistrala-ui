@@ -71,13 +71,13 @@ function initGrid(layout) {
 function saveLayout(grid, dashboardID) {
   const itemData = grid.getItems().map((item) => {
     const hasWidgetScript =
-      item._element.children[2] && item._element.children[2].innerHTML.trim() !== "";
+      item._element.children[1] && item._element.children[1].innerHTML.trim() !== "";
     const itemClone = item._element.cloneNode(true);
     itemClone.removeChild(itemClone.querySelector("script"));
     return {
       innerHTML: itemClone.innerHTML,
-      widgetID: item._element.children[1].children[0].id,
-      ...(hasWidgetScript ? { widgetScript: item._element.children[2].innerHTML } : {}),
+      widgetID: item._element.children[0].children[1].id,
+      ...(hasWidgetScript ? { widgetScript: item._element.children[1].innerHTML } : {}),
     };
   });
 
