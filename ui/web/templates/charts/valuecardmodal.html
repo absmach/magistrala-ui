@@ -1,0 +1,113 @@
+<!-- Copyright (c) Abstract Machines
+SPDX-License-Identifier: Apache-2.0 -->
+
+{{ define "valuecardmodal" }}
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="valueCardModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="valueCardModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="valueCardModalLabel">Value card</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <form id="create-valueCard-form">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="title" class="form-label">Title</label>
+              <input
+                type="text"
+                class="form-control"
+                name="title"
+                id="title"
+                placeholder="Enter the chart title"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="channel-id" class="form-label">Channel ID</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="channel"
+                id="channel-id"
+                placeholder="Enter channel ID"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="value" class="form-label">Select Value</label>
+              <select class="form-select mb-3" name="Value" id="value">
+                <option value="value">Temperature</option>
+                <option value="time">Time</option>
+                <option value="log">Pressure</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button
+              type="button"
+              class="btn body-button"
+              data-bs-dismiss="modal"
+              id="create-valueCard-button"
+            >
+              Create Chart
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Value card form
+    document.getElementById("create-valueCard-button").addEventListener("click", function () {
+      var form = document.getElementById("create-valueCard-form");
+      // Create an object to store the form data
+      var formData = {};
+
+      // Serialize the form data into the object
+      for (var i = 0; i < form.elements.length; i++) {
+        var e = form.elements[i];
+        if (e.type !== "submit" && e.type !== "button") {
+          formData[e.name] = e.value;
+        }
+      }
+      form.reset();
+
+      var widgetID = "valueCard-" + Date.now();
+      var widgetContent = `
+        <div class="card mt-3 widgetcard" >
+          <div class="card-header text-center">
+            <h5 class="card-title">Temperature</h5>
+          </div>
+          <div class="card-body text-center">
+            <p class="card-text value"> 35</p>
+          </div>
+          <div class="card-footer">
+            <p class="card-text"> Units: °C</p>
+            <p class="card-text text"> ChannelID: </p>
+          </div>
+        </div>
+      `;
+        var config = {
+          ID: widgetID,
+          Content: widgetContent,
+          Style:{
+            width: "300px",
+            height: "210px"
+          }
+        };
+        addWidget(config);
+    });
+  </script>
+{{ end }}

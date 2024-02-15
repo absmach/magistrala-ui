@@ -13,6 +13,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/absmach/magistrala-ui/internal/postgres"
+	repo "github.com/absmach/magistrala-ui/postgres"
 	"github.com/absmach/magistrala-ui/ui"
 	"github.com/absmach/magistrala-ui/ui/api"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
@@ -71,7 +73,17 @@ func main() {
 
 	sdk := sdk.NewSDK(sdkConfig)
 
-	svc, err := ui.New(sdk)
+	dbConfig := postgres.Config{}
+	db, err := postgres.Setup(dbConfig, *repo.Migration())
+	if err != nil {
+		log.Fatalf("Failed to setup postgres db : %s", err)
+	}
+
+	dbs := repo.New(db)
+
+	idp := uuid.New()
+
+	svc, err := ui.New(sdk, dbs, idp)
 	if err != nil {
 		log.Fatalf(err.Error())
 	}

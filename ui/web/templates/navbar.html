@@ -14,14 +14,26 @@ SPDX-License-Identifier: Apache-2.0 -->
 
     <div id="index-nav-items">
       <li class="nav-item mb-2 mx-2">
-        {{ $navbarActive := "dashboard" }}
+        {{ $navbarActive := "homepage" }}
         <a
           href="/"
           id="index"
           class="nav-link sidebar-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
         >
           <i class="fas fa-home"></i>
-          <span>Dashboard</span>
+          <span>Home Page</span>
+        </a>
+      </li>
+
+      <li class="nav-item mb-2 mx-2">
+        {{ $navbarActive := "dashboard" }}
+        <a
+          href="/dashboards"
+          id="dashboard"
+          class="nav-link sidebar-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
+        >
+          <i class="fas fa-chart-line"></i>
+          <span>Dashboards</span>
         </a>
       </li>
 

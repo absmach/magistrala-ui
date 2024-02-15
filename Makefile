@@ -50,7 +50,7 @@ clean:
 
 cleandocker:
 	# Stops containers and removes containers, networks, volumes, and images created by up
-	docker-compose -f docker/docker-compose.yml --env-file docker/.env down -v
+	docker compose -f docker/docker-compose.yml --env-file docker/.env down -v
 
 install:
 	cp ${BUILD_DIR}/* $(GOBIN)
@@ -79,7 +79,7 @@ latest: docker
 	$(call docker_push,latest)
 
 run_docker:
-	docker-compose -f docker/docker-compose.yml --env-file docker/.env up
+	docker compose -f docker/docker-compose.yml --env-file docker/.env up
 
 run:
 	${BUILD_DIR}/$(SVC)

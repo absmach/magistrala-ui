@@ -1,0 +1,199 @@
+<!-- Copyright (c) Abstract Machines
+SPDX-License-Identifier: Apache-2.0 -->
+
+{{ define "multigaugemodal" }}
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="multiGaugeModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="multiGaugeModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="multiGaugeModalLabel">Multi Gauge chart</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <form id="create-multiGauge-form">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="title" class="form-label">Title</label>
+              <input
+                type="text"
+                class="form-control"
+                name="title"
+                id="title"
+                placeholder="Enter the chart title"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="channel-id" class="form-label">Channel ID</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="channel"
+                id="channel-id"
+                placeholder="Enter channel ID"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="x-axis" class="form-label">Select x-axis Type</label>
+              <select class="form-select mb-3" name="xAxisType" id="x-axis">
+                <option value="" disabled>Select x-axis Type</option>
+                <option value="value">Value</option>
+                <option value="category">Category</option>
+                <option value="time">Time</option>
+                <option value="log">Log</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="y-axis" class="form-label">Select y-axis Type</label>
+              <select class="form-select mb-3" name="yAxisType" id="y-axis">
+                <option value="" disabled>Select y-axis Type</option>
+                <option value="value">Value</option>
+                <option value="category">Category</option>
+                <option value="time">Time</option>
+                <option value="log">Log</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button
+              type="button"
+              class="btn body-button"
+              id="create-multiGauge-button"
+              data-bs-dismiss="modal"
+            >
+              Create Chart
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+    // multi gauge form
+    document.getElementById("create-multiGauge-button").addEventListener("click", function () {
+      var form = document.getElementById("create-multiGauge-form");
+      // Create an object to store the form data
+      var formData = {};
+
+      // Serialize the form data into the object
+      for (var i = 0; i < form.elements.length; i++) {
+        var e = form.elements[i];
+        if (e.type !== "submit" && e.type !== "button") {
+          formData[e.name] = e.value;
+        }
+      }
+      form.reset();
+
+      var widgetID = "multiGauge-" + Date.now();
+      var widgetScript = `
+        var multiGaugeChart = echarts.init(document.getElementById("${widgetID}"));
+        var gaugeData = [
+        {
+          value: 20,
+          name: 'Perfect',
+          title: {
+            offsetCenter: ['0%', '-30%']
+          },
+          detail: {
+            valueAnimation: true,
+            offsetCenter: ['0%', '-20%']
+          }
+        },
+        {
+          value: 40,
+          name: 'Good',
+          title: {
+            offsetCenter: ['0%', '0%']
+          },
+          detail: {
+            valueAnimation: true,
+            offsetCenter: ['0%', '10%']
+          }
+        },
+        {
+          value: 60,
+          name: 'Commonly',
+          title: {
+            offsetCenter: ['0%', '30%']
+          },
+          detail: {
+            valueAnimation: true,
+            offsetCenter: ['0%', '40%']
+          }
+        }
+      ];
+      var option = {
+        series: [
+          {
+            type: 'gauge',
+            startAngle: 90,
+            endAngle: -270,
+            pointer: {
+              show: false
+            },
+            progress: {
+              show: true,
+              overlap: false,
+              roundCap: true,
+              clip: false,
+              itemStyle: {
+                borderWidth: 1,
+                borderColor: '#464646'
+              }
+            },
+            axisLine: {
+              lineStyle: {
+                width: 30
+              }
+            },
+            splitLine: {
+              show: false,
+              distance: 0,
+              length: 10
+            },
+            axisTick: {
+              show: false
+            },
+            axisLabel: {
+              show: false,
+              distance: 50
+            },
+            data: gaugeData,
+            title: {
+              fontSize: 10
+            },
+            detail: {
+              width: 50,
+              height: 14,
+              fontSize: 14,
+              color: 'inherit',
+              borderColor: 'inherit',
+              borderRadius: 20,
+              borderWidth: 1,
+              formatter: '{value}%'
+            }
+          }
+        ]
+      };
+      multiGaugeChart.setOption(option);
+      `;
+    var config = {
+      ID: widgetID,
+      Script: widgetScript,
+    }
+    addWidget(config);
+    });
+  </script>
+{{ end }}

@@ -1,0 +1,190 @@
+<!-- Copyright (c) Abstract Machines
+SPDX-License-Identifier: Apache-2.0 -->
+
+{{ define "shareddatasetmodal" }}
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="sharedDatasetModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="sharedDatasetmodalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="sharedDatasetModalLabel">Pie and Line chart</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <form id="create-sharedDataset-form">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="title" class="form-label">Title</label>
+              <input
+                type="text"
+                class="form-control"
+                name="title"
+                id="title"
+                placeholder="Enter the chart title"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="channel-id" class="form-label">Channel ID</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="channel"
+                id="channel-id"
+                placeholder="Enter channel ID"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="x-axis" class="form-label">Select x-axis Type</label>
+              <select class="form-select mb-3" name="xAxisType" id="x-axis">
+                <option value="" disabled>Select x-axis Type</option>
+                <option value="value">Value</option>
+                <option value="category">Category</option>
+                <option value="time">Time</option>
+                <option value="log">Log</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="y-axis" class="form-label">Select y-axis Type</label>
+              <select class="form-select mb-3" name="yAxisType" id="y-axis">
+                <option value="" disabled>Select y-axis Type</option>
+                <option value="value">Value</option>
+                <option value="category">Category</option>
+                <option value="time">Time</option>
+                <option value="log">Log</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button
+              type="button"
+              class="btn body-button"
+              id="create-sharedDataset-button"
+              data-bs-dismiss="modal"
+            >
+              Create Chart
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Shared dataset chart form
+    document.getElementById("create-sharedDataset-button").addEventListener("click", function () {
+      var form = document.getElementById("create-sharedDataset-form");
+      // Create an object to store the form data
+      var formData = {};
+
+      // Serialize the form data into the object
+      for (var i = 0; i < form.elements.length; i++) {
+        var e = form.elements[i];
+        if (e.type !== "submit" && e.type !== "button") {
+          formData[e.name] = e.value;
+        }
+      }
+      form.reset();
+      var widgetID = "sharedDataset-" + Date.now();
+      var widgetScript = `
+        var sharedDataset = echarts.init(document.getElementById("${widgetID}"));
+        var option = {
+          legend: {},
+          tooltip: {
+            trigger: 'axis',
+            showContent: false
+          },
+          dataset: {
+            source: [
+              ['product', '2012', '2013', '2014', '2015', '2016', '2017'],
+              ['Things', 56.5, 82.1, 88.7, 70.1, 53.4, 85.1],
+              ['Users', 51.1, 51.4, 55.1, 53.3, 73.8, 68.7],
+              ['Channels', 40.1, 62.2, 69.5, 36.4, 45.2, 32.5],
+              ['Groups', 25.2, 37.1, 41.2, 18, 33.9, 49.1]
+            ]
+          },
+          xAxis: { type: 'category' },
+          yAxis: { gridIndex: 0 },
+          grid: { top: '55%' },
+          series: [
+            {
+              type: 'line',
+              smooth: true,
+              seriesLayoutBy: 'row',
+              emphasis: { focus: 'series' }
+            },
+            {
+              type: 'line',
+              smooth: true,
+              seriesLayoutBy: 'row',
+              emphasis: { focus: 'series' }
+            },
+            {
+              type: 'line',
+              smooth: true,
+              seriesLayoutBy: 'row',
+              emphasis: { focus: 'series' }
+            },
+            {
+              type: 'line',
+              smooth: true,
+              seriesLayoutBy: 'row',
+              emphasis: { focus: 'series' }
+            },
+            {
+              type: 'pie',
+              id: 'pie',
+              radius: '30%',
+              center: ['50%', '25%'],
+              emphasis: {
+                focus: 'self'
+              },
+              label: {
+                formatter: '{b}: {@2012} ({d}%)'
+              },
+              encode: {
+                itemName: 'product',
+                value: '2012',
+                tooltip: '2012'
+              }
+            }
+          ]
+        };
+        sharedDataset.on('updateAxisPointer', function (event) {
+          const xAxisInfo = event.axesInfo[0];
+          if (xAxisInfo) {
+            const dimension = xAxisInfo.value + 1;
+            sharedDataset.setOption({
+              series: {
+                id: 'pie',
+                label: {
+                  formatter: '{b}: {@[' + dimension + ']} ({d}%)'
+                },
+                encode: {
+                  value: dimension,
+                  tooltip: dimension
+                }
+              }
+            });
+          }
+        });
+        sharedDataset.setOption(option);
+      `;
+      var config = {
+        ID: widgetID,
+        Script: widgetScript,
+      }
+      addWidget(config);
+    });
+  </script>
+{{ end }}

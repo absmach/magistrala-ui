@@ -1,0 +1,238 @@
+<!-- Copyright (c) Abstract Machines
+SPDX-License-Identifier: Apache-2.0 -->
+
+{{ define "horizontalbarchartmodal" }}
+  <!-- Modal -->
+  <div
+    class="modal fade"
+    id="horizontalBarChartModal"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="horizontalBarChartModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="horizontalBarChartModalLabel">Horizontal Bar Chart</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <!-- Tab Navs -->
+          <ul class="nav nav-tabs mb-3" id="chartTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active"
+                id="data-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#horizontalBarChartData"
+                type="button"
+                role="tab"
+                aria-controls="data"
+                aria-selected="true"
+              >
+                Data
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="appearance-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#horizontalBarChartAppearance"
+                type="button"
+                role="tab"
+                aria-controls="appearance"
+                aria-selected="false"
+              >
+                Appearance
+              </button>
+            </li>
+          </ul>
+          <div class="tab-content" id="myTabContent">
+            <!-- Data Tab -->
+            <div
+              class="tab-pane fade show active"
+              id="horizontalBarChartData"
+              role="tabpanel"
+              aria-labelledby="data-tab"
+            >
+              <form id="create-horizontalBarChart-data-form">
+                <div class="mb-3">
+                  <label for="channel-id" class="form-label">Channel ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="channel"
+                    id="channel-id"
+                    placeholder="Enter the channel ID"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="thing-id" class="form-label">Thing IDs</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="thing"
+                    id="thing-id"
+                    placeholder="Enter the thing IDs"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="value-name" class="form-label">Value name</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="valueName"
+                    id="value-name"
+                    placeholder="Enter the value name eg. temperature"
+                    required
+                  />
+                </div>
+              </form>
+            </div>
+            <!-- Appearance Tab -->
+            <div
+              class="tab-pane fade"
+              id="horizontalBarChartAppearance"
+              role="tabpanel"
+              aria-labelledby="appearance-tab"
+            >
+              <form id="create-horizontalBarChart-appearance-form">
+                <div class="mb-3">
+                  <label for="title" class="form-label">Title</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="title"
+                    id="title"
+                    placeholder="Enter the chart title"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="y-axis-label" class="form-label">Y axis label</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="yAxisLabel"
+                    id="y-axis-label"
+                    placeholder="Enter the y axis label"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="x-axis-label" class="form-label">X axis label</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="xAxisLabel"
+                    id="x-axis-label"
+                    placeholder="Enter the x axis label"
+                  />
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button
+            type="button"
+            class="btn body-button"
+            id="create-horizontalBarChart-button"
+            data-bs-dismiss="modal"
+          >
+            Create Chart
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    // horizontal bar chart form
+    document
+      .getElementById("create-horizontalBarChart-button")
+      .addEventListener("click", function () {
+        var form = document.getElementById("create-horizontalBarChart-appearance-form");
+        // Create an object to store the form data
+        var formData = {};
+
+        // Serialize the form data into the object
+        for (var i = 0; i < form.elements.length; i++) {
+          var e = form.elements[i];
+          if (e.type !== "submit" && e.type !== "button") {
+            formData[e.name] = e.value;
+          }
+        }
+        form.reset();
+
+        var widgetID = "horizontalBarchart-" + Date.now();
+        var widgetScript = `
+        var horizontalBarChart = echarts.init(document.getElementById("${widgetID}"));
+        var option = {
+            title:{
+              text: '${formData.title}',
+              left: 'center'
+            },
+            dataset: {
+              source: [
+                ['score', 'amount', 'product'],
+                [79.3,85212, 'thing1'],
+                [57.1, 78254, 'thing2'],
+                [14.4, 41032, 'thing3'],
+                [30.1, 12755, 'thing4'],
+                [18.7, 20145, 'thing5'],
+                [88.1, 89146, 'thing6'],
+              ]
+            },
+            grid: { containLabel: true },
+            xAxis: { 
+              name: '${formData.xAxisLabel}',
+              nameLocation: 'middle',
+              nameGap: 30,
+              type: 'value',
+            },
+            yAxis: { 
+              type: 'category',
+              name: '${formData.yAxisLabel}',
+              nameLocation: 'middle',
+              nameGap: 50,
+            },
+            visualMap: {
+              orient: 'horizontal',
+              left: 'center',
+              min: 10,
+              max: 100,
+              text: ['High temperature', 'Low temperature'],
+              // Map the score column to color
+              dimension: 0,
+              inRange: {
+                color: ['#65B581', '#FFCE34', '#FD665F']
+              }
+            },
+            series: [
+              {
+                type: 'bar',
+                encode: {
+                  x: 'amount',
+                  y: 'product'
+                }
+              }
+            ]
+          };
+
+        horizontalBarChart.setOption(option);`;
+
+      var config = {
+        ID: widgetID,
+        Script: widgetScript,
+      }
+      addWidget(config);
+      });
+  </script>
+{{ end }}

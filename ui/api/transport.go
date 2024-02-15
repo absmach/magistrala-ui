@@ -60,6 +60,8 @@ const (
 	groupsItem              = "groups"
 	accessTokenKey          = "token"
 	refreshTokenKey         = "refresh_token"
+	channelKey              = "channel"
+	thingKey                = "thing"
 )
 
 var (
@@ -163,7 +165,44 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 			encodeResponse,
 			opts...,
 		).ServeHTTP))
-
+		r.Route("/dashboards", func(r chi.Router) {
+			r.Get("/{id}", kithttp.NewServer(
+				viewDashboardEndpoint(svc),
+				decodeViewDashboardRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+			r.Post("/", kithttp.NewServer(
+				createDashboardEndpoint(svc),
+				decodeCreateDashboardRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+			r.Patch("/", kithttp.NewServer(
+				updateDashboardEndpoint(svc),
+				decodeUpdateDashboardRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+			r.Get("/list", kithttp.NewServer(
+				listDashboardsEndpoint(svc),
+				decodeListDashboardsRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+			r.Get("/", kithttp.NewServer(
+				dashboardsEndpoint(svc),
+				decodeDashboardRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+			r.Delete("/", kithttp.NewServer(
+				deleteDashboardEndpoint(svc),
+				decodeDeleteDashboardRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
+		})
 		r.Get("/entities", kithttp.NewServer(
 			getEntitiesEndpoint(svc),
 			decodeGetEntitiesRequest,
@@ -797,6 +836,108 @@ func decodeIndexRequest(_ context.Context, r *http.Request) (interface{}, error)
 
 func decodeViewRegistrationRequest(_ context.Context, _ *http.Request) (interface{}, error) {
 	return nil, nil
+}
+
+func decodeCreateDashboardRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	var data createDashboardReq
+	err = json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		return nil, err
+	}
+
+	req := createDashboardReq{
+		token:       token,
+		Name:        data.Name,
+		Description: data.Description,
+	}
+
+	return req, nil
+}
+
+func decodeListDashboardsRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+	page, err := readNumQuery[uint64](r, pageKey, defPage)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	if err != nil {
+		return nil, err
+	}
+	req := listDashboardsReq{
+		token: token,
+		page:  page,
+		limit: limit,
+	}
+
+	return req, nil
+}
+
+func decodeDashboardRequest(_ context.Context, _ *http.Request) (interface{}, error) {
+	return nil, nil
+}
+
+func decodeUpdateDashboardRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+	var data updateDashboardReq
+	err = json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		return nil, err
+	}
+	req := updateDashboardReq{
+		token:       token,
+		ID:          data.ID,
+		Name:        data.Name,
+		Description: data.Description,
+		Metadata:    data.Metadata,
+		Layout:      data.Layout,
+	}
+
+	return req, nil
+}
+
+func decodeDeleteDashboardRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+	var data deleteDashboardReq
+	err = json.NewDecoder(r.Body).Decode(&data)
+	if err != nil {
+		return nil, err
+	}
+	req := deleteDashboardReq{
+		token: token,
+		ID:    data.ID,
+	}
+
+	return req, nil
+}
+
+func decodeViewDashboardRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	req := viewDashboardReq{
+		token:       token,
+		DashboardID: chi.URLParam(r, "id"),
+	}
+
+	return req, nil
 }
 
 func decodeLoginRequest(_ context.Context, _ *http.Request) (interface{}, error) {
@@ -2385,7 +2526,11 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		errors.Contains(err, ui.ErrExecTemplate),
 		errors.Contains(err, ui.ErrFailedDelete),
 		errors.Contains(err, ui.ErrFailedShare),
-		errors.Contains(err, ui.ErrFailedUnshare):
+		errors.Contains(err, ui.ErrFailedUnshare),
+		errors.Contains(err, ui.ErrFailedDashboardSave),
+		errors.Contains(err, ui.ErrFailedDashboardDelete),
+		errors.Contains(err, ui.ErrFailedDashboardUpdate),
+		errors.Contains(err, ui.ErrFailedDashboardRetrieve):
 		w.Header().Set("Location", "/error?error="+url.QueryEscape(displayError.Error()))
 		w.WriteHeader(http.StatusSeeOther)
 	default:
