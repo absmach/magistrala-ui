@@ -17,25 +17,34 @@ function saveCanvas() {
 function cancelEdit() {
   cancelEditGrid(grid);
 }
-
+// Config has the ID, Content and Script parameters
 function addWidget(config) {
   // Create a new grid item
   const newItem = document.createElement("div");
   newItem.className = "item";
   newItem.classList.add("item-editable");
+  if (config.Style === undefined) {
+    config.Style = {
+      width: "500px",
+      height: "500px",
+    };
+  }
+  var styleString = `width: ${config.Style.width}; height: ${config.Style.height};`;
   newItem.innerHTML = `
     <button type="button" class="btn btn-sm" id="removeItem" onclick="removeGridItem(this.parentNode);">
       <i class="fas fa-trash-can"></i>
     </button>
-    <div class="item-content" id="${config.ID}" style="width: 500px;height:400px;">
+    <div class="item-content" id="${config.ID}" style="${styleString}">
+      ${config.Content}
     </div>
-    `;
-  var scriptTag = document.createElement("script");
-  scriptTag.type = "text/javascript";
-  scriptTag.defer = true;
-  scriptTag.innerHTML = config.Script;
-  newItem.appendChild(scriptTag);
-
+  `;
+  if (config.Script) {
+    var scriptTag = document.createElement("script");
+    scriptTag.type = "text/javascript";
+    scriptTag.defer = true;
+    scriptTag.innerHTML = config.Script;
+    newItem.appendChild(scriptTag);
+  }
   grid.add(newItem);
   resizeObserver.observe(newItem);
 }
@@ -60,11 +69,15 @@ function initGrid(layout) {
 }
 
 function saveLayout(grid, dashboardID) {
-  const itemData = grid.getItems().map((item) => ({
-    innerHTML: item._element.innerHTML,
-    widgetID: item._element.children[1].children[0].id,
-    widgetScript: item._element.children[2].innerHTML,
-  }));
+  const itemData = grid.getItems().map((item) => {
+    const hasWidgetScript =
+      item._element.children[2] && item._element.children[2].innerHTML.trim() !== "";
+    return {
+      innerHTML: item._element.innerHTML,
+      widgetID: item._element.children[1].children[0].id,
+      ...(hasWidgetScript ? { widgetScript: item._element.children[2].innerHTML } : {}),
+    };
+  });
 
   const gridState = {
     items: itemData,
@@ -201,13 +214,11 @@ const resizeObserver = new ResizeObserver((entries) => {
     var item = grid.getItems(target)[0];
     var el = item.getElement();
     grid = item.getGrid();
-
     const contentEl = el.querySelector(".item-content");
-    var chart = echarts.getInstanceByDom(contentEl);
-
     // Calculate the change in width and height
     var widthChange = target.clientWidth - previousSize.width;
     var heightChange = target.clientHeight - previousSize.height;
+
     var itemContentWidth =
       parseInt(window.getComputedStyle(contentEl).getPropertyValue("width")) + widthChange;
     var itemContentHeight =
@@ -223,10 +234,51 @@ const resizeObserver = new ResizeObserver((entries) => {
     el.style.height = target.clientHeight + "px";
     el.querySelector(".item-content").style.width = itemContentWidth + "px";
     el.querySelector(".item-content").style.height = itemContentHeight + "px";
-    chart.resize({
-      width: itemContentWidth,
-      height: itemContentHeight,
+
+    var chart = echarts.getInstanceByDom(contentEl);
+    if (chart) {
+      chart.resize({
+        width: itemContentWidth,
+        height: itemContentHeight,
       });
+    } else {
+      const cardDiv = target.querySelector(".widgetcard");
+      const h5Elem = cardDiv.querySelector("h5");
+      const cardBody = cardDiv.querySelector(".card-body");
+      const cardFooter = cardDiv.querySelector(".card-footer");
+
+      if (entry.contentBoxSize) {
+        // The standard makes contentBoxSize an array...
+        if (entry.contentBoxSize[0]) {
+          h5Elem.style.fontSize = Math.max(1, entry.contentBoxSize[0].inlineSize / 300) + "rem";
+          if (cardBody) {
+            cardBody.style.fontSize =
+              Math.max(1.5, entry.contentBoxSize[0].inlineSize / 300) + "rem";
+          }
+          if (cardFooter) {
+            cardFooter.style.fontSize =
+              Math.max(1, entry.contentBoxSize[0].inlineSize / 600) + "rem";
+          }
+        } else {
+          // ...but old versions of Firefox treat it as a single item
+          h5Elem.style.fontSize = Math.max(1, entry.contentBoxSize.inlineSize / 300) + "rem";
+          if (cardBody) {
+            cardBody.style.fontSize = Math.max(1.5, entry.contentBoxSize.inlineSize / 300) + "rem";
+          }
+          if (cardFooter) {
+            cardFooter.style.fontSize = Math.max(1, entry.contentBoxSize.inlineSize / 600) + "rem";
+          }
+        }
+      } else {
+        h5Elem.style.fontSize = `${Math.max(1, entry.contentRect.width / 300)}rem`;
+        if (cardBody) {
+          cardBody.style.fontSize = `${Math.max(1.5, entry.contentRect.width / 300)}rem`;
+        }
+        if (cardFooter) {
+          cardFooter.style.fontSize = `${Math.max(1, entry.contentRect.width / 600)}rem`;
+        }
+      }
+    }
     grid.refreshItems();
     grid.layout(true);
   }

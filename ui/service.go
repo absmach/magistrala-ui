@@ -159,6 +159,13 @@ var (
 		"multigaugemodal",
 		"multibarchartmodal",
 		"shareddatasetmodal",
+		"valuecardmodal",
+		"alarmcountmodal",
+		"alarmstablemodal",
+		"entitiestablemodal",
+		"entitycountmodal",
+		"progressbarmodal",
+		"labelmodal",
 	}
 
 	ErrToken                = errors.New("failed to create token")
