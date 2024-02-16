@@ -161,6 +161,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 
 	r.Route("/", func(r chi.Router) {
 		r.Use(TokenMiddleware)
+		r.Use(domainLoginMiddleware)
 		r.Get("/", http.HandlerFunc(kithttp.NewServer(
 			indexEndpoint(svc),
 			decodeIndexRequest,
@@ -699,84 +700,6 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				opts...,
 			).ServeHTTP)
 		})
-		r.Route("/domains", func(r chi.Router) {
-			r.Post("/", kithttp.NewServer(
-				createDomainEndpoint(svc),
-				decodeCreateDomainRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/", kithttp.NewServer(
-				listDomainsEndpoint(svc),
-				decodeListEntityRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/enable", kithttp.NewServer(
-				enableDomainEndpoint(svc),
-				decodeDomainStatusUpdate,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/disable", kithttp.NewServer(
-				disableDomainEndpoint(svc),
-				decodeDomainStatusUpdate,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/{id}", kithttp.NewServer(
-				domainEndpoint(svc),
-				decodeListEntityByIDRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}", kithttp.NewServer(
-				updateDomainEndpoint(svc),
-				decodeUpdateDomainRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/tags", kithttp.NewServer(
-				updateDomainTagsEndpoint(svc),
-				decodeUpdateDomainTagsRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/assign", kithttp.NewServer(
-				assignMemberEndpoint(svc),
-				decodeAssignMemberRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/unassign", kithttp.NewServer(
-				unassignMemberEndpoint(svc),
-				decodeAssignMemberRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/{id}/members", kithttp.NewServer(
-				listMembersEndpoint(svc),
-				decodeListEntityByIDRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/members", kithttp.NewServer(
-				viewMemberEndpoint(svc),
-				decodeViewMemberRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-		})
 
 		r.Route("/invitations", func(r chi.Router) {
 			r.Post("/", kithttp.NewServer(
@@ -807,6 +730,85 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 				opts...,
 			).ServeHTTP)
 		})
+	})
+	r.Route("/domains", func(r chi.Router) {
+		r.Use(TokenMiddleware)
+		r.Post("/", kithttp.NewServer(
+			createDomainEndpoint(svc),
+			decodeCreateDomainRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
+
+		r.Get("/", kithttp.NewServer(
+			listDomainsEndpoint(svc),
+			decodeListEntityRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
+
+		r.Post("/enable", kithttp.NewServer(
+			enableDomainEndpoint(svc),
+			decodeDomainStatusUpdate,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
+
+		r.Post("/disable", kithttp.NewServer(
+			disableDomainEndpoint(svc),
+			decodeDomainStatusUpdate,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
+
+		r.Get("/{id}", kithttp.NewServer(
+			domainEndpoint(svc),
+			decodeListEntityByIDRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
+
+		r.Post("/{id}", kithttp.NewServer(
+			updateDomainEndpoint(svc),
+			decodeUpdateDomainRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
+
+		r.Post("/{id}/tags", kithttp.NewServer(
+			updateDomainTagsEndpoint(svc),
+			decodeUpdateDomainTagsRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
+
+		r.Post("/{id}/assign", kithttp.NewServer(
+			assignMemberEndpoint(svc),
+			decodeAssignMemberRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
+
+		r.Post("/{id}/unassign", kithttp.NewServer(
+			unassignMemberEndpoint(svc),
+			decodeAssignMemberRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
+
+		r.Get("/{id}/members", kithttp.NewServer(
+			listMembersEndpoint(svc),
+			decodeListEntityByIDRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
+
+		r.Get("/members", kithttp.NewServer(
+			viewMemberEndpoint(svc),
+			decodeViewMemberRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
 	})
 
 	r.Get("/health", magistrala.Health("ui", instanceID))
@@ -2430,6 +2432,29 @@ func TokenMiddleware(next http.Handler) http.Handler {
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
 			if !claims.VerifyExpiresAt(time.Now().Unix(), true) {
 				http.Redirect(w, r, "/token/refresh?referer_url="+url.QueryEscape(r.URL.String()), http.StatusSeeOther)
+				return
+			}
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func domainLoginMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tokenString, err := tokenFromCookie(r, "token")
+		if err != nil {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
+
+		token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
+		if err != nil {
+			http.Redirect(w, r, "/error?error="+url.QueryEscape(err.Error()), http.StatusSeeOther)
+			return
+		}
+		if claims, ok := token.Claims.(jwt.MapClaims); ok {
+			if claims["domain"] == "" {
+				http.Redirect(w, r, "/domains", http.StatusSeeOther)
 				return
 			}
 		}
