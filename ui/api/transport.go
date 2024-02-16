@@ -2563,7 +2563,7 @@ func encodeJSONResponse(_ context.Context, w http.ResponseWriter, response inter
 }
 
 func encodeError(prefix string) kithttp.ErrorEncoder {
-	return func(ctx context.Context, err error, w http.ResponseWriter) {
+	return func(_ context.Context, err error, w http.ResponseWriter) {
 		_, displayError := errors.Unwrap(err)
 
 		switch {
