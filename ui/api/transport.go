@@ -48,15 +48,15 @@ const (
 	defPage                 = 1
 	defLimit                = 10
 	defKey                  = ""
-	usersAPIEndpoint        = "/users"
-	thingsAPIEndpoint       = "/things"
-	channelsAPIEndpoint     = "/channels"
-	groupsAPIEndpoint       = "/groups"
-	bootstrapAPIEndpoint    = "/bootstraps"
-	membersAPIEndpoint      = "/domains/members"
-	loginAPIEndpoint        = "/login"
-	tokenRefreshAPIEndpoint = "/token/refresh"
-	domainsAPIEndpoint      = "/domains"
+	usersAPIEndpoint        = "users"
+	thingsAPIEndpoint       = "things"
+	channelsAPIEndpoint     = "channels"
+	groupsAPIEndpoint       = "groups"
+	bootstrapAPIEndpoint    = "bootstraps"
+	membersAPIEndpoint      = "domains/members"
+	loginAPIEndpoint        = "login"
+	tokenRefreshAPIEndpoint = "token/refresh"
+	domainsAPIEndpoint      = "domains"
 	errorAPIEndpoint        = "error"
 	thingsItem              = "things"
 	channelsItem            = "channels"
@@ -80,753 +80,755 @@ type number interface {
 }
 
 // MakeHandler returns a HTTP handler for API endpoints.
-func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string, secureCookie *securecookie.SecureCookie, providers ...oauth2.Provider) http.Handler {
+func MakeHandler(svc ui.Service, r *chi.Mux, instanceID, prefix string, secureCookie *securecookie.SecureCookie, providers ...oauth2.Provider) http.Handler {
 	opts := []kithttp.ServerOption{
-		kithttp.ServerErrorEncoder(encodeError),
+		kithttp.ServerErrorEncoder(encodeError(prefix)),
 	}
 
-	r.Get("/register", kithttp.NewServer(
-		viewRegistrationEndpoint(svc),
-		decodeViewRegistrationRequest,
-		encodeResponse,
-		opts...,
-	).ServeHTTP)
+	r.Route(prefix, func(r chi.Router) {
+		r.Get("/register", kithttp.NewServer(
+			viewRegistrationEndpoint(svc),
+			decodeViewRegistrationRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
 
-	r.Post("/register", kithttp.NewServer(
-		registerUserEndpoint(svc),
-		decodeRegisterUserRequest,
-		encodeResponse,
-		opts...,
-	).ServeHTTP)
+		r.Post("/register", kithttp.NewServer(
+			registerUserEndpoint(svc, prefix),
+			decodeRegisterUserRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
 
-	r.Get("/login", kithttp.NewServer(
-		loginEndpoint(svc),
-		decodeLoginRequest,
-		encodeResponse,
-		opts...,
-	).ServeHTTP)
+		r.Get("/login", kithttp.NewServer(
+			loginEndpoint(svc),
+			decodeLoginRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
 
-	r.Post("/login", kithttp.NewServer(
-		tokenEndpoint(svc),
-		decodeTokenRequest,
-		encodeResponse,
-		opts...,
-	).ServeHTTP)
+		r.Post("/login", kithttp.NewServer(
+			tokenEndpoint(svc, prefix),
+			decodeTokenRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
 
-	r.Get("/token/refresh", kithttp.NewServer(
-		refreshTokenEndpoint(svc, secureCookie),
-		decodeRefreshTokenRequest(secureCookie),
-		encodeResponse,
-		opts...,
-	).ServeHTTP)
+		r.Get("/token/refresh", kithttp.NewServer(
+			refreshTokenEndpoint(svc, secureCookie, prefix),
+			decodeRefreshTokenRequest(secureCookie),
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
 
-	r.Get("/tokens/secure", kithttp.NewServer(
-		secureTokenEndpoint(svc, secureCookie),
-		decodeSecureTokenRequest,
-		encodeResponse,
-		opts...,
-	).ServeHTTP)
+		r.Get("/tokens/secure", kithttp.NewServer(
+			secureTokenEndpoint(svc, secureCookie, prefix),
+			decodeSecureTokenRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
 
-	r.Get("/logout", kithttp.NewServer(
-		logoutEndpoint(svc),
-		decodeLogoutRequest,
-		encodeResponse,
-		opts...,
-	).ServeHTTP)
+		r.Get("/logout", kithttp.NewServer(
+			logoutEndpoint(svc, prefix),
+			decodeLogoutRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
 
-	for _, provider := range providers {
-		if provider.IsEnabled() {
-			r.HandleFunc("/signup/"+provider.Name(), oauth2Handler(oauth2.SignUp, provider))
-			r.HandleFunc("/signin/"+provider.Name(), oauth2Handler(oauth2.SignIn, provider))
+		for _, provider := range providers {
+			if provider.IsEnabled() {
+				r.HandleFunc("/signup/"+provider.Name(), oauth2Handler(oauth2.SignUp, provider))
+				r.HandleFunc("/signin/"+provider.Name(), oauth2Handler(oauth2.SignIn, provider))
+			}
 		}
-	}
 
-	r.Post("/reset-request", kithttp.NewServer(
-		passwordResetRequestEndpoint(svc),
-		decodePasswordResetRequest,
-		encodeResponse,
-		opts...,
-	).ServeHTTP)
+		r.Post("/reset-request", kithttp.NewServer(
+			passwordResetRequestEndpoint(svc, prefix),
+			decodePasswordResetRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
 
-	r.Get("/error", kithttp.NewServer(
-		errorPageEndpoint(svc),
-		decodeError,
-		encodeResponse,
-		opts...,
-	).ServeHTTP)
+		r.Get("/error", kithttp.NewServer(
+			errorPageEndpoint(svc),
+			decodeError,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
 
-	r.Post("/password/reset", kithttp.NewServer(
-		passwordResetEndpoint(svc),
-		decodePasswordReset,
-		encodeResponse,
-		opts...,
-	).ServeHTTP)
+		r.Post("/password/reset", kithttp.NewServer(
+			passwordResetEndpoint(svc, prefix),
+			decodePasswordReset,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
 
-	r.Get("/password/reset", kithttp.NewServer(
-		showPasswordResetEndpoint(svc),
-		decodeShowPasswordReset,
-		encodeResponse,
-		opts...,
-	).ServeHTTP)
+		r.Get("/password/reset", kithttp.NewServer(
+			showPasswordResetEndpoint(svc),
+			decodeShowPasswordReset,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
 
-	r.Route("/", func(r chi.Router) {
-		r.Use(DecryptCookieMiddleware(secureCookie))
-		r.Use(TokenMiddleware)
 		r.Route("/", func(r chi.Router) {
-			r.Use(AuthnMiddleware)
-			r.Get("/", http.HandlerFunc(kithttp.NewServer(
-				indexEndpoint(svc),
-				decodeIndexRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP))
-			r.Route("/dashboards", func(r chi.Router) {
-				r.Get("/{id}", kithttp.NewServer(
-					viewDashboardEndpoint(svc),
-					decodeViewDashboardRequest,
+			r.Use(DecryptCookieMiddleware(secureCookie, prefix))
+			r.Use(TokenMiddleware(prefix))
+			r.Route("/", func(r chi.Router) {
+				r.Use(AuthnMiddleware(prefix))
+				r.Get("/", http.HandlerFunc(kithttp.NewServer(
+					indexEndpoint(svc),
+					decodeIndexRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP))
+				r.Route("/dashboards", func(r chi.Router) {
+					r.Get("/{id}", kithttp.NewServer(
+						viewDashboardEndpoint(svc),
+						decodeViewDashboardRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+					r.Post("/", kithttp.NewServer(
+						createDashboardEndpoint(svc),
+						decodeCreateDashboardRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+					r.Patch("/", kithttp.NewServer(
+						updateDashboardEndpoint(svc),
+						decodeUpdateDashboardRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+					r.Get("/list", kithttp.NewServer(
+						listDashboardsEndpoint(svc),
+						decodeListDashboardsRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+					r.Get("/", kithttp.NewServer(
+						dashboardsEndpoint(svc),
+						decodeDashboardRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+					r.Delete("/", kithttp.NewServer(
+						deleteDashboardEndpoint(svc),
+						decodeDeleteDashboardRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+				})
+				r.Get("/entities", kithttp.NewServer(
+					getEntitiesEndpoint(svc),
+					decodeGetEntitiesRequest,
 					encodeResponse,
 					opts...,
 				).ServeHTTP)
-				r.Post("/", kithttp.NewServer(
-					createDashboardEndpoint(svc),
-					decodeCreateDashboardRequest,
+
+				r.Post("/password", kithttp.NewServer(
+					updatePasswordEndpoint(svc, prefix),
+					decodePasswordUpdate,
 					encodeResponse,
 					opts...,
 				).ServeHTTP)
-				r.Patch("/", kithttp.NewServer(
-					updateDashboardEndpoint(svc),
-					decodeUpdateDashboardRequest,
+
+				r.Get("/password", kithttp.NewServer(
+					showUpdatePasswordEndpoint(svc),
+					decodeShowPasswordUpdate,
 					encodeResponse,
 					opts...,
 				).ServeHTTP)
-				r.Get("/list", kithttp.NewServer(
-					listDashboardsEndpoint(svc),
-					decodeListDashboardsRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-				r.Get("/", kithttp.NewServer(
-					dashboardsEndpoint(svc),
-					decodeDashboardRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-				r.Delete("/", kithttp.NewServer(
-					deleteDashboardEndpoint(svc),
-					decodeDeleteDashboardRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
+
+				r.Route("/users", func(r chi.Router) {
+					r.Use(AdminAuthMiddleware(prefix))
+					r.Post("/", kithttp.NewServer(
+						createUserEndpoint(svc),
+						decodeUserCreation,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Get("/", kithttp.NewServer(
+						listUsersEndpoint(svc),
+						decodeListEntityRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/bulk", kithttp.NewServer(
+						createUsersEndpoint(svc),
+						decodeUsersCreation,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/enable", kithttp.NewServer(
+						enableUserEndpoint(svc, prefix),
+						decodeUserStatusUpdate,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/disable", kithttp.NewServer(
+						disableUserEndpoint(svc, prefix),
+						decodeUserStatusUpdate,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Get("/{id}", kithttp.NewServer(
+						viewUserEndpoint(svc),
+						decodeView,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}", kithttp.NewServer(
+						updateUserEndpoint(svc),
+						decodeUserUpdate,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/tags", kithttp.NewServer(
+						updateUserTagsEndpoint(svc),
+						decodeUserTagsUpdate,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/identity", kithttp.NewServer(
+						updateUserIdentityEndpoint(svc),
+						decodeUserIdentityUpdate,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/role", kithttp.NewServer(
+						updateUserRoleEndpoint(svc, prefix),
+						decodeUserRoleUpdate,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+				})
+
+				r.Route("/things", func(r chi.Router) {
+					r.Post("/", kithttp.NewServer(
+						createThingEndpoint(svc),
+						decodeThingCreation,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/bulk", kithttp.NewServer(
+						createThingsEndpoint(svc),
+						decodeThingsCreation,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Get("/", kithttp.NewServer(
+						listThingsEndpoint(svc),
+						decodeListEntityRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/enable", kithttp.NewServer(
+						enableThingEndpoint(svc, prefix),
+						decodeThingStatusUpdate,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/disable", kithttp.NewServer(
+						disableThingEndpoint(svc, prefix),
+						decodeThingStatusUpdate,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Get("/{id}", kithttp.NewServer(
+						viewThingEndpoint(svc),
+						decodeView,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}", kithttp.NewServer(
+						updateThingEndpoint(svc),
+						decodeThingUpdate,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/tags", kithttp.NewServer(
+						updateThingTagsEndpoint(svc),
+						decodeThingTagsUpdate,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/secret", kithttp.NewServer(
+						updateThingSecretEndpoint(svc),
+						decodeThingSecretUpdate,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Get("/{id}/channels", kithttp.NewServer(
+						listChannelsByThingEndpoint(svc),
+						decodeListEntityByIDRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/channels/connect", kithttp.NewServer(
+						connectChannelEndpoint(svc, prefix),
+						decodeConnectChannel,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/channels/disconnect", kithttp.NewServer(
+						disconnectChannelEndpoint(svc, prefix),
+						decodeConnectChannel,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/share", kithttp.NewServer(
+						shareThingEndpoint(svc, prefix),
+						decodeShareThingRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/unshare", kithttp.NewServer(
+						unshareThingEndpoint(svc, prefix),
+						decodeShareThingRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Get("/{id}/users", kithttp.NewServer(
+						listThingMembersEndpoint(svc),
+						decodeListEntityByIDRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+				})
+
+				r.Route("/channels", func(r chi.Router) {
+					r.Post("/", kithttp.NewServer(
+						createChannelEndpoint(svc),
+						decodeChannelCreation,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/bulk", kithttp.NewServer(
+						createChannelsEndpoint(svc),
+						decodeChannelsCreation,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Get("/", kithttp.NewServer(
+						listChannelsEndpoint(svc),
+						decodeListEntityRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/enable", kithttp.NewServer(
+						enableChannelEndpoint(svc, prefix),
+						decodeChannelStatusUpdate,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/disable", kithttp.NewServer(
+						disableChannelEndpoint(svc, prefix),
+						decodeChannelStatusUpdate,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Get("/{id}", kithttp.NewServer(
+						viewChannelEndpoint(svc),
+						decodeView,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}", kithttp.NewServer(
+						updateChannelEndpoint(svc),
+						decodeChannelUpdate,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/things/connect", kithttp.NewServer(
+						connectChannelEndpoint(svc, prefix),
+						decodeConnectChannel,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/things/disconnect", kithttp.NewServer(
+						disconnectChannelEndpoint(svc, prefix),
+						decodeConnectChannel,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Get("/{id}/things", kithttp.NewServer(
+						listThingsByChannelEndpoint(svc),
+						decodeListEntityByIDRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/users/assign", kithttp.NewServer(
+						AddMemberToChannelEndpoint(svc, prefix),
+						decodeAddMemberToChannelRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/users/unassign", kithttp.NewServer(
+						RemoveMemberFromChannelEndpoint(svc, prefix),
+						decodeAddMemberToChannelRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Get("/{id}/users", kithttp.NewServer(
+						ListChannelMembersEndpoint(svc),
+						decodeListEntityByIDRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/groups/assign", kithttp.NewServer(
+						addGroupToChannelEndpoint(svc, prefix),
+						decodeAddGroupToChannelRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/groups/unassign", kithttp.NewServer(
+						removeGroupFromChannelEndpoint(svc, prefix),
+						decodeAddGroupToChannelRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Get("/{id}/groups", kithttp.NewServer(
+						ListChannelGroupsEndpoint(svc),
+						decodeListEntityByIDRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+				})
+
+				r.Route("/groups", func(r chi.Router) {
+					r.Post("/", kithttp.NewServer(
+						createGroupEndpoint(svc),
+						decodeGroupCreation,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/bulk", kithttp.NewServer(
+						createGroupsEndpoint(svc),
+						decodeGroupsCreation,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Get("/", kithttp.NewServer(
+						listGroupsEndpoint(svc),
+						decodeListEntityRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/enable", kithttp.NewServer(
+						enableGroupEndpoint(svc, prefix),
+						decodeGroupStatusUpdate,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/disable", kithttp.NewServer(
+						disableGroupEndpoint(svc, prefix),
+						decodeGroupStatusUpdate,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Get("/{id}", kithttp.NewServer(
+						viewGroupEndpoint(svc),
+						decodeView,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Get("/{id}/users", kithttp.NewServer(
+						listGroupMembersEndpoint(svc),
+						decodeListEntityByIDRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}", kithttp.NewServer(
+						updateGroupEndpoint(svc),
+						decodeGroupUpdate,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/users/assign", kithttp.NewServer(
+						assignGroupEndpoint(svc, prefix),
+						decodeAssignGroupRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/users/unassign", kithttp.NewServer(
+						unassignGroupEndpoint(svc, prefix),
+						decodeAssignGroupRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/channels/assign", kithttp.NewServer(
+						addGroupToChannelEndpoint(svc, prefix),
+						decodeAddGroupToChannelRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+					r.Post("/{id}/channels/unassign", kithttp.NewServer(
+						removeGroupFromChannelEndpoint(svc, prefix),
+						decodeAddGroupToChannelRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Get("/{id}/channels", kithttp.NewServer(
+						listGroupChannelsEndpoint(svc),
+						decodeListEntityByIDRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+				})
+
+				r.Route("/messages", func(r chi.Router) {
+					r.Post("/", kithttp.NewServer(
+						publishMessageEndpoint(svc, prefix),
+						decodePublishRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Get("/", kithttp.NewServer(
+						readMessagesEndpoint(svc),
+						decodeReadMessagesRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+				})
+
+				r.Route("/bootstraps", func(r chi.Router) {
+					r.Get("/", kithttp.NewServer(
+						listBootstrap(svc),
+						decodeListEntityRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/", kithttp.NewServer(
+						createBootstrap(svc, prefix),
+						decodeCreateBootstrapRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Get("/{id}", kithttp.NewServer(
+						viewBootstrap(svc),
+						decodeView,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}", kithttp.NewServer(
+						updateBootstrap(svc),
+						decodeUpdateBootstrap,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/delete", kithttp.NewServer(
+						deleteBootstrapEndpoint(svc, prefix),
+						decodeDeleteBootstrap,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/state", kithttp.NewServer(
+						updateBootstrapStateEndpoint(svc, prefix),
+						decodeUpdateBootstrapState,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/certs", kithttp.NewServer(
+						updateBootstrapCerts(svc),
+						decodeUpdateBootstrapCerts,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/connections", kithttp.NewServer(
+						updateBootstrapConnections(svc, prefix),
+						decodeUpdateBootstrapConnections,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Get("/{id}/terminal", kithttp.NewServer(
+						getTerminalEndpoint(svc),
+						decodeView,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/{id}/terminal/input", kithttp.NewServer(
+						handleTerminalInputEndpoint(svc),
+						decodeTerminalCommandRequest,
+						encodeJSONResponse,
+						opts...,
+					).ServeHTTP)
+				})
+
+				r.Route("/invitations", func(r chi.Router) {
+					r.Post("/", kithttp.NewServer(
+						sendInvitationEndpoint(svc),
+						decodeSendInvitationRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Get("/", kithttp.NewServer(
+						listInvitationsEndpoint(svc),
+						decodeListInvitationsRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/accept", kithttp.NewServer(
+						acceptInvitationEndpoint(svc, prefix),
+						decodeAcceptInvitationRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+
+					r.Post("/delete", kithttp.NewServer(
+						deleteInvitationEndpoint(svc, prefix),
+						decodeDeleteInvitationRequest,
+						encodeResponse,
+						opts...,
+					).ServeHTTP)
+				})
 			})
-			r.Get("/entities", kithttp.NewServer(
-				getEntitiesEndpoint(svc),
-				decodeGetEntitiesRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
+			r.Route("/domains", func(r chi.Router) {
+				r.Post("/login", kithttp.NewServer(
+					domainLoginEndpoint(svc, secureCookie, prefix),
+					decodeDomainLoginRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
 
-			r.Post("/password", kithttp.NewServer(
-				updatePasswordEndpoint(svc),
-				decodePasswordUpdate,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/password", kithttp.NewServer(
-				showUpdatePasswordEndpoint(svc),
-				decodeShowPasswordUpdate,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Route("/users", func(r chi.Router) {
-				r.Use(AdminAuthMiddleware)
 				r.Post("/", kithttp.NewServer(
-					createUserEndpoint(svc),
-					decodeUserCreation,
+					createDomainEndpoint(svc, prefix),
+					decodeCreateDomainRequest,
 					encodeResponse,
 					opts...,
 				).ServeHTTP)
 
 				r.Get("/", kithttp.NewServer(
-					listUsersEndpoint(svc),
-					decodeListEntityRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/bulk", kithttp.NewServer(
-					createUsersEndpoint(svc),
-					decodeUsersCreation,
+					listDomainsEndpoint(svc),
+					decodeListDomainsRequest,
 					encodeResponse,
 					opts...,
 				).ServeHTTP)
 
 				r.Post("/enable", kithttp.NewServer(
-					enableUserEndpoint(svc),
-					decodeUserStatusUpdate,
+					enableDomainEndpoint(svc, prefix),
+					decodeDomainStatusUpdate,
 					encodeResponse,
 					opts...,
 				).ServeHTTP)
 
 				r.Post("/disable", kithttp.NewServer(
-					disableUserEndpoint(svc),
-					decodeUserStatusUpdate,
+					disableDomainEndpoint(svc, prefix),
+					decodeDomainStatusUpdate,
 					encodeResponse,
 					opts...,
 				).ServeHTTP)
 
 				r.Get("/{id}", kithttp.NewServer(
-					viewUserEndpoint(svc),
-					decodeView,
+					domainEndpoint(svc),
+					decodeListEntityByIDRequest,
 					encodeResponse,
 					opts...,
 				).ServeHTTP)
 
 				r.Post("/{id}", kithttp.NewServer(
-					updateUserEndpoint(svc),
-					decodeUserUpdate,
+					updateDomainEndpoint(svc),
+					decodeUpdateDomainRequest,
 					encodeResponse,
 					opts...,
 				).ServeHTTP)
 
 				r.Post("/{id}/tags", kithttp.NewServer(
-					updateUserTagsEndpoint(svc),
-					decodeUserTagsUpdate,
+					updateDomainTagsEndpoint(svc),
+					decodeUpdateDomainTagsRequest,
 					encodeResponse,
 					opts...,
 				).ServeHTTP)
 
-				r.Post("/{id}/identity", kithttp.NewServer(
-					updateUserIdentityEndpoint(svc),
-					decodeUserIdentityUpdate,
+				r.Post("/{id}/assign", kithttp.NewServer(
+					assignMemberEndpoint(svc, prefix),
+					decodeAssignMemberRequest,
 					encodeResponse,
 					opts...,
 				).ServeHTTP)
 
-				r.Post("/{id}/role", kithttp.NewServer(
-					updateUserRoleEndpoint(svc),
-					decodeUserRoleUpdate,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-			})
-
-			r.Route("/things", func(r chi.Router) {
-				r.Post("/", kithttp.NewServer(
-					createThingEndpoint(svc),
-					decodeThingCreation,
+				r.Post("/{id}/unassign", kithttp.NewServer(
+					unassignMemberEndpoint(svc, prefix),
+					decodeAssignMemberRequest,
 					encodeResponse,
 					opts...,
 				).ServeHTTP)
 
-				r.Post("/bulk", kithttp.NewServer(
-					createThingsEndpoint(svc),
-					decodeThingsCreation,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Get("/", kithttp.NewServer(
-					listThingsEndpoint(svc),
-					decodeListEntityRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/enable", kithttp.NewServer(
-					enableThingEndpoint(svc),
-					decodeThingStatusUpdate,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/disable", kithttp.NewServer(
-					disableThingEndpoint(svc),
-					decodeThingStatusUpdate,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Get("/{id}", kithttp.NewServer(
-					viewThingEndpoint(svc),
-					decodeView,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}", kithttp.NewServer(
-					updateThingEndpoint(svc),
-					decodeThingUpdate,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}/tags", kithttp.NewServer(
-					updateThingTagsEndpoint(svc),
-					decodeThingTagsUpdate,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}/secret", kithttp.NewServer(
-					updateThingSecretEndpoint(svc),
-					decodeThingSecretUpdate,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Get("/{id}/channels", kithttp.NewServer(
-					listChannelsByThingEndpoint(svc),
+				r.Get("/{id}/members", kithttp.NewServer(
+					listMembersEndpoint(svc),
 					decodeListEntityByIDRequest,
 					encodeResponse,
 					opts...,
 				).ServeHTTP)
 
-				r.Post("/{id}/channels/connect", kithttp.NewServer(
-					connectChannelEndpoint(svc),
-					decodeConnectChannel,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}/channels/disconnect", kithttp.NewServer(
-					disconnectChannelEndpoint(svc),
-					decodeConnectChannel,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}/share", kithttp.NewServer(
-					shareThingEndpoint(svc),
-					decodeShareThingRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}/unshare", kithttp.NewServer(
-					unshareThingEndpoint(svc),
-					decodeShareThingRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Get("/{id}/users", kithttp.NewServer(
-					listThingMembersEndpoint(svc),
-					decodeListEntityByIDRequest,
+				r.Get("/members", kithttp.NewServer(
+					viewMemberEndpoint(svc),
+					decodeViewMemberRequest,
 					encodeResponse,
 					opts...,
 				).ServeHTTP)
 			})
-
-			r.Route("/channels", func(r chi.Router) {
-				r.Post("/", kithttp.NewServer(
-					createChannelEndpoint(svc),
-					decodeChannelCreation,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/bulk", kithttp.NewServer(
-					createChannelsEndpoint(svc),
-					decodeChannelsCreation,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Get("/", kithttp.NewServer(
-					listChannelsEndpoint(svc),
-					decodeListEntityRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/enable", kithttp.NewServer(
-					enableChannelEndpoint(svc),
-					decodeChannelStatusUpdate,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/disable", kithttp.NewServer(
-					disableChannelEndpoint(svc),
-					decodeChannelStatusUpdate,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Get("/{id}", kithttp.NewServer(
-					viewChannelEndpoint(svc),
-					decodeView,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}", kithttp.NewServer(
-					updateChannelEndpoint(svc),
-					decodeChannelUpdate,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}/things/connect", kithttp.NewServer(
-					connectChannelEndpoint(svc),
-					decodeConnectChannel,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}/things/disconnect", kithttp.NewServer(
-					disconnectChannelEndpoint(svc),
-					decodeConnectChannel,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Get("/{id}/things", kithttp.NewServer(
-					listThingsByChannelEndpoint(svc),
-					decodeListEntityByIDRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}/users/assign", kithttp.NewServer(
-					AddMemberToChannelEndpoint(svc),
-					decodeAddMemberToChannelRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}/users/unassign", kithttp.NewServer(
-					RemoveMemberFromChannelEndpoint(svc),
-					decodeAddMemberToChannelRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Get("/{id}/users", kithttp.NewServer(
-					ListChannelMembersEndpoint(svc),
-					decodeListEntityByIDRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}/groups/assign", kithttp.NewServer(
-					addGroupToChannelEndpoint(svc),
-					decodeAddGroupToChannelRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}/groups/unassign", kithttp.NewServer(
-					removeGroupFromChannelEndpoint(svc),
-					decodeAddGroupToChannelRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Get("/{id}/groups", kithttp.NewServer(
-					ListChannelGroupsEndpoint(svc),
-					decodeListEntityByIDRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-			})
-
-			r.Route("/groups", func(r chi.Router) {
-				r.Post("/", kithttp.NewServer(
-					createGroupEndpoint(svc),
-					decodeGroupCreation,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/bulk", kithttp.NewServer(
-					createGroupsEndpoint(svc),
-					decodeGroupsCreation,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Get("/", kithttp.NewServer(
-					listGroupsEndpoint(svc),
-					decodeListEntityRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/enable", kithttp.NewServer(
-					enableGroupEndpoint(svc),
-					decodeGroupStatusUpdate,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/disable", kithttp.NewServer(
-					disableGroupEndpoint(svc),
-					decodeGroupStatusUpdate,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Get("/{id}", kithttp.NewServer(
-					viewGroupEndpoint(svc),
-					decodeView,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Get("/{id}/users", kithttp.NewServer(
-					listGroupMembersEndpoint(svc),
-					decodeListEntityByIDRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}", kithttp.NewServer(
-					updateGroupEndpoint(svc),
-					decodeGroupUpdate,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}/users/assign", kithttp.NewServer(
-					assignGroupEndpoint(svc),
-					decodeAssignGroupRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}/users/unassign", kithttp.NewServer(
-					unassignGroupEndpoint(svc),
-					decodeAssignGroupRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}/channels/assign", kithttp.NewServer(
-					addGroupToChannelEndpoint(svc),
-					decodeAddGroupToChannelRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-				r.Post("/{id}/channels/unassign", kithttp.NewServer(
-					removeGroupFromChannelEndpoint(svc),
-					decodeAddGroupToChannelRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Get("/{id}/channels", kithttp.NewServer(
-					listGroupChannelsEndpoint(svc),
-					decodeListEntityByIDRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-			})
-
-			r.Route("/messages", func(r chi.Router) {
-				r.Post("/", kithttp.NewServer(
-					publishMessageEndpoint(svc),
-					decodePublishRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Get("/", kithttp.NewServer(
-					readMessagesEndpoint(svc),
-					decodeReadMessagesRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-			})
-
-			r.Route("/bootstraps", func(r chi.Router) {
-				r.Get("/", kithttp.NewServer(
-					listBootstrap(svc),
-					decodeListEntityRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/", kithttp.NewServer(
-					createBootstrap(svc),
-					decodeCreateBootstrapRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Get("/{id}", kithttp.NewServer(
-					viewBootstrap(svc),
-					decodeView,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}", kithttp.NewServer(
-					updateBootstrap(svc),
-					decodeUpdateBootstrap,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}/delete", kithttp.NewServer(
-					deleteBootstrapEndpoint(svc),
-					decodeDeleteBootstrap,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}/state", kithttp.NewServer(
-					updateBootstrapStateEndpoint(svc),
-					decodeUpdateBootstrapState,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}/certs", kithttp.NewServer(
-					updateBootstrapCerts(svc),
-					decodeUpdateBootstrapCerts,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}/connections", kithttp.NewServer(
-					updateBootstrapConnections(svc),
-					decodeUpdateBootstrapConnections,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Get("/{id}/terminal", kithttp.NewServer(
-					getTerminalEndpoint(svc),
-					decodeView,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/{id}/terminal/input", kithttp.NewServer(
-					handleTerminalInputEndpoint(svc),
-					decodeTerminalCommandRequest,
-					encodeJSONResponse,
-					opts...,
-				).ServeHTTP)
-			})
-
-			r.Route("/invitations", func(r chi.Router) {
-				r.Post("/", kithttp.NewServer(
-					sendInvitationEndpoint(svc),
-					decodeSendInvitationRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Get("/", kithttp.NewServer(
-					listInvitationsEndpoint(svc),
-					decodeListInvitationsRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/accept", kithttp.NewServer(
-					acceptInvitationEndpoint(svc),
-					decodeAcceptInvitationRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-
-				r.Post("/delete", kithttp.NewServer(
-					deleteInvitationEndpoint(svc),
-					decodeDeleteInvitationRequest,
-					encodeResponse,
-					opts...,
-				).ServeHTTP)
-			})
-		})
-		r.Route("/domains", func(r chi.Router) {
-			r.Post("/login", kithttp.NewServer(
-				domainLoginEndpoint(svc, secureCookie),
-				decodeDomainLoginRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/", kithttp.NewServer(
-				createDomainEndpoint(svc),
-				decodeCreateDomainRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/", kithttp.NewServer(
-				listDomainsEndpoint(svc),
-				decodeListDomainsRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/enable", kithttp.NewServer(
-				enableDomainEndpoint(svc),
-				decodeDomainStatusUpdate,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/disable", kithttp.NewServer(
-				disableDomainEndpoint(svc),
-				decodeDomainStatusUpdate,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/{id}", kithttp.NewServer(
-				domainEndpoint(svc),
-				decodeListEntityByIDRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}", kithttp.NewServer(
-				updateDomainEndpoint(svc),
-				decodeUpdateDomainRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/tags", kithttp.NewServer(
-				updateDomainTagsEndpoint(svc),
-				decodeUpdateDomainTagsRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/assign", kithttp.NewServer(
-				assignMemberEndpoint(svc),
-				decodeAssignMemberRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/unassign", kithttp.NewServer(
-				unassignMemberEndpoint(svc),
-				decodeAssignMemberRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/{id}/members", kithttp.NewServer(
-				listMembersEndpoint(svc),
-				decodeListEntityByIDRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/members", kithttp.NewServer(
-				viewMemberEndpoint(svc),
-				decodeViewMemberRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
 		})
 	})
 
@@ -2304,9 +2306,11 @@ func decodeError(_ context.Context, r *http.Request) (interface{}, error) {
 	}, nil
 }
 
-func decodePageNotFound(_ context.Context, _ *http.Request) (interface{}, error) {
+func decodePageNotFound(_ context.Context, r *http.Request) (interface{}, error) {
+	fmt.Println(r.URL.String())
 	return errorReq{
-		err: "Whoops! Page not found",
+		pageURL: r.URL.String(),
+		err:     "Whoops! Page not found",
 	}, nil
 }
 
@@ -2370,78 +2374,84 @@ func sessionFromHeader(r *http.Request) (ui.Session, error) {
 	return sessionDetails, nil
 }
 
-func AdminAuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var err error
-		defer func() {
+func AdminAuthMiddleware(prefix string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var err error
+			defer func() {
+				if err != nil {
+					http.Redirect(w, r, fmt.Sprintf("%s/%s?error=%s", prefix, errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
+				}
+			}()
+			session, err := sessionFromHeader(r)
 			if err != nil {
-				http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
-			}
-		}()
-		session, err := sessionFromHeader(r)
-		if err != nil {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
-
-		if session.User.Role != "admin" {
-			err = errors.ErrAuthorization
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	})
-}
-
-func TokenMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		session, err := sessionFromHeader(r)
-		if err != nil {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
-
-		// Parse the token without validation to get the expiration time
-		token, _, err := new(jwt.Parser).ParseUnverified(session.AccessToken, jwt.MapClaims{})
-		if err != nil {
-			fmt.Println(err)
-			http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
-			return
-		}
-		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			if !claims.VerifyExpiresAt(time.Now().Unix(), true) {
-				http.Redirect(w, r, "/token/refresh?referer_url="+url.QueryEscape(r.URL.String()), http.StatusSeeOther)
+				http.Redirect(w, r, fmt.Sprintf("%s/%s", prefix, loginAPIEndpoint), http.StatusSeeOther)
 				return
 			}
-		}
-		next.ServeHTTP(w, r)
-	})
-}
 
-func AuthnMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		session, err := sessionFromHeader(r)
-		if err != nil {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
-
-		token, _, err := new(jwt.Parser).ParseUnverified(session.AccessToken, jwt.MapClaims{})
-		if err != nil {
-			http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
-			return
-		}
-		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			if _, ok := claims["domain"]; !ok {
-				http.Redirect(w, r, "/domains", http.StatusSeeOther)
+			if session.User.Role != "admin" {
+				err = errors.ErrAuthorization
 				return
 			}
-		}
-		next.ServeHTTP(w, r)
-	})
+
+			next.ServeHTTP(w, r)
+		})
+	}
 }
 
-func DecryptCookieMiddleware(s *securecookie.SecureCookie) func(http.Handler) http.Handler {
+func TokenMiddleware(prefix string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			session, err := sessionFromHeader(r)
+			if err != nil {
+				http.Redirect(w, r, fmt.Sprintf("%s/%s", prefix, loginAPIEndpoint), http.StatusSeeOther)
+				return
+			}
+
+			// Parse the token without validation to get the expiration time
+			token, _, err := new(jwt.Parser).ParseUnverified(session.AccessToken, jwt.MapClaims{})
+			if err != nil {
+				fmt.Println(err)
+				http.Redirect(w, r, fmt.Sprintf("%s/%s?error=%s", prefix, errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
+				return
+			}
+			if claims, ok := token.Claims.(jwt.MapClaims); ok {
+				if !claims.VerifyExpiresAt(time.Now().Unix(), true) {
+					http.Redirect(w, r, fmt.Sprintf("%s/%s?referer_url=%s", prefix, tokenRefreshAPIEndpoint, url.QueryEscape(r.URL.String())), http.StatusSeeOther)
+					return
+				}
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func AuthnMiddleware(prefix string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			tokenString, err := tokenFromCookie(r, accessTokenKey)
+			if err != nil {
+				http.Redirect(w, r, fmt.Sprintf("%s/%s", prefix, loginAPIEndpoint), http.StatusSeeOther)
+				return
+			}
+
+			token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
+			if err != nil {
+				http.Redirect(w, r, fmt.Sprintf("%s/%s?error=%s", prefix, errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
+				return
+			}
+			if claims, ok := token.Claims.(jwt.MapClaims); ok {
+				if _, ok := claims["domain"]; !ok {
+					http.Redirect(w, r, fmt.Sprintf("%s/%s", prefix, domainsAPIEndpoint), http.StatusSeeOther)
+					return
+				}
+			}
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func DecryptCookieMiddleware(s *securecookie.SecureCookie, prefix string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			var err error
@@ -2449,7 +2459,7 @@ func DecryptCookieMiddleware(s *securecookie.SecureCookie) func(http.Handler) ht
 			defer func() {
 				if err != nil {
 					err = errors.Wrap(err, errCookieDecryption)
-					http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
+					http.Redirect(w, r, fmt.Sprintf("%s/%s?error=%s", prefix, errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
 				}
 			}()
 			sessionCookie, err := tokenFromCookie(r, sessionDetailsKey)
@@ -2553,98 +2563,99 @@ func encodeJSONResponse(_ context.Context, w http.ResponseWriter, response inter
 	return json.NewEncoder(w).Encode(response)
 }
 
-func encodeError(_ context.Context, err error, w http.ResponseWriter) {
-	_, displayError := errors.Unwrap(err)
+func encodeError(prefix string) kithttp.ErrorEncoder {
+	return func(ctx context.Context, err error, w http.ResponseWriter) {
+		_, displayError := errors.Unwrap(err)
 
-	switch {
-	case errors.Contains(err, errAuthorization),
-		errors.Contains(err, errAuthentication),
-		errors.Contains(err, ui.ErrTokenRefresh):
-		w.Header().Set("Location", "/login")
-		w.WriteHeader(http.StatusSeeOther)
-	case errors.Contains(err, ui.ErrToken):
-		w.WriteHeader(http.StatusUnauthorized)
-	case errors.Contains(err, ui.ErrConflict):
-		w.Header().Set("X-Error-Message", err.Error())
-		w.WriteHeader(http.StatusConflict)
-	case errors.Contains(err, errInvalidFile):
-		w.Header().Set("X-Error-Message", err.Error())
-		w.WriteHeader(http.StatusUnsupportedMediaType)
-	case errors.Contains(err, errFileFormat):
-		w.Header().Set("X-Error-Message", err.Error())
-		w.WriteHeader(http.StatusBadRequest)
-	case errors.Contains(err, ui.ErrFailedCreate),
-		errors.Contains(err, ui.ErrFailedRetreive),
-		errors.Contains(err, ui.ErrFailedUpdate),
-		errors.Contains(err, ui.ErrFailedEnable),
-		errors.Contains(err, ui.ErrFailedDisable),
-		errors.Contains(err, ui.ErrFailedAssign),
-		errors.Contains(err, ui.ErrFailedUnassign),
-		errors.Contains(err, ui.ErrFailedConnect),
-		errors.Contains(err, ui.ErrFailedDisconnect),
-		errors.Contains(err, ui.ErrFailedCreatePolicy),
-		errors.Contains(err, ui.ErrFailedUpdatePolicy),
-		errors.Contains(err, ui.ErrFailedDeletePolicy),
-		errors.Contains(err, ui.ErrFailedReset),
-		errors.Contains(err, ui.ErrFailedResetRequest),
-		errors.Contains(err, ui.ErrFailedPublish),
-		errors.Contains(err, ui.ErrExecTemplate),
-		errors.Contains(err, ui.ErrFailedDelete),
-		errors.Contains(err, ui.ErrFailedShare),
-		errors.Contains(err, ui.ErrFailedUnshare),
-		errors.Contains(err, ui.ErrFailedDashboardSave),
-		errors.Contains(err, ui.ErrFailedDashboardDelete),
-		errors.Contains(err, ui.ErrFailedDashboardUpdate),
-		errors.Contains(err, ui.ErrFailedDashboardRetrieve),
-		errors.Contains(err, ui.ErrSessionType):
-		w.Header().Set("Location", fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(displayError.Error())))
-		w.WriteHeader(http.StatusSeeOther)
-	default:
-		if e, ok := status.FromError(err); ok {
-			switch e.Code() {
-			case codes.PermissionDenied:
-				w.WriteHeader(http.StatusForbidden)
-			default:
-				w.WriteHeader(http.StatusServiceUnavailable)
-			}
-			return
-		}
-		switch err {
-		case errMissingSecret,
-			errMissingIdentity,
-			errLimitSize,
-			errPageSize,
-			errMissingConfigID,
-			errMissingMetadata,
-			errMissingEmail,
-			errMissingName,
-			errMissingChannel,
-			errMissingPayload,
-			errMissingPassword,
-			errMissingError,
-			errMissingRefreshToken,
-			errMissingRef,
-			errMissingConfirmPassword,
-			errNameSize,
-			errBearerKey,
-			errMissingItem,
-			errMissingThingID,
-			errMissingChannelID,
-			errMissingDomainID,
-			errMissingUserID,
-			errMissingRelation,
-			errMissingGroupID,
-			errMissingParentID,
-			errMissingDescription,
-			errMissingThingKey,
-			errMissingExternalID,
-			errMissingRole,
-			errMissingValue,
-			errMissingExternalKey:
+		switch {
+		case errors.Contains(err, errAuthorization),
+			errors.Contains(err, errAuthentication),
+			errors.Contains(err, ui.ErrTokenRefresh):
+			w.Header().Set("Location", fmt.Sprintf("%s/login", prefix))
+			w.WriteHeader(http.StatusSeeOther)
+		case errors.Contains(err, ui.ErrToken):
+			w.WriteHeader(http.StatusUnauthorized)
+		case errors.Contains(err, ui.ErrConflict):
+			w.Header().Set("X-Error-Message", err.Error())
+			w.WriteHeader(http.StatusConflict)
+		case errors.Contains(err, errInvalidFile):
+			w.Header().Set("X-Error-Message", err.Error())
+			w.WriteHeader(http.StatusUnsupportedMediaType)
+		case errors.Contains(err, errFileFormat):
 			w.Header().Set("X-Error-Message", err.Error())
 			w.WriteHeader(http.StatusBadRequest)
+		case errors.Contains(err, ui.ErrFailedCreate),
+			errors.Contains(err, ui.ErrFailedRetreive),
+			errors.Contains(err, ui.ErrFailedUpdate),
+			errors.Contains(err, ui.ErrFailedEnable),
+			errors.Contains(err, ui.ErrFailedDisable),
+			errors.Contains(err, ui.ErrFailedAssign),
+			errors.Contains(err, ui.ErrFailedUnassign),
+			errors.Contains(err, ui.ErrFailedConnect),
+			errors.Contains(err, ui.ErrFailedDisconnect),
+			errors.Contains(err, ui.ErrFailedCreatePolicy),
+			errors.Contains(err, ui.ErrFailedUpdatePolicy),
+			errors.Contains(err, ui.ErrFailedDeletePolicy),
+			errors.Contains(err, ui.ErrFailedReset),
+			errors.Contains(err, ui.ErrFailedResetRequest),
+			errors.Contains(err, ui.ErrFailedPublish),
+			errors.Contains(err, ui.ErrExecTemplate),
+			errors.Contains(err, ui.ErrFailedDelete),
+			errors.Contains(err, ui.ErrFailedShare),
+			errors.Contains(err, ui.ErrFailedUnshare),
+			errors.Contains(err, ui.ErrFailedDashboardSave),
+			errors.Contains(err, ui.ErrFailedDashboardDelete),
+			errors.Contains(err, ui.ErrFailedDashboardUpdate),
+			errors.Contains(err, ui.ErrFailedDashboardRetrieve):
+			w.Header().Set("Location", fmt.Sprintf("%s/%s?error=%s", prefix, errorAPIEndpoint, url.QueryEscape(displayError.Error())))
+			w.WriteHeader(http.StatusSeeOther)
 		default:
-			w.WriteHeader(http.StatusBadRequest)
+			if e, ok := status.FromError(err); ok {
+				switch e.Code() {
+				case codes.PermissionDenied:
+					w.WriteHeader(http.StatusForbidden)
+				default:
+					w.WriteHeader(http.StatusServiceUnavailable)
+				}
+				return
+			}
+			switch err {
+			case errMissingSecret,
+				errMissingIdentity,
+				errLimitSize,
+				errPageSize,
+				errMissingConfigID,
+				errMissingMetadata,
+				errMissingEmail,
+				errMissingName,
+				errMissingChannel,
+				errMissingPayload,
+				errMissingPassword,
+				errMissingError,
+				errMissingRefreshToken,
+				errMissingRef,
+				errMissingConfirmPassword,
+				errNameSize,
+				errBearerKey,
+				errMissingItem,
+				errMissingThingID,
+				errMissingChannelID,
+				errMissingDomainID,
+				errMissingUserID,
+				errMissingRelation,
+				errMissingGroupID,
+				errMissingParentID,
+				errMissingDescription,
+				errMissingThingKey,
+				errMissingExternalID,
+				errMissingRole,
+				errMissingValue,
+				errMissingExternalKey:
+				w.Header().Set("X-Error-Message", err.Error())
+				w.WriteHeader(http.StatusBadRequest)
+			default:
+				w.WriteHeader(http.StatusBadRequest)
+			}
 		}
 	}
 }

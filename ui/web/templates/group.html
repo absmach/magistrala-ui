@@ -17,10 +17,18 @@ SPDX-License-Identifier: Apache-2.0 -->
               {{ template "breadcrumb" . }}
               <div class="row">
                 <div class="buttons mb-3">
-                  <a class="btn body-button" href="/groups/{{ .Entity.ID }}/users" role="button">
+                  <a
+                    class="btn body-button"
+                    href="{{ printf "%s/groups/%s/users" pathPrefix .Entity.ID }}"
+                    role="button"
+                  >
                     Assign Users
                   </a>
-                  <a class="btn body-button" href="/groups/{{ .Entity.ID }}/channels" role="button">
+                  <a
+                    class="btn body-button"
+                    href="{{ printf "%s/groups/%s/channels" pathPrefix .Entity.ID }}"
+                    role="button"
+                  >
                     Assign Channels
                   </a>
                 </div>
@@ -62,7 +70,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </tr>
                       <tr>
                         <th>Parent Group</th>
-                        <td><a href="/groups/{{ .Entity.ParentID }}">{{ .Parent }}</a></td>
+                        <td>
+                          <a href="{{ printf "%s/groups/%s" pathPrefix .Entity.ParentID }}">
+                            {{ .Parent }}
+                          </a>
+                        </td>
                         <td></td>
                       </tr>
                       <tr>
@@ -167,6 +179,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         fields: {
           name: "name-field",
         },
+        pathPrefix: "{{ pathPrefix }}",
 			}
 		);
     updateMetadata({
@@ -177,6 +190,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       id: "{{ .Entity.ID }}",
       entity: "groups",
       button: "save-metadata",
+      pathPrefix: "{{ pathPrefix }}",
     });
     </script>
     </body>

@@ -17,13 +17,25 @@ SPDX-License-Identifier: Apache-2.0 -->
               {{ template "breadcrumb" . }}
               <div class="row">
                 <div class="buttons mb-3">
-                  <a href="/channels/{{ .Entity.ID }}/things" type="button" class="btn body-button">
+                  <a
+                    href="{{ printf "%s/channels/%s/things" pathPrefix .Entity.ID }}"
+                    type="button"
+                    class="btn body-button"
+                  >
                     Connect
                   </a>
-                  <a href="/channels/{{ .Entity.ID }}/users" type="button" class="btn body-button">
+                  <a
+                    href="{{ printf "%s/channels/%s/users" pathPrefix .Entity.ID }}"
+                    type="button"
+                    class="btn body-button"
+                  >
                     Assign Users
                   </a>
-                  <a href="/channels/{{ .Entity.ID }}/groups" type="button" class="btn body-button">
+                  <a
+                    href="{{ printf "%s/channels/%s/groups" pathPrefix .Entity.ID }}"
+                    type="button"
+                    class="btn body-button"
+                  >
                     Assign Groups
                   </a>
                 </div>
@@ -166,6 +178,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           fields:{
             name: "name-field",
           },
+        pathPrefix: "{{ pathPrefix }}",
         });
         updateMetadata({
           textArea: "metadataTextArea",
@@ -175,6 +188,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           id: "{{ .Entity.ID }}",
           entity: "channels",
           button: "save-metadata",
+          pathPrefix: "{{ pathPrefix }}",
         });
       </script>
     </body>

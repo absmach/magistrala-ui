@@ -13,7 +13,7 @@ createDashboardForm.addEventListener("submit", function (event) {
     name: createDashboardForm.name.value,
     description: createDashboardForm.description.value,
   };
-  fetch(`/dashboards`, {
+  fetch(`${pathPrefix}/dashboards`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -48,7 +48,7 @@ var total, pageCount;
 const addCards = (pageIndex) => {
   setTimeout(() => {
     currentPage = pageIndex;
-    fetch(`/dashboards/list?page=${pageIndex}&limit=${limit}`, {
+    fetch(`${pathPrefix}/dashboards/list?page=${pageIndex}&limit=${limit}`, {
       method: "GET",
     })
       .then((response) => response.json())
@@ -109,7 +109,7 @@ function createCard(data) {
     newDiv.className = "col-12 col-md-6 col-lg-4 mb-3";
     newDiv.innerHTML = `
         <div class="card">
-          <a href="/dashboards/${dashboard.id}" class="card-link">
+          <a href="${pathPrefix}/dashboards/${dashboard.id}" class="card-link">
             <div class="card-header text-center">
               <h5 class="card-title">${dashboard.name}</h5>
               <h6 class="text-muted fs-6 dashboard-card-id">${dashboard.id}</h6>
@@ -141,7 +141,7 @@ function createCard(data) {
 
 // Delete dashboard deletes the dashboard from the database.
 function deleteDashboard(id) {
-  fetch(`/dashboards`, {
+  fetch(`${pathPrefix}/dashboards`, {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -192,7 +192,7 @@ updateButton.addEventListener("click", function () {
     name: form.name.value,
     description: form.description.value,
   };
-  fetch(`/dashboards`, {
+  fetch(`${pathPrefix}/dashboards`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",

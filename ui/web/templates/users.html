@@ -245,11 +245,12 @@ SPDX-License-Identifier: Apache-2.0 -->
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var table = document.getElementById("itemsTable");
+          let pathPrefix = "{{ pathPrefix }}";
           var rows = table.querySelectorAll("tbody tr");
           rows.forEach(function (row) {
             var userID = row.querySelector(".userID").textContent.trim();
             row.onclick = () => {
-              window.location.href = "/users/" + userID;
+              window.location.href = `${pathPrefix}/users/${userID}`;
             };
             row.classList.add("clickable-row");
           });
@@ -270,8 +271,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           button: "create-user-button",
           value: {},
         });
-      </script>
-      <script type="module">
+      </script>      <script type="module">
         import {
           attachValidationListener,
           validateName,
@@ -308,14 +308,14 @@ SPDX-License-Identifier: Apache-2.0 -->
         });
 
         submitCreateForm({
-          url: "/users",
+          url: '{{ printf "%s/users" pathPrefix }}',
           formId: "userform",
           alertDiv: "alertMessage",
           modal: userModal,
         });
 
         submitCreateForm({
-          url: "/users/bulk",
+          url: '{{ printf "%s/users/bulk" pathPrefix }}',
           formId: "bulkusersform",
           alertDiv: "alertBulkMessage",
           modal: usersModal,

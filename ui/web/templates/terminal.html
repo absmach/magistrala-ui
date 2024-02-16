@@ -50,7 +50,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <!-- Existing terminal content here -->
                 </div>
                 <div class="input-line">
-                  <form action="/bootstraps/1/terminal/input" method="POST">
+                  <form>
                     <span class="input-prefix">&gt;</span>
                     <input class="input-field" name="command" autofocus />
                   </form>
@@ -70,7 +70,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           var formData = new FormData(form);
 
           var xhr = new XMLHttpRequest();
-          xhr.open("POST", "/bootstraps/{{.ThingID}}/terminal/input");
+          xhr.open("POST", '{{ printf "%s/bootstraps/%s/terminal/input" pathPrefix .ThingID }}');
           xhr.onload = function () {
             if (xhr.status === 200) {
               var response = JSON.parse(xhr.responseText);

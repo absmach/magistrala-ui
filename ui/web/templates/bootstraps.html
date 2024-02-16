@@ -194,13 +194,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </thead>
                       <tbody>
                         {{ range $i, $t := .Bootstraps }}
-                          <tr
-                            onclick="location.href='/bootstraps/{{ $t.ThingID }}';"
-                            class="clickable-row"
-                          >
+                          <tr onclick="viewBootstrap('{{ $t.ThingID }}')" class="clickable-row">
                             <td>{{ $t.Name }}</td>
                             <td>
-                              <a href="/things/{{ $t.ThingID }}">{{ $t.ThingID }}</a>
+                              <a href="{{ printf "%s/things/%s" pathPrefix $t.ThingID }}">
+                                {{ $t.ThingID }}
+                              </a>
                             </td>
                             <td>{{ $t.ExternalID }}</td>
                             <td>
@@ -259,12 +258,14 @@ SPDX-License-Identifier: Apache-2.0 -->
           input: "thingFilter",
           itemSelect: "things-select",
           item: "things",
+          pathPrefix: "{{ pathPrefix }}",
         });
 
         fetchIndividualEntity({
           input: "channelFilter",
           itemSelect: "channels-select",
           item: "channels",
+          pathPrefix: "{{ pathPrefix }}",
         });
       </script>
     </body>

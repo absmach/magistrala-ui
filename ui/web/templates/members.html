@@ -45,7 +45,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                           aria-label="Close"
                         ></button>
                       </div>
-                      <form action="/domains/{{ .Session.Domain.ID }}/assign" method="post">
+                      <form
+                        action="{{ printf "%s/domains/%s/assign" pathPrefix .DomainID }}"
+                        method="post"
+                      >
                         <div class="modal-body">
                           <div class="mb-3">
                             <label for="users-scroll" class="form-label">User Name</label>
@@ -109,7 +112,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     <tbody>
                       {{ range $i, $m := .Members }}
                         <tr
-                          onclick="location.href='/domains/members?identity={{ $m.Credentials.Identity }}';"
+                          onclick="viewMember('{{ $m.Credentials.Identity }}')"
                           class="clickable-row"
                         >
                           <td>{{ $m.Name }}</td>
@@ -157,15 +160,18 @@ SPDX-License-Identifier: Apache-2.0 -->
         } else {
           document.getElementById("add-member-button").style.display = "none";
         }
-      </script>
 
-      <script type="module">
+        function viewMember(identity) {
+          window.location.href = '{{ printf "%s/domains/members?identity=" pathPrefix }}' + identity;
+        }
+      </script>      <script type="module">
         import { fetchIndividualEntity } from "/js/infinitescroll.js";
 
         fetchIndividualEntity({
           input: "userFilter",
           itemSelect: "users-scroll",
           item: "users",
+          pathPrefix: "{{ pathPrefix }}",
         });
       </script>
     </body>

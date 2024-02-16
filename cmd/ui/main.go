@@ -46,6 +46,7 @@ type config struct {
 	TLSVerification bool            `env:"MG_UI_VERIFICATION_TLS" envDefault:"false"`
 	HashKey         string          `env:"MG_UI_HASH_KEY"         envDefault:"5jx4x2Qg9OUmzpP5dbveWQ"`
 	BlockKey        string          `env:"MG_UI_BLOCK_KEY"        envDefault:"UtgZjr92jwRY6SPUndHXiyl9QY8qTUyZ"`
+	Prefix          string          `env:"MG_UI_PATH_PREFIX"      envDefault:"/ui"`
 }
 
 func main() {
@@ -96,7 +97,7 @@ func main() {
 
 	idp := uuid.New()
 
-	svc, err := ui.New(sdk, dbs, idp, oauthProvider)
+	svc, err := ui.New(sdk, dbs, idp, cfg.Prefix, oauthProvider)
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
@@ -127,7 +128,7 @@ func main() {
 	go func() {
 		p := fmt.Sprintf(":%s", cfg.Port)
 		logger.Info("GUI service started", slog.String("port", p))
-		errs <- http.ListenAndServe(p, api.MakeHandler(svc, mux, cfg.InstanceID, s, oauthProvider))
+		errs <- http.ListenAndServe(p, api.MakeHandler(svc, mux, cfg.InstanceID, cfg.Prefix, s, oauthProvider))
 	}()
 
 	go func() {

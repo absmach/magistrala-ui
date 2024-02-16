@@ -75,13 +75,19 @@ SPDX-License-Identifier: Apache-2.0 -->
                             </div>
                           </td>
                           <td class="accept-button">
-                            <form method="post" action="/invitations/accept">
+                            <form
+                              method="post"
+                              action="{{ printf "%s/invitations/accept" pathPrefix }}"
+                            >
                               <input type="hidden" name="domainID" value="{{ $v.DomainID }}" />
                               <button type="submit" class="btn body-button">Accept</button>
                             </form>
                           </td>
                           <td>
-                            <form action="/invitations/delete" method="post">
+                            <form
+                              action="{{ printf "%s/invitations/delete" pathPrefix }}"
+                              method="post"
+                            >
                               <input type="hidden" name="userID" value="{{ $v.UserID }}" />
                               <input type="hidden" name="domainID" value="{{ $v.DomainID }}" />
                               <button type="submit" class="btn btn-danger">Delete</button>
@@ -235,7 +241,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             method: "POST",
             body: formData,
           };
-          fetch("/invitations", options)
+          fetch('{{ printf "%s/invitations" pathPrefix }}', options)
             .then(function (response) {
               if (response.status === 200) {
                 invitationForm.reset();
@@ -250,20 +256,21 @@ SPDX-License-Identifier: Apache-2.0 -->
               console.error("Error:", error);
             });
         });
-      </script>
-      <script type="module">
+      </script>      <script type="module">
         import { fetchIndividualEntity } from "/js/infinitescroll.js";
 
         fetchIndividualEntity({
           input: "userFilter",
           itemSelect: "users-scroll",
           item: "users",
+          pathPrefix: "{{ pathPrefix }}",
         });
 
         fetchIndividualEntity({
           input: "domainFilter",
           itemSelect: "domains-scroll",
           item: "domains",
+          pathPrefix: "{{ pathPrefix }}",
         });
       </script>
     </body>

@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form action="/{{ .Path }}/disable" method="post">
+        <form action="{{ printf "%s/%s/disable" pathPrefix .Path }}" method="post">
           <div class="modal-body">
             <span>
               Are you sure you want to
@@ -60,7 +60,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form action="/{{ .Path }}/enable" method="post">
+        <form action="{{ printf "%s/%s/enable" pathPrefix .Path }}" method="post">
           <div class="modal-body">
             <span>
               Are you sure you want to

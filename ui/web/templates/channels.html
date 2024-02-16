@@ -189,10 +189,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </thead>
                       <tbody>
                         {{ range $i, $c := .Channels }}
-                          <tr
-                            onclick="location.href='/channels/{{ $c.ID }}';"
-                            class="clickable-row"
-                          >
+                          <tr onclick="viewChannels('{{ $c.ID }}')" class="clickable-row">
                             <td>{{ $c.Name }}</td>
                             <td class="desc-col">{{ $c.Description }}</td>
                             <td class="meta-col">
@@ -245,8 +242,11 @@ SPDX-License-Identifier: Apache-2.0 -->
           button: "create-channel-button",
           value: {},
         });
-      </script>
-      <script type="module">
+
+        function viewChannels(id) {
+          window.location.href = "{{ printf "%s/channels/" pathPrefix }}" + id;
+        }
+      </script>      <script type="module">
         import { attachValidationListener, validateName, validateJSON } from "/js/validation.js";
         import { submitCreateForm } from "/js/forms.js";
         import { fetchIndividualEntity } from "/js/infinitescroll.js";
@@ -268,14 +268,14 @@ SPDX-License-Identifier: Apache-2.0 -->
         });
 
         submitCreateForm({
-          url: "/channels",
+          url: '{{ printf "%s/channels" pathPrefix }}',
           formId: "channelform",
           alertDiv: "alertMessage",
           modal: channelModal,
         });
 
         submitCreateForm({
-          url: "/channels/bulk",
+          url: '{{ printf "%s/channels/bulk" pathPrefix }}',
           formId: "bulkchannelsform",
           alertDiv: "alertBulkMessage",
           modal: channelsModal,
@@ -285,6 +285,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           input: "parentFilter",
           itemSelect: "infiniteScroll",
           item: "channels",
+          pathPrefix: "{{ pathPrefix }}",
         });
       </script>
     </body>

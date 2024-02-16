@@ -51,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             ></button>
                           </div>
                           <form
-                            action="/channels/{{ .ChannelID }}/groups/assign?item=channels"
+                            action="{{ printf "%s/channels/%s/groups/assign?item=channels" pathPrefix .ChannelID }}"
                             method="post"
                           >
                             <div class="modal-body">
@@ -104,7 +104,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <tbody>
                         {{ $channelID := .ChannelID }}
                         {{ range $i, $g := .Groups }}
-                          <tr onclick="location.href='/groups/{{ $g.ID }}';" class="clickable-row">
+                          <tr onclick="viewGroups('{{ $g.ID }}')" class="clickable-row">
                             <td>{{ $g.Name }}</td>
                             <td class="desc-col">{{ $g.Description }}</td>
                             <td class="meta-col">
@@ -115,7 +115,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             <td class="created-col">{{ $g.CreatedAt }}</td>
                             <td class="text-center">
                               <form
-                                action="/channels/{{ $channelID }}/groups/unassign?item=channels"
+                                action="{{ printf "%s/channels/%s/groups/unassign?item=channels" pathPrefix $channelID }}"
                                 method="post"
                               >
                                 <input
@@ -156,14 +156,18 @@ SPDX-License-Identifier: Apache-2.0 -->
         function openGroupModal() {
           groupModal.show();
         }
-      </script>
-      <script type="module">
+
+        function viewGroups(id){
+          window.location.href = '{{ printf "%s/groups/" pathPrefix}}' + id;
+        };
+      </script>      <script type="module">
         import { fetchIndividualEntity } from "/js/infinitescroll.js";
 
         fetchIndividualEntity({
           input: "groupFilter",
           itemSelect: "infiniteScroll",
           item: "groups",
+          pathPrefix: "{{ pathPrefix }}",
         });
       </script>
     </body>

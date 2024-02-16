@@ -18,7 +18,7 @@ function updateName(config) {
   button.addEventListener("click", function (event) {
     const updatedValue = config.cell.textContent.trim();
     if (validateName(updatedValue, config.alertDiv, config.fieldName, event)) {
-      const url = `/${config.entity}/${config.id}`;
+      const url = `${config.pathPrefix}/${config.entity}/${config.id}`;
       const data = { [config.field]: updatedValue };
 
       submitUpdateForm({
@@ -37,7 +37,7 @@ function updateIdentity(config) {
   button.addEventListener("click", function (event) {
     const updatedValue = config.cell.textContent.trim();
     if (validateEmail(updatedValue, config.alertDiv, config.fieldName, event)) {
-      const url = `/${config.entity}/${config.id}/identity`;
+      const url = `${config.pathPrefix}/${config.entity}/${config.id}/identity`;
       const data = { [config.field]: updatedValue };
 
       submitUpdateForm({
@@ -55,7 +55,7 @@ function updateMetadata(config) {
     event.preventDefault();
     const updatedValue = document.getElementById(config.textArea).value;
     if (validateJSON(updatedValue, config.alertDiv, config.fieldName, event)) {
-      const url = `/${config.entity}/${config.id}`;
+      const url = `${config.pathPrefix}/${config.entity}/${config.id}`;
       const data = { [config.field]: JSON.parse(updatedValue) };
 
       submitUpdateForm({
@@ -74,7 +74,7 @@ function updateTags(config) {
   button.addEventListener("click", function (event) {
     const updatedValue = config.cell.textContent.trim();
     if (validateStringArray(updatedValue, config.alertDiv, config.fieldName, event)) {
-      const url = `/${config.entity}/${config.id}/tags`;
+      const url = `${config.pathPrefix}/${config.entity}/${config.id}/tags`;
       const data = { [config.field]: JSON.parse(updatedValue) };
 
       submitUpdateForm({
@@ -92,7 +92,7 @@ function updateSecret(config) {
   button.addEventListener("click", function (event) {
     const updatedValue = config.cell.textContent.trim();
     if (validatePassword(updatedValue, config.alertDiv, config.fieldName, event)) {
-      const url = `/${config.entity}/${config.id}/secret`;
+      const url = `${config.pathPrefix}/${config.entity}/${config.id}/secret`;
       const data = { [config.field]: updatedValue };
 
       submitUpdateForm({
@@ -109,7 +109,7 @@ function updateDescription(config) {
 
   button.addEventListener("click", function () {
     const updatedValue = config.cell.textContent.trim();
-    const url = `/${config.entity}/${config.id}`;
+    const url = `${config.pathPrefix}/${config.entity}/${config.id}`;
     const data = { [config.field]: updatedValue };
 
     submitUpdateForm({
@@ -128,7 +128,7 @@ function updateContent(config) {
     event.preventDefault();
     const updatedValue = document.getElementById(config.textArea).value;
     if (validateJSON(updatedValue, config.alertDiv, config.fieldName, event)) {
-      const url = `/${config.entity}/${config.id}`;
+      const url = `${config.pathPrefix}/${config.entity}/${config.id}`;
       const data = { [config.field]: updatedValue };
 
       submitUpdateForm({
@@ -146,7 +146,7 @@ function updateClientCerts(config) {
 
   button.addEventListener("click", function () {
     const updatedValue = config.cell.textContent.trim();
-    const url = `/${config.entity}/${config.id}/certs`;
+    const url = `${config.pathPrefix}/${config.entity}/${config.id}/certs`;
     const data = { [config.field]: updatedValue };
 
     submitUpdateForm({
@@ -233,6 +233,7 @@ function attachEditRowListener(config) {
         entity: config.entity,
         alertDiv: config.errorDiv,
         fieldName: config.fields[key],
+        pathPrefix: config.pathPrefix,
       });
     }
   }

@@ -51,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             ></button>
                           </div>
                           <form
-                            action="/things/{{ .Thing.ID }}/channels/connect?item=things"
+                            action="{{ printf "%s/things/%s/channels/connect?item=things" pathPrefix .Thing.ID }}"
                             method="post"
                           >
                             <div class="modal-body">
@@ -106,10 +106,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                         {{ $thingID := .Thing.ID }}
                         {{ $thingKey := .Thing.Credentials.Secret }}
                         {{ range $i, $c := .Channels }}
-                          <tr
-                            onclick="location.href='/channels/{{ $c.ID }}';"
-                            class="clickable-row"
-                          >
+                          <tr onclick="viewChannel('{{ $c.ID }}')" class="clickable-row">
                             <td>{{ $c.Name }}</td>
                             <td class="desc-col">{{ $c.Description }}</td>
                             <td class="meta-col">
@@ -119,7 +116,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             </td>
                             <td class="created-col">{{ $c.CreatedAt }}</td>
                             <td class="messaging-col">
-                              <form action="/messages" method="get">
+                              <form action="{{ printf "%s/messages" pathPrefix }}" method="get">
                                 <input type="hidden" name="thing" value="{{ $thingKey }}" />
                                 <input type="hidden" name="channel" value="{{ $c.ID }}" />
                                 <button
@@ -134,7 +131,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             </td>
                             <td class="remove-col">
                               <form
-                                action="/things/{{ $thingID }}/channels/disconnect?item=things"
+                                action="{{ printf "%s/things/%s/channels/disconnect?item=things" pathPrefix $thingID }}"
                                 method="post"
                               >
                                 <input
@@ -175,14 +172,19 @@ SPDX-License-Identifier: Apache-2.0 -->
         function openChannelModal() {
           channelModal.show();
         }
-      </script>
-      <script type="module">
+
+        function viewChannel(id) {
+          let pathPrefix = "{{ pathPrefix }}";
+          window.location.href = `${pathPrefix}/channels/${id}`;
+        }
+      </script>      <script type="module">
         import { fetchIndividualEntity } from "/js/infinitescroll.js";
 
         fetchIndividualEntity({
           input: "channelFilter",
           itemSelect: "infiniteScroll",
           item: "channels",
+          pathPrefix: "{{ pathPrefix }}",
         });
       </script>
     </body>

@@ -215,7 +215,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </thead>
                       <tbody>
                         {{ range $i, $t := .Things }}
-                          <tr onclick="location.href='/things/{{ $t.ID }}';" class="clickable-row">
+                          <tr onclick="viewThing('{{ $t.ID }}')" class="clickable-row">
                             <td>{{ $t.Name }}</td>
                             <td class="tags-col">
                               {{ range $j, $tag := $t.Tags }}
@@ -272,8 +272,10 @@ SPDX-License-Identifier: Apache-2.0 -->
           button: "create-thing-button",
           value: {},
         });
-      </script>
-      <script type="module">
+        function viewThing(id) {
+          window.location.href = '{{printf "%s/things/" pathPrefix}}' + id;
+        }
+      </script>      <script type="module">
         import {
           attachValidationListener,
           validateName,
@@ -302,14 +304,14 @@ SPDX-License-Identifier: Apache-2.0 -->
         });
 
         submitCreateForm({
-          url: "/things",
+          url: '{{printf "%s/things" pathPrefix}}',
           formId: "thingform",
           alertDiv: "alertMessage",
           modal: thingModal,
         });
 
         submitCreateForm({
-          url: "/things/bulk",
+          url: '{{printf "%s/things/bulk" pathPrefix}}',
           formId: "bulkThingsForm",
           alertDiv: "alertBulkMessage",
           modal: thingsModal,

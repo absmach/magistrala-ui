@@ -35,6 +35,7 @@ function getEntities(config, name) {
     itemSelect: config.itemSelect,
     name: name,
     page: 1,
+    pathPrefix: config.pathPrefix,
   });
 }
 
@@ -62,6 +63,7 @@ function infiniteScroll(config) {
           domain: config.domain,
           permission: config.permission,
           page: currentPageNo,
+          pathPrefix: config.pathPrefix,
         });
       }
     }
@@ -73,7 +75,7 @@ function infiniteScroll(config) {
 let limit = 5;
 function fetchData(config) {
   fetch(
-    `/entities?item=${config.item}&limit=${limit}&name=${config.name}&page=${config.page}&domain=${config.domain}&permission=${config.permission}`,
+    `${config.pathPrefix}/entities?item=${config.item}&limit=${limit}&name=${config.name}&page=${config.page}&domain=${config.domain}&permission=${config.permission}`,
     {
       method: "GET",
     },

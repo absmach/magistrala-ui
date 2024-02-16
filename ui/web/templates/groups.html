@@ -183,7 +183,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       </thead>
                       <tbody>
                         {{ range $i, $g := .Groups }}
-                          <tr onclick="location.href='/groups/{{ $g.ID }}';" class="clickable-row">
+                          <tr onclick="viewGroup('{{ $g.ID }}')">
                             <td>{{ $g.Name }}</td>
 
                             <td class="desc-col">{{ $g.Description }}</td>
@@ -237,8 +237,11 @@ SPDX-License-Identifier: Apache-2.0 -->
           button: "create-group-button",
           value: {},
         });
-      </script>
-      <script type="module">
+
+        function viewGroup(id) {
+          window.location.href = '{{ printf "%s/groups/" pathPrefix }}' + id;
+        }
+      </script>      <script type="module">
         import { attachValidationListener, validateName, validateJSON } from "/js/validation.js";
         import { submitCreateForm } from "/js/forms.js";
         import { fetchIndividualEntity } from "/js/infinitescroll.js";
@@ -260,14 +263,14 @@ SPDX-License-Identifier: Apache-2.0 -->
         });
 
         submitCreateForm({
-          url: "/groups",
+          url: '{{ printf "%s/groups" pathPrefix }}',
           formId: "groupform",
           alertDiv: "alertMessage",
           modal: groupModal,
         });
 
         submitCreateForm({
-          url: "/groups/bulk",
+          url: '{{ printf "%s/groups/bulk" pathPrefix }}',
           formId: "bulkgroupsform",
           alertDiv: "alertBulkMessage",
           modal: groupsModal,
@@ -277,6 +280,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           input: "parentFilter",
           itemSelect: "infiniteScroll",
           item: "groups",
+          pathPrefix: "{{ pathPrefix }}",
         });
       </script>
     </body>

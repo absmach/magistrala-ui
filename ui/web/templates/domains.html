@@ -56,7 +56,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             {{ end }}
                           </td>
                           <td>
-                            <form method="post" action="/domains/login">
+                            <form method="post" action="{{ printf "%s/domains/login" pathPrefix }}">
                               <input type="hidden" name="domainID" value="{{ $d.ID }}" />
                               <button
                                 type="submit"

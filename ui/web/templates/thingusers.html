@@ -50,7 +50,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                               aria-label="Close"
                             ></button>
                           </div>
-                          <form action="/things/{{ .ThingID }}/share?item=things" method="post">
+                          <form
+                            action="{{ printf "%s/things/%s/share?item=things" pathPrefix .ThingID }}"
+                            method="post"
+                          >
                             <div class="modal-body">
                               <div class="mb-3">
                                 <label for="infiniteScroll" class="form-label">User ID</label>
@@ -158,7 +161,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             {{ $thingID := .ThingID }}
                             {{ range $i, $u := .Users }}
                               <tr
-                                onclick="location.href='/domains/members?identity={{ $u.Credentials.Identity }}';"
+                                onclick="viewUser('{{ $u.Credentials.Identity }}')"
                                 class="clickable-row"
                               >
                                 <td>{{ $u.Name }}</td>
@@ -213,7 +216,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             {{ $thingID := .ThingID }}
                             {{ range $i, $u := .Users }}
                               <tr
-                                onclick="location.href='/domains/members?identity={{ $u.Credentials.Identity }}';"
+                                onclick="viewUser('{{ $u.Credentials.Identity }}')"
                                 class="clickable-row"
                               >
                                 <td>{{ $u.Name }}</td>
@@ -232,7 +235,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 <td class="created-col">{{ $u.CreatedAt }}</td>
                                 <td class="text-center">
                                   <form
-                                    action="/things/{{ $thingID }}/unshare?item=things"
+                                    action="{{ printf "%s/things/%s/unshare/?item=things" pathPrefix $thingID }}"
                                     method="post"
                                   >
                                     <input
@@ -279,10 +282,17 @@ SPDX-License-Identifier: Apache-2.0 -->
         }
 
 				function openTab(relation) {
-					var thingID = "{{ .ThingID }}";
 					event.preventDefault();
-					window.location.href = `/things/${thingID}/users?relation=${relation}`;
+          let pathPrefix = "{{ pathPrefix }}";
+          let thingID = "{{ .ThingID }}";
+					window.location.href = `${pathPrefix}/things/${thingID}/users?relation=${relation}`;
 				}
+
+        function viewUser(identity) {
+          event.preventDefault();
+          let pathPrefix = "{{ pathPrefix }}";
+          window.location.href = `${pathPrefix}/domains/members?identity=${identity}`;
+        }
       </script>      <script type="module">
         import { fetchIndividualEntity } from "/js/infinitescroll.js";
 
@@ -291,6 +301,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           itemSelect: "infiniteScroll",
           item: "members",
           domain: '{{.Session.Domain.ID}}',
+          pathPrefix: '{{ pathPrefix }}',
         });
       </script>
     </body>
