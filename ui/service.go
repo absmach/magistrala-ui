@@ -397,7 +397,7 @@ type Service interface {
 	// GetEntities retrieves all entities.
 	GetEntities(token, entity, entityName, domainID, permission string, page, limit uint64) ([]byte, error)
 	// ErrorPage displays an error page.
-	ErrorPage(errMsg string) ([]byte, error)
+	ErrorPage(errMsg, url string) ([]byte, error)
 
 	// ListDomains retrieves domains owned/shared by a user.
 	ListDomains(s Session, status string, page, limit uint64) ([]byte, error)
@@ -2178,11 +2178,13 @@ func (us *uiService) GetEntities(token, entity, entityName, domainID, permission
 	return data, nil
 }
 
-func (us *uiService) ErrorPage(errMsg string) ([]byte, error) {
+func (us *uiService) ErrorPage(errMsg, url string) ([]byte, error) {
 	data := struct {
 		Error string
+		URL   string
 	}{
 		errMsg,
+		url,
 	}
 
 	var btpl bytes.Buffer

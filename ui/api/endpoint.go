@@ -1513,7 +1513,7 @@ func errorPageEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ErrorPage(req.err)
+		res, err := svc.ErrorPage(req.err, req.pageURL)
 		if err != nil {
 			return nil, err
 		}

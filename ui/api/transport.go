@@ -2307,7 +2307,6 @@ func decodeError(_ context.Context, r *http.Request) (interface{}, error) {
 }
 
 func decodePageNotFound(_ context.Context, r *http.Request) (interface{}, error) {
-	fmt.Println(r.URL.String())
 	return errorReq{
 		pageURL: r.URL.String(),
 		err:     "Whoops! Page not found",
