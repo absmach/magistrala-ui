@@ -22,68 +22,155 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form id="create-progressBar-form">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="title" class="form-label">Title</label>
-              <input
-                type="text"
-                class="form-control"
-                name="title"
-                id="title"
-                placeholder="Enter the chart title"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="channel-id" class="form-label">Channel ID</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="channel"
-                id="channel-id"
-                placeholder="Enter the channel ID"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="thing-id" class="form-label">Thing ID</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="thing"
-                id="thing-id"
-                placeholder="Enter the thing ID"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="value-name" class="form-label">Value name</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="valueName"
-                id="value-name"
-                placeholder="Enter the value name eg. temperature"
-              />
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button
-              type="button"
-              class="btn body-button"
-              data-bs-dismiss="modal"
-              id="create-progressBar-button"
+        <div class="modal-body">
+          <!-- Tab Navs -->
+          <ul class="nav nav-tabs mb-3" id="chartTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active"
+                id="data-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#progressBarData"
+                type="button"
+                role="tab"
+                aria-controls="data"
+                aria-selected="true"
+              >
+                Data
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="appearance-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#progressBarAppearance"
+                type="button"
+                role="tab"
+                aria-controls="appearance"
+                aria-selected="false"
+              >
+                Appearance
+              </button>
+            </li>
+          </ul>
+          <!-- Tab Content -->
+          <div class="tab-content" id="myTabContent">
+            <!-- Data Tab -->
+            <div
+              class="tab-pane fade show active"
+              id="progressBarData"
+              role="tabpanel"
+              aria-labelledby="data-tab"
             >
-              Create Chart
-            </button>
+              <form id="create-progressBar-data-form">
+                <div class="mb-3">
+                  <label for="channel-id" class="form-label">Channel ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="channel"
+                    id="channel-id"
+                    placeholder="Enter the channel ID"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="thing-id" class="form-label">Thing ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="thing"
+                    id="thing-id"
+                    placeholder="Enter the thing ID"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="value-name" class="form-label">Value name</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="valueName"
+                    id="value-name"
+                    placeholder="Enter the value name eg. temperature"
+                    required
+                  />
+                </div>
+              </form>
+            </div>
+            <!-- Appearance Tab -->
+            <div
+              class="tab-pane fade"
+              id="progressBarAppearance"
+              role="tabpanel"
+              aria-labelledby="appearance-tab"
+            >
+              <form id="create-progressBar-appearance-form">
+                <div class="mb-3">
+                  <label for="title" class="form-label">Title</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="title"
+                    id="title"
+                    placeholder="Enter the chart title"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="min-value" class="form-label">Min value</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="minValue"
+                    id="min-value"
+                    placeholder="Enter the minimum data value"
+                    value="0"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="max-value" class="form-label">Max value</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="maxValue"
+                    id="max-value"
+                    placeholder="Enter the maximum data value"
+                    value="100"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="progress-bar-color" class="form-label">Progress Bar Color</label>
+                  <select class="form-select mb-3" name="progressBarColor" id="progress-bar-color">
+                    <option value="" disabled>Progress Bar Type</option>
+                    <option value="bg-success">Green</option>
+                    <option value="bg-info">Blue</option>
+                    <option value="bg-warning">Yellow</option>
+                    <option value="bg-danger">Red</option>
+                  </select>
+                </div>
+              </form>
+            </div>
           </div>
-        </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button
+            type="button"
+            class="btn body-button"
+            id="create-progressBar-button"
+            data-bs-dismiss="modal"
+          >
+            Create Chart
+          </button>
+        </div>
       </div>
     </div>
   </div>
   <script>
     // Progress bar form
     document.getElementById("create-progressBar-button").addEventListener("click", function () {
-      var form = document.getElementById("create-progressBar-form");
+      var form = document.getElementById("create-progressBar-appearance-form");
       // Create an object to store the form data
       var formData = {};
 
@@ -96,7 +183,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       }
       form.reset();
 
-      var widgetID = "progressBar-" + Date.now();      
+      var widgetID = "progressBar-" + Date.now();
       var widgetContent = `
         <div class="card widgetcard">
           <div class="card-header text-center">
@@ -104,7 +191,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
           <div class="card-body p-2">
             <div class="progress">
-              <div class="progress-bar" role="progressbar" style="width: 70%" aria-valuemin="0" aria-valuemax="100"></div>
+              <div class="progress-bar ${formData.progressBarColor}" role="progressbar" style="width: 70%" aria-valuemin=${formData.minValue} aria-valuemax=${formData.maxValue}></div>
             </div>
           </div>
           <div class="card-footer text-center">
@@ -115,13 +202,13 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
       `;
       var config = {
-          ID: widgetID,
-          Content: widgetContent,
-          Style:{
-            width: "300px",
-            height: "120px"
-          }
-        };
+        ID: widgetID,
+        Content: widgetContent,
+        Style: {
+          width: "300px",
+          height: "120px",
+        },
+      };
       addWidget(config);
     });
   </script>

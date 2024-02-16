@@ -99,7 +99,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </div>
                 <div class="mb-3">
                   <label for="y-axis-type" class="form-label">Y-axis Type</label>
-                  <select class="form-select mb-3" name="yAxisType" id="y-axis-typr">
+                  <select class="form-select mb-3" name="yAxisType" id="y-axis-type">
                     <option value="" disabled>Select y-axis Type</option>
                     <option value="value">Value</option>
                     <option value="category">Category</option>
@@ -221,8 +221,6 @@ SPDX-License-Identifier: Apache-2.0 -->
         }
       }
       form.reset();
-
-      console.log(formData);
 
       seriesName = formData.seriesName.split(",");
 
