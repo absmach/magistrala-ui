@@ -2453,7 +2453,7 @@ func AuthnMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			if claims["domain"] == "" {
+			if _, ok := claims["domain"]; !ok {
 				http.Redirect(w, r, "/domains", http.StatusSeeOther)
 				return
 			}
