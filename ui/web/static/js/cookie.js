@@ -16,3 +16,10 @@ function getCookie(name) {
   }
   return null;
 }
+
+function clearAllCookies() {
+  var cookies = document.cookie.split(";");
+  for (var i = 0; i < cookies.length; i++) {
+    document.cookie = cookies[i] + "=; expires=" + new Date(0).toUTCString();
+  }
+}

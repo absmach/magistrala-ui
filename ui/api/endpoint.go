@@ -5,8 +5,7 @@ package api
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
+	"encoding/base64"
 	"net/http"
 	"time"
 
@@ -60,11 +59,6 @@ func registerUserEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		// userPage, err := svc.UserProfile(token.AccessToken)
-		// if err != nil {
-		// 	return nil, err
-		// }
-
 		accessExp, err := extractTokenExpiry(token.AccessToken)
 		if err != nil {
 			return nil, err
@@ -74,9 +68,15 @@ func registerUserEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
+		user, err := svc.UserProfile(token.AccessToken)
+		if err != nil {
+			return nil, err
+		}
+		// Encode JSON string with base64 to eliminate characters that are not allowed in cookies.
+		encodedString := base64.StdEncoding.EncodeToString(user)
+
 		tkr := uiRes{
 			code: http.StatusCreated,
-			// html: userPage,
 			cookies: []*http.Cookie{
 				{
 					Name:     accessTokenKey,
@@ -91,6 +91,11 @@ func registerUserEndpoint(svc ui.Service) endpoint.Endpoint {
 					Path:     domainsAPIEndpoint,
 					HttpOnly: true,
 					Expires:  refreshExp,
+				},
+				{
+					Name:  "user",
+					Value: encodedString,
+					Path:  "/",
 				},
 			},
 		}
@@ -143,9 +148,8 @@ func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
 			},
 		}
 		return uiRes{
-			code:    http.StatusSeeOther,
+			code:    http.StatusOK,
 			cookies: cookies,
-			headers: map[string]string{"Location": loginAPIEndpoint},
 		}, nil
 	}
 }
@@ -270,11 +274,6 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		user, err := svc.UserProfile(token.AccessToken)
-		if err != nil {
-			return nil, err
-		}
-
 		accessExp, err := extractTokenExpiry(token.AccessToken)
 		if err != nil {
 			return nil, err
@@ -284,13 +283,12 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		jsonUser, err := json.Marshal(user)
+		user, err := svc.UserProfile(token.AccessToken)
 		if err != nil {
 			return nil, err
 		}
-
-		usrString := string(jsonUser)
-		fmt.Println(usrString)
+		// Encode JSON string with base64 to eliminate characters that are not allowed in cookies.
+		encodedString := base64.StdEncoding.EncodeToString(user)
 
 		tkr := uiRes{
 			code: http.StatusCreated,
@@ -311,7 +309,7 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 				},
 				{
 					Name:  "user",
-					Value: usrString,
+					Value: encodedString,
 					Path:  "/",
 				},
 			},

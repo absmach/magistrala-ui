@@ -190,7 +190,7 @@ func (lm *loggingMiddleware) RefreshToken(refreshToken string) (token sdk.Token,
 }
 
 // UserProfile adds logging middleware to user profile method.
-func (lm *loggingMiddleware) UserProfile(token string) (user sdk.User, err error) {
+func (lm *loggingMiddleware) UserProfile(token string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
