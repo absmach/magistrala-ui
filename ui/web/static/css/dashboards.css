@@ -4,6 +4,22 @@ SPDX-License-Identifier: Apache-2.0 */
 
 .grid {
   position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  grid-gap: 1rem;
+  padding: 1rem;
+}
+
+.grid-editable {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  grid-gap: 1rem;
+  padding: 1rem;
+
+  background-size: calc(18rem + 50px) calc(18rem + 50px);
+  background-image: linear-gradient(to right, lightgrey 1px, transparent 1px),
+    linear-gradient(to bottom, lightgrey 1px, transparent 1px);
 }
 
 .item {
@@ -105,4 +121,8 @@ SPDX-License-Identifier: Apache-2.0 */
 
 .min-vh-50 {
   min-height: 50vh;
+}
+
+.resize-helper {
+  border: 10px dotted #000; /* Customize as needed */
 }

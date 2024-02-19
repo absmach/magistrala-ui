@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 const gridClass = ".grid";
 var grid = initGrid(layout);
+const gridSize = 50;
 
 // Editable canvas is used to make the canvas editable allowing the user to add widgets and be able to move the
 // widgets around the canvas
@@ -139,7 +140,7 @@ function editableCanvas() {
     if (grid) {
       grid.destroy(true);
     }
-    grid = new Muuri(gridClass, {
+    grid = new Muuri(editableGridClass, {
       dragEnabled: true,
       dragHandle: ".item-content",
     });
@@ -190,9 +191,13 @@ const previousSizes = new Map();
 const resizeObserver = new ResizeObserver((entries) => {
   for (let entry of entries) {
     const { target } = entry;
+
+    let snappedWidth = Math.round(target.clientWidth / gridSize) * gridSize;
+    let snappedHeight = Math.round(target.clientHeight / gridSize) * gridSize;
+
     const previousSize = previousSizes.get(target) || {
-      width: target.clientWidth,
-      height: target.clientHeight,
+      width: snappedWidth,
+      height: snappedHeight,
     };
     const contentEl = target.querySelector(".item-content");
     const gridRightPosition = target.parentNode.getBoundingClientRect().right;
@@ -206,10 +211,10 @@ const resizeObserver = new ResizeObserver((entries) => {
       target.style.maxHeight = "none";
     }
 
-    if (widgetRightPosition < gridRightPosition - 5) {
+    if (widgetRightPosition < gridRightPosition - gridSize) {
       // Calculate the change in width and height
-      var widthChange = target.clientWidth - previousSize.width;
-      var heightChange = target.clientHeight - previousSize.height;
+      var widthChange = snappedWidth - previousSize.width;
+      var heightChange = snappedHeight - previousSize.height;
       var itemContentWidth =
         parseInt(window.getComputedStyle(contentEl).getPropertyValue("width")) + widthChange;
       var itemContentHeight =
@@ -217,12 +222,12 @@ const resizeObserver = new ResizeObserver((entries) => {
 
       // Update the previous size for the next callback
       previousSizes.set(target, {
-        width: target.clientWidth,
-        height: target.clientHeight,
+        width: snappedWidth,
+        height: snappedHeight,
       });
 
-      target.style.width = target.clientWidth + "px";
-      target.style.height = target.clientHeight + "px";
+      target.style.width = snappedWidth + "px";
+      target.style.height = snappedHeight + "px";
 
       contentEl.style.width = itemContentWidth + "px";
       contentEl.style.height = itemContentHeight + "px";
