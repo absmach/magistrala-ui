@@ -46,7 +46,7 @@ type config struct {
 	TLSVerification bool            `env:"MG_UI_VERIFICATION_TLS" envDefault:"false"`
 	HashKey         string          `env:"MG_UI_HASH_KEY"         envDefault:"5jx4x2Qg9OUmzpP5dbveWQ"`
 	BlockKey        string          `env:"MG_UI_BLOCK_KEY"        envDefault:"UtgZjr92jwRY6SPUndHXiyl9QY8qTUyZ"`
-	Prefix          string          `env:"MG_UI_PATH_PREFIX"      envDefault:"/ui"`
+	Prefix          string          `env:"MG_UI_PATH_PREFIX"      envDefault:"/"`
 }
 
 func main() {

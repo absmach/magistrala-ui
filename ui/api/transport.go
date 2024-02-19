@@ -85,7 +85,17 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID, prefix string, secureCo
 		kithttp.ServerErrorEncoder(encodeError(prefix)),
 	}
 
-	r.Route(prefix, func(r chi.Router) {
+	var pathPrefix string
+	if prefix != "" {
+		pathPrefix = prefix
+		r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+			http.Redirect(w, r, fmt.Sprintf("%s/", prefix), http.StatusSeeOther)
+		})
+	} else {
+		pathPrefix = "/"
+	}
+
+	r.Route(pathPrefix, func(r chi.Router) {
 		r.Get("/register", kithttp.NewServer(
 			viewRegistrationEndpoint(svc),
 			decodeViewRegistrationRequest,
