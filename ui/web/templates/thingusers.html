@@ -70,24 +70,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   <option disabled>select a User</option>
                                 </select>
                               </div>
-                              <div class="mb-3">
-                                <label for="relation" class="form-label">Relation</label>
-                                <select
-                                  class="form-control"
-                                  name="relation"
-                                  id="relation"
-                                  aria-describedby="relationHelp"
-                                  multiple
-                                  required
-                                >
-                                  {{ range $r := .Relations }}
-                                    <option value="{{ $r }}">
-                                      {{ $r }}
-                                    </option>
-                                  {{ end }}
-                                </select>
-                                <div id="relationHelp" class="form-text">Select Relation.</div>
-                              </div>
+                              <input
+                                type="hidden"
+                                name="relation"
+                                id="relation"
+                                value="administrator"
+                              />
                             </div>
                             <div class="modal-footer">
                               <button
