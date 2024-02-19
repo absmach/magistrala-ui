@@ -235,7 +235,7 @@ type Service interface {
 	// DomainLogin provides a user with an domain level access token and a refresh token.
 	DomainLogin(login sdk.Login, refreshToken string) (sdk.Token, error)
 	// UserProfile displays the user profile page.
-	UserProfile(token string) ([]byte, error)
+	UserProfile(token string) (sdk.User, error)
 
 	// CreateUsers creates new users.
 	CreateUsers(token string, users ...sdk.User) error
@@ -636,18 +636,19 @@ func (us *uiService) DomainLogin(login sdk.Login, refreshToken string) (sdk.Toke
 	return token, nil
 }
 
-func (us *uiService) UserProfile(token string) (b []byte, err error) {
+func (us *uiService) UserProfile(token string) (sdk.User, error) {
 	user, err := us.sdk.UserProfile(token)
 	if err != nil {
-		return nil, err
+		return sdk.User{}, err
 	}
 
-	jsonData, err := json.Marshal(user)
-	if err != nil {
-		return []byte{}, err
-	}
+	// jsonData, err := json.Marshal(userProfile)
+	// if err != nil {
+	// 	return []byte{}, err
+	// }
 
-	return jsonData, nil
+	// return jsonData, nil
+	return user, nil
 }
 
 func (us *uiService) CreateUsers(token string, users ...sdk.User) error {

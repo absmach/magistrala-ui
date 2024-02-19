@@ -410,7 +410,12 @@ SPDX-License-Identifier: Apache-2.0 -->
   </div>
 
   <script src="/js/listUtils.js"></script>
+  <script src="/js/cookie.js"></script>
   <script defer>
+    let user = JSON.parse(getCookie("user"));
+    console.log(getCookie("user"));
+    console.log(user);
+    console.log(user.name);
     var loginStatus = localStorage.getItem("loginStatus");
     var name = localStorage.getItem("userName");
     var identity = localStorage.getItem("userIdentity");

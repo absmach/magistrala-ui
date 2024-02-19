@@ -150,7 +150,7 @@ func (mm *metricsMiddleware) RefreshToken(refreshToken string) (sdk.Token, error
 }
 
 // UserProfile adds metrics middleware to user profile method.
-func (mm *metricsMiddleware) UserProfile(token string) ([]byte, error) {
+func (mm *metricsMiddleware) UserProfile(token string) (sdk.User, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "user_profile").Add(1)
 		mm.latency.With("method", "user_profile").Observe(time.Since(begin).Seconds())

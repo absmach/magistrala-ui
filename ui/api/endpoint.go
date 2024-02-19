@@ -5,6 +5,8 @@ package api
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -58,10 +60,10 @@ func registerUserEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		userPage, err := svc.UserProfile(token.AccessToken)
-		if err != nil {
-			return nil, err
-		}
+		// userPage, err := svc.UserProfile(token.AccessToken)
+		// if err != nil {
+		// 	return nil, err
+		// }
 
 		accessExp, err := extractTokenExpiry(token.AccessToken)
 		if err != nil {
@@ -74,7 +76,7 @@ func registerUserEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		tkr := uiRes{
 			code: http.StatusCreated,
-			html: userPage,
+			// html: userPage,
 			cookies: []*http.Cookie{
 				{
 					Name:     accessTokenKey,
@@ -282,9 +284,16 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
+		jsonUser, err := json.Marshal(user)
+		if err != nil {
+			return nil, err
+		}
+
+		usrString := string(jsonUser)
+		fmt.Println(usrString)
+
 		tkr := uiRes{
 			code: http.StatusCreated,
-			html: user,
 			cookies: []*http.Cookie{
 				{
 					Name:     accessTokenKey,
@@ -299,6 +308,11 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 					Path:     domainsAPIEndpoint,
 					HttpOnly: true,
 					Expires:  refreshExp,
+				},
+				{
+					Name:  "user",
+					Value: usrString,
+					Path:  "/",
 				},
 			},
 		}
