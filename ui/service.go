@@ -200,10 +200,10 @@ var (
 	ErrFailedDashboardUpdate   = errors.New("failed to update dashboard")
 	ErrFailedDashboardDelete   = errors.New("failed to delete dashboard")
 
-	emptyData      = struct{}{}
-	groupRelations = []string{"administrator", "editor", "viewer", "member"}
-	thingRelations = []string{"administrator"}
-	statusOptions  = []string{"all", "enabled", "disabled"}
+	emptyData       = struct{}{}
+	domainRelations = []string{"administrator", "editor", "viewer", "member"}
+	groupRelations  = []string{"administrator", "editor", "viewer"}
+	statusOptions   = []string{"all", "enabled", "disabled"}
 )
 
 // Service specifies service API.
@@ -986,7 +986,6 @@ func (us *uiService) ListThingUsers(token, id, relation string, page, limit uint
 		CollapseActive string
 		ThingID        string
 		Users          []sdk.User
-		Relations      []string
 		CurrentPage    int
 		Pages          int
 		Limit          int
@@ -998,7 +997,6 @@ func (us *uiService) ListThingUsers(token, id, relation string, page, limit uint
 		thingsActive,
 		id,
 		usersPage.Users,
-		thingRelations,
 		int(page),
 		noOfPages,
 		int(limit),
@@ -2136,7 +2134,6 @@ func (us *uiService) ListDomains(token, status string, page, limit uint64) ([]by
 		NavbarActive   string
 		CollapseActive string
 		Domains        []sdk.Domain
-		Relations      []string
 		CurrentPage    int
 		Pages          int
 		Limit          int
@@ -2147,7 +2144,6 @@ func (us *uiService) ListDomains(token, status string, page, limit uint64) ([]by
 		domainsActive,
 		domainsActive,
 		domainsPage.Domains,
-		groupRelations,
 		int(page),
 		noOfPages,
 		int(limit),
@@ -2313,7 +2309,7 @@ func (us *uiService) Members(token, domainID string, page, limit uint64) ([]byte
 		domainActive,
 		domainID,
 		membersPage.Users,
-		groupRelations,
+		domainRelations,
 		int(page),
 		noOfPages,
 		int(limit),
@@ -2382,7 +2378,7 @@ func (us *uiService) Invitations(token, domainID string, page, limit uint64) ([]
 		collapseActive,
 		domainID,
 		invitationsPage.Invitations,
-		groupRelations,
+		domainRelations,
 		int(page),
 		noOfPages,
 		int(limit),
