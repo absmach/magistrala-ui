@@ -89,10 +89,19 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       <script>
         function addToLocalStorage(id, name, alias, permission) {
-          localStorage.setItem("domainID", id);
-          localStorage.setItem("domainName", name);
-          localStorage.setItem("loginStatus", "domain");
-          localStorage.setItem("domainPermission", permission);
+          let domain = {
+            id: id,
+            name: name,
+            alias: alias,
+            loginStatus: "domain",
+            permission: permission,
+          };
+
+          // Encode the domain object to base64
+          var encodedDomain = btoa(JSON.stringify(domain));
+
+          // Add the encoded domain to browser cookies
+          document.cookie = "domain=" + encodedDomain + "; path=/";
         }
       </script>
     </body>

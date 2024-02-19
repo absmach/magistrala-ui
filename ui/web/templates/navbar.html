@@ -410,15 +410,22 @@ SPDX-License-Identifier: Apache-2.0 -->
   </div>
 
   <script src="/js/listUtils.js"></script>
+  <script src="/js/cookie.js"></script>
   <script defer>
-    var loginStatus = localStorage.getItem("loginStatus");
-    var name = localStorage.getItem("userName");
-    var identity = localStorage.getItem("userIdentity");
-    var domainID = localStorage.getItem("domainID");
-    var domainName = localStorage.getItem("domainName");
-    var domainPermission = localStorage.getItem("domainPermission");
+    let user = JSON.parse(atob(getCookie("user")));
+    let name = user.name;
+    let identity = user.credentials.identity;
+    let domain, domainID, domainName, domainPermission, loginStatus;
 
-    if (loginStatus === "general") {
+    if (getCookie("domain")) {
+      domain = JSON.parse(atob(getCookie("domain")));
+      domainID = domain.id;
+      domainName = domain.name;
+      domainPermission = domain.permission;
+      loginStatus = domain.loginStatus;
+    }
+
+    if (loginStatus !== "domain") {
       document.getElementById("domain-nav-item").style.display = "none";
       document.getElementById("things-nav-items").style.display = "none";
       document.getElementById("index-nav-items").style.display = "none";
@@ -466,7 +473,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         method: "GET",
       }).then((response) => {
         if (response.status === 200) {
-          localStorage.clear();
+          clearAllCookies();
           window.location.href = "/login";
         }
       });
