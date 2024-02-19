@@ -238,7 +238,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         // Create an object to store the form data
         var appFormData = {};
 
-        // Serialize the form data into the object
+        // Serialize the appearance form data into the object
         for (var i = 0; i < form.elements.length; i++) {
           var e = form.elements[i];
           if (e.type !== "submit" && e.type !== "button") {
@@ -251,7 +251,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         // Create an object to store the form data
         var dataFormData = {};
 
-        // Serialize the form data into the object
+        // Serialize the data form data into the object
         for (var i = 0; i < form.elements.length; i++) {
           var e = form.elements[i];
           if (e.type !== "submit" && e.type !== "button") {
@@ -418,7 +418,8 @@ SPDX-License-Identifier: Apache-2.0 -->
           Script: widgetScript,
         };
         addWidget(config);
-        metadata[widgetID] = dataFormData;
+        // Append chart metadata to dashboard metadata
+        metadataBuffer[widgetID] = dataFormData;
       });
   </script>
 {{ end }}

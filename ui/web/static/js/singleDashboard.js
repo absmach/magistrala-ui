@@ -98,12 +98,12 @@ function saveLayout(grid, dashboardID) {
     return value;
   });
 
-  console.log("metadata: ", metadata)
-  
+  upMetadata = updateMetadata(metadata, jsonString);
+
   const dashboard = {
     id: dashboardID,
     layout: jsonString,
-    metadata: JSON.stringify(metadata),
+    metadata: JSON.stringify(upMetadata),
   };
 
   fetch("/dashboards", {

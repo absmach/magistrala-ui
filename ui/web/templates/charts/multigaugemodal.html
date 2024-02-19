@@ -172,18 +172,31 @@ SPDX-License-Identifier: Apache-2.0 -->
     document.getElementById("create-multiGauge-button").addEventListener("click", function () {
       var form = document.getElementById("create-multiGaugeChart-appearance-form");
       // Create an object to store the form data
-      var formData = {};
+      var appFormData = {};
 
-      // Serialize the form data into the object
+      // Serialize the appearance form data into the object
       for (var i = 0; i < form.elements.length; i++) {
         var e = form.elements[i];
         if (e.type !== "submit" && e.type !== "button") {
-          formData[e.name] = e.value;
+          appFormData[e.name] = e.value;
         }
       }
       form.reset();
 
-      gaugeLabel = formData.gaugeLabel.split(",");
+      form = document.getElementById("create-multiGaugeChart-data-form");
+      // Create an object to store the form data
+      var dataFormData = {};
+
+      // Serialize the data form data into the object
+      for (var i = 0; i < form.elements.length; i++) {
+        var e = form.elements[i];
+        if (e.type !== "submit" && e.type !== "button") {
+          dataFormData[e.name] = e.value;
+        }
+      }
+      form.reset();
+
+      gaugeLabel = appFormData.gaugeLabel.split(",");
 
       var widgetID = "multiGauge-" + Date.now();
       var widgetScript = `
@@ -225,14 +238,14 @@ SPDX-License-Identifier: Apache-2.0 -->
       ];
       var option = {
         title: {
-          text: '${formData.title}',
+          text: '${appFormData.title}',
           left: 'center'
         },
         series: [
           {
             type: "gauge",
-            min: ${formData.minValue},
-            max: ${formData.maxValue},
+            min: ${appFormData.minValue},
+            max: ${appFormData.maxValue},
             pointer: {
               show: false
             },
@@ -287,6 +300,8 @@ SPDX-License-Identifier: Apache-2.0 -->
         Script: widgetScript,
       };
       addWidget(config);
+      // Append chart metadata to dashboard metadata
+      metadataBuffer[widgetID] = dataFormData;
     });
   </script>
 {{ end }}

@@ -211,25 +211,38 @@ SPDX-License-Identifier: Apache-2.0 -->
     document.getElementById("create-doubleBarChart-button").addEventListener("click", function () {
       var form = document.getElementById("create-doubleBarChart-appearance-form");
       // Create an object to store the form data
-      var formData = {};
+      var appFormData = {};
 
-      // Serialize the form data into the object
+      // Serialize the appearnce form data into the object
       for (var i = 0; i < form.elements.length; i++) {
         var e = form.elements[i];
         if (e.type !== "submit" && e.type !== "button") {
-          formData[e.name] = e.value;
+          appFormData[e.name] = e.value;
         }
       }
       form.reset();
 
-      seriesName = formData.seriesName.split(",");
+      form = document.getElementById("create-doubleBarChart-data-form");
+      // Create an object to store the form data
+      var dataFormData = {};
+
+      // Serialize the data form data into the object
+      for (var i = 0; i < form.elements.length; i++) {
+        var e = form.elements[i];
+        if (e.type !== "submit" && e.type !== "button") {
+          dataFormData[e.name] = e.value;
+        }
+      }
+      form.reset();
+
+      seriesName = appFormData.seriesName.split(",");
 
       var widgetID = "doubleBarchart-" + Date.now();
       var widgetScript = `
         var doubleBarChart = echarts.init(document.getElementById("${widgetID}"));
         var option = {
           title: {
-            text: '${formData.title}',
+            text: '${appFormData.title}',
             left: 'left'
           },
           tooltip: {
@@ -254,7 +267,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               type: 'category',
               // prettier-ignore
               data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-              name: '${formData.xAxisLabel}',
+              name: '${appFormData.xAxisLabel}',
               nameLocation: 'middle',
               nameGap: 30
             }
@@ -262,7 +275,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           yAxis: [
             {
               type: 'value',
-              name: '${formData.yAxisLabel}',
+              name: '${appFormData.yAxisLabel}',
               nameLocation: 'middle',
               nameGap: 40
             }
@@ -310,6 +323,8 @@ SPDX-License-Identifier: Apache-2.0 -->
         Script: widgetScript,
       };
       addWidget(config);
+      // Append chart metadata to dashboard metadata
+      metadataBuffer[widgetID] = dataFormData;
     });
   </script>
 {{ end }}

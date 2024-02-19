@@ -217,25 +217,38 @@ SPDX-License-Identifier: Apache-2.0 -->
       .addEventListener("click", function () {
         var form = document.getElementById("create-multipleLineChart-appearance-form");
         // Create an object to store the form data
-        var formData = {};
+        var appFormData = {};
 
         // Serialize the form data into the object
         for (var i = 0; i < form.elements.length; i++) {
           var e = form.elements[i];
           if (e.type !== "submit" && e.type !== "button") {
-            formData[e.name] = e.value;
+            appFormData[e.name] = e.value;
           }
         }
         form.reset();
 
-        seriesName = formData.seriesName.split(",");
+        form = document.getElementById("create-multipleLineChart-data-form");
+        // Create an object to store the form data
+        var dataFormData = {};
+
+        // Serialize the form data into the object
+        for (var i = 0; i < form.elements.length; i++) {
+          var e = form.elements[i];
+          if (e.type !== "submit" && e.type !== "button") {
+            dataFormData[e.name] = e.value;
+          }
+        }
+        form.reset();
+
+        seriesName = appFormData.seriesName.split(",");
 
         var widgetID = "multipleLinechart-" + Date.now();
         var widgetScript = `
       var multipleLineChart = echarts.init(document.getElementById("${widgetID}"));
       var option = {
         title: {
-          text: '${formData.title}',
+          text: '${appFormData.title}',
           left: 'left'
         },
         legend: {
@@ -245,13 +258,13 @@ SPDX-License-Identifier: Apache-2.0 -->
         xAxis: {
           type: 'category',
           data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-          name: '${formData.xAxisLabel}',
+          name: '${appFormData.xAxisLabel}',
           nameLocation: 'middle',
           nameGap: 30
         },
         yAxis: {
           type: 'value',
-          name: '${formData.yAxisLabel}',
+          name: '${appFormData.yAxisLabel}',
           nameLocation: 'middle',
           nameGap: 40
         },
@@ -281,6 +294,8 @@ SPDX-License-Identifier: Apache-2.0 -->
           Script: widgetScript,
         };
         addWidget(config);
+        // Append chart metadata to dashboard metadata
+        metadataBuffer[widgetID] = dataFormData;
       });
   </script>
 {{ end }}

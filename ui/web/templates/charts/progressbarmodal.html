@@ -172,13 +172,26 @@ SPDX-License-Identifier: Apache-2.0 -->
     document.getElementById("create-progressBar-button").addEventListener("click", function () {
       var form = document.getElementById("create-progressBar-appearance-form");
       // Create an object to store the form data
-      var formData = {};
+      var appFormData = {};
 
-      // Serialize the form data into the object
+      // Serialize the appearance form data into the object
       for (var i = 0; i < form.elements.length; i++) {
         var e = form.elements[i];
         if (e.type !== "submit" && e.type !== "button") {
-          formData[e.name] = e.value;
+          appFormData[e.name] = e.value;
+        }
+      }
+      form.reset();
+
+      form = document.getElementById("create-progressBar-data-form");
+      // Create an object to store the form data
+      var dataFormData = {};
+
+      // Serialize the data form data into the object
+      for (var i = 0; i < form.elements.length; i++) {
+        var e = form.elements[i];
+        if (e.type !== "submit" && e.type !== "button") {
+          dataFormData[e.name] = e.value;
         }
       }
       form.reset();
@@ -187,11 +200,11 @@ SPDX-License-Identifier: Apache-2.0 -->
       var widgetContent = `
         <div class="card widgetcard">
           <div class="card-header text-center">
-            <h5 class="card-title">${formData.title}</h5>
+            <h5 class="card-title">${appFormData.title}</h5>
           </div>
           <div class="card-body p-2">
             <div class="progress">
-              <div class="progress-bar ${formData.progressBarColor}" role="progressbar" style="width: 70%" aria-valuemin=${formData.minValue} aria-valuemax=${formData.maxValue}></div>
+              <div class="progress-bar ${appFormData.progressBarColor}" role="progressbar" style="width: 70%" aria-valuemin=${appFormData.minValue} aria-valuemax=${appFormData.maxValue}></div>
             </div>
           </div>
           <div class="card-footer text-center">
@@ -210,6 +223,8 @@ SPDX-License-Identifier: Apache-2.0 -->
         },
       };
       addWidget(config);
+      // Append chart metadata to dashboard metadata
+      metadataBuffer[widgetID] = dataFormData;
     });
   </script>
 {{ end }}
