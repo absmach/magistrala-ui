@@ -41,7 +41,7 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
-	github.com/jackc/pgx/v5 v5.5.2
+	github.com/jackc/pgx/v5 v5.5.3
 	github.com/mainflux/export v0.1.1-0.20230724124847-67d0bc7f38cb // indirect
 	github.com/mainflux/mainflux v0.12.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
