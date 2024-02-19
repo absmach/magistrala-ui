@@ -56,7 +56,7 @@ const (
 	loginAPIEndpoint        = "/login"
 	tokenRefreshAPIEndpoint = "/token/refresh"
 	domainsAPIEndpoint      = "/domains"
-	errorsAPIEndpoint       = "error"
+	errorAPIEndpoint        = "error"
 	thingsItem              = "things"
 	channelsItem            = "channels"
 	groupsItem              = "groups"
@@ -2426,7 +2426,7 @@ func TokenMiddleware(next http.Handler) http.Handler {
 		// Parse the token without validation to get the expiration time
 		token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
 		if err != nil {
-			http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorsAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
+			http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
 			return
 		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
@@ -2449,7 +2449,7 @@ func domainLoginMiddleware(next http.Handler) http.Handler {
 
 		token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
 		if err != nil {
-			http.Redirect(w, r, "/error?error="+url.QueryEscape(err.Error()), http.StatusSeeOther)
+			http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
 			return
 		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
@@ -2591,7 +2591,7 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		errors.Contains(err, ui.ErrFailedDashboardDelete),
 		errors.Contains(err, ui.ErrFailedDashboardUpdate),
 		errors.Contains(err, ui.ErrFailedDashboardRetrieve):
-		w.Header().Set("Location", fmt.Sprintf("/%s?error=%s", errorsAPIEndpoint, url.QueryEscape(displayError.Error())))
+		w.Header().Set("Location", fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(displayError.Error())))
 		w.WriteHeader(http.StatusSeeOther)
 	default:
 		if e, ok := status.FromError(err); ok {
