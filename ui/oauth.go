@@ -15,6 +15,7 @@ const authEndpoint = "/oauth2/auth"
 var scopes = []string{
 	"email",
 	"profile",
+	"offline_access",
 }
 
 type KratosConfig struct {
