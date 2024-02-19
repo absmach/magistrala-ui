@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="entityCountModalLabel">Entity count card</h5>
+          <h5 class="modal-title" id="entityCountModalLabel">Entity Count Card</h5>
           <button
             type="button"
             class="btn-close"
@@ -25,34 +25,26 @@ SPDX-License-Identifier: Apache-2.0 -->
         <form id="create-entityCount-form">
           <div class="modal-body">
             <div class="mb-3">
-              <label for="title" class="form-label">Title</label>
-              <input
-                type="text"
-                class="form-control"
-                name="title"
-                id="title"
-                placeholder="Enter the chart title"
-              />
-            </div>
-            <div class="mb-3">
               <label for="channel-id" class="form-label">Channel ID</label>
               <input
                 type="text"
                 class="form-control mb-3"
                 name="channel"
                 id="channel-id"
-                placeholder="Enter channel ID"
+                placeholder="Enter the channel ID"
+                required
               />
             </div>
             <div class="mb-3">
-              <label for="y-axis" class="form-label">Select y-axis Type</label>
-              <select class="form-select mb-3" name="yAxisType" id="y-axis">
-                <option value="" disabled>Select y-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
+              <label for="thing-id" class="form-label">Domain ID</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="domain"
+                id="domain-id"
+                placeholder="Enter the domain ID"
+                required
+              />
             </div>
           </div>
           <div class="modal-footer">
@@ -103,13 +95,13 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
         `;
       var config = {
-          ID: widgetID,
-          Content: widgetContent,
-          Style:{
-            width: "300px",
-            height: "170px"
-          }
-        };
+        ID: widgetID,
+        Content: widgetContent,
+        Style: {
+          width: "300px",
+          height: "170px",
+        },
+      };
       addWidget(config);
     });
   </script>

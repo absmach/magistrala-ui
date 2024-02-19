@@ -22,114 +22,265 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form id="create-multipleLineChart-form">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="title" class="form-label">Title</label>
-              <input
-                type="text"
-                class="form-control"
-                name="title"
-                id="title"
-                placeholder="Enter the chart title"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="channel-id" class="form-label">Channel ID</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="channel"
-                id="channel-id"
-                placeholder="Enter channel ID"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="x-axis" class="form-label">Select x-axis Type</label>
-              <select class="form-select mb-3" name="xAxisType" id="x-axis">
-                <option value="" disabled>Select x-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="y-axis" class="form-label">Select y-axis Type</label>
-              <select class="form-select mb-3" name="yAxisType" id="y-axis">
-                <option value="" disabled>Select y-axis Type</option>
-                <option value="value">Value</option>
-                <option value="category">Category</option>
-                <option value="time">Time</option>
-                <option value="log">Log</option>
-              </select>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button
-              type="button"
-              class="btn body-button"
-              id="create-multipleLineChart-button"
-              data-bs-dismiss="modal"
+        <div class="modal-body">
+          <!-- Tab Navs -->
+          <ul class="nav nav-tabs mb-3" id="chartTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active"
+                id="data-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#multipleLineChartData"
+                type="button"
+                role="tab"
+                aria-controls="data"
+                aria-selected="true"
+              >
+                Data
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="appearance-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#multipleLineChartAppearance"
+                type="button"
+                role="tab"
+                aria-controls="appearance"
+                aria-selected="false"
+              >
+                Appearance
+              </button>
+            </li>
+          </ul>
+          <!-- Tab Content -->
+          <div class="tab-content" id="myTabContent">
+            <!-- Data Tab -->
+            <div
+              class="tab-pane fade show active"
+              id="multipleLineChartData"
+              role="tabpanel"
+              aria-labelledby="data-tab"
             >
-              Create Chart
-            </button>
+              <form id="create-multipleLineChart-data-form">
+                <div class="mb-3">
+                  <label for="channel-id" class="form-label">Channel ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="channel"
+                    id="channel-id"
+                    placeholder="Enter the channel ID"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="thing-id" class="form-label">Thing ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="thing"
+                    id="thing-id"
+                    placeholder="Enter the thing ID"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="value-name" class="form-label">Value name</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="valueName"
+                    id="value-name"
+                    placeholder="Enter the value name eg. temperature"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="start-time" class="form-label">Start time</label>
+                  <input
+                    type="datetime-local"
+                    class="form-control mb-3"
+                    name="startTime"
+                    id="start-name"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="stop-time" class="form-label">Stop time</label>
+                  <input
+                    type="datetime-local"
+                    class="form-control mb-3"
+                    name="stopTime"
+                    id="stop-name"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="time-interval" class="form-label">Time interval</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="timeInterval"
+                    id="time-interval"
+                    placeholder="Enter the time interval in seconds"
+                    required
+                  />
+                </div>
+              </form>
+            </div>
+            <!-- Appearance Tab -->
+            <div
+              class="tab-pane fade"
+              id="multipleLineChartAppearance"
+              role="tabpanel"
+              aria-labelledby="appearance-tab"
+            >
+              <form id="create-multipleLineChart-appearance-form">
+                <div class="mb-3">
+                  <label for="title" class="form-label">Title</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="title"
+                    id="title"
+                    placeholder="Enter the chart title"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="y-axis-label" class="form-label">Y axis label</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="yAxisLabel"
+                    id="y-axis-label"
+                    placeholder="Enter the y axis label"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="x-axis-label" class="form-label">X axis label</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="xAxisLabel"
+                    id="x-axis-label"
+                    placeholder="Enter the x axis label"
+                    default="Time"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="series-name" class="form-label">Series name</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="seriesName"
+                    id="series-name"
+                    placeholder="Enter the series name eg. temperature,voltage"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="line-width" class="form-label">Line width</label>
+                  <select class="form-select mb-3" name="lineWidth" id="line-width">
+                    <option value="" disabled>Select the line width</option>
+                    <option value="0.5">0.5</option>
+                    <option value="1.0">1.0</option>
+                    <option value="1.5">1.5</option>
+                    <option value="2.0">2.0</option>
+                    <option value="2.5">2.5</option>
+                    <option value="3.0">3.0</option>
+                    <option value="3.5">3.5</option>
+                  </select>
+                </div>
+              </form>
+            </div>
           </div>
-        </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button
+            type="button"
+            class="btn body-button"
+            id="create-multipleLineChart-button"
+            data-bs-dismiss="modal"
+          >
+            Create Chart
+          </button>
+        </div>
       </div>
     </div>
   </div>
   <script>
     // multiple line chart form
-    document.getElementById("create-multipleLineChart-button").addEventListener("click", function () {
-      var form = document.getElementById("create-multipleLineChart-form");
-      // Create an object to store the form data
-      var formData = {};
+    document
+      .getElementById("create-multipleLineChart-button")
+      .addEventListener("click", function () {
+        var form = document.getElementById("create-multipleLineChart-appearance-form");
+        // Create an object to store the form data
+        var formData = {};
 
-      // Serialize the form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          formData[e.name] = e.value;
+        // Serialize the form data into the object
+        for (var i = 0; i < form.elements.length; i++) {
+          var e = form.elements[i];
+          if (e.type !== "submit" && e.type !== "button") {
+            formData[e.name] = e.value;
+          }
         }
-      }
-      form.reset();
+        form.reset();
 
-      var widgetID = "multipleLinechart-" + Date.now();
-      var widgetScript = `
+        seriesName = formData.seriesName.split(",");
+
+        var widgetID = "multipleLinechart-" + Date.now();
+        var widgetScript = `
       var multipleLineChart = echarts.init(document.getElementById("${widgetID}"));
       var option = {
+        title: {
+          text: '${formData.title}',
+          left: 'left'
+        },
+        legend: {
+          show: true,
+          left: 'right',
+        },
         xAxis: {
           type: 'category',
-          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+          name: '${formData.xAxisLabel}',
+          nameLocation: 'middle',
+          nameGap: 30
         },
         yAxis: {
-          type: 'value'
+          type: 'value',
+          name: '${formData.yAxisLabel}',
+          nameLocation: 'middle',
+          nameGap: 40
         },
         series: [
           {
             data: [150, 230, 224, 218, 135, 147, 260],
-            type: 'line'
+            type: 'line',
+            name: '${seriesName[0]}',
           },
           {
             data: [10, 200, 300, 75, 68, 34, 192],
-            type: 'line'
+            type: 'line',
+            name: '${seriesName[1]}',
           },
           {
             data: [300, 270, 230, 155, 268, 234, 112],
-            type: 'line'
+            type: 'line',
+            name: '${seriesName[2]}',
           },
         ]
       };
 
       multipleLineChart.setOption(option);`;
 
-    var config = {
-      ID: widgetID,
-      Script: widgetScript,
-    }
-    addWidget(config);
-    });
+        var config = {
+          ID: widgetID,
+          Script: widgetScript,
+        };
+        addWidget(config);
+      });
   </script>
 {{ end }}

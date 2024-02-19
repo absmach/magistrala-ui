@@ -22,56 +22,154 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form id="create-valueCard-form">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="title" class="form-label">Title</label>
-              <input
-                type="text"
-                class="form-control"
-                name="title"
-                id="title"
-                placeholder="Enter the chart title"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="channel-id" class="form-label">Channel ID</label>
-              <input
-                type="text"
-                class="form-control mb-3"
-                name="channel"
-                id="channel-id"
-                placeholder="Enter channel ID"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="value" class="form-label">Select Value</label>
-              <select class="form-select mb-3" name="Value" id="value">
-                <option value="value">Temperature</option>
-                <option value="time">Time</option>
-                <option value="log">Pressure</option>
-              </select>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button
-              type="button"
-              class="btn body-button"
-              data-bs-dismiss="modal"
-              id="create-valueCard-button"
+        <div class="modal-body">
+          <!-- Tab Navs -->
+          <ul class="nav nav-tabs mb-3" id="chartTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active"
+                id="data-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#valueCardData"
+                type="button"
+                role="tab"
+                aria-controls="data"
+                aria-selected="true"
+              >
+                Data
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="appearance-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#valueCardAppearance"
+                type="button"
+                role="tab"
+                aria-controls="appearance"
+                aria-selected="false"
+              >
+                Appearance
+              </button>
+            </li>
+          </ul>
+          <!-- Tab Content -->
+          <div class="tab-content" id="myTabContent">
+            <!-- Data Tab -->
+            <div
+              class="tab-pane fade show active"
+              id="valueCardData"
+              role="tabpanel"
+              aria-labelledby="data-tab"
             >
-              Create Chart
-            </button>
+              <form id="create-valueCard-data-form">
+                <div class="mb-3">
+                  <label for="channel-id" class="form-label">Channel ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="channel"
+                    id="channel-id"
+                    placeholder="Enter the channel ID"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="thing-id" class="form-label">Thing ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="thing"
+                    id="thing-id"
+                    placeholder="Enter the thing ID"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="value-name" class="form-label">Value name</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="valueName"
+                    id="value-name"
+                    placeholder="Enter the value name eg. temperature"
+                    required
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="update-interval" class="form-label">Update interval</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="updateInterval"
+                    id="update-interval"
+                    placeholder="Enter the update interval in seconds"
+                    required
+                  />
+                </div>
+              </form>
+            </div>
+            <!-- Appearance Tab -->
+            <div
+              class="tab-pane fade"
+              id="valueCardAppearance"
+              role="tabpanel"
+              aria-labelledby="appearance-tab"
+            >
+              <form id="create-valueCard-appearance-form">
+                <div class="mb-3">
+                  <label for="title" class="form-label">Title</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    name="title"
+                    id="title"
+                    placeholder="Enter the chart title"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="thing-name" class="form-label">Thing Name</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="thingName"
+                    id="thing-name"
+                    placeholder="Enter the thing name"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="value-units" class="form-label">Units</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="valueUnits"
+                    id="value-units"
+                    placeholder="Enter the units"
+                  />
+                </div>
+              </form>
+            </div>
           </div>
-        </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button
+            type="button"
+            class="btn body-button"
+            id="create-valueCard-button"
+            data-bs-dismiss="modal"
+          >
+            Create Chart
+          </button>
+        </div>
       </div>
     </div>
   </div>
   <script>
     // Value card form
     document.getElementById("create-valueCard-button").addEventListener("click", function () {
-      var form = document.getElementById("create-valueCard-form");
+      var form = document.getElementById("create-valueCard-appearance-form");
       // Create an object to store the form data
       var formData = {};
 
@@ -88,14 +186,14 @@ SPDX-License-Identifier: Apache-2.0 -->
       var widgetContent = `
         <div class="card mt-3 widgetcard" >
           <div class="card-header text-center">
-            <h5 class="card-title">Temperature</h5>
+            <h5 class="card-title">${formData.title}</h5>
           </div>
           <div class="card-body text-center">
             <p class="card-text value"> 35</p>
           </div>
           <div class="card-footer">
-            <p class="card-text"> Units: °C</p>
-            <p class="card-text text"> ChannelID: </p>
+            <p class="card-text"> Units: ${formData.valueUnits}</p>
+            <p class="card-text text"> ThingName: ${formData.thingName}</p>
           </div>
         </div>
       `;

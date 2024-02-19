@@ -25,16 +25,6 @@ SPDX-License-Identifier: Apache-2.0 -->
         <form id="create-label-form">
           <div class="modal-body">
             <div class="mb-3">
-              <label for="title" class="form-label">Title</label>
-              <input
-                type="text"
-                class="form-control"
-                name="title"
-                id="title"
-                placeholder="Enter the chart title"
-              />
-            </div>
-            <div class="mb-3">
               <label for="channel-id" class="form-label">Channel ID</label>
               <input
                 type="text"
@@ -45,12 +35,15 @@ SPDX-License-Identifier: Apache-2.0 -->
               />
             </div>
             <div class="mb-3">
-              <label for="value" class="form-label">Select Value</label>
-              <select class="form-select mb-3" name="Value" id="value">
-                <option value="value">Temperature</option>
-                <option value="time">Time</option>
-                <option value="log">Pressure</option>
-              </select>
+              <label for="thing-id" class="form-label">Thing ID</label>
+              <input
+                type="text"
+                class="form-control mb-3"
+                name="thing"
+                id="thing-id"
+                placeholder="Enter the thing ID"
+                required
+              />
             </div>
           </div>
           <div class="modal-footer">
@@ -99,13 +92,13 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
       `;
       var config = {
-          ID: widgetID,
-          Content: widgetContent,
-          Style:{
-            width: "300px",
-            height: "170px"
-          }
-        };
+        ID: widgetID,
+        Content: widgetContent,
+        Style: {
+          width: "300px",
+          height: "170px",
+        },
+      };
       addWidget(config);
     });
   </script>
