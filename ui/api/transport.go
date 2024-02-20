@@ -56,7 +56,7 @@ const (
 	loginAPIEndpoint        = "/login"
 	tokenRefreshAPIEndpoint = "/token/refresh"
 	domainsAPIEndpoint      = "/domains"
-	errorsAPIEndpoint       = "error?error="
+	errorsAPIEndpoint       = "error"
 	thingsItem              = "things"
 	channelsItem            = "channels"
 	groupsItem              = "groups"
@@ -2379,26 +2379,29 @@ func tokenFromCookie(r *http.Request, cookie string) (string, error) {
 
 func AdminAuthOMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var err error
+		defer func() {
+			if err != nil {
+				http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorsAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
+			}
+		}()
 		tokenString, err := tokenFromCookie(r, "user")
 		if err != nil {
-			http.Redirect(w, r, "/"+errorsAPIEndpoint+url.QueryEscape(err.Error()), http.StatusSeeOther)
 			return
 		}
 
 		decodedUser, err := base64.StdEncoding.DecodeString(tokenString)
 		if err != nil {
-			http.Redirect(w, r, "/"+errorsAPIEndpoint+url.QueryEscape(err.Error()), http.StatusSeeOther)
 			return
 		}
 
 		var user sdk.User
 		if err = json.Unmarshal(decodedUser, &user); err != nil {
-			http.Redirect(w, r, "/"+errorsAPIEndpoint+url.QueryEscape(err.Error()), http.StatusSeeOther)
 			return
 		}
 
 		if user.Role != "admin" {
-			http.Redirect(w, r, "/"+errorsAPIEndpoint+url.QueryEscape(errors.ErrAuthorization.Error()), http.StatusSeeOther)
+			err = errors.ErrAuthorization
 			return
 		}
 
@@ -2421,7 +2424,7 @@ func TokenMiddleware(next http.Handler) http.Handler {
 		// Parse the token without validation to get the expiration time
 		token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
 		if err != nil {
-			http.Redirect(w, r, "/"+errorsAPIEndpoint+url.QueryEscape(err.Error()), http.StatusSeeOther)
+			http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorsAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
 			return
 		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
@@ -2563,7 +2566,7 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		errors.Contains(err, ui.ErrFailedDashboardDelete),
 		errors.Contains(err, ui.ErrFailedDashboardUpdate),
 		errors.Contains(err, ui.ErrFailedDashboardRetrieve):
-		w.Header().Set("Location", "/"+errorsAPIEndpoint+url.QueryEscape(displayError.Error()))
+		w.Header().Set("Location", fmt.Sprintf("/%s?error=%s", errorsAPIEndpoint, url.QueryEscape(displayError.Error())))
 		w.WriteHeader(http.StatusSeeOther)
 	default:
 		if e, ok := status.FromError(err); ok {
