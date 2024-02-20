@@ -5,6 +5,7 @@ package api
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
@@ -225,6 +226,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 		).ServeHTTP)
 
 		r.Route("/users", func(r chi.Router) {
+			r.Use(AdminAuthOMiddleware)
 			r.Post("/", kithttp.NewServer(
 				createUserEndpoint(svc),
 				decodeUserCreation,
@@ -2372,6 +2374,35 @@ func tokenFromCookie(r *http.Request, cookie string) (string, error) {
 	}
 
 	return c.Value, nil
+}
+
+func AdminAuthOMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tokenString, err := tokenFromCookie(r, "user")
+		if err != nil {
+			http.Redirect(w, r, "/error?error="+url.QueryEscape(err.Error()), http.StatusSeeOther)
+			return
+		}
+
+		decodedUser, err := base64.StdEncoding.DecodeString(tokenString)
+		if err != nil {
+			http.Redirect(w, r, "/error?error="+url.QueryEscape(err.Error()), http.StatusSeeOther)
+			return
+		}
+
+		var user sdk.User
+		if err = json.Unmarshal(decodedUser, &user); err != nil {
+			http.Redirect(w, r, "/error?error="+url.QueryEscape(err.Error()), http.StatusSeeOther)
+			return
+		}
+
+		if user.Role != "admin" {
+			http.Redirect(w, r, "/error?error="+url.QueryEscape(errors.ErrAuthorization.Error()), http.StatusSeeOther)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
 }
 
 func TokenMiddleware(next http.Handler) http.Handler {
