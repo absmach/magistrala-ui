@@ -349,3 +349,7 @@ function removeNoWidgetPlaceholder() {
   const noWidgetPlaceholder = document.querySelector(".no-widget-placeholder");
   noWidgetPlaceholder.remove();
 }
+
+function clearCanvas() {
+  grid.remove(grid.getItems(), { removeElements: true });
+}
