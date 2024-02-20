@@ -18,8 +18,8 @@ SPDX-License-Identifier: Apache-2.0 -->
     <body>
       {{ template "navbar" . }}
       <div class="main-content pt-3">
-        <div class="container">
-          <div class="row">
+        <div class="container-fluid">
+          <div class="row-mb-3 p-3">
             <div class="col-lg-12 mx-auto py-3">
               {{ template "breadcrumb" . }}
               <div class="row">
@@ -54,47 +54,69 @@ SPDX-License-Identifier: Apache-2.0 -->
                     </button>
                   </div>
                 </div>
-                <div class="row p-3 bg-white dashboard-canvas min-vh-50">
-                  <div class="no-widget-placeholder row align-items-center"></div>
-                  <div class="grid"></div>
+                <div class="row-mb-3 display-none" id="CanvasButtons">
+                  <button
+                    type="button"
+                    class="btn body-button"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#widgetsCanvas"
+                    aria-controls="widgetsCanvas"
+                  >
+                    Add Widgets
+                  </button>
+                  <button type="button" class="btn body-button" onclick="saveCanvas()">
+                    Save Layout
+                  </button>
+                  <button type="button" class="btn body-button" onclick="cancelEdit()">
+                    Cancel
+                  </button>
                 </div>
+                <div id="editableCanvasButton">
+                  <button type="button" class="btn body-button" onclick="editableCanvas()">
+                    Edit Canvas
+                  </button>
+                </div>
+              </div>
+              <div class="row bg-white dashboard-canvas ">
+                <div class="no-widget-placeholder row align-items-center"></div>
+                <div class="grid"></div>
+              </div>
 
-                <!-- Off canvas containing the chart widgets -->
-                <div
-                  class="offcanvas offcanvas-end"
-                  data-bs-scroll="true"
-                  data-bs-backdrop="false"
-                  tabindex="-1"
-                  id="widgetsCanvas"
-                  aria-labelledby="widgetsCanvasLabel"
-                >
-                  <div class="offcanvas-header">
-                    <h5 id="widgetsCanvasLabel">Widgets</h5>
-                    <button
-                      type="button"
-                      class="btn-close"
-                      data-bs-dismiss="offcanvas"
-                      aria-label="Close"
-                    ></button>
-                  </div>
-                  <div class="offcanvas-body">
-                    {{ range $chart := .Charts }}
-                      <div
-                        class="card widget-card mb-3"
-                        onclick="openWidgetModal('{{ $chart.Widget }}')"
-                      >
-                        <div class="card-body">
-                          <div class="card-title">
-                            {{ $chart.Title }}
-                          </div>
-                          <div class="card-text">
-                            {{ $chart.Content }}
-                          </div>
-                          <img src="{{ $chart.Image }}" class="card-img" alt="" />
+              <!-- Off canvas containing the chart widgets -->
+              <div
+                class="offcanvas offcanvas-end"
+                data-bs-scroll="true"
+                data-bs-backdrop="false"
+                tabindex="-1"
+                id="widgetsCanvas"
+                aria-labelledby="widgetsCanvasLabel"
+              >
+                <div class="offcanvas-header">
+                  <h5 id="widgetsCanvasLabel">Widgets</h5>
+                  <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="offcanvas"
+                    aria-label="Close"
+                  ></button>
+                </div>
+                <div class="offcanvas-body">
+                  {{ range $chart := .Charts }}
+                    <div
+                      class="card widget-card mb-3"
+                      onclick="openWidgetModal('{{ $chart.Widget }}')"
+                    >
+                      <div class="card-body">
+                        <div class="card-title">
+                          {{ $chart.Title }}
                         </div>
+                        <div class="card-text">
+                          {{ $chart.Content }}
+                        </div>
+                        <img src="{{ $chart.Image }}" class="card-img" alt="" />
                       </div>
-                    {{ end }}
-                  </div>
+                    </div>
+                  {{ end }}
                 </div>
               </div>
 
