@@ -83,7 +83,6 @@ function saveLayout(grid, dashboardID) {
 
   const gridState = {
     items: itemData,
-    layout: grid._layout,
     settings: {
       dragEnabled: grid._settings.dragEnabled,
       // Add other relevant settings if needed
@@ -131,9 +130,6 @@ function loadLayout(savedLayout) {
     grid = new Muuri(gridClass, {
       dragEnabled: gridState.settings.dragEnabled,
       dragHandle: ".item-content",
-      layout: {
-        fillGaps: true,
-      },
     });
 
     if (gridState.items.length === 0) {
@@ -154,7 +150,7 @@ function loadLayout(savedLayout) {
     }
 
     // Layout the grid
-    grid.layout(gridState.layout);
+    grid.layout();
   } catch (error) {
     console.error("Error loading grid state:", error);
   }
@@ -171,9 +167,6 @@ function editGrid(grid, layout) {
     grid = new Muuri(gridClass, {
       dragEnabled: true,
       dragHandle: ".item-content",
-      layout: {
-        fillGaps: true,
-      },
     });
     if (layout) {
       const gridState = JSON.parse(layout);
@@ -192,7 +185,7 @@ function editGrid(grid, layout) {
           grid.add(newItem);
           resizeObserver.observe(newItem);
         });
-        grid.layout(gridState.layout);
+        grid.layout();
       }
     }
   } catch (error) {
