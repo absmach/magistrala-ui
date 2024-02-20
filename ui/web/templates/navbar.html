@@ -154,7 +154,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       </div>
     </li>
 
-    <li class="nav-item mb-2 mx-2">
+    <li id="users-nav-items" class="nav-item mb-2 mx-2">
       {{ $navbarActive = "users" }}
       <a
         href="/users"
@@ -416,6 +416,10 @@ SPDX-License-Identifier: Apache-2.0 -->
     let name = user.name;
     let identity = user.credentials.identity;
     let domain, domainID, domainName, domainPermission, loginStatus;
+
+    if (user.role !== "admin") {
+      document.getElementById("users-nav-items").style.display = "none";
+    }
 
     if (getCookie("domain")) {
       domain = JSON.parse(atob(getCookie("domain")));

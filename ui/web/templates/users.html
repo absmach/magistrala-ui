@@ -244,18 +244,15 @@ SPDX-License-Identifier: Apache-2.0 -->
       </div>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
-          const userRole = localStorage.getItem("userRole");
-          if (userRole === "admin") {
-            var table = document.getElementById("itemsTable");
-            var rows = table.querySelectorAll("tbody tr");
-            rows.forEach(function (row) {
-              var userID = row.querySelector(".userID").textContent.trim();
-              row.onclick = () => {
-                window.location.href = "/users/" + userID;
-              };
-              row.classList.add("clickable-row");
-            });
-          }
+          var table = document.getElementById("itemsTable");
+          var rows = table.querySelectorAll("tbody tr");
+          rows.forEach(function (row) {
+            var userID = row.querySelector(".userID").textContent.trim();
+            row.onclick = () => {
+              window.location.href = "/users/" + userID;
+            };
+            row.classList.add("clickable-row");
+          });
         });
         const userModal = new bootstrap.Modal(document.getElementById("addUserModal"));
         const usersModal = new bootstrap.Modal(document.getElementById("addUsersModal"));
