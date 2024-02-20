@@ -165,6 +165,14 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 			encodeResponse,
 			opts...,
 		).ServeHTTP))
+
+		r.Get("/data", kithttp.NewServer(
+			fetchReaderDataEndpoint(svc),
+			decodeFetchReaderDataRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
+
 		r.Route("/dashboards", func(r chi.Router) {
 			r.Get("/{id}", kithttp.NewServer(
 				viewDashboardEndpoint(svc),
@@ -836,6 +844,37 @@ func decodeIndexRequest(_ context.Context, r *http.Request) (interface{}, error)
 
 func decodeViewRegistrationRequest(_ context.Context, _ *http.Request) (interface{}, error) {
 	return nil, nil
+}
+
+func decodeFetchReaderDataRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	token, err := tokenFromCookie(r, "token")
+	if err != nil {
+		return nil, err
+	}
+
+	page, err := readNumQuery[uint64](r, pageKey, defPage)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	channel, err := readStringQuery(r, channelKey, defKey)
+	if err != nil {
+		return nil, err
+	}
+
+	req := fetchReaderDataReq{
+		token:     token,
+		channelID: channel,
+		page:      page,
+		limit:     limit,
+	}
+
+	return req, nil
 }
 
 func decodeCreateDashboardRequest(_ context.Context, r *http.Request) (interface{}, error) {

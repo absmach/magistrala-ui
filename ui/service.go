@@ -343,6 +343,8 @@ type Service interface {
 
 	// Publish facilitates a thing publishin messages to a channel.
 	Publish(channelID, thingKey string, message Message) error
+	// Populate chart data
+	FetchReaderData(token, channelID, thingID string, to float64, from float64, page, limit uint64) ([]byte, error)
 	// ReadMessages retrieves messages published in a channel.
 	ReadMessages(token, channelID, thingKey string, page, limit uint64) ([]byte, error)
 
@@ -1751,6 +1753,38 @@ func (us *uiService) ReadMessages(token, channelID, thingKey string, page, limit
 	}
 
 	return btpl.Bytes(), nil
+}
+
+func (us *uiService) FetchReaderData(token, channelID, thingID string, to float64, from float64, page, limit uint64) ([]byte, error) {
+	offset := (page -1) * limit
+	pgm := sdk.PageMetadata{
+		Offset: offset,
+		Limit: limit,
+	}
+	msg, err := us.sdk.ReadMessages(pgm, channelID, token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	data := make(map[string]interface{})
+
+	var yaxisValues []int
+	var xaxisValues []string
+
+	for _, m := range msg.Messages {
+		yaxisValues = append(yaxisValues, int(*m.Value))
+		xaxisValues = append(xaxisValues, time.Unix(int64(m.Time), 0).Format(time.RFC3339))
+	}
+
+	data["yaxis"] = yaxisValues
+	data["xaxis"] = xaxisValues
+
+	jsonData, jsonErr := json.Marshal(data)
+	if jsonErr != nil {
+		return []byte{}, jsonErr
+	}
+
+	return jsonData, nil
 }
 
 func (us *uiService) Publish(channelID, thingKey string, message Message) error {

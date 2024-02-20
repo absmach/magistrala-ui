@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 version: "3.7"
+name: magistrala
 
 networks:
   magistrala-base-net:

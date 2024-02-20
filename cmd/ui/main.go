@@ -30,7 +30,7 @@ type config struct {
 	Port            string          `env:"MG_UI_PORT"             envDefault:"9095"`
 	InstanceID      string          `env:"MG_UI_INSTANCE_ID"      envDefault:""`
 	HTTPAdapterURL  string          `env:"MG_HTTP_ADAPTER_URL"    envDefault:"http://localhost:8008"`
-	ReaderURL       string          `env:"MG_READER_URL"          envDefault:"http://localhost:9007"`
+	ReaderURL       string          `env:"MG_READER_URL"          envDefault:"http://localhost:9011"`
 	ThingsURL       string          `env:"MG_THINGS_URL"          envDefault:"http://localhost:9000"`
 	UsersURL        string          `env:"MG_USERS_URL"           envDefault:"http://localhost:9002"`
 	HostURL         string          `env:"MG_UI_HOST_URL"         envDefault:"http://localhost:9095"`

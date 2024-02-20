@@ -349,3 +349,35 @@ function removeNoWidgetPlaceholder() {
   const noWidgetPlaceholder = document.querySelector(".no-widget-placeholder");
   noWidgetPlaceholder.remove();
 }
+
+async function getData(lineChart, channel) {
+  console.log(channel);
+  try {
+   
+    const response = await fetch("/data?channel=" + channel);
+    if (response.ok) {
+      const data = await response.json();
+
+      lineChart.setOption({
+        xAxis: {
+          data: data.xaxis
+        },
+        series: [
+          {
+            data: data.yaxis
+            },
+        ]
+      });
+    } else {
+      console.error("Failed to fetch data");
+    }
+    setTimeout(function () {
+      getData(lineChart, channel);
+    }, 2000);
+  } catch (error) {
+    console.error(error);
+    setTimeout(function () {
+      getData(lineChart, channel);
+    }, 2000);
+  }
+}

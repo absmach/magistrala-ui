@@ -226,7 +226,8 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // line chart form
     document.getElementById("create-lineChart-button").addEventListener("click", function () {
-      var form = document.getElementById("create-lineChart-appearance-form");
+      var form = document.getElementById("create-lineChart-data-form");
+      var form2 = document.getElementById("create-lineChart-appearance-form");
       // Create an object to store the form data
       var formData = {};
 
@@ -237,6 +238,15 @@ SPDX-License-Identifier: Apache-2.0 -->
           formData[e.name] = e.value;
         }
       }
+
+      for (var i = 0; i < form2.elements.length; i++) {
+        var e = form2.elements[i];
+        if (e.type !== "submit" && e.type !== "button") {
+          formData[e.name] = e.value;
+        }
+      }
+
+      console.log(formData.channel);
       form.reset();
 
       var widgetID = "linechart-" + Date.now();
@@ -250,7 +260,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           },
           xAxis: {
             type: 'category',
-            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            data: [],
             name: '${formData.xAxisLabel}',
             nameLocation: 'middle',
             nameGap: 35
@@ -267,7 +277,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           },
           series: [
             {
-              data: [150, 230, 224, 218, 135, 147, 260],
+              data: [],
               type: 'line',
               lineStyle: {
                 width: '${formData.lineWidth}',
@@ -279,7 +289,10 @@ SPDX-License-Identifier: Apache-2.0 -->
           ]
         };
 
-        lineChart.setOption(option);`;
+        lineChart.setOption(option);
+        getData(lineChart, "${formData.channel}");
+        
+        `;
 
       var config = {
         ID: widgetID,
