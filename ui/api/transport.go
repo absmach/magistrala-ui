@@ -161,7 +161,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 
 	r.Route("/", func(r chi.Router) {
 		r.Use(TokenMiddleware)
-		r.Use(domainLoginMiddleware)
+		r.Use(AuthnMiddleware)
 		r.Get("/", http.HandlerFunc(kithttp.NewServer(
 			indexEndpoint(svc),
 			decodeIndexRequest,
@@ -2439,7 +2439,7 @@ func TokenMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func domainLoginMiddleware(next http.Handler) http.Handler {
+func AuthnMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		tokenString, err := tokenFromCookie(r, "token")
 		if err != nil {
