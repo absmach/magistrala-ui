@@ -8,7 +8,7 @@ require (
 	github.com/absmach/senml v1.0.5
 	github.com/caarlos0/env/v9 v9.0.0
 	github.com/eclipse/paho.mqtt.golang v1.4.3
-	github.com/go-chi/chi/v5 v5.0.11
+	github.com/go-chi/chi/v5 v5.0.12
 	github.com/go-kit/kit v0.13.0
 	github.com/go-zoo/bone v1.3.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
