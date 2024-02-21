@@ -983,8 +983,13 @@ func decodePasswordResetRequest(_ context.Context, r *http.Request) (interface{}
 }
 
 func decodePasswordReset(_ context.Context, r *http.Request) (interface{}, error) {
+	accessToken, err := readStringQuery(r, accessTokenKey, defKey)
+	if err != nil {
+		return nil, err
+	}
+
 	req := passwordResetReq{
-		token:           bone.GetQuery(r, accessTokenKey)[0],
+		token:           accessToken,
 		password:        r.PostFormValue("password"),
 		confirmPassword: r.PostFormValue("confirmPassword"),
 	}
