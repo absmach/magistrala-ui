@@ -17,7 +17,7 @@ require (
 	github.com/rubenv/sql-migrate v1.6.1
 	golang.org/x/exp v0.0.0-20240119083558-1b970713d09a
 	golang.org/x/sync v0.6.0
-	google.golang.org/grpc v1.61.0
+	google.golang.org/grpc v1.61.1
 )
 
 require (
