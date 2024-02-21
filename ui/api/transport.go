@@ -2415,6 +2415,7 @@ func TokenMiddleware(next http.Handler) http.Handler {
 		if err != nil {
 			if errors.Contains(err, http.ErrNoCookie) {
 				http.Redirect(w, r, "/token/refresh?referer_url="+url.QueryEscape(r.URL.String()), http.StatusSeeOther)
+				return
 			}
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
