@@ -227,7 +227,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 		).ServeHTTP)
 
 		r.Route("/users", func(r chi.Router) {
-			r.Use(AdminAuthOMiddleware)
+			r.Use(AdminAuthMiddleware)
 			r.Post("/", kithttp.NewServer(
 				createUserEndpoint(svc),
 				decodeUserCreation,
@@ -2377,7 +2377,7 @@ func tokenFromCookie(r *http.Request, cookie string) (string, error) {
 	return c.Value, nil
 }
 
-func AdminAuthOMiddleware(next http.Handler) http.Handler {
+func AdminAuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var err error
 		defer func() {
@@ -2414,7 +2414,7 @@ func TokenMiddleware(next http.Handler) http.Handler {
 		tokenString, err := tokenFromCookie(r, "token")
 		if err != nil {
 			if errors.Contains(err, http.ErrNoCookie) {
-				http.Redirect(w, r, "/token/refresh?referer_url="+url.QueryEscape(r.URL.String()), http.StatusSeeOther)
+				http.Redirect(w, r, fmt.Sprintf("/%s?referer_url=%s", tokenRefreshAPIEndpoint, url.QueryEscape(r.URL.String())), http.StatusSeeOther)
 				return
 			}
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
@@ -2429,7 +2429,7 @@ func TokenMiddleware(next http.Handler) http.Handler {
 		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
 			if !claims.VerifyExpiresAt(time.Now().Unix(), true) {
-				http.Redirect(w, r, "/token/refresh?referer_url="+url.QueryEscape(r.URL.String()), http.StatusSeeOther)
+				http.Redirect(w, r, fmt.Sprintf("/%s?referer_url=%s", tokenRefreshAPIEndpoint, url.QueryEscape(r.URL.String())), http.StatusSeeOther)
 				return
 			}
 		}
