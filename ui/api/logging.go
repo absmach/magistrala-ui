@@ -53,7 +53,7 @@ func (lm *loggingMiddleware) ViewRegistration() (b []byte, err error) {
 }
 
 // Register adds logging middleware to register method.
-func (lm *loggingMiddleware) RegisterUser(user sdk.User) (token sdk.Token, err error) {
+func (lm *loggingMiddleware) RegisterUser(user sdk.User) (b []byte, err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
@@ -162,7 +162,7 @@ func (lm *loggingMiddleware) UpdatePassword(token, oldPass, newPass string) (err
 }
 
 // Toke adds logging middleware to token method.
-func (lm *loggingMiddleware) Token(login sdk.Login) (token sdk.Token, err error) {
+func (lm *loggingMiddleware) Token(login sdk.Login) (b []byte, err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
@@ -189,18 +189,24 @@ func (lm *loggingMiddleware) RefreshToken(refreshToken string) (token sdk.Token,
 	return lm.svc.RefreshToken(refreshToken)
 }
 
-// UserProfile adds logging middleware to user profile method.
-func (lm *loggingMiddleware) UserProfile(token string) (b []byte, err error) {
+// SessionDetails adds logging middleware to session details method.
+func (lm *loggingMiddleware) SessionDetails(token, session, domainID string) (s string, err error) {
 	defer func(begin time.Time) {
-		duration := slog.String("duration", time.Since(begin).String())
+		args := []any{
+			slog.String("duration", time.Since(begin).String()),
+			slog.String("domain_id", domainID),
+			slog.String("session", session),
+		}
+
 		if err != nil {
-			lm.logger.Warn("View user profile page failed to complete successfully", slog.Any("error", err), duration)
+			args = append(args, slog.Any("error", err))
+			lm.logger.Warn("Session details failed to complete successfully", args...)
 			return
 		}
-		lm.logger.Info("View user profile page completed successfully", duration)
+		lm.logger.Info("Session details completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.UserProfile(token)
+	return lm.svc.SessionDetails(token, session, domainID)
 }
 
 // CreateUsers adds logging middleware to create users method.

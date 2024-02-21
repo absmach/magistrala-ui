@@ -860,6 +860,26 @@ func (req domainLoginReq) validate() error {
 	return nil
 }
 
+type listDomainsReq struct {
+	sdk.Token
+	status string
+	page   uint64
+	limit  uint64
+}
+
+func (req listDomainsReq) validate() error {
+	if req.AccessToken == "" {
+		return errAuthentication
+	}
+	if req.page == 0 {
+		return errPageSize
+	}
+	if req.limit == 0 {
+		return errLimitSize
+	}
+	return nil
+}
+
 type createDomainReq struct {
 	token string
 	sdk.Domain

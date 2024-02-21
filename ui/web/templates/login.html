@@ -157,7 +157,15 @@ SPDX-License-Identifier: Apache-2.0 -->
                   showError(errorMessage);
                   break;
                 default:
-                  window.location.href = "/domains";
+                  response.json().then((data) => {
+                    console.log("login response: ", data);
+                    window.location.href =
+                      "/domains?refresh_token=" +
+                      data.refresh_token +
+                      "&access_token=" +
+                      data.access_token;
+                  });
+                  break;
               }
             })
             .catch((error) => {

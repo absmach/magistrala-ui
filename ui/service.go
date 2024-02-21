@@ -8,6 +8,7 @@ package ui
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -85,6 +86,17 @@ type Message struct {
 	Name     string  `json:"n"`
 	Unit     string  `json:"u"`
 	Value    float64 `json:"v"`
+}
+
+type SessionDetails struct {
+	UserID            string   `json:"user_id"`
+	Username          string   `json:"user_name"`
+	UserIdentity      string   `json:"user_identity"`
+	Role              string   `json:"role"`
+	DomainName        string   `json:"domain_name"`
+	DomainID          string   `json:"domain_id"`
+	DomainPermissions []string `json:"domain_permissions"`
+	LoginStatus       string   `json:"login_status"`
 }
 
 var (
@@ -212,7 +224,7 @@ type Service interface {
 	// ViewRegistration displays the registration page.
 	ViewRegistration() ([]byte, error)
 	// RegisterUser registers a new user and logs them in.
-	RegisterUser(user sdk.User) (sdk.Token, error)
+	RegisterUser(user sdk.User) ([]byte, error)
 	// Login displays the login page.
 	Login() ([]byte, error)
 	// Logout deletes the access token and refresh token from the cookies and logs the user out of the UI.
@@ -228,13 +240,13 @@ type Service interface {
 	// UpdatePassword updates the user's old password to the new password.
 	UpdatePassword(token, oldPass, newPass string) error
 	// Token provides a user with an access token and a refresh token.
-	Token(login sdk.Login) (sdk.Token, error)
+	Token(login sdk.Login) ([]byte, error)
 	// RefreshToken retrieves a new access token and refresh token from the provided refresh token.
 	RefreshToken(refreshToken string) (sdk.Token, error)
 	// DomainLogin provides a user with an domain level access token and a refresh token.
 	DomainLogin(login sdk.Login, refreshToken string) (sdk.Token, error)
-	// UserProfile displays the user profile page.
-	UserProfile(token string) ([]byte, error)
+	// SessionDetails retrieves the details of the user's session.
+	SessionDetails(token, session, domainID string) (string, error)
 
 	// CreateUsers creates new users.
 	CreateUsers(token string, users ...sdk.User) error
@@ -531,13 +543,13 @@ func (us *uiService) ViewRegistration() ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) RegisterUser(user sdk.User) (sdk.Token, error) {
+func (us *uiService) RegisterUser(user sdk.User) ([]byte, error) {
 	_, err := us.sdk.CreateUser(user, "")
 	if err != nil {
 		if errors.Contains(err, ErrConflict) {
-			return sdk.Token{}, errors.Wrap(err, ErrConflict)
+			return []byte{}, errors.Wrap(err, ErrConflict)
 		}
-		return sdk.Token{}, errors.Wrap(err, ErrFailedCreate)
+		return []byte{}, errors.Wrap(err, ErrFailedCreate)
 	}
 
 	login := sdk.Login{
@@ -609,12 +621,18 @@ func (us *uiService) UpdatePassword(token, oldPass, newPass string) error {
 	return nil
 }
 
-func (us *uiService) Token(login sdk.Login) (sdk.Token, error) {
+func (us *uiService) Token(login sdk.Login) (b []byte, err error) {
 	token, err := us.sdk.CreateToken(login)
 	if err != nil {
-		return sdk.Token{}, errors.Wrap(err, ErrToken)
+		return []byte{}, errors.Wrap(err, ErrToken)
 	}
-	return token, nil
+
+	jsonData, err := json.Marshal(token)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return jsonData, nil
 }
 
 func (us *uiService) RefreshToken(refreshToken string) (sdk.Token, error) {
@@ -635,18 +653,45 @@ func (us *uiService) DomainLogin(login sdk.Login, refreshToken string) (sdk.Toke
 	return token, nil
 }
 
-func (us *uiService) UserProfile(token string) (b []byte, err error) {
+func (us *uiService) SessionDetails(token, session, domainID string) (s string, err error) {
 	user, err := us.sdk.UserProfile(token)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	jsonData, err := json.Marshal(user)
+	sessionDetails := SessionDetails{
+		Username:     user.Name,
+		UserIdentity: user.Credentials.Identity,
+		Role:         user.Role,
+		UserID:       user.ID,
+	}
+
+	switch session {
+	case "user":
+		sessionDetails.LoginStatus = "user"
+	case "domain":
+		sessionDetails.LoginStatus = "domain"
+		domain, err := us.sdk.Domain(domainID, token)
+		if err != nil {
+			return "", err
+		}
+		permissions, err := us.sdk.DomainPermissions(domainID, token)
+		if err != nil {
+			return "", err
+		}
+		sessionDetails.DomainName = domain.Name
+		sessionDetails.DomainID = domain.ID
+		sessionDetails.DomainPermissions = permissions.Permissions
+	}
+
+	jsonData, err := json.Marshal(sessionDetails)
 	if err != nil {
-		return []byte{}, err
+		return "", err
 	}
 
-	return jsonData, nil
+	encodedString := base64.StdEncoding.EncodeToString(jsonData)
+
+	return encodedString, nil
 }
 
 func (us *uiService) CreateUsers(token string, users ...sdk.User) error {

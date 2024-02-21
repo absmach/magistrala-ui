@@ -138,13 +138,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                   break;
                 default:
                   response.json().then((data) => {
-                    localStorage.setItem("userName", data.name);
-                    localStorage.setItem("userIdentity", data.credentials.identity);
-                    localStorage.setItem("userRole", data.role);
-                    localStorage.setItem("userID", data.id);
+                    console.log("login response: ", data);
+                    window.location.href =
+                      "/domains?refresh_token=" +
+                      data.refresh_token +
+                      "&access_token=" +
+                      data.access_token;
                   });
-                  localStorage.setItem("loginStatus", "general");
-                  window.location.href = "/domains";
+                  break;
               }
             })
             .catch((error) => {

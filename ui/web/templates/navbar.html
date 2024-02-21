@@ -44,60 +44,33 @@ SPDX-License-Identifier: Apache-2.0 -->
     <!-- Heading -->
     <div class="sidebar-heading mb-3">DOMAINS MANAGEMENT</div>
 
-    <li class="nav-item mb-2 mx-2">
-      {{ $collapseActive := "domains" }}
+    <li class="nav-item mb-2 mx-2" id="domains-sidebar-link">
+      {{ $navbarActive := "domains" }}
       <a
-        href="#domains-collapse"
-        data-bs-toggle="collapse"
-        aria-expanded="false"
-        aria-controls="domains-collapse"
-        class="dropdown-toggle nav-link sidebar-link {{ if eq .CollapseActive $collapseActive }}
-          active
-        {{ end }}"
+        class="nav-link sidebar-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
+        id="domains"
       >
-        <i class="fa-solid fa-sitemap"></i>
+        <i class="fa-solid fa-building"></i>
         <span>Domains</span>
       </a>
-      <div
-        class="collapse {{ if eq .CollapseActive $collapseActive }}
-          show
+    </li>
+
+    <li class="nav-item mb-2 mx-2">
+      {{ $navbarActive = "invitations" }}
+      <a
+        href="/invitations"
+        class="nav-link sidebar-link {{ if eq .NavbarActive $navbarActive }}
+          active
         {{ end }}"
-        id="domains-collapse"
+        id="invitations"
       >
-        <ul class="collapse-list">
-          <li class="nav-item mb-2 mx-2">
-            {{ $navbarActive = "domains" }}
-            <a
-              href="/domains"
-              class="nav-link {{ if eq .NavbarActive $navbarActive }}
-                active
-              {{ end }}
-              "
-              id="domains"
-            >
-              <i class="fa-solid fa-sitemap"></i>
-              <span>Domains</span>
-            </a>
-          </li>
-          <li class="nav-item mb-2 mx-2">
-            {{ $navbarActive = "invitations" }}
-            <a
-              href="/invitations"
-              class="nav-link {{ if eq .NavbarActive $navbarActive }}
-                active
-              {{ end }}"
-              id="invitations"
-            >
-              <i class="fa-solid fa-envelope"></i>
-              <span>Invitations</span>
-            </a>
-          </li>
-        </ul>
-      </div>
+        <i class="fa-solid fa-envelope"></i>
+        <span>Invitations</span>
+      </a>
     </li>
 
     <li class="nav-item mb-2 mx-2" id="domain-nav-item">
-      {{ $collapseActive = "domain" }}
+      {{ $collapseActive := "domain" }}
       <a
         href="#domain-collapse"
         data-bs-toggle="collapse"
@@ -108,7 +81,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         {{ end }}"
       >
         <i class="fa-solid fa-building"></i>
-        <span id="sidebar-domain-name"></span>
+        <span id="domainName"></span>
       </a>
       <div
         class="collapse {{ if eq .CollapseActive $collapseActive }}
@@ -147,7 +120,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               id="domainInvitations"
             >
               <i class="fa-solid fa-envelope"></i>
-              <span>Invitations</span>
+              <span>Domain Invitations</span>
             </a>
           </li>
         </ul>
@@ -269,7 +242,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             ></a>
             <ul class="dropdown-menu dropdown-menu-md-end mt-2 p-3">
               <li class="text-center fw-bold">
-                <span class="drop-item" id="domainName2"></span>
+                <span class="drop-item" id="domainName"></span>
               </li>
               <li><hr class="dropdown-divider" /></li>
               <li>
@@ -285,7 +258,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               </li>
               <li><hr class="dropdown-divider" /></li>
               <li>
-                <a class="dropdown-item user-item-button p-2 mb-2" href="/domains">
+                <a class="dropdown-item user-item-button p-2 mb-2" id="domains">
                   <i class="fa-solid fa-repeat"></i>
                   Switch Domain
                 </a>
@@ -412,40 +385,43 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script src="/js/listUtils.js"></script>
   <script src="/js/cookie.js"></script>
   <script defer>
-    let user = JSON.parse(atob(getCookie("user")));
-    let name = user.name;
-    let identity = user.credentials.identity;
-    let domain, domainID, domainName, domainPermission, loginStatus;
-
-    if (user.role !== "admin") {
-      document.getElementById("users-nav-items").style.display = "none";
+    let sessionDetails = JSON.parse(atob(getCookie("sessionDetails")));
+    console.log(sessionDetails);
+    let name = sessionDetails.user_name;
+    let identity = sessionDetails.user_identity;
+    let userID = sessionDetails.user_id;
+    let role = sessionDetails.role;
+    let loginStatus = sessionDetails.login_status;
+    let domainID, domainName, domainPermissions;
+    if (loginStatus === "domain") {
+      domainName = sessionDetails.domain_name;
+      domainID = sessionDetails.domain_id;
+      domainPermissions = sessionDetails.domain_permissions;
+      console.log(domainPermissions);
     }
 
-    if (getCookie("domain")) {
-      domain = JSON.parse(atob(getCookie("domain")));
-      domainID = domain.id;
-      domainName = domain.name;
-      domainPermission = domain.permission;
-      loginStatus = domain.loginStatus;
-    }
+    document.getElementById("username").innerHTML = name;
+    document.getElementById("identity").innerHTML = identity;
+    document.querySelectorAll("#domains").forEach((element) => {
+      element.href = "/domains?logged_in=true";
+    });
 
     if (loginStatus !== "domain") {
       document.getElementById("domain-nav-item").style.display = "none";
       document.getElementById("things-nav-items").style.display = "none";
       document.getElementById("index-nav-items").style.display = "none";
       document.getElementById("domain-header-dropdown").style.display = "none";
-    }
-    document.getElementById("domain").href = "/domains/" + domainID;
-    document.getElementById("members").href = "/domains/" + domainID + "/members";
-    document.getElementById("domainInvitations").href = "/invitations?domain=" + domainID;
-    document.getElementById("domainName").innerHTML = domainName;
-    document.getElementById("domainName2").innerHTML = domainName;
-    document.getElementById("username").innerHTML = name;
-    document.getElementById("identity").innerHTML = identity;
-    document.getElementById("sidebar-domain-name").innerHTML = domainName;
-
-    if (domainPermission !== "administrator") {
-      document.getElementById("domainInvitations").style.display = "none";
+    } else {
+      document.getElementById("domains-sidebar-link").style.display = "none";
+      document.getElementById("domain").href = "/domains/" + domainID;
+      document.getElementById("members").href = "/domains/" + domainID + "/members";
+      document.getElementById("domainInvitations").href = "/invitations?domain=" + domainID;
+      document.querySelectorAll("#domainName").forEach((element) => {
+        element.innerHTML = domainName;
+      });
+      if (!domainPermissions.includes("admin")) {
+        document.getElementById("domainInvitations").style.display = "none";
+      }
     }
 
     const createDomainModal = new bootstrap.Modal(document.getElementById("createDomainModal"));

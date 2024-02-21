@@ -50,7 +50,7 @@ func (mm *metricsMiddleware) ViewRegistration() ([]byte, error) {
 }
 
 // RegisterUser adds metrics middleware to register user method.
-func (mm *metricsMiddleware) RegisterUser(user sdk.User) (sdk.Token, error) {
+func (mm *metricsMiddleware) RegisterUser(user sdk.User) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "register_user").Add(1)
 		mm.latency.With("method", "register_user").Observe(time.Since(begin).Seconds())
@@ -130,7 +130,7 @@ func (mm *metricsMiddleware) UpdatePassword(token, oldPass, newPass string) erro
 }
 
 // Token adds metrics middleware to token method.
-func (mm *metricsMiddleware) Token(login sdk.Login) (sdk.Token, error) {
+func (mm *metricsMiddleware) Token(login sdk.Login) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "token").Add(1)
 		mm.latency.With("method", "token").Observe(time.Since(begin).Seconds())
@@ -149,14 +149,14 @@ func (mm *metricsMiddleware) RefreshToken(refreshToken string) (sdk.Token, error
 	return mm.svc.RefreshToken(refreshToken)
 }
 
-// UserProfile adds metrics middleware to user profile method.
-func (mm *metricsMiddleware) UserProfile(token string) ([]byte, error) {
+// SessionDetails adds metrics middleware to session details method.
+func (mm *metricsMiddleware) SessionDetails(token, session, domainID string) (string, error) {
 	defer func(begin time.Time) {
-		mm.counter.With("method", "user_profile").Add(1)
-		mm.latency.With("method", "user_profile").Observe(time.Since(begin).Seconds())
+		mm.counter.With("method", "session_details").Add(1)
+		mm.latency.With("method", "session_details").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.UserProfile(token)
+	return mm.svc.SessionDetails(token, session, domainID)
 }
 
 // CreateUsers adds metrics middleware to create users method.

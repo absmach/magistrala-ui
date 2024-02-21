@@ -56,11 +56,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             {{ end }}
                           </td>
                           <td>
-                            <form
-                              method="post"
-                              action="/domains/login"
-                              onsubmit="addToLocalStorage('{{ $d.ID }}', '{{ $d.Name }}', '{{ $d.Alias }}', '{{ $d.Permission }}')"
-                            >
+                            <form method="post" action="/domains/login">
                               <input type="hidden" name="domainID" value="{{ $d.ID }}" />
                               <button
                                 type="submit"
@@ -86,24 +82,6 @@ SPDX-License-Identifier: Apache-2.0 -->
           </div>
         </div>
       </div>
-
-      <script>
-        function addToLocalStorage(id, name, alias, permission) {
-          let domain = {
-            id: id,
-            name: name,
-            alias: alias,
-            loginStatus: "domain",
-            permission: permission,
-          };
-
-          // Encode the domain object to base64
-          var encodedDomain = btoa(JSON.stringify(domain));
-
-          // Add the encoded domain to browser cookies
-          document.cookie = "domain=" + encodedDomain + "; path=/";
-        }
-      </script>
     </body>
   </html>
 {{ end }}
