@@ -2414,8 +2414,7 @@ func TokenMiddleware(next http.Handler) http.Handler {
 		tokenString, err := tokenFromCookie(r, "token")
 		if err != nil {
 			if errors.Contains(err, http.ErrNoCookie) {
-				http.Redirect(w, r, fmt.Sprintf("/%s?referer_url=%s", tokenRefreshAPIEndpoint, url.QueryEscape(r.URL.String())), http.StatusSeeOther)
-				return
+				http.Redirect(w, r, "/token/refresh?referer_url="+url.QueryEscape(r.URL.String()), http.StatusSeeOther)
 			}
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
@@ -2429,7 +2428,7 @@ func TokenMiddleware(next http.Handler) http.Handler {
 		}
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
 			if !claims.VerifyExpiresAt(time.Now().Unix(), true) {
-				http.Redirect(w, r, fmt.Sprintf("/%s?referer_url=%s", tokenRefreshAPIEndpoint, url.QueryEscape(r.URL.String())), http.StatusSeeOther)
+				http.Redirect(w, r, "/token/refresh?referer_url="+url.QueryEscape(r.URL.String()), http.StatusSeeOther)
 				return
 			}
 		}
