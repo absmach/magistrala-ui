@@ -316,6 +316,7 @@ function cancelEditGrid(grid) {
 // No widget placeholder
 function showNoWidgetPlaceholder() {
   const noWidgetPlaceholder = document.querySelector(".no-widget-placeholder");
+  noWidgetPlaceholder.classList.add("min-vh-50");
   const newPlaceholder = document.createElement("div");
   newPlaceholder.innerHTML = `
   <div class="row d-flex justify-content-center">
@@ -341,6 +342,8 @@ function showNoWidgetPlaceholder() {
 function removeNoWidgetPlaceholder() {
   const noWidgetPlaceholder = document.querySelector(".no-widget-placeholder");
   noWidgetPlaceholder.remove();
+  const gridContainer = document.querySelector(".grid");
+  gridContainer.classList.add("min-vh-50");
 }
 
 function clearCanvas() {
