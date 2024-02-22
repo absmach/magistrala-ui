@@ -54,16 +54,16 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </li>
           </ul>
-          <!-- Tab Content -->
-          <div class="tab-content" id="myTabContent">
-            <!-- Data Tab -->
-            <div
-              class="tab-pane fade show active"
-              id="gaugeChartData"
-              role="tabpanel"
-              aria-labelledby="data-tab"
-            >
-              <form id="create-gaugeChart-data-form">
+          <form id="create-gaugeChart-form">
+            <!-- Tab Content -->
+            <div class="tab-content" id="myTabContent">
+              <!-- Data Tab -->
+              <div
+                class="tab-pane fade show active"
+                id="gaugeChartData"
+                role="tabpanel"
+                aria-labelledby="data-tab"
+              >
                 <div class="mb-3">
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
@@ -97,16 +97,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
-              </form>
-            </div>
-            <!-- Appearance Tab -->
-            <div
-              class="tab-pane fade"
-              id="gaugeChartAppearance"
-              role="tabpanel"
-              aria-labelledby="appearance-tab"
-            >
-              <form id="create-gaugeChart-appearance-form">
+              </div>
+              <!-- Appearance Tab -->
+              <div
+                class="tab-pane fade"
+                id="gaugeChartAppearance"
+                role="tabpanel"
+                aria-labelledby="appearance-tab"
+              >
                 <div class="mb-3">
                   <label for="title" class="form-label">Title</label>
                   <input
@@ -149,9 +147,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                     value="100"
                   />
                 </div>
-              </form>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -168,93 +166,29 @@ SPDX-License-Identifier: Apache-2.0 -->
     </div>
   </div>
   <script>
-    // gauge form
     document.getElementById("create-gaugeChart-button").addEventListener("click", function () {
-      var form = document.getElementById("create-gaugeChart-appearance-form");
-      // Create an object to store the form data
-      var appFormData = {};
+      var form = document.getElementById("create-gaugeChart-form");
+      // Create an object to store the chart Data
+      var chartData = {};
 
       // Serialize the appearance form data into the object
       for (var i = 0; i < form.elements.length; i++) {
         var e = form.elements[i];
         if (e.type !== "submit" && e.type !== "button") {
-          appFormData[e.name] = e.value;
+          chartData[e.name] = e.value;
         }
       }
       form.reset();
 
-      form = document.getElementById("create-gaugeChart-data-form");
-
-      var dataFormData = {};
-      // Serialize the data form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          dataFormData[e.name] = e.value;
-        }
-      }
-
-      form.reset();
-
-      var widgetID = "gauge-" + Date.now();
-      var widgetScript = `
-        (function() {
-          var gaugeChart = echarts.init(document.getElementById("${widgetID}"));
-          var option = {
-            title: {
-              text: "${appFormData.title}",
-              left: "center",
-            },
-            tooltip: {
-              formatter: "{a} <br/>{b} : {c}%",
-            },
-            series: [
-              {
-                type: "gauge",
-                min: ${appFormData.minValue},
-                max: ${appFormData.maxValue},
-                progress: {
-                  show: true,
-                },
-                detail: { valueAnimation: true, formatter: "{value}" },
-                data: [
-                  { 
-                    value: 50,
-                    name: "${appFormData.gaugeLabel}",
-                   
-                  },
-                ],
-              },
-            ],
-          };
-
-          gaugeChart.setOption(option);
-
-          function updateGauge() {
-              const randomValue = Math.floor(Math.random() * (${appFormData.maxValue} - ${appFormData.minValue} + 1)) + ${appFormData.minValue};
-              gaugeChart.setOption({
-                series: [
-                  {
-                    data: [
-                      {
-                        value: randomValue,
-                        name: "${appFormData.gaugeLabel}",
-                      },
-                    ],
-                  },
-                ],
-              });
-          }
-          setInterval(updateGauge, 2000); // Corrected setInterval usage
-        })();`;
+      var widgetID = "gaugeChart-" + Date.now();
 
       var config = {
         ID: widgetID,
-        Script: widgetScript,
+        Type: "gaugeChart",
       };
-      addWidget(config);
+      addWidget(chartData, config);
       // Append chart metadata to dashboard metadata
-      metadataBuffer[widgetID] = dataFormData;
+      metadataBuffer[widgetID] = chartData;
     });
   </script>
 {{ end }}

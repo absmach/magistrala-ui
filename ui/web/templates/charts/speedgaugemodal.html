@@ -54,16 +54,15 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </li>
           </ul>
-          <!-- Tab Content -->
-          <div class="tab-content" id="myTabContent">
-            <!-- Data Tab -->
-            <div
-              class="tab-pane fade show active"
-              id="speedGaugeChartData"
-              role="tabpanel"
-              aria-labelledby="data-tab"
-            >
-              <form id="create-speedGaugeChart-data-form">
+          <form id="create-speedGaugeChart-form">
+            <div class="tab-content" id="myTabContent">
+              <!-- Data Tab -->
+              <div
+                class="tab-pane fade show active"
+                id="speedGaugeChartData"
+                role="tabpanel"
+                aria-labelledby="data-tab"
+              >
                 <div class="mb-3">
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
@@ -119,16 +118,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                     value="100"
                   />
                 </div>
-              </form>
-            </div>
-            <!-- Appearance Tab -->
-            <div
-              class="tab-pane fade"
-              id="speedGaugeChartAppearance"
-              role="tabpanel"
-              aria-labelledby="appearance-tab"
-            >
-              <form id="create-speedGaugeChart-appearance-form">
+              </div>
+              <!-- Appearance Tab -->
+              <div
+                class="tab-pane fade"
+                id="speedGaugeChartAppearance"
+                role="tabpanel"
+                aria-labelledby="appearance-tab"
+              >
                 <div class="mb-3">
                   <label for="title" class="form-label">Title</label>
                   <input
@@ -149,9 +146,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                     placeholder="Enter the gauge label"
                   />
                 </div>
-              </form>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -170,119 +167,27 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // Speed gauge form
     document.getElementById("create-speedGauge-button").addEventListener("click", function () {
-      var form = document.getElementById("create-speedGaugeChart-appearance-form");
+      var form = document.getElementById("create-speedGaugeChart-form");
       // Create an object to store the form data
-      var appFormData = {};
+      var chartData = {};
 
-      // Serialize the appearance form data into the object
+      // Serialize the form data into the object
       for (var i = 0; i < form.elements.length; i++) {
         var e = form.elements[i];
         if (e.type !== "submit" && e.type !== "button") {
-          appFormData[e.name] = e.value;
+          chartData[e.name] = e.value;
         }
       }
       form.reset();
 
-      form = document.getElementById("create-speedGaugeChart-data-form");
-      // Create an object to store the form data
-      var dataFormData = {};
-
-      // Serialize the data form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          dataFormData[e.name] = e.value;
-        }
-      }
-      form.reset();
-
-      var widgetID = "speedgauge-" + Date.now();
-      var widgetScript = `
-        var speedGaugeChart = echarts.init(document.getElementById("${widgetID}"));
-        var option = {
-            title: {
-              text: '${appFormData.title}',
-              left: 'center',
-              top: 20,
-              show: true,
-            },
-            series: [
-              {
-                type: 'gauge',
-                axisLine: {
-                  lineStyle: {
-                    width: 30,
-                    color: [
-                      [0.3, '#67e0e3'],
-                      [0.7, '#37a2da'],
-                      [1, '#fd666d']
-                    ]
-                  }
-                },
-                pointer: {
-                  itemStyle: {
-                    color: 'auto'
-                  }
-                },
-                axisTick: {
-                  distance: -30,
-                  length: 8,
-                  lineStyle: {
-                    color: '#fff',
-                    width: 2
-                  }
-                },
-                splitLine: {
-                  distance: -30,
-                  length: 30,
-                  lineStyle: {
-                    color: '#fff',
-                    width: 4
-                  }
-                },
-                axisLabel: {
-                  color: 'inherit',
-                  distance: 40,
-                  fontSize: 20
-                },
-                detail: {
-                  valueAnimation: true,
-                  formatter: '{value} km/h',
-                  color: 'inherit'
-                },
-                data: [
-                  {
-                    value: 25,
-                    name: "${appFormData.gaugeLabel}",
-                  }
-                ]
-              }
-            ]
-          };
-          setInterval(function () {
-            speedGaugeChart.setOption({
-              series: [
-                {
-                  data: [
-                    {
-                      value: +(Math.random() * 100).toFixed(2),
-                      name: "${appFormData.gaugeLabel}",
-                    }
-                  ]
-                }
-              ]
-            });
-          }, 2000);
-
-        speedGaugeChart.setOption(option);`;
-
+      var widgetID = "speedGaugeChart-" + Date.now();
       var config = {
         ID: widgetID,
-        Script: widgetScript,
-      }
-      addWidget(config);
+        Type: "speedGaugeChart",
+      };
+      addWidget(chartData, config);
       // Append chart metadata to dashboard metadata
-      metadataBuffer[widgetID] = dataFormData;
+      metadataBuffer[widgetID] = chartData;
     });
   </script>
 {{ end }}

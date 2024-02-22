@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="alarmsTableModalLabel">Alarms table</h5>
+          <h5 class="modal-title" id="alarmsTableModalLabel">Alarms Table</h5>
           <button
             type="button"
             class="btn-close"
@@ -89,60 +89,30 @@ SPDX-License-Identifier: Apache-2.0 -->
     document.getElementById("create-alarmsTable-button").addEventListener("click", function () {
       var form = document.getElementById("create-alarmsTable-form");
       // Create an object to store the form data
-      var dataFormData = {};
+      var chartData = {};
 
       // Serialize the form data into the object
       for (var i = 0; i < form.elements.length; i++) {
         var e = form.elements[i];
         if (e.type !== "submit" && e.type !== "button") {
-          dataFormData[e.name] = e.value;
+          chartData[e.name] = e.value;
         }
       }
       form.reset();
 
       var widgetID = "alarmsTable-" + Date.now();
-      var widgetContent = `
-        <div class="card mt-3 widgetcard">
-          <div class="card-header text-center">
-            <h5 class="card-title">Alarms Table</h5>
-          </div>
-          <table class="table table-striped table-hover">
-            <thead>
-              <tr>
-                <th scope="col">Severity</th>
-                <th scope="col">Originator</th>
-                <th scope="col">Status</th>
-                <th scope="col">Time Started</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Warning</td>
-                <td>Thing A</td>
-                <td>Enabled</td>
-                <td>2024-01-01 12:00</td>
-              </tr>
-              <tr>
-                <td>Error</td>
-                <td>Thing B</td>
-                <td>Disabled</td>
-                <td>2024-01-02 15:30</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      `;
+      
       var config = {
         ID: widgetID,
-        Content: widgetContent,
+        Type: "alarmsTable",
         Style: {
           width: "500px",
           height: "210px",
         },
       };
-      addWidget(config);
+      addWidget(chartData, config);
       // Append chart metadata to dashboard metadata
-      metadataBuffer[widgetID] = dataFormData;
+      metadataBuffer[widgetID] = chartData;
     });
   </script>
 {{ end }}

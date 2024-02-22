@@ -54,16 +54,15 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </li>
           </ul>
-          <!-- Tab Content -->
-          <div class="tab-content" id="myTabContent">
-            <!-- Data Tab -->
-            <div
-              class="tab-pane fade show active"
-              id="dynamicDataChartData"
-              role="tabpanel"
-              aria-labelledby="data-tab"
-            >
-              <form id="create-dynamicDataChart-data-form">
+          <form id="create-dynamicDataChart-form">
+            <div class="tab-content" id="myTabContent">
+              <!-- Data Tab -->
+              <div
+                class="tab-pane fade show active"
+                id="dynamicDataChartData"
+                role="tabpanel"
+                aria-labelledby="data-tab"
+              >
                 <div class="mb-3">
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
@@ -99,7 +98,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </div>
                 <div class="mb-3">
                   <label for="y-axis-type" class="form-label">Y-axis Type</label>
-                  <select class="form-select mb-3" name="yAxisType" id="y-axis-typr">
+                  <select class="form-select mb-3" name="yAxisType" id="y-axis-type">
                     <option value="" disabled>Select y-axis Type</option>
                     <option value="value">Value</option>
                     <option value="category">Category</option>
@@ -113,8 +112,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     type="datetime-local"
                     class="form-control mb-3"
                     name="startTime"
-                    id="start-name"
-                    placeholder="Enter the start time."
+                    id="start-time"
                     required
                   />
                 </div>
@@ -124,8 +122,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     type="datetime-local"
                     class="form-control mb-3"
                     name="stopTime"
-                    id="stop-name"
-                    placeholder="Enter the stop time."
+                    id="stop-time"
                   />
                 </div>
                 <div class="mb-3">
@@ -139,16 +136,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
-              </form>
-            </div>
-            <!-- Appearance Tab -->
-            <div
-              class="tab-pane fade"
-              id="dynamicDataChartAppearance"
-              role="tabpanel"
-              aria-labelledby="appearance-tab"
-            >
-              <form id="create-dynamicDataChart-appearance-form">
+              </div>
+              <!-- Appearance Tab -->
+              <div
+                class="tab-pane fade"
+                id="dynamicDataChartAppearance"
+                role="tabpanel"
+                aria-labelledby="appearance-tab"
+              >
                 <div class="mb-3">
                   <label for="title" class="form-label">Title</label>
                   <input
@@ -184,36 +179,36 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <input
                     type="text"
                     class="form-control mb-3"
-                    name="barYAxisLabel1"
+                    name="barYAxisLabel"
                     id="bar-y-axis-label"
                     placeholder="Enter the bar chart y axis label"
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="series-name" class="form-label">Line data series name</label>
+                  <label for="lineDataSeriesName" class="form-label">Line data series name</label>
                   <input
                     type="text"
                     class="form-control mb-3"
                     name="lineDataSeriesName"
-                    id="series-name"
+                    id="lineDataSeriesName"
                     placeholder="Enter the series name eg. temperature"
                     required
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="series-name" class="form-label">Bar data series name</label>
+                  <label for="barDataSeriesName" class="form-label">Bar data series name</label>
                   <input
                     type="text"
                     class="form-control mb-3"
                     name="barDataSeriesName"
-                    id="series-name"
-                    placeholder="Enter the series name eg. temperature"
+                    id="barDataSeriesName"
+                    placeholder="Enter the series name eg. humidity"
                     required
                   />
                 </div>
-              </form>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -234,192 +229,28 @@ SPDX-License-Identifier: Apache-2.0 -->
     document
       .getElementById("create-dynamicDataChart-button")
       .addEventListener("click", function () {
-        var form = document.getElementById("create-dynamicDataChart-appearance-form");
+        var form = document.getElementById("create-dynamicDataChart-form");
         // Create an object to store the form data
-        var appFormData = {};
+        var chartData = {};
 
         // Serialize the appearance form data into the object
         for (var i = 0; i < form.elements.length; i++) {
           var e = form.elements[i];
           if (e.type !== "submit" && e.type !== "button") {
-            appFormData[e.name] = e.value;
+            chartData[e.name] = e.value;
           }
         }
         form.reset();
 
-        form = document.getElementById("create-dynamicDataChart-data-form");
-        // Create an object to store the form data
-        var dataFormData = {};
-
-        // Serialize the data form data into the object
-        for (var i = 0; i < form.elements.length; i++) {
-          var e = form.elements[i];
-          if (e.type !== "submit" && e.type !== "button") {
-            dataFormData[e.name] = e.value;
-          }
-        }
-        form.reset();
-
-        var widgetID = "dynamicDatachart-" + Date.now();
-        var widgetScript = `
-          var dynamicDataChart = echarts.init(document.getElementById("${widgetID}"));
-          var app = {};
-          var categories = (function () {
-              let now = new Date();
-              let res = [];
-              let len = 10;
-              while (len--) {
-                  res.unshift(now.toLocaleTimeString().replace(/^\D*/, ''));
-                  now = new Date(+now - 2000);
-              }
-              return res;
-          })();
-          var categories2 = (function () {
-              let res = [];
-              let len = 10;
-              while (len--) {
-                  res.push(10 - len - 1);
-              }
-              return res;
-          })();
-          var data = (function () {
-              
-              let res = [];
-              let len = 10;
-              while (len--) {
-                  res.push(Math.round(Math.random() * 1000));
-              }
-              return res;
-          })();
-          var data2 = (function () {
-              let res = [];
-              let len = 0;
-              while (len < 10) {
-                  res.push(+(Math.random() * 10 + 5).toFixed(1));
-                  len++;
-              }
-              return res;
-          })();
-          var option = {
-              title: {
-                  text: 'Dynamic Data'
-              },
-              tooltip: {
-                  trigger: 'axis',
-                  axisPointer: {
-                          type: 'cross',
-                      label: {
-                          backgroundColor: '#283b56'
-                      }
-              }
-              },
-              legend: {},
-              toolbox: {
-                  show: true,
-              feature: {
-                  dataView: { readOnly: false },
-                  restore: {},
-                  saveAsImage: {}
-              }
-              },
-              dataZoom: {
-                  show: false,
-                  start: 0,
-                  end: 100
-              },
-              xAxis: [
-                  {
-                      type: 'category',
-                      boundaryGap: true,
-                      data: categories,
-                      name: '${appFormData.xAxisLabel}',
-                      nameLocation: 'middle',
-                      nameGap: 35
-                  },
-                  {
-                      type: 'category',
-                      boundaryGap: true,
-                      data: categories2
-                  }
-              ],
-              yAxis: [
-                  {
-                      type: 'value',
-                      scale: true,
-                      name: '${appFormData.lineYAxisLabel}',
-                      nameLocation: 'middle',
-                      nameGap: '35',
-                      max: 30,
-                      min: 0,
-                      boundaryGap: [0.2, 0.2]
-                  },
-                  {
-                      type: 'value',
-                      scale: true,
-                      name: '${appFormData.barYAxisLabel1}',
-                      nameLocation: 'middle',
-                      nameGap: '35',
-                      max: 1200,
-                      min: 0,
-                      boundaryGap: [0.2, 0.2]
-                  }
-              ],
-              series: [
-                  {
-                      name: '${appFormData.barDataSeriesName}',
-                      type: 'bar',
-                      xAxisIndex: 1,
-                      yAxisIndex: 1,
-                      data: data
-                  },
-                  {
-                      name: '${appFormData.lineDataSeriesName}',
-                      type: 'line',
-                      data: data2
-                  }
-              ]
-          };
-          app.count = 11;
-          setInterval(function () {
-              let axisData = new Date().toLocaleTimeString().replace(/^\D*/, '');
-              data.shift();
-              data.push(Math.round(Math.random() * 1000));
-              data2.shift();
-              data2.push(+(Math.random() * 10 + 5).toFixed(1));
-              categories.shift();
-              categories.push(axisData);
-              categories2.shift();
-              categories2.push(app.count++);
-              dynamicDataChart.setOption({
-                  xAxis: [
-                      {
-                          data: categories
-                      },
-                      {
-                          data: categories2
-                      }
-                  ],
-                  series: [
-                      {
-                          data: data
-                      },
-                      {
-                          data: data2
-                      }
-                  ]
-              });
-          }, 2100);
-
-          dynamicDataChart.setOption(option);
-        `;
+        var widgetID = "dynamicDataChart-" + Date.now();
 
         var config = {
           ID: widgetID,
-          Script: widgetScript,
+          Type: "dynamicDataChart",
         };
-        addWidget(config);
+        addWidget(chartData, config);
         // Append chart metadata to dashboard metadata
-        metadataBuffer[widgetID] = dataFormData;
+        metadataBuffer[widgetID] = chartData;
       });
   </script>
 {{ end }}

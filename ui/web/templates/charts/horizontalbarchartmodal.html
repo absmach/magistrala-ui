@@ -54,15 +54,15 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </li>
           </ul>
-          <div class="tab-content" id="myTabContent">
-            <!-- Data Tab -->
-            <div
-              class="tab-pane fade show active"
-              id="horizontalBarChartData"
-              role="tabpanel"
-              aria-labelledby="data-tab"
-            >
-              <form id="create-horizontalBarChart-data-form">
+          <form id="create-horizontalBarChart-form">
+            <div class="tab-content" id="myTabContent">
+              <!-- Data Tab -->
+              <div
+                class="tab-pane fade show active"
+                id="horizontalBarChartData"
+                role="tabpanel"
+                aria-labelledby="data-tab"
+              >
                 <div class="mb-3">
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
@@ -95,16 +95,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
-              </form>
-            </div>
-            <!-- Appearance Tab -->
-            <div
-              class="tab-pane fade"
-              id="horizontalBarChartAppearance"
-              role="tabpanel"
-              aria-labelledby="appearance-tab"
-            >
-              <form id="create-horizontalBarChart-appearance-form">
+              </div>
+              <!-- Appearance Tab -->
+              <div
+                class="tab-pane fade"
+                id="horizontalBarChartAppearance"
+                role="tabpanel"
+                aria-labelledby="appearance-tab"
+              >
                 <div class="mb-3">
                   <label for="title" class="form-label">Title</label>
                   <input
@@ -135,9 +133,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                     placeholder="Enter the x axis label"
                   />
                 </div>
-              </form>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -158,96 +156,28 @@ SPDX-License-Identifier: Apache-2.0 -->
     document
       .getElementById("create-horizontalBarChart-button")
       .addEventListener("click", function () {
-        var form = document.getElementById("create-horizontalBarChart-appearance-form");
+        var form = document.getElementById("create-horizontalBarChart-form");
         // Create an object to store the form data
-        var appFormData = {};
+        var chartData = {};
 
         // Serialize the appearance form data into the object
         for (var i = 0; i < form.elements.length; i++) {
           var e = form.elements[i];
           if (e.type !== "submit" && e.type !== "button") {
-            appFormData[e.name] = e.value;
-          }
-        }
-        form.reset();
-
-        form = document.getElementById("create-horizontalBarChart-data-form");
-        // Create an object to store the form data
-        var dataFormData = {};
-
-        // Serialize the data form data into the object
-        for (var i = 0; i < form.elements.length; i++) {
-          var e = form.elements[i];
-          if (e.type !== "submit" && e.type !== "button") {
-            dataFormData[e.name] = e.value;
+            chartData[e.name] = e.value;
           }
         }
         form.reset();
 
         var widgetID = "horizontalBarchart-" + Date.now();
-        var widgetScript = `
-        var horizontalBarChart = echarts.init(document.getElementById("${widgetID}"));
-        var option = {
-            title:{
-              text: '${appFormData.title}',
-              left: 'center'
-            },
-            dataset: {
-              source: [
-                ['score', 'amount', 'product'],
-                [79.3,85212, 'thing1'],
-                [57.1, 78254, 'thing2'],
-                [14.4, 41032, 'thing3'],
-                [30.1, 12755, 'thing4'],
-                [18.7, 20145, 'thing5'],
-                [88.1, 89146, 'thing6'],
-              ]
-            },
-            grid: { containLabel: true },
-            xAxis: { 
-              name: '${appFormData.xAxisLabel}',
-              nameLocation: 'middle',
-              nameGap: 30,
-              type: 'value',
-            },
-            yAxis: { 
-              type: 'category',
-              name: '${appFormData.yAxisLabel}',
-              nameLocation: 'middle',
-              nameGap: 50,
-            },
-            visualMap: {
-              orient: 'horizontal',
-              left: 'center',
-              min: 10,
-              max: 100,
-              text: ['High temperature', 'Low temperature'],
-              // Map the score column to color
-              dimension: 0,
-              inRange: {
-                color: ['#65B581', '#FFCE34', '#FD665F']
-              }
-            },
-            series: [
-              {
-                type: 'bar',
-                encode: {
-                  x: 'amount',
-                  y: 'product'
-                }
-              }
-            ]
-          };
-
-        horizontalBarChart.setOption(option);`;
 
         var config = {
           ID: widgetID,
-          Script: widgetScript,
+          Type: "horizontalBarChart",
         };
-        addWidget(config);
+        addWidget(chartData, config);
         // Append chart metadata to dashboard metadata
-        metadataBuffer[widgetID] = dataFormData;
+        metadataBuffer[widgetID] = chartData;
       });
   </script>
 {{ end }}

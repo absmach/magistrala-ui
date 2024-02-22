@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="alarmCountModalLabel">Alarm count card</h5>
+          <h5 class="modal-title" id="alarmCountModalLabel">Alarm Count Card</h5>
           <button
             type="button"
             class="btn-close"
@@ -22,7 +22,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form id="create-alarmCount-data-form">
+        <form id="create-alarmCount-form">
           <div class="modal-body">
             <div class="mb-3">
               <label for="channel-id" class="form-label">Channel ID</label>
@@ -87,46 +87,31 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // alarm count form
     document.getElementById("create-alarmCount-button").addEventListener("click", function () {
-      var form = document.getElementById("create-alarmCount-data-form");
+      var form = document.getElementById("create-alarmCount-form");
       // Create an object to store the form data
-      var dataFormData = {};
+      var chartData = {};
 
       // Serialize the form data into the object
       for (var i = 0; i < form.elements.length; i++) {
         var e = form.elements[i];
         if (e.type !== "submit" && e.type !== "button") {
-          dataFormData[e.name] = e.value;
+          chartData[e.name] = e.value;
         }
       }
       form.reset();
 
       var widgetID = "alarmCount-" + Date.now();
-      var widgetContent = `
-        <div class="card widgetcard">
-            <div class="card-header text-center">
-              <h5 class="card-title">Alarm Count</h5>
-            </div>
-            <div class="card-body text-center">
-              <p class="card-text value"> 35</p>
-            </div>
-            <div class="card-footer text-center w-100 bg-warning">
-              <p class="card-text">
-                Warning Level
-              </p>
-            </div>
-        </div>
-      `;
       var config = {
         ID: widgetID,
-        Content: widgetContent,
+        Type: "alarmCount",
         Style: {
           width: "300px",
           height: "160px",
         },
       };
-      addWidget(config);
+      addWidget(chartData, config);
       // Append chart metadata to dashboard metadata
-      metadataBuffer[widgetID] = dataFormData;
+      metadataBuffer[widgetID] = chartData;
     });
   </script>
 {{ end }}

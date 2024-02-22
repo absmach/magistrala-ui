@@ -66,42 +66,29 @@ SPDX-License-Identifier: Apache-2.0 -->
     document.getElementById("create-label-button").addEventListener("click", function () {
       var form = document.getElementById("create-label-form");
       // Create an object to store the form data
-      var dataFormData = {};
+      var chartData = {};
 
       // Serialize the form data into the object
       for (var i = 0; i < form.elements.length; i++) {
         var e = form.elements[i];
         if (e.type !== "submit" && e.type !== "button") {
-          dataFormData[e.name] = e.value;
+          chartData[e.name] = e.value;
         }
       }
       form.reset();
 
-      var widgetID = "label-" + Date.now();
-      var widgetContent = `
-        <div class="card widgetcard">
-          <div class="card-header text-center">
-            <h5 class="card-title">Label</h5>
-          </div>
-          <div class="card-body text-center">
-            <p class="card-subtitle mb-2 text-muted">Selected Entity: <span class="badge bg-primary">Thing6</span></p>
-          </div>
-          <div class="card-footer">
-            <p class="card-text text"> ThingID: 666 666 666</p>
-          </div>
-        </div>
-      `;
+      var widgetID = "labelCard-" + Date.now();
       var config = {
         ID: widgetID,
-        Content: widgetContent,
+        Type: "labelCard",
         Style: {
           width: "300px",
           height: "170px",
         },
       };
-      addWidget(config);
+      addWidget(chartData, config);
       // Append chart metadata to dashboard metadata
-      metadataBuffer[widgetID] = dataFormData;
+      metadataBuffer[widgetID] = chartData;
     });
   </script>
 {{ end }}

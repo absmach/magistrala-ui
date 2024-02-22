@@ -54,15 +54,16 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </li>
           </ul>
-          <div class="tab-content" id="myTabContent">
-            <!-- Data Tab -->
-            <div
-              class="tab-pane fade show active"
-              id="multiBarChartData"
-              role="tabpanel"
-              aria-labelledby="data-tab"
-            >
-              <form id="create-multiBarChart-data-form">
+          <!-- Single Form for both Data and Appearance Tabs -->
+          <form id="create-multiBarChart-form">
+            <div class="tab-content" id="myTabContent">
+              <!-- Data Tab -->
+              <div
+                class="tab-pane fade show active"
+                id="multiBarChartData"
+                role="tabpanel"
+                aria-labelledby="data-tab"
+              >
                 <div class="mb-3">
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
@@ -95,16 +96,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
-              </form>
-            </div>
-            <!-- Appearance Tab -->
-            <div
-              class="tab-pane fade"
-              id="multiBarChartAppearance"
-              role="tabpanel"
-              aria-labelledby="appearance-tab"
-            >
-              <form id="create-multiBarChart-appearance-form">
+              </div>
+              <!-- Appearance Tab -->
+              <div
+                class="tab-pane fade"
+                id="multiBarChartAppearance"
+                role="tabpanel"
+                aria-labelledby="appearance-tab"
+              >
                 <div class="mb-3">
                   <label for="title" class="form-label">Title</label>
                   <input
@@ -146,9 +145,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
-              </form>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -167,223 +166,28 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // Multibar chart form
     document.getElementById("create-multiBarChart-button").addEventListener("click", function () {
-      var form = document.getElementById("create-multiBarChart-appearance-form");
+      var form = document.getElementById("create-multiBarChart-form");
       // Create an object to store the form data
-      var appFormData = {};
+      var chartData = {};
 
       // Serialize the form data into the object
       for (var i = 0; i < form.elements.length; i++) {
         var e = form.elements[i];
         if (e.type !== "submit" && e.type !== "button") {
-          appFormData[e.name] = e.value;
+          chartData[e.name] = e.value;
         }
       }
       form.reset();
 
-      form = document.getElementById("create-multiBarChart-data-form");
-      // Create an object to store the form data
-      var dataFormData = {};
+      var widgetID = "multiBarChart-" + Date.now();
 
-      // Serialize the form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          dataFormData[e.name] = e.value;
-        }
-      }
-      form.reset();
-
-      seriesName = appFormData.seriesName.split(",");
-
-      var widgetID = "multiBarchart-" + Date.now();
-      var widgetScript = `
-        var multiBarChart = echarts.init(document.getElementById("${widgetID}"));
-        var app = {}
-        var posList = [
-            'left',
-            'right',
-            'top',
-            'bottom',
-            'inside',
-            'insideTop',
-            'insideLeft',
-            'insideRight',
-            'insideBottom',
-            'insideTopLeft',
-            'insideTopRight',
-            'insideBottomLeft',
-            'insideBottomRight'
-        ];
-        app.configParameters = {
-                rotate: {
-                min: -90,
-                max: 90
-            },
-            align: {
-            options: {
-                left: 'left',
-                center: 'center',
-                right: 'right'
-            }
-            },
-            verticalAlign: {
-            options: {
-                top: 'top',
-                middle: 'middle',
-                bottom: 'bottom'
-            }
-            },
-            position: {
-            options: posList.reduce(function (map, pos) {
-                map[pos] = pos;
-                return map;
-            }, {})
-            },
-            distance: {
-            min: 0,
-            max: 100
-            }
-        };
-        app.config = {
-            rotate: 90,
-            align: 'left',
-            verticalAlign: 'middle',
-            position: 'insideBottom',
-            distance: 15,
-            onChange: function () {
-            const labelOption = {
-                rotate: app.config.rotate,
-                align: app.config.align,
-                verticalAlign: app.config.verticalAlign,
-                position: app.config.position,
-                distance: app.config.distance
-            };
-            multiBarChart.setOption({
-                series: [
-                {
-                    label: labelOption
-                },
-                {
-                    label: labelOption
-                },
-                {
-                    label: labelOption
-                },
-                {
-                    label: labelOption
-                }
-                ]
-            });
-            }
-        };
-        var labelOption = {
-            show: true,
-            position: app.config.position,
-            distance: app.config.distance,
-            align: app.config.align,
-            verticalAlign: app.config.verticalAlign,
-            rotate: app.config.rotate,
-            formatter: '{c}  {name|{a}}',
-            fontSize: 16,
-            rich: {
-            name: {}
-            }
-        };
-        var option = {
-            title: {
-              text: '${appFormData.title}',
-              left: 'left'
-            },
-            tooltip: {
-            trigger: 'axis',
-            axisPointer: {
-                type: 'shadow'
-            }
-            },
-            legend: {
-              show: true,
-              left: 'right',
-            },
-            toolbox: {
-            show: true,
-            orient: 'vertical',
-            left: 'right',
-            top: 'center',
-            feature: {
-                mark: { show: true },
-                dataView: { show: true, readOnly: false },
-                magicType: { show: true, type: ['line', 'bar', 'stack'] },
-                restore: { show: true },
-                saveAsImage: { show: true }
-            }
-            },
-            xAxis: [
-            {
-                type: 'category',
-                axisTick: { show: false },
-                data: ['2012', '2013', '2014', '2015', '2016'],
-                name: '${appFormData.xAxisLabel}',
-                nameLocation: 'middle',
-                nameGap: 30
-            }
-            ],
-            yAxis: [
-            {
-                type: 'value',
-                name: '${appFormData.yAxisLabel}',
-                nameLocation: 'middle',
-                nameGap: 40
-            }
-            ],
-            series: [
-            {
-                name: '${seriesName[0]}',
-                type: 'bar',
-                barGap: 0,
-                label: labelOption,
-                emphasis: {
-                focus: 'series'
-                },
-                data: [320, 332, 301, 334, 390]
-            },
-            {
-                name: '${seriesName[1]}',
-                type: 'bar',
-                label: labelOption,
-                emphasis: {
-                focus: 'series'
-                },
-                data: [220, 182, 191, 234, 290]
-            },
-            {
-                name: '${seriesName[2]}',
-                type: 'bar',
-                label: labelOption,
-                emphasis: {
-                focus: 'series'
-                },
-                data: [150, 232, 201, 154, 190]
-            },
-            {
-                name: '${seriesName[3]}',
-                type: 'bar',
-                label: labelOption,
-                emphasis: {
-                focus: 'series'
-                },
-                data: [98, 77, 101, 99, 40]
-            }
-            ]
-        };
-        multiBarChart.setOption(option);
-      `;
       var config = {
         ID: widgetID,
-        Script: widgetScript,
+        Type: "multiBarChart",
       };
-      addWidget(config);
+      addWidget(chartData, config);
       // Append chart metadata to dashboard metadata
-      metadataBuffer[widgetID] = dataFormData;
+      metadataBuffer[widgetID] = chartData;
     });
   </script>
 {{ end }}

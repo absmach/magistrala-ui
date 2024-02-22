@@ -14,7 +14,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="sharedDatasetModalLabel">Multiple Dataset Chart</h5>
+          <h5 class="modal-title" id="sharedDatasetModalLabel">Shared Dataset Chart</h5>
           <button
             type="button"
             class="btn-close"
@@ -54,16 +54,16 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </li>
           </ul>
-          <!-- Tab Content -->
-          <div class="tab-content" id="myTabContent">
-            <!-- Data Tab -->
-            <div
-              class="tab-pane fade show active"
-              id="sharedDatasetChartData"
-              role="tabpanel"
-              aria-labelledby="data-tab"
-            >
-              <form id="create-sharedDatasetChart-data-form">
+          <!-- Single Form for both Data and Appearance Tabs -->
+          <form id="create-sharedDatasetChart-form">
+            <div class="tab-content" id="myTabContent">
+              <!-- Data Tab -->
+              <div
+                class="tab-pane fade show active"
+                id="sharedDatasetChartData"
+                role="tabpanel"
+                aria-labelledby="data-tab"
+              >
                 <div class="mb-3">
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
@@ -99,7 +99,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </div>
                 <div class="mb-3">
                   <label for="y-axis-type" class="form-label">Y-axis Type</label>
-                  <select class="form-select mb-3" name="yAxisType" id="y-axis-typr">
+                  <select class="form-select mb-3" name="yAxisType" id="y-axis-type">
                     <option value="" disabled>Select y-axis Type</option>
                     <option value="value">Value</option>
                     <option value="category">Category</option>
@@ -113,7 +113,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     type="datetime-local"
                     class="form-control mb-3"
                     name="startTime"
-                    id="start-name"
+                    id="start-time"
                     required
                   />
                 </div>
@@ -123,7 +123,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     type="datetime-local"
                     class="form-control mb-3"
                     name="stopTime"
-                    id="stop-name"
+                    id="stop-time"
                   />
                 </div>
                 <div class="mb-3">
@@ -137,16 +137,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
-              </form>
-            </div>
-            <!-- Appearance Tab -->
-            <div
-              class="tab-pane fade"
-              id="sharedDatasetChartAppearance"
-              role="tabpanel"
-              aria-labelledby="appearance-tab"
-            >
-              <form id="create-sharedDatasetChart-appearance-form">
+              </div>
+              <!-- Appearance Tab -->
+              <div
+                class="tab-pane fade"
+                id="sharedDatasetChartAppearance"
+                role="tabpanel"
+                aria-labelledby="appearance-tab"
+              >
                 <div class="mb-3">
                   <label for="title" class="form-label">Title</label>
                   <input
@@ -184,13 +182,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                     class="form-control mb-3"
                     name="seriesName"
                     id="series-name"
-                    placeholder="Enter the four series names eg. temperature,voltage,.."
+                    placeholder="Enter the four series names eg. temperature, voltage,.."
                     required
                   />
                 </div>
-              </form>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -209,147 +207,27 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // Shared dataset chart form
     document.getElementById("create-sharedDataset-button").addEventListener("click", function () {
-      var form = document.getElementById("create-sharedDatasetChart-appearance-form");
+      var form = document.getElementById("create-sharedDatasetChart-form");
       // Create an object to store the form data
-      var appFormData = {};
+      var chartData = {};
 
       // Serialize the appearance form data into the object
       for (var i = 0; i < form.elements.length; i++) {
         var e = form.elements[i];
         if (e.type !== "submit" && e.type !== "button") {
-          appFormData[e.name] = e.value;
+          chartData[e.name] = e.value;
         }
       }
       form.reset();
 
-      form = document.getElementById("create-sharedDatasetChart-data-form");
-      // Create an object to store the form data
-      var dataFormData = {};
-
-      // Serialize the data form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          dataFormData[e.name] = e.value;
-        }
-      }
-      form.reset();
-
-      seriesName = appFormData.seriesName.split(",");
-
-      var widgetID = "sharedDataset-" + Date.now();
-      var widgetScript = `
-        var sharedDataset = echarts.init(document.getElementById("${widgetID}"));
-        var option = {
-          title: {
-            text: '${appFormData.title}',
-            left: 'left'
-          },
-          legend: {
-            show: true,
-            left: 'right',
-          },
-          tooltip: {
-            trigger: 'axis',
-            showContent: false
-          },
-          dataset: {
-            source: [
-              ['product', '2012', '2013', '2014', '2015', '2016', '2017'],
-              ['Things', 56.5, 82.1, 88.7, 70.1, 53.4, 85.1],
-              ['Users', 51.1, 51.4, 55.1, 53.3, 73.8, 68.7],
-              ['Channels', 40.1, 62.2, 69.5, 36.4, 45.2, 32.5],
-              ['Groups', 25.2, 37.1, 41.2, 18, 33.9, 49.1]
-            ]
-          },
-          xAxis: {
-            type: 'category',
-            name:'${appFormData.xAxisLabel}',
-            nameLocation: 'middle',
-            nameGap: 30
-          },
-          yAxis: {
-            gridIndex: 0,
-            name: '${appFormData.yAxisLabel}',
-            nameLocation: 'middle',
-            nameGap: 40
-          },
-          grid: { top: '55%' },
-          series: [
-            {
-              type: 'line',
-              smooth: true,
-              seriesLayoutBy: 'row',
-              emphasis: { focus: 'series' },
-              name: '${seriesName[0]}'
-            },
-            {
-              type: 'line',
-              smooth: true,
-              seriesLayoutBy: 'row',
-              emphasis: { focus: 'series' },
-              name: '${seriesName[1]}'
-            },
-            {
-              type: 'line',
-              smooth: true,
-              seriesLayoutBy: 'row',
-              emphasis: { focus: 'series' },
-              name: '${seriesName[2]}'
-            },
-            {
-              type: 'line',
-              smooth: true,
-              seriesLayoutBy: 'row',
-              emphasis: { focus: 'series' },
-              name: '${seriesName[3]}'
-            },
-            {
-              type: 'pie',
-              id: 'pie',
-              radius: '30%',
-              center: ['50%', '25%'],
-              emphasis: {
-                focus: 'self'
-              },
-              label: {
-                formatter: '{b}: {@2012} ({d}%)'
-              },
-              encode: {
-                itemName: 'product',
-                value: '2012',
-                tooltip: '2012'
-              }
-            }
-          ]
-        };
-        sharedDataset.on('updateAxisPointer', function (event) {
-          const xAxisInfo = event.axesInfo[0];
-          if (xAxisInfo) {
-            const dimension = xAxisInfo.value + 1;
-            sharedDataset.setOption({
-              series: {
-                id: 'pie',
-                label: {
-                  formatter: '{b}: {@[' + dimension + ']} ({d}%)'
-                },
-                encode: {
-                  value: dimension,
-                  tooltip: dimension
-                }
-              }
-            });
-          }
-        });
-        sharedDataset.setOption(option);
-      `;
+      var widgetID = "sharedDatasetChart-" + Date.now();
       var config = {
         ID: widgetID,
-        Script: widgetScript,
+        Type: "sharedDatasetChart",
       };
-      addWidget(config);
+      addWidget(chartData, config);
       // Append chart metadata to dashboard metadata
-      metadataBuffer[widgetID] = dataFormData;
+      metadataBuffer[widgetID] = chartData;
     });
   </script>
 {{ end }}

@@ -54,16 +54,15 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </li>
           </ul>
-          <!-- Tab Content -->
-          <div class="tab-content" id="myTabContent">
-            <!-- Data Tab -->
-            <div
-              class="tab-pane fade show active"
-              id="valueCardData"
-              role="tabpanel"
-              aria-labelledby="data-tab"
-            >
-              <form id="create-valueCard-data-form">
+          <form id="create-valueCard-form">
+            <div class="tab-content" id="myTabContent">
+              <!-- Data Tab -->
+              <div
+                class="tab-pane fade show active"
+                id="valueCardData"
+                role="tabpanel"
+                aria-labelledby="data-tab"
+              >
                 <div class="mb-3">
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
@@ -108,16 +107,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
-              </form>
-            </div>
-            <!-- Appearance Tab -->
-            <div
-              class="tab-pane fade"
-              id="valueCardAppearance"
-              role="tabpanel"
-              aria-labelledby="appearance-tab"
-            >
-              <form id="create-valueCard-appearance-form">
+              </div>
+              <!-- Appearance Tab -->
+              <div
+                class="tab-pane fade"
+                id="valueCardAppearance"
+                role="tabpanel"
+                aria-labelledby="appearance-tab"
+              >
                 <div class="mb-3">
                   <label for="title" class="form-label">Title</label>
                   <input
@@ -148,9 +145,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                     placeholder="Enter the units"
                   />
                 </div>
-              </form>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -169,58 +166,32 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // Value card form
     document.getElementById("create-valueCard-button").addEventListener("click", function () {
-      var form = document.getElementById("create-valueCard-appearance-form");
+      var form = document.getElementById("create-valueCard-form");
       // Create an object to store the form data
-      var appFormData = {};
+      var chartData = {};
 
-      // Serialize the apperance form data into the object
+      // Serialize the form data into the object
       for (var i = 0; i < form.elements.length; i++) {
         var e = form.elements[i];
         if (e.type !== "submit" && e.type !== "button") {
-          appFormData[e.name] = e.value;
-        }
-      }
-      form.reset();
-
-      form = document.getElementById("create-valueCard-data-form");
-      // Create an object to store the form data
-      var dataFormData = {};
-
-      // Serialize the data form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          dataFormData[e.name] = e.value;
+          chartData[e.name] = e.value;
         }
       }
       form.reset();
 
       var widgetID = "valueCard-" + Date.now();
-      var widgetContent = `
-        <div class="card mt-3 widgetcard" >
-          <div class="card-header text-center">
-            <h5 class="card-title">${appFormData.title}</h5>
-          </div>
-          <div class="card-body text-center">
-            <p class="card-text value"> 35</p>
-          </div>
-          <div class="card-footer">
-            <p class="card-text"> Units: ${appFormData.valueUnits}</p>
-            <p class="card-text text"> ThingName: ${appFormData.thingName}</p>
-          </div>
-        </div>
-      `;
+
       var config = {
         ID: widgetID,
-        Content: widgetContent,
+        Type: "valueCard",
         Style: {
           width: "300px",
           height: "210px",
         },
       };
-      addWidget(config);
+      addWidget(chartData, config);
       // Append chart metadata to dashboard metadata
-      metadataBuffer[widgetID] = dataFormData;
+      metadataBuffer[widgetID] = chartData;
     });
   </script>
 {{ end }}

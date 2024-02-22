@@ -54,16 +54,15 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </li>
           </ul>
-          <!-- Tab Content -->
-          <div class="tab-content" id="myTabContent">
-            <!-- Data Tab -->
-            <div
-              class="tab-pane fade show active"
-              id="progressBarData"
-              role="tabpanel"
-              aria-labelledby="data-tab"
-            >
-              <form id="create-progressBar-data-form">
+          <form id="create-progressBar-form">
+            <div class="tab-content" id="myTabContent">
+              <!-- Data Tab -->
+              <div
+                class="tab-pane fade show active"
+                id="progressBarData"
+                role="tabpanel"
+                aria-labelledby="data-tab"
+              >
                 <div class="mb-3">
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
@@ -97,16 +96,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
-              </form>
-            </div>
-            <!-- Appearance Tab -->
-            <div
-              class="tab-pane fade"
-              id="progressBarAppearance"
-              role="tabpanel"
-              aria-labelledby="appearance-tab"
-            >
-              <form id="create-progressBar-appearance-form">
+              </div>
+              <!-- Appearance Tab -->
+              <div
+                class="tab-pane fade"
+                id="progressBarAppearance"
+                role="tabpanel"
+                aria-labelledby="appearance-tab"
+              >
                 <div class="mb-3">
                   <label for="title" class="form-label">Title</label>
                   <input
@@ -142,16 +139,16 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <div class="mb-3">
                   <label for="progress-bar-color" class="form-label">Progress Bar Color</label>
                   <select class="form-select mb-3" name="progressBarColor" id="progress-bar-color">
-                    <option value="" disabled>Progress Bar Type</option>
+                    <option value="" disabled>Select Progress Bar Color</option>
                     <option value="bg-success">Green</option>
                     <option value="bg-info">Blue</option>
                     <option value="bg-warning">Yellow</option>
                     <option value="bg-danger">Red</option>
                   </select>
                 </div>
-              </form>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -170,61 +167,32 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // Progress bar form
     document.getElementById("create-progressBar-button").addEventListener("click", function () {
-      var form = document.getElementById("create-progressBar-appearance-form");
+      var form = document.getElementById("create-progressBar-form");
       // Create an object to store the form data
-      var appFormData = {};
+      var chartData = {};
 
       // Serialize the appearance form data into the object
       for (var i = 0; i < form.elements.length; i++) {
         var e = form.elements[i];
         if (e.type !== "submit" && e.type !== "button") {
-          appFormData[e.name] = e.value;
-        }
-      }
-      form.reset();
-
-      form = document.getElementById("create-progressBar-data-form");
-      // Create an object to store the form data
-      var dataFormData = {};
-
-      // Serialize the data form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          dataFormData[e.name] = e.value;
+          chartData[e.name] = e.value;
         }
       }
       form.reset();
 
       var widgetID = "progressBar-" + Date.now();
-      var widgetContent = `
-        <div class="card widgetcard">
-          <div class="card-header text-center">
-            <h5 class="card-title">${appFormData.title}</h5>
-          </div>
-          <div class="card-body p-2">
-            <div class="progress">
-              <div class="progress-bar ${appFormData.progressBarColor}" role="progressbar" style="width: 70%" aria-valuemin=${appFormData.minValue} aria-valuemax=${appFormData.maxValue}></div>
-            </div>
-          </div>
-          <div class="card-footer text-center">
-            <p class="card-text">
-              Status: 70%
-            </p>
-          </div>
-        </div>
-      `;
+
       var config = {
         ID: widgetID,
-        Content: widgetContent,
+        Type: "progressBar",
         Style: {
           width: "300px",
           height: "120px",
         },
       };
-      addWidget(config);
+      addWidget(chartData, config);
       // Append chart metadata to dashboard metadata
-      metadataBuffer[widgetID] = dataFormData;
+      metadataBuffer[widgetID] = chartData;
     });
   </script>
 {{ end }}

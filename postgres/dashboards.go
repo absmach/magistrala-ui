@@ -203,6 +203,7 @@ func toDBDashboard(ds ui.Dashboard) (dbDashboard, error) {
 	if err != nil {
 		return dbDashboard{}, errors.Wrap(ErrJSONMarshal, err)
 	}
+
 	return dbDashboard{
 		ID:          ds.ID,
 		CreatedBy:   ds.CreatedBy,
