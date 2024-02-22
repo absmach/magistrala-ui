@@ -2462,22 +2462,22 @@ func AdminAuthMiddleware(next http.Handler) http.Handler {
 				http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
 			}
 		}()
-		tokenString, err := tokenFromCookie(r, "user")
+		tokenString, err := tokenFromCookie(r, "sessionDetails")
 		if err != nil {
 			return
 		}
 
-		decodedUser, err := base64.StdEncoding.DecodeString(tokenString)
+		decodedSession, err := base64.StdEncoding.DecodeString(tokenString)
 		if err != nil {
 			return
 		}
 
-		var user sdk.User
-		if err = json.Unmarshal(decodedUser, &user); err != nil {
+		var session ui.SessionDetails
+		if err = json.Unmarshal(decodedSession, &session); err != nil {
 			return
 		}
 
-		if user.Role != "admin" {
+		if session.Role != "admin" {
 			err = errors.ErrAuthorization
 			return
 		}

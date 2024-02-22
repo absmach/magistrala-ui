@@ -99,16 +99,15 @@ func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
 			{
 				Name:     refreshTokenKey,
 				Value:    "",
-				Path:     tokenRefreshAPIEndpoint,
+				Path:     domainsAPIEndpoint,
 				MaxAge:   -1,
 				HttpOnly: true,
 			},
 			{
-				Name:     refreshTokenKey,
-				Value:    "",
-				Path:     domainsAPIEndpoint,
-				MaxAge:   -1,
-				HttpOnly: true,
+				Name:   "sessionDetails",
+				Value:  "",
+				Path:   "/",
+				MaxAge: -1,
 			},
 		}
 		return uiRes{
@@ -205,16 +204,15 @@ func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 			{
 				Name:     refreshTokenKey,
 				Value:    "",
-				Path:     tokenRefreshAPIEndpoint,
+				Path:     "/",
 				MaxAge:   -1,
 				HttpOnly: true,
 			},
 			{
-				Name:     refreshTokenKey,
-				Value:    "",
-				Path:     "/",
-				MaxAge:   -1,
-				HttpOnly: true,
+				Name:   "sessionDetails",
+				Value:  "",
+				Path:   "/",
+				MaxAge: -1,
 			},
 		}
 
@@ -278,13 +276,6 @@ func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 					Path:     "/",
 					HttpOnly: true,
 					Expires:  accessExp,
-				},
-				{
-					Name:     refreshTokenKey,
-					Value:    token.RefreshToken,
-					Path:     tokenRefreshAPIEndpoint,
-					HttpOnly: true,
-					Expires:  refreshExp,
 				},
 				{
 					Name:     refreshTokenKey,
@@ -1511,13 +1502,6 @@ func domainLoginEndpoint(svc ui.Service) endpoint.Endpoint {
 					Expires:  refreshExp,
 				},
 				{
-					Name:     refreshTokenKey,
-					Value:    token.RefreshToken,
-					Path:     "/",
-					HttpOnly: true,
-					Expires:  refreshExp,
-				},
-				{
 					Name:  "sessionDetails",
 					Value: sessionDetails,
 					Path:  "/",
@@ -1693,16 +1677,15 @@ func disableDomainEndpoint(svc ui.Service) endpoint.Endpoint {
 			{
 				Name:     refreshTokenKey,
 				Value:    "",
-				Path:     tokenRefreshAPIEndpoint,
+				Path:     "/",
 				MaxAge:   -1,
 				HttpOnly: true,
 			},
 			{
-				Name:     refreshTokenKey,
-				Value:    "",
-				Path:     "/",
-				MaxAge:   -1,
-				HttpOnly: true,
+				Name:   "sessionDetails",
+				Value:  "",
+				Path:   "/",
+				MaxAge: -1,
 			},
 		}
 
