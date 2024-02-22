@@ -1026,7 +1026,7 @@ func decodeTokenRequest(_ context.Context, r *http.Request) (interface{}, error)
 }
 
 func decodeRefreshTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "refresh_token")
+	token, err := tokenFromCookie(r, refreshTokenKey)
 	if err != nil {
 		return nil, err
 	}
@@ -2096,7 +2096,7 @@ func decodeGetEntitiesRequest(_ context.Context, r *http.Request) (interface{}, 
 }
 
 func decodeDomainLoginRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, "refresh_token")
+	token, err := tokenFromCookie(r, refreshTokenKey)
 	if err != nil {
 		return nil, err
 	}
