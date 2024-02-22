@@ -2384,7 +2384,7 @@ func AdminAuthMiddleware(next http.Handler) http.Handler {
 		var err error
 		defer func() {
 			if err != nil {
-				http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorsAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
+				http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
 			}
 		}()
 		tokenString, err := tokenFromCookie(r, "user")
