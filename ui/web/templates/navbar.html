@@ -385,19 +385,17 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script src="/js/listUtils.js"></script>
   <script src="/js/cookie.js"></script>
   <script defer>
-    let sessionDetails = JSON.parse(atob(getCookie("sessionDetails")));
-    console.log(sessionDetails);
-    let name = sessionDetails.user_name;
-    let identity = sessionDetails.user_identity;
-    let userID = sessionDetails.user_id;
-    let role = sessionDetails.role;
+    let sessionDetails = JSON.parse(atob(getCookie("session_details")));
+    let name = sessionDetails.user.name;
+    let identity = sessionDetails.user.identity;
+    let userID = sessionDetails.user.id;
+    let role = sessionDetails.user.role;
     let loginStatus = sessionDetails.login_status;
     let domainID, domainName, domainPermissions;
     if (loginStatus === "domain") {
-      domainName = sessionDetails.domain_name;
-      domainID = sessionDetails.domain_id;
-      domainPermissions = sessionDetails.domain_permissions;
-      console.log(domainPermissions);
+      domainName = sessionDetails.domain.name;
+      domainID = sessionDetails.domain.id;
+      domainPermissions = sessionDetails.domain.permissions;
     }
 
     document.getElementById("username").innerHTML = name;

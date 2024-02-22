@@ -104,7 +104,7 @@ func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
 				HttpOnly: true,
 			},
 			{
-				Name:   "sessionDetails",
+				Name:   sessionDetailsKey,
 				Value:  "",
 				Path:   "/",
 				MaxAge: -1,
@@ -209,7 +209,7 @@ func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 				HttpOnly: true,
 			},
 			{
-				Name:   "sessionDetails",
+				Name:   sessionDetailsKey,
 				Value:  "",
 				Path:   "/",
 				MaxAge: -1,
@@ -1479,7 +1479,7 @@ func domainLoginEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		sessionDetails, err := svc.SessionDetails(token.AccessToken, "domain", req.Login.DomainID)
+		sessionDetails, err := svc.Session(token.AccessToken, "domain", req.Login.DomainID)
 		if err != nil {
 			return nil, err
 		}
@@ -1502,7 +1502,7 @@ func domainLoginEndpoint(svc ui.Service) endpoint.Endpoint {
 					Expires:  refreshExp,
 				},
 				{
-					Name:  "sessionDetails",
+					Name:  sessionDetailsKey,
 					Value: sessionDetails,
 					Path:  "/",
 				},
@@ -1533,7 +1533,7 @@ func listDomainsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		sessionDetails, err := svc.SessionDetails(req.AccessToken, "user", "")
+		sessionDetails, err := svc.Session(req.AccessToken, "user", "")
 		if err != nil {
 			return nil, err
 		}
@@ -1543,7 +1543,7 @@ func listDomainsEndpoint(svc ui.Service) endpoint.Endpoint {
 			html: res,
 			cookies: []*http.Cookie{
 				{
-					Name:  "sessionDetails",
+					Name:  sessionDetailsKey,
 					Value: sessionDetails,
 					Path:  "/",
 				},
@@ -1682,7 +1682,7 @@ func disableDomainEndpoint(svc ui.Service) endpoint.Endpoint {
 				HttpOnly: true,
 			},
 			{
-				Name:   "sessionDetails",
+				Name:   sessionDetailsKey,
 				Value:  "",
 				Path:   "/",
 				MaxAge: -1,

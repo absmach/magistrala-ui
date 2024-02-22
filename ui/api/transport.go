@@ -62,6 +62,7 @@ const (
 	groupsItem              = "groups"
 	accessTokenKey          = "access_token"
 	refreshTokenKey         = "refresh_token"
+	sessionDetailsKey       = "session_details"
 	channelKey              = "channel"
 	thingKey                = "thing"
 	loggedInKey             = "logged_in"
@@ -2462,7 +2463,7 @@ func AdminAuthMiddleware(next http.Handler) http.Handler {
 				http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
 			}
 		}()
-		tokenString, err := tokenFromCookie(r, "sessionDetails")
+		tokenString, err := tokenFromCookie(r, sessionDetailsKey)
 		if err != nil {
 			return
 		}
@@ -2477,7 +2478,7 @@ func AdminAuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		if session.Role != "admin" {
+		if session.User.Role != "admin" {
 			err = errors.ErrAuthorization
 			return
 		}

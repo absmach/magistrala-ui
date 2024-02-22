@@ -189,8 +189,8 @@ func (lm *loggingMiddleware) RefreshToken(refreshToken string) (token sdk.Token,
 	return lm.svc.RefreshToken(refreshToken)
 }
 
-// SessionDetails adds logging middleware to session details method.
-func (lm *loggingMiddleware) SessionDetails(token, session, domainID string) (s string, err error) {
+// Session adds logging middleware to session details method.
+func (lm *loggingMiddleware) Session(token, session, domainID string) (s string, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -200,13 +200,13 @@ func (lm *loggingMiddleware) SessionDetails(token, session, domainID string) (s 
 
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Warn("Session details failed to complete successfully", args...)
+			lm.logger.Warn("Session failed to complete successfully", args...)
 			return
 		}
-		lm.logger.Info("Session details completed successfully", args...)
+		lm.logger.Info("Session completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.SessionDetails(token, session, domainID)
+	return lm.svc.Session(token, session, domainID)
 }
 
 // CreateUsers adds logging middleware to create users method.
