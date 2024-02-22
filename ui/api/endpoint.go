@@ -99,7 +99,7 @@ func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
 			{
 				Name:     refreshTokenKey,
 				Value:    "",
-				Path:     domainsAPIEndpoint,
+				Path:     "/",
 				MaxAge:   -1,
 				HttpOnly: true,
 			},

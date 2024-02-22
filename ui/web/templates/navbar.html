@@ -401,7 +401,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     document.getElementById("username").innerHTML = name;
     document.getElementById("identity").innerHTML = identity;
     document.querySelectorAll("#domains").forEach((element) => {
-      element.href = "/domains?logged_in=true";
+      element.href = "/domains";
     });
 
     if (loginStatus !== "domain") {

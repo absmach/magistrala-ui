@@ -2113,40 +2113,30 @@ func decodeDomainLoginRequest(_ context.Context, r *http.Request) (interface{}, 
 }
 
 func decodeListDomainsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	loggedIn, err := readStringQuery(r, loggedInKey, defKey)
+	accessToken, err := readStringQuery(r, accessTokenKey, defKey)
 	if err != nil {
 		return nil, err
 	}
-	var token sdk.Token
-	if loggedIn == "true" {
-		accessToken, err := tokenFromCookie(r, accessTokenKey)
+	refreshToken, err := readStringQuery(r, refreshTokenKey, defKey)
+	if err != nil {
+		return nil, err
+	}
+
+	if refreshToken == "" {
+		accessToken, err = tokenFromCookie(r, accessTokenKey)
 		if err != nil {
 			return nil, err
 		}
 
-		refreshToken, err := tokenFromCookie(r, refreshTokenKey)
+		refreshToken, err = tokenFromCookie(r, refreshTokenKey)
 		if err != nil {
 			return nil, err
 		}
+	}
 
-		token = sdk.Token{
-			AccessToken:  accessToken,
-			RefreshToken: refreshToken,
-		}
-	} else {
-		accessToken, err := readStringQuery(r, accessTokenKey, defKey)
-		if err != nil {
-			return nil, err
-		}
-		refreshToken, err := readStringQuery(r, refreshTokenKey, defKey)
-		if err != nil {
-			return nil, err
-		}
-
-		token = sdk.Token{
-			AccessToken:  accessToken,
-			RefreshToken: refreshToken,
-		}
+	token := sdk.Token{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	}
 
 	page, err := readNumQuery[uint64](r, pageKey, defPage)
