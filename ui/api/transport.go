@@ -2122,6 +2122,8 @@ func decodeListDomainsRequest(_ context.Context, r *http.Request) (interface{}, 
 		return nil, err
 	}
 
+	provider := "external"
+
 	if refreshToken == "" || accessToken == "" {
 		accessToken, err = tokenFromCookie(r, accessTokenKey)
 		if err != nil {
@@ -2132,6 +2134,7 @@ func decodeListDomainsRequest(_ context.Context, r *http.Request) (interface{}, 
 		if err != nil {
 			return nil, err
 		}
+		provider = "magistrala-ui"
 	}
 
 	token := sdk.Token{
@@ -2155,10 +2158,11 @@ func decodeListDomainsRequest(_ context.Context, r *http.Request) (interface{}, 
 	}
 
 	req := listDomainsReq{
-		Token:  token,
-		status: status,
-		page:   page,
-		limit:  limit,
+		Token:    token,
+		provider: provider,
+		status:   status,
+		page:     page,
+		limit:    limit,
 	}
 
 	return req, nil
