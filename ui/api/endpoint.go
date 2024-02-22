@@ -59,11 +59,34 @@ func registerUserEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		tkr := uiRes{
-			code: http.StatusOK,
-			html: token,
+		accessExp, err := extractTokenExpiry(token.AccessToken)
+		if err != nil {
+			return nil, err
+		}
+		refreshExp, err := extractTokenExpiry(token.RefreshToken)
+		if err != nil {
+			return nil, err
 		}
 
+		tkr := uiRes{
+			code: http.StatusOK,
+			cookies: []*http.Cookie{
+				{
+					Name:     accessTokenKey,
+					Value:    token.AccessToken,
+					Path:     domainsAPIEndpoint,
+					HttpOnly: true,
+					Expires:  accessExp,
+				},
+				{
+					Name:     refreshTokenKey,
+					Value:    token.RefreshToken,
+					Path:     domainsAPIEndpoint,
+					HttpOnly: true,
+					Expires:  refreshExp,
+				},
+			},
+		}
 		return tkr, nil
 	}
 }
@@ -236,9 +259,33 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
+		accessExp, err := extractTokenExpiry(token.AccessToken)
+		if err != nil {
+			return nil, err
+		}
+		refreshExp, err := extractTokenExpiry(token.RefreshToken)
+		if err != nil {
+			return nil, err
+		}
+
 		tkr := uiRes{
 			code: http.StatusOK,
-			html: token,
+			cookies: []*http.Cookie{
+				{
+					Name:     accessTokenKey,
+					Value:    token.AccessToken,
+					Path:     domainsAPIEndpoint,
+					HttpOnly: true,
+					Expires:  accessExp,
+				},
+				{
+					Name:     refreshTokenKey,
+					Value:    token.RefreshToken,
+					Path:     domainsAPIEndpoint,
+					HttpOnly: true,
+					Expires:  refreshExp,
+				},
+			},
 		}
 
 		return tkr, nil

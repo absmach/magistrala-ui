@@ -2122,7 +2122,7 @@ func decodeListDomainsRequest(_ context.Context, r *http.Request) (interface{}, 
 		return nil, err
 	}
 
-	if refreshToken == "" {
+	if refreshToken == "" || accessToken == "" {
 		accessToken, err = tokenFromCookie(r, accessTokenKey)
 		if err != nil {
 			return nil, err

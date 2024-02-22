@@ -53,7 +53,7 @@ func (lm *loggingMiddleware) ViewRegistration() (b []byte, err error) {
 }
 
 // Register adds logging middleware to register method.
-func (lm *loggingMiddleware) RegisterUser(user sdk.User) (b []byte, err error) {
+func (lm *loggingMiddleware) RegisterUser(user sdk.User) (t sdk.Token, err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
@@ -162,7 +162,7 @@ func (lm *loggingMiddleware) UpdatePassword(token, oldPass, newPass string) (err
 }
 
 // Toke adds logging middleware to token method.
-func (lm *loggingMiddleware) Token(login sdk.Login) (b []byte, err error) {
+func (lm *loggingMiddleware) Token(login sdk.Login) (t sdk.Token, err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {

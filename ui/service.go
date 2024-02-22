@@ -233,7 +233,7 @@ type Service interface {
 	// ViewRegistration displays the registration page.
 	ViewRegistration() ([]byte, error)
 	// RegisterUser registers a new user and logs them in.
-	RegisterUser(user sdk.User) ([]byte, error)
+	RegisterUser(user sdk.User) (sdk.Token, error)
 	// Login displays the login page.
 	Login() ([]byte, error)
 	// Logout deletes the access token and refresh token from the cookies and logs the user out of the UI.
@@ -249,7 +249,7 @@ type Service interface {
 	// UpdatePassword updates the user's old password to the new password.
 	UpdatePassword(token, oldPass, newPass string) error
 	// Token provides a user with an access token and a refresh token.
-	Token(login sdk.Login) ([]byte, error)
+	Token(login sdk.Login) (sdk.Token, error)
 	// RefreshToken retrieves a new access token and refresh token from the provided refresh token.
 	RefreshToken(refreshToken string) (sdk.Token, error)
 	// DomainLogin provides a user with an domain level access token and a refresh token.
@@ -552,9 +552,9 @@ func (us *uiService) ViewRegistration() ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) RegisterUser(user sdk.User) ([]byte, error) {
+func (us *uiService) RegisterUser(user sdk.User) (sdk.Token, error) {
 	if _, err := us.sdk.CreateUser(user, ""); err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedCreate)
+		return sdk.Token{}, errors.Wrap(err, ErrFailedCreate)
 	}
 
 	login := sdk.Login{
@@ -626,18 +626,13 @@ func (us *uiService) UpdatePassword(token, oldPass, newPass string) error {
 	return nil
 }
 
-func (us *uiService) Token(login sdk.Login) (b []byte, err error) {
+func (us *uiService) Token(login sdk.Login) (sdk.Token, error) {
 	token, err := us.sdk.CreateToken(login)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrToken)
+		return sdk.Token{}, errors.Wrap(err, ErrToken)
 	}
 
-	data, err := json.Marshal(token)
-	if err != nil {
-		return []byte{}, err
-	}
-
-	return data, nil
+	return token, nil
 }
 
 func (us *uiService) RefreshToken(refreshToken string) (sdk.Token, error) {
