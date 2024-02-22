@@ -74,14 +74,14 @@ func registerUserEndpoint(svc ui.Service) endpoint.Endpoint {
 				{
 					Name:     accessTokenKey,
 					Value:    token.AccessToken,
-					Path:     domainsAPIEndpoint,
+					Path:     "/",
 					HttpOnly: true,
 					Expires:  accessExp,
 				},
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
-					Path:     domainsAPIEndpoint,
+					Path:     "/",
 					HttpOnly: true,
 					Expires:  refreshExp,
 				},
@@ -274,14 +274,14 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 				{
 					Name:     accessTokenKey,
 					Value:    token.AccessToken,
-					Path:     domainsAPIEndpoint,
+					Path:     "/",
 					HttpOnly: true,
 					Expires:  accessExp,
 				},
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
-					Path:     domainsAPIEndpoint,
+					Path:     "/",
 					HttpOnly: true,
 					Expires:  refreshExp,
 				},
