@@ -1571,27 +1571,24 @@ func listDomainsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		uires := uiRes{
-			code: http.StatusOK,
-			html: res,
-		}
-
 		sessionDetails, err := svc.Session(req.AccessToken, "user", "")
 		if err != nil {
 			return nil, err
 		}
 
-		if req.provider == "external" {
-			accessExp, err := extractTokenExpiry(req.AccessToken)
-			if err != nil {
-				return nil, err
-			}
-			refreshExp, err := extractTokenExpiry(req.RefreshToken)
-			if err != nil {
-				return nil, err
-			}
+		accessExp, err := extractTokenExpiry(req.AccessToken)
+		if err != nil {
+			return nil, err
+		}
+		refreshExp, err := extractTokenExpiry(req.RefreshToken)
+		if err != nil {
+			return nil, err
+		}
 
-			uires.cookies = []*http.Cookie{
+		return uiRes{
+			code: http.StatusOK,
+			html: res,
+			cookies: []*http.Cookie{
 				{
 					Name:  sessionDetailsKey,
 					Value: sessionDetails,
@@ -1611,18 +1608,8 @@ func listDomainsEndpoint(svc ui.Service) endpoint.Endpoint {
 					HttpOnly: true,
 					Expires:  refreshExp,
 				},
-			}
-		} else {
-			uires.cookies = []*http.Cookie{
-				{
-					Name:  sessionDetailsKey,
-					Value: sessionDetails,
-					Path:  "/",
-				},
-			}
-		}
-
-		return uires, nil
+			},
+		}, nil
 	}
 }
 

@@ -862,10 +862,9 @@ func (req domainLoginReq) validate() error {
 
 type listDomainsReq struct {
 	sdk.Token
-	provider string
-	status   string
-	page     uint64
-	limit    uint64
+	status string
+	page   uint64
+	limit  uint64
 }
 
 func (req listDomainsReq) validate() error {

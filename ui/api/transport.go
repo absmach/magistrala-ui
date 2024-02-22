@@ -160,14 +160,6 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 		encodeResponse,
 		opts...,
 	).ServeHTTP)
-
-	r.Get("/domains", kithttp.NewServer(
-		listDomainsEndpoint(svc),
-		decodeListDomainsRequest,
-		encodeResponse,
-		opts...,
-	).ServeHTTP)
-
 	r.Route("/", func(r chi.Router) {
 		r.Use(TokenMiddleware)
 		r.Use(AuthnMiddleware)
@@ -2113,28 +2105,14 @@ func decodeDomainLoginRequest(_ context.Context, r *http.Request) (interface{}, 
 }
 
 func decodeListDomainsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	accessToken, err := readStringQuery(r, accessTokenKey, defKey)
-	if err != nil {
-		return nil, err
-	}
-	refreshToken, err := readStringQuery(r, refreshTokenKey, defKey)
+	accessToken, err := tokenFromCookie(r, accessTokenKey)
 	if err != nil {
 		return nil, err
 	}
 
-	provider := "external"
-
-	if refreshToken == "" || accessToken == "" {
-		accessToken, err = tokenFromCookie(r, accessTokenKey)
-		if err != nil {
-			return nil, err
-		}
-
-		refreshToken, err = tokenFromCookie(r, refreshTokenKey)
-		if err != nil {
-			return nil, err
-		}
-		provider = "magistrala-ui"
+	refreshToken, err := tokenFromCookie(r, refreshTokenKey)
+	if err != nil {
+		return nil, err
 	}
 
 	token := sdk.Token{
@@ -2158,11 +2136,10 @@ func decodeListDomainsRequest(_ context.Context, r *http.Request) (interface{}, 
 	}
 
 	req := listDomainsReq{
-		Token:    token,
-		provider: provider,
-		status:   status,
-		page:     page,
-		limit:    limit,
+		Token:  token,
+		status: status,
+		page:   page,
+		limit:  limit,
 	}
 
 	return req, nil
