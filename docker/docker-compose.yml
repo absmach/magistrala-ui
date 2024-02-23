@@ -49,7 +49,7 @@ services:
     restart: on-failure
     command: postgres -c "max_connections=${MG_POSTGRES_MAX_CONNECTIONS}"
     ports:
-      - 6042:5432
+      - 6007:5432
     networks:
       - magistrala-base-net
     volumes:
