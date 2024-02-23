@@ -97,10 +97,6 @@ function saveLayout(grid, dashboardID) {
   });
   const gridState = {
     items: itemData,
-    settings: {
-      dragEnabled: grid._settings.dragEnabled,
-      // Add other relevant settings if needed
-    },
   };
 
   // Convert the gridState to a JSON string
@@ -140,7 +136,7 @@ function loadLayout(savedLayout) {
     }
     // Initialize a new grid with drag enabled or disabled based on saved state
     grid = new Muuri(gridClass, {
-      dragEnabled: gridState.settings.dragEnabled,
+      dragEnabled: false,
       dragHandle: ".item-content",
     });
 
@@ -162,8 +158,8 @@ function loadLayout(savedLayout) {
         defaultConfig = {
           ID: itemData.widgetID,
         };
-        ma = JSON.parse(metadata);
-        chartData = ma[itemData.widgetID];
+        md = JSON.parse(metadata);
+        chartData = md[itemData.widgetID];
         config = createChart(chartData, defaultConfig);
         var styleString = `width: ${itemData.widgetSize.width}; height: ${itemData.widgetSize.height};`;
         newItem.innerHTML = `
@@ -220,8 +216,8 @@ function editGrid(grid, layout) {
           defaultConfig = {
             ID: itemData.widgetID,
           };
-          ma = JSON.parse(metadata);
-          chartData = ma[itemData.widgetID];
+          md = JSON.parse(metadata);
+          chartData = md[itemData.widgetID];
           config = createChart(chartData, defaultConfig);
           var styleString = `width: ${itemData.widgetSize.width}; height: ${itemData.widgetSize.height};`;
           newItem.innerHTML = `
@@ -412,17 +408,17 @@ function updateMetadata(layout, savedMetadata) {
   let upMetadata = {};
   // add metadata from the buffer
   if (savedMetadata !== "") {
-    ma = JSON.parse(savedMetadata);
-    uma = { ...ma, ...metadataBuffer };
+    md = JSON.parse(savedMetadata);
+    umd = { ...md, ...metadataBuffer };
   } else {
-    uma = metadataBuffer;
+    umd = metadataBuffer;
   }
 
   // filter out any removed widgets
   if (layout) {
     const gridState = JSON.parse(layout);
     gridState.items.forEach((itemData) => {
-      upMetadata[itemData.widgetID] = uma[itemData.widgetID];
+      upMetadata[itemData.widgetID] = umd[itemData.widgetID];
     });
   }
   return upMetadata;

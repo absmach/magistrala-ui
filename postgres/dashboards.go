@@ -199,7 +199,7 @@ func toDBDashboard(ds ui.Dashboard) (dbDashboard, error) {
 	if err != nil {
 		return dbDashboard{}, errors.Wrap(ErrJSONMarshal, err)
 	}
-	ma, err := json.Marshal(ds.Metadata)
+	md, err := json.Marshal(ds.Metadata)
 	if err != nil {
 		return dbDashboard{}, errors.Wrap(ErrJSONMarshal, err)
 	}
@@ -210,7 +210,7 @@ func toDBDashboard(ds ui.Dashboard) (dbDashboard, error) {
 		Name:        ds.Name,
 		Description: ds.Description,
 		Layout:      lt,
-		Metadata:    ma,
+		Metadata:    md,
 		CreatedAt:   ds.CreatedAt,
 		UpdatedAt:   ds.UpdatedAt,
 	}, nil
@@ -223,9 +223,9 @@ func toDashboard(dsDB dbDashboard) (ui.Dashboard, error) {
 			return ui.Dashboard{}, errors.Wrap(ErrJSONUnmarshal, err)
 		}
 	}
-	var ma string
+	var md string
 	if dsDB.Metadata != nil {
-		if err := json.Unmarshal(dsDB.Metadata, &ma); err != nil {
+		if err := json.Unmarshal(dsDB.Metadata, &md); err != nil {
 			return ui.Dashboard{}, errors.Wrap(ErrJSONUnmarshal, err)
 		}
 	}
@@ -236,7 +236,7 @@ func toDashboard(dsDB dbDashboard) (ui.Dashboard, error) {
 		Name:        dsDB.Name,
 		Description: dsDB.Description,
 		Layout:      lt,
-		Metadata:    ma,
+		Metadata:    md,
 		CreatedAt:   dsDB.CreatedAt,
 		UpdatedAt:   dsDB.UpdatedAt,
 	}, nil
