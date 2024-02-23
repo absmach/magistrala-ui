@@ -167,18 +167,13 @@ SPDX-License-Identifier: Apache-2.0 -->
   </div>
   <script>
     document.getElementById("create-gaugeChart-button").addEventListener("click", function () {
-      var form = document.getElementById("create-gaugeChart-form");
-      // Create an object to store the chart Data
-      var chartData = {};
-
-      // Serialize the appearance form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          chartData[e.name] = e.value;
-        }
+      let form = document.getElementById("create-gaugeChart-form");
+      // Create an object to store the form data
+      let chartData = {};
+      let formData = new FormData(form);
+      for (var pair of formData.entries()) {
+        chartData[pair[0]] = pair[1];
       }
-      form.reset();
 
       var widgetID = "gaugeChart-" + Date.now();
 

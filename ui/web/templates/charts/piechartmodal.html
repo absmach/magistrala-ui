@@ -145,18 +145,13 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // pie chart form
     document.getElementById("create-pieChart-button").addEventListener("click", function () {
-      var form = document.getElementById("create-pieChart-form");
+      let form = document.getElementById("create-pieChart-form");
       // Create an object to store the form data
-      var chartData = {};
-
-      // Serialize the appearance form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          chartData[e.name] = e.value;
-        }
+      let chartData = {};
+      let formData = new FormData(form);
+      for (var pair of formData.entries()) {
+        chartData[pair[0]] = pair[1];
       }
-      form.reset();
 
       var widgetID = "pieChart-" + Date.now();
       var config = {

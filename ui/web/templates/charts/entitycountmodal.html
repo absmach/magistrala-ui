@@ -65,18 +65,13 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // entity count form
     document.getElementById("create-entityCount-button").addEventListener("click", function () {
-      var form = document.getElementById("create-entityCount-form");
+      let form = document.getElementById("create-entityCount-form");
       // Create an object to store the form data
-      var chartData = {};
-
-      // Serialize the form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          chartData[e.name] = e.value;
-        }
+      let chartData = {};
+      let formData = new FormData(form);
+      for (var pair of formData.entries()) {
+        chartData[pair[0]] = pair[1];
       }
-      form.reset();
 
       var widgetID = "entityCount-" + Date.now();
       var config = {

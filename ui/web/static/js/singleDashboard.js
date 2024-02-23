@@ -72,10 +72,10 @@ function initGrid(layout) {
 function saveLayout(grid, dashboardID) {
   const itemData = grid.getItems().map((item) => {
     const itemElement = item._element;
-
+    const itemContent = itemElement.querySelector(".item-content");
     // Extract the widget size
-    const widgetWidth = itemElement.style.width;
-    const widgetHeight = itemElement.style.height;
+    const widgetWidth = itemContent.style.width;
+    const widgetHeight = itemContent.style.height;
 
     // Extract the widget  position
     const positionLeft = itemElement.style.left;
@@ -151,8 +151,6 @@ function loadLayout(savedLayout) {
       gridState.items.forEach((itemData) => {
         const newItem = document.createElement("div");
         newItem.className = "item";
-        newItem.classList.add("item-editable");
-
         if (itemData.widgetPosition) {
           newItem.style.position = "absolute";
           newItem.style.left = itemData.widgetPosition.left;
