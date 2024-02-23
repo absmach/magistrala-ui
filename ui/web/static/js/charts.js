@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 function createChart(chartData, config) {
-  switch (config.Type) {
+  switch (chartData.Type) {
     case "alarmCount":
-      return createAlarmCountCard(config);
+      return createAlarmCountCard(chartData, config);
     case "alarmsTable":
-      return createAlarmsTable(config);
+      return createAlarmsTable(chartData, config);
     case "areaLineChart":
       return createAreaLineChart(chartData, config);
     case "timeSeriesBarChart":
@@ -18,15 +18,15 @@ function createChart(chartData, config) {
     case "dynamicDataChart":
       return createDynamicDataChart(chartData, config);
     case "entitiesTable":
-      return createEntitiesTable(config);
+      return createEntitiesTable(chartData, config);
     case "entityCount":
-      return createEntityCount(config);
+      return createEntityCount(chartData, config);
     case "gaugeChart":
       return createGaugeChart(chartData, config);
     case "horizontalBarChart":
       return createHorizontalBarChart(chartData, config);
     case "labelCard":
-      return createLabelCard(config);
+      return createLabelCard(chartData, config);
     case "lineChart":
       return createTimeSeriesLineChart(chartData, config);
     case "multiBarChart":
@@ -56,7 +56,7 @@ function createChart(chartData, config) {
   }
 }
 
-function createAlarmCountCard(config) {
+function createAlarmCountCard(chartData, config) {
   config.Content = `
     <div class="card widgetcard">
         <div class="card-header text-center">
@@ -75,7 +75,7 @@ function createAlarmCountCard(config) {
   return config;
 }
 
-function createAlarmsTable(config) {
+function createAlarmsTable(chartData, config) {
   config.Content = `
         <div class="card mt-3 widgetcard">
           <div class="card-header text-center">
@@ -531,7 +531,7 @@ function createDynamicDataChart(chartData, config) {
   return config;
 }
 
-function createEntitiesTable(config) {
+function createEntitiesTable(chartData, config) {
   config.Content = `
   <div class="card mt-3 widgetcard">
     <div class="card-header text-center">
@@ -597,7 +597,7 @@ function createEntitiesTable(config) {
   return config;
 }
 
-function createEntityCount(config) {
+function createEntityCount(chartData, config) {
   config.Content = `
         <div class="card widgetcard">
           <div class="card-header text-center">
@@ -729,7 +729,7 @@ function createHorizontalBarChart(chartData, config) {
   return config;
 }
 
-function createLabelCard(config) {
+function createLabelCard(chartData, config) {
   config.Content = `
   <div class="card widgetcard">
     <div class="card-header text-center">

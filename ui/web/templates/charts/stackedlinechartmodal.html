@@ -229,10 +229,9 @@ SPDX-License-Identifier: Apache-2.0 -->
 
         var config = {
           ID: widgetID,
-          Type: "stackedLineChart",
         };
+        chartData["Type"] = "stackedLineChart";
         addWidget(chartData, config);
-        // Append chart metadata to dashboard metadata
         metadataBuffer[widgetID] = chartData;
       });
   </script>

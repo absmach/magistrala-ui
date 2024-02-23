@@ -72,11 +72,10 @@ function initGrid(layout) {
 function saveLayout(grid, dashboardID) {
   const itemData = grid.getItems().map((item) => {
     const itemElement = item._element;
-    const itemContent = itemElement.querySelector(".item-content");
 
     // Extract the widget size
-    const widgetWidth = itemContent.style.width;
-    const widgetHeight = itemContent.style.height;
+    const widgetWidth = itemElement.style.width;
+    const widgetHeight = itemElement.style.height;
 
     // Extract the widget  position
     const positionLeft = itemElement.style.left;
@@ -108,12 +107,10 @@ function saveLayout(grid, dashboardID) {
   const jsonString = JSON.stringify(gridState);
 
   // Update the metadata
-  if (metadata !== "") {
-    ma = JSON.parse(metadata);
-    upMetadata = { ...ma, ...metadataBuffer };
-  } else {
-    upMetadata = metadataBuffer;
-  }
+  upMetadata = updateMetadata(jsonString, metadata);
+
+  console.log("upMetadata: ", upMetadata);
+  console.log("jsonString: ", jsonString);
 
   const dashboard = {
     id: dashboardID,
@@ -157,35 +154,25 @@ function loadLayout(savedLayout) {
       gridState.items.forEach((itemData) => {
         const newItem = document.createElement("div");
         newItem.className = "item";
-        // Apply saved size
-        newItem.style.width = itemData.widgetSize.width;
-        newItem.style.height = itemData.widgetSize.height;
+        newItem.classList.add("item-editable");
 
-        // Apply saved position
         if (itemData.widgetPosition) {
           newItem.style.position = "absolute";
           newItem.style.left = itemData.widgetPosition.left;
           newItem.style.top = itemData.widgetPosition.top;
-          // Apply transform for exact positioning if available
           if (itemData.widgetPosition.transform) {
             newItem.style.transform = itemData.widgetPosition.transform;
           }
         }
         defaultConfig = {
           ID: itemData.widgetID,
-          Type: itemData.widgetID.split("-")[0],
+          Type: itemData.widgetID.Type,
         };
 
         ma = JSON.parse(metadata);
         chartData = ma[itemData.widgetID];
         config = createChart(chartData, defaultConfig);
-        if (config.Style === undefined) {
-          config.Style = {
-            width: "500px",
-            height: "500px",
-          };
-        }
-        var styleString = `width: ${config.Style.width}; height: ${config.Style.height};`;
+        var styleString = `width: ${itemData.widgetSize.width}; height: ${itemData.widgetSize.height};`;
         newItem.innerHTML = `
         <div class="item-border">
           <div class="item-content" id="${config.ID}" style="${styleString}">
@@ -199,7 +186,7 @@ function loadLayout(savedLayout) {
           scriptTag.innerHTML = config.Script;
           newItem.appendChild(scriptTag);
         }
-        grid.add(newItem, { layout: false });
+        grid.add(newItem, { layout: true });
       });
     }
     // Layout the grid
@@ -228,34 +215,23 @@ function editGrid(grid, layout) {
         gridState.items.forEach((itemData) => {
           const newItem = document.createElement("div");
           newItem.className = "item";
-          // Apply saved size
-          newItem.style.width = itemData.widgetSize.width;
-          newItem.style.height = itemData.widgetSize.height;
-          // Apply saved position
+          newItem.classList.add("item-editable");
           if (itemData.widgetPosition) {
             newItem.style.position = "absolute";
             newItem.style.left = itemData.widgetPosition.left;
             newItem.style.top = itemData.widgetPosition.top;
-            // Apply transform for exact positioning if available
             if (itemData.widgetPosition.transform) {
               newItem.style.transform = itemData.widgetPosition.transform;
             }
           }
           defaultConfig = {
             ID: itemData.widgetID,
-            Type: itemData.widgetID.split("-")[0],
+            Type: itemData.widgetID.Type,
           };
-
           ma = JSON.parse(metadata);
           chartData = ma[itemData.widgetID];
           config = createChart(chartData, defaultConfig);
-          if (config.Style === undefined) {
-            config.Style = {
-              width: "500px",
-              height: "500px",
-            };
-          }
-          var styleString = `width: ${config.Style.width}; height: ${config.Style.height};`;
+          var styleString = `width: ${itemData.widgetSize.width}; height: ${itemData.widgetSize.height};`;
           newItem.innerHTML = `
           <div class="item-border">
             <button type="button" class="btn btn-sm" id="removeItem" onclick="removeGridItem(this.parentNode.parentNode);">
@@ -272,8 +248,8 @@ function editGrid(grid, layout) {
             scriptTag.innerHTML = config.Script;
             newItem.appendChild(scriptTag);
           }
-
           grid.add(newItem, { layout: true });
+          resizeObserver.observe(newItem);
         });
         grid.layout();
       }
@@ -438,4 +414,24 @@ function removeNoWidgetPlaceholder() {
 
 function clearCanvas() {
   grid.remove(grid.getItems(), { removeElements: true });
+}
+
+function updateMetadata(layout, savedMetadata) {
+  let upMetadata = {};
+  // add metadata from the buffer
+  if (savedMetadata !== "") {
+    ma = JSON.parse(savedMetadata);
+    uma = { ...ma, ...metadataBuffer };
+  } else {
+    uma = metadataBuffer;
+  }
+
+  // filter out any removed widgets
+  if (layout) {
+    const gridState = JSON.parse(layout);
+    gridState.items.forEach((itemData) => {
+      upMetadata[itemData.widgetID] = uma[itemData.widgetID];
+    });
+  }
+  return upMetadata;
 }

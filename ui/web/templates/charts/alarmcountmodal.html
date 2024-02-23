@@ -103,14 +103,13 @@ SPDX-License-Identifier: Apache-2.0 -->
       var widgetID = "alarmCount-" + Date.now();
       var config = {
         ID: widgetID,
-        Type: "alarmCount",
         Style: {
           width: "300px",
           height: "160px",
         },
       };
+      chartData["Type"] = "alarmCount";
       addWidget(chartData, config);
-      // Append chart metadata to dashboard metadata
       metadataBuffer[widgetID] = chartData;
     });
   </script>

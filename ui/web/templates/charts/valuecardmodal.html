@@ -183,14 +183,13 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var config = {
         ID: widgetID,
-        Type: "valueCard",
         Style: {
           width: "300px",
           height: "210px",
         },
       };
+      chartData["Type"] = "valueCard";
       addWidget(chartData, config);
-      // Append chart metadata to dashboard metadata
       metadataBuffer[widgetID] = chartData;
     });
   </script>

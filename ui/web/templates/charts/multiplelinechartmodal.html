@@ -227,10 +227,9 @@ SPDX-License-Identifier: Apache-2.0 -->
         var widgetID = "multipleLineChart-" + Date.now();
         var config = {
           ID: widgetID,
-          Type: "multipleLineChart",
         };
+        chartData["Type"] = "multipleLineChart";
         addWidget(chartData, config);
-        // Append chart metadata to dashboard metadata
         metadataBuffer[widgetID] = chartData;
       });
   </script>

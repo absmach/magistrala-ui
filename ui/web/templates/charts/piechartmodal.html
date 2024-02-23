@@ -159,13 +159,11 @@ SPDX-License-Identifier: Apache-2.0 -->
       form.reset();
 
       var widgetID = "pieChart-" + Date.now();
-
       var config = {
         ID: widgetID,
-        Type: "pieChart",
       };
+      chartData["Type"] = "pieChart";
       addWidget(chartData, config);
-      // Append chart metadata to dashboard metadata
       metadataBuffer[widgetID] = chartData;
     });
   </script>

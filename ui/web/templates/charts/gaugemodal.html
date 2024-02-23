@@ -184,10 +184,9 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var config = {
         ID: widgetID,
-        Type: "gaugeChart",
       };
+      chartData["Type"] = "gaugeChart";
       addWidget(chartData, config);
-      // Append chart metadata to dashboard metadata
       metadataBuffer[widgetID] = chartData;
     });
   </script>
