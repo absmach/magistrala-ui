@@ -25,7 +25,6 @@ import (
 	"github.com/absmach/magistrala/pkg/transformers/senml"
 	mgsenml "github.com/absmach/senml"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/golang-jwt/jwt"
 	"golang.org/x/exp/slices"
 )
 
@@ -2402,9 +2401,9 @@ func (us *uiService) DeleteInvitation(token, userID, domainID string) error {
 }
 
 func (us *uiService) CreateDashboard(token string, dashboardReq DashboardReq) ([]byte, error) {
-	userID, err := getUserID(token)
-	if err != nil {
-		return []byte{}, errors.Wrap(ErrFailedRetrieveUserID, err)
+	user, sdkerr := us.sdk.UserProfile(token)
+	if sdkerr != nil {
+		return []byte{}, errors.Wrap(ErrFailedRetrieveUserID, sdkerr)
 	}
 
 	dashboardID, err := us.idProvider.ID()
@@ -2413,7 +2412,7 @@ func (us *uiService) CreateDashboard(token string, dashboardReq DashboardReq) ([
 	}
 	dashboard := Dashboard{
 		ID:          dashboardID,
-		CreatedBy:   userID,
+		CreatedBy:   user.ID,
 		Name:        dashboardReq.Name,
 		Description: dashboardReq.Description,
 		Layout:      dashboardReq.Layout,
@@ -2439,12 +2438,12 @@ func (us *uiService) ViewDashboard(token, dashboardID string) ([]byte, error) {
 	var btpl bytes.Buffer
 	charts := CreateItem()
 
-	userID, err := getUserID(token)
-	if err != nil {
-		return btpl.Bytes(), errors.Wrap(ErrFailedRetrieveUserID, err)
+	user, sdkerr := us.sdk.UserProfile(token)
+	if sdkerr != nil {
+		return btpl.Bytes(), errors.Wrap(ErrFailedRetrieveUserID, sdkerr)
 	}
 
-	dashboard, err := us.drepo.Retrieve(context.Background(), dashboardID, userID)
+	dashboard, err := us.drepo.Retrieve(context.Background(), dashboardID, user.ID)
 	if err != nil {
 		return btpl.Bytes(), errors.Wrap(ErrFailedDashboardRetrieve, err)
 	}
@@ -2478,15 +2477,15 @@ func (us *uiService) ViewDashboard(token, dashboardID string) ([]byte, error) {
 func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 
-	userID, err := getUserID(token)
-	if err != nil {
-		return []byte{}, errors.Wrap(ErrFailedRetrieveUserID, err)
+	user, sdkerr := us.sdk.UserProfile(token)
+	if sdkerr != nil {
+		return []byte{}, errors.Wrap(ErrFailedRetrieveUserID, sdkerr)
 	}
 
 	pgm := DashboardPageMeta{
 		Offset:    offset,
 		Limit:     limit,
-		CreatedBy: userID,
+		CreatedBy: user.ID,
 	}
 	dashboardsPage, err := us.drepo.RetrieveAll(context.Background(), pgm)
 	if err != nil {
@@ -2533,12 +2532,12 @@ func (us *uiService) Dashboards() ([]byte, error) {
 }
 
 func (us *uiService) UpdateDashboard(token, dashboardID string, dashboardReq DashboardReq) error {
-	userID, err := getUserID(token)
-	if err != nil {
-		return errors.Wrap(ErrFailedRetrieveUserID, err)
+	user, sdkerr := us.sdk.UserProfile(token)
+	if sdkerr != nil {
+		return errors.Wrap(ErrFailedRetrieveUserID, sdkerr)
 	}
 
-	if err = us.drepo.Update(context.Background(), dashboardID, userID, dashboardReq); err != nil {
+	if err := us.drepo.Update(context.Background(), dashboardID, user.ID, dashboardReq); err != nil {
 		return errors.Wrap(ErrFailedDashboardUpdate, err)
 	}
 
@@ -2546,12 +2545,12 @@ func (us *uiService) UpdateDashboard(token, dashboardID string, dashboardReq Das
 }
 
 func (us *uiService) DeleteDashboard(token, dashboardID string) error {
-	userID, err := getUserID(token)
-	if err != nil {
-		return errors.Wrap(ErrFailedRetrieveUserID, err)
+	user, sdkerr := us.sdk.UserProfile(token)
+	if sdkerr != nil {
+		return errors.Wrap(ErrFailedRetrieveUserID, sdkerr)
 	}
 
-	if err = us.drepo.Delete(context.Background(), dashboardID, userID); err != nil {
+	if err := us.drepo.Delete(context.Background(), dashboardID, user.ID); err != nil {
 		return errors.Wrap(ErrFailedDashboardDelete, err)
 	}
 
@@ -2654,16 +2653,4 @@ func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, 
 	}
 
 	return tpl, nil
-}
-
-func getUserID(token string) (string, error) {
-	tkn, _, err := new(jwt.Parser).ParseUnverified(token, jwt.MapClaims{})
-	if err != nil {
-		return "", err
-	}
-	claims, ok := tkn.Claims.(jwt.MapClaims)
-	if !ok {
-		return "", err
-	}
-	return claims["user"].(string), nil
 }
