@@ -109,9 +109,6 @@ function saveLayout(grid, dashboardID) {
   // Update the metadata
   upMetadata = updateMetadata(jsonString, metadata);
 
-  console.log("upMetadata: ", upMetadata);
-  console.log("jsonString: ", jsonString);
-
   const dashboard = {
     id: dashboardID,
     layout: jsonString,
@@ -166,9 +163,7 @@ function loadLayout(savedLayout) {
         }
         defaultConfig = {
           ID: itemData.widgetID,
-          Type: itemData.widgetID.Type,
         };
-
         ma = JSON.parse(metadata);
         chartData = ma[itemData.widgetID];
         config = createChart(chartData, defaultConfig);
@@ -226,7 +221,6 @@ function editGrid(grid, layout) {
           }
           defaultConfig = {
             ID: itemData.widgetID,
-            Type: itemData.widgetID.Type,
           };
           ma = JSON.parse(metadata);
           chartData = ma[itemData.widgetID];
