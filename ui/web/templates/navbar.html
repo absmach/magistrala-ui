@@ -385,41 +385,45 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script src="/js/listUtils.js"></script>
   <script src="/js/cookie.js"></script>
   <script defer>
-    let sessionDetails = JSON.parse(atob(getCookie("session_details")));
-    let name = sessionDetails.user.name;
-    let identity = sessionDetails.user.identity;
-    let userID = sessionDetails.user.id;
-    let role = sessionDetails.user.role;
-    let loginStatus = sessionDetails.login_status;
-    let domainID, domainName, domainPermissions;
-    if (loginStatus === "domain") {
-      domainName = sessionDetails.domain.name;
-      domainID = sessionDetails.domain.id;
-      domainPermissions = sessionDetails.domain.permissions;
-    }
-
-    document.getElementById("username").innerHTML = name;
-    document.getElementById("identity").innerHTML = identity;
-    document.querySelectorAll("#domains").forEach((element) => {
-      element.href = "/domains";
-    });
-
-    if (loginStatus !== "domain") {
-      document.getElementById("domain-nav-item").style.display = "none";
-      document.getElementById("things-nav-items").style.display = "none";
-      document.getElementById("index-nav-items").style.display = "none";
-      document.getElementById("domain-header-dropdown").style.display = "none";
-    } else {
-      document.getElementById("domains-sidebar-link").style.display = "none";
-      document.getElementById("domain").href = "/domains/" + domainID;
-      document.getElementById("members").href = "/domains/" + domainID + "/members";
-      document.getElementById("domainInvitations").href = "/invitations?domain=" + domainID;
-      document.querySelectorAll("#domainName").forEach((element) => {
-        element.innerHTML = domainName;
-      });
-      if (!domainPermissions.includes("admin")) {
-        document.getElementById("domainInvitations").style.display = "none";
+    try {
+      let sessionDetails = JSON.parse(atob(getCookie("session_details")));
+      let name = sessionDetails.user.name;
+      let identity = sessionDetails.user.identity;
+      let userID = sessionDetails.user.id;
+      let role = sessionDetails.user.role;
+      let loginStatus = sessionDetails.login_status;
+      let domainID, domainName, domainPermissions;
+      if (loginStatus === "domain") {
+        domainName = sessionDetails.domain.name;
+        domainID = sessionDetails.domain.id;
+        domainPermissions = sessionDetails.domain.permissions;
       }
+
+      document.getElementById("username").innerHTML = name;
+      document.getElementById("identity").innerHTML = identity;
+      document.querySelectorAll("#domains").forEach((element) => {
+        element.href = "/domains";
+      });
+
+      if (loginStatus !== "domain") {
+        document.getElementById("domain-nav-item").style.display = "none";
+        document.getElementById("things-nav-items").style.display = "none";
+        document.getElementById("index-nav-items").style.display = "none";
+        document.getElementById("domain-header-dropdown").style.display = "none";
+      } else {
+        document.getElementById("domains-sidebar-link").style.display = "none";
+        document.getElementById("domain").href = "/domains/" + domainID;
+        document.getElementById("members").href = "/domains/" + domainID + "/members";
+        document.getElementById("domainInvitations").href = "/invitations?domain=" + domainID;
+        document.querySelectorAll("#domainName").forEach((element) => {
+          element.innerHTML = domainName;
+        });
+        if (!domainPermissions.includes("admin")) {
+          document.getElementById("domainInvitations").style.display = "none";
+        }
+      }
+    } catch (error) {
+      console.error("Error loading session details:", error);
     }
 
     const createDomainModal = new bootstrap.Modal(document.getElementById("createDomainModal"));
@@ -449,12 +453,16 @@ SPDX-License-Identifier: Apache-2.0 -->
     function logout() {
       fetch("/logout", {
         method: "GET",
-      }).then((response) => {
-        if (response.status === 200) {
-          clearAllCookies();
-          window.location.href = "/login";
-        }
-      });
+      })
+        .then((response) => {
+          if (response.status === 200) {
+            clearAllCookies();
+            window.location.href = "/login";
+          }
+        })
+        .catch((error) => {
+          console.error("error logging out: ", error);
+        });
     }
 
     codeMirrorEditor({

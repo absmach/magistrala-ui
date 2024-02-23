@@ -2115,11 +2115,6 @@ func decodeListDomainsRequest(_ context.Context, r *http.Request) (interface{}, 
 		return nil, err
 	}
 
-	token := sdk.Token{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-	}
-
 	page, err := readNumQuery[uint64](r, pageKey, defPage)
 	if err != nil {
 		return nil, err
@@ -2136,7 +2131,10 @@ func decodeListDomainsRequest(_ context.Context, r *http.Request) (interface{}, 
 	}
 
 	req := listDomainsReq{
-		Token:  token,
+		Token: sdk.Token{
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+		},
 		status: status,
 		page:   page,
 		limit:  limit,
@@ -2637,7 +2635,8 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		errors.Contains(err, ui.ErrFailedDashboardSave),
 		errors.Contains(err, ui.ErrFailedDashboardDelete),
 		errors.Contains(err, ui.ErrFailedDashboardUpdate),
-		errors.Contains(err, ui.ErrFailedDashboardRetrieve):
+		errors.Contains(err, ui.ErrFailedDashboardRetrieve),
+		errors.Contains(err, ui.ErrSessionType):
 		w.Header().Set("Location", fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(displayError.Error())))
 		w.WriteHeader(http.StatusSeeOther)
 	default:
