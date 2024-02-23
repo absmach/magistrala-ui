@@ -191,6 +191,9 @@ SPDX-License-Identifier: Apache-2.0 -->
           invitationModal.show();
         }
 
+        let userID = '{{.SessionDetails.User.ID}}';
+        let domainPermissions = '{{.SessionDetails.Domain.Permissions}}';
+
         rows.forEach(function (row) {
           const inviter = row.querySelector(".inviter").textContent.trim();
           const invited = row.querySelector(".invited").textContent.trim();

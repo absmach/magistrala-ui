@@ -5,6 +5,7 @@ package api
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -12,6 +13,7 @@ import (
 	"github.com/absmach/magistrala-ui/ui"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/golang-jwt/jwt"
+	"github.com/gorilla/securecookie"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -21,7 +23,7 @@ func indexEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.Index(req.token)
+		res, err := svc.Index(req.Session)
 		if err != nil {
 			return nil, err
 		}
@@ -113,20 +115,6 @@ func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		cookies := []*http.Cookie{
 			{
-				Name:     accessTokenKey,
-				Value:    "",
-				Path:     "/",
-				MaxAge:   -1,
-				HttpOnly: true,
-			},
-			{
-				Name:     refreshTokenKey,
-				Value:    "",
-				Path:     "/",
-				MaxAge:   -1,
-				HttpOnly: true,
-			},
-			{
 				Name:   sessionDetailsKey,
 				Value:  "",
 				Path:   "/",
@@ -191,8 +179,10 @@ func showPasswordResetEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func showUpdatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(_ context.Context, _ interface{}) (interface{}, error) {
-		res, err := svc.PasswordUpdate()
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(showUpdatePasswordReq)
+
+		res, err := svc.PasswordUpdate(req.Session)
 		if err != nil {
 			return nil, err
 		}
@@ -217,20 +207,6 @@ func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		cookies := []*http.Cookie{
-			{
-				Name:     accessTokenKey,
-				Value:    "",
-				Path:     "/",
-				MaxAge:   -1,
-				HttpOnly: true,
-			},
-			{
-				Name:     refreshTokenKey,
-				Value:    "",
-				Path:     "/",
-				MaxAge:   -1,
-				HttpOnly: true,
-			},
 			{
 				Name:   sessionDetailsKey,
 				Value:  "",
@@ -292,23 +268,75 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
+func secureTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(secureTokenReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		sessionDetails, err := svc.Session(req.Session, "user")
+		if err != nil {
+			return nil, err
+		}
+
+		sessionDetails.Token = req.Token
+
+		session, err := json.Marshal(sessionDetails)
+		if err != nil {
+			return nil, err
+		}
+		secureSessionDetails, err := s.Encode(sessionDetailsKey, string(session))
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code: http.StatusSeeOther,
+			cookies: []*http.Cookie{
+				{
+					Name:  sessionDetailsKey,
+					Value: secureSessionDetails,
+					Path:  "/",
+				},
+				{
+					Name:     accessTokenKey,
+					Value:    "",
+					Path:     "/",
+					MaxAge:   -1,
+					HttpOnly: true,
+				},
+				{
+					Name:     refreshTokenKey,
+					Value:    "",
+					Path:     "/",
+					MaxAge:   -1,
+					HttpOnly: true,
+				},
+			},
+			headers: map[string]string{"Location": domainsAPIEndpoint},
+		}, nil
+	}
+}
+
+func refreshTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(refreshTokenReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		token, err := svc.RefreshToken(req.refreshToken)
+		token, err := svc.RefreshToken(req.RefreshToken)
 		if err != nil {
 			return nil, err
 		}
 
-		accessExp, err := extractTokenExpiry(token.AccessToken)
+		req.Session.Token = token
+		session, err := json.Marshal(req.Session)
 		if err != nil {
 			return nil, err
 		}
-		refreshExp, err := extractTokenExpiry(token.RefreshToken)
+		secureSessionDetails, err := s.Encode(sessionDetailsKey, string(session))
 		if err != nil {
 			return nil, err
 		}
@@ -318,18 +346,9 @@ func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			headers: map[string]string{"Location": req.ref},
 			cookies: []*http.Cookie{
 				{
-					Name:     accessTokenKey,
-					Value:    token.AccessToken,
-					Path:     "/",
-					HttpOnly: true,
-					Expires:  accessExp,
-				},
-				{
-					Name:     refreshTokenKey,
-					Value:    token.RefreshToken,
-					Path:     "/",
-					HttpOnly: true,
-					Expires:  refreshExp,
+					Name:  sessionDetailsKey,
+					Value: secureSessionDetails,
+					Path:  "/",
 				},
 			},
 		}
@@ -379,7 +398,7 @@ func listUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListUsers(req.token, req.status, req.page, req.limit)
+		res, err := svc.ListUsers(req.status, req.Session, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -398,7 +417,7 @@ func viewUserEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ViewUser(req.token, req.id)
+		res, err := svc.ViewUser(req.id, req.Session)
 		if err != nil {
 			return nil, err
 		}
@@ -628,7 +647,7 @@ func listThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListThings(req.token, req.status, req.page, req.limit)
+		res, err := svc.ListThings(req.status, req.Session, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -647,7 +666,7 @@ func viewThingEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ViewThing(req.token, req.id)
+		res, err := svc.ViewThing(req.id, req.Session)
 		if err != nil {
 			return nil, err
 		}
@@ -750,7 +769,7 @@ func listThingMembersEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(listEntityByIDReq)
 
-		res, err := svc.ListThingUsers(req.token, req.id, req.relation, req.page, req.limit)
+		res, err := svc.ListThingUsers(req.id, req.relation, req.Session, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -769,7 +788,7 @@ func listChannelsByThingEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListChannelsByThing(req.token, req.id, req.page, req.limit)
+		res, err := svc.ListChannelsByThing(req.id, req.Session, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -882,7 +901,7 @@ func listChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListChannels(req.token, req.status, req.page, req.limit)
+		res, err := svc.ListChannels(req.status, req.Session, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -901,7 +920,7 @@ func viewChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ViewChannel(req.token, req.id)
+		res, err := svc.ViewChannel(req.id, req.Session)
 		if err != nil {
 			return nil, err
 		}
@@ -937,7 +956,7 @@ func listThingsByChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListThingsByChannel(req.token, req.id, req.page, req.limit)
+		res, err := svc.ListThingsByChannel(req.id, req.Session, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -989,7 +1008,7 @@ func ListChannelMembersEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(listEntityByIDReq)
 
-		res, err := svc.ListChannelUsers(req.token, req.id, req.relation, req.page, req.limit)
+		res, err := svc.ListChannelUsers(req.id, req.relation, req.Session, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1068,7 +1087,7 @@ func ListChannelGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListChannelUserGroups(req.token, req.id, req.page, req.limit)
+		res, err := svc.ListChannelUserGroups(req.id, req.Session, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1121,7 +1140,7 @@ func listGroupMembersEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListGroupUsers(req.token, req.id, req.relation, req.page, req.limit)
+		res, err := svc.ListGroupUsers(req.id, req.relation, req.Session, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1140,7 +1159,7 @@ func viewGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ViewGroup(req.token, req.id)
+		res, err := svc.ViewGroup(req.id, req.Session)
 		if err != nil {
 			return nil, err
 		}
@@ -1176,7 +1195,7 @@ func listGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListGroups(req.token, req.status, req.page, req.limit)
+		res, err := svc.ListGroups(req.status, req.Session, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1227,7 +1246,7 @@ func listGroupChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(listEntityByIDReq)
 
-		res, err := svc.ListUserGroupChannels(req.token, req.id, req.page, req.limit)
+		res, err := svc.ListUserGroupChannels(req.id, req.Session, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1264,7 +1283,7 @@ func readMessagesEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ReadMessages(req.token, req.channelID, req.thingKey, req.page, req.limit)
+		res, err := svc.ReadMessages(req.channelID, req.thingKey, req.Session, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1301,7 +1320,7 @@ func listBootstrap(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListBootstrap(req.token, req.page, req.limit)
+		res, err := svc.ListBootstrap(req.Session, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1408,7 +1427,7 @@ func viewBootstrap(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ViewBootstrap(req.token, req.id)
+		res, err := svc.ViewBootstrap(req.id, req.Session)
 		if err != nil {
 			return nil, err
 		}
@@ -1426,7 +1445,7 @@ func getTerminalEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.GetRemoteTerminal(req.id)
+		res, err := svc.GetRemoteTerminal(req.Session, req.id)
 		if err != nil {
 			return nil, err
 		}
@@ -1505,28 +1524,29 @@ func errorPageEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func domainLoginEndpoint(svc ui.Service) endpoint.Endpoint {
+func domainLoginEndpoint(svc ui.Service, s *securecookie.SecureCookie) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(domainLoginReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-
-		token, err := svc.DomainLogin(req.Login, req.token)
+		token, err := svc.DomainLogin(req.Login, req.RefreshToken)
+		if err != nil {
+			return nil, err
+		}
+		req.Domain.ID = req.DomainID
+		req.AccessToken = token.AccessToken
+		sessionDetails, err := svc.Session(req.Session, "domain")
 		if err != nil {
 			return nil, err
 		}
 
-		accessExp, err := extractTokenExpiry(token.AccessToken)
+		sessionDetails.Token = token
+		session, err := json.Marshal(sessionDetails)
 		if err != nil {
 			return nil, err
 		}
-		refreshExp, err := extractTokenExpiry(token.RefreshToken)
-		if err != nil {
-			return nil, err
-		}
-
-		sessionDetails, err := svc.Session(token.AccessToken, "domain", req.Login.DomainID)
+		secureSessionDetails, err := s.Encode(sessionDetailsKey, string(session))
 		if err != nil {
 			return nil, err
 		}
@@ -1535,22 +1555,8 @@ func domainLoginEndpoint(svc ui.Service) endpoint.Endpoint {
 			code: http.StatusSeeOther,
 			cookies: []*http.Cookie{
 				{
-					Name:     accessTokenKey,
-					Value:    token.AccessToken,
-					Path:     "/",
-					HttpOnly: true,
-					Expires:  accessExp,
-				},
-				{
-					Name:     refreshTokenKey,
-					Value:    token.RefreshToken,
-					Path:     "/",
-					HttpOnly: true,
-					Expires:  refreshExp,
-				},
-				{
 					Name:  sessionDetailsKey,
-					Value: sessionDetails,
+					Value: secureSessionDetails,
 					Path:  "/",
 				},
 			},
@@ -1566,21 +1572,9 @@ func listDomainsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListDomains(req.AccessToken, req.status, req.page, req.limit)
-		if err != nil {
-			return nil, err
-		}
+		fmt.Println("here")
 
-		sessionDetails, err := svc.Session(req.AccessToken, "user", "")
-		if err != nil {
-			return nil, err
-		}
-
-		accessExp, err := extractTokenExpiry(req.AccessToken)
-		if err != nil {
-			return nil, err
-		}
-		refreshExp, err := extractTokenExpiry(req.RefreshToken)
+		res, err := svc.ListDomains(req.status, req.Session, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1588,27 +1582,6 @@ func listDomainsEndpoint(svc ui.Service) endpoint.Endpoint {
 		return uiRes{
 			code: http.StatusOK,
 			html: res,
-			cookies: []*http.Cookie{
-				{
-					Name:  sessionDetailsKey,
-					Value: sessionDetails,
-					Path:  "/",
-				},
-				{
-					Name:     accessTokenKey,
-					Value:    req.AccessToken,
-					Path:     "/",
-					HttpOnly: true,
-					Expires:  accessExp,
-				},
-				{
-					Name:     refreshTokenKey,
-					Value:    req.RefreshToken,
-					Path:     "/",
-					HttpOnly: true,
-					Expires:  refreshExp,
-				},
-			},
 		}, nil
 	}
 }
@@ -1672,7 +1645,7 @@ func domainEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.Domain(req.token, req.id)
+		res, err := svc.Domain(req.id, req.Session)
 		if err != nil {
 			return nil, err
 		}
@@ -1787,7 +1760,7 @@ func viewMemberEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ViewMember(req.token, req.userIdentity)
+		res, err := svc.ViewMember(req.userIdentity, req.Session)
 		if err != nil {
 			return nil, err
 		}
@@ -1806,7 +1779,7 @@ func listMembersEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.Members(req.token, req.id, req.page, req.limit)
+		res, err := svc.Members(req.id, req.Session, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1878,7 +1851,7 @@ func listInvitationsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.Invitations(req.token, req.domainID, req.page, req.limit)
+		res, err := svc.Invitations(req.domainID, req.Session, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1939,7 +1912,7 @@ func viewDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ViewDashboard(req.token, req.DashboardID)
+		res, err := svc.ViewDashboard(req.DashboardID, req.Session)
 		if err != nil {
 			return nil, err
 		}
@@ -1996,8 +1969,13 @@ func listDashboardsEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func dashboardsEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(_ context.Context, _ interface{}) (interface{}, error) {
-		res, err := svc.Dashboards()
+	return func(_ context.Context, request interface{}) (interface{}, error) {
+		req := request.(dashboardsReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+
+		res, err := svc.Dashboards(req.Session)
 		if err != nil {
 			return nil, err
 		}

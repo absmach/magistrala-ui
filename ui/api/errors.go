@@ -43,4 +43,5 @@ var (
 	errMissingDomainID        = errors.New("missing domain id")
 	errMissingRole            = errors.New("missing role")
 	errMissingValue           = errors.New("missing value")
+	errCookieDecryption       = errors.New("failed to decrypt the cookie")
 )
