@@ -353,8 +353,12 @@ function removeNoWidgetPlaceholder() {
 async function getData(lineChart, channel) {
   console.log(channel);
   try {
-   
-    const response = await fetch("/data?channel=" + channel);
+    const params = new URLSearchParams({
+      channel: channel,
+      limit: 10,
+      offset: 0,
+    });
+    const response = await fetch(`/data?${params}`);
     if (response.ok) {
       const data = await response.json();
 
@@ -373,11 +377,11 @@ async function getData(lineChart, channel) {
     }
     setTimeout(function () {
       getData(lineChart, channel);
-    }, 2000);
+    }, 20000);
   } catch (error) {
     console.error(error);
     setTimeout(function () {
       getData(lineChart, channel);
-    }, 2000);
+    }, 20000);
   }
 }

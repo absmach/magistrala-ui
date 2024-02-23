@@ -1710,9 +1710,14 @@ func (us *uiService) ListUserGroupChannels(token, id string, page, limit uint64)
 
 func (us *uiService) ReadMessages(token, channelID, thingKey string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
-	pgm := sdk.PageMetadata{
-		Offset: offset,
-		Limit:  limit,
+	pgm := sdk.MessagePageMeta{
+		PageMetadata: sdk.PageMetadata{
+			Offset: offset,
+			Limit:  limit,
+			Name:   "temp",
+		},
+		Interval:    "10 seconds",
+		Aggregation: "MAX",
 	}
 	msg, err := us.sdk.ReadMessages(pgm, channelID, token)
 	if err != nil {
@@ -1756,10 +1761,12 @@ func (us *uiService) ReadMessages(token, channelID, thingKey string, page, limit
 }
 
 func (us *uiService) FetchReaderData(token, channelID, thingID string, to float64, from float64, page, limit uint64) ([]byte, error) {
-	offset := (page -1) * limit
-	pgm := sdk.PageMetadata{
-		Offset: offset,
-		Limit: limit,
+	offset := (page - 1) * limit
+	pgm := sdk.MessagePageMeta{
+		PageMetadata: sdk.PageMetadata{
+			Offset: offset,
+			Limit:  limit,
+		},
 	}
 	msg, err := us.sdk.ReadMessages(pgm, channelID, token)
 	if err != nil {

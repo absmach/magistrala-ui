@@ -633,6 +633,25 @@ type readMessagesReq struct {
 	limit     uint64
 }
 
+func (req readMessagesReq) validate() error {
+	if req.token == "" {
+		return errAuthorization
+	}
+	if req.channelID == "" {
+		return errMissingChannelID
+	}
+	if req.thingKey == "" {
+		return errMissingThingKey
+	}
+	if req.page == 0 {
+		return errPageSize
+	}
+	if req.limit == 0 {
+		return errLimitSize
+	}
+
+	return nil
+}
 type fetchReaderDataReq struct {
 	token     string
 	channelID string
@@ -659,26 +678,7 @@ func (req fetchReaderDataReq) validate() error {
 	if req.limit == 0 {
 		return errLimitSize
 	}
-	return nil
-}
-
-func (req readMessagesReq) validate() error {
-	if req.token == "" {
-		return errAuthorization
-	}
-	if req.channelID == "" {
-		return errMissingChannelID
-	}
-	if req.thingKey == "" {
-		return errMissingThingKey
-	}
-	if req.page == 0 {
-		return errPageSize
-	}
-	if req.limit == 0 {
-		return errLimitSize
-	}
-
+	
 	return nil
 }
 
