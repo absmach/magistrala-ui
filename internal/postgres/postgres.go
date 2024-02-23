@@ -22,7 +22,7 @@ var (
 // Config defines the options that are used when connecting to the PostgresSQL instance.
 type Config struct {
 	Host        string `env:"MG_UI_DB_HOST"           envDefault:"localhost"`
-	Port        string `env:"MG_UI_DB_PORT"           envDefault:"6042"`
+	Port        string `env:"MG_UI_DB_PORT"           envDefault:"5432"`
 	User        string `env:"MG_UI_DB_USER"           envDefault:"magistrala-ui"`
 	Pass        string `env:"MG_UI_DB_PASS"           envDefault:"magistrala-ui"`
 	Name        string `env:"MG_UI_DB_NAME"           envDefault:"dashboards"`
@@ -63,9 +63,9 @@ func Connect(cfg Config) (*sqlx.DB, error) {
 
 // MigrateDB applies any unapplied database migrations.
 func MigrateDB(db *sqlx.DB, migrations migrate.MemoryMigrationSource) error {
-	_, err := migrate.Exec(db.DB, "postgres", migrations, migrate.Up)
-	if err != nil {
+	if _, err := migrate.Exec(db.DB, "postgres", migrations, migrate.Up); err != nil {
 		return errors.Wrap(errMigration, err)
 	}
+
 	return nil
 }
