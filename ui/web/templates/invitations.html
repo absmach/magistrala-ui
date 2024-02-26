@@ -30,7 +30,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               <div class="table-responsive table-container">
                 {{ template "tableheader" . }}
                 <div class="itemsTable">
-                  <table id="itemsTable" class="table">
+                  <table id="invitations-table" class="table">
                     <thead>
                       <tr>
                         <th scope="col"></th>
@@ -178,17 +178,13 @@ SPDX-License-Identifier: Apache-2.0 -->
       </div>
       <script>
         const invitationModal = new bootstrap.Modal(document.getElementById("invitationModal"));
-        var loggedInUser = localStorage.getItem("userID");
-        var loginStatus = localStorage.getItem("loginStatus");
-        var userRole = localStorage.getItem("userRole");
-        var domainPermission = localStorage.getItem("domainPermission");
-        var table = document.getElementById("itemsTable");
-        var rows = table.querySelectorAll("tbody tr");
+        const table = document.getElementById("invitations-table");
+        const rows = table.querySelectorAll("tbody tr");
         const navbarActive = '{{.NavbarActive}}';
 
         function openInvitationModal() {
-          var domainsSelect = document.getElementById("domains-select");
-          var domainID = '{{.DomainID}}';
+          const domainsSelect = document.getElementById("domains-select");
+          const domainID = '{{.DomainID}}';
           if (navbarActive !== "invitations") {
             domainsSelect.innerHTML = domainsSelect.innerHTML = `<input type="hidden" name="domainID" value="${domainID}" />`;
           }
@@ -196,14 +192,14 @@ SPDX-License-Identifier: Apache-2.0 -->
         }
 
         rows.forEach(function (row) {
-          var inviter = row.querySelector(".inviter").textContent.trim();
-          var invited = row.querySelector(".invited").textContent.trim();
-          if (inviter === loggedInUser) {
+          const inviter = row.querySelector(".inviter").textContent.trim();
+          const invited = row.querySelector(".invited").textContent.trim();
+          if (inviter === userID) {
             row.querySelector("#invited").style.display = "none";
             row.querySelector("#inviter").style.display = "block";
             row.querySelector("#invite").style.display = "none";
             row.querySelector(".accept-button").style.display = "none";
-          } else if (invited === loggedInUser) {
+          } else if (invited === userID) {
             row.querySelector("#invited").style.display = "block";
             row.querySelector("#inviter").style.display = "none";
             row.querySelector("#invite").style.display = "none";
@@ -216,7 +212,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         });
 
 
-        if ((navbarActive === "invitations") && (loginStatus === "general" || domainPermission !== "admin")) {
+        if ((navbarActive === "invitations") && (loginStatus === "user" || !domainPermissions.includes("admin"))) {
           document.getElementById("invite-button").style.display = "none";
         }
 

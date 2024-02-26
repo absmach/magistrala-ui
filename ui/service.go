@@ -8,6 +8,7 @@ package ui
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -85,6 +86,25 @@ type Message struct {
 	Name     string  `json:"n"`
 	Unit     string  `json:"u"`
 	Value    float64 `json:"v"`
+}
+
+type User struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Identity string `json:"identity"`
+	Role     string `json:"role"`
+}
+
+type Domain struct {
+	ID          string   `json:"id"`
+	Name        string   `json:"name"`
+	Permissions []string `json:"permissions"`
+}
+
+type SessionDetails struct {
+	User        User   `json:"user"`
+	Domain      Domain `json:"domain"`
+	LoginStatus string `json:"login_status"`
 }
 
 var (
@@ -190,6 +210,7 @@ var (
 	ErrFailedShare          = errors.New("failed to share entity")
 	ErrFailedUnshare        = errors.New("failed to unshare entity")
 	ErrConflict             = errors.New("entity already exists")
+	ErrSessionType          = errors.New("invalid session type")
 
 	ErrFailedViewDashboard     = errors.New("failed to view dashboard")
 	ErrFailedDashboardSave     = errors.New("failed to save dashboard")
@@ -233,8 +254,8 @@ type Service interface {
 	RefreshToken(refreshToken string) (sdk.Token, error)
 	// DomainLogin provides a user with an domain level access token and a refresh token.
 	DomainLogin(login sdk.Login, refreshToken string) (sdk.Token, error)
-	// UserProfile displays the user profile page.
-	UserProfile(token string) ([]byte, error)
+	// Session retrieves the details of the user's session.
+	Session(token, session, domainID string) (string, error)
 
 	// CreateUsers creates new users.
 	CreateUsers(token string, users ...sdk.User) error
@@ -532,11 +553,7 @@ func (us *uiService) ViewRegistration() ([]byte, error) {
 }
 
 func (us *uiService) RegisterUser(user sdk.User) (sdk.Token, error) {
-	_, err := us.sdk.CreateUser(user, "")
-	if err != nil {
-		if errors.Contains(err, ErrConflict) {
-			return sdk.Token{}, errors.Wrap(err, ErrConflict)
-		}
+	if _, err := us.sdk.CreateUser(user, ""); err != nil {
 		return sdk.Token{}, errors.Wrap(err, ErrFailedCreate)
 	}
 
@@ -614,6 +631,7 @@ func (us *uiService) Token(login sdk.Login) (sdk.Token, error) {
 	if err != nil {
 		return sdk.Token{}, errors.Wrap(err, ErrToken)
 	}
+
 	return token, nil
 }
 
@@ -635,18 +653,49 @@ func (us *uiService) DomainLogin(login sdk.Login, refreshToken string) (sdk.Toke
 	return token, nil
 }
 
-func (us *uiService) UserProfile(token string) (b []byte, err error) {
+func (us *uiService) Session(token, session, domainID string) (s string, err error) {
 	user, err := us.sdk.UserProfile(token)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	jsonData, err := json.Marshal(user)
+	sessionDetails := SessionDetails{
+		User: User{
+			ID:       user.ID,
+			Name:     user.Name,
+			Identity: user.Credentials.Identity,
+			Role:     user.Role,
+		},
+	}
+
+	switch session {
+	case "user":
+		sessionDetails.LoginStatus = "user"
+	case "domain":
+		sessionDetails.LoginStatus = "domain"
+		domain, err := us.sdk.Domain(domainID, token)
+		if err != nil {
+			return "", err
+		}
+		permissions, err := us.sdk.DomainPermissions(domainID, token)
+		if err != nil {
+			return "", err
+		}
+		sessionDetails.Domain.Name = domain.Name
+		sessionDetails.Domain.ID = domain.ID
+		sessionDetails.Domain.Permissions = permissions.Permissions
+	default:
+		return "", ErrSessionType
+	}
+
+	data, err := json.Marshal(sessionDetails)
 	if err != nil {
-		return []byte{}, err
+		return "", err
 	}
 
-	return jsonData, nil
+	encodedString := base64.StdEncoding.EncodeToString(data)
+
+	return encodedString, nil
 }
 
 func (us *uiService) CreateUsers(token string, users ...sdk.User) error {
@@ -2087,11 +2136,11 @@ func (us *uiService) GetEntities(token, entity, entityName, domainID, permission
 		items["data"] = domains.Domains
 	}
 
-	jsonData, err := json.Marshal(items)
+	data, err := json.Marshal(items)
 	if err != nil {
 		return []byte{}, err
 	}
-	return jsonData, nil
+	return data, nil
 }
 
 func (us *uiService) ErrorPage(errMsg string) ([]byte, error) {
@@ -2426,12 +2475,12 @@ func (us *uiService) CreateDashboard(token string, dashboardReq DashboardReq) ([
 
 	item := make(map[string]interface{})
 	item["dashboard"] = ds
-	jsonData, err := json.Marshal(item)
+	data, err := json.Marshal(item)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	return jsonData, nil
+	return data, nil
 }
 
 func (us *uiService) ViewDashboard(token, dashboardID string) ([]byte, error) {
@@ -2500,12 +2549,12 @@ func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, e
 	items["limit"] = limit
 	items["current_page"] = page
 	items["pages"] = noOfPages
-	jsonData, err := json.Marshal(items)
+	data, err := json.Marshal(items)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	return jsonData, nil
+	return data, nil
 }
 
 func (us *uiService) Dashboards() ([]byte, error) {

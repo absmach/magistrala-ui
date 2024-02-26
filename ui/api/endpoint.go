@@ -5,7 +5,7 @@ package api
 
 import (
 	"context"
-	"encoding/base64"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -68,15 +68,8 @@ func registerUserEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		user, err := svc.UserProfile(token.AccessToken)
-		if err != nil {
-			return nil, err
-		}
-		// Encode JSON string with base64 to eliminate characters that are not allowed in cookies.
-		encodedString := base64.StdEncoding.EncodeToString(user)
-
 		tkr := uiRes{
-			code: http.StatusCreated,
+			code: http.StatusOK,
 			cookies: []*http.Cookie{
 				{
 					Name:     accessTokenKey,
@@ -88,18 +81,12 @@ func registerUserEndpoint(svc ui.Service) endpoint.Endpoint {
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
-					Path:     domainsAPIEndpoint,
+					Path:     "/",
 					HttpOnly: true,
 					Expires:  refreshExp,
 				},
-				{
-					Name:  "user",
-					Value: encodedString,
-					Path:  "/",
-				},
 			},
 		}
-
 		return tkr, nil
 	}
 }
@@ -135,16 +122,15 @@ func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
 			{
 				Name:     refreshTokenKey,
 				Value:    "",
-				Path:     tokenRefreshAPIEndpoint,
+				Path:     "/",
 				MaxAge:   -1,
 				HttpOnly: true,
 			},
 			{
-				Name:     refreshTokenKey,
-				Value:    "",
-				Path:     domainsAPIEndpoint,
-				MaxAge:   -1,
-				HttpOnly: true,
+				Name:   sessionDetailsKey,
+				Value:  "",
+				Path:   "/",
+				MaxAge: -1,
 			},
 		}
 		return uiRes{
@@ -241,16 +227,15 @@ func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 			{
 				Name:     refreshTokenKey,
 				Value:    "",
-				Path:     tokenRefreshAPIEndpoint,
+				Path:     "/",
 				MaxAge:   -1,
 				HttpOnly: true,
 			},
 			{
-				Name:     refreshTokenKey,
-				Value:    "",
-				Path:     domainsAPIEndpoint,
-				MaxAge:   -1,
-				HttpOnly: true,
+				Name:   sessionDetailsKey,
+				Value:  "",
+				Path:   "/",
+				MaxAge: -1,
 			},
 		}
 
@@ -283,15 +268,8 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		user, err := svc.UserProfile(token.AccessToken)
-		if err != nil {
-			return nil, err
-		}
-		// Encode JSON string with base64 to eliminate characters that are not allowed in cookies.
-		encodedString := base64.StdEncoding.EncodeToString(user)
-
 		tkr := uiRes{
-			code: http.StatusCreated,
+			code: http.StatusOK,
 			cookies: []*http.Cookie{
 				{
 					Name:     accessTokenKey,
@@ -303,14 +281,9 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
-					Path:     domainsAPIEndpoint,
+					Path:     "/",
 					HttpOnly: true,
 					Expires:  refreshExp,
-				},
-				{
-					Name:  "user",
-					Value: encodedString,
-					Path:  "/",
 				},
 			},
 		}
@@ -354,14 +327,7 @@ func refreshTokenEndpoint(svc ui.Service) endpoint.Endpoint {
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
-					Path:     tokenRefreshAPIEndpoint,
-					HttpOnly: true,
-					Expires:  refreshExp,
-				},
-				{
-					Name:     refreshTokenKey,
-					Value:    token.RefreshToken,
-					Path:     domainsAPIEndpoint,
+					Path:     "/",
 					HttpOnly: true,
 					Expires:  refreshExp,
 				},
@@ -1560,6 +1526,11 @@ func domainLoginEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
+		sessionDetails, err := svc.Session(token.AccessToken, "domain", req.Login.DomainID)
+		if err != nil {
+			return nil, err
+		}
+
 		return uiRes{
 			code: http.StatusSeeOther,
 			cookies: []*http.Cookie{
@@ -1573,16 +1544,14 @@ func domainLoginEndpoint(svc ui.Service) endpoint.Endpoint {
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
-					Path:     domainsAPIEndpoint,
+					Path:     "/",
 					HttpOnly: true,
 					Expires:  refreshExp,
 				},
 				{
-					Name:     refreshTokenKey,
-					Value:    token.RefreshToken,
-					Path:     tokenRefreshAPIEndpoint,
-					HttpOnly: true,
-					Expires:  refreshExp,
+					Name:  sessionDetailsKey,
+					Value: sessionDetails,
+					Path:  "/",
 				},
 			},
 			headers: map[string]string{"Location": "/?domain=" + req.DomainID},
@@ -1592,12 +1561,26 @@ func domainLoginEndpoint(svc ui.Service) endpoint.Endpoint {
 
 func listDomainsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
-		req := request.(listEntityReq)
+		req := request.(listDomainsReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.ListDomains(req.token, req.status, req.page, req.limit)
+		res, err := svc.ListDomains(req.AccessToken, req.status, req.page, req.limit)
+		if err != nil {
+			return nil, err
+		}
+
+		sessionDetails, err := svc.Session(req.AccessToken, "user", "")
+		if err != nil {
+			return nil, err
+		}
+
+		accessExp, err := extractTokenExpiry(req.AccessToken)
+		if err != nil {
+			return nil, err
+		}
+		refreshExp, err := extractTokenExpiry(req.RefreshToken)
 		if err != nil {
 			return nil, err
 		}
@@ -1605,6 +1588,27 @@ func listDomainsEndpoint(svc ui.Service) endpoint.Endpoint {
 		return uiRes{
 			code: http.StatusOK,
 			html: res,
+			cookies: []*http.Cookie{
+				{
+					Name:  sessionDetailsKey,
+					Value: sessionDetails,
+					Path:  "/",
+				},
+				{
+					Name:     accessTokenKey,
+					Value:    req.AccessToken,
+					Path:     "/",
+					HttpOnly: true,
+					Expires:  accessExp,
+				},
+				{
+					Name:     refreshTokenKey,
+					Value:    req.RefreshToken,
+					Path:     "/",
+					HttpOnly: true,
+					Expires:  refreshExp,
+				},
+			},
 		}, nil
 	}
 }
@@ -1622,7 +1626,7 @@ func createDomainEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": domainsAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s?logged_in=true", domainsAPIEndpoint)},
 		}, nil
 	}
 }
@@ -1720,16 +1724,15 @@ func disableDomainEndpoint(svc ui.Service) endpoint.Endpoint {
 			{
 				Name:     refreshTokenKey,
 				Value:    "",
-				Path:     tokenRefreshAPIEndpoint,
+				Path:     "/",
 				MaxAge:   -1,
 				HttpOnly: true,
 			},
 			{
-				Name:     refreshTokenKey,
-				Value:    "",
-				Path:     domainsAPIEndpoint,
-				MaxAge:   -1,
-				HttpOnly: true,
+				Name:   sessionDetailsKey,
+				Value:  "",
+				Path:   "/",
+				MaxAge: -1,
 			},
 		}
 

@@ -149,14 +149,14 @@ func (mm *metricsMiddleware) RefreshToken(refreshToken string) (sdk.Token, error
 	return mm.svc.RefreshToken(refreshToken)
 }
 
-// UserProfile adds metrics middleware to user profile method.
-func (mm *metricsMiddleware) UserProfile(token string) ([]byte, error) {
+// Session adds metrics middleware to session details method.
+func (mm *metricsMiddleware) Session(token, session, domainID string) (string, error) {
 	defer func(begin time.Time) {
-		mm.counter.With("method", "user_profile").Add(1)
-		mm.latency.With("method", "user_profile").Observe(time.Since(begin).Seconds())
+		mm.counter.With("method", "session").Add(1)
+		mm.latency.With("method", "session").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.UserProfile(token)
+	return mm.svc.Session(token, session, domainID)
 }
 
 // CreateUsers adds metrics middleware to create users method.

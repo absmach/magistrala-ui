@@ -151,8 +151,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         function openMemberModal() {
           memberModal.show();
         }
-
-        var userRole = localStorage.getItem("userRole");
+        var userRole = role;
         if (userRole == "admin") {
           document.getElementById("add-member-button").style.display = "block";
         } else {
