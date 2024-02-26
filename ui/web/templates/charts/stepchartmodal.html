@@ -67,23 +67,27 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
                     type="text"
+                    pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
                     class="form-control mb-3"
                     name="channel"
                     id="channel-id"
                     placeholder="Enter the channel ID"
                     required
                   />
+                  <div class="invalid-feedback">Please enter a valid uuid</div>
                 </div>
                 <div class="mb-3">
                   <label for="thing-id" class="form-label">Thing ID</label>
                   <input
                     type="text"
+                    pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
                     class="form-control mb-3"
                     name="thing"
                     id="thing-id"
                     placeholder="Enter the thing ID"
                     required
                   />
+                  <div class="invalid-feedback">Please enter a valid uuid</div>
                 </div>
                 <div class="mb-3">
                   <label for="value-name" class="form-label">Value name</label>
@@ -106,6 +110,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
+                <div class="invalid-time"></div>
                 <div class="mb-3">
                   <label for="stop-time" class="form-label">Stop time</label>
                   <input
@@ -118,7 +123,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <div class="mb-3">
                   <label for="time-interval" class="form-label">Time interval</label>
                   <input
-                    type="text"
+                    type="number"
                     class="form-control mb-3"
                     name="timeInterval"
                     id="time-interval"
@@ -172,7 +177,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                     name="seriesName"
                     id="series-name"
                     placeholder="Enter the series name eg. temperature,voltage"
-                    required
                   />
                 </div>
                 <div class="mb-3">
@@ -194,12 +198,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button
-            type="button"
-            class="btn body-button"
-            id="create-stepChart-button"
-            data-bs-dismiss="modal"
-          >
+          <button type="button" class="btn body-button" id="create-stepChart-button">
             Create Chart
           </button>
         </div>
@@ -210,6 +209,11 @@ SPDX-License-Identifier: Apache-2.0 -->
     // step chart form
     document.getElementById("create-stepChart-button").addEventListener("click", function () {
       let form = document.getElementById("create-stepChart-form");
+      if (!form.checkValidity()) {
+        form.classList.add("was-validated");
+        return;
+      }
+
       // Create an object to store the form data
       let chartData = {};
       let formData = new FormData(form);
@@ -217,11 +221,22 @@ SPDX-License-Identifier: Apache-2.0 -->
         chartData[pair[0]] = pair[1];
       }
 
+      if (chartData.stopTime <= chartData.startTime) {
+        let invalidTimeFeedback = document.getElementsByClassName("invalid-time");
+        invalidTimeFeedback[0].innerHTML = "Stop time should be greater than start time";
+        invalidTimeFeedback[0].style.color = "red";
+        return;
+      }
+
       var widgetID = "stepChart-" + Date.now();
 
       chartData["Type"] = "stepChart";
       addWidget(chartData, widgetID);
       metadataBuffer[widgetID] = chartData;
+
+      form.reset();
+      form.classList.remove("was-validated");
+      bootstrap.Modal.getInstance(document.getElementById("stepChartModal")).hide();
     });
   </script>
 {{ end }}

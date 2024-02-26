@@ -68,23 +68,27 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
                     type="text"
+                    pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
                     class="form-control mb-3"
                     name="channel"
                     id="channel-id"
                     placeholder="Enter the channel ID"
                     required
                   />
+                  <div class="invalid-feedback">Please enter a valid uuid</div>
                 </div>
                 <div class="mb-3">
                   <label for="thing-id" class="form-label">Thing ID</label>
                   <input
                     type="text"
+                    pattern="^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
                     class="form-control mb-3"
                     name="thing"
                     id="thing-id"
                     placeholder="Enter the thing ID"
                     required
                   />
+                  <div class="invalid-feedback">Please enter a valid uuid</div>
                 </div>
                 <div class="mb-3">
                   <label for="value-name" class="form-label">Value names</label>
@@ -153,12 +157,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button
-            type="button"
-            class="btn body-button"
-            id="create-multiGauge-button"
-            data-bs-dismiss="modal"
-          >
+          <button type="button" class="btn body-button" id="create-multiGauge-button">
             Create Chart
           </button>
         </div>
@@ -169,6 +168,11 @@ SPDX-License-Identifier: Apache-2.0 -->
     // multi gauge form
     document.getElementById("create-multiGauge-button").addEventListener("click", function () {
       let form = document.getElementById("create-multiGaugeChart-form");
+      if (!form.checkValidity()) {
+        form.classList.add("was-validated");
+        return;
+      }
+
       // Create an object to store the form data
       let chartData = {};
       let formData = new FormData(form);
@@ -181,6 +185,10 @@ SPDX-License-Identifier: Apache-2.0 -->
       chartData["Type"] = "multiGaugeChart";
       addWidget(chartData, widgetID);
       metadataBuffer[widgetID] = chartData;
+
+      form.reset();
+      form.classList.remove("was-validated");
+      bootstrap.Modal.getInstance(document.getElementById("multiGaugeModal")).hide();
     });
   </script>
 {{ end }}
