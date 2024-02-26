@@ -87,60 +87,26 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // line chart form
     document.getElementById("create-entitiesTable-button").addEventListener("click", function () {
-      var form = document.getElementById("create-entitiesTable-form");
+      let form = document.getElementById("create-entitiesTable-form");
       // Create an object to store the form data
-      var formData = {};
-
-      // Serialize the form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          formData[e.name] = e.value;
-        }
+      let chartData = {};
+      let formData = new FormData(form);
+      for (var pair of formData.entries()) {
+        chartData[pair[0]] = pair[1];
       }
-      form.reset();
 
       var widgetID = "entitiesTable-" + Date.now();
-      var widgetContent = `
-      <div class="card mt-3 widgetcard">
-        <div class="card-header text-center">
-          <h5 class="card-title">Entities Table</h5>
-        </div>
-        <table class="table table-striped table-hover">
-          <thead>
-              <tr>
-                  <th scope="col">Name</th>
-                  <th scope="col">Owner</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Time Created</th>
-              </tr>
-          </thead>
-          <tbody>
-              <tr>
-                  <td>Entity 1</td>
-                  <td>Owner A</td>
-                  <td>Enabled</td>
-                  <td>2024-01-01 12:00</td>
-              </tr>
-              <tr>
-                  <td>Entity 2</td>
-                  <td>Owner B</td>
-                  <td>Disabled</td>
-                  <td>2024-01-02 15:30</td>
-              </tr>
-          </tbody>
-        </table>
-      </div>
-      `;
+
       var config = {
         ID: widgetID,
-        Content: widgetContent,
         Style: {
           width: "500px",
           height: "210px",
         },
       };
-      addWidget(config);
+      chartData["Type"] = "entitiesTable";
+      addWidget(chartData, config);
+      metadataBuffer[widgetID] = chartData;
     });
   </script>
 {{ end }}

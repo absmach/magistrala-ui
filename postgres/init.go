@@ -20,6 +20,7 @@ func Migration() *migrate.MemoryMigrationSource {
 						name VARCHAR(255) NOT NULL,
 						description TEXT,
 						layout JSONB,
+						metadata JSONB,
 						created_at TIMESTAMP,
 						updated_at TIMESTAMP,
 						UNIQUE (id),

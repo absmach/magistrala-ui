@@ -54,15 +54,15 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </li>
           </ul>
-          <div class="tab-content" id="myTabContent">
-            <!-- Data Tab -->
-            <div
-              class="tab-pane fade show active"
-              id="donutChartData"
-              role="tabpanel"
-              aria-labelledby="data-tab"
-            >
-              <form id="create-donutChart-data-form">
+          <form id="create-donutChart-form">
+            <div class="tab-content" id="myTabContent">
+              <!-- Data Tab -->
+              <div
+                class="tab-pane fade show active"
+                id="donutChartData"
+                role="tabpanel"
+                aria-labelledby="data-tab"
+              >
                 <div class="mb-3">
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
@@ -95,16 +95,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
-              </form>
-            </div>
-            <!-- Appearance Tab -->
-            <div
-              class="tab-pane fade"
-              id="donutChartappearance"
-              role="tabpanel"
-              aria-labelledby="appearance-tab"
-            >
-              <form id="create-donutChart-appearance-form">
+              </div>
+              <!-- Appearance Tab -->
+              <div
+                class="tab-pane fade"
+                id="donutChartappearance"
+                role="tabpanel"
+                aria-labelledby="appearance-tab"
+              >
                 <div class="mb-3">
                   <label for="title" class="form-label">Title</label>
                   <input
@@ -126,9 +124,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
-              </form>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -147,72 +145,22 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // donut form
     document.getElementById("create-donut-button").addEventListener("click", function () {
-      var form = document.getElementById("create-donutChart-appearance-form");
+      let form = document.getElementById("create-donutChart-form");
       // Create an object to store the form data
-      var formData = {};
-
-      // Serialize the form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          formData[e.name] = e.value;
-        }
+      let chartData = {};
+      let formData = new FormData(form);
+      for (var pair of formData.entries()) {
+        chartData[pair[0]] = pair[1];
       }
-      form.reset();
 
-      var widgetID = "donut-" + Date.now();
-      var widgetScript = `
-        var donut = echarts.init(document.getElementById("${widgetID}"));
-        var option = {
-            title:{
-              text:'${formData.title}',
-              left: 'center',
-            },
-            tooltip: {
-              trigger: 'item'
-            },
-            legend: {
-              top: '5%',
-              left: 'center'
-            },
-            series: [
-              {
-                name: '${formData.seriesName}',
-                type: 'pie',
-                radius: ['40%', '70%'],
-                avoidLabelOverlap: false,
-                label: {
-                  show: false,
-                  position: 'center'
-                },
-                emphasis: {
-                  label: {
-                    show: true,
-                    fontSize: 40,
-                    fontWeight: 'bold'
-                  }
-                },
-                labelLine: {
-                  show: false
-                },
-                data: [
-                  { value: 1048, name: 'Thing1' },
-                  { value: 735, name: 'Thing2' },
-                  { value: 580, name: 'Thing3' },
-                  { value: 484, name: 'Thing4' },
-                  { value: 300, name: 'Thing5' }
-                ]
-              }
-            ]
-        };
-
-        donut.setOption(option);`;
+      var widgetID = "donutChart-" + Date.now();
 
       var config = {
         ID: widgetID,
-        Script: widgetScript,
-      }
-      addWidget(config);
+      };
+      chartData["Type"] = "donutChart";
+      addWidget(chartData, config);
+      metadataBuffer[widgetID] = chartData;
     });
   </script>
 {{ end }}

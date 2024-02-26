@@ -94,8 +94,8 @@ func CreateItem() []Item {
 			Widget:  "multiBarChart",
 		},
 		{
-			Title:   "Multiple Dataset Chart",
-			Content: "This is a multiple dataset chart",
+			Title:   "Shared Dataset Chart",
+			Content: "This is a shared dataset chart",
 			Widget:  "sharedDataset",
 		},
 		{

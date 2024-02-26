@@ -54,16 +54,16 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </li>
           </ul>
-          <!-- Tab Content -->
-          <div class="tab-content" id="myTabContent">
-            <!-- Data Tab -->
-            <div
-              class="tab-pane fade show active"
-              id="lineChartData"
-              role="tabpanel"
-              aria-labelledby="data-tab"
-            >
-              <form id="create-lineChart-data-form">
+          <form id="create-lineChart-form">
+            <!-- Tab Content -->
+            <div class="tab-content" id="myTabContent">
+              <!-- Data Tab -->
+              <div
+                class="tab-pane fade show active"
+                id="lineChartData"
+                role="tabpanel"
+                aria-labelledby="data-tab"
+              >
                 <div class="mb-3">
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
@@ -103,8 +103,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     type="datetime-local"
                     class="form-control mb-3"
                     name="startTime"
-                    id="start-name"
-                    placeholder="Enter the start time."
+                    id="start-time"
                     required
                   />
                 </div>
@@ -114,8 +113,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     type="datetime-local"
                     class="form-control mb-3"
                     name="stopTime"
-                    id="stop-name"
-                    placeholder="Enter the stop time."
+                    id="stop-time"
                   />
                 </div>
                 <div class="mb-3">
@@ -129,16 +127,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
-              </form>
-            </div>
-            <!-- Appearance Tab -->
-            <div
-              class="tab-pane fade"
-              id="lineChartAppearance"
-              role="tabpanel"
-              aria-labelledby="appearance-tab"
-            >
-              <form id="create-lineChart-appearance-form">
+              </div>
+              <!-- Appearance Tab -->
+              <div
+                class="tab-pane fade"
+                id="lineChartAppearance"
+                role="tabpanel"
+                aria-labelledby="appearance-tab"
+              >
                 <div class="mb-3">
                   <label for="title" class="form-label">Title</label>
                   <input
@@ -167,7 +163,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                     name="xAxisLabel"
                     id="x-axis-label"
                     placeholder="Enter the x axis label"
-                    default="Time"
                   />
                 </div>
                 <div class="mb-3">
@@ -183,14 +178,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </div>
                 <div class="mb-3">
                   <label for="line-color" class="form-label">Line color</label>
-                  <input
-                    type="color"
-                    class="form-control mb-3"
-                    name="lineColor"
-                    id="line-color"
-                    placeholder="Enter the line color"
-                    default="#000000"
-                  />
+                  <input type="color" class="form-control mb-3" name="lineColor" id="line-color" />
                 </div>
                 <div class="mb-3">
                   <label for="line-width" class="form-label">Line width</label>
@@ -205,9 +193,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                     <option value="3.5">3.5</option>
                   </select>
                 </div>
-              </form>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -226,66 +214,22 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // line chart form
     document.getElementById("create-lineChart-button").addEventListener("click", function () {
-      var form = document.getElementById("create-lineChart-appearance-form");
+      let form = document.getElementById("create-lineChart-form");
       // Create an object to store the form data
-      var formData = {};
-
-      // Serialize the form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          formData[e.name] = e.value;
-        }
+      let chartData = {};
+      let formData = new FormData(form);
+      for (var pair of formData.entries()) {
+        chartData[pair[0]] = pair[1];
       }
-      form.reset();
 
-      var widgetID = "linechart-" + Date.now();
-      var widgetScript = `
-        var lineChart = echarts.init(document.getElementById("${widgetID}")); 
-        var option = {
-          title: {
-            text: '${formData.title}',
-            left: 'center',
-            show: true
-          },
-          xAxis: {
-            type: 'category',
-            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            name: '${formData.xAxisLabel}',
-            nameLocation: 'middle',
-            nameGap: 35
-          },
-          yAxis: {
-            type: 'value',
-            name: '${formData.yAxisLabel}',
-            nameLocation: 'middle',
-            nameGap: 35
-          },
-          legend: {
-            show: true,
-            left: 'right',
-          },
-          series: [
-            {
-              data: [150, 230, 224, 218, 135, 147, 260],
-              type: 'line',
-              lineStyle: {
-                width: '${formData.lineWidth}',
-                type: 'solid',
-                color: '${formData.lineColor}'
-              },
-              name: '${formData.seriesName}'
-            }
-          ]
-        };
-
-        lineChart.setOption(option);`;
+      var widgetID = "lineChart-" + Date.now();
 
       var config = {
         ID: widgetID,
-        Script: widgetScript,
-      }
-      addWidget(config);
+      };
+      chartData["Type"] = "lineChart";
+      addWidget(chartData, config);
+      metadataBuffer[widgetID] = chartData;
     });
   </script>
 {{ end }}

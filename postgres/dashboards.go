@@ -26,8 +26,8 @@ func New(db *sqlx.DB) ui.DashboardRepository {
 // Create a non-existing dashboard for a user.
 func (r *repo) Create(ctx context.Context, dashboard ui.Dashboard) (ui.Dashboard, error) {
 	q := `
-    INSERT INTO dashboards (id, created_by, name, description, layout, created_at, updated_at)
-    VALUES (:id, :created_by, :name, :description, :layout, :created_at, :updated_at)
+    INSERT INTO dashboards (id, created_by, name, description, layout, metadata, created_at, updated_at)
+    VALUES (:id, :created_by, :name, :description, :layout, :metadata, :created_at, :updated_at)
 	RETURNING id, created_by, name, description, layout, created_at`
 
 	dbDs, err := toDBDashboard(dashboard)
@@ -54,7 +54,7 @@ func (r *repo) Create(ctx context.Context, dashboard ui.Dashboard) (ui.Dashboard
 
 // Retrieve a dashboard using a dashboard id and user id.
 func (r *repo) Retrieve(ctx context.Context, dashboardID, userID string) (ui.Dashboard, error) {
-	q := `SELECT id, created_by, name, description, layout, created_at, updated_at
+	q := `SELECT id, created_by, name, description, layout, metadata, created_at, updated_at
 	FROM dashboards WHERE id = :id AND created_by = :created_by`
 
 	tmp := ui.Dashboard{
@@ -139,6 +139,10 @@ func (r *repo) Update(ctx context.Context, dashboardID, userID string, dr ui.Das
 		query = append(query, "layout = :layout")
 		d.Layout = dr.Layout
 	}
+	if dr.Metadata != "" {
+		query = append(query, "metadata = :metadata")
+		d.Metadata = dr.Metadata
+	}
 	if len(query) > 0 {
 		upq = strings.Join(query, ",")
 	}
@@ -185,6 +189,7 @@ type dbDashboard struct {
 	Name        string    `db:"name"`
 	Description string    `db:"description"`
 	Layout      []byte    `db:"layout"`
+	Metadata    []byte    `db:"metadata"`
 	CreatedAt   time.Time `db:"created_at"`
 	UpdatedAt   time.Time `db:"updated_at"`
 }
@@ -194,12 +199,18 @@ func toDBDashboard(ds ui.Dashboard) (dbDashboard, error) {
 	if err != nil {
 		return dbDashboard{}, errors.Wrap(ErrJSONMarshal, err)
 	}
+	md, err := json.Marshal(ds.Metadata)
+	if err != nil {
+		return dbDashboard{}, errors.Wrap(ErrJSONMarshal, err)
+	}
+
 	return dbDashboard{
 		ID:          ds.ID,
 		CreatedBy:   ds.CreatedBy,
 		Name:        ds.Name,
 		Description: ds.Description,
 		Layout:      lt,
+		Metadata:    md,
 		CreatedAt:   ds.CreatedAt,
 		UpdatedAt:   ds.UpdatedAt,
 	}, nil
@@ -212,6 +223,12 @@ func toDashboard(dsDB dbDashboard) (ui.Dashboard, error) {
 			return ui.Dashboard{}, errors.Wrap(ErrJSONUnmarshal, err)
 		}
 	}
+	var md string
+	if dsDB.Metadata != nil {
+		if err := json.Unmarshal(dsDB.Metadata, &md); err != nil {
+			return ui.Dashboard{}, errors.Wrap(ErrJSONUnmarshal, err)
+		}
+	}
 
 	return ui.Dashboard{
 		ID:          dsDB.ID,
@@ -219,6 +236,7 @@ func toDashboard(dsDB dbDashboard) (ui.Dashboard, error) {
 		Name:        dsDB.Name,
 		Description: dsDB.Description,
 		Layout:      lt,
+		Metadata:    md,
 		CreatedAt:   dsDB.CreatedAt,
 		UpdatedAt:   dsDB.UpdatedAt,
 	}, nil

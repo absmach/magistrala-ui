@@ -54,16 +54,16 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </li>
           </ul>
-          <!-- Tab Content -->
-          <div class="tab-content" id="myTabContent">
-            <!-- Data Tab -->
-            <div
-              class="tab-pane fade show active"
-              id="areaLineChartData"
-              role="tabpanel"
-              aria-labelledby="data-tab"
-            >
-              <form id="create-areaLineChart-data-form">
+          <form id="create-areaLineChart-form">
+            <!-- Tab Content -->
+            <div class="tab-content" id="myTabContent">
+              <!-- Data Tab -->
+              <div
+                class="tab-pane fade show active"
+                id="areaLineChartData"
+                role="tabpanel"
+                aria-labelledby="data-tab"
+              >
                 <div class="mb-3">
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
@@ -99,7 +99,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </div>
                 <div class="mb-3">
                   <label for="y-axis-type" class="form-label">Y-axis Type</label>
-                  <select class="form-select mb-3" name="yAxisType" id="y-axis-typr">
+                  <select class="form-select mb-3" name="yAxisType" id="y-axis-type">
                     <option value="" disabled>Select y-axis Type</option>
                     <option value="value">Value</option>
                     <option value="category">Category</option>
@@ -113,7 +113,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     type="datetime-local"
                     class="form-control mb-3"
                     name="startTime"
-                    id="start-name"
+                    id="start-time"
                     required
                   />
                 </div>
@@ -123,7 +123,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     type="datetime-local"
                     class="form-control mb-3"
                     name="stopTime"
-                    id="stop-name"
+                    id="stop-time"
                   />
                 </div>
                 <div class="mb-3">
@@ -137,16 +137,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
-              </form>
-            </div>
-            <!-- Appearance Tab -->
-            <div
-              class="tab-pane fade"
-              id="areaLineChartAppearance"
-              role="tabpanel"
-              aria-labelledby="appearance-tab"
-            >
-              <form id="create-areaLineChart-appearance-form">
+              </div>
+              <!-- Appearance Tab -->
+              <div
+                class="tab-pane fade"
+                id="areaLineChartAppearance"
+                role="tabpanel"
+                aria-labelledby="appearance-tab"
+              >
                 <div class="mb-3">
                   <label for="title" class="form-label">Title</label>
                   <input
@@ -177,9 +175,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                     placeholder="Enter the x axis label"
                   />
                 </div>
-              </form>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -198,113 +196,22 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // area line chart form
     document.getElementById("create-areaLineChart-button").addEventListener("click", function () {
-      var form = document.getElementById("create-areaLineChart-appearance-form");
+      let form = document.getElementById("create-areaLineChart-form");
       // Create an object to store the form data
-      var formData = {};
-
-      // Serialize the form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          formData[e.name] = e.value;
-        }
+      let chartData = {};
+      let formData = new FormData(form);
+      for (var pair of formData.entries()) {
+        chartData[pair[0]] = pair[1];
       }
-      form.reset();
 
-      var widgetID = "arealinechart-" + Date.now();
-      var widgetScript = `
-        var areaLineChart = echarts.init(document.getElementById("${widgetID}"));
-        var option = {
-            tooltip: {
-              trigger: 'axis',
-              axisPointer: {
-                type: 'cross',
-                label: {
-                  backgroundColor: '#6a7985'
-                }
-              }
-            },
-            title: {
-              text: '${formData.title}',
-            },
-            legend: {
-              data: ['voltage', 'current', 'temperature', 'pressue']
-            },
-            grid: {
-              left: '3%',
-              right: '4%',
-              bottom: '3%',
-              containLabel: true
-            },
-            xAxis: [
-              {
-                type: 'category',
-                boundaryGap: false,
-                data: ['thing1', 'thing2', 'thing3', 'thing4', 'thing5', 'thing6', 'thing7'],
-                name: '${formData.xAxisLabel}',
-                nameLocation: 'middle',
-                nameGap: 25,
-              }
-            ],
-            yAxis: [
-              {
-                type: 'value',
-                name: '${formData.yAxisLabel}',
-                nameLocation: 'middle',
-                nameGap: 35,
-              }
-            ],
-            series: [
-              {
-                name: 'voltage',
-                type: 'line',
-                stack: 'Total',
-                areaStyle: {},
-                emphasis: {
-                  focus: 'series'
-                },
-                data: [120, 132, 101, 134, 90, 230, 210]
-              },
-              {
-                name: 'current',
-                type: 'line',
-                stack: 'Total',
-                areaStyle: {},
-                emphasis: {
-                  focus: 'series'
-                },
-                data: [220, 182, 191, 234, 290, 330, 310]
-              },
-              {
-                name: 'temperature',
-                type: 'line',
-                stack: 'Total',
-                areaStyle: {},
-                emphasis: {
-                  focus: 'series'
-                },
-                data: [150, 232, 201, 154, 190, 330, 410]
-              },
-              {
-                name: 'pressure',
-                type: 'line',
-                stack: 'Total',
-                areaStyle: {},
-                emphasis: {
-                  focus: 'series'
-                },
-                data: [320, 332, 301, 334, 390, 330, 320]
-              },
-            ]
-          };
-
-        areaLineChart.setOption(option);`;
+      var widgetID = "areaLineChart-" + Date.now();
 
       var config = {
         ID: widgetID,
-        Script: widgetScript,
-      }
-      addWidget(config);
+      };
+      chartData["Type"] = "areaLineChart";
+      addWidget(chartData, config);
+      metadataBuffer[widgetID] = chartData;
     });
   </script>
 {{ end }}

@@ -54,16 +54,16 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </li>
           </ul>
-          <!-- Tab Content -->
-          <div class="tab-content" id="myTabContent">
-            <!-- Data Tab -->
-            <div
-              class="tab-pane fade show active"
-              id="stackedLineChartData"
-              role="tabpanel"
-              aria-labelledby="data-tab"
-            >
-              <form id="create-stackedLineChart-data-form">
+          <!-- Single Form for both Data and Appearance Tabs -->
+          <form id="create-stackedLineChart-form">
+            <div class="tab-content" id="myTabContent">
+              <!-- Data Tab -->
+              <div
+                class="tab-pane fade show active"
+                id="stackedLineChartData"
+                role="tabpanel"
+                aria-labelledby="data-tab"
+              >
                 <div class="mb-3">
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
@@ -103,7 +103,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     type="datetime-local"
                     class="form-control mb-3"
                     name="startTime"
-                    id="start-name"
+                    id="start-time"
                     required
                   />
                 </div>
@@ -113,7 +113,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     type="datetime-local"
                     class="form-control mb-3"
                     name="stopTime"
-                    id="stop-name"
+                    id="stop-time"
                   />
                 </div>
                 <div class="mb-3">
@@ -127,16 +127,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
-              </form>
-            </div>
-            <!-- Appearance Tab -->
-            <div
-              class="tab-pane fade"
-              id="stackedLineChartAppearance"
-              role="tabpanel"
-              aria-labelledby="appearance-tab"
-            >
-              <form id="create-stackdeLineChart-appearance-form">
+              </div>
+              <!-- Appearance Tab -->
+              <div
+                class="tab-pane fade"
+                id="stackedLineChartAppearance"
+                role="tabpanel"
+                aria-labelledby="appearance-tab"
+              >
                 <div class="mb-3">
                   <label for="title" class="form-label">Title</label>
                   <input
@@ -165,7 +163,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                     name="xAxisLabel"
                     id="x-axis-label"
                     placeholder="Enter the x axis label"
-                    default="Time"
                   />
                 </div>
                 <div class="mb-3">
@@ -175,7 +172,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     class="form-control mb-3"
                     name="seriesName"
                     id="series-name"
-                    placeholder="Enter the series name eg. temperature,voltage"
+                    placeholder="Enter the series name eg. temperature, voltage"
                     required
                   />
                 </div>
@@ -192,9 +189,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                     <option value="3.5">3.5</option>
                   </select>
                 </div>
-              </form>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -215,89 +212,22 @@ SPDX-License-Identifier: Apache-2.0 -->
     document
       .getElementById("create-stackedLineChart-button")
       .addEventListener("click", function () {
-        var form = document.getElementById("create-stackdeLineChart-appearance-form");
-        // Create an object to store the form data
-        var formData = {};
-
-        // Serialize the form data into the object
-        for (var i = 0; i < form.elements.length; i++) {
-          var e = form.elements[i];
-          if (e.type !== "submit" && e.type !== "button") {
-            formData[e.name] = e.value;
-          }
-        }
-        form.reset();
-        seriesName = formData.seriesName.split(",");
-
-        var widgetID = "stackedlinechart-" + Date.now();
-        var widgetScript = `
-        var stackedLineChart = echarts.init(document.getElementById("${widgetID}"));
-        var option = {
-            title: {
-              text: "${formData.title}",
-              left: 'left',
-            },
-            tooltip: {
-              trigger: 'axis'
-            },
-            legend: {
-              data: ['${seriesName[0]}', '${seriesName[1]}', '${seriesName[2]}'],
-              left: 'right',
-            },
-            grid: {
-              left: '3%',
-              right: '4%',
-              bottom: '3%',
-              containLabel: true
-            },
-            toolbox: {
-              feature: {
-                saveAsImage: {}
-              }
-            },
-            xAxis: {
-              type: 'category',
-              boundaryGap: false,
-              data: ['Thing1', 'Thing2', 'Thing3', 'Thing4', 'Thing5', 'Thing6', 'Thing7'],
-              name: '${formData.xAxisLabel}',
-              nameLocation: 'middle',
-              nameGap: 35,
-            },
-            yAxis: {
-              type: 'value',
-              name: '${formData.yAxisLabel}',
-              nameLocation: 'middle',
-              nameGap: 35,
-            },
-            series: [
-              {
-                name: '${seriesName[0]}',
-                type: 'line',
-                stack: 'Total',
-                data: [120, 132, 101, 134, 90, 230, 210]
-              },
-              {
-                name: '${seriesName[1]}',
-                type: 'line',
-                stack: 'Total',
-                data: [220, 182, 191, 234, 290, 330, 310]
-              },
-              {
-                name: '${seriesName[2]}',
-                type: 'line',
-                stack: 'Total',
-                data: [150, 232, 201, 154, 190, 330, 410]
-              },
-            ]
-          };
-
-        stackedLineChart.setOption(option);`;
-
-      var config = {
-        ID: widgetID,
-        Script: widgetScript,
+        let form = document.getElementById("create-stackedLineChart-form");
+      // Create an object to store the form data
+      let chartData = {};
+      let formData = new FormData(form);
+      for (var pair of formData.entries()) {
+        chartData[pair[0]] = pair[1];
       }
-      addWidget(config);
-    });
+
+        var widgetID = "stackedLineChart-" + Date.now();
+
+        var config = {
+          ID: widgetID,
+        };
+        chartData["Type"] = "stackedLineChart";
+        addWidget(chartData, config);
+        metadataBuffer[widgetID] = chartData;
+      });
   </script>
 {{ end }}

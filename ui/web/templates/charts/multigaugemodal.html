@@ -54,16 +54,16 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </li>
           </ul>
-          <!-- Tab Content -->
-          <div class="tab-content" id="myTabContent">
-            <!-- Data Tab -->
-            <div
-              class="tab-pane fade show active"
-              id="multiGaugeChartData"
-              role="tabpanel"
-              aria-labelledby="data-tab"
-            >
-              <form id="create-multiGaugeChart-data-form">
+          <!-- Single Form for both Data and Appearance Tabs -->
+          <form id="create-multiGaugeChart-form">
+            <div class="tab-content" id="myTabContent">
+              <!-- Data Tab -->
+              <div
+                class="tab-pane fade show active"
+                id="multiGaugeChartData"
+                role="tabpanel"
+                aria-labelledby="data-tab"
+              >
                 <div class="mb-3">
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
@@ -93,20 +93,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                     class="form-control mb-3"
                     name="valueName"
                     id="value-name"
-                    placeholder="Enter the value names eg. temperature,voltage"
+                    placeholder="Enter the value names eg. temperature, voltage"
                     required
                   />
                 </div>
-              </form>
-            </div>
-            <!-- Appearance Tab -->
-            <div
-              class="tab-pane fade"
-              id="multiGaugeChartAppearance"
-              role="tabpanel"
-              aria-labelledby="appearance-tab"
-            >
-              <form id="create-multiGaugeChart-appearance-form">
+              </div>
+              <!-- Appearance Tab -->
+              <div
+                class="tab-pane fade"
+                id="multiGaugeChartAppearance"
+                role="tabpanel"
+                aria-labelledby="appearance-tab"
+              >
                 <div class="mb-3">
                   <label for="title" class="form-label">Title</label>
                   <input
@@ -124,7 +122,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     class="form-control mb-3"
                     name="gaugeLabel"
                     id="gauge-label"
-                    placeholder="Enter the three gauge labels eg temperature,voltage,pressure"
+                    placeholder="Enter the three gauge labels eg temperature, voltage, pressure"
                   />
                 </div>
                 <div class="mb-3">
@@ -149,9 +147,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                     value="100"
                   />
                 </div>
-              </form>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -170,123 +168,22 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // multi gauge form
     document.getElementById("create-multiGauge-button").addEventListener("click", function () {
-      var form = document.getElementById("create-multiGaugeChart-appearance-form");
+      let form = document.getElementById("create-multiGaugeChart-form");
       // Create an object to store the form data
-      var formData = {};
-
-      // Serialize the form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          formData[e.name] = e.value;
-        }
+      let chartData = {};
+      let formData = new FormData(form);
+      for (var pair of formData.entries()) {
+        chartData[pair[0]] = pair[1];
       }
-      form.reset();
 
-      gaugeLabel = formData.gaugeLabel.split(",");
+      var widgetID = "multiGaugeChart-" + Date.now();
 
-      var widgetID = "multiGauge-" + Date.now();
-      var widgetScript = `
-        var multiGaugeChart = echarts.init(document.getElementById("${widgetID}"));
-        var gaugeData = [
-        {
-          value: 20,
-          name: '${gaugeLabel[0]}',
-          title: {
-            offsetCenter: ['0%', '-30%']
-          },
-          detail: {
-            valueAnimation: true,
-            offsetCenter: ['0%', '-18%']
-          }
-        },
-        {
-          value: 40,
-          name: '${gaugeLabel[1]}',
-          title: {
-            offsetCenter: ['0%', '0%']
-          },
-          detail: {
-            valueAnimation: true,
-            offsetCenter: ['0%', '12%']
-          }
-        },
-        {
-          value: 60,
-          name: '${gaugeLabel[2]}',
-          title: {
-            offsetCenter: ['0%', '28%']
-          },
-          detail: {
-            valueAnimation: true,
-            offsetCenter: ['0%', '40%']
-          }
-        }
-      ];
-      var option = {
-        title: {
-          text: '${formData.title}',
-          left: 'center'
-        },
-        series: [
-          {
-            type: "gauge",
-            min: ${formData.minValue},
-            max: ${formData.maxValue},
-            pointer: {
-              show: false
-            },
-            progress: {
-              show: true,
-              overlap: false,
-              roundCap: true,
-              clip: false,
-              itemStyle: {
-                borderWidth: 1,
-                borderColor: '#464646'
-              }
-            },
-            axisLine: {
-              lineStyle: {
-                width: 30
-              }
-            },
-            splitLine: {
-              show: false,
-              distance: 0,
-              length: 10
-            },
-            axisTick: {
-              show: false
-            },
-            axisLabel: {
-              show: false,
-              distance: 50
-            },
-            data: gaugeData,
-            title: {
-              fontSize: 10
-            },
-            detail: {
-              width: 50,
-              height: 14,
-              fontSize: 14,
-              color: 'inherit',
-              borderColor: 'inherit',
-              borderRadius: 20,
-              borderWidth: 1,
-              formatter: '{value}%'
-            }
-          }
-        ]
-      };
-      multiGaugeChart.setOption(option);
-      `;
       var config = {
         ID: widgetID,
-        Script: widgetScript,
       };
-      addWidget(config);
+      chartData["Type"] = "multiGaugeChart";
+      addWidget(chartData, config);
+      metadataBuffer[widgetID] = chartData;
     });
   </script>
 {{ end }}

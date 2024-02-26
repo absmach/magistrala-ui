@@ -54,16 +54,15 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </li>
           </ul>
-          <!-- Tab Content -->
-          <div class="tab-content" id="myTabContent">
-            <!-- Data Tab -->
-            <div
-              class="tab-pane fade show active"
-              id="valueCardData"
-              role="tabpanel"
-              aria-labelledby="data-tab"
-            >
-              <form id="create-valueCard-data-form">
+          <form id="create-valueCard-form">
+            <div class="tab-content" id="myTabContent">
+              <!-- Data Tab -->
+              <div
+                class="tab-pane fade show active"
+                id="valueCardData"
+                role="tabpanel"
+                aria-labelledby="data-tab"
+              >
                 <div class="mb-3">
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
@@ -108,16 +107,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
-              </form>
-            </div>
-            <!-- Appearance Tab -->
-            <div
-              class="tab-pane fade"
-              id="valueCardAppearance"
-              role="tabpanel"
-              aria-labelledby="appearance-tab"
-            >
-              <form id="create-valueCard-appearance-form">
+              </div>
+              <!-- Appearance Tab -->
+              <div
+                class="tab-pane fade"
+                id="valueCardAppearance"
+                role="tabpanel"
+                aria-labelledby="appearance-tab"
+              >
                 <div class="mb-3">
                   <label for="title" class="form-label">Title</label>
                   <input
@@ -148,9 +145,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                     placeholder="Enter the units"
                   />
                 </div>
-              </form>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -169,43 +166,26 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // Value card form
     document.getElementById("create-valueCard-button").addEventListener("click", function () {
-      var form = document.getElementById("create-valueCard-appearance-form");
+      let form = document.getElementById("create-valueCard-form");
       // Create an object to store the form data
-      var formData = {};
-
-      // Serialize the form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          formData[e.name] = e.value;
-        }
+      let chartData = {};
+      let formData = new FormData(form);
+      for (var pair of formData.entries()) {
+        chartData[pair[0]] = pair[1];
       }
-      form.reset();
 
       var widgetID = "valueCard-" + Date.now();
-      var widgetContent = `
-        <div class="card mt-3 widgetcard" >
-          <div class="card-header text-center">
-            <h5 class="card-title">${formData.title}</h5>
-          </div>
-          <div class="card-body text-center">
-            <p class="card-text value"> 35</p>
-          </div>
-          <div class="card-footer">
-            <p class="card-text"> Units: ${formData.valueUnits}</p>
-            <p class="card-text text"> ThingName: ${formData.thingName}</p>
-          </div>
-        </div>
-      `;
-        var config = {
-          ID: widgetID,
-          Content: widgetContent,
-          Style:{
-            width: "300px",
-            height: "210px"
-          }
-        };
-        addWidget(config);
+
+      var config = {
+        ID: widgetID,
+        Style: {
+          width: "300px",
+          height: "210px",
+        },
+      };
+      chartData["Type"] = "valueCard";
+      addWidget(chartData, config);
+      metadataBuffer[widgetID] = chartData;
     });
   </script>
 {{ end }}

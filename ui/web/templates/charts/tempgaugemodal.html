@@ -54,16 +54,15 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </li>
           </ul>
-          <!-- Tab Content -->
-          <div class="tab-content" id="myTabContent">
-            <!-- Data Tab -->
-            <div
-              class="tab-pane fade show active"
-              id="tempGaugeChartData"
-              role="tabpanel"
-              aria-labelledby="data-tab"
-            >
-              <form id="create-tempGaugeChart-data-form">
+          <form id="create-tempGaugeChart-form">
+            <div class="tab-content" id="myTabContent">
+              <!-- Data Tab -->
+              <div
+                class="tab-pane fade show active"
+                id="tempGaugeChartData"
+                role="tabpanel"
+                aria-labelledby="data-tab"
+              >
                 <div class="mb-3">
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
@@ -119,16 +118,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                     value="100"
                   />
                 </div>
-              </form>
-            </div>
-            <!-- Appearance Tab -->
-            <div
-              class="tab-pane fade"
-              id="tempGaugeChartAppearance"
-              role="tabpanel"
-              aria-labelledby="appearance-tab"
-            >
-              <form id="create-tempGaugeChart-appearance-form">
+              </div>
+              <!-- Appearance Tab -->
+              <div
+                class="tab-pane fade"
+                id="tempGaugeChartAppearance"
+                role="tabpanel"
+                aria-labelledby="appearance-tab"
+              >
                 <div class="mb-3">
                   <label for="title" class="form-label">Title</label>
                   <input
@@ -149,9 +146,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                     placeholder="Enter the gauge label"
                   />
                 </div>
-              </form>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -170,169 +167,22 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // Temperature gauge form
     document.getElementById("create-tempGauge-button").addEventListener("click", function () {
-      var form = document.getElementById("create-tempGaugeChart-appearance-form");
+      let form = document.getElementById("create-tempGaugeChart-form");
       // Create an object to store the form data
-      var formData = {};
-
-      // Serialize the form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          formData[e.name] = e.value;
-        }
+      let chartData = {};
+      let formData = new FormData(form);
+      for (var pair of formData.entries()) {
+        chartData[pair[0]] = pair[1];
       }
-      form.reset();
 
-      var widgetID = "tempgauge-" + Date.now();
-      var widgetScript = `
-        var tempGaugeChart = echarts.init(document.getElementById("${widgetID}"));
-        var option = {
-           title: {
-              text: '${formData.title}',
-              left: 'center',
-              textStyle: {
-                color: '#FFAB91'
-              }
-            },
-            series: [
-              {
-                type: 'gauge',
-                center: ['50%', '80%'],
-                startAngle: 200,
-                endAngle: -20,
-                min: 0,
-                max: 60,
-                splitNumber: 12,
-                itemStyle: {
-                  color: '#FFAB91'
-                },
-                progress: {
-                  show: true,
-                  width: 30
-                },
-                pointer: {
-                  show: false
-                },
-                axisLine: {
-                  lineStyle: {
-                    width: 30
-                  }
-                },
-                axisTick: {
-                  distance: -44,
-                  splitNumber: 5,
-                  lineStyle: {
-                    width: 2,
-                    color: '#999'
-                  }
-                },
-                splitLine: {
-                  distance: -52,
-                  length: 7,
-                  lineStyle: {
-                    width: 2,
-                    color: '#999'
-                  }
-                },
-                axisLabel: {
-                  distance: -20,
-                  color: '#999',
-                  fontSize: 20
-                },
-                anchor: {
-                  show: false
-                },
-                title: {
-                  show: false
-                },
-                detail: {
-                  valueAnimation: true,
-                  width: '60%',
-                  lineHeight: 40,
-                  borderRadius: 1,
-                  offsetCenter: [0, '-5%'],
-                  fontSize: 30,
-                  fontWeight: 'bolder',
-                  formatter: '{value} °C',
-                  color: 'inherit'
-                },
-                data: [
-                  {
-                    value: 20
-                  }
-                ]
-              },
-              {
-                type: 'gauge',
-                center: ['50%', '80%'],
-                startAngle: 200,
-                endAngle: -20,
-                min: 0,
-                max: 60,
-                itemStyle: {
-                  color: '#FD7347'
-                },
-                progress: {
-                  show: true,
-                  width: 8
-                },
-                pointer: {
-                  show: false
-                },
-                axisLine: {
-                  show: false
-                },
-                axisTick: {
-                  show: false
-                },
-                splitLine: {
-                  show: false
-                },
-                axisLabel: {
-                  show: false
-                },
-                detail: {
-                  show: false
-                },
-                data: [
-                  {
-                    value: 37,
-                    name: '${formData.gaugeLabel}'
-                  }
-                ]
-              }
-            ]
-          };
-          setInterval(function () {
-            const random = +(Math.random() * 60).toFixed(2);
-            tempGaugeChart.setOption({
-              series: [
-                {
-                  data: [
-                    {
-                      value: random
-                    }
-                  ]
-                },
-                {
-                  data: [
-                    {
-                      value: random,
-                      name: '${formData.gaugeLabel}'
-                    }
-                  ]
-                }
-              ]
-            });
-          }, 2000);
-
-        tempGaugeChart.setOption(option);`;
+      var widgetID = "tempGaugeChart-" + Date.now();
 
       var config = {
         ID: widgetID,
-        Script: widgetScript,
-      }
-      addWidget(config);
+      };
+      chartData["Type"] = "tempGaugeChart";
+      addWidget(chartData, config);
+      metadataBuffer[widgetID] = chartData;
     });
   </script>
 {{ end }}

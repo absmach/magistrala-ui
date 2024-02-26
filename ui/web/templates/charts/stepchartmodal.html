@@ -54,16 +54,15 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </li>
           </ul>
-          <!-- Tab Content -->
-          <div class="tab-content" id="myTabContent">
-            <!-- Data Tab -->
-            <div
-              class="tab-pane fade show active"
-              id="stepChartData"
-              role="tabpanel"
-              aria-labelledby="data-tab"
-            >
-              <form id="create-stepChart-data-form">
+          <form id="create-stepChart-form">
+            <div class="tab-content" id="myTabContent">
+              <!-- Data Tab -->
+              <div
+                class="tab-pane fade show active"
+                id="stepChartData"
+                role="tabpanel"
+                aria-labelledby="data-tab"
+              >
                 <div class="mb-3">
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
@@ -103,7 +102,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     type="datetime-local"
                     class="form-control mb-3"
                     name="startTime"
-                    id="start-name"
+                    id="start-time"
                     required
                   />
                 </div>
@@ -113,7 +112,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     type="datetime-local"
                     class="form-control mb-3"
                     name="stopTime"
-                    id="stop-name"
+                    id="stop-time"
                   />
                 </div>
                 <div class="mb-3">
@@ -127,16 +126,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
-              </form>
-            </div>
-            <!-- Appearance Tab -->
-            <div
-              class="tab-pane fade"
-              id="stepChartAppearance"
-              role="tabpanel"
-              aria-labelledby="appearance-tab"
-            >
-              <form id="create-stepChart-appearance-form">
+              </div>
+              <!-- Appearance Tab -->
+              <div
+                class="tab-pane fade"
+                id="stepChartAppearance"
+                role="tabpanel"
+                aria-labelledby="appearance-tab"
+              >
                 <div class="mb-3">
                   <label for="title" class="form-label">Title</label>
                   <input
@@ -165,7 +162,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                     name="xAxisLabel"
                     id="x-axis-label"
                     placeholder="Enter the x axis label"
-                    default="Time"
                   />
                 </div>
                 <div class="mb-3">
@@ -192,9 +188,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                     <option value="3.5">3.5</option>
                   </select>
                 </div>
-              </form>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -213,87 +209,21 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // step chart form
     document.getElementById("create-stepChart-button").addEventListener("click", function () {
-      var form = document.getElementById("create-stepChart-appearance-form");
+      let form = document.getElementById("create-stepChart-form");
       // Create an object to store the form data
-      var formData = {};
-
-      // Serialize the form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          formData[e.name] = e.value;
-        }
+      let chartData = {};
+      let formData = new FormData(form);
+      for (var pair of formData.entries()) {
+        chartData[pair[0]] = pair[1];
       }
-      form.reset();
 
-      seriesName = formData.seriesName.split(",");
-
-      var widgetID = "stepchart-" + Date.now();
-      var widgetScript = `
-        var stepChart = echarts.init(document.getElementById("${widgetID}"));
-        var option = {
-          title: {
-            text: '${formData.title}',
-            left: 'left'
-          },
-          tooltip: {
-            trigger: 'axis'
-          },
-          legend: {
-            show: true,
-            left: 'right',
-          },
-          grid: {
-            left: '3%',
-            right: '4%',
-            bottom: '3%',
-            containLabel: true
-          },
-          toolbox: {
-            feature: {
-              saveAsImage: {}
-            }
-          },
-          xAxis: {
-            type: 'category',
-            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-            name: '${formData.xAxisLabel}',
-            nameLocation: 'middle',
-            nameGap: 30
-          },
-          yAxis: {
-            type: 'value',
-            name: '${formData.yAxisLabel}',
-            nameLocation: 'middle',
-            nameGap: 40
-          },
-          series: [
-            {
-              name: '${seriesName[0]}',
-              type: 'line',
-              step: 'start',
-              data: [120, 132, 101, 134, 90, 230, 210]
-            },
-            {
-              name: '${seriesName[1]}',
-              type: 'line',
-              step: 'middle',
-              data: [220, 282, 201, 234, 290, 430, 410]
-            },
-            {
-              name: '${seriesName[2]}',
-              type: 'line',
-              step: 'end',
-              data: [450, 432, 401, 454, 590, 530, 510]
-            }
-          ]
-        };
-        stepChart.setOption(option);`;
+      var widgetID = "stepChart-" + Date.now();
       var config = {
         ID: widgetID,
-        Script: widgetScript,
       };
-      addWidget(config);
+      chartData["Type"] = "stepChart";
+      addWidget(chartData, config);
+      metadataBuffer[widgetID] = chartData;
     });
   </script>
 {{ end }}

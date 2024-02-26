@@ -54,15 +54,15 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </li>
           </ul>
-          <div class="tab-content" id="myTabContent">
-            <!-- Data Tab -->
-            <div
-              class="tab-pane fade show active"
-              id="pieChartData"
-              role="tabpanel"
-              aria-labelledby="data-tab"
-            >
-              <form id="create-pieChart-data-form">
+          <form id="create-pieChart-form">
+            <div class="tab-content" id="myTabContent">
+              <!-- Data Tab -->
+              <div
+                class="tab-pane fade show active"
+                id="pieChartData"
+                role="tabpanel"
+                aria-labelledby="data-tab"
+              >
                 <div class="mb-3">
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
@@ -95,16 +95,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
-              </form>
-            </div>
-            <!-- Appearance Tab -->
-            <div
-              class="tab-pane fade"
-              id="pieChartappearance"
-              role="tabpanel"
-              aria-labelledby="appearance-tab"
-            >
-              <form id="create-pieChart-appearance-form">
+              </div>
+              <!-- Appearance Tab -->
+              <div
+                class="tab-pane fade"
+                id="pieChartappearance"
+                role="tabpanel"
+                aria-labelledby="appearance-tab"
+              >
                 <div class="mb-3">
                   <label for="title" class="form-label">Title</label>
                   <input
@@ -126,9 +124,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
-              </form>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -147,64 +145,21 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // pie chart form
     document.getElementById("create-pieChart-button").addEventListener("click", function () {
-      var form = document.getElementById("create-pieChart-appearance-form");
+      let form = document.getElementById("create-pieChart-form");
       // Create an object to store the form data
-      var formData = {};
-
-      // Serialize the form data into the object
-      for (var i = 0; i < form.elements.length; i++) {
-        var e = form.elements[i];
-        if (e.type !== "submit" && e.type !== "button") {
-          formData[e.name] = e.value;
-        }
+      let chartData = {};
+      let formData = new FormData(form);
+      for (var pair of formData.entries()) {
+        chartData[pair[0]] = pair[1];
       }
-      form.reset();
 
-      var widgetID = "piechart-" + Date.now();
-      var widgetScript = `
-        var pieChart = echarts.init(document.getElementById("${widgetID}"));
-        var option = {
-            title: {
-                text: '${formData.title}',
-                left: 'center',
-            },
-            tooltip: {
-                trigger: 'item'
-            },
-            legend: {
-                orient: 'vertical',
-                left: 'left'
-            },
-            series: [
-                {
-                name: '${formData.seriesName}',
-                type: 'pie',
-                radius: '50%',
-                data: [
-                    { value: 1048, name: 'thing1' },
-                    { value: 735, name: 'thing2' },
-                    { value: 580, name: 'thing3' },
-                    { value: 484, name: 'thing4' },
-                    { value: 300, name: 'thing5' }
-                ],
-                emphasis: {
-                    itemStyle: {
-                    shadowBlur: 10,
-                    shadowOffsetX: 0,
-                    shadowColor: 'rgba(0, 0, 0, 0.5)'
-                    }
-                }
-                }
-            ]
-        };
-
-        pieChart.setOption(option);`;
-
+      var widgetID = "pieChart-" + Date.now();
       var config = {
         ID: widgetID,
-        Script: widgetScript,
-      }
-      addWidget(config);
+      };
+      chartData["Type"] = "pieChart";
+      addWidget(chartData, config);
+      metadataBuffer[widgetID] = chartData;
     });
   </script>
 {{ end }}
