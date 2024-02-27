@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/absmach/magistrala-ui/ui"
+	"github.com/absmach/magistrala-ui/ui/oauth2"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 )
 
@@ -94,32 +95,23 @@ func (lm *loggingMiddleware) Logout() (err error) {
 	return lm.svc.Logout()
 }
 
-// KratosSignIn adds logging middleware to kratos signin method.
-func (lm *loggingMiddleware) KratosSignIn() (url string, err error) {
+// OAuth2Handler adds logging middleware to OAuth2 handler method.
+func (lm *loggingMiddleware) OAuth2Handler(state oauth2.State, provider oauth2.Provider) (url string, err error) {
 	defer func(begin time.Time) {
-		duration := slog.String("duration", time.Since(begin).String())
+		args := []any{
+			slog.String("duration", time.Since(begin).String()),
+			slog.String("state", state.String()),
+			slog.String("provider", provider.String()),
+		}
 		if err != nil {
-			lm.logger.Warn("Kratos sign in failed to complete successfully", slog.Any("error", err), duration)
+			args = append(args, slog.Any("error", err))
+			lm.logger.Warn("OAuth handler failed to complete successfully", args...)
 			return
 		}
-		lm.logger.Info("Kratos sign in completed successfully", duration)
+		lm.logger.Info("OAuth handler completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.KratosSignIn()
-}
-
-// KratosSignUp adds logging middleware to kratos signup method.
-func (lm *loggingMiddleware) KratosSignUp() (url string, err error) {
-	defer func(begin time.Time) {
-		duration := slog.String("duration", time.Since(begin).String())
-		if err != nil {
-			lm.logger.Warn("Kratos sign up failed to complete successfully", slog.Any("error", err), duration)
-			return
-		}
-		lm.logger.Info("Kratos sign up completed successfully", duration)
-	}(time.Now())
-
-	return lm.svc.KratosSignUp()
+	return lm.svc.OAuth2Handler(state, provider)
 }
 
 // PasswordResetRequest adds logging middleware to password reset request method.

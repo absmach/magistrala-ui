@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/absmach/magistrala-ui/ui"
+	"github.com/absmach/magistrala-ui/ui/oauth2"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/go-kit/kit/metrics"
 )
@@ -79,24 +80,15 @@ func (mm *metricsMiddleware) Logout() error {
 	return mm.svc.Logout()
 }
 
-// KratosSignIn adds metrics middleware to kratos signin method.
-func (mm *metricsMiddleware) KratosSignIn() (url string, err error) {
+// OAuth2Handler adds metrics middleware to OAuth2 handler method.
+func (mm *metricsMiddleware) OAuth2Handler(state oauth2.State, provider oauth2.Provider) (url string, err error) {
+	method := provider.String() + "_oauth_" + state.String()
 	defer func(begin time.Time) {
-		mm.counter.With("method", "kratos_signin").Add(1)
-		mm.latency.With("method", "kratos_signin").Observe(time.Since(begin).Seconds())
+		mm.counter.With("method", method).Add(1)
+		mm.latency.With("method", method).Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.KratosSignIn()
-}
-
-// KratosSignUp adds metrics middleware to kratos signup method.
-func (mm *metricsMiddleware) KratosSignUp() (url string, err error) {
-	defer func(begin time.Time) {
-		mm.counter.With("method", "kratos_signup").Add(1)
-		mm.latency.With("method", "kratos_signup").Observe(time.Since(begin).Seconds())
-	}(time.Now())
-
-	return mm.svc.KratosSignUp()
+	return mm.svc.OAuth2Handler(state, provider)
 }
 
 // PasswordResetRequest adds metrics middleware to password reset request method.

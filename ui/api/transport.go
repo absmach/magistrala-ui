@@ -18,6 +18,7 @@ import (
 
 	"github.com/absmach/magistrala"
 	"github.com/absmach/magistrala-ui/ui"
+	"github.com/absmach/magistrala-ui/ui/oauth2"
 	"github.com/absmach/magistrala/pkg/errors"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/go-chi/chi/v5"
@@ -126,8 +127,8 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 		opts...,
 	).ServeHTTP)
 
-	r.HandleFunc("/signup/kratos", kratosSignUpHandler(svc))
-	r.HandleFunc("/signin/kratos", kratosSignInHandler(svc))
+	r.HandleFunc("/signup/google", oauth2Handler(svc, oauth2.SignUp, oauth2.Google))
+	r.HandleFunc("/signin/google", oauth2Handler(svc, oauth2.SignIn, oauth2.Google))
 
 	r.Post("/reset-request", kithttp.NewServer(
 		passwordResetRequestEndpoint(svc),
@@ -1044,21 +1045,9 @@ func decodeLogoutRequest(_ context.Context, _ *http.Request) (interface{}, error
 	return nil, nil
 }
 
-func kratosSignInHandler(svc ui.Service) http.HandlerFunc {
+func oauth2Handler(svc ui.Service, state oauth2.State, provider oauth2.Provider) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		url, err := svc.KratosSignIn()
-		if err != nil {
-			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
-			return
-		}
-
-		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
-	}
-}
-
-func kratosSignUpHandler(svc ui.Service) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		url, err := svc.KratosSignUp()
+		url, err := svc.OAuth2Handler(state, provider)
 		if err != nil {
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return

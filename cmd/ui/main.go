@@ -17,6 +17,7 @@ import (
 	repo "github.com/absmach/magistrala-ui/postgres"
 	"github.com/absmach/magistrala-ui/ui"
 	"github.com/absmach/magistrala-ui/ui/api"
+	"github.com/absmach/magistrala-ui/ui/oauth2/google"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/absmach/magistrala/pkg/uuid"
 	"github.com/caarlos0/env/v10"
@@ -39,11 +40,10 @@ type config struct {
 	InvitationsURL     string          `env:"MG_INVITATIONS_URL"      envDefault:"http://localhost:9020"`
 	MsgContentType     sdk.ContentType `env:"MG_UI_CONTENT_TYPE"      envDefault:"application/senml+json"`
 	TLSVerification    bool            `env:"MG_UI_VERIFICATION_TLS"  envDefault:"false"`
-	KratosURL          string          `env:"MG_KRATOS_URL"           envDefault:"http://localhost:4433"`
-	KratosClientID     string          `env:"MG_KRATOS_CLIENT_ID"     envDefault:""`
-	KratosClientSecret string          `env:"MG_KRATOS_CLIENT_SECRET" envDefault:""`
-	KratosRedirectURL  string          `env:"MG_KRATOS_REDIRECT_URL"  envDefault:"http://localhost/oauth/callback/kratos"`
-	KratosState        string          `env:"MG_KRATOS_STATE"         envDefault:""`
+	GoogleClientID     string          `env:"MG_GOOGLE_CLIENT_ID"     envDefault:""`
+	GoogleClientSecret string          `env:"MG_GOOGLE_CLIENT_SECRET" envDefault:""`
+	GoogleRedirectURL  string          `env:"MG_GOOGLE_REDIRECT_URL"  envDefault:"http://localhost/oauth/callback/google"`
+	GoogleState        string          `env:"MG_GOOGLE_STATE"         envDefault:""`
 }
 
 func main() {
@@ -77,7 +77,7 @@ func main() {
 	}
 
 	sdk := sdk.NewSDK(sdkConfig)
-	kconf := ui.NewKratosConfig(cfg.KratosURL, cfg.KratosClientID, cfg.KratosClientSecret, cfg.KratosState, cfg.KratosRedirectURL)
+	googleHandler := google.NewHandler(cfg.GoogleClientID, cfg.GoogleClientSecret, cfg.GoogleState, cfg.GoogleRedirectURL)
 
 	dbConfig := postgres.Config{}
 	db, err := postgres.Setup(dbConfig, *repo.Migration())
@@ -89,7 +89,7 @@ func main() {
 
 	idp := uuid.New()
 
-	svc, err := ui.New(sdk, dbs, idp, &kconf)
+	svc, err := ui.New(sdk, dbs, idp, googleHandler)
 	if err != nil {
 		log.Fatalf(err.Error())
 	}

@@ -21,6 +21,7 @@ import (
 
 	"github.com/absmach/agent/pkg/bootstrap"
 	"github.com/absmach/magistrala"
+	"github.com/absmach/magistrala-ui/ui/oauth2"
 	"github.com/absmach/magistrala/pkg/errors"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/absmach/magistrala/pkg/transformers/senml"
@@ -220,7 +221,6 @@ var (
 	ErrFailedDashboardUpdate   = errors.New("failed to update dashboard")
 	ErrFailedDashboardDelete   = errors.New("failed to delete dashboard")
 
-	emptyData       = struct{}{}
 	domainRelations = []string{"administrator", "editor", "viewer", "member"}
 	groupRelations  = []string{"administrator", "editor", "viewer"}
 	statusOptions   = []string{"all", "enabled", "disabled"}
@@ -234,12 +234,10 @@ type Service interface {
 	ViewRegistration() ([]byte, error)
 	// RegisterUser registers a new user and logs them in.
 	RegisterUser(user sdk.User) (sdk.Token, error)
-	// KratosSignUp redirects the user to the kratos singup page.
-	KratosSignUp() (string, error)
+	// OAuth2Handler redirects the user to the oauth singup or signin page.
+	OAuth2Handler(state oauth2.State, provider oauth2.Provider) (string, error)
 	// Login displays the login page.
 	Login() ([]byte, error)
-	// KratosSignIn redirects the user to the kratos login page.
-	KratosSignIn() (string, error)
 	// Logout deletes the access token and refresh token from the cookies and logs the user out of the UI.
 	Logout() error
 	// PasswordResetRequest sends an email with a link to the password reset page with a valid request token.
@@ -443,25 +441,25 @@ type Service interface {
 var _ Service = (*uiService)(nil)
 
 type uiService struct {
-	sdk          sdk.SDK
-	tpls         *template.Template
-	drepo        DashboardRepository
-	idProvider   magistrala.IDProvider
-	kratosConfig *KratosConfig
+	sdk        sdk.SDK
+	tpls       *template.Template
+	drepo      DashboardRepository
+	idProvider magistrala.IDProvider
+	google     oauth2.Handler
 }
 
 // New instantiates the HTTP adapter implementation.
-func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider, cfg *KratosConfig) (Service, error) {
+func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider, google oauth2.Handler) (Service, error) {
 	tpl, err := parseTemplates(sdk, templates)
 	if err != nil {
 		return nil, err
 	}
 	return &uiService{
-		sdk:          sdk,
-		tpls:         tpl,
-		drepo:        db,
-		idProvider:   idp,
-		kratosConfig: cfg,
+		sdk:        sdk,
+		tpls:       tpl,
+		drepo:      db,
+		idProvider: idp,
+		google:     google,
 	}, nil
 }
 
@@ -550,8 +548,14 @@ func (us *uiService) Index(token string) (b []byte, err error) {
 }
 
 func (us *uiService) ViewRegistration() ([]byte, error) {
+	data := struct {
+		IsGoogleEnabled bool
+	}{
+		us.google.IsEnabled(),
+	}
+
 	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "registration", emptyData); err != nil {
+	if err := us.tpls.ExecuteTemplate(&btpl, "registration", data); err != nil {
 		return []byte{}, errors.Wrap(err, ErrExecTemplate)
 	}
 
@@ -571,8 +575,14 @@ func (us *uiService) RegisterUser(user sdk.User) (sdk.Token, error) {
 }
 
 func (us *uiService) Login() ([]byte, error) {
+	data := struct {
+		IsGoogleEnabled bool
+	}{
+		us.google.IsEnabled(),
+	}
+
 	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "login", emptyData); err != nil {
+	if err := us.tpls.ExecuteTemplate(&btpl, "login", data); err != nil {
 		return []byte{}, errors.Wrap(err, ErrExecTemplate)
 	}
 
@@ -583,12 +593,15 @@ func (us *uiService) Logout() error {
 	return nil
 }
 
-func (us *uiService) KratosSignIn() (string, error) {
-	return us.kratosConfig.GenerateSignInURL()
-}
-
-func (us *uiService) KratosSignUp() (string, error) {
-	return us.kratosConfig.GenerateSignUpURL()
+func (us *uiService) OAuth2Handler(state oauth2.State, _ oauth2.Provider) (string, error) {
+	switch state {
+	case oauth2.SignIn:
+		return us.google.GenerateSignInURL()
+	case oauth2.SignUp:
+		return us.google.GenerateSignUpURL()
+	default:
+		return "", errors.New("invalid state")
+	}
 }
 
 func (us *uiService) PasswordResetRequest(email string) error {
