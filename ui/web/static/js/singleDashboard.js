@@ -17,7 +17,7 @@ function cancelEdit() {
   cancelEditGrid(grid);
 }
 // Config has the ID, Content and Script parameters
-function addWidget(chartData, config) {
+function addEchartsWidget(chartData, config) {
   // Create a new grid item
   const newItem = document.createElement("div");
   newItem.className = "item";
@@ -25,10 +25,12 @@ function addWidget(chartData, config) {
   config = createChart(chartData, config);
   if (config.Style === undefined) {
     config.Style = {
-      width: "500px",
-      height: "500px",
+      width: "400px",
+      height: "400px",
     };
   }
+  newItem.style.minWidth = config.Style.width;
+  newItem.style.minHeight = config.Style.height;
   var styleString = `width: ${config.Style.width}; height: ${config.Style.height};`;
   newItem.innerHTML = `
   <div class="item-border">
@@ -47,6 +49,28 @@ function addWidget(chartData, config) {
     newItem.appendChild(scriptTag);
   }
   grid.add(newItem);
+  resizeObserver.observe(newItem);
+}
+
+function addBootstrapWidget(chartData, config) {
+  const newItem = document.createElement("div");
+  newItem.className = "item";
+  newItem.classList.add("item-editable");
+  config = createChart(chartData, config);
+  newItem.innerHTML = `
+  <div class="item-border">
+    <button type="button" class="btn btn-sm" id="removeItem" onclick="removeGridItem(this.parentNode.parentNode);">
+      <i class="fas fa-trash-can"></i>
+    </button>
+    <div class="item-content" id="${config.ID}">
+      ${config.Content}
+    </div>
+  `;
+
+  grid.add(newItem);
+  newItem.style.minWidth = newItem.clientWidth + "px";
+  newItem.style.minHeight = newItem.clientHeight + "px";
+
   resizeObserver.observe(newItem);
 }
 
@@ -81,12 +105,16 @@ function saveLayout(grid, dashboardID) {
     const positionLeft = itemElement.style.left;
     const positionTop = itemElement.style.top;
     const transform = itemElement.style.transform;
+    const minWidth = itemElement.style.minWidth;
+    const minHeight = itemElement.style.minHeight;
 
     return {
       widgetID: item._element.children[0].children[1].id,
       widgetSize: {
         width: widgetWidth,
         height: widgetHeight,
+        minWidth: minWidth,
+        minHeight: minHeight,
       },
       widgetPosition: {
         left: positionLeft,
@@ -209,6 +237,8 @@ function editGrid(grid, layout) {
             newItem.style.position = "absolute";
             newItem.style.left = itemData.widgetPosition.left;
             newItem.style.top = itemData.widgetPosition.top;
+            newItem.style.minWidth = itemData.widgetSize.minWidth;
+            newItem.style.minHeight = itemData.widgetSize.minHeight;
             if (itemData.widgetPosition.transform) {
               newItem.style.transform = itemData.widgetPosition.transform;
             }
