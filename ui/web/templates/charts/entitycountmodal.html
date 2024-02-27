@@ -76,13 +76,9 @@ SPDX-License-Identifier: Apache-2.0 -->
       var widgetID = "entityCount-" + Date.now();
       var config = {
         ID: widgetID,
-        Style: {
-          width: "300px",
-          height: "170px",
-        },
       };
       chartData["Type"] = "entityCount";
-      addWidget(chartData, config);
+      addBootstrapWidget(chartData, config);
       metadataBuffer[widgetID] = chartData;
     });
   </script>

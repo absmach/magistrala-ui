@@ -98,13 +98,9 @@ SPDX-License-Identifier: Apache-2.0 -->
       var widgetID = "alarmCount-" + Date.now();
       var config = {
         ID: widgetID,
-        Style: {
-          width: "300px",
-          height: "160px",
-        },
       };
       chartData["Type"] = "alarmCount";
-      addWidget(chartData, config);
+      addBootstrapWidget(chartData, config);
       metadataBuffer[widgetID] = chartData;
     });
   </script>
