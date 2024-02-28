@@ -97,11 +97,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var widgetID = "alarmsTable-" + Date.now();
 
-      var config = {
-        ID: widgetID,
-      };
       chartData["Type"] = "alarmsTable";
-      addBootstrapWidget(chartData, config);
+      addWidget(chartData, widgetID);
       metadataBuffer[widgetID] = chartData;
     });
   </script>

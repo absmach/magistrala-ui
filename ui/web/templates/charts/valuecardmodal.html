@@ -176,11 +176,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var widgetID = "valueCard-" + Date.now();
 
-      var config = {
-        ID: widgetID,
-      };
       chartData["Type"] = "valueCard";
-      addBootstrapWidget(chartData, config);
+      addWidget(chartData, widgetID);
       metadataBuffer[widgetID] = chartData;
     });
   </script>

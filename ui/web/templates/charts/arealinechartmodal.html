@@ -206,11 +206,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var widgetID = "areaLineChart-" + Date.now();
 
-      var config = {
-        ID: widgetID,
-      };
       chartData["Type"] = "areaLineChart";
-      addEchartsWidget(chartData, config);
+      addWidget(chartData, widgetID);
       metadataBuffer[widgetID] = chartData;
     });
   </script>

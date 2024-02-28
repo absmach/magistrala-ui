@@ -73,11 +73,9 @@ SPDX-License-Identifier: Apache-2.0 -->
       }
 
       var widgetID = "labelCard-" + Date.now();
-      var config = {
-        ID: widgetID,
-      };
+
       chartData["Type"] = "labelCard";
-      addBootstrapWidget(chartData, config);
+      addWidget(chartData, widgetID);
       metadataBuffer[widgetID] = chartData;
     });
   </script>

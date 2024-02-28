@@ -239,11 +239,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 
         var widgetID = "dynamicDataChart-" + Date.now();
 
-        var config = {
-          ID: widgetID,
-        };
         chartData["Type"] = "dynamicDataChart";
-        addEchartsWidget(chartData, config);
+        addWidget(chartData, widgetID);
         metadataBuffer[widgetID] = chartData;
       });
   </script>

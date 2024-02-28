@@ -178,11 +178,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var widgetID = "multiGaugeChart-" + Date.now();
 
-      var config = {
-        ID: widgetID,
-      };
       chartData["Type"] = "multiGaugeChart";
-      addEchartsWidget(chartData, config);
+      addWidget(chartData, widgetID);
       metadataBuffer[widgetID] = chartData;
     });
   </script>

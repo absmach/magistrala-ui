@@ -16,62 +16,11 @@ function saveCanvas() {
 function cancelEdit() {
   cancelEditGrid(grid);
 }
-// Config has the ID, Content and Script parameters
-function addEchartsWidget(chartData, config) {
-  // Create a new grid item
-  const newItem = document.createElement("div");
-  newItem.className = "item";
-  newItem.classList.add("item-editable");
-  config = createChart(chartData, config);
-  if (config.Style === undefined) {
-    config.Style = {
-      width: "400px",
-      height: "400px",
-    };
-  }
-  newItem.style.minWidth = config.Style.width;
-  newItem.style.minHeight = config.Style.height;
-  var styleString = `width: ${config.Style.width}; height: ${config.Style.height};`;
-  newItem.innerHTML = `
-  <div class="item-border">
-    <button type="button" class="btn btn-sm" id="removeItem" onclick="removeGridItem(this.parentNode.parentNode);">
-      <i class="fas fa-trash-can"></i>
-    </button>
-    <div class="item-content" id="${config.ID}" style="${styleString}">
-      ${config.Content}
-    </div>
-  `;
-  if (config.Script) {
-    var scriptTag = document.createElement("script");
-    scriptTag.type = "text/javascript";
-    scriptTag.defer = true;
-    scriptTag.innerHTML = config.Script;
-    newItem.appendChild(scriptTag);
-  }
-  grid.add(newItem);
-  resizeObserver.observe(newItem);
-}
 
-function addBootstrapWidget(chartData, config) {
-  const newItem = document.createElement("div");
-  newItem.className = "item";
-  newItem.classList.add("item-editable");
-  config = createChart(chartData, config);
-  newItem.innerHTML = `
-  <div class="item-border">
-    <button type="button" class="btn btn-sm" id="removeItem" onclick="removeGridItem(this.parentNode.parentNode);">
-      <i class="fas fa-trash-can"></i>
-    </button>
-    <div class="item-content" id="${config.ID}">
-      ${config.Content}
-    </div>
-  `;
-
-  grid.add(newItem);
-  newItem.style.minWidth = newItem.clientWidth + "px";
-  newItem.style.minHeight = newItem.clientHeight + "px";
-
-  resizeObserver.observe(newItem);
+function addWidget(chartData, widgetID) {
+  let newItem = new Widget(chartData, widgetID);
+  grid.add(newItem.element);
+  resizeObserver.observe(newItem.element);
 }
 
 function removeGridItem(item) {
@@ -172,9 +121,16 @@ function loadLayout(savedLayout) {
       showNoWidgetPlaceholder();
     } else {
       // Add items to the grid
+      let md = JSON.parse(metadata);
       gridState.items.forEach((itemData) => {
-        const newItem = document.createElement("div");
-        newItem.className = "item";
+        chartData = md[itemData.widgetID];
+        wd = new Widget(chartData, itemData.widgetID);
+        const newItem = wd.element;
+        newItem.classList.remove("item-editable");
+        const removeButton = newItem.querySelector("#removeItem");
+        if (removeButton) {
+          removeButton.remove();
+        }
         if (itemData.widgetPosition) {
           newItem.style.position = "absolute";
           newItem.style.left = itemData.widgetPosition.left;
@@ -183,27 +139,7 @@ function loadLayout(savedLayout) {
             newItem.style.transform = itemData.widgetPosition.transform;
           }
         }
-        defaultConfig = {
-          ID: itemData.widgetID,
-        };
-        md = JSON.parse(metadata);
-        chartData = md[itemData.widgetID];
-        config = createChart(chartData, defaultConfig);
-        var styleString = `width: ${itemData.widgetSize.width}; height: ${itemData.widgetSize.height};`;
-        newItem.innerHTML = `
-        <div class="item-border">
-          <div class="item-content" id="${config.ID}" style="${styleString}">
-            ${config.Content}
-          </div>
-        `;
-        if (config.Script) {
-          var scriptTag = document.createElement("script");
-          scriptTag.type = "text/javascript";
-          scriptTag.defer = true;
-          scriptTag.innerHTML = config.Script;
-          newItem.appendChild(scriptTag);
-        }
-        grid.add(newItem, { layout: true });
+        grid.add(newItem);
       });
     }
     // Layout the grid
@@ -229,10 +165,11 @@ function editGrid(grid, layout) {
       const gridState = JSON.parse(layout);
 
       if (gridState) {
+        let md = JSON.parse(metadata);
         gridState.items.forEach((itemData) => {
-          const newItem = document.createElement("div");
-          newItem.className = "item";
-          newItem.classList.add("item-editable");
+          chartData = md[itemData.widgetID];
+          wd = new Widget(chartData, itemData.widgetID);
+          const newItem = wd.element;
           if (itemData.widgetPosition) {
             newItem.style.position = "absolute";
             newItem.style.left = itemData.widgetPosition.left;
@@ -242,29 +179,6 @@ function editGrid(grid, layout) {
             if (itemData.widgetPosition.transform) {
               newItem.style.transform = itemData.widgetPosition.transform;
             }
-          }
-          defaultConfig = {
-            ID: itemData.widgetID,
-          };
-          md = JSON.parse(metadata);
-          chartData = md[itemData.widgetID];
-          config = createChart(chartData, defaultConfig);
-          var styleString = `width: ${itemData.widgetSize.width}; height: ${itemData.widgetSize.height};`;
-          newItem.innerHTML = `
-          <div class="item-border">
-            <button type="button" class="btn btn-sm" id="removeItem" onclick="removeGridItem(this.parentNode.parentNode);">
-              <i class="fas fa-trash-can"></i>
-            </button>
-            <div class="item-content" id="${config.ID}" style="${styleString}">
-              ${config.Content}
-            </div>
-          `;
-          if (config.Script) {
-            var scriptTag = document.createElement("script");
-            scriptTag.type = "text/javascript";
-            scriptTag.defer = true;
-            scriptTag.innerHTML = config.Script;
-            newItem.appendChild(scriptTag);
           }
           grid.add(newItem, { layout: true });
           resizeObserver.observe(newItem);

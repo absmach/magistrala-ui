@@ -205,11 +205,9 @@ SPDX-License-Identifier: Apache-2.0 -->
       }
 
       var widgetID = "timeSeriesBarChart-" + Date.now();
-      var config = {
-        ID: widgetID,
-      };
+
       chartData["Type"] = "timeSeriesBarChart";
-      addEchartsWidget(chartData, config);
+      addWidget(chartData, widgetID);
       metadataBuffer[widgetID] = chartData;
     });
   </script>
