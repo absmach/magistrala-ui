@@ -51,6 +51,7 @@ class AlarmCount extends Chart {
         </div>
     </div>
     </div>
+    </div>
   `;
   }
 }
