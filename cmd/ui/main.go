@@ -122,7 +122,7 @@ func main() {
 	go func() {
 		p := fmt.Sprintf(":%s", cfg.Port)
 		logger.Info("GUI service started", slog.String("port", p))
-		errs <- http.ListenAndServe(p, api.MakeHandler(svc, mux, googleProvider, cfg.InstanceID))
+		errs <- http.ListenAndServe(p, api.MakeHandler(svc, mux, cfg.InstanceID, googleProvider))
 	}()
 
 	go func() {

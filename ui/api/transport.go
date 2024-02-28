@@ -80,7 +80,7 @@ type number interface {
 }
 
 // MakeHandler returns a HTTP handler for API endpoints.
-func MakeHandler(svc ui.Service, r *chi.Mux, google oauth2.Provider, instanceID string) http.Handler {
+func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string, providers ...oauth2.Provider) http.Handler {
 	opts := []kithttp.ServerOption{
 		kithttp.ServerErrorEncoder(encodeError),
 	}
@@ -127,8 +127,12 @@ func MakeHandler(svc ui.Service, r *chi.Mux, google oauth2.Provider, instanceID 
 		opts...,
 	).ServeHTTP)
 
-	r.HandleFunc("/signup/google", oauth2Handler(oauth2.SignUp, google))
-	r.HandleFunc("/signin/google", oauth2Handler(oauth2.SignIn, google))
+	for _, provider := range providers {
+		if provider.IsEnabled() {
+			r.HandleFunc("/signup/"+provider.Name(), oauth2Handler(oauth2.SignUp, provider))
+			r.HandleFunc("/signin/"+provider.Name(), oauth2Handler(oauth2.SignIn, provider))
+		}
+	}
 
 	r.Post("/reset-request", kithttp.NewServer(
 		passwordResetRequestEndpoint(svc),

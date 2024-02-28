@@ -38,6 +38,14 @@ func NewProvider(cfg mgoauth2.Config) mgoauth2.Provider {
 	}
 }
 
+func (cfg *config) Name() string {
+	return "google"
+}
+
+func (cfg *config) Icon() string {
+	return "fa-google"
+}
+
 func (cfg *config) IsEnabled() bool {
 	return cfg.oauth2.ClientID != "" && cfg.oauth2.ClientSecret != ""
 }

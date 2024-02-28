@@ -75,16 +75,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </button>
                 </div>
               </form>
-              {{ if .IsGoogleEnabled }}
-              <div class="text-center">
-                <p>or sign up with:</p>
-                <button type="button" class="btn btn-link btn-floating mx-1">
-                  <a href="/signup/google">
-                    <i class="fab fa-google"></i>
-                  </a>
-                </button>
-              </div>
-              {{ end }}
+              {{ range $i, $c := .Providers }}
+                {{ if $c.IsEnabled }}
+                  <div class="text-center text-light">
+                    <p>or sign up with:</p>
+                    <button type="button" class="btn btn-link btn-floating mx-1">
+                      <a href="/signup/{{ $c.Name }}">
+                        <i class="fab {{ $c.Icon }}"></i>
+                      </a>
+                    </button>
+                  </div>
+                {{ end }}
+              {{ end }}              
               <div class="col-md-12">
                 <p class="text-center text-light">
                   Already have an account?

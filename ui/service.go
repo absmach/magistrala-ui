@@ -443,11 +443,11 @@ type uiService struct {
 	tpls       *template.Template
 	drepo      DashboardRepository
 	idProvider magistrala.IDProvider
-	google     oauth2.Provider
+	providers  []oauth2.Provider
 }
 
 // New instantiates the HTTP adapter implementation.
-func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider, google oauth2.Provider) (Service, error) {
+func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider, providers ...oauth2.Provider) (Service, error) {
 	tpl, err := parseTemplates(sdk, templates)
 	if err != nil {
 		return nil, err
@@ -457,7 +457,7 @@ func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider, google 
 		tpls:       tpl,
 		drepo:      db,
 		idProvider: idp,
-		google:     google,
+		providers:  providers,
 	}, nil
 }
 
@@ -547,9 +547,9 @@ func (us *uiService) Index(token string) (b []byte, err error) {
 
 func (us *uiService) ViewRegistration() ([]byte, error) {
 	data := struct {
-		IsGoogleEnabled bool
+		Providers []oauth2.Provider
 	}{
-		us.google.IsEnabled(),
+		us.providers,
 	}
 
 	var btpl bytes.Buffer
@@ -574,9 +574,9 @@ func (us *uiService) RegisterUser(user sdk.User) (sdk.Token, error) {
 
 func (us *uiService) Login() ([]byte, error) {
 	data := struct {
-		IsGoogleEnabled bool
+		Providers []oauth2.Provider
 	}{
-		us.google.IsEnabled(),
+		us.providers,
 	}
 
 	var btpl bytes.Buffer

@@ -13,6 +13,11 @@ type Config struct {
 // Provider is an interface that provides the OAuth2 flow for a specific provider
 // (e.g. Google, GitHub, etc.)
 type Provider interface {
+	// Name returns the name of the provider.
+	// This should be unique across all providers and in lowercase.
+	Name() string
+	// Icon returns the icon of the provider.
+	Icon() string
 	// IsEnabled returns whether the provider is enabled.
 	IsEnabled() bool
 	// GenerateSignInURL generates a URL for the sign-in flow.
