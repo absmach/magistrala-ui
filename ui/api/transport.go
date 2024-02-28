@@ -2652,7 +2652,8 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		errors.Contains(err, ui.ErrFailedDashboardDelete),
 		errors.Contains(err, ui.ErrFailedDashboardUpdate),
 		errors.Contains(err, ui.ErrFailedDashboardRetrieve),
-		errors.Contains(err, ui.ErrSessionType):
+		errors.Contains(err, ui.ErrSessionType),
+		errors.Contains(err, ui.ErrInvalidState):
 		w.Header().Set("Location", fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(displayError.Error())))
 		w.WriteHeader(http.StatusSeeOther)
 	default:

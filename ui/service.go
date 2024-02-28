@@ -212,6 +212,7 @@ var (
 	ErrFailedUnshare        = errors.New("failed to unshare entity")
 	ErrConflict             = errors.New("entity already exists")
 	ErrSessionType          = errors.New("invalid session type")
+	ErrInvalidState         = errors.New("invalid OAuth2.0 state")
 
 	ErrFailedViewDashboard     = errors.New("failed to view dashboard")
 	ErrFailedDashboardSave     = errors.New("failed to save dashboard")
@@ -600,7 +601,7 @@ func (us *uiService) OAuth2Handler(state oauth2.State, _ oauth2.Provider) (strin
 	case oauth2.SignUp:
 		return us.google.GenerateSignUpURL()
 	default:
-		return "", errors.New("invalid state")
+		return "", ErrInvalidState
 	}
 }
 
