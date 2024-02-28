@@ -10,9 +10,9 @@ type Config struct {
 	RedirectURL  string `env:"REDIRECT_URL"    envDefault:""`
 }
 
-// Handler is an interface that provides the OAuth2 flow for a specific provider
+// Provider is an interface that provides the OAuth2 flow for a specific provider
 // (e.g. Google, GitHub, etc.)
-type Handler interface {
+type Provider interface {
 	// IsEnabled returns whether the provider is enabled.
 	IsEnabled() bool
 	// GenerateSignInURL generates a URL for the sign-in flow.
@@ -24,9 +24,6 @@ type Handler interface {
 // State is the state of the OAuth2 flow.
 type State uint8
 
-// Provider is the provider of the OAuth2 flow.
-type Provider uint8
-
 const (
 	// SignIn is the state for the sign-in flow.
 	SignIn State = iota
@@ -34,24 +31,12 @@ const (
 	SignUp
 )
 
-// Google is the provider for Google.
-const Google Provider = iota
-
 func (s State) String() string {
 	switch s {
 	case SignIn:
 		return "signin"
 	case SignUp:
 		return "signup"
-	default:
-		return "unknown"
-	}
-}
-
-func (p Provider) String() string {
-	switch p {
-	case Google:
-		return "google"
 	default:
 		return "unknown"
 	}

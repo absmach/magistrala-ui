@@ -212,7 +212,6 @@ var (
 	ErrFailedUnshare        = errors.New("failed to unshare entity")
 	ErrConflict             = errors.New("entity already exists")
 	ErrSessionType          = errors.New("invalid session type")
-	ErrInvalidState         = errors.New("invalid OAuth2.0 state")
 
 	ErrFailedViewDashboard     = errors.New("failed to view dashboard")
 	ErrFailedDashboardSave     = errors.New("failed to save dashboard")
@@ -235,8 +234,6 @@ type Service interface {
 	ViewRegistration() ([]byte, error)
 	// RegisterUser registers a new user and logs them in.
 	RegisterUser(user sdk.User) (sdk.Token, error)
-	// OAuth2Handler redirects the user to the oauth singup or signin page.
-	OAuth2Handler(state oauth2.State, provider oauth2.Provider) (string, error)
 	// Login displays the login page.
 	Login() ([]byte, error)
 	// Logout deletes the access token and refresh token from the cookies and logs the user out of the UI.
@@ -446,11 +443,11 @@ type uiService struct {
 	tpls       *template.Template
 	drepo      DashboardRepository
 	idProvider magistrala.IDProvider
-	google     oauth2.Handler
+	google     oauth2.Provider
 }
 
 // New instantiates the HTTP adapter implementation.
-func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider, google oauth2.Handler) (Service, error) {
+func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider, google oauth2.Provider) (Service, error) {
 	tpl, err := parseTemplates(sdk, templates)
 	if err != nil {
 		return nil, err
@@ -592,17 +589,6 @@ func (us *uiService) Login() ([]byte, error) {
 
 func (us *uiService) Logout() error {
 	return nil
-}
-
-func (us *uiService) OAuth2Handler(state oauth2.State, _ oauth2.Provider) (string, error) {
-	switch state {
-	case oauth2.SignIn:
-		return us.google.GenerateSignInURL()
-	case oauth2.SignUp:
-		return us.google.GenerateSignUpURL()
-	default:
-		return "", ErrInvalidState
-	}
 }
 
 func (us *uiService) PasswordResetRequest(email string) error {

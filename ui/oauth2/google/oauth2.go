@@ -17,15 +17,15 @@ var scopes = []string{
 	"https://www.googleapis.com/auth/userinfo.profile",
 }
 
-var _ mgoauth2.Handler = (*config)(nil)
+var _ mgoauth2.Provider = (*config)(nil)
 
 type config struct {
 	oauth2 *oauth2.Config
 	state  string
 }
 
-// NewHandler returns a new Google OAuth2 handler.
-func NewHandler(cfg mgoauth2.Config) mgoauth2.Handler {
+// NewProvider returns a new Google OAuth2 Provider.
+func NewProvider(cfg mgoauth2.Config) mgoauth2.Provider {
 	return &config{
 		oauth2: &oauth2.Config{
 			ClientID:     cfg.ClientID,

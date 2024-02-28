@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/absmach/magistrala-ui/ui"
-	"github.com/absmach/magistrala-ui/ui/oauth2"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 )
 
@@ -93,25 +92,6 @@ func (lm *loggingMiddleware) Logout() (err error) {
 	}(time.Now())
 
 	return lm.svc.Logout()
-}
-
-// OAuth2Handler adds logging middleware to OAuth2 handler method.
-func (lm *loggingMiddleware) OAuth2Handler(state oauth2.State, provider oauth2.Provider) (url string, err error) {
-	defer func(begin time.Time) {
-		args := []any{
-			slog.String("duration", time.Since(begin).String()),
-			slog.String("state", state.String()),
-			slog.String("provider", provider.String()),
-		}
-		if err != nil {
-			args = append(args, slog.Any("error", err))
-			lm.logger.Warn("OAuth handler failed to complete successfully", args...)
-			return
-		}
-		lm.logger.Info("OAuth handler completed successfully", args...)
-	}(time.Now())
-
-	return lm.svc.OAuth2Handler(state, provider)
 }
 
 // PasswordResetRequest adds logging middleware to password reset request method.

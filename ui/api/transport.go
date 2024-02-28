@@ -80,7 +80,7 @@ type number interface {
 }
 
 // MakeHandler returns a HTTP handler for API endpoints.
-func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
+func MakeHandler(svc ui.Service, r *chi.Mux, google oauth2.Provider, instanceID string) http.Handler {
 	opts := []kithttp.ServerOption{
 		kithttp.ServerErrorEncoder(encodeError),
 	}
@@ -127,8 +127,8 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string) http.Handler {
 		opts...,
 	).ServeHTTP)
 
-	r.HandleFunc("/signup/google", oauth2Handler(svc, oauth2.SignUp, oauth2.Google))
-	r.HandleFunc("/signin/google", oauth2Handler(svc, oauth2.SignIn, oauth2.Google))
+	r.HandleFunc("/signup/google", oauth2Handler(oauth2.SignUp, google))
+	r.HandleFunc("/signin/google", oauth2Handler(oauth2.SignIn, google))
 
 	r.Post("/reset-request", kithttp.NewServer(
 		passwordResetRequestEndpoint(svc),
@@ -1045,9 +1045,19 @@ func decodeLogoutRequest(_ context.Context, _ *http.Request) (interface{}, error
 	return nil, nil
 }
 
-func oauth2Handler(svc ui.Service, state oauth2.State, provider oauth2.Provider) http.HandlerFunc {
+func oauth2Handler(state oauth2.State, provider oauth2.Provider) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		url, err := svc.OAuth2Handler(state, provider)
+		var url string
+		var err error
+		switch state {
+		case oauth2.SignIn:
+			url, err = provider.GenerateSignInURL()
+		case oauth2.SignUp:
+			url, err = provider.GenerateSignUpURL()
+		default:
+			err = fmt.Errorf("invalid state")
+		}
+
 		if err != nil {
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
@@ -2652,8 +2662,7 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 		errors.Contains(err, ui.ErrFailedDashboardDelete),
 		errors.Contains(err, ui.ErrFailedDashboardUpdate),
 		errors.Contains(err, ui.ErrFailedDashboardRetrieve),
-		errors.Contains(err, ui.ErrSessionType),
-		errors.Contains(err, ui.ErrInvalidState):
+		errors.Contains(err, ui.ErrSessionType):
 		w.Header().Set("Location", fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(displayError.Error())))
 		w.WriteHeader(http.StatusSeeOther)
 	default:
