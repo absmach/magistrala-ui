@@ -1467,11 +1467,11 @@ func (lm *loggingMiddleware) UpdateDomain(token string, domain sdk.Domain) (err 
 }
 
 // Domain adds logging middleware to domain method.
-func (lm *loggingMiddleware) Domain(id string, s ui.Session) (b []byte, err error) {
+func (lm *loggingMiddleware) Domain(s ui.Session) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
-			slog.String("domain_id", id),
+			slog.Any("domain", s.Domain),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
@@ -1480,7 +1480,7 @@ func (lm *loggingMiddleware) Domain(id string, s ui.Session) (b []byte, err erro
 		lm.logger.Info("View domain completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.Domain(id, s)
+	return lm.svc.Domain(s)
 }
 
 // EnableDomain adds logging middleware to enable domain method.
@@ -1574,11 +1574,11 @@ func (lm *loggingMiddleware) ViewMember(identity string, s ui.Session) (b []byte
 }
 
 // Members adds logging middleware to members method.
-func (lm *loggingMiddleware) Members(domainID string, s ui.Session, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) Members(s ui.Session, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
-			slog.String("domain_id", domainID),
+			slog.Any("domain", s.Domain),
 			slog.Uint64("page", page),
 			slog.Uint64("limit", limit),
 		}
@@ -1589,7 +1589,7 @@ func (lm *loggingMiddleware) Members(domainID string, s ui.Session, page, limit 
 		lm.logger.Info("Members completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.Members(domainID, s, page, limit)
+	return lm.svc.Members(s, page, limit)
 }
 
 // SendInvitation adds logging middleware to send invitation method.

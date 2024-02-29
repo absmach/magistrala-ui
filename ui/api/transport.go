@@ -1052,12 +1052,12 @@ func decodeSecureTokenRequest(_ context.Context, r *http.Request) (interface{}, 
 
 func decodeRefreshTokenRequest(s *securecookie.SecureCookie) kithttp.DecodeRequestFunc {
 	return func(_ context.Context, r *http.Request) (interface{}, error) {
-		sessionCookie, err := r.Cookie(sessionDetailsKey)
+		sessionCookie, err := tokenFromCookie(r, sessionDetailsKey)
 		if err != nil {
 			return nil, err
 		}
 		var session string
-		if err := s.Decode(sessionDetailsKey, sessionCookie.Value, &session); err != nil {
+		if err := s.Decode(sessionDetailsKey, sessionCookie, &session); err != nil {
 			return nil, err
 		}
 		var sessionDetails ui.Session
@@ -2454,11 +2454,11 @@ func DecryptCookieMiddleware(s *securecookie.SecureCookie) func(http.Handler) ht
 					http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
 				}
 			}()
-			sessionCookie, err := r.Cookie(sessionDetailsKey)
+			sessionCookie, err := tokenFromCookie(r, sessionDetailsKey)
 			if err != nil {
 				return
 			}
-			if err = s.Decode(sessionDetailsKey, sessionCookie.Value, &decryptedSessionCookie); err != nil {
+			if err = s.Decode(sessionDetailsKey, sessionCookie, &decryptedSessionCookie); err != nil {
 				return
 			}
 

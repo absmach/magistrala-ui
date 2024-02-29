@@ -840,13 +840,13 @@ func (mm *metricsMiddleware) UpdateDomain(token string, domain sdk.Domain) error
 }
 
 // Domain adds metrics middleware to domain method.
-func (mm *metricsMiddleware) Domain(id string, s ui.Session) ([]byte, error) {
+func (mm *metricsMiddleware) Domain(s ui.Session) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "domain").Add(1)
 		mm.latency.With("method", "domain").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.Domain(id, s)
+	return mm.svc.Domain(s)
 }
 
 // EnableDomain adds metrics middleware to enable domain method.
@@ -900,13 +900,13 @@ func (mm *metricsMiddleware) ViewMember(identity string, s ui.Session) ([]byte, 
 }
 
 // Members adds metrics middleware to members method.
-func (mm *metricsMiddleware) Members(domainID string, s ui.Session, page, limit uint64) ([]byte, error) {
+func (mm *metricsMiddleware) Members(s ui.Session, page, limit uint64) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "members").Add(1)
 		mm.latency.With("method", "members").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.Members(domainID, s, page, limit)
+	return mm.svc.Members(s, page, limit)
 }
 
 // SendInvitation adds metrics middleware to send invitation method.

@@ -45,7 +45,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           aria-label="Close"
                         ></button>
                       </div>
-                      <form action="/domains/{{ .DomainID }}/assign" method="post">
+                      <form action="/domains/{{ .SessionDetails.Domain.ID }}/assign" method="post">
                         <div class="modal-body">
                           <div class="mb-3">
                             <label for="users-scroll" class="form-label">User Name</label>

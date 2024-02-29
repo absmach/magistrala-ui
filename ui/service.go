@@ -215,7 +215,6 @@ var (
 	ErrFailedUnshare        = errors.New("failed to unshare entity")
 	ErrConflict             = errors.New("entity already exists")
 	ErrSessionType          = errors.New("invalid session type")
-	ErrFailedDecrypt        = errors.New("failed to decrypt token")
 
 	ErrFailedViewDashboard     = errors.New("failed to view dashboard")
 	ErrFailedDashboardSave     = errors.New("failed to save dashboard")
@@ -403,7 +402,7 @@ type Service interface {
 	// UpdateDomain updates the domain with the given ID.
 	UpdateDomain(token string, domain sdk.Domain) error
 	// Domain displays the domain page.
-	Domain(id string, s Session) ([]byte, error)
+	Domain(s Session) ([]byte, error)
 	// EnableDomain updates the status of the domain to enabled.
 	EnableDomain(token, id string) error
 	// DisableDomain updates the status of the domain to disabled.
@@ -415,7 +414,7 @@ type Service interface {
 	// View Member retrieves information about the domain Member with the given ID.
 	ViewMember(userIdentity string, s Session) ([]byte, error)
 	// Members retrieves the members of a domain with a given ID.
-	Members(domainID string, s Session, page, limit uint64) ([]byte, error)
+	Members(s Session, page, limit uint64) ([]byte, error)
 
 	// SendInvitation sends an invitation to a given user to join a domain.
 	SendInvitation(token string, invitation sdk.Invitation) error
@@ -2259,13 +2258,13 @@ func (us *uiService) UpdateDomain(token string, domain sdk.Domain) error {
 	return err
 }
 
-func (us *uiService) Domain(id string, s Session) ([]byte, error) {
-	domain, err := us.sdk.Domain(id, s.AccessToken)
+func (us *uiService) Domain(s Session) ([]byte, error) {
+	domain, err := us.sdk.Domain(s.Domain.ID, s.AccessToken)
 	if err != nil {
 		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
-	permissions, err := us.sdk.DomainPermissions(id, s.AccessToken)
+	permissions, err := us.sdk.DomainPermissions(s.Domain.ID, s.AccessToken)
 	if err != nil {
 		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
@@ -2368,7 +2367,7 @@ func (us *uiService) ViewMember(userIdentity string, s Session) (b []byte, err e
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) Members(domainID string, s Session, page, limit uint64) ([]byte, error) {
+func (us *uiService) Members(s Session, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 
 	pgm := sdk.PageMetadata{
@@ -2376,7 +2375,7 @@ func (us *uiService) Members(domainID string, s Session, page, limit uint64) ([]
 		Limit:  limit,
 	}
 
-	membersPage, err := us.sdk.ListDomainUsers(domainID, pgm, s.AccessToken)
+	membersPage, err := us.sdk.ListDomainUsers(s.Domain.ID, pgm, s.AccessToken)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -2390,7 +2389,6 @@ func (us *uiService) Members(domainID string, s Session, page, limit uint64) ([]
 	data := struct {
 		NavbarActive   string
 		CollapseActive string
-		DomainID       string
 		Members        []sdk.User
 		Relations      []string
 		CurrentPage    int
@@ -2401,7 +2399,6 @@ func (us *uiService) Members(domainID string, s Session, page, limit uint64) ([]
 	}{
 		membersActive,
 		domainActive,
-		domainID,
 		membersPage.Users,
 		domainRelations,
 		int(page),
@@ -2461,7 +2458,6 @@ func (us *uiService) Invitations(domainID string, s Session, page, limit uint64)
 	data := struct {
 		NavbarActive   string
 		CollapseActive string
-		DomainID       string
 		Invitations    []sdk.Invitation
 		Relations      []string
 		CurrentPage    int
@@ -2472,7 +2468,6 @@ func (us *uiService) Invitations(domainID string, s Session, page, limit uint64)
 	}{
 		navbarActive,
 		collapseActive,
-		domainID,
 		invitationsPage.Invitations,
 		domainRelations,
 		int(page),

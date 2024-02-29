@@ -1572,8 +1572,6 @@ func listDomainsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		fmt.Println("here")
-
 		res, err := svc.ListDomains(req.status, req.Session, req.page, req.limit)
 		if err != nil {
 			return nil, err
@@ -1645,7 +1643,7 @@ func domainEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.Domain(req.id, req.Session)
+		res, err := svc.Domain(req.Session)
 		if err != nil {
 			return nil, err
 		}
@@ -1779,7 +1777,7 @@ func listMembersEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.Members(req.id, req.Session, req.page, req.limit)
+		res, err := svc.Members(req.Session, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
