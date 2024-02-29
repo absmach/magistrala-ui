@@ -139,6 +139,10 @@ function loadLayout(savedLayout) {
             newItem.style.transform = itemData.widgetPosition.transform;
           }
         }
+        const contentEl = newItem.querySelector(".item-content");
+        contentEl.style.width = itemData.widgetSize.width;
+        contentEl.style.height = itemData.widgetSize.height;
+
         grid.add(newItem);
       });
     }
@@ -180,6 +184,9 @@ function editGrid(grid, layout) {
               newItem.style.transform = itemData.widgetPosition.transform;
             }
           }
+          const contentEl = newItem.querySelector(".item-content");
+          contentEl.style.width = itemData.widgetSize.width;
+          contentEl.style.height = itemData.widgetSize.height;
           grid.add(newItem, { layout: true });
           resizeObserver.observe(newItem);
         });
