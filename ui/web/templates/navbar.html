@@ -396,6 +396,10 @@ SPDX-License-Identifier: Apache-2.0 -->
       let role = '{{.SessionDetails.User.Role}}';
       let loginStatus = '{{.SessionDetails.LoginStatus}}';
       let domainID, domainName, domainPermissions;
+
+      if (role !== "admin") {
+      document.getElementById("users-nav-items").style.display = "none";
+    }
       if (loginStatus === "domain") {
         domainPermissions = '{{.SessionDetails.Domain.Permissions}}';
         domainID = '{{.SessionDetails.Domain.ID}}';
