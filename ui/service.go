@@ -1710,14 +1710,16 @@ func (us *uiService) ListUserGroupChannels(token, id string, page, limit uint64)
 
 func (us *uiService) ReadMessages(token, channelID, thingKey string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
-	pgm := sdk.MessagePageMeta{
+	pgm := sdk.MessagePageMetadata{
 		PageMetadata: sdk.PageMetadata{
 			Offset: offset,
 			Limit:  limit,
 			Name:   "temp",
 		},
-		Interval:    "10 seconds",
-		Aggregation: "MAX",
+		Interval:   "10 minutes",
+		Aggregation: "MIN",
+		From: 1709208007,
+		To: 1709208907,
 	}
 	msg, err := us.sdk.ReadMessages(pgm, channelID, token)
 	if err != nil {
@@ -1756,23 +1758,27 @@ func (us *uiService) ReadMessages(token, channelID, thingKey string, page, limit
 	if err := us.tpls.ExecuteTemplate(&btpl, "readmessages", data); err != nil {
 		return []byte{}, errors.Wrap(err, ErrExecTemplate)
 	}
-
+	fmt.Println("Messages:", msg.Total)
 	return btpl.Bytes(), nil
 }
 
 func (us *uiService) FetchReaderData(token, channelID, thingID string, to float64, from float64, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
-	pgm := sdk.MessagePageMeta{
+	pgm := sdk.MessagePageMetadata{
 		PageMetadata: sdk.PageMetadata{
 			Offset: offset,
 			Limit:  limit,
 		},
+		Interval:    "1 minute",
+		Aggregation: "MAX",
+		From: 1709208007,
+		To: 1709208907,
 	}
 	msg, err := us.sdk.ReadMessages(pgm, channelID, token)
 	if err != nil {
 		return []byte{}, err
 	}
-
+	fmt.Println("Messages:", msg.Total)
 	data := make(map[string]interface{})
 
 	var yaxisValues []int

@@ -377,11 +377,11 @@ async function getData(lineChart, channel) {
     }
     setTimeout(function () {
       getData(lineChart, channel);
-    }, 20000);
+    }, 500000);
   } catch (error) {
     console.error(error);
     setTimeout(function () {
       getData(lineChart, channel);
-    }, 20000);
+    }, 500000);
   }
 }
