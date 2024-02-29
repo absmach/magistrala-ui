@@ -71,6 +71,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <button type="submit" class="login-btn py-3" id="login-button">Log In</button>
                 </div>
               </form>
+              {{ range $i, $c := .Providers }}
+                {{ if $c.IsEnabled }}
+                  <div class="text-center text-light">
+                    <p>or sign in with:</p>
+                    <button type="button" class="btn btn-link btn-floating mx-1">
+                      <a href="/signin/{{ $c.Name }}">
+                        <i class="fab {{ $c.Icon }}"></i>
+                      </a>
+                    </button>
+                  </div>
+                {{ end }}
+              {{ end }}
               <div class="col-md-12">
                 <p class="text-center text-light">
                   Don't have an account?

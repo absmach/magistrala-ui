@@ -21,6 +21,7 @@ import (
 
 	"github.com/absmach/agent/pkg/bootstrap"
 	"github.com/absmach/magistrala"
+	"github.com/absmach/magistrala-ui/ui/oauth2"
 	"github.com/absmach/magistrala/pkg/errors"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 	"github.com/absmach/magistrala/pkg/transformers/senml"
@@ -220,7 +221,6 @@ var (
 	ErrFailedDashboardUpdate   = errors.New("failed to update dashboard")
 	ErrFailedDashboardDelete   = errors.New("failed to delete dashboard")
 
-	emptyData       = struct{}{}
 	domainRelations = []string{"administrator", "editor", "viewer", "member"}
 	groupRelations  = []string{"administrator", "editor", "viewer"}
 	statusOptions   = []string{"all", "enabled", "disabled"}
@@ -443,10 +443,11 @@ type uiService struct {
 	tpls       *template.Template
 	drepo      DashboardRepository
 	idProvider magistrala.IDProvider
+	providers  []oauth2.Provider
 }
 
 // New instantiates the HTTP adapter implementation.
-func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider) (Service, error) {
+func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider, providers ...oauth2.Provider) (Service, error) {
 	tpl, err := parseTemplates(sdk, templates)
 	if err != nil {
 		return nil, err
@@ -456,6 +457,7 @@ func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider) (Servic
 		tpls:       tpl,
 		drepo:      db,
 		idProvider: idp,
+		providers:  providers,
 	}, nil
 }
 
@@ -544,8 +546,14 @@ func (us *uiService) Index(token string) (b []byte, err error) {
 }
 
 func (us *uiService) ViewRegistration() ([]byte, error) {
+	data := struct {
+		Providers []oauth2.Provider
+	}{
+		us.providers,
+	}
+
 	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "registration", emptyData); err != nil {
+	if err := us.tpls.ExecuteTemplate(&btpl, "registration", data); err != nil {
 		return []byte{}, errors.Wrap(err, ErrExecTemplate)
 	}
 
@@ -565,8 +573,14 @@ func (us *uiService) RegisterUser(user sdk.User) (sdk.Token, error) {
 }
 
 func (us *uiService) Login() ([]byte, error) {
+	data := struct {
+		Providers []oauth2.Provider
+	}{
+		us.providers,
+	}
+
 	var btpl bytes.Buffer
-	if err := us.tpls.ExecuteTemplate(&btpl, "login", emptyData); err != nil {
+	if err := us.tpls.ExecuteTemplate(&btpl, "login", data); err != nil {
 		return []byte{}, errors.Wrap(err, ErrExecTemplate)
 	}
 
