@@ -1,20 +1,14 @@
 // Copyright (c) Abstract Machines
 // SPDX-License-Identifier: Apache-2.0
-var gridClass = ".grid";
+const gridClass = ".grid";
 var grid = initGrid(layout);
 
 // Editable canvas is used to make the canvas editable allowing the user to add widgets and be able to move the
 // widgets around the canvas
-function editableCanvas() {
-  grid = editGrid(grid, layout);
-}
-
-function saveCanvas() {
-  saveGrid(grid, dashboardID);
-}
 
 function cancelEdit() {
-  cancelEditGrid(grid);
+  grid._settings.dragEnabled = false;
+  window.location.reload();
 }
 
 function addWidget(chartData, widgetID) {
@@ -42,7 +36,13 @@ function initGrid(layout) {
   return grid;
 }
 
-function saveLayout(grid, dashboardID) {
+function saveLayout() {
+  grid._settings.dragEnabled = false;
+  document.querySelectorAll("#removeItem").forEach((item) => {
+    item.classList.add("no-opacity");
+    item.disabled = true;
+  });
+
   const itemData = grid.getItems().map((item) => {
     const itemElement = item._element;
     const itemContent = itemElement.querySelector(".item-content");
@@ -129,7 +129,7 @@ function loadLayout(savedLayout) {
         newItem.classList.remove("item-editable");
         const removeButton = newItem.querySelector("#removeItem");
         if (removeButton) {
-          removeButton.remove();
+          removeButton.style.display = "none";
         }
         if (itemData.widgetPosition) {
           newItem.style.position = "absolute";
@@ -155,7 +155,7 @@ function loadLayout(savedLayout) {
 
 // Editable canvas is used to make the canvas editable allowing the user to add widgets and be able to move the
 // widgets around the canvas
-function editGrid(grid, layout) {
+function editableCanvas() {
   removeNoWidgetPlaceholder();
   try {
     if (grid) {
@@ -301,22 +301,6 @@ const resizeObserver = new ResizeObserver((entries) => {
     }
   }
 });
-
-// Save the grid layout
-function saveGrid(grid, dashboardID) {
-  grid._settings.dragEnabled = false;
-  document.querySelectorAll("#removeItem").forEach((item) => {
-    item.classList.add("no-opacity");
-    item.disabled = true;
-  });
-  saveLayout(grid, dashboardID);
-}
-
-// Cancel the grid layout
-function cancelEditGrid(grid) {
-  grid._settings.dragEnabled = false;
-  window.location.reload();
-}
 
 // No widget placeholder
 function showNoWidgetPlaceholder() {

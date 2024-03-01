@@ -5,12 +5,11 @@ class AlarmCount {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "bootstrap";
     this.Style = {
       width: "400px",
       height: "175px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     <div class="card widgetcard">
@@ -35,12 +34,11 @@ class AlarmsTable {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "bootstrap";
     this.Style = {
       width: "400px",
       height: "200px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
         <div class="card mt-3 widgetcard">
@@ -81,12 +79,11 @@ class AreaLineChart {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "echarts";
     this.Style = {
       width: "450px",
       height: "450px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     </div>
@@ -185,12 +182,11 @@ class TimeSeriesBarChart {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "echarts";
     this.Style = {
       width: "400px",
       height: "400px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     </div>
@@ -237,12 +233,11 @@ class DonutChart {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "echarts";
     this.Style = {
       width: "400px",
       height: "400px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     </div>
@@ -300,12 +295,11 @@ class DoubleBarChart {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "echarts";
     this.Style = {
       width: "450px",
       height: "450px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     </div>
@@ -398,12 +392,11 @@ class DynamicDataChart {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "echarts";
     this.Style = {
       width: "450px",
       height: "450px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     </div>
@@ -567,12 +560,11 @@ class EntitiesTable {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "bootstrap";
     this.Style = {
       width: "400px",
       height: "200px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
   <div class="card mt-3 widgetcard">
@@ -644,12 +636,11 @@ class EntityCount {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "bootstrap";
     this.Style = {
       width: "400px",
       height: "175px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
         <div class="card widgetcard">
@@ -674,12 +665,11 @@ class GaugeChart {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "echarts";
     this.Style = {
       width: "400px",
       height: "400px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     </div>
@@ -741,12 +731,11 @@ class HorizontalBarChart {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "echarts";
     this.Style = {
       width: "400px",
       height: "400px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     </div>
@@ -813,12 +802,11 @@ class LabelCard {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "bootstrap";
     this.Style = {
       width: "420px",
-      height: "200px",
+      height: "180px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     <div class="card widgetcard">
@@ -841,12 +829,11 @@ class TimeSeriesLineChart {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "echarts";
     this.Style = {
       width: "400px",
       height: "400px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     </div>
@@ -898,12 +885,11 @@ class MultiBarChart {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "echarts";
     this.Style = {
       width: "450px",
       height: "450px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     </div>
@@ -918,7 +904,7 @@ class MultiBarChart {
         'top',
         'bottom',
         'inside',
-        'insideTop',
+        'insideTop',Fproge
         'insideLeft',
         'insideRight',
         'insideBottom',
@@ -1097,12 +1083,11 @@ class MultiGaugeChart {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "echarts";
     this.Style = {
       width: "400px",
       height: "400px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     </div>
@@ -1211,12 +1196,11 @@ class MultipleLineChart {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "echarts";
     this.Style = {
       width: "400px",
       height: "400px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     </div>
@@ -1273,12 +1257,11 @@ class PieChart {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "echarts";
     this.Style = {
       width: "400px",
       height: "400px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     </div>
@@ -1328,12 +1311,11 @@ class ProgressBar {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "bootstrap";
     this.Style = {
       width: "400px",
-      height: "150px",
+      height: "100px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
         <div class="card widgetcard">
@@ -1361,12 +1343,11 @@ class SharedDatasetChart {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "echarts";
     this.Style = {
       width: "450px",
       height: "450px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     </div>
@@ -1484,12 +1465,11 @@ class SpeedGaugeChart {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "echarts";
     this.Style = {
       width: "400px",
       height: "400px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     </div>
@@ -1579,12 +1559,11 @@ class StackedLineChart {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "echarts";
     this.Style = {
       width: "450px",
       height: "450px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     </div>
@@ -1659,12 +1638,11 @@ class StepChart {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "echarts";
     this.Style = {
       width: "450px",
       height: "450px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     </div>
@@ -1737,12 +1715,11 @@ class TempGaugeChart {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "echarts";
     this.Style = {
       width: "450px",
       height: "450px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     </div>
@@ -1897,12 +1874,11 @@ class ValueCard {
   constructor(chartData, widgetID) {
     this.chartData = chartData;
     this.ID = widgetID;
-    this.chartSource = "bootstrap";
     this.Style = {
       width: "400px",
       height: "200px",
     };
-    var styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
+    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     <div class="card mt-3 widgetcard" >
@@ -1967,9 +1943,10 @@ class Widget {
             <i class="fas fa-trash-can"></i>
           </button>
           ${this.config.Content}
+          </div>
         `;
     if (this.config.Script) {
-      var scriptTag = document.createElement("script");
+      let scriptTag = document.createElement("script");
       scriptTag.type = "text/javascript";
       scriptTag.defer = true;
       scriptTag.innerHTML = this.config.Script;
