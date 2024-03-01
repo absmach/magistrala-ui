@@ -199,6 +199,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 
         let userID = '{{.SessionDetails.User.ID}}';
         let domainPermissions = '{{.SessionDetails.Domain.Permissions}}';
+        let loginStatus= '{{.SessionDetails.LoginStatus}}'
 
         rows.forEach(function (row) {
           const inviter = row.querySelector(".inviter").textContent.trim();
