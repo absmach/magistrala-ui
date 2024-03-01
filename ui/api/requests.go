@@ -4,8 +4,6 @@
 package api
 
 import (
-	"fmt"
-
 	"github.com/absmach/magistrala-ui/ui"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 )
@@ -888,7 +886,6 @@ type listDomainsReq struct {
 
 func (req listDomainsReq) validate() error {
 	if req.AccessToken == "" {
-		fmt.Println("here")
 		return errAuthentication
 	}
 	if req.page == 0 {

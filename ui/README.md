@@ -34,6 +34,8 @@ The service is configured using the environment variables presented in the follo
 | MG_GOOGLE_CLIENT_SECRET | Google client secret                                                    | ""                                       |
 | MG_GOOGLE_REDIRECT_URL  | Google redirect URL                                                     | <http://localhost/oauth/callback/google> |
 | MG_GOOGLE_STATE         | Google state                                                            | ""                                       |
+| MG_UI_HASH_KEY          | Secure cookie encoding key                                              | ""                                       |
+| MG_UI_BLOCK_KEY         | Secure cookie encrypting key                                            | ""                                       |
 
 ## Deployment
 
@@ -80,5 +82,7 @@ MG_GOOGLE_CLIENT_ID="" \
 MG_GOOGLE_CLIENT_SECRET="" \
 MG_GOOGLE_REDIRECT_URL="http://localhost/oauth/callback/google" \
 MG_GOOGLE_STATE="" \
+MG_UI_HASH_KEY=""\
+MG_UI_BLOCK_KEY=""\
 $GOBIN/magistrala-ui
 ```

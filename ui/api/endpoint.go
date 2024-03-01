@@ -275,7 +275,7 @@ func secureTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie) endpoint.
 			return nil, err
 		}
 
-		sessionDetails, err := svc.Session(req.Session, "user")
+		sessionDetails, err := svc.Session(req.Session)
 		if err != nil {
 			return nil, err
 		}
@@ -398,7 +398,7 @@ func listUsersEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListUsers(req.status, req.Session, req.page, req.limit)
+		res, err := svc.ListUsers(req.Session, req.status, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -417,7 +417,7 @@ func viewUserEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ViewUser(req.id, req.Session)
+		res, err := svc.ViewUser(req.Session, req.id)
 		if err != nil {
 			return nil, err
 		}
@@ -647,7 +647,7 @@ func listThingsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListThings(req.status, req.Session, req.page, req.limit)
+		res, err := svc.ListThings(req.Session, req.status, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -666,7 +666,7 @@ func viewThingEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ViewThing(req.id, req.Session)
+		res, err := svc.ViewThing(req.Session, req.id)
 		if err != nil {
 			return nil, err
 		}
@@ -769,7 +769,7 @@ func listThingMembersEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(listEntityByIDReq)
 
-		res, err := svc.ListThingUsers(req.id, req.relation, req.Session, req.page, req.limit)
+		res, err := svc.ListThingUsers(req.Session, req.id, req.relation, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -788,7 +788,7 @@ func listChannelsByThingEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListChannelsByThing(req.id, req.Session, req.page, req.limit)
+		res, err := svc.ListChannelsByThing(req.Session, req.id, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -901,7 +901,7 @@ func listChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListChannels(req.status, req.Session, req.page, req.limit)
+		res, err := svc.ListChannels(req.Session, req.status, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -920,7 +920,7 @@ func viewChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ViewChannel(req.id, req.Session)
+		res, err := svc.ViewChannel(req.Session, req.id)
 		if err != nil {
 			return nil, err
 		}
@@ -956,7 +956,7 @@ func listThingsByChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListThingsByChannel(req.id, req.Session, req.page, req.limit)
+		res, err := svc.ListThingsByChannel(req.Session, req.id, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1008,7 +1008,7 @@ func ListChannelMembersEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(listEntityByIDReq)
 
-		res, err := svc.ListChannelUsers(req.id, req.relation, req.Session, req.page, req.limit)
+		res, err := svc.ListChannelUsers(req.Session, req.id, req.relation, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1087,7 +1087,7 @@ func ListChannelGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListChannelUserGroups(req.id, req.Session, req.page, req.limit)
+		res, err := svc.ListChannelUserGroups(req.Session, req.id, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1140,7 +1140,7 @@ func listGroupMembersEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListGroupUsers(req.id, req.relation, req.Session, req.page, req.limit)
+		res, err := svc.ListGroupUsers(req.Session, req.id, req.relation, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1159,7 +1159,7 @@ func viewGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ViewGroup(req.id, req.Session)
+		res, err := svc.ViewGroup(req.Session, req.id)
 		if err != nil {
 			return nil, err
 		}
@@ -1195,7 +1195,7 @@ func listGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListGroups(req.status, req.Session, req.page, req.limit)
+		res, err := svc.ListGroups(req.Session, req.status, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1246,7 +1246,7 @@ func listGroupChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(listEntityByIDReq)
 
-		res, err := svc.ListUserGroupChannels(req.id, req.Session, req.page, req.limit)
+		res, err := svc.ListUserGroupChannels(req.Session, req.id, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1283,7 +1283,7 @@ func readMessagesEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ReadMessages(req.channelID, req.thingKey, req.Session, req.page, req.limit)
+		res, err := svc.ReadMessages(req.Session, req.channelID, req.thingKey, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1427,7 +1427,7 @@ func viewBootstrap(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ViewBootstrap(req.id, req.Session)
+		res, err := svc.ViewBootstrap(req.Session, req.id)
 		if err != nil {
 			return nil, err
 		}
@@ -1536,7 +1536,7 @@ func domainLoginEndpoint(svc ui.Service, s *securecookie.SecureCookie) endpoint.
 		}
 		req.Domain.ID = req.DomainID
 		req.AccessToken = token.AccessToken
-		sessionDetails, err := svc.Session(req.Session, "domain")
+		sessionDetails, err := svc.Session(req.Session)
 		if err != nil {
 			return nil, err
 		}
@@ -1572,7 +1572,7 @@ func listDomainsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ListDomains(req.status, req.Session, req.page, req.limit)
+		res, err := svc.ListDomains(req.Session, req.status, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1758,7 +1758,7 @@ func viewMemberEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ViewMember(req.userIdentity, req.Session)
+		res, err := svc.ViewMember(req.Session, req.userIdentity)
 		if err != nil {
 			return nil, err
 		}
@@ -1849,7 +1849,7 @@ func listInvitationsEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.Invitations(req.domainID, req.Session, req.page, req.limit)
+		res, err := svc.Invitations(req.Session, req.domainID, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -1910,7 +1910,7 @@ func viewDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ViewDashboard(req.DashboardID, req.Session)
+		res, err := svc.ViewDashboard(req.Session, req.DashboardID)
 		if err != nil {
 			return nil, err
 		}
