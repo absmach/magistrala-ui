@@ -51,11 +51,11 @@ func (cfg *config) IsEnabled() bool {
 }
 
 func (cfg *config) GenerateSignInURL() (string, error) {
-	return cfg.generateURL("signin")
+	return cfg.generateURL(mgoauth2.SignIn.String())
 }
 
 func (cfg *config) GenerateSignUpURL() (string, error) {
-	return cfg.generateURL("signup")
+	return cfg.generateURL(mgoauth2.SignUp.String())
 }
 
 func (cfg *config) generateURL(state string) (string, error) {
