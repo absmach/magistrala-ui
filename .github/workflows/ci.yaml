@@ -39,13 +39,6 @@ jobs:
             npx prettier --config .prettierrc --plugin prettier-plugin-go-template --list-different .
           fi
 
-      - name: Prettier Output
-        if: ${{ failure() }}
-        shell: bash
-        run: |
-          echo "The following files are not formatted:"
-          echo "${{steps.prettier-run.outputs.prettier_output}}"
-
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v4
         with:
