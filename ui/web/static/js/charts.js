@@ -929,7 +929,7 @@ class MultiBarChart extends Echart {
         'top',
         'bottom',
         'inside',
-        'insideTop',
+        'insideTop',Fproge
         'insideLeft',
         'insideRight',
         'insideBottom',
