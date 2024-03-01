@@ -57,3 +57,5 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240123012728-ef4313101c80 // indirect
 	google.golang.org/protobuf v1.32.0 // indirect
 )
+
+replace github.com/absmach/magistrala => /home/musilah/ULTRAVIOLET/magistrala-new

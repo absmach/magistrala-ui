@@ -191,7 +191,15 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID, prefix string, secureCo
 					encodeResponse,
 					opts...,
 				).ServeHTTP))
-				r.Route("/dashboards", func(r chi.Router) {
+		
+		r.Get("/data", kithttp.NewServer(
+			fetchReaderDataEndpoint(svc),
+			decodeFetchReaderDataRequest,
+			encodeResponse,
+			opts...,
+		).ServeHTTP)
+
+		r.Route("/dashboards", func(r chi.Router) {
 					r.Get("/{id}", kithttp.NewServer(
 						viewDashboardEndpoint(svc),
 						decodeViewDashboardRequest,
@@ -1817,7 +1825,7 @@ func decodePublishRequest(_ context.Context, r *http.Request) (interface{}, erro
 			Unit:     r.PostFormValue("unit"),
 			Value:    floatValue,
 		},
-	}, nil
+		}, nil
 }
 
 func decodeReadMessagesRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -1847,6 +1855,39 @@ func decodeReadMessagesRequest(_ context.Context, r *http.Request) (interface{},
 		limit:     limit,
 		Session:   session,
 	}, nil
+}
+
+func decodeFetchReaderDataRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	fmt.Println("debug")
+	token, err := tokenFromCookie(r, accessTokenKey)
+	if err != nil {
+		return nil, err
+	}
+
+	page, err := readNumQuery[uint64](r, pageKey, defPage)
+	if err != nil {
+		return nil, err
+	}
+
+	limit, err := readNumQuery[uint64](r, limitKey, defLimit)
+	if err != nil {
+		return nil, err
+	}
+
+	channel, err := readStringQuery(r, channelKey, defKey)
+	if err != nil {
+		return nil, err
+	}
+
+	req := fetchReaderDataReq{
+		token:     token,
+		channelID: channel,
+		page:      page,
+		limit:     limit,
+	}
+	fmt.Println("request", req)
+
+	return req, nil
 }
 
 func decodeTerminalCommandRequest(_ context.Context, r *http.Request) (interface{}, error) {

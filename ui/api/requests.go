@@ -670,6 +670,36 @@ func (req readMessagesReq) validate() error {
 	return nil
 }
 
+type fetchReaderDataReq struct {
+	token     string
+	channelID string
+	thingID   string
+	to        float64
+	from      float64
+	page      uint64
+	limit     uint64
+}
+
+func (req fetchReaderDataReq) validate() error {
+	if req.token == "" {
+		return errAuthorization
+	}
+	if req.channelID == "" {
+		return errMissingChannelID
+	}
+	if req.thingID == "" {
+		return errMissingThingID
+	}
+	if req.page == 0 {
+		return errPageSize
+	}
+	if req.limit == 0 {
+		return errLimitSize
+	}
+
+	return nil
+}
+
 type bootstrapCommandReq struct {
 	token   string
 	command string

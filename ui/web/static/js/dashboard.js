@@ -336,3 +336,41 @@ function updateMetadata(layout, savedMetadata) {
   }
   return upMetadata;
 }
+
+async function getData(lineChart, channel) {
+  console.log(channel);
+  try {
+    const params = new URLSearchParams({
+      channel: channel,
+      limit: 10,
+      offset: 0,
+    });
+    const response = await fetch(`/data?${params}`);
+    if (response.ok) {
+      console.log("response: ", response)
+      const data = await response.json();
+      console.log("data: ", data);
+
+      lineChart.setOption({
+        xAxis: {
+          data: data.xaxis
+        },
+        series: [
+          {
+            data: data.yaxis
+            },
+        ]
+      });
+    } else {
+      console.error("Failed to fetch data");
+    }
+    setTimeout(function () {
+      getData(lineChart, channel);
+    }, 500000);
+  } catch (error) {
+    console.error(error);
+    setTimeout(function () {
+      getData(lineChart, channel);
+    }, 500000);
+  }
+}

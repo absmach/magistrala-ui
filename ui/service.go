@@ -372,7 +372,8 @@ type Service interface {
 	Publish(channelID, thingKey string, message Message) error
 	// ReadMessages retrieves messages published in a channel.
 	ReadMessages(s Session, channelID, thingKey string, page, limit uint64) ([]byte, error)
-
+	// Populate chart data
+	FetchReaderData(token, channelID, thingID string, to float64, from float64, page, limit uint64) ([]byte, error)
 	// CreateBootstrap creates a new bootstrap config.
 	CreateBootstrap(token string, config ...sdk.BootstrapConfig) error
 	// ListBootstrap retrieves all bootstrap configs.
@@ -1786,9 +1787,15 @@ func (us *uiService) ListUserGroupChannels(s Session, id string, page, limit uin
 
 func (us *uiService) ReadMessages(s Session, channelID, thingKey string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
-	pgm := sdk.PageMetadata{
-		Offset: offset,
-		Limit:  limit,
+	pgm := sdk.MessagePageMetadata{
+		PageMetadata: sdk.PageMetadata{
+			Offset: offset,
+			Limit:  limit,
+		},
+		// Interval:    "1 minute",
+		// Aggregation: "MAX",
+		// From: 1709208007,
+		// To: 1709208907,
 	}
 	msg, err := us.sdk.ReadMessages(pgm, channelID, s.AccessToken)
 	if err != nil {
@@ -1831,6 +1838,44 @@ func (us *uiService) ReadMessages(s Session, channelID, thingKey string, page, l
 	}
 
 	return btpl.Bytes(), nil
+}
+
+func (us *uiService) FetchReaderData(token, channelID, thingID string, to float64, from float64, page, limit uint64) ([]byte, error) {
+	offset := (page - 1) * limit
+	pgm := sdk.MessagePageMetadata{
+		PageMetadata: sdk.PageMetadata{
+			Offset: offset,
+			Limit:  limit,
+		},
+		// Interval:    "1 minute",
+		// Aggregation: "MAX",
+		// From: 1709208007,
+		// To: 1709208907,
+	}
+	msg, err := us.sdk.ReadMessages(pgm, channelID, token)
+	if err != nil {
+		return []byte{}, err
+	}
+	fmt.Println("Messages:", msg.Total)
+	data := make(map[string]interface{})
+
+	var yaxisValues []int
+	var xaxisValues []string
+
+	for _, m := range msg.Messages {
+		yaxisValues = append(yaxisValues, int(*m.Value))
+		xaxisValues = append(xaxisValues, time.Unix(int64(m.Time), 0).Format(time.RFC3339))
+	}
+
+	data["yaxis"] = yaxisValues
+	data["xaxis"] = xaxisValues
+
+	jsonData, jsonErr := json.Marshal(data)
+	if jsonErr != nil {
+		return []byte{}, jsonErr
+	}
+
+	return jsonData, nil
 }
 
 func (us *uiService) Publish(channelID, thingKey string, message Message) error {

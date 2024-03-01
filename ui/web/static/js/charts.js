@@ -818,7 +818,7 @@ class TimeSeriesLineChart extends Echart {
       },
       series: [
         {
-          data: [150, 230, 224, 218, 135, 147, 260],
+          data: [],
           type: 'line',
           lineStyle: {
             width: '${this.chartData.lineWidth}',
