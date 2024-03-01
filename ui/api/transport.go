@@ -171,9 +171,9 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string, secureCookie *se
 
 	r.Route("/", func(r chi.Router) {
 		r.Use(DecryptCookieMiddleware(secureCookie))
-		r.Use(TokenMiddleware(secureCookie))
+		r.Use(TokenMiddleware)
 		r.Route("/", func(r chi.Router) {
-			r.Use(AuthnMiddleware(secureCookie))
+			r.Use(AuthnMiddleware)
 			r.Get("/", http.HandlerFunc(kithttp.NewServer(
 				indexEndpoint(svc),
 				decodeIndexRequest,
@@ -2391,56 +2391,52 @@ func AdminAuthMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func TokenMiddleware(s *securecookie.SecureCookie) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			session, err := sessionFromHeader(r)
-			if err != nil {
-				http.Redirect(w, r, "/login", http.StatusSeeOther)
-				return
-			}
+func TokenMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		session, err := sessionFromHeader(r)
+		if err != nil {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
 
-			// Parse the token without validation to get the expiration time
-			token, _, err := new(jwt.Parser).ParseUnverified(session.AccessToken, jwt.MapClaims{})
-			if err != nil {
-				fmt.Println(err)
-				http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
+		// Parse the token without validation to get the expiration time
+		token, _, err := new(jwt.Parser).ParseUnverified(session.AccessToken, jwt.MapClaims{})
+		if err != nil {
+			fmt.Println(err)
+			http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
+			return
+		}
+		if claims, ok := token.Claims.(jwt.MapClaims); ok {
+			if !claims.VerifyExpiresAt(time.Now().Unix(), true) {
+				http.Redirect(w, r, "/token/refresh?referer_url="+url.QueryEscape(r.URL.String()), http.StatusSeeOther)
 				return
 			}
-			if claims, ok := token.Claims.(jwt.MapClaims); ok {
-				if !claims.VerifyExpiresAt(time.Now().Unix(), true) {
-					http.Redirect(w, r, "/token/refresh?referer_url="+url.QueryEscape(r.URL.String()), http.StatusSeeOther)
-					return
-				}
-			}
-			next.ServeHTTP(w, r)
-		})
-	}
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
-func AuthnMiddleware(s *securecookie.SecureCookie) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			session, err := sessionFromHeader(r)
-			if err != nil {
-				http.Redirect(w, r, "/login", http.StatusSeeOther)
-				return
-			}
+func AuthnMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		session, err := sessionFromHeader(r)
+		if err != nil {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+			return
+		}
 
-			token, _, err := new(jwt.Parser).ParseUnverified(session.AccessToken, jwt.MapClaims{})
-			if err != nil {
-				http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
+		token, _, err := new(jwt.Parser).ParseUnverified(session.AccessToken, jwt.MapClaims{})
+		if err != nil {
+			http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
+			return
+		}
+		if claims, ok := token.Claims.(jwt.MapClaims); ok {
+			if _, ok := claims["domain"]; !ok {
+				http.Redirect(w, r, "/domains", http.StatusSeeOther)
 				return
 			}
-			if claims, ok := token.Claims.(jwt.MapClaims); ok {
-				if _, ok := claims["domain"]; !ok {
-					http.Redirect(w, r, "/domains", http.StatusSeeOther)
-					return
-				}
-			}
-			next.ServeHTTP(w, r)
-		})
-	}
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 func DecryptCookieMiddleware(s *securecookie.SecureCookie) func(http.Handler) http.Handler {
