@@ -679,13 +679,13 @@ func (mm *metricsMiddleware) ReadMessages(s ui.Session, channelID, thingKey stri
 	return mm.svc.ReadMessages(s, channelID, thingKey, page, limit)
 }
 
-func (mm *metricsMiddleware) FetchReaderData(token, channelID, thingID string, to float64, from float64, page, limit uint64) ([]byte, error) {
+func (mm *metricsMiddleware) FetchReaderData(token string, channelID string, page, limit uint64) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "fetch_reader_data").Add(1)
 		mm.latency.With("method", "fetch_reader_data").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.FetchReaderData(token, channelID, thingID, to, from, page, limit)
+	return mm.svc.FetchReaderData(token, channelID, page, limit)
 }
 
 // CreateBootstrap adds metrics middleware to create bootstrap method.

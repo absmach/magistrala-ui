@@ -347,28 +347,29 @@ async function getData(lineChart, channel) {
     });
     const response = await fetch(`/data?${params}`);
     if (response.ok) {
-      console.log("response: ", response)
       const data = await response.json();
-      console.log("data: ", data);
+
+      // Combine the x and y axis data to sort the data by time
+      // This is to allow the earlier data to be displayed first
+      let combinedData = data.xaxis.map((x, i) => ({ time: x, value: data.yaxis[i] }));
+      combinedData.sort((a, b) => new Date(a.time) - new Date(b.time));
+      let sortedXaxis = combinedData.map((item) => item.time);
+      let sortedYaxis = combinedData.map((item) => item.value);
 
       lineChart.setOption({
         xAxis: {
-          data: data.xaxis
+          data: sortedXaxis,
         },
         series: [
           {
-            data: data.yaxis
-            },
-        ]
+            data: sortedYaxis,
+          },
+        ],
       });
     } else {
       console.error("Failed to fetch data");
     }
-    setTimeout(function () {
-      getData(lineChart, channel);
-    }, 500000);
   } catch (error) {
-    console.error(error);
     setTimeout(function () {
       getData(lineChart, channel);
     }, 500000);

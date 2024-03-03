@@ -373,7 +373,7 @@ type Service interface {
 	// ReadMessages retrieves messages published in a channel.
 	ReadMessages(s Session, channelID, thingKey string, page, limit uint64) ([]byte, error)
 	// Populate chart data
-	FetchReaderData(token, channelID, thingID string, to float64, from float64, page, limit uint64) ([]byte, error)
+	FetchReaderData(token string, channelID string, page, limit uint64) ([]byte, error)
 	// CreateBootstrap creates a new bootstrap config.
 	CreateBootstrap(token string, config ...sdk.BootstrapConfig) error
 	// ListBootstrap retrieves all bootstrap configs.
@@ -1840,7 +1840,7 @@ func (us *uiService) ReadMessages(s Session, channelID, thingKey string, page, l
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) FetchReaderData(token, channelID, thingID string, to float64, from float64, page, limit uint64) ([]byte, error) {
+func (us *uiService) FetchReaderData(token string, channelID string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 	pgm := sdk.MessagePageMetadata{
 		PageMetadata: sdk.PageMetadata{

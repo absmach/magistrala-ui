@@ -1295,6 +1295,24 @@ func readMessagesEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
+func fetchReaderDataEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(fetchReaderDataReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		res, err := svc.FetchReaderData(req.token, req.channelID, req.page, req.limit)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code: http.StatusOK,
+			html: res,
+		}, nil
+	}
+}
+
 func createBootstrap(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(createBootstrapReq)

@@ -1180,7 +1180,7 @@ func (lm *loggingMiddleware) ReadMessages(s ui.Session, channelID, thingKey stri
 	return lm.svc.ReadMessages(s, channelID, thingKey, page, limit)
 }
 
-func (lm *loggingMiddleware) FetchReaderData(token, channelID, thingID string, to float64, from float64, page, limit uint64) (b []byte, err error){
+func (lm *loggingMiddleware) FetchReaderData(token string, channelID string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -1196,7 +1196,7 @@ func (lm *loggingMiddleware) FetchReaderData(token, channelID, thingID string, t
 		lm.logger.Info("Fetch reader data completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.FetchReaderData(token, channelID, thingID, to, from, page, limit)
+	return lm.svc.FetchReaderData(token, channelID, page, limit)
 }
 
 // CreateBootstrap adds logging middleware to create bootstrap method.

@@ -673,9 +673,6 @@ func (req readMessagesReq) validate() error {
 type fetchReaderDataReq struct {
 	token     string
 	channelID string
-	thingID   string
-	to        float64
-	from      float64
 	page      uint64
 	limit     uint64
 }
@@ -686,9 +683,6 @@ func (req fetchReaderDataReq) validate() error {
 	}
 	if req.channelID == "" {
 		return errMissingChannelID
-	}
-	if req.thingID == "" {
-		return errMissingThingID
 	}
 	if req.page == 0 {
 		return errPageSize
