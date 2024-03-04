@@ -98,7 +98,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <a
               class="nav-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
               id="domain"
-              href="{{ printf "%s/domains/%s" pathPrefix {{ .Session.Domain.ID }} }}"
+              href="{{ printf "%s/domains/%s" pathPrefix .Session.Domain.ID }}"
             >
               <i class="fa-solid fa-building"></i>
               <span>Domain</span>
@@ -107,7 +107,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <li class="nav-item mb-2 mx-2">
             {{ $navbarActive = "members" }}
             <a
-              href="{{ printf "%s/domains/%s/members" pathPrefix {{ .Session.Domain.ID }} }}"
+              href="{{ printf "%s/domains/%s/members" pathPrefix .Session.Domain.ID }}"
               id="members"
               class="nav-link  {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
             >
@@ -118,7 +118,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <li class="nav-item mb-2 mx-2">
             {{ $navbarActive = "domaininvitations" }}
             <a
-              href="{{ printf "%s/invitations?domain=%s" pathPrefix {{ .Session.Domain.ID }} }}"
+              href="{{ printf "%s/invitations?domain=%s" pathPrefix .Session.Domain.ID }}"
               class="nav-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
               id="domainInvitations"
             >

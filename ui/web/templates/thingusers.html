@@ -276,6 +276,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
       </div>
       <script>
+         let pathPrefix = "{{ pathPrefix }}";
         const userModal = new bootstrap.Modal(document.getElementById("addUserModal"));
         function openUserModal() {
           userModal.show();
@@ -283,14 +284,12 @@ SPDX-License-Identifier: Apache-2.0 -->
 
 				function openTab(relation) {
 					event.preventDefault();
-          let pathPrefix = "{{ pathPrefix }}";
           let thingID = "{{ .ThingID }}";
 					window.location.href = `${pathPrefix}/things/${thingID}/users?relation=${relation}`;
 				}
 
         function viewUser(identity) {
           event.preventDefault();
-          let pathPrefix = "{{ pathPrefix }}";
           window.location.href = `${pathPrefix}/domains/members?identity=${identity}`;
         }
       </script>      <script type="module">
@@ -301,7 +300,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           itemSelect: "infiniteScroll",
           item: "members",
           domain: '{{.Session.Domain.ID}}',
-          pathPrefix: '{{ pathPrefix }}',
+          pathPrefix: pathPrefix,
         });
       </script>
     </body>

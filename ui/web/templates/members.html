@@ -46,7 +46,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                         ></button>
                       </div>
                       <form
-                        action="{{ printf "%s/domains/%s/assign" pathPrefix .DomainID }}"
+                        action="{{ printf "%s/domains/%s/assign" pathPrefix .Session.Domain.ID }}"
                         method="post"
                       >
                         <div class="modal-body">

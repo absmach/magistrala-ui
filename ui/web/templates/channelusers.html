@@ -476,6 +476,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
       </div>
 			<script>
+        let pathPrefix = "{{ pathPrefix }}";
 				const userModal = new bootstrap.Modal(
 					document.getElementById("addUserModal"),
 				);
@@ -485,7 +486,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 
         function openTab(relation) {
 					event.preventDefault();
-					var channelID = '{{.ChannelID}}';
+					let channelID = '{{.ChannelID}}';
 					window.location.href = `${pathPrefix}/channels/${channelID}/users?relation=${relation}`;
 				}
 
@@ -500,7 +501,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           itemSelect: "infiniteScroll",
           item: "members",
           domain: '{{.Session.Domain.ID}}',
-          pathPrefix: "{{ pathPrefix }}",
+          pathPrefix: pathPrefix,
         });
       </script>
     </body>
