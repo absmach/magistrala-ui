@@ -910,7 +910,7 @@ type listDomainsReq struct {
 }
 
 func (req listDomainsReq) validate() error {
-	if req.AccessToken == "" {
+	if req.Token.AccessToken == "" {
 		return errAuthentication
 	}
 	if req.page == 0 {

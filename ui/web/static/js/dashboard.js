@@ -338,7 +338,6 @@ function updateMetadata(layout, savedMetadata) {
 }
 
 async function getData(lineChart, channel) {
-  console.log(channel);
   try {
     const params = new URLSearchParams({
       channel: channel,

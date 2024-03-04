@@ -1792,10 +1792,6 @@ func (us *uiService) ReadMessages(s Session, channelID, thingKey string, page, l
 			Offset: offset,
 			Limit:  limit,
 		},
-		// Interval:    "1 minute",
-		// Aggregation: "MAX",
-		// From: 1709208007,
-		// To: 1709208907,
 	}
 	msg, err := us.sdk.ReadMessages(pgm, channelID, s.AccessToken)
 	if err != nil {
@@ -1847,10 +1843,6 @@ func (us *uiService) FetchReaderData(token string, channelID string, page, limit
 			Offset: offset,
 			Limit:  limit,
 		},
-		// Interval:    "1 minute",
-		// Aggregation: "MAX",
-		// From: 1709208007,
-		// To: 1709208907,
 	}
 	msg, err := us.sdk.ReadMessages(pgm, channelID, token)
 	if err != nil {
