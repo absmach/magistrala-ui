@@ -89,11 +89,15 @@ class AreaLineChart {
       width: "450px",
       height: "450px",
     };
-    this.Content = `
+    this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
+  }
+
+  #generateContent() {
+    return `
     <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
-    this.Script = this.#generateScript();
   }
 
   #generateScript() {
@@ -195,11 +199,15 @@ class TimeSeriesBarChart {
       width: "400px",
       height: "400px",
     };
-    this.Content = `
+    this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
+  }
+
+  #generateContent() {
+    return `
     <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
-    this.Script = this.#generateScript();
   }
 
   #generateScript() {
@@ -249,11 +257,15 @@ class DonutChart {
       width: "400px",
       height: "400px",
     };
-    this.Content = `
+    this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
+  }
+
+  #generateContent() {
+    return `
     <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
-    this.Script = this.#generateScript();
   }
 
   #generateScript() {
@@ -314,11 +326,15 @@ class DoubleBarChart {
       width: "450px",
       height: "450px",
     };
-    this.Content = `
+    this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
+  }
+
+  #generateContent() {
+    return `
     <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
-    this.Script = this.#generateScript();
   }
 
   #generateScript() {
@@ -414,11 +430,15 @@ class DynamicDataChart {
       width: "450px",
       height: "450px",
     };
-    this.Content = `
+    this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
+  }
+
+  #generateContent() {
+    return `
     <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
-    this.Script = this.#generateScript();
   }
 
   #generateScript() {
@@ -664,11 +684,15 @@ class GaugeChart {
       width: "400px",
       height: "400px",
     };
-    this.Content = `
+    this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
+  }
+
+  #generateContent() {
+    return `
     <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
-    this.Script = this.#generateScript();
   }
 
   #generateScript() {
@@ -733,11 +757,15 @@ class HorizontalBarChart {
       width: "400px",
       height: "400px",
     };
-    this.Content = `
+    this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
+  }
+
+  #generateContent() {
+    return `
     <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
-    this.Script = this.#generateScript();
   }
 
   #generateScript() {
@@ -837,11 +865,15 @@ class TimeSeriesLineChart {
       width: "400px",
       height: "400px",
     };
-    this.Content = `
+    this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
+  }
+
+  #generateContent() {
+    return `
     <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
-    this.Script = this.#generateScript();
   }
 
   #generateScript() {
@@ -896,12 +928,15 @@ class MultiBarChart {
       width: "450px",
       height: "450px",
     };
-    this.Content = `
+    this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
+  }
+
+  #generateContent() {
+    return `
     <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
-
-    this.Script = this.#generateScript();
   }
 
   #generateScript() {
@@ -1098,11 +1133,15 @@ class MultiGaugeChart {
       width: "400px",
       height: "400px",
     };
-    this.Content = `
+    this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
+  }
+
+  #generateContent() {
+    return `
     <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
-    this.Script = this.#generateScript();
   }
 
   #generateScript() {
@@ -1214,11 +1253,15 @@ class MultipleLineChart {
       width: "400px",
       height: "400px",
     };
-    this.Content = `
+    this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
+  }
+
+  #generateContent() {
+    return `
     <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
-    this.Script = this.#generateScript();
   }
 
   #generateScript() {
@@ -1278,11 +1321,15 @@ class PieChart {
       width: "400px",
       height: "400px",
     };
-    this.Content = `
+    this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
+  }
+
+  #generateContent() {
+    return `
     <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
-    this.Script = this.#generateScript();
   }
 
   #generateScript() {
@@ -1370,11 +1417,15 @@ class SharedDatasetChart {
       width: "450px",
       height: "450px",
     };
-    this.Content = `
+    this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
+  }
+
+  #generateContent() {
+    return `
     <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
-    this.Script = this.#generateScript();
   }
 
   #generateScript() {
@@ -1495,11 +1546,15 @@ class SpeedGaugeChart {
       width: "400px",
       height: "400px",
     };
-    this.Content = `
+    this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
+  }
+
+  #generateContent() {
+    return `
     <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
-    this.Script = this.#generateScript();
   }
 
   #generateScript() {
@@ -1592,11 +1647,15 @@ class StackedLineChart {
       width: "450px",
       height: "450px",
     };
-    this.Content = `
+    this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
+  }
+
+  #generateContent() {
+    return `
     <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
-    this.Script = this.#generateScript();
   }
 
   #generateScript() {
@@ -1674,11 +1733,15 @@ class StepChart {
       width: "450px",
       height: "450px",
     };
-    this.Content = `
+    this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
+  }
+
+  #generateContent() {
+    return `
     <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
-    this.Script = this.#generateScript();
   }
 
   #generateScript() {
@@ -1754,11 +1817,15 @@ class TempGaugeChart {
       width: "450px",
       height: "450px",
     };
-    this.Content = `
+    this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
+  }
+
+  #generateContent() {
+    return `
     <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
-    this.Script = this.#generateScript();
   }
 
   #generateScript() {
