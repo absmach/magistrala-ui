@@ -30,35 +30,39 @@ import (
 )
 
 const (
-	templatesDir            = "ui/web/templates"
-	chartTemplatesDir       = "ui/web/templates/charts"
-	enabled                 = "enabled"
-	statePending            = "pending"
-	statusAll               = "all"
-	homepageActive          = "homepage"
-	dashboardsActive        = "dashboards"
-	dashboardActive         = "dashboard"
-	usersActive             = "users"
-	userActive              = "user"
-	thingsActive            = "things"
-	thingActive             = "thing"
-	groupsActive            = "groups"
-	groupActive             = "group"
-	channelsActive          = "channels"
-	channelActive           = "channel"
-	readMessagesActive      = "readmessages"
-	bootstrapsActive        = "bootstraps"
-	domainActive            = "domain"
-	domainsActive           = "domains"
-	membersActive           = "members"
-	invitationsActive       = "invitations"
-	domainInvitationsActive = "domaininvitations"
-	usersEndpoint           = "/users"
-	thingsEndpoint          = "/things"
-	channelsEndpoint        = "/channels"
-	groupsEndpoint          = "/groups"
-	bootstrapEndpoint       = "/bootstraps"
+	templatesDir                        = "ui/web/templates"
+	chartTemplatesDir                   = "ui/web/templates/charts"
+	enabled                             = "enabled"
+	statePending                        = "pending"
+	statusAll                           = "all"
+	homepageActive                      = "homepage"
+	dashboardsActive                    = "dashboards"
+	dashboardActive                     = "dashboard"
+	usersActive                         = "users"
+	userActive                          = "user"
+	thingsActive                        = "things"
+	thingActive                         = "thing"
+	groupsActive                        = "groups"
+	groupActive                         = "group"
+	channelsActive                      = "channels"
+	channelActive                       = "channel"
+	readMessagesActive                  = "readmessages"
+	bootstrapsActive                    = "bootstraps"
+	domainActive                        = "domain"
+	domainsActive                       = "domains"
+	membersActive                       = "members"
+	invitationsActive                   = "invitations"
+	domainInvitationsActive             = "domaininvitations"
+	usersEndpoint                       = "/users"
+	thingsEndpoint                      = "/things"
+	channelsEndpoint                    = "/channels"
+	groupsEndpoint                      = "/groups"
+	bootstrapEndpoint                   = "/bootstraps"
+	UserLoginStatus         LoginStatus = "user"
+	DomainLoginStatus       LoginStatus = "domain"
 )
+
+type LoginStatus string
 
 type dataSummary struct {
 	TotalUsers       int
@@ -102,9 +106,9 @@ type Domain struct {
 }
 
 type Session struct {
-	User        User   `json:"user"`
-	Domain      Domain `json:"domain"`
-	LoginStatus string `json:"login_status"`
+	User        User        `json:"user"`
+	Domain      Domain      `json:"domain"`
+	LoginStatus LoginStatus `json:"login_status"`
 	sdk.Token   `json:"token"`
 }
 
@@ -682,7 +686,7 @@ func (us *uiService) Session(s Session) (Session, error) {
 		LoginStatus: s.LoginStatus,
 	}
 
-	if s.LoginStatus == "domain" {
+	if s.LoginStatus == DomainLoginStatus {
 		domain, err := us.sdk.Domain(s.Domain.ID, s.AccessToken)
 		if err != nil {
 			return Session{}, err

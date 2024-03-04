@@ -1043,7 +1043,7 @@ func decodeSecureTokenRequest(_ context.Context, r *http.Request) (interface{}, 
 			AccessToken:  accessToken,
 			RefreshToken: refreshToken,
 		},
-		LoginStatus: "user",
+		LoginStatus: ui.UserLoginStatus,
 	}
 
 	return secureTokenReq{
@@ -2066,7 +2066,7 @@ func decodeDomainLoginRequest(_ context.Context, r *http.Request) (interface{}, 
 	if err != nil {
 		return nil, err
 	}
-	session.LoginStatus = "domain"
+	session.LoginStatus = ui.DomainLoginStatus
 
 	return domainLoginReq{
 		Session: session,
