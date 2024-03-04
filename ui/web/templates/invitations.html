@@ -190,16 +190,16 @@ SPDX-License-Identifier: Apache-2.0 -->
 
         function openInvitationModal() {
           const domainsSelect = document.getElementById("domains-select");
-          const domainID = '{{.SessionDetails.Domain.ID}}';
+          const domainID = '{{.Session.Domain.ID}}';
           if (navbarActive !== "invitations") {
             domainsSelect.innerHTML = domainsSelect.innerHTML = `<input type="hidden" name="domainID" value="${domainID}" />`;
           }
           invitationModal.show();
         }
 
-        let userID = '{{.SessionDetails.User.ID}}';
-        let domainPermissions = '{{.SessionDetails.Domain.Permissions}}';
-        let loginStatus= '{{.SessionDetails.LoginStatus}}'
+        let userID = '{{.Session.User.ID}}';
+        let domainPermissions = '{{.Session.Domain.Permissions}}';
+        let loginStatus= '{{.Session.LoginStatus}}'
 
         rows.forEach(function (row) {
           const inviter = row.querySelector(".inviter").textContent.trim();

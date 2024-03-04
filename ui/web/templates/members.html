@@ -45,7 +45,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           aria-label="Close"
                         ></button>
                       </div>
-                      <form action="/domains/{{ .SessionDetails.Domain.ID }}/assign" method="post">
+                      <form action="/domains/{{ .Session.Domain.ID }}/assign" method="post">
                         <div class="modal-body">
                           <div class="mb-3">
                             <label for="users-scroll" class="form-label">User Name</label>
@@ -151,7 +151,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         function openMemberModal() {
           memberModal.show();
         }
-        let userRole = '{{.SessionDetails.User.Role}}';
+        let userRole = '{{.Session.User.Role}}';
         if (userRole == "admin") {
           document.getElementById("add-member-button").style.display = "block";
         } else {

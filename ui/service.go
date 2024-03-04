@@ -381,7 +381,7 @@ type Service interface {
 	// UpdateBootstrapState updates bootstrap configuration state.
 	UpdateBootstrapState(token string, config sdk.BootstrapConfig) error
 	// ViewBootstrap retrieves a bootstrap config by thing id.
-	ViewBootstrap(things Session, idID string) ([]byte, error)
+	ViewBootstrap(s Session, id string) ([]byte, error)
 	// GetRemoteTerminal returns remote terminal for a bootstrap config with mainflux agent installed.
 	GetRemoteTerminal(s Session, thingID string) ([]byte, error)
 	// ProcessTerminalCommand sends mqtt command to agent and retrieves a response asynchronously.
@@ -531,7 +531,7 @@ func (us *uiService) Index(s Session) (b []byte, err error) {
 		NavbarActive   string
 		CollapseActive string
 		Summary        dataSummary
-		SessionDetails Session
+		Session        Session
 	}{
 		homepageActive,
 		homepageActive,
@@ -621,7 +621,7 @@ func (us *uiService) PasswordUpdate(s Session) (b []byte, err error) {
 	data := struct {
 		NavbarActive   string
 		CollapseActive string
-		SessionDetails Session
+		Session        Session
 	}{
 		"password",
 		"password",
@@ -672,7 +672,7 @@ func (us *uiService) Session(s Session) (Session, error) {
 		return Session{}, err
 	}
 
-	sessionDetails := Session{
+	session := Session{
 		User: User{
 			ID:       user.ID,
 			Name:     user.Name,
@@ -690,12 +690,12 @@ func (us *uiService) Session(s Session) (Session, error) {
 		if err != nil {
 			return Session{}, err
 		}
-		sessionDetails.Domain.Name = domain.Name
-		sessionDetails.Domain.ID = domain.ID
-		sessionDetails.Domain.Permissions = permissions.Permissions
+		session.Domain.Name = domain.Name
+		session.Domain.ID = domain.ID
+		session.Domain.Permissions = permissions.Permissions
 	}
 
-	return sessionDetails, nil
+	return session, nil
 }
 
 func (us *uiService) CreateUsers(token string, users ...sdk.User) error {
@@ -738,7 +738,7 @@ func (us *uiService) ListUsers(s Session, status string, page, limit uint64) ([]
 		Limit          int
 		StatusOptions  []string
 		Status         string
-		SessionDetails Session
+		Session        Session
 	}{
 		usersActive,
 		usersActive,
@@ -777,7 +777,7 @@ func (us *uiService) ViewUser(s Session, id string) (b []byte, err error) {
 		Entity         sdk.User
 		Breadcrumbs    []breadcrumb
 		Path           string
-		SessionDetails Session
+		Session        Session
 	}{
 		usersActive,
 		userActive,
@@ -890,7 +890,7 @@ func (us *uiService) ListThings(s Session, status string, page, limit uint64) ([
 		Limit          int
 		StatusOptions  []string
 		Status         string
-		SessionDetails Session
+		Session        Session
 	}{
 		thingsActive,
 		thingsActive,
@@ -934,7 +934,7 @@ func (us *uiService) ViewThing(s Session, id string) (b []byte, err error) {
 		Permissions    []string
 		Breadcrumbs    []breadcrumb
 		Path           string
-		SessionDetails Session
+		Session        Session
 	}{
 		thingsActive,
 		thingActive,
@@ -1046,7 +1046,7 @@ func (us *uiService) ListThingUsers(s Session, id, relation string, page, limit 
 		TabActive      string
 		Permissions    []string
 		Breadcrumbs    []breadcrumb
-		SessionDetails Session
+		Session        Session
 	}{
 		thingsActive,
 		thingsActive,
@@ -1110,7 +1110,7 @@ func (us *uiService) ListChannelsByThing(s Session, id string, page, limit uint6
 		Limit          int
 		Permissions    []string
 		Breadcrumbs    []breadcrumb
-		SessionDetails Session
+		Session        Session
 	}{
 		thingsActive,
 		thingsActive,
@@ -1176,7 +1176,7 @@ func (us *uiService) ListChannels(s Session, status string, page, limit uint64) 
 		Breadcrumbs    []breadcrumb
 		StatusOptions  []string
 		Status         string
-		SessionDetails Session
+		Session        Session
 	}{
 		channelsActive,
 		channelsActive,
@@ -1222,7 +1222,7 @@ func (us *uiService) ViewChannel(s Session, channelID string) (b []byte, err err
 		Permissions    []string
 		Breadcrumbs    []breadcrumb
 		Path           string
-		SessionDetails Session
+		Session        Session
 	}{
 		channelsActive,
 		channelActive,
@@ -1286,7 +1286,7 @@ func (us *uiService) ListThingsByChannel(s Session, channelID string, page, limi
 		Limit          int
 		Permissions    []string
 		Breadcrumbs    []breadcrumb
-		SessionDetails Session
+		Session        Session
 	}{
 		channelsActive,
 		channelsActive,
@@ -1407,7 +1407,7 @@ func (us *uiService) ListChannelUsers(s Session, id, relation string, page, limi
 		TabActive      string
 		Permissions    []string
 		Breadcrumbs    []breadcrumb
-		SessionDetails Session
+		Session        Session
 	}{
 		channelsActive,
 		channelsActive,
@@ -1481,7 +1481,7 @@ func (us *uiService) ListChannelUserGroups(s Session, id string, page, limit uin
 		Limit          int
 		Permissions    []string
 		Breadcrumbs    []breadcrumb
-		SessionDetails Session
+		Session        Session
 	}{
 		channelsActive,
 		channelsActive,
@@ -1554,7 +1554,7 @@ func (us *uiService) ListGroupUsers(s Session, id, relation string, page, limit 
 		TabActive      string
 		Permissions    []string
 		Breadcrumbs    []breadcrumb
-		SessionDetails Session
+		Session        Session
 	}{
 		groupsActive,
 		groupsActive,
@@ -1622,7 +1622,7 @@ func (us *uiService) ViewGroup(s Session, id string) (b []byte, err error) {
 		Permissions    []string
 		Breadcrumbs    []breadcrumb
 		Path           string
-		SessionDetails Session
+		Session        Session
 	}{
 		groupsActive,
 		groupActive,
@@ -1678,7 +1678,7 @@ func (us *uiService) ListGroups(s Session, status string, page, limit uint64) ([
 		Breadcrumbs    []breadcrumb
 		StatusOptions  []string
 		Status         string
-		SessionDetails Session
+		Session        Session
 	}{
 		groupsActive,
 		groupsActive,
@@ -1751,7 +1751,7 @@ func (us *uiService) ListUserGroupChannels(s Session, id string, page, limit uin
 		Limit          int
 		Permissions    []string
 		Breadcrumbs    []breadcrumb
-		SessionDetails Session
+		Session        Session
 	}{
 		groupsActive,
 		groupsActive,
@@ -1801,7 +1801,7 @@ func (us *uiService) ReadMessages(s Session, channelID, thingKey string, page, l
 		Pages          int
 		Limit          int
 		Breadcrumbs    []breadcrumb
-		SessionDetails Session
+		Session        Session
 	}{
 		thingsActive,
 		readMessagesActive,
@@ -1887,7 +1887,7 @@ func (us *uiService) ListBootstrap(s Session, page, limit uint64) ([]byte, error
 		Pages          int
 		Limit          int
 		Breadcrumbs    []breadcrumb
-		SessionDetails Session
+		Session        Session
 	}{
 		bootstrapsActive,
 		bootstrapsActive,
@@ -1984,7 +1984,7 @@ func (us *uiService) ViewBootstrap(s Session, thingID string) ([]byte, error) {
 		Bootstrap      sdk.BootstrapConfig
 		Thing          sdk.Thing
 		Breadcrumbs    []breadcrumb
-		SessionDetails Session
+		Session        Session
 	}{
 		bootstrapsActive,
 		bootstrapsActive,
@@ -2014,7 +2014,7 @@ func (us *uiService) GetRemoteTerminal(s Session, thingID string) (b []byte, err
 		CollapseActive string
 		ThingID        string
 		Breadcrumbs    []breadcrumb
-		SessionDetails Session
+		Session        Session
 	}{
 		bootstrapsActive,
 		bootstrapsActive,
@@ -2213,7 +2213,7 @@ func (us *uiService) ListDomains(s Session, status string, page, limit uint64) (
 		Breadcrumbs    []breadcrumb
 		StatusOptions  []string
 		Status         string
-		SessionDetails Session
+		Session        Session
 	}{
 		domainsActive,
 		domainsActive,
@@ -2267,7 +2267,7 @@ func (us *uiService) Domain(s Session) ([]byte, error) {
 		Breadcrumbs    []breadcrumb
 		Permissions    []string
 		Path           string
-		SessionDetails Session
+		Session        Session
 	}{
 		domainActive,
 		domainActive,
@@ -2337,7 +2337,7 @@ func (us *uiService) ViewMember(s Session, userIdentity string) (b []byte, err e
 		CollapseActive string
 		User           sdk.User
 		Breadcrumbs    []breadcrumb
-		SessionDetails Session
+		Session        Session
 	}{
 		membersActive,
 		domainActive,
@@ -2382,7 +2382,7 @@ func (us *uiService) Members(s Session, page, limit uint64) ([]byte, error) {
 		Pages          int
 		Limit          int
 		Breadcrumbs    []breadcrumb
-		SessionDetails Session
+		Session        Session
 	}{
 		membersActive,
 		domainActive,
@@ -2451,7 +2451,7 @@ func (us *uiService) Invitations(s Session, domainID string, page, limit uint64)
 		Pages          int
 		Limit          int
 		Breadcrumbs    []breadcrumb
-		SessionDetails Session
+		Session        Session
 	}{
 		navbarActive,
 		collapseActive,
@@ -2539,7 +2539,7 @@ func (us *uiService) ViewDashboard(s Session, dashboardID string) ([]byte, error
 		Charts         []Item
 		Dashboard      Dashboard
 		Breadcrumbs    []breadcrumb
-		SessionDetails Session
+		Session        Session
 	}{
 		dashboardsActive,
 		dashboardsActive,
@@ -2599,7 +2599,7 @@ func (us *uiService) Dashboards(s Session) (b []byte, err error) {
 		NavbarActive   string
 		CollapseActive string
 		Breadcrumbs    []breadcrumb
-		SessionDetails Session
+		Session        Session
 	}{
 		dashboardsActive,
 		dashboardsActive,

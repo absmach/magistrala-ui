@@ -82,7 +82,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         {{ end }}"
       >
         <i class="fa-solid fa-building"></i>
-        <span id="domainName">{{ .SessionDetails.Domain.Name }}</span>
+        <span id="domainName">{{ .Session.Domain.Name }}</span>
       </a>
       <div
         class="collapse {{ if eq .CollapseActive $collapseActive }}
@@ -96,7 +96,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <a
               class="nav-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
               id="domain"
-              href="/domains/{{ .SessionDetails.Domain.ID }}"
+              href="/domains/{{ .Session.Domain.ID }}"
             >
               <i class="fa-solid fa-building"></i>
               <span>Domain</span>
@@ -105,7 +105,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <li class="nav-item mb-2 mx-2">
             {{ $navbarActive = "members" }}
             <a
-              href="/domains/{{ .SessionDetails.Domain.ID }}/members"
+              href="/domains/{{ .Session.Domain.ID }}/members"
               id="members"
               class="nav-link  {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
             >
@@ -116,7 +116,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <li class="nav-item mb-2 mx-2">
             {{ $navbarActive = "domaininvitations" }}
             <a
-              href="/invitations?domain={{ .SessionDetails.Domain.ID }}"
+              href="/invitations?domain={{ .Session.Domain.ID }}"
               class="nav-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
               id="domainInvitations"
             >
@@ -241,11 +241,11 @@ SPDX-License-Identifier: Apache-2.0 -->
               aria-expanded="false"
               id="domainName"
             >
-              {{ .SessionDetails.Domain.Name }}
+              {{ .Session.Domain.Name }}
             </a>
             <ul class="dropdown-menu dropdown-menu-md-end mt-2 p-3">
               <li class="text-center fw-bold">
-                <span class="drop-item" id="domainName">{{ .SessionDetails.Domain.Name }}</span>
+                <span class="drop-item" id="domainName">{{ .Session.Domain.Name }}</span>
               </li>
               <li><hr class="dropdown-divider" /></li>
               <li>
@@ -284,9 +284,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <i class="fa-regular fa-user fs-2"></i>
                 </div>
                 <div>
-                  <span class="dropdown-item" id="username">{{ .SessionDetails.User.Name }}</span>
+                  <span class="dropdown-item" id="username">{{ .Session.User.Name }}</span>
                   <span class="dropdown-item text-muted" id="identity">
-                    {{ .SessionDetails.User.Identity }}
+                    {{ .Session.User.Identity }}
                   </span>
                 </div>
               </li>
@@ -392,17 +392,17 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script src="/js/cookie.js"></script>
   <script defer>
     try {
-      let userID = '{{.SessionDetails.User.ID}}';
-      let role = '{{.SessionDetails.User.Role}}';
-      let loginStatus = '{{.SessionDetails.LoginStatus}}';
+      let userID = '{{.Session.User.ID}}';
+      let role = '{{.Session.User.Role}}';
+      let loginStatus = '{{.Session.LoginStatus}}';
       let domainID, domainName, domainPermissions;
 
       if (role !== "admin") {
       document.getElementById("users-nav-items").style.display = "none";
     }
       if (loginStatus === "domain") {
-        domainPermissions = '{{.SessionDetails.Domain.Permissions}}';
-        domainID = '{{.SessionDetails.Domain.ID}}';
+        domainPermissions = '{{.Session.Domain.Permissions}}';
+        domainID = '{{.Session.Domain.ID}}';
       }
 
       if (loginStatus !== "domain") {
