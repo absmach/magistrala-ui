@@ -14,9 +14,9 @@ TIME ?= $(shell date +%F_%T)
 define compile_service
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) GOARM=$(GOARM) \
 	go build -ldflags "-s -w \
-	-X 'github.com/absmach/magistrala-ui.BuildTime=$(TIME)' \
-	-X 'github.com/absmach/magistrala-ui.Version=$(VERSION)' \
-	-X 'github.com/absmach/magistrala-ui.Commit=$(COMMIT)'" \
+	-X 'github.com/absmach/magistrala.BuildTime=$(TIME)' \
+	-X 'github.com/absmach/magistrala.Version=$(VERSION)' \
+	-X 'github.com/absmach/magistrala.Commit=$(COMMIT)'" \
 	-o ${BUILD_DIR}/$(SVC) cmd/$(SVC)/main.go
 endef
 
