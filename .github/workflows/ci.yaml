@@ -32,17 +32,12 @@ jobs:
         run: npm install
 
       - name: Run Prettier
-        id: prettier-run
-        uses: rutajdash/prettier-cli-action@v1.0.2
-        with:
-          config_path: ./.prettierrc
-
-      - name: Prettier Output
-        if: ${{ failure() }}
-        shell: bash
         run: |
-          echo "The following files are not formatted:"
-          echo "${{steps.prettier-run.outputs.prettier_output}}"
+          npx prettier --config .prettierrc --plugin prettier-plugin-go-template --check .
+          if [ $? -ne 0 ]; then
+            echo "The following files are not formatted:"
+            npx prettier --config .prettierrc --plugin prettier-plugin-go-template --list-different .
+          fi
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v4

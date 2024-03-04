@@ -40,7 +40,6 @@ linters-settings:
     field-writes-are-uses: false
     generated-is-used: false
 
-
 linters:
   disable-all: true
   enable:
