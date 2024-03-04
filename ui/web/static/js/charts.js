@@ -1,10 +1,32 @@
 // Copyright (c) Abstract Machines
 // SPDX-License-Identifier: Apache-2.0
 
-class AlarmCount {
-  constructor(chartData, widgetID) {
-    this.chartData = chartData;
+class Chart {
+  constructor(widgetID, chartData) {
     this.ID = widgetID;
+    this.chartData = chartData;
+  }
+}
+
+class Echart extends Chart {
+  constructor(widgetID, chartData) {
+    super(widgetID, chartData);
+    this.Style = {
+      width: "400px",
+      height: "400px",
+    };
+    this.Content = this.#generateContent();
+  }
+  #generateContent() {
+    return `
+      <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
+      </div>
+      `;
+  }
+}
+class AlarmCount extends Chart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
     this.Style = {
       width: "400px",
       height: "175px",
@@ -33,10 +55,9 @@ class AlarmCount {
   }
 }
 
-class AlarmsTable {
+class AlarmsTable extends Chart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
+    super(widgetID, chartData);
     this.Style = {
       width: "400px",
       height: "200px",
@@ -81,23 +102,10 @@ class AlarmsTable {
   }
 }
 
-class AreaLineChart {
+class AreaLineChart extends Echart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
-    this.Style = {
-      width: "450px",
-      height: "450px",
-    };
-    this.Content = this.#generateContent();
+    super(widgetID, chartData);
     this.Script = this.#generateScript();
-  }
-
-  #generateContent() {
-    return `
-    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
-    </div>
-    `;
   }
 
   #generateScript() {
@@ -191,23 +199,10 @@ class AreaLineChart {
   }
 }
 
-class TimeSeriesBarChart {
+class TimeSeriesBarChart extends Echart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
-    this.Style = {
-      width: "400px",
-      height: "400px",
-    };
-    this.Content = this.#generateContent();
+    super(widgetID, chartData);
     this.Script = this.#generateScript();
-  }
-
-  #generateContent() {
-    return `
-    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
-    </div>
-    `;
   }
 
   #generateScript() {
@@ -249,23 +244,10 @@ class TimeSeriesBarChart {
   }
 }
 
-class DonutChart {
+class DonutChart extends Echart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
-    this.Style = {
-      width: "400px",
-      height: "400px",
-    };
-    this.Content = this.#generateContent();
+    super(widgetID, chartData);
     this.Script = this.#generateScript();
-  }
-
-  #generateContent() {
-    return `
-    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
-    </div>
-    `;
   }
 
   #generateScript() {
@@ -318,23 +300,10 @@ class DonutChart {
   }
 }
 
-class DoubleBarChart {
+class DoubleBarChart extends Echart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
-    this.Style = {
-      width: "450px",
-      height: "450px",
-    };
-    this.Content = this.#generateContent();
+    super(widgetID, chartData);
     this.Script = this.#generateScript();
-  }
-
-  #generateContent() {
-    return `
-    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
-    </div>
-    `;
   }
 
   #generateScript() {
@@ -422,23 +391,10 @@ class DoubleBarChart {
   }
 }
 
-class DynamicDataChart {
+class DynamicDataChart extends Echart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
-    this.Style = {
-      width: "450px",
-      height: "450px",
-    };
-    this.Content = this.#generateContent();
+    super(widgetID, chartData);
     this.Script = this.#generateScript();
-  }
-
-  #generateContent() {
-    return `
-    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
-    </div>
-    `;
   }
 
   #generateScript() {
@@ -597,10 +553,9 @@ class DynamicDataChart {
   }
 }
 
-class EntitiesTable {
+class EntitiesTable extends Chart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
+    super(widgetID, chartData);
     this.Style = {
       width: "400px",
       height: "200px",
@@ -644,10 +599,9 @@ class EntitiesTable {
   }
 }
 
-class EntityCount {
+class EntityCount extends Chart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
+    super(widgetID, chartData);
     this.Style = {
       width: "400px",
       height: "175px",
@@ -676,23 +630,10 @@ class EntityCount {
   }
 }
 
-class GaugeChart {
+class GaugeChart extends Echart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
-    this.Style = {
-      width: "400px",
-      height: "400px",
-    };
-    this.Content = this.#generateContent();
+    super(widgetID, chartData);
     this.Script = this.#generateScript();
-  }
-
-  #generateContent() {
-    return `
-    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
-    </div>
-    `;
   }
 
   #generateScript() {
@@ -749,23 +690,10 @@ class GaugeChart {
   }
 }
 
-class HorizontalBarChart {
+class HorizontalBarChart extends Echart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
-    this.Style = {
-      width: "400px",
-      height: "400px",
-    };
-    this.Content = this.#generateContent();
+    super(widgetID, chartData);
     this.Script = this.#generateScript();
-  }
-
-  #generateContent() {
-    return `
-    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
-    </div>
-    `;
   }
 
   #generateScript() {
@@ -827,10 +755,9 @@ class HorizontalBarChart {
   }
 }
 
-class LabelCard {
+class LabelCard extends Chart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
+    super(widgetID, chartData);
     this.Style = {
       width: "420px",
       height: "180px",
@@ -857,23 +784,10 @@ class LabelCard {
   }
 }
 
-class TimeSeriesLineChart {
+class TimeSeriesLineChart extends Echart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
-    this.Style = {
-      width: "400px",
-      height: "400px",
-    };
-    this.Content = this.#generateContent();
+    super(widgetID, chartData);
     this.Script = this.#generateScript();
-  }
-
-  #generateContent() {
-    return `
-    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
-    </div>
-    `;
   }
 
   #generateScript() {
@@ -920,23 +834,10 @@ class TimeSeriesLineChart {
   }
 }
 
-class MultiBarChart {
+class MultiBarChart extends Echart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
-    this.Style = {
-      width: "450px",
-      height: "450px",
-    };
-    this.Content = this.#generateContent();
+    super(widgetID, chartData);
     this.Script = this.#generateScript();
-  }
-
-  #generateContent() {
-    return `
-    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
-    </div>
-    `;
   }
 
   #generateScript() {
@@ -1125,23 +1026,10 @@ class MultiBarChart {
   }
 }
 
-class MultiGaugeChart {
+class MultiGaugeChart extends Echart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
-    this.Style = {
-      width: "400px",
-      height: "400px",
-    };
-    this.Content = this.#generateContent();
+    super(widgetID, chartData);
     this.Script = this.#generateScript();
-  }
-
-  #generateContent() {
-    return `
-    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
-    </div>
-    `;
   }
 
   #generateScript() {
@@ -1245,23 +1133,10 @@ class MultiGaugeChart {
   }
 }
 
-class MultipleLineChart {
+class MultipleLineChart extends Echart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
-    this.Style = {
-      width: "400px",
-      height: "400px",
-    };
-    this.Content = this.#generateContent();
+    super(widgetID, chartData);
     this.Script = this.#generateScript();
-  }
-
-  #generateContent() {
-    return `
-    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
-    </div>
-    `;
   }
 
   #generateScript() {
@@ -1313,23 +1188,10 @@ class MultipleLineChart {
   }
 }
 
-class PieChart {
+class PieChart extends Echart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
-    this.Style = {
-      width: "400px",
-      height: "400px",
-    };
-    this.Content = this.#generateContent();
+    super(widgetID, chartData);
     this.Script = this.#generateScript();
-  }
-
-  #generateContent() {
-    return `
-    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
-    </div>
-    `;
   }
 
   #generateScript() {
@@ -1374,10 +1236,9 @@ class PieChart {
   }
 }
 
-class ProgressBar {
+class ProgressBar extends Chart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
+    super(widgetID, chartData);
     this.Style = {
       width: "400px",
       height: "100px",
@@ -1409,23 +1270,10 @@ class ProgressBar {
   }
 }
 
-class SharedDatasetChart {
+class SharedDatasetChart extends Echart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
-    this.Style = {
-      width: "450px",
-      height: "450px",
-    };
-    this.Content = this.#generateContent();
+    super(widgetID, chartData);
     this.Script = this.#generateScript();
-  }
-
-  #generateContent() {
-    return `
-    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
-    </div>
-    `;
   }
 
   #generateScript() {
@@ -1538,23 +1386,10 @@ class SharedDatasetChart {
   }
 }
 
-class SpeedGaugeChart {
+class SpeedGaugeChart extends Echart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
-    this.Style = {
-      width: "400px",
-      height: "400px",
-    };
-    this.Content = this.#generateContent();
+    super(widgetID, chartData);
     this.Script = this.#generateScript();
-  }
-
-  #generateContent() {
-    return `
-    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
-    </div>
-    `;
   }
 
   #generateScript() {
@@ -1639,23 +1474,10 @@ class SpeedGaugeChart {
   }
 }
 
-class StackedLineChart {
+class StackedLineChart extends Echart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
-    this.Style = {
-      width: "450px",
-      height: "450px",
-    };
-    this.Content = this.#generateContent();
+    super(widgetID, chartData);
     this.Script = this.#generateScript();
-  }
-
-  #generateContent() {
-    return `
-    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
-    </div>
-    `;
   }
 
   #generateScript() {
@@ -1725,23 +1547,10 @@ class StackedLineChart {
   }
 }
 
-class StepChart {
+class StepChart extends Echart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
-    this.Style = {
-      width: "450px",
-      height: "450px",
-    };
-    this.Content = this.#generateContent();
+    super(widgetID, chartData);
     this.Script = this.#generateScript();
-  }
-
-  #generateContent() {
-    return `
-    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
-    </div>
-    `;
   }
 
   #generateScript() {
@@ -1809,23 +1618,10 @@ class StepChart {
   }
 }
 
-class TempGaugeChart {
+class TempGaugeChart extends Echart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
-    this.Style = {
-      width: "450px",
-      height: "450px",
-    };
-    this.Content = this.#generateContent();
+    super(widgetID, chartData);
     this.Script = this.#generateScript();
-  }
-
-  #generateContent() {
-    return `
-    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
-    </div>
-    `;
   }
 
   #generateScript() {
@@ -1975,10 +1771,9 @@ class TempGaugeChart {
   }
 }
 
-class ValueCard {
+class ValueCard extends Chart {
   constructor(chartData, widgetID) {
-    this.chartData = chartData;
-    this.ID = widgetID;
+    super(widgetID, chartData);
     this.Style = {
       width: "400px",
       height: "200px",
