@@ -9,9 +9,12 @@ class AlarmCount {
       width: "400px",
       height: "175px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
-    this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    this.Content = this.#generateContent();
+  }
+
+  #generateContent() {
+    return `
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     <div class="card widgetcard">
         <div class="card-header text-center">
           <h5 class="card-title">Alarm Count</h5>
@@ -38,9 +41,12 @@ class AlarmsTable {
       width: "400px",
       height: "200px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
-    this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    this.Content = this.#generateContent();
+  }
+
+  #generateContent() {
+    return `
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
         <div class="card mt-3 widgetcard">
           <div class="card-header text-center">
             <h5 class="card-title">Alarms Table</h5>
@@ -83,9 +89,8 @@ class AreaLineChart {
       width: "450px",
       height: "450px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
     this.Script = `
@@ -186,9 +191,8 @@ class TimeSeriesBarChart {
       width: "400px",
       height: "400px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
     this.Script = `
@@ -237,9 +241,8 @@ class DonutChart {
       width: "400px",
       height: "400px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
     this.Script = `
@@ -299,9 +302,8 @@ class DoubleBarChart {
       width: "450px",
       height: "450px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
     let seriesName = this.chartData.seriesName.split(",");
@@ -396,9 +398,8 @@ class DynamicDataChart {
       width: "450px",
       height: "450px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
     this.Script = `
@@ -564,9 +565,12 @@ class EntitiesTable {
       width: "400px",
       height: "200px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
-    this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    this.Content = this.#generateContent();
+  }
+
+  #generateContent() {
+    return `
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
   <div class="card mt-3 widgetcard">
     <div class="card-header text-center">
       <h5 class="card-title">Entities Table</h5>
@@ -597,38 +601,6 @@ class EntitiesTable {
     </table>
   </div>
   `;
-    `
-      <div class="card mt-3 widgetcard">
-        <div class="card-header text-center">
-          <h5 class="card-title">Entities Table</h5>
-        </div>
-        <table class="table table-striped table-hover">
-          <thead>
-              <tr>
-                  <th scope="col">Name</th>
-                  <th scope="col">Owner</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Time Created</th>
-              </tr>
-          </thead>
-          <tbody>
-              <tr>
-                  <td>Entity 1</td>
-                  <td>Owner A</td>
-                  <td>Enabled</td>
-                  <td>2024-01-01 12:00</td>
-              </tr>
-              <tr>
-                  <td>Entity 2</td>
-                  <td>Owner B</td>
-                  <td>Disabled</td>
-                  <td>2024-01-02 15:30</td>
-              </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-      `;
   }
 }
 
@@ -640,9 +612,12 @@ class EntityCount {
       width: "400px",
       height: "175px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
-    this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    this.Content = this.#generateContent();
+  }
+
+  #generateContent() {
+    return `
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
         <div class="card widgetcard">
           <div class="card-header text-center">
             <h5 class="card-title">Entity Count</h5>
@@ -669,9 +644,8 @@ class GaugeChart {
       width: "400px",
       height: "400px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
     this.Script = `
@@ -735,9 +709,8 @@ class HorizontalBarChart {
       width: "400px",
       height: "400px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
     this.Script = `
@@ -806,9 +779,12 @@ class LabelCard {
       width: "420px",
       height: "180px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
-    this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    this.Content = this.#generateContent();
+  }
+
+  #generateContent() {
+    return `
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     <div class="card widgetcard">
     <div class="card-header text-center">
       <h5 class="card-title">Label</h5>
@@ -833,9 +809,8 @@ class TimeSeriesLineChart {
       width: "400px",
       height: "400px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
     this.Script = `
@@ -889,9 +864,8 @@ class MultiBarChart {
       width: "450px",
       height: "450px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
     let seriesName = this.chartData.seriesName.split(",");
@@ -1087,9 +1061,8 @@ class MultiGaugeChart {
       width: "400px",
       height: "400px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
     let gaugeLabel = this.chartData.gaugeLabel.split(",");
@@ -1200,9 +1173,8 @@ class MultipleLineChart {
       width: "400px",
       height: "400px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
     let seriesName = this.chartData.seriesName.split(",");
@@ -1261,9 +1233,8 @@ class PieChart {
       width: "400px",
       height: "400px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
     this.Script = `
@@ -1315,9 +1286,12 @@ class ProgressBar {
       width: "400px",
       height: "100px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
-    this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    this.Content = this.#generateContent();
+  }
+
+  #generateContent() {
+    return `
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
         <div class="card widgetcard">
           <div class="card-header text-center">
             <h5 class="card-title">${this.chartData.title}</h5>
@@ -1347,9 +1321,8 @@ class SharedDatasetChart {
       width: "450px",
       height: "450px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
     let seriesName = this.chartData.seriesName.split(",");
@@ -1469,9 +1442,8 @@ class SpeedGaugeChart {
       width: "400px",
       height: "400px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
     this.Script = `
@@ -1563,9 +1535,8 @@ class StackedLineChart {
       width: "450px",
       height: "450px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
     let seriesName = this.chartData.seriesName.split(",");
@@ -1642,9 +1613,8 @@ class StepChart {
       width: "450px",
       height: "450px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
     let seriesName = this.chartData.seriesName.split(",");
@@ -1719,9 +1689,8 @@ class TempGaugeChart {
       width: "450px",
       height: "450px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
     this.Content = `
-    <div class="item-content" id="${this.ID}" style="${styleString}">
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     </div>
     `;
     this.Script = `
@@ -1878,8 +1847,11 @@ class ValueCard {
       width: "400px",
       height: "200px",
     };
-    let styleString = `width: ${this.Style.width}; height: ${this.Style.height};`;
-    this.Content = `
+    this.Content = this.#generateContent();
+  }
+
+  #generateContent() {
+    return `
     <div class="item-content" id="${this.ID}" style="${styleString}">
     <div class="card mt-3 widgetcard" >
       <div class="card-header text-center">
@@ -1930,11 +1902,11 @@ class Widget {
     this.chartData = chartData;
     this.widgetID = widgetID;
     this.config = new chartTypes[this.chartData.Type](chartData, widgetID);
-    this.element = this.loadChart();
+    this.element = this.createWidgetElement();
   }
 
-  loadChart() {
-    let newItem = document.createElement("div");
+  createWidgetElement() {
+    const newItem = document.createElement("div");
     newItem.className = "item";
     newItem.classList.add("item-editable");
     newItem.innerHTML = `
@@ -1952,8 +1924,10 @@ class Widget {
       scriptTag.innerHTML = this.config.Script;
       newItem.appendChild(scriptTag);
     }
-    newItem.style.minWidth = this.config.Style.width;
-    newItem.style.minHeight = this.config.Style.height;
+    Object.assign(newItem.style, {
+      minWidth: this.config.Style.width,
+      minHeight: this.config.Style.height,
+    });
     return newItem;
   }
 }

@@ -47,29 +47,15 @@ function saveLayout() {
     const itemElement = item._element;
     const itemContent = itemElement.querySelector(".item-content");
     // Extract the widget size
-    const widgetWidth = itemContent.style.width;
-    const widgetHeight = itemContent.style.height;
+    const { width, height } = itemContent.style;
 
     // Extract the widget  position
-    const positionLeft = itemElement.style.left;
-    const positionTop = itemElement.style.top;
-    const transform = itemElement.style.transform;
-    const minWidth = itemElement.style.minWidth;
-    const minHeight = itemElement.style.minHeight;
+    const { left, top, transform, minWidth, minHeight } = itemElement.style;
 
     return {
       widgetID: item._element.children[0].children[1].id,
-      widgetSize: {
-        width: widgetWidth,
-        height: widgetHeight,
-        minWidth: minWidth,
-        minHeight: minHeight,
-      },
-      widgetPosition: {
-        left: positionLeft,
-        top: positionTop,
-        transform: transform,
-      },
+      widgetSize: { width, height, minWidth, minHeight },
+      widgetPosition: { left, top, transform },
     };
   });
   const gridState = {
@@ -107,46 +93,43 @@ function saveLayout() {
 function loadLayout(savedLayout) {
   try {
     const gridState = JSON.parse(savedLayout);
-    // Clear the existing grid
     if (grid) {
       grid.destroy(true);
     }
-    // Initialize a new grid with drag enabled or disabled based on saved state
     grid = new Muuri(gridClass, {
       dragEnabled: false,
       dragHandle: ".item-content",
     });
-
     if (gridState.items.length === 0) {
       showNoWidgetPlaceholder();
     } else {
-      // Add items to the grid
-      let md = JSON.parse(metadata);
+      const metadataObj = JSON.parse(metadata);
       gridState.items.forEach((itemData) => {
-        chartData = md[itemData.widgetID];
-        wd = new Widget(chartData, itemData.widgetID);
-        const newItem = wd.element;
+        const chartData = metadataObj[itemData.widgetID];
+        const widget = new Widget(chartData, itemData.widgetID);
+        const newItem = widget.element;
         newItem.classList.remove("item-editable");
         const removeButton = newItem.querySelector("#removeItem");
         if (removeButton) {
           removeButton.style.display = "none";
         }
-        if (itemData.widgetPosition) {
-          newItem.style.position = "absolute";
-          newItem.style.left = itemData.widgetPosition.left;
-          newItem.style.top = itemData.widgetPosition.top;
-          if (itemData.widgetPosition.transform) {
-            newItem.style.transform = itemData.widgetPosition.transform;
-          }
+        const { widgetPosition, widgetSize } = itemData;
+        if (widgetPosition) {
+          Object.assign(newItem.style, {
+            position: "absolute",
+            left: widgetPosition.left,
+            top: widgetPosition.top,
+            transform: widgetPosition.transform || "",
+          });
         }
         const contentEl = newItem.querySelector(".item-content");
-        contentEl.style.width = itemData.widgetSize.width;
-        contentEl.style.height = itemData.widgetSize.height;
-
+        Object.assign(contentEl.style, {
+          width: widgetSize.width,
+          height: widgetSize.height,
+        });
         grid.add(newItem);
       });
     }
-    // Layout the grid
     grid.layout();
   } catch (error) {
     console.error("Error loading grid state:", error);
@@ -167,26 +150,28 @@ function editableCanvas() {
     });
     if (layout) {
       const gridState = JSON.parse(layout);
-
       if (gridState) {
-        let md = JSON.parse(metadata);
+        const metadataObj = JSON.parse(metadata);
         gridState.items.forEach((itemData) => {
-          chartData = md[itemData.widgetID];
-          wd = new Widget(chartData, itemData.widgetID);
-          const newItem = wd.element;
-          if (itemData.widgetPosition) {
-            newItem.style.position = "absolute";
-            newItem.style.left = itemData.widgetPosition.left;
-            newItem.style.top = itemData.widgetPosition.top;
-            newItem.style.minWidth = itemData.widgetSize.minWidth;
-            newItem.style.minHeight = itemData.widgetSize.minHeight;
-            if (itemData.widgetPosition.transform) {
-              newItem.style.transform = itemData.widgetPosition.transform;
-            }
+          const chartData = metadataObj[itemData.widgetID];
+          const widget = new Widget(chartData, itemData.widgetID);
+          const newItem = widget.element;
+          const { widgetPosition, widgetSize } = itemData;
+          if (widgetPosition) {
+            Object.assign(newItem.style, {
+              position: "absolute",
+              left: widgetPosition.left,
+              top: widgetPosition.top,
+              minWidth: widgetSize.minWidth,
+              minHeight: widgetSize.minHeight,
+              transform: widgetPosition.transform || "",
+            });
           }
           const contentEl = newItem.querySelector(".item-content");
-          contentEl.style.width = itemData.widgetSize.width;
-          contentEl.style.height = itemData.widgetSize.height;
+          Object.assign(contentEl.style, {
+            width: widgetSize.width,
+            height: widgetSize.height,
+          });
           grid.add(newItem, { layout: true });
           resizeObserver.observe(newItem);
         });
@@ -196,14 +181,12 @@ function editableCanvas() {
   } catch (error) {
     console.error("Error loading grid state:", error);
   }
-
   document.getElementById("editableCanvasButton").classList.add("display-none");
   document.getElementById("CanvasButtons").classList.remove("display-none");
   document.querySelectorAll("#removeItem").forEach((item) => {
     item.classList.remove("no-opacity");
     item.disabled = false;
   });
-
   return grid;
 }
 
