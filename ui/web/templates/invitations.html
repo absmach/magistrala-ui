@@ -46,7 +46,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                               You have been invited by
                               <span class="badge invited-pill">{{ $v.InvitedBy }}</span>
                               to join the domain
-                              <span class="badge domain-pill">{{ $v.DomainID }}</span>
+                              <span class="badge domain-pill">
+                                {{ $v.DomainID }}
+                              </span>
                               with the relation
                               <span class="badge relation-pill">{{ $v.Relation }}</span>
                             </div>
@@ -54,7 +56,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                               You have invited
                               <span class="badge invited-pill">{{ $v.UserID }}</span>
                               to join the domain
-                              <span class="badge domain-pill">{{ $v.DomainID }}</span>
+                              <span class="badge domain-pill">
+                                {{ $v.DomainID }}
+                              </span>
                               with the relation
                               <span class="badge relation-pill">{{ $v.Relation }}</span>
                             </div>
@@ -63,7 +67,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                               has been invited by
                               <span class="badge invited-pill">{{ $v.InvitedBy }}</span>
                               to join the domain
-                              <span class="badge domain-pill">{{ $v.DomainID }}</span>
+                              <span class="badge domain-pill">
+                                {{ $v.DomainID }}
+                              </span>
                               with the relation
                               <span class="badge relation-pill">{{ $v.Relation }}</span>
                             </div>
@@ -184,12 +190,16 @@ SPDX-License-Identifier: Apache-2.0 -->
 
         function openInvitationModal() {
           const domainsSelect = document.getElementById("domains-select");
-          const domainID = '{{.DomainID}}';
+          const domainID = '{{.Session.Domain.ID}}';
           if (navbarActive !== "invitations") {
             domainsSelect.innerHTML = domainsSelect.innerHTML = `<input type="hidden" name="domainID" value="${domainID}" />`;
           }
           invitationModal.show();
         }
+
+        let userID = '{{.Session.User.ID}}';
+        let domainPermissions = '{{.Session.Domain.Permissions}}';
+        let loginStatus= '{{.Session.LoginStatus}}'
 
         rows.forEach(function (row) {
           const inviter = row.querySelector(".inviter").textContent.trim();

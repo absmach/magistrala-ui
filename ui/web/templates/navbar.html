@@ -49,6 +49,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       <a
         class="nav-link sidebar-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
         id="domains"
+        href="/domains"
       >
         <i class="fa-solid fa-building"></i>
         <span>Domains</span>
@@ -81,7 +82,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         {{ end }}"
       >
         <i class="fa-solid fa-building"></i>
-        <span id="domainName"></span>
+        <span id="domainName">{{ .Session.Domain.Name }}</span>
       </a>
       <div
         class="collapse {{ if eq .CollapseActive $collapseActive }}
@@ -93,9 +94,9 @@ SPDX-License-Identifier: Apache-2.0 -->
           <li class="nav-item mb-2 mx-2">
             {{ $navbarActive = "domain" }}
             <a
-              href=""
               class="nav-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
               id="domain"
+              href="/domains/{{ .Session.Domain.ID }}"
             >
               <i class="fa-solid fa-building"></i>
               <span>Domain</span>
@@ -104,7 +105,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <li class="nav-item mb-2 mx-2">
             {{ $navbarActive = "members" }}
             <a
-              href=""
+              href="/domains/{{ .Session.Domain.ID }}/members"
               id="members"
               class="nav-link  {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
             >
@@ -115,7 +116,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <li class="nav-item mb-2 mx-2">
             {{ $navbarActive = "domaininvitations" }}
             <a
-              href=""
+              href="/invitations?domain={{ .Session.Domain.ID }}"
               class="nav-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
               id="domainInvitations"
             >
@@ -239,10 +240,12 @@ SPDX-License-Identifier: Apache-2.0 -->
               data-bs-display="static"
               aria-expanded="false"
               id="domainName"
-            ></a>
+            >
+              {{ .Session.Domain.Name }}
+            </a>
             <ul class="dropdown-menu dropdown-menu-md-end mt-2 p-3">
               <li class="text-center fw-bold">
-                <span class="drop-item" id="domainName"></span>
+                <span class="drop-item" id="domainName">{{ .Session.Domain.Name }}</span>
               </li>
               <li><hr class="dropdown-divider" /></li>
               <li>
@@ -258,7 +261,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               </li>
               <li><hr class="dropdown-divider" /></li>
               <li>
-                <a class="dropdown-item user-item-button p-2 mb-2" id="domains">
+                <a class="dropdown-item user-item-button p-2 mb-2" id="domains" href="/domains">
                   <i class="fa-solid fa-repeat"></i>
                   Switch Domain
                 </a>
@@ -281,8 +284,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <i class="fa-regular fa-user fs-2"></i>
                 </div>
                 <div>
-                  <span class="dropdown-item" id="username"></span>
-                  <span class="dropdown-item text-muted" id="identity"></span>
+                  <span class="dropdown-item" id="username">{{ .Session.User.Name }}</span>
+                  <span class="dropdown-item text-muted" id="identity">
+                    {{ .Session.User.Identity }}
+                  </span>
                 </div>
               </li>
               <li class="mb-2"><hr class="dropdown-divider" /></li>
@@ -304,6 +309,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   </nav>
 
   {{ template "metadatamodal" }}
+
 
   <!-- Modal -->
   <div
@@ -386,24 +392,18 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script src="/js/cookie.js"></script>
   <script defer>
     try {
-      let sessionDetails = JSON.parse(atob(getCookie("session_details")));
-      let name = sessionDetails.user.name;
-      let identity = sessionDetails.user.identity;
-      let userID = sessionDetails.user.id;
-      let role = sessionDetails.user.role;
-      let loginStatus = sessionDetails.login_status;
+      let userID = '{{.Session.User.ID}}';
+      let role = '{{.Session.User.Role}}';
+      let loginStatus = '{{.Session.LoginStatus}}';
       let domainID, domainName, domainPermissions;
-      if (loginStatus === "domain") {
-        domainName = sessionDetails.domain.name;
-        domainID = sessionDetails.domain.id;
-        domainPermissions = sessionDetails.domain.permissions;
-      }
 
-      document.getElementById("username").innerHTML = name;
-      document.getElementById("identity").innerHTML = identity;
-      document.querySelectorAll("#domains").forEach((element) => {
-        element.href = "/domains";
-      });
+      if (role !== "admin") {
+      document.getElementById("users-nav-items").style.display = "none";
+    }
+      if (loginStatus === "domain") {
+        domainPermissions = '{{.Session.Domain.Permissions}}';
+        domainID = '{{.Session.Domain.ID}}';
+      }
 
       if (loginStatus !== "domain") {
         document.getElementById("domain-nav-item").style.display = "none";
@@ -412,12 +412,6 @@ SPDX-License-Identifier: Apache-2.0 -->
         document.getElementById("domain-header-dropdown").style.display = "none";
       } else {
         document.getElementById("domains-sidebar-link").style.display = "none";
-        document.getElementById("domain").href = "/domains/" + domainID;
-        document.getElementById("members").href = "/domains/" + domainID + "/members";
-        document.getElementById("domainInvitations").href = "/invitations?domain=" + domainID;
-        document.querySelectorAll("#domainName").forEach((element) => {
-          element.innerHTML = domainName;
-        });
         if (!domainPermissions.includes("admin")) {
           document.getElementById("domainInvitations").style.display = "none";
         }

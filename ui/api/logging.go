@@ -25,7 +25,7 @@ func LoggingMiddleware(svc ui.Service, logger *slog.Logger) ui.Service {
 }
 
 // Index adds logging middleware to index method.
-func (lm *loggingMiddleware) Index(token string) (b []byte, err error) {
+func (lm *loggingMiddleware) Index(s ui.Session) (b []byte, err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
@@ -35,7 +35,7 @@ func (lm *loggingMiddleware) Index(token string) (b []byte, err error) {
 		lm.logger.Info("View index page completed successfully", duration)
 	}(time.Now())
 
-	return lm.svc.Index(token)
+	return lm.svc.Index(s)
 }
 
 // ViewRegistration adds logging middleware to view registration method.
@@ -134,7 +134,7 @@ func (lm *loggingMiddleware) ShowPasswordReset() (b []byte, err error) {
 }
 
 // PasswordUpdate adds logging middleware to password update method.
-func (lm *loggingMiddleware) PasswordUpdate() (b []byte, err error) {
+func (lm *loggingMiddleware) PasswordUpdate(s ui.Session) (b []byte, err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
@@ -144,7 +144,7 @@ func (lm *loggingMiddleware) PasswordUpdate() (b []byte, err error) {
 		lm.logger.Info("View password update page completed successfully", duration)
 	}(time.Now())
 
-	return lm.svc.PasswordUpdate()
+	return lm.svc.PasswordUpdate(s)
 }
 
 // UpdatePassword adds logging middleware to update password method.
@@ -190,12 +190,11 @@ func (lm *loggingMiddleware) RefreshToken(refreshToken string) (token sdk.Token,
 }
 
 // Session adds logging middleware to session details method.
-func (lm *loggingMiddleware) Session(token, session, domainID string) (s string, err error) {
+func (lm *loggingMiddleware) Session(s ui.Session) (session ui.Session, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
-			slog.String("domain_id", domainID),
-			slog.String("session", session),
+			slog.Any("session_user", s.User),
 		}
 
 		if err != nil {
@@ -206,7 +205,7 @@ func (lm *loggingMiddleware) Session(token, session, domainID string) (s string,
 		lm.logger.Info("Session completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.Session(token, session, domainID)
+	return lm.svc.Session(s)
 }
 
 // CreateUsers adds logging middleware to create users method.
@@ -228,7 +227,7 @@ func (lm *loggingMiddleware) CreateUsers(token string, users ...sdk.User) (err e
 }
 
 // ListUsers adds logging middleware to list users method.
-func (lm *loggingMiddleware) ListUsers(token, status string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListUsers(s ui.Session, status string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -244,11 +243,11 @@ func (lm *loggingMiddleware) ListUsers(token, status string, page, limit uint64)
 		lm.logger.Info("List users completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ListUsers(token, status, page, limit)
+	return lm.svc.ListUsers(s, status, page, limit)
 }
 
 // ViewUser adds logging middleware to view user method.
-func (lm *loggingMiddleware) ViewUser(token, id string) (b []byte, err error) {
+func (lm *loggingMiddleware) ViewUser(s ui.Session, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -262,7 +261,7 @@ func (lm *loggingMiddleware) ViewUser(token, id string) (b []byte, err error) {
 		lm.logger.Info("View user completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ViewUser(token, id)
+	return lm.svc.ViewUser(s, id)
 }
 
 // UpdateUser adds logging middleware to update user method.
@@ -405,7 +404,7 @@ func (lm *loggingMiddleware) CreateThings(token string, things ...sdk.Thing) (er
 }
 
 // ListThings adds logging middleware to list things method.
-func (lm *loggingMiddleware) ListThings(token, status string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListThings(s ui.Session, status string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -421,11 +420,11 @@ func (lm *loggingMiddleware) ListThings(token, status string, page, limit uint64
 		lm.logger.Info("List things completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ListThings(token, status, page, limit)
+	return lm.svc.ListThings(s, status, page, limit)
 }
 
 // ViewThing adds logging middleware to view thing method.
-func (lm *loggingMiddleware) ViewThing(token, id string) (b []byte, err error) {
+func (lm *loggingMiddleware) ViewThing(s ui.Session, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -439,7 +438,7 @@ func (lm *loggingMiddleware) ViewThing(token, id string) (b []byte, err error) {
 		lm.logger.Info("View thing completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ViewThing(token, id)
+	return lm.svc.ViewThing(s, id)
 }
 
 // UpdateThing adds logging middleware to update thing method.
@@ -573,7 +572,7 @@ func (lm *loggingMiddleware) UnshareThing(token, thingID string, req sdk.UsersRe
 }
 
 // ListThingUsers adds logging middleware to list thing users method.
-func (lm *loggingMiddleware) ListThingUsers(token, id, relation string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListThingUsers(s ui.Session, id, relation string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -590,11 +589,11 @@ func (lm *loggingMiddleware) ListThingUsers(token, id, relation string, page, li
 		lm.logger.Info("List thing users completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ListThingUsers(token, id, relation, page, limit)
+	return lm.svc.ListThingUsers(s, id, relation, page, limit)
 }
 
 // ListChannelsByThing adds logging middleware to list channels by thing method.
-func (lm *loggingMiddleware) ListChannelsByThing(token, id string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListChannelsByThing(s ui.Session, id string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -610,7 +609,7 @@ func (lm *loggingMiddleware) ListChannelsByThing(token, id string, page, limit u
 		lm.logger.Info("List channels by thing completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ListChannelsByThing(token, id, page, limit)
+	return lm.svc.ListChannelsByThing(s, id, page, limit)
 }
 
 // CreateChannel adds logging middleware to create channel method.
@@ -646,7 +645,7 @@ func (lm *loggingMiddleware) CreateChannels(token string, channels ...sdk.Channe
 }
 
 // ListChannels adds logging middleware to list channels method.
-func (lm *loggingMiddleware) ListChannels(token, status string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListChannels(s ui.Session, status string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -662,11 +661,11 @@ func (lm *loggingMiddleware) ListChannels(token, status string, page, limit uint
 		lm.logger.Info("List channels completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ListChannels(token, status, page, limit)
+	return lm.svc.ListChannels(s, status, page, limit)
 }
 
 // ViewChannel adds logging middleware to view channel method.
-func (lm *loggingMiddleware) ViewChannel(token, id string) (b []byte, err error) {
+func (lm *loggingMiddleware) ViewChannel(s ui.Session, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -680,7 +679,7 @@ func (lm *loggingMiddleware) ViewChannel(token, id string) (b []byte, err error)
 		lm.logger.Info("View channel completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ViewChannel(token, id)
+	return lm.svc.ViewChannel(s, id)
 }
 
 // UpdateChannel adds logging middleware to update channel method.
@@ -702,7 +701,7 @@ func (lm *loggingMiddleware) UpdateChannel(token string, channel sdk.Channel) (e
 }
 
 // ListThingsByChannel adds logging middleware to list things by channel method.
-func (lm *loggingMiddleware) ListThingsByChannel(token, id string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListThingsByChannel(s ui.Session, id string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -718,7 +717,7 @@ func (lm *loggingMiddleware) ListThingsByChannel(token, id string, page, limit u
 		lm.logger.Info("List things by channel completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ListThingsByChannel(token, id, page, limit)
+	return lm.svc.ListThingsByChannel(s, id, page, limit)
 }
 
 // EnableChannel adds logging middleware to enable channel method.
@@ -874,7 +873,7 @@ func (lm *loggingMiddleware) RemoveUserFromChannel(token, channelID string, req 
 }
 
 // ListChannelUsers adds logging middleware to list channel users method.
-func (lm *loggingMiddleware) ListChannelUsers(token, channelID, relation string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListChannelUsers(s ui.Session, channelID, relation string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -891,7 +890,7 @@ func (lm *loggingMiddleware) ListChannelUsers(token, channelID, relation string,
 		lm.logger.Info("List channel users completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ListChannelUsers(token, channelID, relation, page, limit)
+	return lm.svc.ListChannelUsers(s, channelID, relation, page, limit)
 }
 
 // AddUserGroupToChannel adds logging middleware to add usergroup to channel method.
@@ -933,7 +932,7 @@ func (lm *loggingMiddleware) RemoveUserGroupFromChannel(token, channelID string,
 }
 
 // ListChannelUserGroups adds logging middleware to list channel user groups method.
-func (lm *loggingMiddleware) ListChannelUserGroups(token, id string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListChannelUserGroups(s ui.Session, id string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -949,7 +948,7 @@ func (lm *loggingMiddleware) ListChannelUserGroups(token, id string, page, limit
 		lm.logger.Info("List channel usergroups completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ListChannelUserGroups(token, id, page, limit)
+	return lm.svc.ListChannelUserGroups(s, id, page, limit)
 }
 
 // CreateGroups adds logging middleware to create groups method.
@@ -971,7 +970,7 @@ func (lm *loggingMiddleware) CreateGroups(token string, groups ...sdk.Group) (er
 }
 
 // ListGroupUsers adds logging middleware to list group users method.
-func (lm *loggingMiddleware) ListGroupUsers(token, id, relation string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListGroupUsers(s ui.Session, id, relation string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -988,7 +987,7 @@ func (lm *loggingMiddleware) ListGroupUsers(token, id, relation string, page, li
 		lm.logger.Info("List group users completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ListGroupUsers(token, id, relation, page, limit)
+	return lm.svc.ListGroupUsers(s, id, relation, page, limit)
 }
 
 // Assign adds logging middleware to assign method.
@@ -1032,7 +1031,7 @@ func (lm *loggingMiddleware) Unassign(token, groupID string, userRelation sdk.Us
 }
 
 // ViewGroup adds logging middleware to view group method.
-func (lm *loggingMiddleware) ViewGroup(token, id string) (b []byte, err error) {
+func (lm *loggingMiddleware) ViewGroup(s ui.Session, id string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -1046,7 +1045,7 @@ func (lm *loggingMiddleware) ViewGroup(token, id string) (b []byte, err error) {
 		lm.logger.Info("View group completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ViewGroup(token, id)
+	return lm.svc.ViewGroup(s, id)
 }
 
 // UpdateGroup adds logging middleware to update group method.
@@ -1068,7 +1067,7 @@ func (lm *loggingMiddleware) UpdateGroup(token string, group sdk.Group) (err err
 }
 
 // ListGroups adds logging middleware to list groups method.
-func (lm *loggingMiddleware) ListGroups(token, status string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListGroups(s ui.Session, status string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -1084,7 +1083,7 @@ func (lm *loggingMiddleware) ListGroups(token, status string, page, limit uint64
 		lm.logger.Info("List groups completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ListGroups(token, status, page, limit)
+	return lm.svc.ListGroups(s, status, page, limit)
 }
 
 // EnableGroup adds logging middleware to enable group method.
@@ -1124,7 +1123,7 @@ func (lm *loggingMiddleware) DisableGroup(token, id string) (err error) {
 }
 
 // ListUserGroupChannels adds logging middleware to list usergroup channels method.
-func (lm *loggingMiddleware) ListUserGroupChannels(token, id string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListUserGroupChannels(s ui.Session, id string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -1140,7 +1139,7 @@ func (lm *loggingMiddleware) ListUserGroupChannels(token, id string, page, limit
 		lm.logger.Info("List usergroup channels completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ListUserGroupChannels(token, id, page, limit)
+	return lm.svc.ListUserGroupChannels(s, id, page, limit)
 }
 
 // Publish adds logging middleware to publish method.
@@ -1162,7 +1161,7 @@ func (lm *loggingMiddleware) Publish(channelID, thingKey string, message ui.Mess
 }
 
 // ReadMessages adds logging middleware to read messages method.
-func (lm *loggingMiddleware) ReadMessages(token, channelID, thingKey string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ReadMessages(s ui.Session, channelID, thingKey string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -1178,7 +1177,7 @@ func (lm *loggingMiddleware) ReadMessages(token, channelID, thingKey string, pag
 		lm.logger.Info("Read messages completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ReadMessages(token, channelID, thingKey, page, limit)
+	return lm.svc.ReadMessages(s, channelID, thingKey, page, limit)
 }
 
 // CreateBootstrap adds logging middleware to create bootstrap method.
@@ -1196,7 +1195,7 @@ func (lm *loggingMiddleware) CreateBootstrap(token string, config ...sdk.Bootstr
 }
 
 // ListBootstrap adds logging middleware to list bootstrap method.
-func (lm *loggingMiddleware) ListBootstrap(token string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListBootstrap(s ui.Session, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -1211,7 +1210,7 @@ func (lm *loggingMiddleware) ListBootstrap(token string, page, limit uint64) (b 
 		lm.logger.Info("List bootstraps completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ListBootstrap(token, page, limit)
+	return lm.svc.ListBootstrap(s, page, limit)
 }
 
 // UpdateBootstrap adds logging middleware to update bootstrap method.
@@ -1307,7 +1306,7 @@ func (lm *loggingMiddleware) UpdateBootstrapState(token string, config sdk.Boots
 }
 
 // ViewBootstrap adds logging middleware to view bootstrap method.
-func (lm *loggingMiddleware) ViewBootstrap(token string, thingID string) (b []byte, err error) {
+func (lm *loggingMiddleware) ViewBootstrap(s ui.Session, thingID string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -1321,11 +1320,11 @@ func (lm *loggingMiddleware) ViewBootstrap(token string, thingID string) (b []by
 		lm.logger.Info("View bootstrap completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ViewBootstrap(token, thingID)
+	return lm.svc.ViewBootstrap(s, thingID)
 }
 
 // GetRemoteTerminal adds logging middleware to remote terminal.
-func (lm *loggingMiddleware) GetRemoteTerminal(thingID string) (res []byte, err error) {
+func (lm *loggingMiddleware) GetRemoteTerminal(s ui.Session, thingID string) (res []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -1339,7 +1338,7 @@ func (lm *loggingMiddleware) GetRemoteTerminal(thingID string) (res []byte, err 
 		lm.logger.Info("View remote terminal completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.GetRemoteTerminal(thingID)
+	return lm.svc.GetRemoteTerminal(s, thingID)
 }
 
 // ProcessTerminalCommand adds logging middleware to async function ProcessTerminalCommand.
@@ -1419,7 +1418,7 @@ func (lm *loggingMiddleware) DomainLogin(login sdk.Login, refreshToken string) (
 }
 
 // ListDomains adds logging middleware to list domains method.
-func (lm *loggingMiddleware) ListDomains(token, status string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ListDomains(s ui.Session, status string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -1434,7 +1433,7 @@ func (lm *loggingMiddleware) ListDomains(token, status string, page, limit uint6
 		lm.logger.Info("List domains completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ListDomains(token, status, page, limit)
+	return lm.svc.ListDomains(s, status, page, limit)
 }
 
 // CreateDomain adds logging middleware to create domain method.
@@ -1468,11 +1467,11 @@ func (lm *loggingMiddleware) UpdateDomain(token string, domain sdk.Domain) (err 
 }
 
 // Domain adds logging middleware to domain method.
-func (lm *loggingMiddleware) Domain(token, id string) (b []byte, err error) {
+func (lm *loggingMiddleware) Domain(s ui.Session) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
-			slog.String("domain_id", id),
+			slog.Any("domain", s.Domain),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
@@ -1481,7 +1480,7 @@ func (lm *loggingMiddleware) Domain(token, id string) (b []byte, err error) {
 		lm.logger.Info("View domain completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.Domain(token, id)
+	return lm.svc.Domain(s)
 }
 
 // EnableDomain adds logging middleware to enable domain method.
@@ -1561,7 +1560,7 @@ func (lm *loggingMiddleware) UnassignMember(token, domainID string, req sdk.User
 }
 
 // ViewMember adds logging middleware to view member method.
-func (lm *loggingMiddleware) ViewMember(token, identity string) (b []byte, err error) {
+func (lm *loggingMiddleware) ViewMember(s ui.Session, identity string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
@@ -1571,15 +1570,15 @@ func (lm *loggingMiddleware) ViewMember(token, identity string) (b []byte, err e
 		lm.logger.Info("View member completed successfully", duration)
 	}(time.Now())
 
-	return lm.svc.ViewMember(token, identity)
+	return lm.svc.ViewMember(s, identity)
 }
 
 // Members adds logging middleware to members method.
-func (lm *loggingMiddleware) Members(token, domainID string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) Members(s ui.Session, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
-			slog.String("domain_id", domainID),
+			slog.Any("domain", s.Domain),
 			slog.Uint64("page", page),
 			slog.Uint64("limit", limit),
 		}
@@ -1590,7 +1589,7 @@ func (lm *loggingMiddleware) Members(token, domainID string, page, limit uint64)
 		lm.logger.Info("Members completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.Members(token, domainID, page, limit)
+	return lm.svc.Members(s, page, limit)
 }
 
 // SendInvitation adds logging middleware to send invitation method.
@@ -1614,7 +1613,7 @@ func (lm *loggingMiddleware) SendInvitation(token string, invitation sdk.Invitat
 }
 
 // Invitations adds logging middleware to invitations method.
-func (lm *loggingMiddleware) Invitations(token, domainID string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) Invitations(s ui.Session, domainID string, page, limit uint64) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -1629,7 +1628,7 @@ func (lm *loggingMiddleware) Invitations(token, domainID string, page, limit uin
 		lm.logger.Info("Invitations completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.Invitations(token, domainID, page, limit)
+	return lm.svc.Invitations(s, domainID, page, limit)
 }
 
 // AcceptInvitation adds logging middleware to accept invitation method.
@@ -1668,7 +1667,7 @@ func (lm *loggingMiddleware) DeleteInvitation(token, userID, domainID string) (e
 }
 
 // ViewDashboard adds logging middleware to view dashboard method.
-func (lm *loggingMiddleware) ViewDashboard(token, dashboardID string) (b []byte, err error) {
+func (lm *loggingMiddleware) ViewDashboard(s ui.Session, dashboardID string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
@@ -1682,7 +1681,7 @@ func (lm *loggingMiddleware) ViewDashboard(token, dashboardID string) (b []byte,
 		lm.logger.Info("View dashboard completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ViewDashboard(token, dashboardID)
+	return lm.svc.ViewDashboard(s, dashboardID)
 }
 
 // CreateDashboard adds logging middleware to create dashboard method.
@@ -1724,7 +1723,7 @@ func (lm *loggingMiddleware) ListDashboards(token string, page, limit uint64) (b
 }
 
 // Dashboards adds logging middleware to dashboards method.
-func (lm *loggingMiddleware) Dashboards() (b []byte, err error) {
+func (lm *loggingMiddleware) Dashboards(s ui.Session) (b []byte, err error) {
 	defer func(begin time.Time) {
 		duration := slog.String("duration", time.Since(begin).String())
 		if err != nil {
@@ -1734,7 +1733,7 @@ func (lm *loggingMiddleware) Dashboards() (b []byte, err error) {
 		lm.logger.Info("Dashboards completed successfully", duration)
 	}(time.Now())
 
-	return lm.svc.Dashboards()
+	return lm.svc.Dashboards(s)
 }
 
 // UpdateDashboard adds logging middleware to update dashboard method.

@@ -283,15 +283,14 @@ SPDX-License-Identifier: Apache-2.0 -->
 					event.preventDefault();
 					window.location.href = `/things/${thingID}/users?relation=${relation}`;
 				}
-      </script>
-      <script type="module">
+      </script>      <script type="module">
         import { fetchIndividualEntity } from "/js/infinitescroll.js";
 
         fetchIndividualEntity({
           input: "userFilter",
           itemSelect: "infiniteScroll",
           item: "members",
-          domain: domainID,
+          domain: '{{.Session.Domain.ID}}',
         });
       </script>
     </body>

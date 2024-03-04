@@ -5,7 +5,6 @@ package api
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
@@ -25,6 +24,7 @@ import (
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/go-zoo/bone"
 	"github.com/golang-jwt/jwt"
+	"github.com/gorilla/securecookie"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -63,7 +63,7 @@ const (
 	groupsItem              = "groups"
 	accessTokenKey          = "access_token"
 	refreshTokenKey         = "refresh_token"
-	sessionDetailsKey       = "session_details"
+	sessionDetailsKey       = "session"
 	channelKey              = "channel"
 	thingKey                = "thing"
 	loggedInKey             = "logged_in"
@@ -80,7 +80,7 @@ type number interface {
 }
 
 // MakeHandler returns a HTTP handler for API endpoints.
-func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string, providers ...oauth2.Provider) http.Handler {
+func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string, secureCookie *securecookie.SecureCookie, providers ...oauth2.Provider) http.Handler {
 	opts := []kithttp.ServerOption{
 		kithttp.ServerErrorEncoder(encodeError),
 	}
@@ -114,8 +114,15 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string, providers ...oau
 	).ServeHTTP)
 
 	r.Get("/token/refresh", kithttp.NewServer(
-		refreshTokenEndpoint(svc),
-		decodeRefreshTokenRequest,
+		refreshTokenEndpoint(svc, secureCookie),
+		decodeRefreshTokenRequest(secureCookie),
+		encodeResponse,
+		opts...,
+	).ServeHTTP)
+
+	r.Get("/tokens/secure", kithttp.NewServer(
+		secureTokenEndpoint(svc, secureCookie),
+		decodeSecureTokenRequest,
 		encodeResponse,
 		opts...,
 	).ServeHTTP)
@@ -162,662 +169,665 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string, providers ...oau
 		opts...,
 	).ServeHTTP)
 
-	r.Post("/domains/login", kithttp.NewServer(
-		domainLoginEndpoint(svc),
-		decodeDomainLoginRequest,
-		encodeResponse,
-		opts...,
-	).ServeHTTP)
 	r.Route("/", func(r chi.Router) {
+		r.Use(DecryptCookieMiddleware(secureCookie))
 		r.Use(TokenMiddleware)
-		r.Use(AuthnMiddleware)
-		r.Get("/", http.HandlerFunc(kithttp.NewServer(
-			indexEndpoint(svc),
-			decodeIndexRequest,
-			encodeResponse,
-			opts...,
-		).ServeHTTP))
-		r.Route("/dashboards", func(r chi.Router) {
-			r.Get("/{id}", kithttp.NewServer(
-				viewDashboardEndpoint(svc),
-				decodeViewDashboardRequest,
+		r.Route("/", func(r chi.Router) {
+			r.Use(AuthnMiddleware)
+			r.Get("/", http.HandlerFunc(kithttp.NewServer(
+				indexEndpoint(svc),
+				decodeIndexRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP))
+			r.Route("/dashboards", func(r chi.Router) {
+				r.Get("/{id}", kithttp.NewServer(
+					viewDashboardEndpoint(svc),
+					decodeViewDashboardRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+				r.Post("/", kithttp.NewServer(
+					createDashboardEndpoint(svc),
+					decodeCreateDashboardRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+				r.Patch("/", kithttp.NewServer(
+					updateDashboardEndpoint(svc),
+					decodeUpdateDashboardRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+				r.Get("/list", kithttp.NewServer(
+					listDashboardsEndpoint(svc),
+					decodeListDashboardsRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+				r.Get("/", kithttp.NewServer(
+					dashboardsEndpoint(svc),
+					decodeDashboardRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+				r.Delete("/", kithttp.NewServer(
+					deleteDashboardEndpoint(svc),
+					decodeDeleteDashboardRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+			})
+			r.Get("/entities", kithttp.NewServer(
+				getEntitiesEndpoint(svc),
+				decodeGetEntitiesRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
-			r.Post("/", kithttp.NewServer(
-				createDashboardEndpoint(svc),
-				decodeCreateDashboardRequest,
+
+			r.Post("/password", kithttp.NewServer(
+				updatePasswordEndpoint(svc),
+				decodePasswordUpdate,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
-			r.Patch("/", kithttp.NewServer(
-				updateDashboardEndpoint(svc),
-				decodeUpdateDashboardRequest,
+
+			r.Get("/password", kithttp.NewServer(
+				showUpdatePasswordEndpoint(svc),
+				decodeShowPasswordUpdate,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
-			r.Get("/list", kithttp.NewServer(
-				listDashboardsEndpoint(svc),
-				decodeListDashboardsRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-			r.Get("/", kithttp.NewServer(
-				dashboardsEndpoint(svc),
-				decodeDashboardRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-			r.Delete("/", kithttp.NewServer(
-				deleteDashboardEndpoint(svc),
-				decodeDeleteDashboardRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
+
+			r.Route("/users", func(r chi.Router) {
+				r.Use(AdminAuthMiddleware)
+				r.Post("/", kithttp.NewServer(
+					createUserEndpoint(svc),
+					decodeUserCreation,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Get("/", kithttp.NewServer(
+					listUsersEndpoint(svc),
+					decodeListEntityRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/bulk", kithttp.NewServer(
+					createUsersEndpoint(svc),
+					decodeUsersCreation,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/enable", kithttp.NewServer(
+					enableUserEndpoint(svc),
+					decodeUserStatusUpdate,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/disable", kithttp.NewServer(
+					disableUserEndpoint(svc),
+					decodeUserStatusUpdate,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Get("/{id}", kithttp.NewServer(
+					viewUserEndpoint(svc),
+					decodeView,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}", kithttp.NewServer(
+					updateUserEndpoint(svc),
+					decodeUserUpdate,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/tags", kithttp.NewServer(
+					updateUserTagsEndpoint(svc),
+					decodeUserTagsUpdate,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/identity", kithttp.NewServer(
+					updateUserIdentityEndpoint(svc),
+					decodeUserIdentityUpdate,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/role", kithttp.NewServer(
+					updateUserRoleEndpoint(svc),
+					decodeUserRoleUpdate,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+			})
+
+			r.Route("/things", func(r chi.Router) {
+				r.Post("/", kithttp.NewServer(
+					createThingEndpoint(svc),
+					decodeThingCreation,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/bulk", kithttp.NewServer(
+					createThingsEndpoint(svc),
+					decodeThingsCreation,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Get("/", kithttp.NewServer(
+					listThingsEndpoint(svc),
+					decodeListEntityRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/enable", kithttp.NewServer(
+					enableThingEndpoint(svc),
+					decodeThingStatusUpdate,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/disable", kithttp.NewServer(
+					disableThingEndpoint(svc),
+					decodeThingStatusUpdate,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Get("/{id}", kithttp.NewServer(
+					viewThingEndpoint(svc),
+					decodeView,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}", kithttp.NewServer(
+					updateThingEndpoint(svc),
+					decodeThingUpdate,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/tags", kithttp.NewServer(
+					updateThingTagsEndpoint(svc),
+					decodeThingTagsUpdate,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/secret", kithttp.NewServer(
+					updateThingSecretEndpoint(svc),
+					decodeThingSecretUpdate,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Get("/{id}/channels", kithttp.NewServer(
+					listChannelsByThingEndpoint(svc),
+					decodeListEntityByIDRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/channels/connect", kithttp.NewServer(
+					connectChannelEndpoint(svc),
+					decodeConnectChannel,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/channels/disconnect", kithttp.NewServer(
+					disconnectChannelEndpoint(svc),
+					decodeConnectChannel,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/share", kithttp.NewServer(
+					shareThingEndpoint(svc),
+					decodeShareThingRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/unshare", kithttp.NewServer(
+					unshareThingEndpoint(svc),
+					decodeShareThingRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Get("/{id}/users", kithttp.NewServer(
+					listThingMembersEndpoint(svc),
+					decodeListEntityByIDRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+			})
+
+			r.Route("/channels", func(r chi.Router) {
+				r.Post("/", kithttp.NewServer(
+					createChannelEndpoint(svc),
+					decodeChannelCreation,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/bulk", kithttp.NewServer(
+					createChannelsEndpoint(svc),
+					decodeChannelsCreation,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Get("/", kithttp.NewServer(
+					listChannelsEndpoint(svc),
+					decodeListEntityRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/enable", kithttp.NewServer(
+					enableChannelEndpoint(svc),
+					decodeChannelStatusUpdate,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/disable", kithttp.NewServer(
+					disableChannelEndpoint(svc),
+					decodeChannelStatusUpdate,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Get("/{id}", kithttp.NewServer(
+					viewChannelEndpoint(svc),
+					decodeView,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}", kithttp.NewServer(
+					updateChannelEndpoint(svc),
+					decodeChannelUpdate,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/things/connect", kithttp.NewServer(
+					connectChannelEndpoint(svc),
+					decodeConnectChannel,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/things/disconnect", kithttp.NewServer(
+					disconnectChannelEndpoint(svc),
+					decodeConnectChannel,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Get("/{id}/things", kithttp.NewServer(
+					listThingsByChannelEndpoint(svc),
+					decodeListEntityByIDRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/users/assign", kithttp.NewServer(
+					AddMemberToChannelEndpoint(svc),
+					decodeAddMemberToChannelRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/users/unassign", kithttp.NewServer(
+					RemoveMemberFromChannelEndpoint(svc),
+					decodeAddMemberToChannelRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Get("/{id}/users", kithttp.NewServer(
+					ListChannelMembersEndpoint(svc),
+					decodeListEntityByIDRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/groups/assign", kithttp.NewServer(
+					addGroupToChannelEndpoint(svc),
+					decodeAddGroupToChannelRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/groups/unassign", kithttp.NewServer(
+					removeGroupFromChannelEndpoint(svc),
+					decodeAddGroupToChannelRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Get("/{id}/groups", kithttp.NewServer(
+					ListChannelGroupsEndpoint(svc),
+					decodeListEntityByIDRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+			})
+
+			r.Route("/groups", func(r chi.Router) {
+				r.Post("/", kithttp.NewServer(
+					createGroupEndpoint(svc),
+					decodeGroupCreation,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/bulk", kithttp.NewServer(
+					createGroupsEndpoint(svc),
+					decodeGroupsCreation,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Get("/", kithttp.NewServer(
+					listGroupsEndpoint(svc),
+					decodeListEntityRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/enable", kithttp.NewServer(
+					enableGroupEndpoint(svc),
+					decodeGroupStatusUpdate,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/disable", kithttp.NewServer(
+					disableGroupEndpoint(svc),
+					decodeGroupStatusUpdate,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Get("/{id}", kithttp.NewServer(
+					viewGroupEndpoint(svc),
+					decodeView,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Get("/{id}/users", kithttp.NewServer(
+					listGroupMembersEndpoint(svc),
+					decodeListEntityByIDRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}", kithttp.NewServer(
+					updateGroupEndpoint(svc),
+					decodeGroupUpdate,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/users/assign", kithttp.NewServer(
+					assignGroupEndpoint(svc),
+					decodeAssignGroupRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/users/unassign", kithttp.NewServer(
+					unassignGroupEndpoint(svc),
+					decodeAssignGroupRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/channels/assign", kithttp.NewServer(
+					addGroupToChannelEndpoint(svc),
+					decodeAddGroupToChannelRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+				r.Post("/{id}/channels/unassign", kithttp.NewServer(
+					removeGroupFromChannelEndpoint(svc),
+					decodeAddGroupToChannelRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Get("/{id}/channels", kithttp.NewServer(
+					listGroupChannelsEndpoint(svc),
+					decodeListEntityByIDRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+			})
+
+			r.Route("/messages", func(r chi.Router) {
+				r.Post("/", kithttp.NewServer(
+					publishMessageEndpoint(svc),
+					decodePublishRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Get("/", kithttp.NewServer(
+					readMessagesEndpoint(svc),
+					decodeReadMessagesRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+			})
+
+			r.Route("/bootstraps", func(r chi.Router) {
+				r.Get("/", kithttp.NewServer(
+					listBootstrap(svc),
+					decodeListEntityRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/", kithttp.NewServer(
+					createBootstrap(svc),
+					decodeCreateBootstrapRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Get("/{id}", kithttp.NewServer(
+					viewBootstrap(svc),
+					decodeView,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}", kithttp.NewServer(
+					updateBootstrap(svc),
+					decodeUpdateBootstrap,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/delete", kithttp.NewServer(
+					deleteBootstrapEndpoint(svc),
+					decodeDeleteBootstrap,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/state", kithttp.NewServer(
+					updateBootstrapStateEndpoint(svc),
+					decodeUpdateBootstrapState,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/certs", kithttp.NewServer(
+					updateBootstrapCerts(svc),
+					decodeUpdateBootstrapCerts,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/connections", kithttp.NewServer(
+					updateBootstrapConnections(svc),
+					decodeUpdateBootstrapConnections,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Get("/{id}/terminal", kithttp.NewServer(
+					getTerminalEndpoint(svc),
+					decodeView,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/{id}/terminal/input", kithttp.NewServer(
+					handleTerminalInputEndpoint(svc),
+					decodeTerminalCommandRequest,
+					encodeJSONResponse,
+					opts...,
+				).ServeHTTP)
+			})
+
+			r.Route("/invitations", func(r chi.Router) {
+				r.Post("/", kithttp.NewServer(
+					sendInvitationEndpoint(svc),
+					decodeSendInvitationRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Get("/", kithttp.NewServer(
+					listInvitationsEndpoint(svc),
+					decodeListInvitationsRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/accept", kithttp.NewServer(
+					acceptInvitationEndpoint(svc),
+					decodeAcceptInvitationRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+
+				r.Post("/delete", kithttp.NewServer(
+					deleteInvitationEndpoint(svc),
+					decodeDeleteInvitationRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
+			})
 		})
-		r.Get("/entities", kithttp.NewServer(
-			getEntitiesEndpoint(svc),
-			decodeGetEntitiesRequest,
-			encodeResponse,
-			opts...,
-		).ServeHTTP)
+		r.Route("/domains", func(r chi.Router) {
+			r.Post("/login", kithttp.NewServer(
+				domainLoginEndpoint(svc, secureCookie),
+				decodeDomainLoginRequest,
+				encodeResponse,
+				opts...,
+			).ServeHTTP)
 
-		r.Post("/password", kithttp.NewServer(
-			updatePasswordEndpoint(svc),
-			decodePasswordUpdate,
-			encodeResponse,
-			opts...,
-		).ServeHTTP)
-
-		r.Get("/password", kithttp.NewServer(
-			showUpdatePasswordEndpoint(svc),
-			decodeShowPasswordUpdate,
-			encodeResponse,
-			opts...,
-		).ServeHTTP)
-
-		r.Route("/users", func(r chi.Router) {
-			r.Use(AdminAuthMiddleware)
 			r.Post("/", kithttp.NewServer(
-				createUserEndpoint(svc),
-				decodeUserCreation,
+				createDomainEndpoint(svc),
+				decodeCreateDomainRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
 
 			r.Get("/", kithttp.NewServer(
-				listUsersEndpoint(svc),
-				decodeListEntityRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/bulk", kithttp.NewServer(
-				createUsersEndpoint(svc),
-				decodeUsersCreation,
+				listDomainsEndpoint(svc),
+				decodeListDomainsRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
 
 			r.Post("/enable", kithttp.NewServer(
-				enableUserEndpoint(svc),
-				decodeUserStatusUpdate,
+				enableDomainEndpoint(svc),
+				decodeDomainStatusUpdate,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
 
 			r.Post("/disable", kithttp.NewServer(
-				disableUserEndpoint(svc),
-				decodeUserStatusUpdate,
+				disableDomainEndpoint(svc),
+				decodeDomainStatusUpdate,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
 
 			r.Get("/{id}", kithttp.NewServer(
-				viewUserEndpoint(svc),
-				decodeView,
+				domainEndpoint(svc),
+				decodeListEntityByIDRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
 
 			r.Post("/{id}", kithttp.NewServer(
-				updateUserEndpoint(svc),
-				decodeUserUpdate,
+				updateDomainEndpoint(svc),
+				decodeUpdateDomainRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
 
 			r.Post("/{id}/tags", kithttp.NewServer(
-				updateUserTagsEndpoint(svc),
-				decodeUserTagsUpdate,
+				updateDomainTagsEndpoint(svc),
+				decodeUpdateDomainTagsRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
 
-			r.Post("/{id}/identity", kithttp.NewServer(
-				updateUserIdentityEndpoint(svc),
-				decodeUserIdentityUpdate,
+			r.Post("/{id}/assign", kithttp.NewServer(
+				assignMemberEndpoint(svc),
+				decodeAssignMemberRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
 
-			r.Post("/{id}/role", kithttp.NewServer(
-				updateUserRoleEndpoint(svc),
-				decodeUserRoleUpdate,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-		})
-
-		r.Route("/things", func(r chi.Router) {
-			r.Post("/", kithttp.NewServer(
-				createThingEndpoint(svc),
-				decodeThingCreation,
+			r.Post("/{id}/unassign", kithttp.NewServer(
+				unassignMemberEndpoint(svc),
+				decodeAssignMemberRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
 
-			r.Post("/bulk", kithttp.NewServer(
-				createThingsEndpoint(svc),
-				decodeThingsCreation,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/", kithttp.NewServer(
-				listThingsEndpoint(svc),
-				decodeListEntityRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/enable", kithttp.NewServer(
-				enableThingEndpoint(svc),
-				decodeThingStatusUpdate,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/disable", kithttp.NewServer(
-				disableThingEndpoint(svc),
-				decodeThingStatusUpdate,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/{id}", kithttp.NewServer(
-				viewThingEndpoint(svc),
-				decodeView,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}", kithttp.NewServer(
-				updateThingEndpoint(svc),
-				decodeThingUpdate,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/tags", kithttp.NewServer(
-				updateThingTagsEndpoint(svc),
-				decodeThingTagsUpdate,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/secret", kithttp.NewServer(
-				updateThingSecretEndpoint(svc),
-				decodeThingSecretUpdate,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/{id}/channels", kithttp.NewServer(
-				listChannelsByThingEndpoint(svc),
+			r.Get("/{id}/members", kithttp.NewServer(
+				listMembersEndpoint(svc),
 				decodeListEntityByIDRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
 
-			r.Post("/{id}/channels/connect", kithttp.NewServer(
-				connectChannelEndpoint(svc),
-				decodeConnectChannel,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/channels/disconnect", kithttp.NewServer(
-				disconnectChannelEndpoint(svc),
-				decodeConnectChannel,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/share", kithttp.NewServer(
-				shareThingEndpoint(svc),
-				decodeShareThingRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/unshare", kithttp.NewServer(
-				unshareThingEndpoint(svc),
-				decodeShareThingRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/{id}/users", kithttp.NewServer(
-				listThingMembersEndpoint(svc),
-				decodeListEntityByIDRequest,
+			r.Get("/members", kithttp.NewServer(
+				viewMemberEndpoint(svc),
+				decodeViewMemberRequest,
 				encodeResponse,
 				opts...,
 			).ServeHTTP)
 		})
-
-		r.Route("/channels", func(r chi.Router) {
-			r.Post("/", kithttp.NewServer(
-				createChannelEndpoint(svc),
-				decodeChannelCreation,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/bulk", kithttp.NewServer(
-				createChannelsEndpoint(svc),
-				decodeChannelsCreation,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/", kithttp.NewServer(
-				listChannelsEndpoint(svc),
-				decodeListEntityRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/enable", kithttp.NewServer(
-				enableChannelEndpoint(svc),
-				decodeChannelStatusUpdate,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/disable", kithttp.NewServer(
-				disableChannelEndpoint(svc),
-				decodeChannelStatusUpdate,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/{id}", kithttp.NewServer(
-				viewChannelEndpoint(svc),
-				decodeView,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}", kithttp.NewServer(
-				updateChannelEndpoint(svc),
-				decodeChannelUpdate,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/things/connect", kithttp.NewServer(
-				connectChannelEndpoint(svc),
-				decodeConnectChannel,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/things/disconnect", kithttp.NewServer(
-				disconnectChannelEndpoint(svc),
-				decodeConnectChannel,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/{id}/things", kithttp.NewServer(
-				listThingsByChannelEndpoint(svc),
-				decodeListEntityByIDRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/users/assign", kithttp.NewServer(
-				AddMemberToChannelEndpoint(svc),
-				decodeAddMemberToChannelRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/users/unassign", kithttp.NewServer(
-				RemoveMemberFromChannelEndpoint(svc),
-				decodeAddMemberToChannelRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/{id}/users", kithttp.NewServer(
-				ListChannelMembersEndpoint(svc),
-				decodeListEntityByIDRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/groups/assign", kithttp.NewServer(
-				addGroupToChannelEndpoint(svc),
-				decodeAddGroupToChannelRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/groups/unassign", kithttp.NewServer(
-				removeGroupFromChannelEndpoint(svc),
-				decodeAddGroupToChannelRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/{id}/groups", kithttp.NewServer(
-				ListChannelGroupsEndpoint(svc),
-				decodeListEntityByIDRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-		})
-
-		r.Route("/groups", func(r chi.Router) {
-			r.Post("/", kithttp.NewServer(
-				createGroupEndpoint(svc),
-				decodeGroupCreation,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/bulk", kithttp.NewServer(
-				createGroupsEndpoint(svc),
-				decodeGroupsCreation,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/", kithttp.NewServer(
-				listGroupsEndpoint(svc),
-				decodeListEntityRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/enable", kithttp.NewServer(
-				enableGroupEndpoint(svc),
-				decodeGroupStatusUpdate,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/disable", kithttp.NewServer(
-				disableGroupEndpoint(svc),
-				decodeGroupStatusUpdate,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/{id}", kithttp.NewServer(
-				viewGroupEndpoint(svc),
-				decodeView,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/{id}/users", kithttp.NewServer(
-				listGroupMembersEndpoint(svc),
-				decodeListEntityByIDRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}", kithttp.NewServer(
-				updateGroupEndpoint(svc),
-				decodeGroupUpdate,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/users/assign", kithttp.NewServer(
-				assignGroupEndpoint(svc),
-				decodeAssignGroupRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/users/unassign", kithttp.NewServer(
-				unassignGroupEndpoint(svc),
-				decodeAssignGroupRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/channels/assign", kithttp.NewServer(
-				addGroupToChannelEndpoint(svc),
-				decodeAddGroupToChannelRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-			r.Post("/{id}/channels/unassign", kithttp.NewServer(
-				removeGroupFromChannelEndpoint(svc),
-				decodeAddGroupToChannelRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/{id}/channels", kithttp.NewServer(
-				listGroupChannelsEndpoint(svc),
-				decodeListEntityByIDRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-		})
-
-		r.Route("/messages", func(r chi.Router) {
-			r.Post("/", kithttp.NewServer(
-				publishMessageEndpoint(svc),
-				decodePublishRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/", kithttp.NewServer(
-				readMessagesEndpoint(svc),
-				decodeReadMessagesRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-		})
-
-		r.Route("/bootstraps", func(r chi.Router) {
-			r.Get("/", kithttp.NewServer(
-				listBootstrap(svc),
-				decodeListEntityRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/", kithttp.NewServer(
-				createBootstrap(svc),
-				decodeCreateBootstrapRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/{id}", kithttp.NewServer(
-				viewBootstrap(svc),
-				decodeView,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}", kithttp.NewServer(
-				updateBootstrap(svc),
-				decodeUpdateBootstrap,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/delete", kithttp.NewServer(
-				deleteBootstrapEndpoint(svc),
-				decodeDeleteBootstrap,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/state", kithttp.NewServer(
-				updateBootstrapStateEndpoint(svc),
-				decodeUpdateBootstrapState,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/certs", kithttp.NewServer(
-				updateBootstrapCerts(svc),
-				decodeUpdateBootstrapCerts,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/connections", kithttp.NewServer(
-				updateBootstrapConnections(svc),
-				decodeUpdateBootstrapConnections,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/{id}/terminal", kithttp.NewServer(
-				getTerminalEndpoint(svc),
-				decodeView,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/{id}/terminal/input", kithttp.NewServer(
-				handleTerminalInputEndpoint(svc),
-				decodeTerminalCommandRequest,
-				encodeJSONResponse,
-				opts...,
-			).ServeHTTP)
-		})
-
-		r.Route("/invitations", func(r chi.Router) {
-			r.Post("/", kithttp.NewServer(
-				sendInvitationEndpoint(svc),
-				decodeSendInvitationRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Get("/", kithttp.NewServer(
-				listInvitationsEndpoint(svc),
-				decodeListInvitationsRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/accept", kithttp.NewServer(
-				acceptInvitationEndpoint(svc),
-				decodeAcceptInvitationRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-
-			r.Post("/delete", kithttp.NewServer(
-				deleteInvitationEndpoint(svc),
-				decodeDeleteInvitationRequest,
-				encodeResponse,
-				opts...,
-			).ServeHTTP)
-		})
-	})
-	r.Route("/domains", func(r chi.Router) {
-		r.Use(TokenMiddleware)
-		r.Post("/", kithttp.NewServer(
-			createDomainEndpoint(svc),
-			decodeCreateDomainRequest,
-			encodeResponse,
-			opts...,
-		).ServeHTTP)
-
-		r.Get("/", kithttp.NewServer(
-			listDomainsEndpoint(svc),
-			decodeListDomainsRequest,
-			encodeResponse,
-			opts...,
-		).ServeHTTP)
-
-		r.Post("/enable", kithttp.NewServer(
-			enableDomainEndpoint(svc),
-			decodeDomainStatusUpdate,
-			encodeResponse,
-			opts...,
-		).ServeHTTP)
-
-		r.Post("/disable", kithttp.NewServer(
-			disableDomainEndpoint(svc),
-			decodeDomainStatusUpdate,
-			encodeResponse,
-			opts...,
-		).ServeHTTP)
-
-		r.Get("/{id}", kithttp.NewServer(
-			domainEndpoint(svc),
-			decodeListEntityByIDRequest,
-			encodeResponse,
-			opts...,
-		).ServeHTTP)
-
-		r.Post("/{id}", kithttp.NewServer(
-			updateDomainEndpoint(svc),
-			decodeUpdateDomainRequest,
-			encodeResponse,
-			opts...,
-		).ServeHTTP)
-
-		r.Post("/{id}/tags", kithttp.NewServer(
-			updateDomainTagsEndpoint(svc),
-			decodeUpdateDomainTagsRequest,
-			encodeResponse,
-			opts...,
-		).ServeHTTP)
-
-		r.Post("/{id}/assign", kithttp.NewServer(
-			assignMemberEndpoint(svc),
-			decodeAssignMemberRequest,
-			encodeResponse,
-			opts...,
-		).ServeHTTP)
-
-		r.Post("/{id}/unassign", kithttp.NewServer(
-			unassignMemberEndpoint(svc),
-			decodeAssignMemberRequest,
-			encodeResponse,
-			opts...,
-		).ServeHTTP)
-
-		r.Get("/{id}/members", kithttp.NewServer(
-			listMembersEndpoint(svc),
-			decodeListEntityByIDRequest,
-			encodeResponse,
-			opts...,
-		).ServeHTTP)
-
-		r.Get("/members", kithttp.NewServer(
-			viewMemberEndpoint(svc),
-			decodeViewMemberRequest,
-			encodeResponse,
-			opts...,
-		).ServeHTTP)
 	})
 
 	r.Get("/health", magistrala.Health("ui", instanceID))
@@ -836,16 +846,14 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID string, providers ...oau
 }
 
 func decodeIndexRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
 
-	req := indexReq{
-		token: token,
-	}
-
-	return req, nil
+	return indexReq{
+		Session: session,
+	}, nil
 }
 
 func decodeViewRegistrationRequest(_ context.Context, _ *http.Request) (interface{}, error) {
@@ -853,31 +861,28 @@ func decodeViewRegistrationRequest(_ context.Context, _ *http.Request) (interfac
 }
 
 func decodeCreateDashboardRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	var data createDashboardReq
-	err = json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		return nil, err
 	}
 
-	req := createDashboardReq{
-		token:       token,
+	return createDashboardReq{
+		token:       session.AccessToken,
 		Name:        data.Name,
 		Description: data.Description,
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeListDashboardsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
+
 	page, err := readNumQuery[uint64](r, pageKey, defPage)
 	if err != nil {
 		return nil, err
@@ -887,100 +892,102 @@ func decodeListDashboardsRequest(_ context.Context, r *http.Request) (interface{
 	if err != nil {
 		return nil, err
 	}
-	req := listDashboardsReq{
-		token: token,
+
+	return listDashboardsReq{
+		token: session.AccessToken,
 		page:  page,
 		limit: limit,
-	}
-
-	return req, nil
+	}, nil
 }
 
-func decodeDashboardRequest(_ context.Context, _ *http.Request) (interface{}, error) {
-	return nil, nil
+func decodeDashboardRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	session, err := sessionFromHeader(r)
+	if err != nil {
+		return nil, err
+	}
+	return dashboardsReq{
+		Session: session,
+	}, nil
 }
 
 func decodeUpdateDashboardRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
 	var data updateDashboardReq
-	err = json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		return nil, err
 	}
-	req := updateDashboardReq{
-		token:       token,
+
+	return updateDashboardReq{
+		token:       session.AccessToken,
 		ID:          data.ID,
 		Name:        data.Name,
 		Description: data.Description,
 		Metadata:    data.Metadata,
 		Layout:      data.Layout,
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeDeleteDashboardRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
 	var data deleteDashboardReq
-	err = json.NewDecoder(r.Body).Decode(&data)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		return nil, err
 	}
-	req := deleteDashboardReq{
-		token: token,
-		ID:    data.ID,
-	}
 
-	return req, nil
+	return deleteDashboardReq{
+		token: session.AccessToken,
+		ID:    data.ID,
+	}, nil
 }
 
 func decodeViewDashboardRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
 
-	req := viewDashboardReq{
-		token:       token,
+	return viewDashboardReq{
 		DashboardID: chi.URLParam(r, "id"),
-	}
-
-	return req, nil
+		Session:     session,
+	}, nil
 }
 
 func decodeLoginRequest(_ context.Context, _ *http.Request) (interface{}, error) {
 	return nil, nil
 }
 
-func decodeShowPasswordUpdate(_ context.Context, _ *http.Request) (interface{}, error) {
-	return nil, nil
-}
-
-func decodePasswordUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+func decodeShowPasswordUpdate(_ context.Context, r *http.Request) (interface{}, error) {
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-	req := updateUserPasswordReq{
-		token:   token,
+	return showUpdatePasswordReq{
+		Session: session,
+	}, nil
+}
+
+func decodePasswordUpdate(_ context.Context, r *http.Request) (interface{}, error) {
+	session, err := sessionFromHeader(r)
+	if err != nil {
+		return nil, err
+	}
+	return updateUserPasswordReq{
+		token:   session.AccessToken,
 		oldPass: r.PostFormValue("oldpass"),
 		newPass: r.PostFormValue("newpass"),
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodePasswordResetRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	req := passwordResetRequestReq{
+	return passwordResetRequestReq{
 		email: r.PostFormValue("email"),
-	}
-	return req, nil
+	}, nil
 }
 
 func decodePasswordReset(_ context.Context, r *http.Request) (interface{}, error) {
@@ -989,12 +996,11 @@ func decodePasswordReset(_ context.Context, r *http.Request) (interface{}, error
 		return nil, err
 	}
 
-	req := passwordResetReq{
+	return passwordResetReq{
 		token:           accessToken,
 		password:        r.PostFormValue("password"),
 		confirmPassword: r.PostFormValue("confirmPassword"),
-	}
-	return req, nil
+	}, nil
 }
 
 func decodeShowPasswordReset(_ context.Context, _ *http.Request) (interface{}, error) {
@@ -1002,7 +1008,7 @@ func decodeShowPasswordReset(_ context.Context, _ *http.Request) (interface{}, e
 }
 
 func decodeRegisterUserRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	req := registerUserReq{
+	return registerUserReq{
 		User: sdk.User{
 			Name: r.PostFormValue("name"),
 			Credentials: sdk.Credentials{
@@ -1010,39 +1016,65 @@ func decodeRegisterUserRequest(_ context.Context, r *http.Request) (interface{},
 				Secret:   r.PostFormValue("password"),
 			},
 		},
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	req := tokenReq{
+	return tokenReq{
 		sdk.Login{
 			Identity: r.PostFormValue("email"),
 			Secret:   r.PostFormValue("password"),
 		},
-	}
-
-	return req, nil
+	}, nil
 }
 
-func decodeRefreshTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, refreshTokenKey)
+func decodeSecureTokenRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	accessToken, err := tokenFromCookie(r, accessTokenKey)
+	if err != nil {
+		return nil, err
+	}
+	refreshToken, err := tokenFromCookie(r, refreshTokenKey)
 	if err != nil {
 		return nil, err
 	}
 
-	referer, err := readStringQuery(r, refererKey, defKey)
-	if err != nil {
-		return nil, err
+	session := ui.Session{
+		Token: sdk.Token{
+			AccessToken:  accessToken,
+			RefreshToken: refreshToken,
+		},
+		LoginStatus: ui.UserLoginStatus,
 	}
 
-	req := refreshTokenReq{
-		refreshToken: token,
-		ref:          referer,
-	}
+	return secureTokenReq{
+		Session: session,
+	}, nil
+}
 
-	return req, nil
+func decodeRefreshTokenRequest(s *securecookie.SecureCookie) kithttp.DecodeRequestFunc {
+	return func(_ context.Context, r *http.Request) (interface{}, error) {
+		sessionCookie, err := tokenFromCookie(r, sessionDetailsKey)
+		if err != nil {
+			return nil, err
+		}
+		var session string
+		if err := s.Decode(sessionDetailsKey, sessionCookie, &session); err != nil {
+			return nil, err
+		}
+		var sessionDetails ui.Session
+		if err := json.Unmarshal([]byte(session), &sessionDetails); err != nil {
+			return ui.Session{}, err
+		}
+		referer, err := readStringQuery(r, refererKey, defKey)
+		if err != nil {
+			return nil, err
+		}
+
+		return refreshTokenReq{
+			Session: sessionDetails,
+			ref:     referer,
+		}, nil
+	}
 }
 
 func decodeLogoutRequest(_ context.Context, _ *http.Request) (interface{}, error) {
@@ -1072,16 +1104,16 @@ func oauth2Handler(state oauth2.State, provider oauth2.Provider) http.HandlerFun
 }
 
 func decodeUserCreation(_ context.Context, r *http.Request) (interface{}, error) {
+	session, err := sessionFromHeader(r)
+	if err != nil {
+		return nil, err
+	}
 	var meta map[string]interface{}
 	if err := json.Unmarshal([]byte(r.PostFormValue("metadata")), &meta); err != nil {
 		return nil, err
 	}
 	var tags []string
 	if err := json.Unmarshal([]byte(r.PostFormValue("tags")), &tags); err != nil {
-		return nil, err
-	}
-	token, err := tokenFromCookie(r, accessTokenKey)
-	if err != nil {
 		return nil, err
 	}
 	credentials := sdk.Credentials{
@@ -1095,20 +1127,17 @@ func decodeUserCreation(_ context.Context, r *http.Request) (interface{}, error)
 		Metadata:    meta,
 	}
 
-	req := createUserReq{
-		token: token,
+	return createUserReq{
+		token: session.AccessToken,
 		User:  user,
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeUsersCreation(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	file, handler, err := r.FormFile("usersFile")
 	if err != nil {
 		return nil, err
@@ -1162,132 +1191,114 @@ func decodeUsersCreation(_ context.Context, r *http.Request) (interface{}, error
 
 		users = append(users, user)
 	}
-	req := createUsersReq{
-		token: token,
-		users: users,
-	}
 
-	return req, nil
+	return createUsersReq{
+		token: session.AccessToken,
+		users: users,
+	}, nil
 }
 
 func decodeView(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-	req := viewResourceReq{
-		token: token,
-		id:    chi.URLParam(r, "id"),
-	}
 
-	return req, nil
+	return viewResourceReq{
+		id:      chi.URLParam(r, "id"),
+		Session: session,
+	}, nil
 }
 
 func decodeUserUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	var user sdk.User
-	if err = json.NewDecoder(r.Body).Decode(&user); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		return nil, err
 	}
 	user.ID = chi.URLParam(r, "id")
 
-	req := updateUserReq{
-		token: token,
+	return updateUserReq{
+		token: session.AccessToken,
 		User:  user,
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeUserTagsUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	var user sdk.User
-	if err = json.NewDecoder(r.Body).Decode(&user); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
 		return nil, err
 	}
 	user.ID = chi.URLParam(r, "id")
 
-	req := updateUserTagsReq{
-		token: token,
+	return updateUserTagsReq{
+		token: session.AccessToken,
 		User:  user,
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeUserIdentityUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	var credentials sdk.Credentials
-	if err = json.NewDecoder(r.Body).Decode(&credentials); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {
 		return nil, err
 	}
 
-	req := updateUserIdentityReq{
-		token: token,
+	return updateUserIdentityReq{
+		token: session.AccessToken,
 		User: sdk.User{
 			ID:          chi.URLParam(r, "id"),
 			Credentials: credentials,
 		},
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeUserStatusUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
-	req := updateUserStatusReq{
-		token: token,
+	return updateUserStatusReq{
+		token: session.AccessToken,
 		id:    r.PostFormValue("entityID"),
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeUserRoleUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
-	req := updateUserRoleReq{
-		token: token,
+	return updateUserRoleReq{
+		token: session.AccessToken,
 		User: sdk.User{
 			ID:   chi.URLParam(r, "id"),
 			Role: r.PostFormValue("role"),
 		},
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeAssignGroupRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
 
 	return assignReq{
-		token:   token,
+		token:   session.AccessToken,
 		groupID: chi.URLParam(r, "id"),
 		UsersRelationRequest: sdk.UsersRelationRequest{
 			UserIDs:  r.Form["userID"],
@@ -1297,17 +1308,16 @@ func decodeAssignGroupRequest(_ context.Context, r *http.Request) (interface{}, 
 }
 
 func decodeShareThingRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	session, err := sessionFromHeader(r)
+	if err != nil {
+		return nil, err
+	}
 	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
 
-	token, err := tokenFromCookie(r, accessTokenKey)
-	if err != nil {
-		return nil, err
-	}
-
 	return shareThingReq{
-		token: token,
+		token: session.AccessToken,
 		id:    chi.URLParam(r, "id"),
 		UsersRelationRequest: sdk.UsersRelationRequest{
 			UserIDs:  r.Form["userID"],
@@ -1317,17 +1327,16 @@ func decodeShareThingRequest(_ context.Context, r *http.Request) (interface{}, e
 }
 
 func decodeAddMemberToChannelRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	session, err := sessionFromHeader(r)
+	if err != nil {
+		return nil, err
+	}
 	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
 
-	token, err := tokenFromCookie(r, accessTokenKey)
-	if err != nil {
-		return nil, err
-	}
-
 	return addUserToChannelReq{
-		token:     token,
+		token:     session.AccessToken,
 		ChannelID: chi.URLParam(r, "id"),
 		UsersRelationRequest: sdk.UsersRelationRequest{
 			Relation: r.Form.Get("relation"),
@@ -1337,6 +1346,10 @@ func decodeAddMemberToChannelRequest(_ context.Context, r *http.Request) (interf
 }
 
 func decodeThingCreation(_ context.Context, r *http.Request) (interface{}, error) {
+	session, err := sessionFromHeader(r)
+	if err != nil {
+		return nil, err
+	}
 	var meta map[string]interface{}
 	if err := json.Unmarshal([]byte(r.PostFormValue("metadata")), &meta); err != nil {
 		return nil, err
@@ -1345,13 +1358,9 @@ func decodeThingCreation(_ context.Context, r *http.Request) (interface{}, error
 	if err := json.Unmarshal([]byte(r.PostFormValue("tags")), &tags); err != nil {
 		return nil, err
 	}
-	token, err := tokenFromCookie(r, accessTokenKey)
-	if err != nil {
-		return nil, err
-	}
 
-	req := createThingReq{
-		token: token,
+	return createThingReq{
+		token: session.AccessToken,
 		Thing: sdk.Thing{
 			Name: r.PostFormValue("name"),
 			ID:   r.PostFormValue("thingID"),
@@ -1362,93 +1371,78 @@ func decodeThingCreation(_ context.Context, r *http.Request) (interface{}, error
 			Tags:     tags,
 			Metadata: meta,
 		},
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeThingUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	var thing sdk.Thing
-	if err = json.NewDecoder(r.Body).Decode(&thing); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&thing); err != nil {
 		return nil, err
 	}
 	thing.ID = chi.URLParam(r, "id")
 
-	req := updateThingReq{
-		token: token,
+	return updateThingReq{
+		token: session.AccessToken,
 		Thing: thing,
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeThingTagsUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	var thing sdk.Thing
-	if err = json.NewDecoder(r.Body).Decode(&thing); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&thing); err != nil {
 		return nil, err
 	}
 	thing.ID = chi.URLParam(r, "id")
 
-	req := updateThingTagsReq{
-		token: token,
+	return updateThingTagsReq{
+		token: session.AccessToken,
 		Thing: thing,
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeThingSecretUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	var credentials sdk.Credentials
-	if err = json.NewDecoder(r.Body).Decode(&credentials); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&credentials); err != nil {
 		return nil, err
 	}
 
-	req := updateThingSecretReq{
-		token: token,
+	return updateThingSecretReq{
+		token: session.AccessToken,
 		Thing: sdk.Thing{
 			ID:          chi.URLParam(r, "id"),
 			Credentials: credentials,
 		},
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeThingStatusUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
-	req := updateThingStatusReq{
-		token: token,
+	return updateThingStatusReq{
+		token: session.AccessToken,
 		id:    r.PostFormValue("entityID"),
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeThingsCreation(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	file, handler, err := r.FormFile("thingsFile")
 	if err != nil {
 		return nil, err
@@ -1506,22 +1500,20 @@ func decodeThingsCreation(_ context.Context, r *http.Request) (interface{}, erro
 
 		things = append(things, thing)
 	}
-	req := createThingsReq{
-		token:  token,
-		things: things,
-	}
 
-	return req, nil
+	return createThingsReq{
+		token:  session.AccessToken,
+		things: things,
+	}, nil
 }
 
 func decodeChannelCreation(_ context.Context, r *http.Request) (interface{}, error) {
-	var meta map[string]interface{}
-	if err := json.Unmarshal([]byte(r.PostFormValue("metadata")), &meta); err != nil {
+	session, err := sessionFromHeader(r)
+	if err != nil {
 		return nil, err
 	}
-
-	token, err := tokenFromCookie(r, accessTokenKey)
-	if err != nil {
+	var meta map[string]interface{}
+	if err := json.Unmarshal([]byte(r.PostFormValue("metadata")), &meta); err != nil {
 		return nil, err
 	}
 
@@ -1532,20 +1524,17 @@ func decodeChannelCreation(_ context.Context, r *http.Request) (interface{}, err
 		ParentID:    r.PostFormValue("parentID"),
 	}
 
-	req := createChannelReq{
-		token:   token,
+	return createChannelReq{
+		token:   session.AccessToken,
 		Channel: ch,
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeChannelsCreation(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	file, handler, err := r.FormFile("channelsFile")
 	if err != nil {
 		return nil, err
@@ -1591,40 +1580,35 @@ func decodeChannelsCreation(_ context.Context, r *http.Request) (interface{}, er
 
 		channels = append(channels, channel)
 	}
-	req := createChannelsReq{
-		token:    token,
-		Channels: channels,
-	}
 
-	return req, nil
+	return createChannelsReq{
+		token:    session.AccessToken,
+		Channels: channels,
+	}, nil
 }
 
 func decodeChannelUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	var channel sdk.Channel
-	if err = json.NewDecoder(r.Body).Decode(&channel); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&channel); err != nil {
 		return nil, err
 	}
 	channel.ID = chi.URLParam(r, "id")
 
-	req := updateChannelReq{
-		token:   token,
+	return updateChannelReq{
+		token:   session.AccessToken,
 		Channel: channel,
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeConnectChannel(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
@@ -1639,14 +1623,14 @@ func decodeConnectChannel(_ context.Context, r *http.Request) (interface{}, erro
 	switch item {
 	case thingsItem:
 		req = connectThingReq{
-			token:     token,
+			token:     session.AccessToken,
 			channelID: r.Form.Get("channelID"),
 			thingID:   chi.URLParam(r, "id"),
 			item:      item,
 		}
 	case channelsItem:
 		req = connectThingReq{
-			token:     token,
+			token:     session.AccessToken,
 			channelID: chi.URLParam(r, "id"),
 			thingID:   r.Form.Get("thingID"),
 			item:      item,
@@ -1657,26 +1641,22 @@ func decodeConnectChannel(_ context.Context, r *http.Request) (interface{}, erro
 }
 
 func decodeChannelStatusUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
-	req := updateChannelStatusReq{
-		token: token,
+	return updateChannelStatusReq{
+		token: session.AccessToken,
 		id:    r.PostFormValue("entityID"),
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeAddGroupToChannelRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	if err := r.ParseForm(); err != nil {
+	session, err := sessionFromHeader(r)
+	if err != nil {
 		return nil, err
 	}
-
-	token, err := tokenFromCookie(r, accessTokenKey)
-	if err != nil {
+	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
 
@@ -1686,7 +1666,7 @@ func decodeAddGroupToChannelRequest(_ context.Context, r *http.Request) (interfa
 	}
 
 	req := addUserGroupToChannelReq{
-		token: token,
+		token: session.AccessToken,
 		item:  item,
 	}
 
@@ -1703,34 +1683,31 @@ func decodeAddGroupToChannelRequest(_ context.Context, r *http.Request) (interfa
 }
 
 func decodeGroupCreation(_ context.Context, r *http.Request) (interface{}, error) {
+	session, err := sessionFromHeader(r)
+	if err != nil {
+		return nil, err
+	}
 	var meta map[string]interface{}
 	if err := json.Unmarshal([]byte(r.PostFormValue("metadata")), &meta); err != nil {
 		return nil, err
 	}
-	token, err := tokenFromCookie(r, accessTokenKey)
-	if err != nil {
-		return nil, err
-	}
 
-	req := createGroupReq{
-		token: token,
+	return createGroupReq{
+		token: session.AccessToken,
 		Group: sdk.Group{
 			Name:        r.PostFormValue("name"),
 			Description: r.PostFormValue("description"),
 			Metadata:    meta,
 			ParentID:    r.PostFormValue("parentID"),
 		},
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeGroupsCreation(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	file, handler, err := r.FormFile("groupsFile")
 	if err != nil {
 		return nil, err
@@ -1776,46 +1753,40 @@ func decodeGroupsCreation(_ context.Context, r *http.Request) (interface{}, erro
 
 		groups = append(groups, group)
 	}
-	req := createGroupsReq{
-		token:  token,
-		Groups: groups,
-	}
 
-	return req, nil
+	return createGroupsReq{
+		token:  session.AccessToken,
+		Groups: groups,
+	}, nil
 }
 
 func decodeGroupUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
 
 	var group sdk.Group
-	if err = json.NewDecoder(r.Body).Decode(&group); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&group); err != nil {
 		return nil, err
 	}
 	group.ID = chi.URLParam(r, "id")
 
-	req := updateGroupReq{
-		token: token,
+	return updateGroupReq{
+		token: session.AccessToken,
 		Group: group,
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeGroupStatusUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
-	req := updateGroupStatusReq{
-		token: token,
+	return updateGroupStatusReq{
+		token: session.AccessToken,
 		id:    r.PostFormValue("entityID"),
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodePublishRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -1824,7 +1795,7 @@ func decodePublishRequest(_ context.Context, r *http.Request) (interface{}, erro
 		return nil, err
 	}
 
-	req := publishReq{
+	return publishReq{
 		thingKey:  r.PostFormValue("thingKey"),
 		channelID: r.PostFormValue("channelID"),
 		Message: ui.Message{
@@ -1834,17 +1805,10 @@ func decodePublishRequest(_ context.Context, r *http.Request) (interface{}, erro
 			Unit:     r.PostFormValue("unit"),
 			Value:    floatValue,
 		},
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeReadMessagesRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
-	if err != nil {
-		return nil, err
-	}
-
 	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
@@ -1859,42 +1823,43 @@ func decodeReadMessagesRequest(_ context.Context, r *http.Request) (interface{},
 		return nil, err
 	}
 
-	req := readMessagesReq{
-		token:     token,
+	session, err := sessionFromHeader(r)
+	if err != nil {
+		return nil, err
+	}
+
+	return readMessagesReq{
 		channelID: r.Form.Get("channel"),
 		thingKey:  r.Form.Get("thing"),
 		page:      page,
 		limit:     limit,
-	}
-
-	return req, nil
+		Session:   session,
+	}, nil
 }
 
 func decodeTerminalCommandRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-	req := bootstrapCommandReq{
-		token:   token,
+	return bootstrapCommandReq{
+		token:   session.AccessToken,
 		id:      chi.URLParam(r, "id"),
 		command: strings.ReplaceAll(strings.Trim(r.PostFormValue("command"), " "), " ", ","),
-	}
-	return req, nil
+	}, nil
 }
 
 func decodeCreateBootstrapRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
 
-	req := createBootstrapReq{
-		token: token,
+	return createBootstrapReq{
+		token: session.AccessToken,
 		BootstrapConfig: sdk.BootstrapConfig{
 			ThingID:     r.FormValue("thingID"),
 			ExternalID:  r.FormValue("externalID"),
@@ -1907,113 +1872,92 @@ func decodeCreateBootstrapRequest(_ context.Context, r *http.Request) (interface
 			CACert:      r.FormValue("CACert"),
 			State:       1,
 		},
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeUpdateBootstrap(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	var config sdk.BootstrapConfig
-	if err = json.NewDecoder(r.Body).Decode(&config); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {
 		return nil, err
 	}
 	config.ThingID = chi.URLParam(r, "id")
 
-	req := updateBootstrapReq{
-		token:           token,
+	return updateBootstrapReq{
+		token:           session.AccessToken,
 		BootstrapConfig: config,
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeDeleteBootstrap(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
-	req := deleteBootstrapReq{
-		token: token,
+	return deleteBootstrapReq{
+		token: session.AccessToken,
 		id:    chi.URLParam(r, "id"),
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeUpdateBootstrapState(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	state, err := strconv.Atoi(r.FormValue("state"))
 	if err != nil {
 		return nil, err
 	}
 
-	req := updateBootstrapStateReq{
-		token: token,
+	return updateBootstrapStateReq{
+		token: session.AccessToken,
 		BootstrapConfig: sdk.BootstrapConfig{
 			ThingID: chi.URLParam(r, "id"),
 			State:   state,
 		},
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeUpdateBootstrapCerts(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	var config sdk.BootstrapConfig
-	if err = json.NewDecoder(r.Body).Decode(&config); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&config); err != nil {
 		return nil, err
 	}
 	config.ThingID = chi.URLParam(r, "id")
 
-	req := updateBootstrapCertReq{
-		token:           token,
+	return updateBootstrapCertReq{
+		token:           session.AccessToken,
 		BootstrapConfig: config,
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeUpdateBootstrapConnections(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
 
-	req := updateBootstrapConnReq{
-		token: token,
+	return updateBootstrapConnReq{
+		token: session.AccessToken,
 		BootstrapConfig: sdk.BootstrapConfig{
 			ThingID:  chi.URLParam(r, "id"),
 			Channels: r.PostForm["channelID"],
 		},
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeListEntityRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
-	if err != nil {
-		return nil, err
-	}
 	page, err := readNumQuery[uint64](r, pageKey, defPage)
 	if err != nil {
 		return nil, err
@@ -2029,21 +1973,20 @@ func decodeListEntityRequest(_ context.Context, r *http.Request) (interface{}, e
 		return nil, err
 	}
 
-	req := listEntityReq{
-		token:  token,
-		status: status,
-		page:   page,
-		limit:  limit,
-	}
-
-	return req, nil
-}
-
-func decodeListEntityByIDRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
+
+	return listEntityReq{
+		status:  status,
+		page:    page,
+		limit:   limit,
+		Session: session,
+	}, nil
+}
+
+func decodeListEntityByIDRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	page, err := readNumQuery[uint64](r, pageKey, defPage)
 	if err != nil {
 		return nil, err
@@ -2059,23 +2002,25 @@ func decodeListEntityByIDRequest(_ context.Context, r *http.Request) (interface{
 		return nil, err
 	}
 
-	req := listEntityByIDReq{
-		token:    token,
-		id:       chi.URLParam(r, "id"),
-		page:     page,
-		limit:    limit,
-		relation: relation,
-	}
-
-	return req, nil
-}
-
-func decodeGetEntitiesRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
 
+	return listEntityByIDReq{
+		id:       chi.URLParam(r, "id"),
+		page:     page,
+		limit:    limit,
+		relation: relation,
+		Session:  session,
+	}, nil
+}
+
+func decodeGetEntitiesRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	session, err := sessionFromHeader(r)
+	if err != nil {
+		return nil, err
+	}
 	item, err := readStringQuery(r, itemKey, defKey)
 	if err != nil {
 		return nil, err
@@ -2105,46 +2050,33 @@ func decodeGetEntitiesRequest(_ context.Context, r *http.Request) (interface{}, 
 		return nil, err
 	}
 
-	req := getEntitiesReq{
-		token:      token,
+	return getEntitiesReq{
+		token:      session.AccessToken,
 		item:       item,
 		page:       page,
 		name:       name,
 		domainID:   domainID,
 		limit:      limit,
 		permission: permission,
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeDomainLoginRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, refreshTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
+	session.LoginStatus = ui.DomainLoginStatus
 
-	req := domainLoginReq{
-		token: token,
+	return domainLoginReq{
+		Session: session,
 		Login: sdk.Login{
 			DomainID: r.FormValue("domainID"),
 		},
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeListDomainsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	accessToken, err := tokenFromCookie(r, accessTokenKey)
-	if err != nil {
-		return nil, err
-	}
-
-	refreshToken, err := tokenFromCookie(r, refreshTokenKey)
-	if err != nil {
-		return nil, err
-	}
-
 	page, err := readNumQuery[uint64](r, pageKey, defPage)
 	if err != nil {
 		return nil, err
@@ -2160,21 +2092,21 @@ func decodeListDomainsRequest(_ context.Context, r *http.Request) (interface{}, 
 		return nil, err
 	}
 
-	req := listDomainsReq{
-		Token: sdk.Token{
-			AccessToken:  accessToken,
-			RefreshToken: refreshToken,
-		},
-		status: status,
-		page:   page,
-		limit:  limit,
+	session, err := sessionFromHeader(r)
+	if err != nil {
+		return nil, err
 	}
 
-	return req, nil
+	return listDomainsReq{
+		status:  status,
+		page:    page,
+		limit:   limit,
+		Session: session,
+	}, nil
 }
 
 func decodeCreateDomainRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
@@ -2189,137 +2121,114 @@ func decodeCreateDomainRequest(_ context.Context, r *http.Request) (interface{},
 		return nil, err
 	}
 
-	req := createDomainReq{
-		token: token,
+	return createDomainReq{
+		token: session.AccessToken,
 		Domain: sdk.Domain{
 			Name:     r.FormValue("name"),
 			Alias:    r.FormValue("alias"),
 			Tags:     tags,
 			Metadata: meta,
 		},
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeUpdateDomainRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	var domain sdk.Domain
-	if err = json.NewDecoder(r.Body).Decode(&domain); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&domain); err != nil {
 		return nil, err
 	}
 	domain.ID = chi.URLParam(r, "id")
 
-	req := updateDomainReq{
-		token:  token,
+	return updateDomainReq{
+		token:  session.AccessToken,
 		Domain: domain,
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeUpdateDomainTagsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	var domain sdk.Domain
-	if err = json.NewDecoder(r.Body).Decode(&domain); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&domain); err != nil {
 		return nil, err
 	}
 	domain.ID = chi.URLParam(r, "id")
 
-	req := updateDomainTagsReq{
-		token:  token,
+	return updateDomainTagsReq{
+		token:  session.AccessToken,
 		Domain: domain,
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeDomainStatusUpdate(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
-	req := updateDomainStatusReq{
-		token: token,
+	return updateDomainStatusReq{
+		token: session.AccessToken,
 		id:    r.PostFormValue("entityID"),
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeAssignMemberRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	if err := r.ParseForm(); err != nil {
-		return nil, err
-	}
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
+	if err := r.ParseForm(); err != nil {
+		return nil, err
+	}
 
-	req := assignMemberReq{
-		token:    token,
+	return assignMemberReq{
+		token:    session.AccessToken,
 		domainID: chi.URLParam(r, "id"),
 		UsersRelationRequest: sdk.UsersRelationRequest{
 			UserIDs:  r.Form["userID"],
 			Relation: r.Form.Get("relation"),
 		},
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeViewMemberRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
-	if err != nil {
-		return nil, err
-	}
-
 	identity, err := readStringQuery(r, identityKey, defKey)
 	if err != nil {
 		return nil, err
 	}
 
-	req := viewMemberReq{
-		token:        token,
-		userIdentity: identity,
-	}
-
-	return req, nil
-}
-
-func decodeSendInvitationRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
 
-	req := sendInvitationReq{
-		token: token,
+	return viewMemberReq{
+		Session:      session,
+		userIdentity: identity,
+	}, nil
+}
+
+func decodeSendInvitationRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	session, err := sessionFromHeader(r)
+	if err != nil {
+		return nil, err
+	}
+	return sendInvitationReq{
+		token: session.AccessToken,
 		Invitation: sdk.Invitation{
 			DomainID: r.PostFormValue("domainID"),
 			UserID:   r.PostFormValue("userID"),
 			Relation: r.PostFormValue("relation"),
 		},
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeListInvitationsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
-	if err != nil {
-		return nil, err
-	}
-
 	page, err := readNumQuery[uint64](r, pageKey, defPage)
 	if err != nil {
 		return nil, err
@@ -2335,40 +2244,39 @@ func decodeListInvitationsRequest(_ context.Context, r *http.Request) (interface
 		return nil, err
 	}
 
-	req := listInvitationsReq{
-		token:    token,
-		domainID: domainID,
-		page:     page,
-		limit:    limit,
-	}
-
-	return req, nil
-}
-
-func decodeAcceptInvitationRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
 
+	return listInvitationsReq{
+		Session:  session,
+		domainID: domainID,
+		page:     page,
+		limit:    limit,
+	}, nil
+}
+
+func decodeAcceptInvitationRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	session, err := sessionFromHeader(r)
+	if err != nil {
+		return nil, err
+	}
 	if err := r.ParseForm(); err != nil {
 		return nil, err
 	}
 
-	req := acceptInvitationReq{
-		token:    token,
+	return acceptInvitationReq{
+		token:    session.AccessToken,
 		domainID: r.Form.Get("domainID"),
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeDeleteInvitationRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	token, err := tokenFromCookie(r, accessTokenKey)
+	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
-
 	domain, err := readStringQuery(r, domainKey, defKey)
 	if err != nil {
 		return nil, err
@@ -2378,14 +2286,12 @@ func decodeDeleteInvitationRequest(_ context.Context, r *http.Request) (interfac
 		return nil, err
 	}
 
-	req := deleteInvitationReq{
-		token:    token,
+	return deleteInvitationReq{
+		token:    session.AccessToken,
 		domain:   domain,
 		domainID: r.Form.Get("domainID"),
 		userID:   r.Form.Get("userID"),
-	}
-
-	return req, nil
+	}, nil
 }
 
 func decodeError(_ context.Context, r *http.Request) (interface{}, error) {
@@ -2454,6 +2360,16 @@ func tokenFromCookie(r *http.Request, cookie string) (string, error) {
 	return c.Value, nil
 }
 
+func sessionFromHeader(r *http.Request) (ui.Session, error) {
+	session := r.Header.Get(sessionDetailsKey)
+	var sessionDetails ui.Session
+	if err := json.Unmarshal([]byte(session), &sessionDetails); err != nil {
+		return ui.Session{}, err
+	}
+
+	return sessionDetails, nil
+}
+
 func AdminAuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var err error
@@ -2462,18 +2378,9 @@ func AdminAuthMiddleware(next http.Handler) http.Handler {
 				http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
 			}
 		}()
-		tokenString, err := tokenFromCookie(r, sessionDetailsKey)
+		session, err := sessionFromHeader(r)
 		if err != nil {
-			return
-		}
-
-		decodedSession, err := base64.StdEncoding.DecodeString(tokenString)
-		if err != nil {
-			return
-		}
-
-		var session ui.SessionDetails
-		if err = json.Unmarshal(decodedSession, &session); err != nil {
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 
@@ -2488,19 +2395,16 @@ func AdminAuthMiddleware(next http.Handler) http.Handler {
 
 func TokenMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tokenString, err := tokenFromCookie(r, accessTokenKey)
+		session, err := sessionFromHeader(r)
 		if err != nil {
-			if errors.Contains(err, http.ErrNoCookie) {
-				http.Redirect(w, r, "/token/refresh?referer_url="+url.QueryEscape(r.URL.String()), http.StatusSeeOther)
-				return
-			}
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 
 		// Parse the token without validation to get the expiration time
-		token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
+		token, _, err := new(jwt.Parser).ParseUnverified(session.AccessToken, jwt.MapClaims{})
 		if err != nil {
+			fmt.Println(err)
 			http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
 			return
 		}
@@ -2516,13 +2420,13 @@ func TokenMiddleware(next http.Handler) http.Handler {
 
 func AuthnMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tokenString, err := tokenFromCookie(r, accessTokenKey)
+		session, err := sessionFromHeader(r)
 		if err != nil {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 
-		token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
+		token, _, err := new(jwt.Parser).ParseUnverified(session.AccessToken, jwt.MapClaims{})
 		if err != nil {
 			http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
 			return
@@ -2535,6 +2439,32 @@ func AuthnMiddleware(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+func DecryptCookieMiddleware(s *securecookie.SecureCookie) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var err error
+			var decryptedSessionCookie string
+			defer func() {
+				if err != nil {
+					err = errors.Wrap(err, errCookieDecryption)
+					http.Redirect(w, r, fmt.Sprintf("/%s?error=%s", errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
+				}
+			}()
+			sessionCookie, err := tokenFromCookie(r, sessionDetailsKey)
+			if err != nil {
+				return
+			}
+			if err = s.Decode(sessionDetailsKey, sessionCookie, &decryptedSessionCookie); err != nil {
+				return
+			}
+
+			r.Header.Set(sessionDetailsKey, decryptedSessionCookie)
+
+			next.ServeHTTP(w, r)
+		})
+	}
 }
 
 func handleStaticFiles(m *chi.Mux) {

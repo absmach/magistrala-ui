@@ -11,11 +11,11 @@ import (
 const maxNameSize = 1024
 
 type indexReq struct {
-	token string
+	ui.Session
 }
 
 func (req indexReq) validate() error {
-	if req.token == "" {
+	if req.AccessToken == "" {
 		return errAuthorization
 	}
 	return nil
@@ -52,13 +52,27 @@ func (req tokenReq) validate() error {
 	return nil
 }
 
+type secureTokenReq struct {
+	ui.Session
+}
+
+func (req secureTokenReq) validate() error {
+	if req.AccessToken == "" {
+		return errAuthorization
+	}
+	if req.RefreshToken == "" {
+		return errMissingRefreshToken
+	}
+	return nil
+}
+
 type refreshTokenReq struct {
-	refreshToken string
-	ref          string
+	ui.Session
+	ref string
 }
 
 func (req refreshTokenReq) validate() error {
-	if req.refreshToken == "" {
+	if req.RefreshToken == "" {
 		return errMissingRefreshToken
 	}
 	if req.ref == "" {
@@ -107,14 +121,14 @@ func (req createUsersReq) validate() error {
 }
 
 type listEntityReq struct {
-	token  string
+	ui.Session
 	status string
 	page   uint64
 	limit  uint64
 }
 
 func (req listEntityReq) validate() error {
-	if req.token == "" {
+	if req.AccessToken == "" {
 		return errAuthorization
 	}
 	if req.page == 0 {
@@ -127,7 +141,7 @@ func (req listEntityReq) validate() error {
 }
 
 type listEntityByIDReq struct {
-	token    string
+	ui.Session
 	id       string
 	page     uint64
 	limit    uint64
@@ -135,7 +149,7 @@ type listEntityByIDReq struct {
 }
 
 func (req listEntityByIDReq) validate() error {
-	if req.token == "" {
+	if req.AccessToken == "" {
 		return errAuthorization
 	}
 	if req.id == "" {
@@ -151,15 +165,14 @@ func (req listEntityByIDReq) validate() error {
 }
 
 type viewResourceReq struct {
-	token string
-	id    string
+	ui.Session
+	id string
 }
 
 func (req viewResourceReq) validate() error {
-	if req.token == "" {
+	if req.AccessToken == "" {
 		return errAuthorization
 	}
-
 	if req.id == "" {
 		return errMissingUserID
 	}
@@ -252,6 +265,10 @@ func (req updateUserRoleReq) validate() error {
 	}
 
 	return nil
+}
+
+type showUpdatePasswordReq struct {
+	ui.Session
 }
 
 type updateUserPasswordReq struct {
@@ -626,7 +643,7 @@ func (req publishReq) validate() error {
 }
 
 type readMessagesReq struct {
-	token     string
+	ui.Session
 	channelID string
 	thingKey  string
 	page      uint64
@@ -634,7 +651,7 @@ type readMessagesReq struct {
 }
 
 func (req readMessagesReq) validate() error {
-	if req.token == "" {
+	if req.AccessToken == "" {
 		return errAuthorization
 	}
 	if req.channelID == "" {
@@ -846,12 +863,12 @@ func (req addUserGroupToChannelReq) validate() error {
 }
 
 type domainLoginReq struct {
-	token string
+	ui.Session
 	sdk.Login
 }
 
 func (req domainLoginReq) validate() error {
-	if req.token == "" {
+	if req.AccessToken == "" {
 		return errAuthentication
 	}
 	if req.DomainID == "" {
@@ -861,7 +878,7 @@ func (req domainLoginReq) validate() error {
 }
 
 type listDomainsReq struct {
-	sdk.Token
+	ui.Session
 	status string
 	page   uint64
 	limit  uint64
@@ -967,12 +984,12 @@ func (req assignMemberReq) validate() error {
 }
 
 type viewMemberReq struct {
-	token        string
+	ui.Session
 	userIdentity string
 }
 
 func (req viewMemberReq) validate() error {
-	if req.token == "" {
+	if req.AccessToken == "" {
 		return errAuthentication
 	}
 	if req.userIdentity == "" {
@@ -1041,14 +1058,14 @@ func (req deleteInvitationReq) validate() error {
 }
 
 type listInvitationsReq struct {
-	token    string
+	ui.Session
 	domainID string
 	page     uint64
 	limit    uint64
 }
 
 func (req listInvitationsReq) validate() error {
-	if req.token == "" {
+	if req.AccessToken == "" {
 		return errAuthentication
 	}
 	if req.page == 0 {
@@ -1062,12 +1079,12 @@ func (req listInvitationsReq) validate() error {
 }
 
 type viewDashboardReq struct {
-	token       string
+	ui.Session
 	DashboardID string `json:"dashboard_id"`
 }
 
 func (req viewDashboardReq) validate() error {
-	if req.token == "" {
+	if req.AccessToken == "" {
 		return errAuthorization
 	}
 	return nil
@@ -1100,6 +1117,14 @@ func (req listDashboardsReq) validate() error {
 	if req.page == 0 {
 		return errPageSize
 	}
+	return nil
+}
+
+type dashboardsReq struct {
+	ui.Session
+}
+
+func (req dashboardsReq) validate() error {
 	return nil
 }
 
