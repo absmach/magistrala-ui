@@ -111,7 +111,8 @@ function loadLayout(savedLayout) {
         newItem.classList.remove("item-editable");
         const removeButton = newItem.querySelector("#removeItem");
         if (removeButton) {
-          removeButton.style.display = "none";
+          removeButton.classList.add("no-opacity");
+          removeButton.disabled = true;
         }
         const { widgetPosition, widgetSize } = itemData;
         if (widgetPosition) {
