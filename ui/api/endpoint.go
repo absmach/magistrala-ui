@@ -49,7 +49,7 @@ func viewRegistrationEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func registerUserEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
+func registerUserEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(registerUserReq)
 		if err := req.validate(); err != nil {
@@ -76,14 +76,14 @@ func registerUserEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 				{
 					Name:     accessTokenKey,
 					Value:    token.AccessToken,
-					Path:     prefix,
+					Path:     "/",
 					HttpOnly: true,
 					Expires:  accessExp,
 				},
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
-					Path:     prefix,
+					Path:     "/",
 					HttpOnly: true,
 					Expires:  refreshExp,
 				},
@@ -107,7 +107,7 @@ func loginEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func logoutEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
+func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, _ interface{}) (interface{}, error) {
 		if err := svc.Logout(); err != nil {
 			return nil, err
@@ -117,7 +117,7 @@ func logoutEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 			{
 				Name:   sessionDetailsKey,
 				Value:  "",
-				Path:   prefix,
+				Path:   "/",
 				MaxAge: -1,
 			},
 		}
@@ -210,7 +210,7 @@ func updatePasswordEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 			{
 				Name:   sessionDetailsKey,
 				Value:  "",
-				Path:   prefix,
+				Path:   "/",
 				MaxAge: -1,
 			},
 		}
@@ -223,7 +223,7 @@ func updatePasswordEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	}
 }
 
-func tokenEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
+func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(tokenReq)
 		if err := req.validate(); err != nil {
@@ -250,14 +250,14 @@ func tokenEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 				{
 					Name:     accessTokenKey,
 					Value:    token.AccessToken,
-					Path:     prefix,
+					Path:     "/",
 					HttpOnly: true,
 					Expires:  accessExp,
 				},
 				{
 					Name:     refreshTokenKey,
 					Value:    token.RefreshToken,
-					Path:     prefix,
+					Path:     "/",
 					HttpOnly: true,
 					Expires:  refreshExp,
 				},
@@ -297,19 +297,19 @@ func secureTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix st
 				{
 					Name:  sessionDetailsKey,
 					Value: secureSessionDetails,
-					Path:  prefix,
+					Path:  "/",
 				},
 				{
 					Name:     accessTokenKey,
 					Value:    "",
-					Path:     prefix,
+					Path:     "/",
 					MaxAge:   -1,
 					HttpOnly: true,
 				},
 				{
 					Name:     refreshTokenKey,
 					Value:    "",
-					Path:     prefix,
+					Path:     "/",
 					MaxAge:   -1,
 					HttpOnly: true,
 				},
@@ -319,7 +319,7 @@ func secureTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix st
 	}
 }
 
-func refreshTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix string) endpoint.Endpoint {
+func refreshTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(refreshTokenReq)
 		if err := req.validate(); err != nil {
@@ -348,7 +348,7 @@ func refreshTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix s
 				{
 					Name:  sessionDetailsKey,
 					Value: secureSessionDetails,
-					Path:  prefix,
+					Path:  "/",
 				},
 			},
 		}
@@ -1557,7 +1557,7 @@ func domainLoginEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix st
 				{
 					Name:  sessionDetailsKey,
 					Value: secureSessionDetails,
-					Path:  prefix,
+					Path:  "/",
 				},
 			},
 			headers: map[string]string{"Location": fmt.Sprintf("%s/?domain=%s", prefix, req.DomainID)},
@@ -1688,7 +1688,7 @@ func disableDomainEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 			{
 				Name:     accessTokenKey,
 				Value:    "",
-				Path:     prefix,
+				Path:     "/",
 				MaxAge:   -1,
 				HttpOnly: true,
 			},

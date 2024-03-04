@@ -104,7 +104,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID, prefix string, secureCo
 		).ServeHTTP)
 
 		r.Post("/register", kithttp.NewServer(
-			registerUserEndpoint(svc, prefix),
+			registerUserEndpoint(svc),
 			decodeRegisterUserRequest,
 			encodeResponse,
 			opts...,
@@ -118,14 +118,14 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID, prefix string, secureCo
 		).ServeHTTP)
 
 		r.Post("/login", kithttp.NewServer(
-			tokenEndpoint(svc, prefix),
+			tokenEndpoint(svc),
 			decodeTokenRequest,
 			encodeResponse,
 			opts...,
 		).ServeHTTP)
 
 		r.Get("/token/refresh", kithttp.NewServer(
-			refreshTokenEndpoint(svc, secureCookie, prefix),
+			refreshTokenEndpoint(svc, secureCookie),
 			decodeRefreshTokenRequest(secureCookie),
 			encodeResponse,
 			opts...,
@@ -139,7 +139,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID, prefix string, secureCo
 		).ServeHTTP)
 
 		r.Get("/logout", kithttp.NewServer(
-			logoutEndpoint(svc, prefix),
+			logoutEndpoint(svc),
 			decodeLogoutRequest,
 			encodeResponse,
 			opts...,
