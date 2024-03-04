@@ -11,15 +11,12 @@ SPDX-License-Identifier: Apache-2.0 */
 }
 
 .grid-editable {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
-  grid-gap: 1rem;
-  padding: 1rem;
-
-  background-size: calc(18rem + 50px) calc(18rem + 50px);
+  background-size: calc(10rem + 10px) calc(10rem + 10px);
   background-image: linear-gradient(to right, lightgrey 1px, transparent 1px),
     linear-gradient(to bottom, lightgrey 1px, transparent 1px);
+
+  min-width: 100%;
+  min-height: 50vh;
 }
 
 .item {
