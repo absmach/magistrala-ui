@@ -2438,13 +2438,13 @@ func TokenMiddleware(prefix string) func(http.Handler) http.Handler {
 func AuthnMiddleware(prefix string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			tokenString, err := tokenFromCookie(r, accessTokenKey)
+			session, err := sessionFromHeader(r)
 			if err != nil {
 				http.Redirect(w, r, fmt.Sprintf("%s/%s", prefix, loginAPIEndpoint), http.StatusSeeOther)
 				return
 			}
 
-			token, _, err := new(jwt.Parser).ParseUnverified(tokenString, jwt.MapClaims{})
+			token, _, err := new(jwt.Parser).ParseUnverified(session.AccessToken, jwt.MapClaims{})
 			if err != nil {
 				http.Redirect(w, r, fmt.Sprintf("%s/%s?error=%s", prefix, errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
 				return
