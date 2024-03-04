@@ -679,6 +679,7 @@ func (us *uiService) Session(s Session) (Session, error) {
 			Identity: user.Credentials.Identity,
 			Role:     user.Role,
 		},
+		LoginStatus: s.LoginStatus,
 	}
 
 	if s.LoginStatus == "domain" {
