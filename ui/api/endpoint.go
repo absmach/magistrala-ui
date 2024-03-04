@@ -1692,19 +1692,6 @@ func disableDomainEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 				MaxAge:   -1,
 				HttpOnly: true,
 			},
-			{
-				Name:     refreshTokenKey,
-				Value:    "",
-				Path:     prefix,
-				MaxAge:   -1,
-				HttpOnly: true,
-			},
-			{
-				Name:   sessionDetailsKey,
-				Value:  "",
-				Path:   prefix,
-				MaxAge: -1,
-			},
 		}
 
 		return uiRes{
