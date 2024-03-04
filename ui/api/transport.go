@@ -2463,19 +2463,15 @@ func AuthnMiddleware(prefix string) func(http.Handler) http.Handler {
 func DecryptCookieMiddleware(s *securecookie.SecureCookie, prefix string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			var err error
 			var decryptedSessionCookie string
-			defer func() {
-				if err != nil {
-					err = errors.Wrap(err, errCookieDecryption)
-					http.Redirect(w, r, fmt.Sprintf("%s/%s?error=%s", prefix, errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
-				}
-			}()
 			sessionCookie, err := tokenFromCookie(r, sessionDetailsKey)
 			if err != nil {
+				http.Redirect(w, r, fmt.Sprintf("%s/%s", prefix, loginAPIEndpoint), http.StatusSeeOther)
 				return
 			}
 			if err = s.Decode(sessionDetailsKey, sessionCookie, &decryptedSessionCookie); err != nil {
+				err = errors.Wrap(err, errCookieDecryption)
+				http.Redirect(w, r, fmt.Sprintf("%s/%s?error=%s", prefix, errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
 				return
 			}
 
