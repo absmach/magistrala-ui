@@ -65,7 +65,6 @@ SPDX-License-Identifier: Apache-2.0 -->
 
     const itemsPerPage = document.querySelectorAll(".itemsPerPage a");
     itemsPerPage.forEach(item => {
-      const hrefParams = new URLSearchParams(item.getAttribute("href"));
       const newParams = { page: currentPage, limit: item.textContent };
       if (selectedStatus) {
         newParams.status = selectedStatus;
@@ -73,12 +72,10 @@ SPDX-License-Identifier: Apache-2.0 -->
       updateQueryParameters(newParams, item);
     });
 
-    var paginationLinks = document.querySelectorAll(".pagination a");
+    const paginationLinks = document.querySelectorAll(".pagination a");
     paginationLinks.forEach(function (item) {
-      var href = item.getAttribute("href");
-      var hrefParams = new URLSearchParams(href);
-      var page = hrefParams.get("page");
-      var newParams = { page: page };
+      const hrefParams = new URLSearchParams(item.getAttribute("href"));
+      let newParams = { page: hrefParams.get("page") };
       if (selectedLimit) {
         newParams.limit = selectedLimit;
       }
