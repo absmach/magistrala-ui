@@ -80,11 +80,11 @@ func main() {
 
 	sdk := sdk.NewSDK(sdkConfig)
 
-	googleConfig := oauth2.Config{}
-	if err := env.ParseWithOptions(&googleConfig, env.Options{Prefix: envPrefixGoogle}); err != nil {
+	oauthConfig := oauth2.Config{}
+	if err := env.ParseWithOptions(&oauthConfig, env.Options{Prefix: envPrefixGoogle}); err != nil {
 		log.Fatalf("failed to load Google configuration : %s", err.Error())
 	}
-	googleProvider := google.NewProvider(googleConfig)
+	oauthProvider := google.NewProvider(oauthConfig)
 
 	dbConfig := postgres.Config{}
 	db, err := postgres.Setup(dbConfig, *repo.Migration())
@@ -96,7 +96,7 @@ func main() {
 
 	idp := uuid.New()
 
-	svc, err := ui.New(sdk, dbs, idp, googleProvider)
+	svc, err := ui.New(sdk, dbs, idp, oauthProvider)
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
@@ -127,7 +127,7 @@ func main() {
 	go func() {
 		p := fmt.Sprintf(":%s", cfg.Port)
 		logger.Info("GUI service started", slog.String("port", p))
-		errs <- http.ListenAndServe(p, api.MakeHandler(svc, mux, cfg.InstanceID, s, googleProvider))
+		errs <- http.ListenAndServe(p, api.MakeHandler(svc, mux, cfg.InstanceID, s, oauthProvider))
 	}()
 
 	go func() {
