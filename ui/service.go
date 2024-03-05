@@ -1836,7 +1836,7 @@ func (us *uiService) FetchChartData(token string, channelID string, mpgm sdk.Mes
 		return []byte{}, err
 	}
 
-	data, jsonErr := json.Marshal(msg.Messages)
+	data, jsonErr := json.Marshal(msg)
 	if jsonErr != nil {
 		return []byte{}, errors.Wrap(err, ErrExecTemplate)
 	}

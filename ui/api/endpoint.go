@@ -1307,8 +1307,9 @@ func FetchChartDataEndpoint(svc ui.Service) endpoint.Endpoint {
 		}
 
 		return uiRes{
-			code: http.StatusOK,
-			html: res,
+			code:    http.StatusOK,
+			html:    res,
+			headers: map[string]string{"Content-Type": jsonContentType},
 		}, nil
 	}
 }
