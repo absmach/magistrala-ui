@@ -166,11 +166,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 
         var widgetID = "horizontalBarchart-" + Date.now();
 
-        var config = {
-          ID: widgetID,
-        };
         chartData["Type"] = "horizontalBarChart";
-        addEchartsWidget(chartData, config);
+        addWidget(chartData, widgetID);
         metadataBuffer[widgetID] = chartData;
       });
   </script>

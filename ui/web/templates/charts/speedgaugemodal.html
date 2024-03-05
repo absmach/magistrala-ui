@@ -176,11 +176,9 @@ SPDX-License-Identifier: Apache-2.0 -->
       }
 
       var widgetID = "speedGaugeChart-" + Date.now();
-      var config = {
-        ID: widgetID,
-      };
+
       chartData["Type"] = "speedGaugeChart";
-      addEchartsWidget(chartData, config);
+      addWidget(chartData, widgetID);
       metadataBuffer[widgetID] = chartData;
     });
   </script>

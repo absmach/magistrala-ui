@@ -222,11 +222,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 
         var widgetID = "stackedLineChart-" + Date.now();
 
-        var config = {
-          ID: widgetID,
-        };
         chartData["Type"] = "stackedLineChart";
-        addEchartsWidget(chartData, config);
+        addWidget(chartData, widgetID);
         metadataBuffer[widgetID] = chartData;
       });
   </script>

@@ -224,11 +224,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var widgetID = "lineChart-" + Date.now();
 
-      var config = {
-        ID: widgetID,
-      };
       chartData["Type"] = "lineChart";
-      addEchartsWidget(chartData, config);
+      addWidget(chartData, widgetID);
       metadataBuffer[widgetID] = chartData;
     });
   </script>

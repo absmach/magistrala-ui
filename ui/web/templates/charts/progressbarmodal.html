@@ -177,11 +177,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var widgetID = "progressBar-" + Date.now();
 
-      var config = {
-        ID: widgetID,
-      };
       chartData["Type"] = "progressBar";
-      addBootstrapWidget(chartData, config);
+      addWidget(chartData, widgetID);
       metadataBuffer[widgetID] = chartData;
     });
   </script>

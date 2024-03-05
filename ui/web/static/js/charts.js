@@ -1,63 +1,42 @@
 // Copyright (c) Abstract Machines
 // SPDX-License-Identifier: Apache-2.0
 
-function createChart(chartData, config) {
-  switch (chartData.Type) {
-    case "alarmCount":
-      return createAlarmCountCard(chartData, config);
-    case "alarmsTable":
-      return createAlarmsTable(chartData, config);
-    case "areaLineChart":
-      return createAreaLineChart(chartData, config);
-    case "timeSeriesBarChart":
-      return createTimeSeriesBarChart(chartData, config);
-    case "donutChart":
-      return createDonutChart(chartData, config);
-    case "doubleBarChart":
-      return createDoubleBarChart(chartData, config);
-    case "dynamicDataChart":
-      return createDynamicDataChart(chartData, config);
-    case "entitiesTable":
-      return createEntitiesTable(chartData, config);
-    case "entityCount":
-      return createEntityCount(chartData, config);
-    case "gaugeChart":
-      return createGaugeChart(chartData, config);
-    case "horizontalBarChart":
-      return createHorizontalBarChart(chartData, config);
-    case "labelCard":
-      return createLabelCard(chartData, config);
-    case "lineChart":
-      return createTimeSeriesLineChart(chartData, config);
-    case "multiBarChart":
-      return createMultiBarChart(chartData, config);
-    case "multiGaugeChart":
-      return createMultiGaugeChart(chartData, config);
-    case "multipleLineChart":
-      return createMultipleLineChart(chartData, config);
-    case "pieChart":
-      return createPieChart(chartData, config);
-    case "progressBar":
-      return createProgressBar(chartData, config);
-    case "sharedDatasetChart":
-      return createSharedDatasetChart(chartData, config);
-    case "speedGaugeChart":
-      return createSpeedGaugeChart(chartData, config);
-    case "stackedLineChart":
-      return createStackedLineChart(chartData, config);
-    case "stepChart":
-      return createStepChart(chartData, config);
-    case "tempGaugeChart":
-      return createTempGaugeChart(chartData, config);
-    case "valueCard":
-      return createValueCard(chartData, config);
-    default:
-      return null;
+class Chart {
+  constructor(widgetID, chartData) {
+    this.ID = widgetID;
+    this.chartData = chartData;
   }
 }
 
-function createAlarmCountCard(chartData, config) {
-  config.Content = `
+class Echart extends Chart {
+  constructor(widgetID, chartData) {
+    super(widgetID, chartData);
+    this.Style = {
+      width: "400px",
+      height: "400px",
+    };
+    this.Content = this.#generateContent();
+  }
+  #generateContent() {
+    return `
+      <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
+      </div>
+      `;
+  }
+}
+class AlarmCount extends Chart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Style = {
+      width: "400px",
+      height: "175px",
+    };
+    this.Content = this.#generateContent();
+  }
+
+  #generateContent() {
+    return `
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     <div class="card widgetcard">
         <div class="card-header text-center">
           <h5 class="card-title">Alarm Count</h5>
@@ -71,12 +50,24 @@ function createAlarmCountCard(chartData, config) {
           </p>
         </div>
     </div>
+    </div>
   `;
-  return config;
+  }
 }
 
-function createAlarmsTable(chartData, config) {
-  config.Content = `
+class AlarmsTable extends Chart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Style = {
+      width: "400px",
+      height: "200px",
+    };
+    this.Content = this.#generateContent();
+  }
+
+  #generateContent() {
+    return `
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
         <div class="card mt-3 widgetcard">
           <div class="card-header text-center">
             <h5 class="card-title">Alarms Table</h5>
@@ -106,120 +97,133 @@ function createAlarmsTable(chartData, config) {
             </tbody>
           </table>
         </div>
+    </div>
       `;
-  return config;
+  }
 }
 
-function createAreaLineChart(chartData, config) {
-  config.Script = `
-        var areaLineChart = echarts.init(document.getElementById("${config.ID}"));
-        var option = {
-            tooltip: {
-              trigger: 'axis',
-              axisPointer: {
-                type: 'cross',
-                label: {
-                  backgroundColor: '#6a7985'
-                }
-              }
-            },
-            title: {
-              text: '${chartData.title}',
-            },
-            legend: {
-              data: ['voltage', 'current', 'temperature', 'pressue']
-            },
-            grid: {
-              left: '3%',
-              right: '4%',
-              bottom: '3%',
-              containLabel: true
-            },
-            xAxis: [
-              {
-                type: 'category',
-                boundaryGap: false,
-                data: ['thing1', 'thing2', 'thing3', 'thing4', 'thing5', 'thing6', 'thing7'],
-                name: '${chartData.xAxisLabel}',
-                nameLocation: 'middle',
-                nameGap: 25,
-              }
-            ],
-            yAxis: [
-              {
-                type: 'value',
-                name: '${chartData.yAxisLabel}',
-                nameLocation: 'middle',
-                nameGap: 35,
-              }
-            ],
-            series: [
-              {
-                name: 'voltage',
-                type: 'line',
-                stack: 'Total',
-                areaStyle: {},
-                emphasis: {
-                  focus: 'series'
-                },
-                data: [120, 132, 101, 134, 90, 230, 210]
-              },
-              {
-                name: 'current',
-                type: 'line',
-                stack: 'Total',
-                areaStyle: {},
-                emphasis: {
-                  focus: 'series'
-                },
-                data: [220, 182, 191, 234, 290, 330, 310]
-              },
-              {
-                name: 'temperature',
-                type: 'line',
-                stack: 'Total',
-                areaStyle: {},
-                emphasis: {
-                  focus: 'series'
-                },
-                data: [150, 232, 201, 154, 190, 330, 410]
-              },
-              {
-                name: 'pressure',
-                type: 'line',
-                stack: 'Total',
-                areaStyle: {},
-                emphasis: {
-                  focus: 'series'
-                },
-                data: [320, 332, 301, 334, 390, 330, 320]
-              },
-            ]
-          };
+class AreaLineChart extends Echart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Script = this.#generateScript();
+  }
 
-        areaLineChart.setOption(option);`;
-  return config;
+  #generateScript() {
+    return `
+    var areaLineChart = echarts.init(document.getElementById("${this.ID}"));
+    var option = {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'cross',
+            label: {
+              backgroundColor: '#6a7985'
+            }
+          }
+        },
+        title: {
+          text: '${this.chartData.title}',
+        },
+        legend: {
+          data: ['voltage', 'current', 'temperature', 'pressue']
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        xAxis: [
+          {
+            type: 'category',
+            boundaryGap: false,
+            data: ['thing1', 'thing2', 'thing3', 'thing4', 'thing5', 'thing6', 'thing7'],
+            name: '${this.chartData.xAxisLabel}',
+            nameLocation: 'middle',
+            nameGap: 25,
+          }
+        ],
+        yAxis: [
+          {
+            type: 'value',
+            name: '${this.chartData.yAxisLabel}',
+            nameLocation: 'middle',
+            nameGap: 35,
+          }
+        ],
+        series: [
+          {
+            name: 'voltage',
+            type: 'line',
+            stack: 'Total',
+            areaStyle: {},
+            emphasis: {
+              focus: 'series'
+            },
+            data: [120, 132, 101, 134, 90, 230, 210]
+          },
+          {
+            name: 'current',
+            type: 'line',
+            stack: 'Total',
+            areaStyle: {},
+            emphasis: {
+              focus: 'series'
+            },
+            data: [220, 182, 191, 234, 290, 330, 310]
+          },
+          {
+            name: 'temperature',
+            type: 'line',
+            stack: 'Total',
+            areaStyle: {},
+            emphasis: {
+              focus: 'series'
+            },
+            data: [150, 232, 201, 154, 190, 330, 410]
+          },
+          {
+            name: 'pressure',
+            type: 'line',
+            stack: 'Total',
+            areaStyle: {},
+            emphasis: {
+              focus: 'series'
+            },
+            data: [320, 332, 301, 334, 390, 330, 320]
+          },
+        ]
+      };
+
+    areaLineChart.setOption(option);`;
+  }
 }
 
-function createTimeSeriesBarChart(chartData, config) {
-  config.Script = `
-    var barChart = echarts.init(document.getElementById("${config.ID}"));
+class TimeSeriesBarChart extends Echart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Script = this.#generateScript();
+  }
+
+  #generateScript() {
+    return `
+    var barChart = echarts.init(document.getElementById("${this.ID}"));
     var option = {
       title: {
-        text: '${chartData.title}',
+        text: '${this.chartData.title}',
         left: 'center',
         show: true
       },
       xAxis: {
         type: 'category',
         data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        name: '${chartData.xAxisLabel}',
+        name: '${this.chartData.xAxisLabel}',
         nameLocation: 'middle',
         nameGap: 35
       },
       yAxis: {
         type: 'value',
-        name: '${chartData.yAxisLabel}',
+        name: '${this.chartData.yAxisLabel}',
         nameLocation: 'middle',
         nameGap: 35
       },
@@ -231,72 +235,84 @@ function createTimeSeriesBarChart(chartData, config) {
           {
             data: [120, 200, 150, 80, 70, 110, 130],
             type: 'bar',
-            name: '${chartData.seriesName}'
+            name: '${this.chartData.seriesName}'
           }
         ]
     };
 
     barChart.setOption(option);`;
-  return config;
+  }
 }
 
-function createDonutChart(chartData, config) {
-  config.Script = `
-  var donut = echarts.init(document.getElementById("${config.ID}"));
-  var option = {
-      title:{
-        text:'${chartData.title}',
-        left: 'center',
-      },
-      tooltip: {
-        trigger: 'item'
-      },
-      legend: {
-        top: '5%',
-        left: 'center'
-      },
-      series: [
-        {
-          name: '${chartData.seriesName}',
-          type: 'pie',
-          radius: ['40%', '70%'],
-          avoidLabelOverlap: false,
-          label: {
-            show: false,
-            position: 'center'
-          },
-          emphasis: {
+class DonutChart extends Echart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Script = this.#generateScript();
+  }
+
+  #generateScript() {
+    return `
+    var donut = echarts.init(document.getElementById("${this.ID}"));
+    var option = {
+        title:{
+          text:'${this.chartData.title}',
+          left: 'center',
+        },
+        tooltip: {
+          trigger: 'item'
+        },
+        legend: {
+          top: '5%',
+          left: 'center'
+        },
+        series: [
+          {
+            name: '${this.chartData.seriesName}',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            avoidLabelOverlap: false,
             label: {
-              show: true,
-              fontSize: 40,
-              fontWeight: 'bold'
-            }
-          },
-          labelLine: {
-            show: false
-          },
-          data: [
-            { value: 1048, name: 'Thing1' },
-            { value: 735, name: 'Thing2' },
-            { value: 580, name: 'Thing3' },
-            { value: 484, name: 'Thing4' },
-            { value: 300, name: 'Thing5' }
-          ]
-        }
-      ]
-  };
+              show: false,
+              position: 'center'
+            },
+            emphasis: {
+              label: {
+                show: true,
+                fontSize: 40,
+                fontWeight: 'bold'
+              }
+            },
+            labelLine: {
+              show: false
+            },
+            data: [
+              { value: 1048, name: 'Thing1' },
+              { value: 735, name: 'Thing2' },
+              { value: 580, name: 'Thing3' },
+              { value: 484, name: 'Thing4' },
+              { value: 300, name: 'Thing5' }
+            ]
+          }
+        ]
+    };
 
-  donut.setOption(option);`;
-  return config;
+    donut.setOption(option);`;
+  }
 }
 
-function createDoubleBarChart(chartData, config) {
-  seriesName = chartData.seriesName.split(",");
-  config.Script = `
-    var doubleBarChart = echarts.init(document.getElementById("${config.ID}"));
+class DoubleBarChart extends Echart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Script = this.#generateScript();
+  }
+
+  #generateScript() {
+    let seriesName = this.chartData.seriesName.split(",");
+    return `
+    var doubleBarChart = echarts.init(document.getElementById("${this.ID}"));
     var option = {
       title: {
-        text: '${chartData.title}',
+        text: '${this.chartData.title}',
         left: 'left'
       },
       tooltip: {
@@ -321,7 +337,7 @@ function createDoubleBarChart(chartData, config) {
           type: 'category',
           // prettier-ignore
           data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-          name: '${chartData.xAxisLabel}',
+          name: '${this.chartData.xAxisLabel}',
           nameLocation: 'middle',
           nameGap: 30
         }
@@ -329,7 +345,7 @@ function createDoubleBarChart(chartData, config) {
       yAxis: [
         {
           type: 'value',
-          name: '${chartData.yAxisLabel}',
+          name: '${this.chartData.yAxisLabel}',
           nameLocation: 'middle',
           nameGap: 40
         }
@@ -372,167 +388,184 @@ function createDoubleBarChart(chartData, config) {
 
     doubleBarChart.setOption(option);
   `;
-  return config;
+  }
 }
 
-function createDynamicDataChart(chartData, config) {
-  config.Script = `
-  var dynamicDataChart = echarts.init(document.getElementById("${config.ID}"));
-  var app = {};
-  var categories = (function () {
-      let now = new Date();
-      let res = [];
-      let len = 10;
-      while (len--) {
-          res.unshift(now.toLocaleTimeString().replace(/^\D*/, ''));
-          now = new Date(+now - 2000);
-      }
-      return res;
-  })();
-  var categories2 = (function () {
-      let res = [];
-      let len = 10;
-      while (len--) {
-          res.push(10 - len - 1);
-      }
-      return res;
-  })();
-  var data = (function () {
-      
-      let res = [];
-      let len = 10;
-      while (len--) {
-          res.push(Math.round(Math.random() * 1000));
-      }
-      return res;
-  })();
-  var data2 = (function () {
-      let res = [];
-      let len = 0;
-      while (len < 10) {
-          res.push(+(Math.random() * 10 + 5).toFixed(1));
-          len++;
-      }
-      return res;
-  })();
-  var option = {
-      title: {
-          text: '${chartData.title}',
-          left:'left'
-      },
-      tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-                  type: 'cross',
-              label: {
-                  backgroundColor: '#283b56'
-              }
-      }
-      },
-      legend: {},
-      toolbox: {
-          show: true,
-      feature: {
-          dataView: { readOnly: false },
-          restore: {},
-          saveAsImage: {}
-      }
-      },
-      dataZoom: {
-          show: false,
-          start: 0,
-          end: 100
-      },
-      xAxis: [
-          {
-              type: 'category',
-              boundaryGap: true,
-              data: categories,
-              name: '${chartData.xAxisLabel}',
-              nameLocation: 'middle',
-              nameGap: 35
-          },
-          {
-              type: 'category',
-              boundaryGap: true,
-              data: categories2
-          }
-      ],
-      yAxis: [
-          {
-              type: 'value',
-              scale: true,
-              name: '${chartData.lineYAxisLabel}',
-              nameLocation: 'middle',
-              nameGap: '35',
-              max: 30,
-              min: 0,
-              boundaryGap: [0.2, 0.2]
-          },
-          {
-              type: 'value',
-              scale: true,
-              name: '${chartData.barYAxisLabel1}',
-              nameLocation: 'middle',
-              nameGap: '35',
-              max: 1200,
-              min: 0,
-              boundaryGap: [0.2, 0.2]
-          }
-      ],
-      series: [
-          {
-              name: '${chartData.barDataSeriesName}',
-              type: 'bar',
-              xAxisIndex: 1,
-              yAxisIndex: 1,
-              data: data
-          },
-          {
-              name: '${chartData.lineDataSeriesName}',
-              type: 'line',
-              data: data2
-          }
-      ]
-  };
-  app.count = 11;
-  setInterval(function () {
-      let axisData = new Date().toLocaleTimeString().replace(/^\D*/, '');
-      data.shift();
-      data.push(Math.round(Math.random() * 1000));
-      data2.shift();
-      data2.push(+(Math.random() * 10 + 5).toFixed(1));
-      categories.shift();
-      categories.push(axisData);
-      categories2.shift();
-      categories2.push(app.count++);
-      dynamicDataChart.setOption({
-          xAxis: [
-              {
-                  data: categories
-              },
-              {
-                  data: categories2
-              }
-          ],
-          series: [
-              {
-                  data: data
-              },
-              {
-                  data: data2
-              }
-          ]
-      });
-  }, 2100);
+class DynamicDataChart extends Echart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Script = this.#generateScript();
+  }
 
-  dynamicDataChart.setOption(option);
-`;
-  return config;
+  #generateScript() {
+    return `
+    var dynamicDataChart = echarts.init(document.getElementById("${this.ID}"));
+    var app = {};
+    var categories = (function () {
+        let now = new Date();
+        let res = [];
+        let len = 10;
+        while (len--) {
+            res.unshift(now.toLocaleTimeString().replace(/^\D*/, ''));
+            now = new Date(+now - 2000);
+        }
+        return res;
+    })();
+    var categories2 = (function () {
+        let res = [];
+        let len = 10;
+        while (len--) {
+            res.push(10 - len - 1);
+        }
+        return res;
+    })();
+    var data = (function () {
+        
+        let res = [];
+        let len = 10;
+        while (len--) {
+            res.push(Math.round(Math.random() * 1000));
+        }
+        return res;
+    })();
+    var data2 = (function () {
+        let res = [];
+        let len = 0;
+        while (len < 10) {
+            res.push(+(Math.random() * 10 + 5).toFixed(1));
+            len++;
+        }
+        return res;
+    })();
+    var option = {
+        title: {
+            text: '${this.chartData.title}',
+            left:'left'
+        },
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                    type: 'cross',
+                label: {
+                    backgroundColor: '#283b56'
+                }
+        }
+        },
+        legend: {},
+        toolbox: {
+            show: true,
+        feature: {
+            dataView: { readOnly: false },
+            restore: {},
+            saveAsImage: {}
+        }
+        },
+        dataZoom: {
+            show: false,
+            start: 0,
+            end: 100
+        },
+        xAxis: [
+            {
+                type: 'category',
+                boundaryGap: true,
+                data: categories,
+                name: '${this.chartData.xAxisLabel}',
+                nameLocation: 'middle',
+                nameGap: 35
+            },
+            {
+                type: 'category',
+                boundaryGap: true,
+                data: categories2
+            }
+        ],
+        yAxis: [
+            {
+                type: 'value',
+                scale: true,
+                name: '${this.chartData.lineYAxisLabel}',
+                nameLocation: 'middle',
+                nameGap: '35',
+                max: 30,
+                min: 0,
+                boundaryGap: [0.2, 0.2]
+            },
+            {
+                type: 'value',
+                scale: true,
+                name: '${this.chartData.barYAxisLabel1}',
+                nameLocation: 'middle',
+                nameGap: '35',
+                max: 1200,
+                min: 0,
+                boundaryGap: [0.2, 0.2]
+            }
+        ],
+        series: [
+            {
+                name: '${this.chartData.barDataSeriesName}',
+                type: 'bar',
+                xAxisIndex: 1,
+                yAxisIndex: 1,
+                data: data
+            },
+            {
+                name: '${this.chartData.lineDataSeriesName}',
+                type: 'line',
+                data: data2
+            }
+        ]
+    };
+    app.count = 11;
+    setInterval(function () {
+        let axisData = new Date().toLocaleTimeString().replace(/^\D*/, '');
+        data.shift();
+        data.push(Math.round(Math.random() * 1000));
+        data2.shift();
+        data2.push(+(Math.random() * 10 + 5).toFixed(1));
+        categories.shift();
+        categories.push(axisData);
+        categories2.shift();
+        categories2.push(app.count++);
+        dynamicDataChart.setOption({
+            xAxis: [
+                {
+                    data: categories
+                },
+                {
+                    data: categories2
+                }
+            ],
+            series: [
+                {
+                    data: data
+                },
+                {
+                    data: data2
+                }
+            ]
+        });
+    }, 2100);
+
+    dynamicDataChart.setOption(option);
+  `;
+  }
 }
 
-function createEntitiesTable(chartData, config) {
-  config.Content = `
+class EntitiesTable extends Chart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Style = {
+      width: "400px",
+      height: "200px",
+    };
+    this.Content = this.#generateContent();
+  }
+
+  #generateContent() {
+    return `
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
   <div class="card mt-3 widgetcard">
     <div class="card-header text-center">
       <h5 class="card-title">Entities Table</h5>
@@ -563,42 +596,22 @@ function createEntitiesTable(chartData, config) {
     </table>
   </div>
   `;
-  `
-      <div class="card mt-3 widgetcard">
-        <div class="card-header text-center">
-          <h5 class="card-title">Entities Table</h5>
-        </div>
-        <table class="table table-striped table-hover">
-          <thead>
-              <tr>
-                  <th scope="col">Name</th>
-                  <th scope="col">Owner</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Time Created</th>
-              </tr>
-          </thead>
-          <tbody>
-              <tr>
-                  <td>Entity 1</td>
-                  <td>Owner A</td>
-                  <td>Enabled</td>
-                  <td>2024-01-01 12:00</td>
-              </tr>
-              <tr>
-                  <td>Entity 2</td>
-                  <td>Owner B</td>
-                  <td>Disabled</td>
-                  <td>2024-01-02 15:30</td>
-              </tr>
-          </tbody>
-        </table>
-      </div>
-      `;
-  return config;
+  }
 }
 
-function createEntityCount(chartData, config) {
-  config.Content = `
+class EntityCount extends Chart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Style = {
+      width: "400px",
+      height: "175px",
+    };
+    this.Content = this.#generateContent();
+  }
+
+  #generateContent() {
+    return `
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
         <div class="card widgetcard">
           <div class="card-header text-center">
             <h5 class="card-title">Entity Count</h5>
@@ -612,17 +625,24 @@ function createEntityCount(chartData, config) {
             </p>
           </div>
         </div>
+    </div>
         `;
-  return config;
+  }
 }
 
-function createGaugeChart(chartData, config) {
-  config.Script = `
+class GaugeChart extends Echart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Script = this.#generateScript();
+  }
+
+  #generateScript() {
+    return `
   (function() {
-    var gaugeChart = echarts.init(document.getElementById("${config.ID}"));
+    var gaugeChart = echarts.init(document.getElementById("${this.ID}"));
     var option = {
       title: {
-        text: "${chartData.title}",
+        text: "${this.chartData.title}",
         left: "center",
       },
       tooltip: {
@@ -631,8 +651,8 @@ function createGaugeChart(chartData, config) {
       series: [
         {
           type: "gauge",
-          min: ${chartData.minValue},
-          max: ${chartData.maxValue},
+          min: ${this.chartData.minValue},
+          max: ${this.chartData.maxValue},
           progress: {
             show: true,
           },
@@ -640,7 +660,7 @@ function createGaugeChart(chartData, config) {
           data: [
             { 
               value: 50,
-              name: "${chartData.gaugeLabel}",
+              name: "${this.chartData.gaugeLabel}",
              
             },
           ],
@@ -651,14 +671,14 @@ function createGaugeChart(chartData, config) {
     gaugeChart.setOption(option);
 
     function updateGauge() {
-        const randomValue = Math.floor(Math.random() * (${chartData.maxValue} - ${chartData.minValue} + 1)) + ${chartData.minValue};
+        const randomValue = Math.floor(Math.random() * (${this.chartData.maxValue} - ${this.chartData.minValue} + 1)) + ${this.chartData.minValue};
         gaugeChart.setOption({
           series: [
             {
               data: [
                 {
                   value: randomValue,
-                  name: "${chartData.gaugeLabel}",
+                  name: "${this.chartData.gaugeLabel}",
                 },
               ],
             },
@@ -667,71 +687,88 @@ function createGaugeChart(chartData, config) {
     }
     setInterval(updateGauge, 2000);
   })();`;
-  return config;
+  }
 }
 
-function createHorizontalBarChart(chartData, config) {
-  config.Script = `
-        var horizontalBarChart = echarts.init(document.getElementById("${config.ID}"));
-        var option = {
-            title:{
-              text: '${chartData.title}',
-              left: 'center'
-            },
-            dataset: {
-              source: [
-                ['score', 'amount', 'product'],
-                [79.3,85212, 'thing1'],
-                [57.1, 78254, 'thing2'],
-                [14.4, 41032, 'thing3'],
-                [30.1, 12755, 'thing4'],
-                [18.7, 20145, 'thing5'],
-                [88.1, 89146, 'thing6'],
-              ]
-            },
-            grid: { containLabel: true },
-            xAxis: { 
-              name: '${chartData.xAxisLabel}',
-              nameLocation: 'middle',
-              nameGap: 30,
-              type: 'value',
-            },
-            yAxis: { 
-              type: 'category',
-              name: '${chartData.yAxisLabel}',
-              nameLocation: 'middle',
-              nameGap: 50,
-            },
-            visualMap: {
-              orient: 'horizontal',
-              left: 'center',
-              min: 10,
-              max: 100,
-              text: ['High temperature', 'Low temperature'],
-              // Map the score column to color
-              dimension: 0,
-              inRange: {
-                color: ['#65B581', '#FFCE34', '#FD665F']
-              }
-            },
-            series: [
-              {
-                type: 'bar',
-                encode: {
-                  x: 'amount',
-                  y: 'product'
-                }
-              }
+class HorizontalBarChart extends Echart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Script = this.#generateScript();
+  }
+
+  #generateScript() {
+    return `
+      var horizontalBarChart = echarts.init(document.getElementById("${this.ID}"));
+      var option = {
+          title:{
+            text: '${this.chartData.title}',
+            left: 'center'
+          },
+          dataset: {
+            source: [
+              ['score', 'amount', 'product'],
+              [79.3,85212, 'thing1'],
+              [57.1, 78254, 'thing2'],
+              [14.4, 41032, 'thing3'],
+              [30.1, 12755, 'thing4'],
+              [18.7, 20145, 'thing5'],
+              [88.1, 89146, 'thing6'],
             ]
-          };
+          },
+          grid: { containLabel: true },
+          xAxis: { 
+            name: '${this.chartData.xAxisLabel}',
+            nameLocation: 'middle',
+            nameGap: 30,
+            type: 'value',
+          },
+          yAxis: { 
+            type: 'category',
+            name: '${this.chartData.yAxisLabel}',
+            nameLocation: 'middle',
+            nameGap: 50,
+          },
+          visualMap: {
+            orient: 'horizontal',
+            left: 'center',
+            min: 10,
+            max: 100,
+            text: ['High temperature', 'Low temperature'],
+            // Map the score column to color
+            dimension: 0,
+            inRange: {
+              color: ['#65B581', '#FFCE34', '#FD665F']
+            }
+          },
+          series: [
+            {
+              type: 'bar',
+              encode: {
+                x: 'amount',
+                y: 'product'
+              }
+            }
+          ]
+        };
 
-        horizontalBarChart.setOption(option);`;
-  return config;
+      horizontalBarChart.setOption(option);`;
+  }
 }
 
-function createLabelCard(chartData, config) {
-  config.Content = `
-  <div class="card widgetcard">
+class LabelCard extends Chart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Style = {
+      width: "420px",
+      height: "180px",
+    };
+    this.Content = this.#generateContent();
+  }
+
+  #generateContent() {
+    return `
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
+    <div class="card widgetcard">
     <div class="card-header text-center">
       <h5 class="card-title">Label</h5>
     </div>
@@ -741,30 +778,37 @@ function createLabelCard(chartData, config) {
     <div class="card-footer">
       <p class="card-text text"> ThingID: 666 666 666</p>
     </div>
-  </div>
+    </div>
+    </div>
 `;
-  return config;
+  }
 }
 
-function createTimeSeriesLineChart(chartData, config) {
-  config.Script = `
-    var lineChart = echarts.init(document.getElementById("${config.ID}")); 
+class TimeSeriesLineChart extends Echart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Script = this.#generateScript();
+  }
+
+  #generateScript() {
+    return `
+    var lineChart = echarts.init(document.getElementById("${this.ID}")); 
     var option = {
       title: {
-        text: '${chartData.title}',
+        text: '${this.chartData.title}',
         left: 'center',
         show: true
       },
       xAxis: {
         type: 'category',
         data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        name: '${chartData.xAxisLabel}',
+        name: '${this.chartData.xAxisLabel}',
         nameLocation: 'middle',
         nameGap: 35
       },
       yAxis: {
         type: 'value',
-        name: '${chartData.yAxisLabel}',
+        name: '${this.chartData.yAxisLabel}',
         nameLocation: 'middle',
         nameGap: 35
       },
@@ -777,23 +821,29 @@ function createTimeSeriesLineChart(chartData, config) {
           data: [150, 230, 224, 218, 135, 147, 260],
           type: 'line',
           lineStyle: {
-            width: '${chartData.lineWidth}',
+            width: '${this.chartData.lineWidth}',
             type: 'solid',
-            color: '${chartData.lineColor}'
+            color: '${this.chartData.lineColor}'
           },
-          name: '${chartData.seriesName}'
+          name: '${this.chartData.seriesName}'
         }
       ]
     };
 
     lineChart.setOption(option);`;
-  return config;
+  }
 }
 
-function createMultiBarChart(chartData, config) {
-  seriesName = chartData.seriesName.split(",");
-  config.Script = `
-    var multiBarChart = echarts.init(document.getElementById("${config.ID}"));
+class MultiBarChart extends Echart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Script = this.#generateScript();
+  }
+
+  #generateScript() {
+    let seriesName = this.chartData.seriesName.split(",");
+    return `
+    var multiBarChart = echarts.init(document.getElementById("${this.ID}"));
     var app = {}
     var posList = [
         'left',
@@ -887,7 +937,7 @@ function createMultiBarChart(chartData, config) {
     };
     var option = {
         title: {
-          text: '${chartData.title}',
+          text: '${this.chartData.title}',
           left: 'left'
         },
         tooltip: {
@@ -918,7 +968,7 @@ function createMultiBarChart(chartData, config) {
             type: 'category',
             axisTick: { show: false },
             data: ['2012', '2013', '2014', '2015', '2016'],
-            name: '${chartData.xAxisLabel}',
+            name: '${this.chartData.xAxisLabel}',
             nameLocation: 'middle',
             nameGap: 30
         }
@@ -926,7 +976,7 @@ function createMultiBarChart(chartData, config) {
         yAxis: [
         {
             type: 'value',
-            name: '${chartData.yAxisLabel}',
+            name: '${this.chartData.yAxisLabel}',
             nameLocation: 'middle',
             nameGap: 40
         }
@@ -973,13 +1023,19 @@ function createMultiBarChart(chartData, config) {
     };
     multiBarChart.setOption(option);
   `;
-  return config;
+  }
 }
 
-function createMultiGaugeChart(chartData, config) {
-  gaugeLabel = chartData.gaugeLabel.split(",");
-  config.Script = `
-    var multiGaugeChart = echarts.init(document.getElementById("${config.ID}"));
+class MultiGaugeChart extends Echart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Script = this.#generateScript();
+  }
+
+  #generateScript() {
+    let gaugeLabel = this.chartData.gaugeLabel.split(",");
+    return `
+    var multiGaugeChart = echarts.init(document.getElementById("${this.ID}"));
     var gaugeData = [
     {
       value: 20,
@@ -1017,14 +1073,14 @@ function createMultiGaugeChart(chartData, config) {
   ];
   var option = {
     title: {
-      text: '${chartData.title}',
+      text: '${this.chartData.title}',
       left: 'center'
     },
     series: [
       {
         type: "gauge",
-        min: ${chartData.minValue},
-        max: ${chartData.maxValue},
+        min: ${this.chartData.minValue},
+        max: ${this.chartData.maxValue},
         pointer: {
           show: false
         },
@@ -1074,16 +1130,22 @@ function createMultiGaugeChart(chartData, config) {
   };
   multiGaugeChart.setOption(option);
   `;
-  return config;
+  }
 }
 
-function createMultipleLineChart(chartData, config) {
-  seriesName = chartData.seriesName.split(",");
-  config.Script = `
-    var multipleLineChart = echarts.init(document.getElementById("${config.ID}"));
+class MultipleLineChart extends Echart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Script = this.#generateScript();
+  }
+
+  #generateScript() {
+    let seriesName = this.chartData.seriesName.split(",");
+    return `
+    var multipleLineChart = echarts.init(document.getElementById("${this.ID}"));
     var option = {
       title: {
-        text: '${chartData.title}',
+        text: '${this.chartData.title}',
         left: 'left'
       },
       legend: {
@@ -1093,13 +1155,13 @@ function createMultipleLineChart(chartData, config) {
       xAxis: {
         type: 'category',
         data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        name: '${chartData.xAxisLabel}',
+        name: '${this.chartData.xAxisLabel}',
         nameLocation: 'middle',
         nameGap: 30
       },
       yAxis: {
         type: 'value',
-        name: '${chartData.yAxisLabel}',
+        name: '${this.chartData.yAxisLabel}',
         nameLocation: 'middle',
         nameGap: 40
       },
@@ -1123,15 +1185,21 @@ function createMultipleLineChart(chartData, config) {
     };
 
     multipleLineChart.setOption(option);`;
-  return config;
+  }
 }
 
-function createPieChart(chartData, config) {
-  config.Script = `
-    var pieChart = echarts.init(document.getElementById("${config.ID}"));
+class PieChart extends Echart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Script = this.#generateScript();
+  }
+
+  #generateScript() {
+    return `
+    var pieChart = echarts.init(document.getElementById("${this.ID}"));
     var option = {
         title: {
-            text: '${chartData.title}',
+            text: '${this.chartData.title}',
             left: 'center',
         },
         tooltip: {
@@ -1143,7 +1211,7 @@ function createPieChart(chartData, config) {
         },
         series: [
             {
-            name: '${chartData.seriesName}',
+            name: '${this.chartData.seriesName}',
             type: 'pie',
             radius: '50%',
             data: [
@@ -1165,19 +1233,30 @@ function createPieChart(chartData, config) {
     };
 
     pieChart.setOption(option);`;
-  return config;
+  }
 }
 
-function createProgressBar(chartData, config) {
-  config.Content = `
+class ProgressBar extends Chart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Style = {
+      width: "400px",
+      height: "100px",
+    };
+    this.Content = this.#generateContent();
+  }
+
+  #generateContent() {
+    return `
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
         <div class="card widgetcard">
           <div class="card-header text-center">
-            <h5 class="card-title">${chartData.title}</h5>
+            <h5 class="card-title">${this.chartData.title}</h5>
           </div>
           <div class="card-body p-2">
             <div class="progress">
-              <div class="progress-bar ${chartData.progressBarColor}" role="progressbar" style="width: 70%" aria-valuemin=${chartData.minValue} 
-              aria-valuemax=${chartData.maxValue}></div>
+              <div class="progress-bar ${this.chartData.progressBarColor}" role="progressbar" style="width: 70%" aria-valuemin=${this.chartData.minValue} 
+              aria-valuemax=${this.chartData.maxValue}></div>
             </div>
           </div>
           <div class="card-footer text-center">
@@ -1186,209 +1265,228 @@ function createProgressBar(chartData, config) {
             </p>
           </div>
         </div>
+    </div>
       `;
-  return config;
+  }
 }
 
-function createSharedDatasetChart(chartData, config) {
-  seriesName = chartData.seriesName.split(",");
-  config.Script = `
-  var sharedDataset = echarts.init(document.getElementById("${config.ID}"));
-  var option = {
-    title: {
-      text: '${chartData.title}',
-      left: 'left'
-    },
-    legend: {
-      show: true,
-      left: 'right',
-    },
-    tooltip: {
-      trigger: 'axis',
-      showContent: false
-    },
-    dataset: {
-      source: [
-        ['product', '2012', '2013', '2014', '2015', '2016', '2017'],
-        ['Things', 56.5, 82.1, 88.7, 70.1, 53.4, 85.1],
-        ['Users', 51.1, 51.4, 55.1, 53.3, 73.8, 68.7],
-        ['Channels', 40.1, 62.2, 69.5, 36.4, 45.2, 32.5],
-        ['Groups', 25.2, 37.1, 41.2, 18, 33.9, 49.1]
-      ]
-    },
-    xAxis: {
-      type: 'category',
-      name:'${chartData.xAxisLabel}',
-      nameLocation: 'middle',
-      nameGap: 30
-    },
-    yAxis: {
-      gridIndex: 0,
-      name: '${chartData.yAxisLabel}',
-      nameLocation: 'middle',
-      nameGap: 40
-    },
-    grid: { top: '55%' },
-    series: [
-      {
-        type: 'line',
-        smooth: true,
-        seriesLayoutBy: 'row',
-        emphasis: { focus: 'series' },
-        name: '${seriesName[0]}'
-      },
-      {
-        type: 'line',
-        smooth: true,
-        seriesLayoutBy: 'row',
-        emphasis: { focus: 'series' },
-        name: '${seriesName[1]}'
-      },
-      {
-        type: 'line',
-        smooth: true,
-        seriesLayoutBy: 'row',
-        emphasis: { focus: 'series' },
-        name: '${seriesName[2]}'
-      },
-      {
-        type: 'line',
-        smooth: true,
-        seriesLayoutBy: 'row',
-        emphasis: { focus: 'series' },
-        name: '${seriesName[3]}'
-      },
-      {
-        type: 'pie',
-        id: 'pie',
-        radius: '30%',
-        center: ['50%', '25%'],
-        emphasis: {
-          focus: 'self'
-        },
-        label: {
-          formatter: '{b}: {@2012} ({d}%)'
-        },
-        encode: {
-          itemName: 'product',
-          value: '2012',
-          tooltip: '2012'
-        }
-      }
-    ]
-  };
-  sharedDataset.on('updateAxisPointer', function (event) {
-    const xAxisInfo = event.axesInfo[0];
-    if (xAxisInfo) {
-      const dimension = xAxisInfo.value + 1;
-      sharedDataset.setOption({
-        series: {
-          id: 'pie',
-          label: {
-            formatter: '{b}: {@[' + dimension + ']} ({d}%)'
-          },
-          encode: {
-            value: dimension,
-            tooltip: dimension
-          }
-        }
-      });
-    }
-  });
-  sharedDataset.setOption(option);
-`;
-  return config;
-}
+class SharedDatasetChart extends Echart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Script = this.#generateScript();
+  }
 
-function createSpeedGaugeChart(chartData, config) {
-  config.Script = `
-  var speedGaugeChart = echarts.init(document.getElementById("${config.ID}"));
-  var option = {
+  #generateScript() {
+    let seriesName = this.chartData.seriesName.split(",");
+    return `
+    var sharedDataset = echarts.init(document.getElementById("${this.ID}"));
+    var option = {
       title: {
-        text: '${chartData.title}',
-        left: 'center',
-        top: 20,
-        show: true,
+        text: '${this.chartData.title}',
+        left: 'left'
       },
+      legend: {
+        show: true,
+        left: 'right',
+      },
+      tooltip: {
+        trigger: 'axis',
+        showContent: false
+      },
+      dataset: {
+        source: [
+          ['product', '2012', '2013', '2014', '2015', '2016', '2017'],
+          ['Things', 56.5, 82.1, 88.7, 70.1, 53.4, 85.1],
+          ['Users', 51.1, 51.4, 55.1, 53.3, 73.8, 68.7],
+          ['Channels', 40.1, 62.2, 69.5, 36.4, 45.2, 32.5],
+          ['Groups', 25.2, 37.1, 41.2, 18, 33.9, 49.1]
+        ]
+      },
+      xAxis: {
+        type: 'category',
+        name:'${this.chartData.xAxisLabel}',
+        nameLocation: 'middle',
+        nameGap: 30
+      },
+      yAxis: {
+        gridIndex: 0,
+        name: '${this.chartData.yAxisLabel}',
+        nameLocation: 'middle',
+        nameGap: 40
+      },
+      grid: { top: '55%' },
       series: [
         {
-          type: 'gauge',
-          axisLine: {
-            lineStyle: {
-              width: 30,
-              color: [
-                [0.3, '#67e0e3'],
-                [0.7, '#37a2da'],
-                [1, '#fd666d']
-              ]
-            }
+          type: 'line',
+          smooth: true,
+          seriesLayoutBy: 'row',
+          emphasis: { focus: 'series' },
+          name: '${seriesName[0]}'
+        },
+        {
+          type: 'line',
+          smooth: true,
+          seriesLayoutBy: 'row',
+          emphasis: { focus: 'series' },
+          name: '${seriesName[1]}'
+        },
+        {
+          type: 'line',
+          smooth: true,
+          seriesLayoutBy: 'row',
+          emphasis: { focus: 'series' },
+          name: '${seriesName[2]}'
+        },
+        {
+          type: 'line',
+          smooth: true,
+          seriesLayoutBy: 'row',
+          emphasis: { focus: 'series' },
+          name: '${seriesName[3]}'
+        },
+        {
+          type: 'pie',
+          id: 'pie',
+          radius: '30%',
+          center: ['50%', '25%'],
+          emphasis: {
+            focus: 'self'
           },
-          pointer: {
-            itemStyle: {
-              color: 'auto'
-            }
+          label: {
+            formatter: '{b}: {@2012} ({d}%)'
           },
-          axisTick: {
-            distance: -30,
-            length: 8,
-            lineStyle: {
-              color: '#fff',
-              width: 2
-            }
-          },
-          splitLine: {
-            distance: -30,
-            length: 30,
-            lineStyle: {
-              color: '#fff',
-              width: 4
-            }
-          },
-          axisLabel: {
-            color: 'inherit',
-            distance: 40,
-            fontSize: 20
-          },
-          detail: {
-            valueAnimation: true,
-            formatter: '{value} km/h',
-            color: 'inherit'
-          },
-          data: [
-            {
-              value: 25,
-              name: "${chartData.gaugeLabel}",
-            }
-          ]
+          encode: {
+            itemName: 'product',
+            value: '2012',
+            tooltip: '2012'
+          }
         }
       ]
     };
-    setInterval(function () {
-      speedGaugeChart.setOption({
+    sharedDataset.on('updateAxisPointer', function (event) {
+      const xAxisInfo = event.axesInfo[0];
+      if (xAxisInfo) {
+        const dimension = xAxisInfo.value + 1;
+        sharedDataset.setOption({
+          series: {
+            id: 'pie',
+            label: {
+              formatter: '{b}: {@[' + dimension + ']} ({d}%)'
+            },
+            encode: {
+              value: dimension,
+              tooltip: dimension
+            }
+          }
+        });
+      }
+    });
+    sharedDataset.setOption(option);
+  `;
+  }
+}
+
+class SpeedGaugeChart extends Echart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Script = this.#generateScript();
+  }
+
+  #generateScript() {
+    return `
+    var speedGaugeChart = echarts.init(document.getElementById("${this.ID}"));
+    var option = {
+        title: {
+          text: '${this.chartData.title}',
+          left: 'center',
+          top: 20,
+          show: true,
+        },
         series: [
           {
+            type: 'gauge',
+            axisLine: {
+              lineStyle: {
+                width: 30,
+                color: [
+                  [0.3, '#67e0e3'],
+                  [0.7, '#37a2da'],
+                  [1, '#fd666d']
+                ]
+              }
+            },
+            pointer: {
+              itemStyle: {
+                color: 'auto'
+              }
+            },
+            axisTick: {
+              distance: -30,
+              length: 8,
+              lineStyle: {
+                color: '#fff',
+                width: 2
+              }
+            },
+            splitLine: {
+              distance: -30,
+              length: 30,
+              lineStyle: {
+                color: '#fff',
+                width: 4
+              }
+            },
+            axisLabel: {
+              color: 'inherit',
+              distance: 40,
+              fontSize: 20
+            },
+            detail: {
+              valueAnimation: true,
+              formatter: '{value} km/h',
+              color: 'inherit'
+            },
             data: [
               {
-                value: +(Math.random() * 100).toFixed(2),
-                name: "${chartData.gaugeLabel}",
+                value: 25,
+                name: "${this.chartData.gaugeLabel}",
               }
             ]
           }
         ]
-      });
-    }, 2000);
+      };
+      setInterval(function () {
+        speedGaugeChart.setOption({
+          series: [
+            {
+              data: [
+                {
+                  value: +(Math.random() * 100).toFixed(2),
+                  name: "${this.chartData.gaugeLabel}",
+                }
+              ]
+            }
+          ]
+        });
+      }, 2000);
 
-  speedGaugeChart.setOption(option);`;
-  return config;
+    speedGaugeChart.setOption(option);`;
+  }
 }
 
-function createStackedLineChart(chartData, config) {
-  seriesName = chartData.seriesName.split(",");
-  config.Script = `
-    var stackedLineChart = echarts.init(document.getElementById("${config.ID}"));
+class StackedLineChart extends Echart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Script = this.#generateScript();
+  }
+
+  #generateScript() {
+    let seriesName = this.chartData.seriesName.split(",");
+    return `
+    var stackedLineChart = echarts.init(document.getElementById("${this.ID}"));
     var option = {
         title: {
-          text: "${chartData.title}",
+          text: "${this.chartData.title}",
           left: 'left',
         },
         tooltip: {
@@ -1413,13 +1511,13 @@ function createStackedLineChart(chartData, config) {
           type: 'category',
           boundaryGap: false,
           data: ['Thing1', 'Thing2', 'Thing3', 'Thing4', 'Thing5', 'Thing6', 'Thing7'],
-          name: '${chartData.xAxisLabel}',
+          name: '${this.chartData.xAxisLabel}',
           nameLocation: 'middle',
           nameGap: 35,
         },
         yAxis: {
           type: 'value',
-          name: '${chartData.yAxisLabel}',
+          name: '${this.chartData.yAxisLabel}',
           nameLocation: 'middle',
           nameGap: 35,
         },
@@ -1446,16 +1544,22 @@ function createStackedLineChart(chartData, config) {
       };
 
     stackedLineChart.setOption(option);`;
-  return config;
+  }
 }
 
-function createStepChart(chartData, config) {
-  seriesName = chartData.seriesName.split(",");
-  config.Script = `
-    var stepChart = echarts.init(document.getElementById("${config.ID}"));
+class StepChart extends Echart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Script = this.#generateScript();
+  }
+
+  #generateScript() {
+    let seriesName = this.chartData.seriesName.split(",");
+    return `
+    var stepChart = echarts.init(document.getElementById("${this.ID}"));
     var option = {
       title: {
-        text: '${chartData.title}',
+        text: '${this.chartData.title}',
         left: 'left'
       },
       tooltip: {
@@ -1479,13 +1583,13 @@ function createStepChart(chartData, config) {
       xAxis: {
         type: 'category',
         data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        name: '${chartData.xAxisLabel}',
+        name: '${this.chartData.xAxisLabel}',
         nameLocation: 'middle',
         nameGap: 30
       },
       yAxis: {
         type: 'value',
-        name: '${chartData.yAxisLabel}',
+        name: '${this.chartData.yAxisLabel}',
         nameLocation: 'middle',
         nameGap: 40
       },
@@ -1511,15 +1615,21 @@ function createStepChart(chartData, config) {
       ]
     };
     stepChart.setOption(option);`;
-  return config;
+  }
 }
 
-function createTempGaugeChart(chartData, config) {
-  config.Script = `
-    var tempGaugeChart = echarts.init(document.getElementById("${config.ID}"));
+class TempGaugeChart extends Echart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Script = this.#generateScript();
+  }
+
+  #generateScript() {
+    return `
+    var tempGaugeChart = echarts.init(document.getElementById("${this.ID}"));
     var option = {
         title: {
-          text: '${chartData.title}',
+          text: '${this.chartData.title}',
           left: 'center',
           textStyle: {
             color: '#FFAB91'
@@ -1628,7 +1738,7 @@ function createTempGaugeChart(chartData, config) {
             data: [
               {
                 value: 37,
-                name: '${chartData.gaugeLabel}'
+                name: '${this.chartData.gaugeLabel}'
               }
             ]
           }
@@ -1649,7 +1759,7 @@ function createTempGaugeChart(chartData, config) {
               data: [
                 {
                   value: random,
-                  name: '${chartData.gaugeLabel}'
+                  name: '${this.chartData.gaugeLabel}'
                 }
               ]
             }
@@ -1658,23 +1768,96 @@ function createTempGaugeChart(chartData, config) {
       }, 2000);
 
     tempGaugeChart.setOption(option);`;
-  return config;
+  }
 }
 
-function createValueCard(chartData, config) {
-  config.Content = `
+class ValueCard extends Chart {
+  constructor(chartData, widgetID) {
+    super(widgetID, chartData);
+    this.Style = {
+      width: "400px",
+      height: "200px",
+    };
+    this.Content = this.#generateContent();
+  }
+
+  #generateContent() {
+    return `
+    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
     <div class="card mt-3 widgetcard" >
       <div class="card-header text-center">
-        <h5 class="card-title">${chartData.title}</h5>
+        <h5 class="card-title">${this.chartData.title}</h5>
       </div>
       <div class="card-body text-center">
         <p class="card-text value"> 35</p>
       </div>
       <div class="card-footer">
-        <p class="card-text"> Units: ${chartData.valueUnits}</p>
-        <p class="card-text text"> ThingName: ${chartData.thingName}</p>
+        <p class="card-text"> Units: ${this.chartData.valueUnits}</p>
+        <p class="card-text text"> ThingName: ${this.chartData.thingName}</p>
       </div>
     </div>
+    </div>
   `;
-  return config;
+  }
+}
+
+const chartTypes = {
+  alarmCount: AlarmCount,
+  alarmsTable: AlarmsTable,
+  areaLineChart: AreaLineChart,
+  timeSeriesBarChart: TimeSeriesBarChart,
+  donutChart: DonutChart,
+  doubleBarChart: DoubleBarChart,
+  dynamicDataChart: DynamicDataChart,
+  entitiesTable: EntitiesTable,
+  entityCount: EntityCount,
+  gaugeChart: GaugeChart,
+  horizontalBarChart: HorizontalBarChart,
+  labelCard: LabelCard,
+  lineChart: TimeSeriesLineChart,
+  multiBarChart: MultiBarChart,
+  multiGaugeChart: MultiGaugeChart,
+  multipleLineChart: MultipleLineChart,
+  pieChart: PieChart,
+  progressBar: ProgressBar,
+  sharedDatasetChart: SharedDatasetChart,
+  speedGaugeChart: SpeedGaugeChart,
+  stackedLineChart: StackedLineChart,
+  stepChart: StepChart,
+  tempGaugeChart: TempGaugeChart,
+  valueCard: ValueCard,
+};
+
+class Widget {
+  constructor(chartData, widgetID) {
+    this.chartData = chartData;
+    this.widgetID = widgetID;
+    this.config = new chartTypes[this.chartData.Type](chartData, widgetID);
+    this.element = this.#createWidgetElement();
+  }
+
+  #createWidgetElement() {
+    const newItem = document.createElement("div");
+    newItem.className = "item item-editable";
+    newItem.innerHTML = `
+        <div class="item-border">
+          <button type="button" class="btn btn-sm" id="removeItem" onclick="removeGridItem(this.parentNode.parentNode);">
+            <i class="fas fa-trash-can"></i>
+          </button>
+          ${this.config.Content}
+          </div>
+        `;
+    if (this.config.Script) {
+      let scriptTag = document.createElement("script");
+      scriptTag.type = "text/javascript";
+      scriptTag.defer = true;
+      scriptTag.innerHTML = this.config.Script;
+      newItem.appendChild(scriptTag);
+    }
+    Object.assign(newItem.style, {
+      minWidth: this.config.Style.width,
+      minHeight: this.config.Style.height,
+    });
+    return newItem;
+  }
 }

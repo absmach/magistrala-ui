@@ -97,11 +97,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var widgetID = "entitiesTable-" + Date.now();
 
-      var config = {
-        ID: widgetID,
-      };
       chartData["Type"] = "entitiesTable";
-      addBootstrapWidget(chartData, config);
+      addWidget(chartData, widgetID);
       metadataBuffer[widgetID] = chartData;
     });
   </script>

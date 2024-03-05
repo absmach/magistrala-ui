@@ -155,11 +155,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var widgetID = "donutChart-" + Date.now();
 
-      var config = {
-        ID: widgetID,
-      };
       chartData["Type"] = "donutChart";
-      addEchartsWidget(chartData, config);
+      addWidget(chartData, widgetID);
       metadataBuffer[widgetID] = chartData;
     });
   </script>

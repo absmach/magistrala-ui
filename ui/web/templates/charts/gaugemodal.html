@@ -177,11 +177,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       var widgetID = "gaugeChart-" + Date.now();
 
-      var config = {
-        ID: widgetID,
-      };
       chartData["Type"] = "gaugeChart";
-      addEchartsWidget(chartData, config);
+      addWidget(chartData, widgetID);
       metadataBuffer[widgetID] = chartData;
     });
   </script>

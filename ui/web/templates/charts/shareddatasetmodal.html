@@ -215,11 +215,9 @@ SPDX-License-Identifier: Apache-2.0 -->
       }
 
       var widgetID = "sharedDatasetChart-" + Date.now();
-      var config = {
-        ID: widgetID,
-      };
+
       chartData["Type"] = "sharedDatasetChart";
-      addEchartsWidget(chartData, config);
+      addWidget(chartData, widgetID);
       metadataBuffer[widgetID] = chartData;
     });
   </script>
