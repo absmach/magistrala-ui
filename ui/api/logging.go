@@ -1161,13 +1161,13 @@ func (lm *loggingMiddleware) Publish(channelID, thingKey string, message ui.Mess
 }
 
 // ReadMessages adds logging middleware to read messages method.
-func (lm *loggingMiddleware) ReadMessages(s ui.Session, channelID, thingKey string, page, limit uint64) (b []byte, err error) {
+func (lm *loggingMiddleware) ReadMessages(s ui.Session, channelID, thingKey string, page uint64, mpgm sdk.MessagePageMetadata) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
 			slog.String("channel_id", channelID),
 			slog.Uint64("page", page),
-			slog.Uint64("limit", limit),
+			slog.Any("page metadata", mpgm),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
@@ -1177,16 +1177,16 @@ func (lm *loggingMiddleware) ReadMessages(s ui.Session, channelID, thingKey stri
 		lm.logger.Info("Read messages completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ReadMessages(s, channelID, thingKey, page, limit)
+	return lm.svc.ReadMessages(s, channelID, thingKey, page, mpgm)
 }
 
-func (lm *loggingMiddleware) FetchReaderData(token string, channelID string, page, limit uint64) (b []byte, err error) {
+// FetchChartData adds logging middleware to fetch chart data method.
+func (lm *loggingMiddleware) FetchChartData(token string, channelID string, mpgm sdk.MessagePageMetadata) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
 			slog.String("channel_id", channelID),
-			slog.Uint64("page", page),
-			slog.Uint64("limit", limit),
+			slog.Any("page_metadata", mpgm),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
@@ -1196,7 +1196,7 @@ func (lm *loggingMiddleware) FetchReaderData(token string, channelID string, pag
 		lm.logger.Info("Fetch reader data completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.FetchReaderData(token, channelID, page, limit)
+	return lm.svc.FetchChartData(token, channelID, mpgm)
 }
 
 // CreateBootstrap adds logging middleware to create bootstrap method.

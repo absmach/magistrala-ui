@@ -1283,7 +1283,7 @@ func readMessagesEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ReadMessages(req.Session, req.channelID, req.thingKey, req.page, req.limit)
+		res, err := svc.ReadMessages(req.Session, req.channelID, req.thingKey, req.page, req.mpgm)
 		if err != nil {
 			return nil, err
 		}
@@ -1295,13 +1295,13 @@ func readMessagesEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func fetchReaderDataEndpoint(svc ui.Service) endpoint.Endpoint {
+func FetchChartDataEndpoint(svc ui.Service) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
-		req := request.(fetchReaderDataReq)
+		req := request.(readMessagesReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.FetchReaderData(req.token, req.channelID, req.page, req.limit)
+		res, err := svc.FetchChartData(req.Session.AccessToken, req.channelID, req.mpgm)
 		if err != nil {
 			return nil, err
 		}

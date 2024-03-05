@@ -804,15 +804,13 @@ class TimeSeriesLineChart extends Echart {
         data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
         name: '${this.chartData.xAxisLabel}',
         nameLocation: 'middle',
-        nameGap: 35,
-        min: 0,
+        nameGap: 35
       },
       yAxis: {
         type: 'value',
         name: '${this.chartData.yAxisLabel}',
         nameLocation: 'middle',
-        nameGap: 35,
-        min: 0,
+        nameGap: 35
       },
       legend: {
         show: true,
@@ -820,7 +818,7 @@ class TimeSeriesLineChart extends Echart {
       },
       series: [
         {
-          data: [],
+          data: [150, 230, 224, 218, 135, 147, 260],
           type: 'line',
           lineStyle: {
             width: '${this.chartData.lineWidth}',
