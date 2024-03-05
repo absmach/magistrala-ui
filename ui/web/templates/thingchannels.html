@@ -122,7 +122,12 @@ SPDX-License-Identifier: Apache-2.0 -->
                               <form action="/messages" method="get">
                                 <input type="hidden" name="thing" value="{{ $thingKey }}" />
                                 <input type="hidden" name="channel" value="{{ $c.ID }}" />
-                                <button type="submit" class="btn">
+                                <button
+                                  type="submit"
+                                  class="btn {{ if (serviceUnavailable "reader") }}
+                                    disabled-item
+                                  {{ end }}"
+                                >
                                   <i class="fas fa-envelope-open"></i>
                                 </button>
                               </form>
