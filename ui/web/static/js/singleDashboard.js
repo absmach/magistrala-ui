@@ -37,12 +37,6 @@ function initGrid(layout) {
 }
 
 function saveLayout() {
-  grid._settings.dragEnabled = false;
-  document.querySelectorAll("#removeItem").forEach((item) => {
-    item.classList.add("no-opacity");
-    item.disabled = true;
-  });
-
   const itemData = grid.getItems().map((item) => {
     const itemElement = item._element;
     const itemContent = itemElement.querySelector(".item-content");
