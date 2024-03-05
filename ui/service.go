@@ -219,6 +219,7 @@ var (
 	ErrFailedUnshare        = errors.New("failed to unshare entity")
 	ErrConflict             = errors.New("entity already exists")
 	ErrSessionType          = errors.New("invalid session type")
+	ErrJSONMarshal          = errors.New("failed to encode to json")
 
 	ErrFailedViewDashboard     = errors.New("failed to view dashboard")
 	ErrFailedDashboardSave     = errors.New("failed to save dashboard")
@@ -1838,7 +1839,7 @@ func (us *uiService) FetchChartData(token string, channelID string, mpgm sdk.Mes
 
 	data, jsonErr := json.Marshal(msg)
 	if jsonErr != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(err, ErrJSONMarshal)
 	}
 
 	return data, nil
@@ -2184,7 +2185,7 @@ func (us *uiService) GetEntities(token, entity, entityName, domainID, permission
 
 	data, err := json.Marshal(items)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(err, ErrJSONMarshal)
 	}
 	return data, nil
 }

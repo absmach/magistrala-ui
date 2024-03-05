@@ -2733,6 +2733,7 @@ func encodeError(prefix string) kithttp.ErrorEncoder {
 			errors.Contains(err, ui.ErrFailedDashboardSave),
 			errors.Contains(err, ui.ErrFailedDashboardDelete),
 			errors.Contains(err, ui.ErrFailedDashboardUpdate),
+			errors.Contains(err, ui.ErrJSONMarshal),
 			errors.Contains(err, ui.ErrFailedDashboardRetrieve):
 			w.Header().Set("Location", fmt.Sprintf("%s/%s?error=%s", prefix, errorAPIEndpoint, url.QueryEscape(displayError.Error())))
 			w.WriteHeader(http.StatusSeeOther)
