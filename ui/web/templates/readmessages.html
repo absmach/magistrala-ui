@@ -106,7 +106,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   aria-label="Close"
                 ></button>
               </div>
-              <form action="/messages" method="post">
+              <form action="{{ printf "%s/messages" pathPrefix }}" method="post">
                 <div class="modal-body">
                   <input type="hidden" name="thingKey" value="{{ .ThKey }}" />
                   <input type="hidden" name="channelID" value="{{ .ChID }}" />

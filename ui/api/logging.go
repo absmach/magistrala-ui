@@ -1382,11 +1382,12 @@ func (lm *loggingMiddleware) GetEntities(token, entityType, entityName, domainID
 }
 
 // ErrorPage adds logging middleware to error page method.
-func (lm *loggingMiddleware) ErrorPage(errMsg string) (b []byte, err error) {
+func (lm *loggingMiddleware) ErrorPage(errMsg, url string) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
 			slog.String("error", errMsg),
+			slog.String("url", url),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
@@ -1396,7 +1397,7 @@ func (lm *loggingMiddleware) ErrorPage(errMsg string) (b []byte, err error) {
 		lm.logger.Info("Error page completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ErrorPage(errMsg)
+	return lm.svc.ErrorPage(errMsg, url)
 }
 
 // DomainLogin adds logging middleware to domain login method.

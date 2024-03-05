@@ -128,7 +128,7 @@ func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func passwordResetRequestEndpoint(svc ui.Service) endpoint.Endpoint {
+func passwordResetRequestEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(passwordResetRequestReq)
 		if err := req.validate(); err != nil {
@@ -141,12 +141,12 @@ func passwordResetRequestEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": loginAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s", prefix, loginAPIEndpoint)},
 		}, nil
 	}
 }
 
-func passwordResetEndpoint(svc ui.Service) endpoint.Endpoint {
+func passwordResetEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(passwordResetReq)
 		if err := req.validate(); err != nil {
@@ -159,7 +159,7 @@ func passwordResetEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": loginAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s", prefix, loginAPIEndpoint)},
 		}, nil
 	}
 }
@@ -194,7 +194,7 @@ func showUpdatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
+func updatePasswordEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateUserPasswordReq)
 
@@ -218,7 +218,7 @@ func updatePasswordEndpoint(svc ui.Service) endpoint.Endpoint {
 		return uiRes{
 			code:    http.StatusSeeOther,
 			cookies: cookies,
-			headers: map[string]string{"Location": loginAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s", prefix, loginAPIEndpoint)},
 		}, nil
 	}
 }
@@ -268,7 +268,7 @@ func tokenEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func secureTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie) endpoint.Endpoint {
+func secureTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(secureTokenReq)
 		if err := req.validate(); err != nil {
@@ -314,7 +314,7 @@ func secureTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie) endpoint.
 					HttpOnly: true,
 				},
 			},
-			headers: map[string]string{"Location": domainsAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s", prefix, domainsAPIEndpoint)},
 		}, nil
 	}
 }
@@ -480,7 +480,7 @@ func updateUserIdentityEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func updateUserRoleEndpoint(svc ui.Service) endpoint.Endpoint {
+func updateUserRoleEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateUserRoleReq)
 		if err := req.validate(); err != nil {
@@ -493,12 +493,12 @@ func updateUserRoleEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": usersAPIEndpoint + "/" + req.ID},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s", prefix, usersAPIEndpoint, req.ID)},
 		}, nil
 	}
 }
 
-func enableUserEndpoint(svc ui.Service) endpoint.Endpoint {
+func enableUserEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateUserStatusReq)
 		if err := req.validate(); err != nil {
@@ -511,12 +511,12 @@ func enableUserEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": usersAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s", prefix, usersAPIEndpoint)},
 		}, nil
 	}
 }
 
-func disableUserEndpoint(svc ui.Service) endpoint.Endpoint {
+func disableUserEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateUserStatusReq)
 		if err := req.validate(); err != nil {
@@ -529,12 +529,12 @@ func disableUserEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": usersAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s", prefix, usersAPIEndpoint)},
 		}, nil
 	}
 }
 
-func AddMemberToChannelEndpoint(svc ui.Service) endpoint.Endpoint {
+func AddMemberToChannelEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(addUserToChannelReq)
 		if err := req.validate(); err != nil {
@@ -547,12 +547,12 @@ func AddMemberToChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": channelsAPIEndpoint + "/" + req.ChannelID + usersAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s/%s", prefix, channelsAPIEndpoint, req.ChannelID, usersAPIEndpoint)},
 		}, nil
 	}
 }
 
-func RemoveMemberFromChannelEndpoint(svc ui.Service) endpoint.Endpoint {
+func RemoveMemberFromChannelEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(addUserToChannelReq)
 		if err := req.validate(); err != nil {
@@ -565,12 +565,12 @@ func RemoveMemberFromChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": channelsAPIEndpoint + "/" + req.ChannelID + usersAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s/%s", prefix, channelsAPIEndpoint, req.ChannelID, usersAPIEndpoint)},
 		}, nil
 	}
 }
 
-func assignGroupEndpoint(svc ui.Service) endpoint.Endpoint {
+func assignGroupEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(assignReq)
 		if err := req.validate(); err != nil {
@@ -583,12 +583,12 @@ func assignGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": groupsAPIEndpoint + "/" + req.groupID + usersAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s/%s", prefix, groupsAPIEndpoint, req.groupID, usersAPIEndpoint)},
 		}, nil
 	}
 }
 
-func unassignGroupEndpoint(svc ui.Service) endpoint.Endpoint {
+func unassignGroupEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(assignReq)
 		if err := req.validate(); err != nil {
@@ -601,7 +601,7 @@ func unassignGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": groupsAPIEndpoint + "/" + req.groupID + usersAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s/%s", prefix, groupsAPIEndpoint, req.groupID, usersAPIEndpoint)},
 		}, nil
 	}
 }
@@ -729,7 +729,7 @@ func updateThingSecretEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func enableThingEndpoint(svc ui.Service) endpoint.Endpoint {
+func enableThingEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateThingStatusReq)
 		if err := req.validate(); err != nil {
@@ -742,12 +742,12 @@ func enableThingEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": thingsAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s", prefix, thingsAPIEndpoint)},
 		}, nil
 	}
 }
 
-func disableThingEndpoint(svc ui.Service) endpoint.Endpoint {
+func disableThingEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateThingStatusReq)
 		if err := req.validate(); err != nil {
@@ -760,7 +760,7 @@ func disableThingEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": thingsAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s", prefix, thingsAPIEndpoint)},
 		}, nil
 	}
 }
@@ -800,7 +800,7 @@ func listChannelsByThingEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func connectChannelEndpoint(svc ui.Service) endpoint.Endpoint {
+func connectChannelEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(connectThingReq)
 		if err := req.validate(); err != nil {
@@ -817,12 +817,12 @@ func connectChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 		case thingsItem:
 			ret = uiRes{
 				code:    http.StatusSeeOther,
-				headers: map[string]string{"Location": thingsAPIEndpoint + "/" + req.thingID + channelsAPIEndpoint},
+				headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s/%s", prefix, thingsAPIEndpoint, req.thingID, channelsAPIEndpoint)},
 			}
 		case channelsItem:
 			ret = uiRes{
 				code:    http.StatusSeeOther,
-				headers: map[string]string{"Location": channelsAPIEndpoint + "/" + req.channelID + thingsAPIEndpoint},
+				headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s/%s", prefix, channelsAPIEndpoint, req.channelID, thingsAPIEndpoint)},
 			}
 		}
 
@@ -830,7 +830,7 @@ func connectChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func disconnectChannelEndpoint(svc ui.Service) endpoint.Endpoint {
+func disconnectChannelEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(connectThingReq)
 		if err := req.validate(); err != nil {
@@ -847,12 +847,12 @@ func disconnectChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 		case thingsItem:
 			ret = uiRes{
 				code:    http.StatusSeeOther,
-				headers: map[string]string{"Location": thingsAPIEndpoint + "/" + req.thingID + channelsAPIEndpoint},
+				headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s/%s", prefix, thingsAPIEndpoint, req.thingID, channelsAPIEndpoint)},
 			}
 		case channelsItem:
 			ret = uiRes{
 				code:    http.StatusSeeOther,
-				headers: map[string]string{"Location": channelsAPIEndpoint + "/" + req.channelID + thingsAPIEndpoint},
+				headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s/%s", prefix, channelsAPIEndpoint, req.channelID, thingsAPIEndpoint)},
 			}
 		}
 
@@ -968,7 +968,7 @@ func listThingsByChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func enableChannelEndpoint(svc ui.Service) endpoint.Endpoint {
+func enableChannelEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateChannelStatusReq)
 		if err := req.validate(); err != nil {
@@ -981,12 +981,12 @@ func enableChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": channelsAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s", prefix, channelsAPIEndpoint)},
 		}, nil
 	}
 }
 
-func disableChannelEndpoint(svc ui.Service) endpoint.Endpoint {
+func disableChannelEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateChannelStatusReq)
 		if err := req.validate(); err != nil {
@@ -999,7 +999,7 @@ func disableChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": channelsAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s", prefix, channelsAPIEndpoint)},
 		}, nil
 	}
 }
@@ -1020,7 +1020,7 @@ func ListChannelMembersEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func addGroupToChannelEndpoint(svc ui.Service) endpoint.Endpoint {
+func addGroupToChannelEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(addUserGroupToChannelReq)
 		if err := req.validate(); err != nil {
@@ -1037,12 +1037,12 @@ func addGroupToChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 		case groupsItem:
 			ret = uiRes{
 				code:    http.StatusSeeOther,
-				headers: map[string]string{"Location": groupsAPIEndpoint + "/" + req.UserGroupIDs[0] + channelsAPIEndpoint},
+				headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s/%s", prefix, groupsAPIEndpoint, req.UserGroupIDs[0], channelsAPIEndpoint)},
 			}
 		case channelsItem:
 			ret = uiRes{
 				code:    http.StatusSeeOther,
-				headers: map[string]string{"Location": channelsAPIEndpoint + "/" + req.channelID + groupsAPIEndpoint},
+				headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s/%s", prefix, channelsAPIEndpoint, req.channelID, groupsAPIEndpoint)},
 			}
 		}
 
@@ -1050,7 +1050,7 @@ func addGroupToChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func removeGroupFromChannelEndpoint(svc ui.Service) endpoint.Endpoint {
+func removeGroupFromChannelEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(addUserGroupToChannelReq)
 		if err := req.validate(); err != nil {
@@ -1067,12 +1067,12 @@ func removeGroupFromChannelEndpoint(svc ui.Service) endpoint.Endpoint {
 		case groupsItem:
 			ret = uiRes{
 				code:    http.StatusSeeOther,
-				headers: map[string]string{"Location": groupsAPIEndpoint + "/" + req.UserGroupIDs[0] + channelsAPIEndpoint},
+				headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s/%s", prefix, groupsAPIEndpoint, req.UserGroupIDs[0], channelsAPIEndpoint)},
 			}
 		case channelsItem:
 			ret = uiRes{
 				code:    http.StatusSeeOther,
-				headers: map[string]string{"Location": channelsAPIEndpoint + "/" + req.channelID + groupsAPIEndpoint},
+				headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s/%s", prefix, channelsAPIEndpoint, req.channelID, groupsAPIEndpoint)},
 			}
 		}
 
@@ -1206,7 +1206,7 @@ func listGroupsEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func enableGroupEndpoint(svc ui.Service) endpoint.Endpoint {
+func enableGroupEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateGroupStatusReq)
 		if err := req.validate(); err != nil {
@@ -1219,12 +1219,12 @@ func enableGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": groupsAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s", prefix, groupsAPIEndpoint)},
 		}, nil
 	}
 }
 
-func disableGroupEndpoint(svc ui.Service) endpoint.Endpoint {
+func disableGroupEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateGroupStatusReq)
 		if err := req.validate(); err != nil {
@@ -1237,7 +1237,7 @@ func disableGroupEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": groupsAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s", prefix, groupsAPIEndpoint)},
 		}, nil
 	}
 }
@@ -1258,7 +1258,7 @@ func listGroupChannelsEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func publishMessageEndpoint(svc ui.Service) endpoint.Endpoint {
+func publishMessageEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(publishReq)
 		if err := req.validate(); err != nil {
@@ -1271,7 +1271,7 @@ func publishMessageEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": "/messages?thing=" + req.thingKey + "&channel=" + req.channelID},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/messages?thing=%s&channel=%s", prefix, req.thingKey, req.channelID)},
 		}, nil
 	}
 }
@@ -1295,7 +1295,7 @@ func readMessagesEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func createBootstrap(svc ui.Service) endpoint.Endpoint {
+func createBootstrap(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(createBootstrapReq)
 		if err := req.validate(); err != nil {
@@ -1308,7 +1308,7 @@ func createBootstrap(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": bootstrapAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s", prefix, bootstrapAPIEndpoint)},
 		}, nil
 	}
 }
@@ -1349,7 +1349,7 @@ func updateBootstrap(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func deleteBootstrapEndpoint(svc ui.Service) endpoint.Endpoint {
+func deleteBootstrapEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(deleteBootstrapReq)
 		if err := req.validate(); err != nil {
@@ -1362,12 +1362,12 @@ func deleteBootstrapEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": bootstrapAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s", prefix, bootstrapAPIEndpoint)},
 		}, nil
 	}
 }
 
-func updateBootstrapStateEndpoint(svc ui.Service) endpoint.Endpoint {
+func updateBootstrapStateEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(updateBootstrapStateReq)
 		if err := req.validate(); err != nil {
@@ -1380,12 +1380,12 @@ func updateBootstrapStateEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": bootstrapAPIEndpoint + "/" + req.ThingID},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s", prefix, bootstrapAPIEndpoint, req.ThingID)},
 		}, nil
 	}
 }
 
-func updateBootstrapConnections(svc ui.Service) endpoint.Endpoint {
+func updateBootstrapConnections(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (response interface{}, err error) {
 		req := request.(updateBootstrapConnReq)
 		if err := req.validate(); err != nil {
@@ -1398,7 +1398,7 @@ func updateBootstrapConnections(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": bootstrapAPIEndpoint + "/" + req.ThingID},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s", prefix, bootstrapAPIEndpoint, req.ThingID)},
 		}, nil
 	}
 }
@@ -1513,7 +1513,7 @@ func errorPageEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ErrorPage(req.err)
+		res, err := svc.ErrorPage(req.err, req.pageURL)
 		if err != nil {
 			return nil, err
 		}
@@ -1524,7 +1524,7 @@ func errorPageEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func domainLoginEndpoint(svc ui.Service, s *securecookie.SecureCookie) endpoint.Endpoint {
+func domainLoginEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(domainLoginReq)
 		if err := req.validate(); err != nil {
@@ -1560,7 +1560,7 @@ func domainLoginEndpoint(svc ui.Service, s *securecookie.SecureCookie) endpoint.
 					Path:  "/",
 				},
 			},
-			headers: map[string]string{"Location": "/?domain=" + req.DomainID},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/?domain=%s", prefix, req.DomainID)},
 		}, nil
 	}
 }
@@ -1584,7 +1584,7 @@ func listDomainsEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func createDomainEndpoint(svc ui.Service) endpoint.Endpoint {
+func createDomainEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(createDomainReq)
 		if err := req.validate(); err != nil {
@@ -1597,7 +1597,7 @@ func createDomainEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": fmt.Sprintf("%s?logged_in=true", domainsAPIEndpoint)},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s", prefix, domainsAPIEndpoint)},
 		}, nil
 	}
 }
@@ -1655,7 +1655,7 @@ func domainEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func enableDomainEndpoint(svc ui.Service) endpoint.Endpoint {
+func enableDomainEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateDomainStatusReq)
 		if err := req.validate(); err != nil {
@@ -1668,12 +1668,12 @@ func enableDomainEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": domainsAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s", prefix, domainsAPIEndpoint)},
 		}, nil
 	}
 }
 
-func disableDomainEndpoint(svc ui.Service) endpoint.Endpoint {
+func disableDomainEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateDomainStatusReq)
 		if err := req.validate(); err != nil {
@@ -1692,30 +1692,17 @@ func disableDomainEndpoint(svc ui.Service) endpoint.Endpoint {
 				MaxAge:   -1,
 				HttpOnly: true,
 			},
-			{
-				Name:     refreshTokenKey,
-				Value:    "",
-				Path:     "/",
-				MaxAge:   -1,
-				HttpOnly: true,
-			},
-			{
-				Name:   sessionDetailsKey,
-				Value:  "",
-				Path:   "/",
-				MaxAge: -1,
-			},
 		}
 
 		return uiRes{
 			code:    http.StatusSeeOther,
 			cookies: cookies,
-			headers: map[string]string{"Location": loginAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s", prefix, loginAPIEndpoint)},
 		}, nil
 	}
 }
 
-func assignMemberEndpoint(svc ui.Service) endpoint.Endpoint {
+func assignMemberEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(assignMemberReq)
 		if err := req.validate(); err != nil {
@@ -1728,12 +1715,12 @@ func assignMemberEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": domainsAPIEndpoint + "/" + req.domainID + "/members"},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s/members", prefix, domainsAPIEndpoint, req.domainID)},
 		}, nil
 	}
 }
 
-func unassignMemberEndpoint(svc ui.Service) endpoint.Endpoint {
+func unassignMemberEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(assignMemberReq)
 		if err := req.validate(); err != nil {
@@ -1746,7 +1733,7 @@ func unassignMemberEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": domainsAPIEndpoint + "/" + req.domainID + "/members"},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s/members", prefix, domainsAPIEndpoint, req.domainID)},
 		}, nil
 	}
 }
@@ -1789,7 +1776,7 @@ func listMembersEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func shareThingEndpoint(svc ui.Service) endpoint.Endpoint {
+func shareThingEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(shareThingReq)
 		if err := req.validate(); err != nil {
@@ -1802,12 +1789,12 @@ func shareThingEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": thingsAPIEndpoint + "/" + req.id + usersAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s/%s", prefix, thingsAPIEndpoint, req.id, usersAPIEndpoint)},
 		}, nil
 	}
 }
 
-func unshareThingEndpoint(svc ui.Service) endpoint.Endpoint {
+func unshareThingEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(shareThingReq)
 		if err := req.validate(); err != nil {
@@ -1820,7 +1807,7 @@ func unshareThingEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": thingsAPIEndpoint + "/" + req.id + usersAPIEndpoint},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s/%s", prefix, thingsAPIEndpoint, req.id, usersAPIEndpoint)},
 		}, nil
 	}
 }
@@ -1861,7 +1848,7 @@ func listInvitationsEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func acceptInvitationEndpoint(svc ui.Service) endpoint.Endpoint {
+func acceptInvitationEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(acceptInvitationReq)
 		if err := req.validate(); err != nil {
@@ -1874,12 +1861,12 @@ func acceptInvitationEndpoint(svc ui.Service) endpoint.Endpoint {
 
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": "/domains"},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s", prefix, domainsAPIEndpoint)},
 		}, nil
 	}
 }
 
-func deleteInvitationEndpoint(svc ui.Service) endpoint.Endpoint {
+func deleteInvitationEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(deleteInvitationReq)
 		if err := req.validate(); err != nil {
@@ -1893,12 +1880,12 @@ func deleteInvitationEndpoint(svc ui.Service) endpoint.Endpoint {
 		if req.domain == "" {
 			return uiRes{
 				code:    http.StatusSeeOther,
-				headers: map[string]string{"Location": "/invitations"},
+				headers: map[string]string{"Location": fmt.Sprintf("%s/invitations", prefix)},
 			}, nil
 		}
 		return uiRes{
 			code:    http.StatusSeeOther,
-			headers: map[string]string{"Location": domainsAPIEndpoint + "/" + req.domainID + "/invitations"},
+			headers: map[string]string{"Location": fmt.Sprintf("%s/%s/%s/invitations", prefix, domainsAPIEndpoint, req.domainID)},
 		}, nil
 	}
 }

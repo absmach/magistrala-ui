@@ -139,7 +139,7 @@ function saveLayout(grid, dashboardID) {
     metadata: JSON.stringify(upMetadata),
   };
 
-  fetch("/dashboards", {
+  fetch(`${pathPrefix}/dashboards`, {
     method: "PATCH",
     body: JSON.stringify(dashboard),
     headers: {

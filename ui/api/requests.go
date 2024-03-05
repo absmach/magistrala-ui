@@ -807,7 +807,8 @@ func (req getEntitiesReq) validate() error {
 }
 
 type errorReq struct {
-	err string
+	pageURL string
+	err     string
 }
 
 func (req errorReq) validate() error {

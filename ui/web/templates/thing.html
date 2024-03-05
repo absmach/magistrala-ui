@@ -17,10 +17,18 @@ SPDX-License-Identifier: Apache-2.0 -->
               {{ template "breadcrumb" . }}
               <div class="row">
                 <div class="buttons mb-3">
-                  <a class="btn body-button" href="/things/{{ .Entity.ID }}/channels" role="button">
+                  <a
+                    class="btn body-button"
+                    href="{{ printf "%s/things/%s/channels" pathPrefix .Entity.ID }}"
+                    role="button"
+                  >
                     Connect
                   </a>
-                  <a class="btn body-button" href="/things/{{ .Entity.ID }}/users" role="button">
+                  <a
+                    class="btn body-button"
+                    href="{{ printf "%s/things/%s/users" pathPrefix .Entity.ID }}"
+                    role="button"
+                  >
                     Share
                   </a>
                 </div>
@@ -189,6 +197,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             secret: "secret-field",
             tags: "tags-field",
           },
+          pathPrefix: "{{ pathPrefix }}",
         }
       );
       updateMetadata({
@@ -199,6 +208,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           id: "{{ .Entity.ID }}",
           entity: "things",
           button: "save-metadata",
+          pathPrefix: "{{ pathPrefix }}",
         });
     </script>
     </body>

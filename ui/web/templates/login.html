@@ -86,7 +86,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               <div class="col-md-12">
                 <p class="text-center text-light">
                   Don't have an account?
-                  <a href="/register" class="text-light">Sign Up</a>
+                  <a href="{{ printf "%s/register" pathPrefix }}" class="text-light">Sign Up</a>
                 </p>
               </div>
             </div>
@@ -106,7 +106,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                 <h5 class="modal-title" id="forgotPasswordModalLabel">Enter email</h5>
               </div>
               <div class="modal-body">
-                <form method="post" action="/reset-request" class="reset-pw-form">
+                <form
+                  method="post"
+                  action="{{ printf "%s/reset-request" pathPrefix }}"
+                  class="reset-pw-form"
+                >
                   <div class="mb-3">
                     <label for="reset-email" class="form-label">Email</label>
                     <input
@@ -152,11 +156,11 @@ SPDX-License-Identifier: Apache-2.0 -->
         const passwordField = document.querySelector(".password-field");
         const emailField = document.querySelector(".email-field");
         const loginError = document.getElementById("loginError");
-
+        const pathPrefix = "{{ pathPrefix }}";
         function submitLoginForm() {
           event.preventDefault();
           var form = event.target;
-          fetch("/login", {
+          fetch('{{ printf "%s/login" pathPrefix }}', {
             method: "POST",
             body: new FormData(form),
           })
@@ -169,7 +173,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   showError(errorMessage);
                   break;
                 default:
-                  window.location.href = "/tokens/secure";
+                  window.location.href = `${pathPrefix}/tokens/secure`;
                   break;
               }
             })

@@ -20,7 +20,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <button
                     type="button"
                     class="btn body-button"
-                    onclick="location.href='/bootstraps/{{ .Bootstrap.ThingID }}/terminal'"
+                    onclick="location.href= '/bootstraps/{{ .Bootstrap.ThingID }}/terminal'"
                   >
                     Remote Terminal
                   </button>
@@ -51,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <tr>
                         <th>Thing</th>
                         <td>
-                          <a href="/things/{{ .Bootstrap.ThingID }}">
+                          <a href="{{ printf "%s/things/%s" pathPrefix .Bootstrap.ThingID }}">
                             {{ .Thing.Name }}
                           </a>
                         </td>
@@ -62,7 +62,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                         <td>
                           {{ range $i, $c := .Bootstrap.Channels }}
                             <span class="badge rounded-pill enabled-pill">
-                              <a href="/channels/{{ $c }}">{{ $c }}</a>
+                              <a href="{{ printf "%s/channels/%s" pathPrefix $c }}">{{ $c }}</a>
                             </span>
                           {{ end }}
                         </td>
@@ -210,7 +210,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                     aria-label="Close"
                   ></button>
                 </div>
-                <form action="/bootstraps/{{ .Bootstrap.ThingID }}/connections" method="post">
+                <form
+                  action="{{ printf "%s/bootstraps/%s/connections" pathPrefix .Bootstrap.ThingID }}"
+                  method="post"
+                >
                   <div class="modal-body">
                     <div class="mb-3">
                       <label for="channels-select" class="form-label">Channels</label>
@@ -302,7 +305,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                     aria-label="Close"
                   ></button>
                 </div>
-                <form action="/bootstraps/{{ .Bootstrap.ThingID }}/delete" method="post">
+                <form
+                  action="{{ printf "%s/bootstraps/%s/delete" pathPrefix .Bootstrap.ThingID }}"
+                  method="post"
+                >
                   <div class="modal-body">
                     <p>
                       Are you sure you want to
@@ -343,7 +349,10 @@ SPDX-License-Identifier: Apache-2.0 -->
                     aria-label="Close"
                   ></button>
                 </div>
-                <form action="/bootstraps/{{ .Bootstrap.ThingID }}/state" method="post">
+                <form
+                  action="{{ printf "%s/bootstraps/%s/state" pathPrefix .Bootstrap.ThingID }}"
+                  method="post"
+                >
                   {{ if eq .Bootstrap.State 0 }}
                     <div class="modal-body">
                       <p>
@@ -428,7 +437,8 @@ SPDX-License-Identifier: Apache-2.0 -->
           clientCert: "clientCert-field",
           clientKey: "clientKey-field",
           CACert: "CACert-field",
-        }
+        },
+        pathPrefix: "{{ pathPrefix }}",
       });
 
       updateContent({
@@ -439,12 +449,14 @@ SPDX-License-Identifier: Apache-2.0 -->
         id: "{{ .Bootstrap.ThingID }}",
         entity: "bootstraps",
         button: "save-content",
+        pathPrefix: "{{ pathPrefix }}",
       });
 
       fetchIndividualEntity({
           input: "channelFilter",
           itemSelect: "channels-select",
           item: "channels",
+          pathPrefix: "{{ pathPrefix }}",
         });
     </script>
     </body>

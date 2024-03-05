@@ -51,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             ></button>
                           </div>
                           <form
-                            action="/channels/{{ .ChannelID }}/users/assign?item=channels"
+                            action="{{ printf "%s/channels/%s/users/assign?item=channels" pathPrefix .ChannelID }}"
                             method="post"
                           >
                             <div class="modal-body">
@@ -210,7 +210,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <tbody>
                             {{ range $i, $u := .Users }}
                               <tr
-                                onclick="location.href='/domains/members?identity={{ $u.Credentials.Identity }}';"
+                                onclick="viewUser('{{ $u.Credentials.Identity }}')"
                                 class="clickable-row"
                               >
                                 <td>{{ $u.Name }}</td>
@@ -264,7 +264,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <tbody>
                             {{ range $i, $u := .Users }}
                               <tr
-                                onclick="location.href='/domains/members?identity={{ $u.Credentials.Identity }}';"
+                                onclick="viewUser('{{ $u.Credentials.Identity }}')"
                                 class="clickable-row"
                               >
                                 <td>{{ $u.Name }}</td>
@@ -283,7 +283,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 <td class="created-col">{{ $u.CreatedAt }}</td>
                                 <td class="text-center">
                                   <form
-                                    action="/channels/{{ $channelID }}/users/unassign?item=channels"
+                                    action="{{ printf "%s/channels/%s/users/unassign?item=channels" pathPrefix $channelID }}"
                                     method="post"
                                   >
                                     <input
@@ -340,7 +340,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <tbody>
                             {{ range $i, $u := .Users }}
                               <tr
-                                onclick="location.href='/domains/members?identity={{ $u.Credentials.Identity }}';"
+                                onclick="viewUser('{{ $u.Credentials.Identity }}')"
                                 class="clickable-row"
                               >
                                 <td>{{ $u.Name }}</td>
@@ -359,7 +359,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 <td class="created-col">{{ $u.CreatedAt }}</td>
                                 <td class="text-center">
                                   <form
-                                    action="/channels/{{ $channelID }}/users/unassign?item=channels"
+                                    action="{{ printf "%s/channels/%s/users/unassign?item=channels" pathPrefix $channelID }}"
                                     method="post"
                                   >
                                     <input
@@ -416,7 +416,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <tbody>
                             {{ range $i, $u := .Users }}
                               <tr
-                                onclick="location.href='/domains/members?identity={{ $u.Credentials.Identity }}';"
+                                onclick="viewUser('{{ $u.Credentials.Identity }}')"
                                 class="clickable-row"
                               >
                                 <td>{{ $u.Name }}</td>
@@ -435,7 +435,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 <td class="created-col">{{ $u.CreatedAt }}</td>
                                 <td class="text-center">
                                   <form
-                                    action="/channels/{{ $channelID }}/users/unassign?item=channels"
+                                    action="{{ printf "%s/channels/%s/users/unassign?item=channels" pathPrefix $channelID }}"
                                     method="post"
                                   >
                                     <input
@@ -476,6 +476,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
       </div>
 			<script>
+        let pathPrefix = "{{ pathPrefix }}";
 				const userModal = new bootstrap.Modal(
 					document.getElementById("addUserModal"),
 				);
@@ -485,9 +486,13 @@ SPDX-License-Identifier: Apache-2.0 -->
 
         function openTab(relation) {
 					event.preventDefault();
-					var channelID = '{{.ChannelID}}';
-					window.location.href = `/channels/${channelID}/users?relation=${relation}`;
+					let channelID = '{{.ChannelID}}';
+					window.location.href = `${pathPrefix}/channels/${channelID}/users?relation=${relation}`;
 				}
+
+        function viewUser(identity) {
+          window.location.href = `${pathPrefix}/domains/members?identity=${identity}`;
+        }
 			</script>      <script type="module">
         import { fetchIndividualEntity } from "/js/infinitescroll.js";
 
@@ -496,6 +501,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           itemSelect: "infiniteScroll",
           item: "members",
           domain: '{{.Session.Domain.ID}}',
+          pathPrefix: pathPrefix,
         });
       </script>
     </body>

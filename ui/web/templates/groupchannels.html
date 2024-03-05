@@ -51,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             ></button>
                           </div>
                           <form
-                            action="/groups/{{ .GroupID }}/channels/assign?item=groups"
+                            action="{{ printf "%s/groups/%s/channels/assign?item=groups" pathPrefix .GroupID }}"
                             method="post"
                           >
                             <div class="modal-body">
@@ -104,10 +104,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <tbody>
                         {{ $groupID := .GroupID }}
                         {{ range $i, $c := .Channels }}
-                          <tr
-                            onclick="location.href='/channels/{{ $c.ID }}';"
-                            class="clickable-row"
-                          >
+                          <tr onclick="viewChannel('{{ $c.ID }}')" class="clickable-row">
                             <td>{{ $c.Name }}</td>
                             <td class="desc-col">{{ $c.Description }}</td>
                             <td class="meta-col">
@@ -118,7 +115,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             <td class="created-col">{{ $c.CreatedAt }}</td>
                             <td class="text-center">
                               <form
-                                action="/groups/{{ $groupID }}/channels/unassign?item=groups"
+                                action="{{ printf "%s/groups/%s/channels/unassign?item=groups" pathPrefix $groupID }}"
                                 method="post"
                               >
                                 <input
@@ -159,14 +156,18 @@ SPDX-License-Identifier: Apache-2.0 -->
         function openChannelModal() {
           channelModal.show();
         }
-      </script>
-      <script type="module">
+
+        function viewChannel(channelID) {
+          window.location.href = '{{ printf "%s/channels/%s" pathPrefix}}' + channelID;
+        }
+      </script>      <script type="module">
         import { fetchIndividualEntity } from "/js/infinitescroll.js";
 
         fetchIndividualEntity({
           input: "channelFilter",
           itemSelect: "infiniteScroll",
           item: "channels",
+          pathPrefix: "{{ pathPrefix }}",
         });
       </script>
     </body>

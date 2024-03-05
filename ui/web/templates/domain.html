@@ -189,18 +189,20 @@ SPDX-License-Identifier: Apache-2.0 -->
               alias: "alias-field",
               tags: "tags-field",
             },
+            pathPrefix: "{{ pathPrefix }}",
           }
         );
 
         updateMetadata({
-      textArea: "metadataTextArea",
-      field:"metadata",
-      alertDiv: "metadataError",
-      fieldName: "metadata-field",
-      id: "{{ .Entity.ID }}",
-      entity: "domains",
-      button: "save-metadata",
-    });
+          textArea: "metadataTextArea",
+          field:"metadata",
+          alertDiv: "metadataError",
+          fieldName: "metadata-field",
+          id: "{{ .Entity.ID }}",
+          entity: "domains",
+          button: "save-metadata",
+          pathPrefix: "{{ pathPrefix }}",
+        });
       </script>
     </body>
   </html>

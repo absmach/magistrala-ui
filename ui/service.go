@@ -397,7 +397,7 @@ type Service interface {
 	// GetEntities retrieves all entities.
 	GetEntities(token, entity, entityName, domainID, permission string, page, limit uint64) ([]byte, error)
 	// ErrorPage displays an error page.
-	ErrorPage(errMsg string) ([]byte, error)
+	ErrorPage(errMsg, url string) ([]byte, error)
 
 	// ListDomains retrieves domains owned/shared by a user.
 	ListDomains(s Session, status string, page, limit uint64) ([]byte, error)
@@ -451,11 +451,12 @@ type uiService struct {
 	drepo      DashboardRepository
 	idProvider magistrala.IDProvider
 	providers  []oauth2.Provider
+	prefix     string
 }
 
 // New instantiates the HTTP adapter implementation.
-func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider, providers ...oauth2.Provider) (Service, error) {
-	tpl, err := parseTemplates(sdk, templates)
+func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider, prefix string, providers ...oauth2.Provider) (Service, error) {
+	tpl, err := parseTemplates(sdk, templates, prefix)
 	if err != nil {
 		return nil, err
 	}
@@ -465,6 +466,7 @@ func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider, provide
 		drepo:      db,
 		idProvider: idp,
 		providers:  providers,
+		prefix:     prefix,
 	}, nil
 }
 
@@ -930,7 +932,7 @@ func (us *uiService) ViewThing(s Session, id string) (b []byte, err error) {
 	}
 
 	crumbs := []breadcrumb{
-		{Name: thingsActive, URL: thingsEndpoint},
+		{Name: thingsActive, URL: us.prefix + thingsEndpoint},
 		{Name: thing.Name},
 	}
 
@@ -1038,8 +1040,8 @@ func (us *uiService) ListThingUsers(s Session, id, relation string, page, limit 
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumb{
-		{Name: thingsActive, URL: thingsEndpoint},
-		{Name: id, URL: thingsEndpoint + "/" + id},
+		{Name: thingsActive, URL: us.prefix + thingsEndpoint},
+		{Name: id, URL: us.prefix + thingsEndpoint + "/" + id},
 		{Name: "Share"},
 	}
 
@@ -1103,8 +1105,8 @@ func (us *uiService) ListChannelsByThing(s Session, id string, page, limit uint6
 	noOfPages := int(math.Ceil(float64(chsPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumb{
-		{Name: thingsActive, URL: thingsEndpoint},
-		{Name: id, URL: thingsEndpoint + "/" + id},
+		{Name: thingsActive, URL: us.prefix + thingsEndpoint},
+		{Name: id, URL: us.prefix + thingsEndpoint + "/" + id},
 		{Name: "Connect"},
 	}
 
@@ -1218,7 +1220,7 @@ func (us *uiService) ViewChannel(s Session, channelID string) (b []byte, err err
 	}
 
 	crumbs := []breadcrumb{
-		{Name: channelsActive, URL: channelsEndpoint},
+		{Name: channelsActive, URL: us.prefix + channelsEndpoint},
 		{Name: channel.Name},
 	}
 
@@ -1279,8 +1281,8 @@ func (us *uiService) ListThingsByChannel(s Session, channelID string, page, limi
 	noOfPages := int(math.Ceil(float64(thsPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumb{
-		{Name: channelsActive, URL: channelsEndpoint},
-		{Name: channelID, URL: channelsEndpoint + "/" + channelID},
+		{Name: channelsActive, URL: us.prefix + channelsEndpoint},
+		{Name: channelID, URL: us.prefix + channelsEndpoint + "/" + channelID},
 		{Name: "Connect"},
 	}
 
@@ -1398,8 +1400,8 @@ func (us *uiService) ListChannelUsers(s Session, id, relation string, page, limi
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumb{
-		{Name: channelsActive, URL: channelsEndpoint},
-		{Name: id, URL: channelsEndpoint + "/" + id},
+		{Name: channelsActive, URL: us.prefix + channelsEndpoint},
+		{Name: id, URL: us.prefix + channelsEndpoint + "/" + id},
 		{Name: "Assign Users"},
 	}
 
@@ -1473,8 +1475,8 @@ func (us *uiService) ListChannelUserGroups(s Session, id string, page, limit uin
 	noOfPages := int(math.Ceil(float64(groupsPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumb{
-		{Name: channelsActive, URL: channelsEndpoint},
-		{Name: id, URL: channelsEndpoint + "/" + id},
+		{Name: channelsActive, URL: us.prefix + channelsEndpoint},
+		{Name: id, URL: us.prefix + channelsEndpoint + "/" + id},
 		{Name: "Assign Groups"},
 	}
 
@@ -1545,8 +1547,8 @@ func (us *uiService) ListGroupUsers(s Session, id, relation string, page, limit 
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumb{
-		{Name: groupsActive, URL: groupsEndpoint},
-		{Name: id, URL: groupsEndpoint + "/" + id},
+		{Name: groupsActive, URL: us.prefix + groupsEndpoint},
+		{Name: id, URL: us.prefix + groupsEndpoint + "/" + id},
 		{Name: "Assign Users"},
 	}
 
@@ -1618,7 +1620,7 @@ func (us *uiService) ViewGroup(s Session, id string) (b []byte, err error) {
 	}
 
 	crumbs := []breadcrumb{
-		{Name: groupsActive, URL: groupsEndpoint},
+		{Name: groupsActive, URL: us.prefix + groupsEndpoint},
 		{Name: group.Name},
 	}
 
@@ -1743,8 +1745,8 @@ func (us *uiService) ListUserGroupChannels(s Session, id string, page, limit uin
 	noOfPages := int(math.Ceil(float64(channelsPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumb{
-		{Name: groupsActive, URL: groupsEndpoint},
-		{Name: id, URL: groupsEndpoint + "/" + id},
+		{Name: groupsActive, URL: us.prefix + groupsEndpoint},
+		{Name: id, URL: us.prefix + groupsEndpoint + "/" + id},
 		{Name: "Assign Channels"},
 	}
 
@@ -2176,11 +2178,13 @@ func (us *uiService) GetEntities(token, entity, entityName, domainID, permission
 	return data, nil
 }
 
-func (us *uiService) ErrorPage(errMsg string) ([]byte, error) {
+func (us *uiService) ErrorPage(errMsg, url string) ([]byte, error) {
 	data := struct {
 		Error string
+		URL   string
 	}{
 		errMsg,
+		url,
 	}
 
 	var btpl bytes.Buffer
@@ -2649,7 +2653,7 @@ func (us *uiService) DeleteDashboard(token, dashboardID string) error {
 	return nil
 }
 
-func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, err error) {
+func parseTemplates(mfsdk sdk.SDK, templates []string, prefix string) (tpl *template.Template, err error) {
 	tpl = template.New("mainflux")
 	tpl = tpl.Funcs(template.FuncMap{
 		"toJSON": func(data map[string]interface{}) string {
@@ -2729,6 +2733,9 @@ func parseTemplates(mfsdk sdk.SDK, templates []string) (tpl *template.Template, 
 			}
 
 			return v.FieldByName(name).IsValid()
+		},
+		"pathPrefix": func() string {
+			return prefix
 		},
 	})
 

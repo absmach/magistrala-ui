@@ -90,7 +90,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               <div class="col-md-12">
                 <p class="text-center text-light">
                   Already have an account?
-                  <a href="/login" class="text-light">Log In</a>
+                  <a href="{{ printf "%s/login" pathPrefix }}" class="text-light">Log In</a>
                 </p>
               </div>
             </div>
@@ -137,7 +137,8 @@ SPDX-License-Identifier: Apache-2.0 -->
         function submitRegistrationForm() {
           event.preventDefault();
           var form = event.target;
-          fetch("/register", {
+          let pathPrefix = "{{ pathPrefix }}";
+          fetch( `${pathPrefix}/register`, {
             method: "POST",
             body: new FormData(form),
           })
@@ -149,7 +150,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   showError(errorMessage);
                   break;
                 default:
-                  window.location.href = "/tokens/secure";
+                  window.location.href = `${pathPrefix}/tokens/secure`;
                   break;
               }
             })

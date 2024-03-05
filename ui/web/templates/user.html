@@ -163,7 +163,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   aria-label="Close"
                 ></button>
               </div>
-              <form action="/users/{{ .Entity.ID }}/role" method="post">
+              <form action="{{ printf "%s/users/%s/role" pathPrefix .Entity.ID }}" method="post">
                 <div class="modal-body">
                   <span>
                     Are you sure you want to update the role of
@@ -251,6 +251,7 @@ SPDX-License-Identifier: Apache-2.0 -->
               identity: "identity-field",
               tags: "tags-field",
             },
+            pathPrefix: "{{ pathPrefix }}",
           });
 
           updateMetadata({
@@ -261,6 +262,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           id: "{{ .Entity.ID }}",
           entity: "users",
           button: "save-metadata",
+          pathPrefix: "{{ pathPrefix }}",
         });
       </script>
     </body>

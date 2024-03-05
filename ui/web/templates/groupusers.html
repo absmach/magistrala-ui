@@ -51,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             ></button>
                           </div>
                           <form
-                            action="/groups/{{ .GroupID }}/users/assign?item=groups"
+                            action="{{ printf "%s/groups/%s/users/assign?item=groups" pathPrefix .GroupID }}"
                             method="post"
                           >
                             <div class="modal-body">
@@ -211,7 +211,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                             {{ $groupID:= .GroupID }}
                             {{ range $i, $u := .Users }}
                               <tr
-                                onclick="location.href='/domains/members?identity={{ $u.Credentials.Identity }}';"
+                                onclick="viewUser('{{ $u.Credentials.Identity }}')"
                                 class="clickable-row"
                               >
                                 <td>{{ $u.Name }}</td>
@@ -266,7 +266,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <tbody>
                             {{ range $i, $u := .Users }}
                               <tr
-                                onclick="location.href='/domains/members?identity={{ $u.Credentials.Identity }}';"
+                                onclick="viewUser('{{ $u.Credentials.Identity }}')"
                                 class="clickable-row"
                               >
                                 <td>{{ $u.Name }}</td>
@@ -285,7 +285,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 <td class="created-col">{{ $u.CreatedAt }}</td>
                                 <td class="text-center">
                                   <form
-                                    action="/groups/{{ $groupID }}/users/unassign?item=groups"
+                                    action="{{ printf "%s/groups/%s/users/unassign?item=groups" pathPrefix $groupID }}"
                                     method="post"
                                   >
                                     <input
@@ -342,7 +342,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <tbody>
                             {{ range $i, $u := .Users }}
                               <tr
-                                onclick="location.href='/domains/members?identity={{ $u.Credentials.Identity }}';"
+                                onclick="viewUser('{{ $u.Credentials.Identity }}')"
                                 class="clickable-row"
                               >
                                 <td>{{ $u.Name }}</td>
@@ -361,7 +361,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 <td class="created-col">{{ $u.CreatedAt }}</td>
                                 <td class="text-center">
                                   <form
-                                    action="/groups/{{ $groupID }}/users/unassign?item=groups"
+                                    action="{{ printf "%s/groups/%s/users/unassign?item=groups" pathPrefix $groupID }}"
                                     method="post"
                                   >
                                     <input
@@ -418,7 +418,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <tbody>
                             {{ range $i, $u := .Users }}
                               <tr
-                                onclick="location.href='/domains/members?identity={{ $u.Credentials.Identity }}';"
+                                onclick="viewUser('{{ $u.Credentials.Identity }}')"
                                 class="clickable-row"
                               >
                                 <td>{{ $u.Name }}</td>
@@ -437,7 +437,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                 <td class="created-col">{{ $u.CreatedAt }}</td>
                                 <td class="text-center">
                                   <form
-                                    action="/groups/{{ $groupID }}/users/unassign?item=groups"
+                                    action="{{ printf "%s/groups/%s/users/unassign?item=groups" pathPrefix $groupID }}"
                                     method="post"
                                   >
                                     <input
@@ -478,18 +478,22 @@ SPDX-License-Identifier: Apache-2.0 -->
         </div>
       </div>
 			<script>
+        let pathPrefix = "{{ pathPrefix }}";
 				const userModal = new bootstrap.Modal(
 					document.getElementById("addUserModal"),
 				);
 				function openUserModal() {
 					userModal.show();
 				}
-
 				function openTab(relation) {
-					var groupID = "{{ .GroupID }}";
+					let groupID = "{{ .GroupID }}";
 					event.preventDefault();
-					window.location.href = `/groups/${groupID}/users?relation=${relation}`;
+					window.location.href = `${pathPrefix}/groups/${groupID}/users?relation=${relation}`;
 				}
+
+        function viewUser(identity) {
+          window.location.href = `${pathPrefix}/domains/members?identity=${identity}`;
+        }
 			</script>      <script type="module">
         import { fetchIndividualEntity } from "/js/infinitescroll.js";
 
@@ -498,6 +502,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           itemSelect: "infiniteScroll",
           item: "members",
           domain: '{{.Session.Domain.ID}}',
+          pathPrefix: pathPrefix,
         });
       </script>
     </body>

@@ -5,7 +5,10 @@ SPDX-License-Identifier: Apache-2.0 -->
   <!-- Sidebbar -->
   <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark" id="accordionSidebar">
     <!-- Sidebar Brand -->
-    <a class="sidebar-brand d-flex justify-content-center pt-2" href="/">
+    <a
+      class="sidebar-brand d-flex justify-content-center pt-2"
+      href="{{ printf "%s/" pathPrefix }}"
+    >
       <h1 class="mx-3">Magistrala</h1>
     </a>
 
@@ -16,7 +19,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       <li class="nav-item mb-2 mx-2">
         {{ $navbarActive := "homepage" }}
         <a
-          href="/"
+          href="{{ printf "%s/" pathPrefix }}"
           id="index"
           class="nav-link sidebar-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
         >
@@ -28,7 +31,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       <li class="nav-item mb-2 mx-2">
         {{ $navbarActive := "dashboard" }}
         <a
-          href="/dashboards"
+          href="{{ printf "%s/dashboards" pathPrefix }}"
           id="dashboard"
           class="nav-link sidebar-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
         >
@@ -48,8 +51,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       {{ $navbarActive := "domains" }}
       <a
         class="nav-link sidebar-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
-        id="domains"
-        href="/domains"
+        href="{{ printf "%s/domains" pathPrefix }}"
       >
         <i class="fa-solid fa-building"></i>
         <span>Domains</span>
@@ -59,7 +61,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     <li class="nav-item mb-2 mx-2">
       {{ $navbarActive = "invitations" }}
       <a
-        href="/invitations"
+        href="{{ printf "%s/invitations" pathPrefix }}"
         class="nav-link sidebar-link {{ if eq .NavbarActive $navbarActive }}
           active
         {{ end }}"
@@ -96,7 +98,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             <a
               class="nav-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
               id="domain"
-              href="/domains/{{ .Session.Domain.ID }}"
+              href="{{ printf "%s/domains/%s" pathPrefix .Session.Domain.ID }}"
             >
               <i class="fa-solid fa-building"></i>
               <span>Domain</span>
@@ -105,7 +107,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <li class="nav-item mb-2 mx-2">
             {{ $navbarActive = "members" }}
             <a
-              href="/domains/{{ .Session.Domain.ID }}/members"
+              href="{{ printf "%s/domains/%s/members" pathPrefix .Session.Domain.ID }}"
               id="members"
               class="nav-link  {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
             >
@@ -116,7 +118,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <li class="nav-item mb-2 mx-2">
             {{ $navbarActive = "domaininvitations" }}
             <a
-              href="/invitations?domain={{ .Session.Domain.ID }}"
+              href="{{ printf "%s/invitations?domain=%s" pathPrefix .Session.Domain.ID }}"
               class="nav-link {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
               id="domainInvitations"
             >
@@ -131,7 +133,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     <li id="users-nav-items" class="nav-item mb-2 mx-2">
       {{ $navbarActive = "users" }}
       <a
-        href="/users"
+        href="{{ printf "%s/users" pathPrefix }}"
         class=" nav-link sidebar-link {{ if (serviceUnavailable "users") }}
           disabled-item
         {{ end }} {{ if eq .NavbarActive $navbarActive }}active{{ end }}"
@@ -150,7 +152,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       <li class="nav-item mb-2 mx-2">
         {{ $navbarActive = "groups" }}
         <a
-          href="/groups"
+          href="{{ printf "%s/groups" pathPrefix }}"
           id="groups"
           class="nav-link sidebar-link {{ if (serviceUnavailable "users") }}
             disabled-item
@@ -163,7 +165,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       <li class="nav-item mb-2 mx-2">
         {{ $navbarActive = "things" }}
         <a
-          href="/things"
+          href="{{ printf "%s/things" pathPrefix }}"
           id="things"
           class="nav-link sidebar-link {{ if (serviceUnavailable "things") }}
             disabled-item
@@ -176,7 +178,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       <li class="nav-item mb-2 mx-2">
         {{ $navbarActive = "channels" }}
         <a
-          href="/channels"
+          href="{{ printf "%s/channels" pathPrefix }}"
           id="channels"
           class="nav-link sidebar-link {{ if (serviceUnavailable "things") }}
             disabled-item
@@ -189,7 +191,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       <li class="nav-item mb-2 mx-2">
         {{ $navbarActive = "bootstraps" }}
         <a
-          href="/bootstraps"
+          href="{{ printf "%s/bootstraps" pathPrefix }}"
           id="bootstraps"
           class="nav-link sidebar-link {{ if (serviceUnavailable "bootstrap") }}
             disabled-item
@@ -261,7 +263,10 @@ SPDX-License-Identifier: Apache-2.0 -->
               </li>
               <li><hr class="dropdown-divider" /></li>
               <li>
-                <a class="dropdown-item user-item-button p-2 mb-2" id="domains" href="/domains">
+                <a
+                  class="dropdown-item user-item-button p-2 mb-2"
+                  href="{{ printf "%s/domains" pathPrefix }}"
+                >
                   <i class="fa-solid fa-repeat"></i>
                   Switch Domain
                 </a>
@@ -292,7 +297,10 @@ SPDX-License-Identifier: Apache-2.0 -->
               </li>
               <li class="mb-2"><hr class="dropdown-divider" /></li>
               <li class="mb-2">
-                <a href="/password" class="dropdown-item user-item-button p-2 mb-2">
+                <a
+                  href="{{ printf "%s/password" pathPrefix }}"
+                  class="dropdown-item user-item-button p-2 mb-2"
+                >
                   <i class="fas fa-solid fa-lock me-2"></i>
                   <span>Update password</span>
                 </a>
@@ -330,7 +338,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form action="/domains" method="post">
+        <form action="{{ printf "%s/domains" pathPrefix }}" method="post">
           <div class="modal-body">
             <div class="row mb-3">
               <div class="col-md-12">
@@ -445,13 +453,13 @@ SPDX-License-Identifier: Apache-2.0 -->
     });
 
     function logout() {
-      fetch("/logout", {
+      fetch('{{ printf "%s/logout" pathPrefix }}', {
         method: "GET",
       })
         .then((response) => {
           if (response.status === 200) {
             clearAllCookies();
-            window.location.href = "/login";
+            window.location.href = '{{ printf "%s/login" pathPrefix }}';
           }
         })
         .catch((error) => {

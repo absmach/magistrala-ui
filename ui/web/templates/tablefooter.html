@@ -48,9 +48,9 @@ SPDX-License-Identifier: Apache-2.0 -->
     </ul>
   </nav>
   <script>
-    const currentPage = '{{ .CurrentPage }}';
-    const selectedLimit = '{{ .Limit }}';
-    let selectedStatus;
+    var currentPage = '{{ .CurrentPage }}';
+    var selectedLimit = '{{ .Limit }}';
+    var selectedStatus;
     function updateQueryParameters(newParams, element) {
       const params = new URLSearchParams(window.location.search);
       for (const key in newParams) {
@@ -63,7 +63,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       element.setAttribute("href", href);
     }
 
-    const itemsPerPage = document.querySelectorAll(".itemsPerPage a");
+    var itemsPerPage = document.querySelectorAll(".itemsPerPage a");
     itemsPerPage.forEach(item => {
       const newParams = { page: currentPage, limit: item.textContent };
       if (selectedStatus) {
@@ -72,7 +72,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       updateQueryParameters(newParams, item);
     });
 
-    const paginationLinks = document.querySelectorAll(".pagination a");
+    var paginationLinks = document.querySelectorAll(".pagination a");
     paginationLinks.forEach(function (item) {
       const hrefParams = new URLSearchParams(item.getAttribute("href"));
       let newParams = { page: hrefParams.get("page") };
@@ -88,7 +88,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   </script> {{ if isset "StatusOptions" . }}
     <script>
       selectedStatus = '{{.Status}}';
-      const statusOptions = JSON.parse('{{ toSlice .StatusOptions }}');
+      var statusOptions = JSON.parse('{{ toSlice .StatusOptions }}');
       statusOptions.forEach(status => {
         const statusElement = document.getElementById(status + "Status");
         const newParams = { page: currentPage, limit: selectedLimit, status: status };

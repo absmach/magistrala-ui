@@ -4,7 +4,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 {{ define "breadcrumb" }}
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="/">Home Page</a></li>
+      <li class="breadcrumb-item"><a href="{{ printf "%s/" pathPrefix }}">Home Page</a></li>
       {{ $length := len .Breadcrumbs }}
       {{ range $i, $b:=  .Breadcrumbs }}
         <li class="breadcrumb-item">

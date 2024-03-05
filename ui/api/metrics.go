@@ -790,13 +790,13 @@ func (mm *metricsMiddleware) GetEntities(token, item, name, domainID, permission
 }
 
 // ErrorPage adds metrics middleware to error page method.
-func (mm *metricsMiddleware) ErrorPage(errMsg string) ([]byte, error) {
+func (mm *metricsMiddleware) ErrorPage(errMsg, url string) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "errorpage").Add(1)
 		mm.latency.With("method", "errorpage").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ErrorPage(errMsg)
+	return mm.svc.ErrorPage(errMsg, url)
 }
 
 // DomainLogin adds metrics middleware to domain login method.

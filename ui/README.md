@@ -36,6 +36,7 @@ The service is configured using the environment variables presented in the follo
 | MG_GOOGLE_STATE         | Google state                                                            | ""                                       |
 | MG_UI_HASH_KEY          | Secure cookie encoding key                                              | ""                                       |
 | MG_UI_BLOCK_KEY         | Secure cookie encrypting key                                            | ""                                       |
+| MG_UI_PATH_PREFIX       | URL path prefix                                                         | ""                                       |
 
 ## Deployment
 
@@ -84,5 +85,6 @@ MG_GOOGLE_REDIRECT_URL="http://localhost/oauth/callback/google" \
 MG_GOOGLE_STATE="" \
 MG_UI_HASH_KEY=""\
 MG_UI_BLOCK_KEY=""\
+MG_UI_PATH_PREFIX=""\
 $GOBIN/magistrala-ui
 ```
