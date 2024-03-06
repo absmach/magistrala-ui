@@ -1375,7 +1375,7 @@ func FetchChartDataEndpoint(svc ui.Service) endpoint.Endpoint {
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		res, err := svc.FetchChartData(req.Session.AccessToken, req.channelID, req.mpgm)
+		res, err := svc.FetchChartData(req.Session.Token, req.channelID, req.mpgm)
 		if err != nil {
 			return nil, err
 		}
