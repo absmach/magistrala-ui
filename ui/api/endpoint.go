@@ -126,6 +126,13 @@ func logoutEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 				Path:   fmt.Sprintf("%s/%s/login", prefix, domainsAPIEndpoint),
 				MaxAge: -1,
 			},
+			{
+				Name:     refreshTokenKey,
+				Value:    "",
+				Path:     fmt.Sprintf("%s/%s", prefix, tokenRefreshAPIEndpoint),
+				MaxAge:   -1,
+				HttpOnly: true,
+			},
 		}
 		return uiRes{
 			code:    http.StatusOK,
@@ -224,6 +231,13 @@ func updatePasswordEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 				Value:  "",
 				Path:   fmt.Sprintf("%s/%s/login", prefix, domainsAPIEndpoint),
 				MaxAge: -1,
+			},
+			{
+				Name:     refreshTokenKey,
+				Value:    "",
+				Path:     fmt.Sprintf("%s/%s", prefix, tokenRefreshAPIEndpoint),
+				MaxAge:   -1,
+				HttpOnly: true,
 			},
 		}
 
