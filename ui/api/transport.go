@@ -151,7 +151,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID, prefix string, secureCo
 		).ServeHTTP)
 
 		r.Get("/logout", kithttp.NewServer(
-			logoutEndpoint(svc),
+			logoutEndpoint(svc, prefix),
 			decodeLogoutRequest,
 			encodeResponse,
 			opts...,

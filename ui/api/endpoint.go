@@ -107,7 +107,7 @@ func loginEndpoint(svc ui.Service) endpoint.Endpoint {
 	}
 }
 
-func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
+func logoutEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, _ interface{}) (interface{}, error) {
 		if err := svc.Logout(); err != nil {
 			return nil, err
@@ -118,6 +118,12 @@ func logoutEndpoint(svc ui.Service) endpoint.Endpoint {
 				Name:   sessionDetailsKey,
 				Value:  "",
 				Path:   "/",
+				MaxAge: -1,
+			},
+			{
+				Name:   refreshTokenKey,
+				Value:  "",
+				Path:   fmt.Sprintf("%s/%s/login", prefix, domainsAPIEndpoint),
 				MaxAge: -1,
 			},
 		}
@@ -213,6 +219,12 @@ func updatePasswordEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 				Path:   "/",
 				MaxAge: -1,
 			},
+			{
+				Name:   refreshTokenKey,
+				Value:  "",
+				Path:   fmt.Sprintf("%s/%s/login", prefix, domainsAPIEndpoint),
+				MaxAge: -1,
+			},
 		}
 
 		return uiRes{
@@ -299,6 +311,11 @@ func secureTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix st
 			return nil, err
 		}
 
+		refreshExp, err := extractTokenExpiry(req.RefreshToken)
+		if err != nil {
+			return nil, err
+		}
+
 		return uiRes{
 			code: http.StatusSeeOther,
 			cookies: []*http.Cookie{
@@ -311,7 +328,15 @@ func secureTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix st
 				{
 					Name:     refreshTokenKey,
 					Value:    secureRefreshToken,
+					Path:     fmt.Sprintf("%s/%s", prefix, tokenRefreshAPIEndpoint),
+					Expires:  refreshExp,
+					HttpOnly: true,
+				},
+				{
+					Name:     refreshTokenKey,
+					Value:    secureRefreshToken,
 					Path:     fmt.Sprintf("%s/%s/login", prefix, domainsAPIEndpoint),
+					Expires:  refreshExp,
 					HttpOnly: true,
 				},
 				{
@@ -358,6 +383,11 @@ func refreshTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix s
 		if err != nil {
 			return nil, err
 		}
+		refreshExp, err := extractTokenExpiry(token.RefreshToken)
+		if err != nil {
+			return nil, err
+		}
+
 		tkr := uiRes{
 			code:    http.StatusSeeOther,
 			headers: map[string]string{"Location": req.ref},
@@ -372,12 +402,14 @@ func refreshTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix s
 					Name:     refreshTokenKey,
 					Value:    secureRefreshToken,
 					Path:     fmt.Sprintf("%s/%s", prefix, tokenRefreshAPIEndpoint),
+					Expires:  refreshExp,
 					HttpOnly: true,
 				},
 				{
 					Name:     refreshTokenKey,
 					Value:    secureRefreshToken,
 					Path:     fmt.Sprintf("%s/%s/login", prefix, domainsAPIEndpoint),
+					Expires:  refreshExp,
 					HttpOnly: true,
 				},
 			},
@@ -1605,6 +1637,11 @@ func domainLoginEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix st
 			return nil, err
 		}
 
+		refreshExp, err := extractTokenExpiry(token.RefreshToken)
+		if err != nil {
+			return nil, err
+		}
+
 		return uiRes{
 			code: http.StatusSeeOther,
 			cookies: []*http.Cookie{
@@ -1618,12 +1655,14 @@ func domainLoginEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix st
 					Name:     refreshTokenKey,
 					Value:    secureRefreshToken,
 					Path:     fmt.Sprintf("%s/%s", prefix, tokenRefreshAPIEndpoint),
+					Expires:  refreshExp,
 					HttpOnly: true,
 				},
 				{
 					Name:     refreshTokenKey,
 					Value:    secureRefreshToken,
 					Path:     fmt.Sprintf("%s/%s/login", prefix, domainsAPIEndpoint),
+					Expires:  refreshExp,
 					HttpOnly: true,
 				},
 			},
