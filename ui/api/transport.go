@@ -2489,7 +2489,7 @@ func readBoolQuery(r *http.Request, key string, def bool) (bool, error) {
 func tokenFromCookie(r *http.Request, cookie string) (string, error) {
 	c, err := r.Cookie(cookie)
 	if err != nil {
-		return "", errors.Wrap(err, errCredentials)
+		return "", errors.Wrap(err, errInvalidCredentials)
 	}
 
 	return c.Value, nil
@@ -2695,7 +2695,7 @@ func encodeError(prefix string) kithttp.ErrorEncoder {
 		_, displayError := errors.Unwrap(err)
 
 		switch {
-		case errors.Contains(err, errCredentials),
+		case errors.Contains(err, errInvalidCredentials),
 			errors.Contains(err, errAuthentication),
 			errors.Contains(err, ui.ErrTokenRefresh):
 			w.Header().Set("Location", fmt.Sprintf("%s/login", prefix))

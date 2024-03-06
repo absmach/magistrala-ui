@@ -6,7 +6,7 @@ package api
 import "github.com/absmach/magistrala/pkg/errors"
 
 var (
-	errCredentials            = errors.New("missing or invalid credentials provided")
+	errInvalidCredentials     = errors.New("missing or invalid credentials provided")
 	errAuthentication         = errors.New("failed to perform authentication over the entity")
 	errAuthorization          = errors.New("failed to perform authorization over the entity")
 	errMissingSecret          = errors.New("missing secret")

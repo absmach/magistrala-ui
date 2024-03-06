@@ -23,9 +23,9 @@ var (
 type Config struct {
 	Host        string `env:"MG_UI_DB_HOST"           envDefault:"localhost"`
 	Port        string `env:"MG_UI_DB_PORT"           envDefault:"5432"`
-	User        string `env:"MG_UI_DB_USER"           envDefault:"magistrala"`
-	Pass        string `env:"MG_UI_DB_PASS"           envDefault:"magistrala"`
-	Name        string `env:"MG_UI_DB_NAME"           envDefault:"ui"`
+	User        string `env:"MG_UI_DB_USER"           envDefault:"magistrala-ui"`
+	Pass        string `env:"MG_UI_DB_PASS"           envDefault:"magistrala-ui"`
+	Name        string `env:"MG_UI_DB_NAME"           envDefault:"dashboards"`
 	SSLMode     string `env:"MG_UI_DB_SSL_MODE"       envDefault:"disable"`
 	SSLCert     string `env:"MG_UI_DB_SSL_CERT"       envDefault:""`
 	SSLKey      string `env:"MG_UI_DB_SSL_KEY"        envDefault:""`

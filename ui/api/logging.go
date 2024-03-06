@@ -1167,7 +1167,7 @@ func (lm *loggingMiddleware) ReadMessages(s ui.Session, channelID, thingKey stri
 			slog.String("duration", time.Since(begin).String()),
 			slog.String("channel_id", channelID),
 			slog.Uint64("page", page),
-			slog.Any("page metadata", mpgm),
+			slog.Any("page_metadata", mpgm),
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
