@@ -311,7 +311,7 @@ func secureTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix st
 				{
 					Name:     refreshTokenKey,
 					Value:    secureRefreshToken,
-					Path:     fmt.Sprintf("%s/%s", prefix, domainsAPIEndpoint),
+					Path:     fmt.Sprintf("%s/%s/login", prefix, domainsAPIEndpoint),
 					HttpOnly: true,
 				},
 				{
@@ -377,7 +377,7 @@ func refreshTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix s
 				{
 					Name:     refreshTokenKey,
 					Value:    secureRefreshToken,
-					Path:     fmt.Sprintf("%s/%s", prefix, domainsAPIEndpoint),
+					Path:     fmt.Sprintf("%s/%s/login", prefix, domainsAPIEndpoint),
 					HttpOnly: true,
 				},
 			},
@@ -1620,6 +1620,12 @@ func domainLoginEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix st
 					Path:     fmt.Sprintf("%s/%s", prefix, tokenRefreshAPIEndpoint),
 					HttpOnly: true,
 				},
+				{
+					Name:     refreshTokenKey,
+					Value:    secureRefreshToken,
+					Path:     fmt.Sprintf("%s/%s/login", prefix, domainsAPIEndpoint),
+					HttpOnly: true,
+				},
 			},
 			headers: map[string]string{"Location": fmt.Sprintf("%s/?domain=%s", prefix, req.DomainID)},
 		}, nil
@@ -1756,6 +1762,12 @@ func disableDomainEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 				Name:   refreshTokenKey,
 				Value:  "",
 				Path:   fmt.Sprintf("%s/%s", prefix, tokenRefreshAPIEndpoint),
+				MaxAge: -1,
+			},
+			{
+				Name:   refreshTokenKey,
+				Value:  "",
+				Path:   fmt.Sprintf("%s/%s/login", prefix, domainsAPIEndpoint),
 				MaxAge: -1,
 			},
 		}
