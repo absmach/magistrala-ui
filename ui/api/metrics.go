@@ -682,8 +682,8 @@ func (mm *metricsMiddleware) ReadMessages(s ui.Session, channelID, thingKey stri
 // FetchChartData adds metrics middleware to fetch chart data method.
 func (mm *metricsMiddleware) FetchChartData(token string, channelID string, mpgm sdk.MessagePageMetadata) ([]byte, error) {
 	defer func(begin time.Time) {
-		mm.counter.With("method", "fetch_reader_data").Add(1)
-		mm.latency.With("method", "fetch_reader_data").Observe(time.Since(begin).Seconds())
+		mm.counter.With("method", "fetch_chart_data").Add(1)
+		mm.latency.With("method", "fetch_chart_data").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
 	return mm.svc.FetchChartData(token, channelID, mpgm)

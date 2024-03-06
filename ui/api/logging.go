@@ -1189,10 +1189,10 @@ func (lm *loggingMiddleware) FetchChartData(token string, channelID string, mpgm
 		}
 		if err != nil {
 			args = append(args, slog.Any("error", err))
-			lm.logger.Warn("Fetch reader data failed to complete successfully", args...)
+			lm.logger.Warn("Fetch chart data failed to complete successfully", args...)
 			return
 		}
-		lm.logger.Info("Fetch reader data completed successfully", args...)
+		lm.logger.Info("Fetch chart data completed successfully", args...)
 	}(time.Now())
 
 	return lm.svc.FetchChartData(token, channelID, mpgm)
