@@ -1283,7 +1283,7 @@ func readMessagesEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ReadMessages(req.Session, req.channelID, req.thingKey, req.page, req.limit)
+		res, err := svc.ReadMessages(req.Session, req.channelID, req.thingKey, req.mpgm)
 		if err != nil {
 			return nil, err
 		}
@@ -1291,6 +1291,25 @@ func readMessagesEndpoint(svc ui.Service) endpoint.Endpoint {
 		return uiRes{
 			code: http.StatusOK,
 			html: res,
+		}, nil
+	}
+}
+
+func FetchChartDataEndpoint(svc ui.Service) endpoint.Endpoint {
+	return func(_ context.Context, request interface{}) (response interface{}, err error) {
+		req := request.(readMessagesReq)
+		if err := req.validate(); err != nil {
+			return nil, err
+		}
+		res, err := svc.FetchChartData(req.Session.AccessToken, req.channelID, req.mpgm)
+		if err != nil {
+			return nil, err
+		}
+
+		return uiRes{
+			code:    http.StatusOK,
+			html:    res,
+			headers: map[string]string{"Content-Type": jsonContentType},
 		}, nil
 	}
 }

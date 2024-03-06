@@ -11,7 +11,7 @@ The service is configured using the environment variables presented in the follo
 | MG_UI_LOG_LEVEL         | Log level for UI (debug, info, warn, error)                             | debug                                    |
 | MG_UI_PORT              | Port where UI service is run                                            | 9095                                     |
 | MG_HTTP_ADAPTER_URL     | HTTP adapter URL                                                        | <http://localhost:8008>                  |
-| MG_READER_URL           | Reader URL                                                              | <http://localhost:9007>                  |
+| MG_READER_URL           | Reader URL                                                              | <http://localhost:9011>                  |
 | MG_THINGS_URL           | Things URL                                                              | <http://localhost:9000>                  |
 | MG_USERS_URL            | Users URL                                                               | <http://localhost:9002>                  |
 | MG_INVITATIONS_URL      | Invitations URL                                                         | <http://localhost:9020>                  |
@@ -60,7 +60,7 @@ make install
 MG_UI_LOG_LEVEL=debug \
 MG_UI_PORT=9095 \
 MG_HTTP_ADAPTER_URL="http://localhost:8008" \
-MG_READER_URL="http://localhost:9007" \
+MG_READER_URL="http://localhost:9011" \
 MG_THINGS_URL="http://localhost:9000" \
 MG_USERS_URL="http://localhost:9002" \
 MG_INVITATIONS_URL="http://localhost:9020" \

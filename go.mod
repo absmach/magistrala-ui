@@ -4,7 +4,7 @@ go 1.21.5
 
 require (
 	github.com/absmach/agent v0.0.0-20240202075640-cc619e6685c8
-	github.com/absmach/magistrala v0.14.0
+	github.com/absmach/magistrala v0.14.1-0.20240305111255-42d433a92f39
 	github.com/absmach/senml v1.0.5
 	github.com/caarlos0/env/v10 v10.0.0
 	github.com/eclipse/paho.mqtt.golang v1.4.3
@@ -13,9 +13,9 @@ require (
 	github.com/go-kit/kit v0.13.0
 	github.com/go-zoo/bone v1.3.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/gorilla/securecookie v1.1.2
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 // indirect
-	github.com/gorilla/securecookie v1.1.2
 	github.com/jackc/pgx/v5 v5.5.3
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/jmoiron/sqlx v1.3.5

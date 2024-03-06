@@ -670,13 +670,23 @@ func (mm *metricsMiddleware) Publish(channelID, thingKey string, message ui.Mess
 }
 
 // ReadMessages adds metrics middleware to read messages method.
-func (mm *metricsMiddleware) ReadMessages(s ui.Session, channelID, thingKey string, page, limit uint64) ([]byte, error) {
+func (mm *metricsMiddleware) ReadMessages(s ui.Session, channelID, thingKey string, mpgm sdk.MessagePageMetadata) ([]byte, error) {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "read_messages").Add(1)
 		mm.latency.With("method", "read_messages").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return mm.svc.ReadMessages(s, channelID, thingKey, page, limit)
+	return mm.svc.ReadMessages(s, channelID, thingKey, mpgm)
+}
+
+// FetchChartData adds metrics middleware to fetch chart data method.
+func (mm *metricsMiddleware) FetchChartData(token string, channelID string, mpgm sdk.MessagePageMetadata) ([]byte, error) {
+	defer func(begin time.Time) {
+		mm.counter.With("method", "fetch_chart_data").Add(1)
+		mm.latency.With("method", "fetch_chart_data").Observe(time.Since(begin).Seconds())
+	}(time.Now())
+
+	return mm.svc.FetchChartData(token, channelID, mpgm)
 }
 
 // CreateBootstrap adds metrics middleware to create bootstrap method.

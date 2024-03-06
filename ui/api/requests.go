@@ -4,11 +4,20 @@
 package api
 
 import (
+	"slices"
+	"strings"
+	"time"
+
 	"github.com/absmach/magistrala-ui/ui"
 	sdk "github.com/absmach/magistrala/pkg/sdk/go"
 )
 
-const maxNameSize = 1024
+const (
+	maxNameSize  = 1024
+	maxLimitSize = 1000
+)
+
+var validAggregations = []string{"MAX", "MIN", "AVG", "SUM", "COUNT"}
 
 type indexReq struct {
 	ui.Session
@@ -16,7 +25,7 @@ type indexReq struct {
 
 func (req indexReq) validate() error {
 	if req.AccessToken == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	return nil
 }
@@ -58,7 +67,7 @@ type secureTokenReq struct {
 
 func (req secureTokenReq) validate() error {
 	if req.AccessToken == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.RefreshToken == "" {
 		return errMissingRefreshToken
@@ -88,7 +97,7 @@ type createUserReq struct {
 
 func (req createUserReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.User.Credentials.Secret == "" {
 		return errMissingSecret
@@ -106,7 +115,7 @@ type createUsersReq struct {
 
 func (req createUsersReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	for _, user := range req.users {
 		if user.Credentials.Secret == "" {
@@ -129,7 +138,7 @@ type listEntityReq struct {
 
 func (req listEntityReq) validate() error {
 	if req.AccessToken == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.page == 0 {
 		return errPageSize
@@ -150,7 +159,7 @@ type listEntityByIDReq struct {
 
 func (req listEntityByIDReq) validate() error {
 	if req.AccessToken == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.id == "" {
 		return errMissingUserID
@@ -171,7 +180,7 @@ type viewResourceReq struct {
 
 func (req viewResourceReq) validate() error {
 	if req.AccessToken == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.id == "" {
 		return errMissingUserID
@@ -187,7 +196,7 @@ type updateUserReq struct {
 
 func (req updateUserReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.ID == "" {
 		return errMissingUserID
@@ -205,7 +214,7 @@ type updateUserTagsReq struct {
 
 func (req updateUserTagsReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.ID == "" {
 		return errMissingUserID
@@ -220,7 +229,7 @@ type updateUserIdentityReq struct {
 
 func (req updateUserIdentityReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.ID == "" {
 		return errMissingUserID
@@ -239,7 +248,7 @@ type updateUserStatusReq struct {
 
 func (req updateUserStatusReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.id == "" {
 		return errMissingUserID
@@ -255,7 +264,7 @@ type updateUserRoleReq struct {
 
 func (req updateUserRoleReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.ID == "" {
 		return errMissingUserID
@@ -279,7 +288,7 @@ type updateUserPasswordReq struct {
 
 func (req updateUserPasswordReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.oldPass == "" {
 		return errMissingSecret
@@ -309,7 +318,7 @@ type passwordResetReq struct {
 
 func (req passwordResetReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.password == "" {
 		return errMissingPassword
@@ -330,7 +339,7 @@ type createThingReq struct {
 
 func (req createThingReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.Thing.Name == "" {
 		return errMissingName
@@ -345,7 +354,7 @@ type updateThingReq struct {
 
 func (req updateThingReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.ID == "" {
 		return errMissingThingID
@@ -366,7 +375,7 @@ type updateThingTagsReq struct {
 
 func (req updateThingTagsReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.ID == "" {
 		return errMissingThingID
@@ -381,7 +390,7 @@ type updateThingSecretReq struct {
 
 func (req updateThingSecretReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.ID == "" {
 		return errMissingThingID
@@ -399,7 +408,7 @@ type updateThingStatusReq struct {
 
 func (req updateThingStatusReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.id == "" {
 		return errMissingThingID
@@ -415,7 +424,7 @@ type createThingsReq struct {
 
 func (req createThingsReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	return nil
 }
@@ -427,7 +436,7 @@ type createChannelReq struct {
 
 func (req createChannelReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.Channel.Name == "" {
 		return errMissingName
@@ -442,7 +451,7 @@ type createChannelsReq struct {
 
 func (req createChannelsReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	for _, channel := range req.Channels {
 		if channel.Name == "" {
@@ -459,7 +468,7 @@ type updateChannelReq struct {
 
 func (req updateChannelReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.ID == "" {
 		return errMissingChannelID
@@ -482,7 +491,7 @@ type connectThingReq struct {
 
 func (req connectThingReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.channelID == "" {
 		return errMissingChannelID
@@ -504,7 +513,7 @@ type shareThingReq struct {
 
 func (req shareThingReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if len(req.UserIDs) == 0 {
 		return errMissingUserID
@@ -525,7 +534,7 @@ type updateChannelStatusReq struct {
 
 func (req updateChannelStatusReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.id == "" {
 		return errMissingChannelID
@@ -540,7 +549,7 @@ type createGroupReq struct {
 
 func (req createGroupReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.Group.Name == "" {
 		return errMissingName
@@ -556,7 +565,7 @@ type createGroupsReq struct {
 
 func (req createGroupsReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	for _, group := range req.Groups {
 		if group.Name == "" {
@@ -574,7 +583,7 @@ type updateGroupReq struct {
 
 func (req updateGroupReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.ID == "" {
 		return errMissingGroupID
@@ -596,7 +605,7 @@ type assignReq struct {
 
 func (req assignReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 
 	if req.groupID == "" {
@@ -618,7 +627,7 @@ type updateGroupStatusReq struct {
 
 func (req updateGroupStatusReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.id == "" {
 		return errMissingGroupID
@@ -646,25 +655,36 @@ type readMessagesReq struct {
 	ui.Session
 	channelID string
 	thingKey  string
-	page      uint64
-	limit     uint64
+	mpgm      sdk.MessagePageMetadata
 }
 
 func (req readMessagesReq) validate() error {
-	if req.AccessToken == "" {
-		return errAuthorization
+	if req.AccessToken == "" && req.thingKey == "" {
+		return errInvalidCredentials
 	}
 	if req.channelID == "" {
 		return errMissingChannelID
 	}
-	if req.thingKey == "" {
-		return errMissingThingKey
-	}
-	if req.page == 0 {
-		return errPageSize
-	}
-	if req.limit == 0 {
+	if req.mpgm.Limit < 1 || req.mpgm.Limit > maxLimitSize {
 		return errLimitSize
+	}
+
+	if req.mpgm.Aggregation != "" {
+		if req.mpgm.From == 0 {
+			return errMissingFrom
+		}
+
+		if req.mpgm.To == 0 {
+			return errMissingTo
+		}
+
+		if !slices.Contains(validAggregations, strings.ToUpper(req.mpgm.Aggregation)) {
+			return errInvalidAggregation
+		}
+
+		if _, err := time.ParseDuration(req.mpgm.Interval); err != nil {
+			return errInvalidInterval
+		}
 	}
 
 	return nil
@@ -678,7 +698,7 @@ type bootstrapCommandReq struct {
 
 func (req bootstrapCommandReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.id == "" {
 		return errMissingConfigID
@@ -693,7 +713,7 @@ type updateBootstrapReq struct {
 
 func (req updateBootstrapReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 
 	if req.ThingID == "" {
@@ -709,7 +729,7 @@ type deleteBootstrapReq struct {
 
 func (req deleteBootstrapReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.id == "" {
 		return errMissingConfigID
@@ -724,7 +744,7 @@ type updateBootstrapStateReq struct {
 
 func (req updateBootstrapStateReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.ThingID == "" {
 		return errMissingConfigID
@@ -739,7 +759,7 @@ type updateBootstrapCertReq struct {
 
 func (req updateBootstrapCertReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.ThingID == "" {
 		return errMissingThingID
@@ -754,7 +774,7 @@ type updateBootstrapConnReq struct {
 
 func (req updateBootstrapConnReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.ThingID == "" {
 		return errMissingConfigID
@@ -769,7 +789,7 @@ type createBootstrapReq struct {
 
 func (req createBootstrapReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.ExternalID == "" {
 		return errMissingExternalID
@@ -792,7 +812,7 @@ type getEntitiesReq struct {
 
 func (req getEntitiesReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.page == 0 {
 		return errPageSize
@@ -826,7 +846,7 @@ type addUserToChannelReq struct {
 
 func (req addUserToChannelReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.ChannelID == "" {
 		return errMissingChannelID
@@ -849,7 +869,7 @@ type addUserGroupToChannelReq struct {
 
 func (req addUserGroupToChannelReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.channelID == "" {
 		return errMissingChannelID
@@ -886,7 +906,7 @@ type listDomainsReq struct {
 }
 
 func (req listDomainsReq) validate() error {
-	if req.AccessToken == "" {
+	if req.Token.AccessToken == "" {
 		return errAuthentication
 	}
 	if req.page == 0 {
@@ -953,7 +973,7 @@ type updateDomainStatusReq struct {
 
 func (req updateDomainStatusReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.id == "" {
 		return errMissingDomainID
@@ -1086,7 +1106,7 @@ type viewDashboardReq struct {
 
 func (req viewDashboardReq) validate() error {
 	if req.AccessToken == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	return nil
 }
@@ -1100,7 +1120,7 @@ type createDashboardReq struct {
 
 func (req createDashboardReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	return nil
 }
@@ -1113,7 +1133,7 @@ type listDashboardsReq struct {
 
 func (req listDashboardsReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	if req.page == 0 {
 		return errPageSize
@@ -1140,7 +1160,7 @@ type updateDashboardReq struct {
 
 func (req updateDashboardReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	return nil
 }
@@ -1152,7 +1172,7 @@ type deleteDashboardReq struct {
 
 func (req deleteDashboardReq) validate() error {
 	if req.token == "" {
-		return errAuthorization
+		return errInvalidCredentials
 	}
 	return nil
 }

@@ -6,8 +6,9 @@ package api
 import "github.com/absmach/magistrala/pkg/errors"
 
 var (
-	errAuthorization          = errors.New("missing or invalid credentials provided")
+	errInvalidCredentials     = errors.New("missing or invalid credentials provided")
 	errAuthentication         = errors.New("failed to perform authentication over the entity")
+	errAuthorization          = errors.New("failed to perform authorization over the entity")
 	errMissingSecret          = errors.New("missing secret")
 	errMissingIdentity        = errors.New("missing entity identity")
 	errLimitSize              = errors.New("invalid limit size")
@@ -44,4 +45,8 @@ var (
 	errMissingRole            = errors.New("missing role")
 	errMissingValue           = errors.New("missing value")
 	errCookieDecryption       = errors.New("failed to decrypt the cookie")
+	errMissingFrom            = errors.New("missing from time value")
+	errMissingTo              = errors.New("missing to time value")
+	errInvalidAggregation     = errors.New("invalid aggregation value")
+	errInvalidInterval        = errors.New("invalid interval value")
 )

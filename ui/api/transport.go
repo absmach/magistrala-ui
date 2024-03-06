@@ -45,6 +45,20 @@ const (
 	permissionKey           = "permission"
 	identityKey             = "identity"
 	statusKey               = "status"
+	formatKey               = "format"
+	subtopicKey             = "subtopic"
+	publisherKey            = "publisher"
+	protocolKey             = "protocol"
+	valueKey                = "v"
+	stringValueKey          = "vs"
+	dataValueKey            = "vd"
+	boolValueKey            = "vb"
+	comparatorKey           = "comparator"
+	fromKey                 = "from"
+	toKey                   = "to"
+	aggregationKey          = "aggregation"
+	intervalKey             = "interval"
+	defInterval             = "1s"
 	defPage                 = 1
 	defLimit                = 10
 	defKey                  = ""
@@ -191,6 +205,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID, prefix string, secureCo
 					encodeResponse,
 					opts...,
 				).ServeHTTP))
+
 				r.Route("/dashboards", func(r chi.Router) {
 					r.Get("/{id}", kithttp.NewServer(
 						viewDashboardEndpoint(svc),
@@ -651,6 +666,13 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID, prefix string, secureCo
 						opts...,
 					).ServeHTTP)
 				})
+
+				r.Get("/data", kithttp.NewServer(
+					FetchChartDataEndpoint(svc),
+					decodeReadMessagesRequest,
+					encodeResponse,
+					opts...,
+				).ServeHTTP)
 
 				r.Route("/bootstraps", func(r chi.Router) {
 					r.Get("/", kithttp.NewServer(
@@ -1835,17 +1857,98 @@ func decodeReadMessagesRequest(_ context.Context, r *http.Request) (interface{},
 		return nil, err
 	}
 
+	subtopic, err := readStringQuery(r, subtopicKey, "")
+	if err != nil {
+		return nil, err
+	}
+
+	publisher, err := readStringQuery(r, publisherKey, "")
+	if err != nil {
+		return nil, err
+	}
+
+	protocol, err := readStringQuery(r, protocolKey, "")
+	if err != nil {
+		return nil, err
+	}
+
+	name, err := readStringQuery(r, nameKey, "")
+	if err != nil {
+		return nil, err
+	}
+
+	v, err := readNumQuery[float64](r, valueKey, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	vs, err := readStringQuery(r, stringValueKey, "")
+	if err != nil {
+		return nil, err
+	}
+
+	vd, err := readStringQuery(r, dataValueKey, "")
+	if err != nil {
+		return nil, err
+	}
+
+	vb, err := readBoolQuery(r, boolValueKey, false)
+	if err != nil {
+		return nil, err
+	}
+
+	from, err := readNumQuery[float64](r, fromKey, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	to, err := readNumQuery[float64](r, toKey, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	aggregation, err := readStringQuery(r, aggregationKey, "")
+	if err != nil {
+		return nil, err
+	}
+
+	var interval string
+	if aggregation != "" {
+		interval, err = readStringQuery(r, intervalKey, defInterval)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	session, err := sessionFromHeader(r)
 	if err != nil {
 		return nil, err
 	}
 
+	offset := (page - 1) * limit
+
 	return readMessagesReq{
 		channelID: r.Form.Get("channel"),
 		thingKey:  r.Form.Get("thing"),
-		page:      page,
-		limit:     limit,
 		Session:   session,
+		mpgm: sdk.MessagePageMetadata{
+			PageMetadata: sdk.PageMetadata{
+				Limit:  limit,
+				Offset: offset,
+				Name:   name,
+			},
+			Subtopic:    subtopic,
+			Publisher:   publisher,
+			Protocol:    protocol,
+			Value:       v,
+			StringValue: vs,
+			DataValue:   vd,
+			BoolValue:   &vb,
+			From:        from,
+			To:          to,
+			Aggregation: aggregation,
+			Interval:    interval,
+		},
 	}, nil
 }
 
@@ -2364,10 +2467,28 @@ func readNumQuery[N number](r *http.Request, key string, def N) (N, error) {
 	}
 }
 
+func readBoolQuery(r *http.Request, key string, def bool) (bool, error) {
+	vals := r.URL.Query()[key]
+	if len(vals) > 1 {
+		return false, errInvalidQueryParams
+	}
+
+	if len(vals) == 0 {
+		return def, nil
+	}
+
+	b, err := strconv.ParseBool(vals[0])
+	if err != nil {
+		return false, errors.Wrap(errInvalidQueryParams, err)
+	}
+
+	return b, nil
+}
+
 func tokenFromCookie(r *http.Request, cookie string) (string, error) {
 	c, err := r.Cookie(cookie)
 	if err != nil {
-		return "", errors.Wrap(err, errAuthorization)
+		return "", errors.Wrap(err, errInvalidCredentials)
 	}
 
 	return c.Value, nil
@@ -2399,7 +2520,7 @@ func AdminAuthMiddleware(prefix string) func(http.Handler) http.Handler {
 			}
 
 			if session.User.Role != "admin" {
-				err = errors.ErrAuthorization
+				err = errAuthorization
 				return
 			}
 
@@ -2573,7 +2694,7 @@ func encodeError(prefix string) kithttp.ErrorEncoder {
 		_, displayError := errors.Unwrap(err)
 
 		switch {
-		case errors.Contains(err, errAuthorization),
+		case errors.Contains(err, errInvalidCredentials),
 			errors.Contains(err, errAuthentication),
 			errors.Contains(err, ui.ErrTokenRefresh):
 			w.Header().Set("Location", fmt.Sprintf("%s/login", prefix))
@@ -2611,6 +2732,7 @@ func encodeError(prefix string) kithttp.ErrorEncoder {
 			errors.Contains(err, ui.ErrFailedDashboardSave),
 			errors.Contains(err, ui.ErrFailedDashboardDelete),
 			errors.Contains(err, ui.ErrFailedDashboardUpdate),
+			errors.Contains(err, ui.ErrJSONMarshal),
 			errors.Contains(err, ui.ErrFailedDashboardRetrieve):
 			w.Header().Set("Location", fmt.Sprintf("%s/%s?error=%s", prefix, errorAPIEndpoint, url.QueryEscape(displayError.Error())))
 			w.WriteHeader(http.StatusSeeOther)

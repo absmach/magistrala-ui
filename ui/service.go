@@ -219,6 +219,7 @@ var (
 	ErrFailedUnshare        = errors.New("failed to unshare entity")
 	ErrConflict             = errors.New("entity already exists")
 	ErrSessionType          = errors.New("invalid session type")
+	ErrJSONMarshal          = errors.New("failed to encode to json")
 
 	ErrFailedViewDashboard     = errors.New("failed to view dashboard")
 	ErrFailedDashboardSave     = errors.New("failed to save dashboard")
@@ -371,7 +372,9 @@ type Service interface {
 	// Publish facilitates a thing publishin messages to a channel.
 	Publish(channelID, thingKey string, message Message) error
 	// ReadMessages retrieves messages published in a channel.
-	ReadMessages(s Session, channelID, thingKey string, page, limit uint64) ([]byte, error)
+	ReadMessages(s Session, channelID, thingKey string, mpgm sdk.MessagePageMetadata) ([]byte, error)
+	// FetchChartData retrieves messages published in a channel to populate charts.
+	FetchChartData(token string, channelID string, mpgm sdk.MessagePageMetadata) ([]byte, error)
 
 	// CreateBootstrap creates a new bootstrap config.
 	CreateBootstrap(token string, config ...sdk.BootstrapConfig) error
@@ -1784,22 +1787,19 @@ func (us *uiService) ListUserGroupChannels(s Session, id string, page, limit uin
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) ReadMessages(s Session, channelID, thingKey string, page, limit uint64) ([]byte, error) {
-	offset := (page - 1) * limit
-	pgm := sdk.PageMetadata{
-		Offset: offset,
-		Limit:  limit,
-	}
-	msg, err := us.sdk.ReadMessages(pgm, channelID, s.AccessToken)
+func (us *uiService) ReadMessages(s Session, channelID, thingKey string, mpgm sdk.MessagePageMetadata) ([]byte, error) {
+	msg, err := us.sdk.ReadMessages(mpgm, channelID, s.AccessToken)
 	if err != nil {
 		return []byte{}, err
 	}
 
-	noOfPages := int(math.Ceil(float64(msg.Total) / float64(limit)))
+	noOfPages := int(math.Ceil(float64(msg.Total) / float64(mpgm.Limit)))
 
 	crumbs := []breadcrumb{
 		{Name: "Read Messages"},
 	}
+
+	currentPage := int(math.Ceil(float64(mpgm.Offset)/float64(mpgm.Limit)) + 1)
 
 	data := struct {
 		NavbarActive   string
@@ -1818,9 +1818,9 @@ func (us *uiService) ReadMessages(s Session, channelID, thingKey string, page, l
 		channelID,
 		thingKey,
 		msg.Messages,
-		int(page),
+		currentPage,
 		noOfPages,
-		int(limit),
+		int(mpgm.Limit),
 		crumbs,
 		s,
 	}
@@ -1831,6 +1831,20 @@ func (us *uiService) ReadMessages(s Session, channelID, thingKey string, page, l
 	}
 
 	return btpl.Bytes(), nil
+}
+
+func (us *uiService) FetchChartData(token string, channelID string, mpgm sdk.MessagePageMetadata) ([]byte, error) {
+	msg, sdkErr := us.sdk.ReadMessages(mpgm, channelID, token)
+	if sdkErr != nil {
+		return []byte{}, sdkErr
+	}
+
+	data, err := json.Marshal(msg)
+	if err != nil {
+		return []byte{}, errors.Wrap(err, ErrJSONMarshal)
+	}
+
+	return data, nil
 }
 
 func (us *uiService) Publish(channelID, thingKey string, message Message) error {
@@ -2173,7 +2187,7 @@ func (us *uiService) GetEntities(token, entity, entityName, domainID, permission
 
 	data, err := json.Marshal(items)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(err, ErrJSONMarshal)
 	}
 	return data, nil
 }
