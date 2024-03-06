@@ -121,5 +121,12 @@ SPDX-License-Identifier: Apache-2.0 */
 }
 
 .resize-helper {
-  border: 10px dotted #000; /* Customize as needed */
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  border: 1px dashed #1d2231;
+  pointer-events: none;
 }

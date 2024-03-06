@@ -16,7 +16,7 @@ function cancelEdit() {
 function addWidget(chartData, widgetID) {
   let newItem = new Widget(chartData, widgetID);
   grid.add(newItem.element);
-  // resizeObserver.observe(newItem.element);
+  resizeObserver.observe(newItem.element);
 }
 
 function removeGridItem(item) {
@@ -172,7 +172,7 @@ function editableCanvas() {
             height: widgetSize.height,
           });
           grid.add(newItem, { layout: true });
-          // resizeObserver.observe(newItem);
+          resizeObserver.observe(newItem);
         });
         grid.layout();
       }
@@ -188,6 +188,109 @@ function editableCanvas() {
   });
   return grid;
 }
+
+const previousSizes = new Map();
+
+const resizeObserver = new ResizeObserver((entries) => {
+  for (let entry of entries) {
+    const { target } = entry;
+    addResizeHelper(target);
+    const br = target.querySelector(".item-border");
+    br.style.border = "none";
+    const resizeHelper = target.querySelector(".resize-helper");
+    const previousSize = previousSizes.get(target) || {
+      width: target.clientWidth,
+      height: target.clientHeight,
+    };
+
+    const snapToGrid = (size) => Math.round(size / gridSize) * gridSize;
+    const contentEl = target.querySelector(".item-content");
+    const gridRightPosition = target.parentNode.getBoundingClientRect().right;
+    const widgetRightPosition = resizeHelper.getBoundingClientRect().right;
+    const isOverflowing = widgetRightPosition > gridRightPosition;
+    if (isOverflowing) {
+      const newWidth = snapToGrid(target.clientWidth);
+      const newHeight = snapToGrid(target.clientHeight);
+
+      resizeHelper.style.maxWidth = newWidth + "px";
+      resizeHelper.style.maxHeight = newHeight + "px";
+    } else {
+      resizeHelper.style.maxWidth = "none";
+      resizeHelper.style.maxHeight = "none";
+    }
+
+    if (widgetRightPosition < gridRightPosition - 5) {
+      const snappedWidth = snapToGrid(target.clientWidth);
+      const snappedHeight = snapToGrid(target.clientHeight);
+
+      resizeHelper.style.width = snappedWidth + "px";
+      resizeHelper.style.height = snappedHeight + "px";
+
+      previousSizes.set(target, {
+        width: parseInt(window.getComputedStyle(resizeHelper).getPropertyValue("width")),
+        height: parseInt(window.getComputedStyle(resizeHelper).getPropertyValue("height")),
+      });
+
+      const finalizeResize = (event) => {
+        contentEl.style.width = resizeHelper.style.width;
+        contentEl.style.height = resizeHelper.style.height;
+
+        // Resize apache echarts chart
+        const chart = echarts.getInstanceByDom(contentEl);
+        if (chart) {
+          chart.resize({
+            width: parseInt(window.getComputedStyle(resizeHelper).getPropertyValue("width")),
+            height: parseInt(window.getComputedStyle(resizeHelper).getPropertyValue("height")),
+          });
+        } else {
+          const cardDiv = target.querySelector(".widgetcard");
+          const h5Elem = cardDiv.querySelector("h5");
+          const cardBody = cardDiv.querySelector(".card-body");
+          const cardFooter = cardDiv.querySelector(".card-footer");
+
+          if (entry.contentBoxSize) {
+            // The standard makes contentBoxSize an array...
+            if (entry.contentBoxSize[0]) {
+              h5Elem.style.fontSize = Math.max(1, entry.contentBoxSize[0].inlineSize / 300) + "rem";
+              if (cardBody) {
+                cardBody.style.fontSize =
+                  Math.max(1.5, entry.contentBoxSize[0].inlineSize / 300) + "rem";
+              }
+              if (cardFooter) {
+                cardFooter.style.fontSize =
+                  Math.max(1, entry.contentBoxSize[0].inlineSize / 600) + "rem";
+              }
+            } else {
+              // ...but old versions of Firefox treat it as a single item
+              h5Elem.style.fontSize = Math.max(1, entry.contentBoxSize.inlineSize / 300) + "rem";
+              if (cardBody) {
+                cardBody.style.fontSize =
+                  Math.max(1.5, entry.contentBoxSize.inlineSize / 300) + "rem";
+              }
+              if (cardFooter) {
+                cardFooter.style.fontSize =
+                  Math.max(1, entry.contentBoxSize.inlineSize / 600) + "rem";
+              }
+            }
+          } else {
+            h5Elem.style.fontSize = `${Math.max(1, entry.contentRect.width / 300)}rem`;
+            if (cardBody) {
+              cardBody.style.fontSize = `${Math.max(1.5, entry.contentRect.width / 300)}rem`;
+            }
+            if (cardFooter) {
+              cardFooter.style.fontSize = `${Math.max(1, entry.contentRect.width / 600)}rem`;
+            }
+          }
+        }
+        grid.refreshItems();
+        grid.layout(true);
+        document.removeEventListener("mouseup", finalizeResize);
+        console.log("Resize finalized");
+      };
+      document.addEventListener("mouseup", finalizeResize);
+    }
+  }
+});
 
 // No widget placeholder
 function showNoWidgetPlaceholder() {
