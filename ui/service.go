@@ -1834,13 +1834,13 @@ func (us *uiService) ReadMessages(s Session, channelID, thingKey string, mpgm sd
 }
 
 func (us *uiService) FetchChartData(token string, channelID string, mpgm sdk.MessagePageMetadata) ([]byte, error) {
-	msg, err := us.sdk.ReadMessages(mpgm, channelID, token)
-	if err != nil {
-		return []byte{}, err
+	msg, sdkErr := us.sdk.ReadMessages(mpgm, channelID, token)
+	if sdkErr != nil {
+		return []byte{}, sdkErr
 	}
 
-	data, jsonErr := json.Marshal(msg)
-	if jsonErr != nil {
+	data, err := json.Marshal(msg)
+	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrJSONMarshal)
 	}
 
