@@ -275,13 +275,16 @@ func secureTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix st
 			return nil, err
 		}
 
-		sessionDetails, err := svc.Session(req.Session)
+		sessionReq := ui.Session{
+			Token:       req.AccessToken,
+			LoginStatus: ui.UserLoginStatus,
+		}
+
+		sessionDetails, err := svc.Session(sessionReq)
 		if err != nil {
 			return nil, err
 		}
-
-		sessionDetails.Token = req.Token
-
+		sessionDetails.Token = req.AccessToken
 		session, err := json.Marshal(sessionDetails)
 		if err != nil {
 			return nil, err
@@ -291,27 +294,37 @@ func secureTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix st
 			return nil, err
 		}
 
+		secureRefreshToken, err := s.Encode(refreshTokenKey, req.RefreshToken)
+		if err != nil {
+			return nil, err
+		}
+
 		return uiRes{
 			code: http.StatusSeeOther,
 			cookies: []*http.Cookie{
 				{
-					Name:  sessionDetailsKey,
-					Value: secureSessionDetails,
-					Path:  "/",
-				},
-				{
-					Name:     accessTokenKey,
-					Value:    "",
+					Name:     sessionDetailsKey,
+					Value:    secureSessionDetails,
 					Path:     "/",
-					MaxAge:   -1,
 					HttpOnly: true,
 				},
 				{
 					Name:     refreshTokenKey,
-					Value:    "",
-					Path:     "/",
-					MaxAge:   -1,
+					Value:    secureRefreshToken,
+					Path:     fmt.Sprintf("%s/%s", prefix, domainsAPIEndpoint),
 					HttpOnly: true,
+				},
+				{
+					Name:   accessTokenKey,
+					Value:  "",
+					Path:   "/",
+					MaxAge: -1,
+				},
+				{
+					Name:   refreshTokenKey,
+					Value:  "",
+					Path:   "/",
+					MaxAge: -1,
 				},
 			},
 			headers: map[string]string{"Location": fmt.Sprintf("%s/%s", prefix, domainsAPIEndpoint)},
@@ -319,19 +332,19 @@ func secureTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix st
 	}
 }
 
-func refreshTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie) endpoint.Endpoint {
+func refreshTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix string) endpoint.Endpoint {
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(refreshTokenReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		token, err := svc.RefreshToken(req.RefreshToken)
+		token, err := svc.RefreshToken(req.Token)
 		if err != nil {
 			return nil, err
 		}
 
-		req.Session.Token = token
+		req.Session.Token = token.AccessToken
 		session, err := json.Marshal(req.Session)
 		if err != nil {
 			return nil, err
@@ -341,14 +354,31 @@ func refreshTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie) endpoint
 			return nil, err
 		}
 
+		secureRefreshToken, err := s.Encode(refreshTokenKey, token.RefreshToken)
+		if err != nil {
+			return nil, err
+		}
 		tkr := uiRes{
 			code:    http.StatusSeeOther,
 			headers: map[string]string{"Location": req.ref},
 			cookies: []*http.Cookie{
 				{
-					Name:  sessionDetailsKey,
-					Value: secureSessionDetails,
-					Path:  "/",
+					Name:     sessionDetailsKey,
+					Value:    secureSessionDetails,
+					Path:     "/",
+					HttpOnly: true,
+				},
+				{
+					Name:     refreshTokenKey,
+					Value:    secureRefreshToken,
+					Path:     fmt.Sprintf("%s/%s", prefix, tokenRefreshAPIEndpoint),
+					HttpOnly: true,
+				},
+				{
+					Name:     refreshTokenKey,
+					Value:    secureRefreshToken,
+					Path:     fmt.Sprintf("%s/%s", prefix, domainsAPIEndpoint),
+					HttpOnly: true,
 				},
 			},
 		}
@@ -1549,18 +1579,18 @@ func domainLoginEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix st
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
-		token, err := svc.DomainLogin(req.Login, req.RefreshToken)
+		token, err := svc.DomainLogin(req.Login, req.Token)
 		if err != nil {
 			return nil, err
 		}
 		req.Domain.ID = req.DomainID
-		req.AccessToken = token.AccessToken
+		req.Token = token.AccessToken
 		sessionDetails, err := svc.Session(req.Session)
 		if err != nil {
 			return nil, err
 		}
 
-		sessionDetails.Token = token
+		sessionDetails.Token = token.AccessToken
 		session, err := json.Marshal(sessionDetails)
 		if err != nil {
 			return nil, err
@@ -1570,13 +1600,25 @@ func domainLoginEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix st
 			return nil, err
 		}
 
+		secureRefreshToken, err := s.Encode(refreshTokenKey, token.RefreshToken)
+		if err != nil {
+			return nil, err
+		}
+
 		return uiRes{
 			code: http.StatusSeeOther,
 			cookies: []*http.Cookie{
 				{
-					Name:  sessionDetailsKey,
-					Value: secureSessionDetails,
-					Path:  "/",
+					Name:     sessionDetailsKey,
+					Value:    secureSessionDetails,
+					Path:     "/",
+					HttpOnly: true,
+				},
+				{
+					Name:     refreshTokenKey,
+					Value:    secureRefreshToken,
+					Path:     fmt.Sprintf("%s/%s", prefix, tokenRefreshAPIEndpoint),
+					HttpOnly: true,
 				},
 			},
 			headers: map[string]string{"Location": fmt.Sprintf("%s/?domain=%s", prefix, req.DomainID)},
@@ -1705,11 +1747,16 @@ func disableDomainEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 
 		cookies := []*http.Cookie{
 			{
-				Name:     accessTokenKey,
-				Value:    "",
-				Path:     "/",
-				MaxAge:   -1,
-				HttpOnly: true,
+				Name:   sessionDetailsKey,
+				Value:  "",
+				Path:   "/",
+				MaxAge: -1,
+			},
+			{
+				Name:   refreshTokenKey,
+				Value:  "",
+				Path:   fmt.Sprintf("%s/%s", prefix, tokenRefreshAPIEndpoint),
+				MaxAge: -1,
 			},
 		}
 
