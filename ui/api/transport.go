@@ -1930,7 +1930,6 @@ func decodeReadMessagesRequest(_ context.Context, r *http.Request) (interface{},
 	return readMessagesReq{
 		channelID: r.Form.Get("channel"),
 		thingKey:  r.Form.Get("thing"),
-		page:      page,
 		Session:   session,
 		mpgm: sdk.MessagePageMetadata{
 			PageMetadata: sdk.PageMetadata{

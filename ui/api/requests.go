@@ -655,7 +655,6 @@ type readMessagesReq struct {
 	ui.Session
 	channelID string
 	thingKey  string
-	page      uint64
 	mpgm      sdk.MessagePageMetadata
 }
 
@@ -665,9 +664,6 @@ func (req readMessagesReq) validate() error {
 	}
 	if req.channelID == "" {
 		return errMissingChannelID
-	}
-	if req.page == 0 {
-		return errPageSize
 	}
 	if req.mpgm.Limit < 1 || req.mpgm.Limit > maxLimitSize {
 		return errLimitSize

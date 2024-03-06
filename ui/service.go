@@ -372,7 +372,7 @@ type Service interface {
 	// Publish facilitates a thing publishin messages to a channel.
 	Publish(channelID, thingKey string, message Message) error
 	// ReadMessages retrieves messages published in a channel.
-	ReadMessages(s Session, channelID, thingKey string, page uint64, mpgm sdk.MessagePageMetadata) ([]byte, error)
+	ReadMessages(s Session, channelID, thingKey string, mpgm sdk.MessagePageMetadata) ([]byte, error)
 	// FetchChartData retrieves messages published in a channel to populate charts.
 	FetchChartData(token string, channelID string, mpgm sdk.MessagePageMetadata) ([]byte, error)
 
@@ -1787,7 +1787,7 @@ func (us *uiService) ListUserGroupChannels(s Session, id string, page, limit uin
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) ReadMessages(s Session, channelID, thingKey string, page uint64, mpgm sdk.MessagePageMetadata) ([]byte, error) {
+func (us *uiService) ReadMessages(s Session, channelID, thingKey string, mpgm sdk.MessagePageMetadata) ([]byte, error) {
 	msg, err := us.sdk.ReadMessages(mpgm, channelID, s.AccessToken)
 	if err != nil {
 		return []byte{}, err
@@ -1798,6 +1798,8 @@ func (us *uiService) ReadMessages(s Session, channelID, thingKey string, page ui
 	crumbs := []breadcrumb{
 		{Name: "Read Messages"},
 	}
+
+	currentPage := int(math.Ceil(float64(mpgm.Offset)/float64(mpgm.Limit)) + 1)
 
 	data := struct {
 		NavbarActive   string
@@ -1816,7 +1818,7 @@ func (us *uiService) ReadMessages(s Session, channelID, thingKey string, page ui
 		channelID,
 		thingKey,
 		msg.Messages,
-		int(page),
+		currentPage,
 		noOfPages,
 		int(mpgm.Limit),
 		crumbs,

@@ -1283,7 +1283,7 @@ func readMessagesEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		res, err := svc.ReadMessages(req.Session, req.channelID, req.thingKey, req.page, req.mpgm)
+		res, err := svc.ReadMessages(req.Session, req.channelID, req.thingKey, req.mpgm)
 		if err != nil {
 			return nil, err
 		}

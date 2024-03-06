@@ -1161,12 +1161,11 @@ func (lm *loggingMiddleware) Publish(channelID, thingKey string, message ui.Mess
 }
 
 // ReadMessages adds logging middleware to read messages method.
-func (lm *loggingMiddleware) ReadMessages(s ui.Session, channelID, thingKey string, page uint64, mpgm sdk.MessagePageMetadata) (b []byte, err error) {
+func (lm *loggingMiddleware) ReadMessages(s ui.Session, channelID, thingKey string, mpgm sdk.MessagePageMetadata) (b []byte, err error) {
 	defer func(begin time.Time) {
 		args := []any{
 			slog.String("duration", time.Since(begin).String()),
 			slog.String("channel_id", channelID),
-			slog.Uint64("page", page),
 			slog.Any("page_metadata", mpgm),
 		}
 		if err != nil {
@@ -1177,7 +1176,7 @@ func (lm *loggingMiddleware) ReadMessages(s ui.Session, channelID, thingKey stri
 		lm.logger.Info("Read messages completed successfully", args...)
 	}(time.Now())
 
-	return lm.svc.ReadMessages(s, channelID, thingKey, page, mpgm)
+	return lm.svc.ReadMessages(s, channelID, thingKey, mpgm)
 }
 
 // FetchChartData adds logging middleware to fetch chart data method.
