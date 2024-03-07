@@ -337,7 +337,9 @@ function updateMetadata(layout, savedMetadata) {
   return upMetadata;
 }
 
+// Set dynamic parameters for all the modals
 document.addEventListener("DOMContentLoaded", function () {
+  // Get the current formatted date and time
   function formatDateTime(date) {
     let formatted = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
       .toISOString()
@@ -350,6 +352,7 @@ document.addEventListener("DOMContentLoaded", function () {
   let startTimes = document.querySelectorAll("#start-time");
   let stopTimes = document.querySelectorAll("#stop-time");
 
+  // Set the max attribute for the start and stop times
   startTimes.forEach(function (startTime) {
     startTime.setAttribute("max", formattedNow);
   });

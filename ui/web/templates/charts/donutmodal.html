@@ -100,6 +100,15 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                 </div>
+                <div class="mb-3">
+                  <label for="aggregation-type" class="form-label">Aggregation</label>
+                  <select class="form-select mb-3" name="aggregationType" id="aggregation-type">
+                    <option value="" disabled>Select an update interval</option>
+                    <option value="SUM">Sum</option>
+                    <option value="COUNT">Count</option>
+                    <option value="AVG">Average</option>
+                  </select>
+                </div>
               </div>
               <!-- Appearance Tab -->
               <div

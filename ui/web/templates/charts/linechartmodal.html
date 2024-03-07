@@ -108,6 +108,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     class="form-control mb-3 no-validate"
                     name="startTime"
                     id="start-time"
+                    required
                   />
                   <div class="invalid-time"></div>
                 </div>
@@ -118,6 +119,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     class="form-control mb-3 no-validate"
                     name="stopTime"
                     id="stop-time"
+                    required
                   />
                 </div>
                 <div class="mb-3">
@@ -132,6 +134,17 @@ SPDX-License-Identifier: Apache-2.0 -->
                     <option value="20">20s</option>
                     <option value="30">30s</option>
                     <option value="60">60s</option>
+                  </select>
+                </div>
+                <div class="mb-3">
+                  <label for="aggregation-type" class="form-label">Aggregation</label>
+                  <select class="form-select mb-3" name="aggregationType" id="aggregation-type">
+                    <option value="" disabled>Select an update interval</option>
+                    <option value="MAX">Maximum</option>
+                    <option value="MIN">Minimum</option>
+                    <option value="SUM">Sum</option>
+                    <option value="COUNT">Count</option>
+                    <option value="AVG">Average</option>
                   </select>
                 </div>
               </div>
