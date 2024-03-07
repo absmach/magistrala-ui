@@ -107,7 +107,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                     class="form-control mb-3"
                     name="startTime"
                     id="start-time"
-                    required
                   />
                   <div class="invalid-time"></div>
                 </div>
@@ -121,15 +120,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="time-interval" class="form-label">Time interval</label>
-                  <input
-                    type="number"
-                    class="form-control mb-3"
-                    name="timeInterval"
-                    id="time-interval"
-                    placeholder="Enter the time interval in seconds"
-                    required
-                  />
+                  <label for="update-interval" class="form-label">Update interval</label>
+                  <select class="form-select mb-3" name="updateInterval" id="update-interval">
+                    <option value="" disabled>Select an update interval</option>
+                    <option value="1">1s</option>
+                    <option value="2">2s</option>
+                    <option value="5">5s</option>
+                    <option value="10">10s</option>
+                    <option value="15">15s</option>
+                    <option value="20">20s</option>
+                    <option value="30">30s</option>
+                    <option value="60">60s</option>
+                  </select>
                 </div>
               </div>
               <!-- Appearance Tab -->
@@ -197,7 +199,14 @@ SPDX-License-Identifier: Apache-2.0 -->
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="close-multipleLineChart-button"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
           <button type="button" class="btn body-button" id="create-multipleLineChart-button">
             Create Chart
           </button>
@@ -210,7 +219,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     document
       .getElementById("create-multipleLineChart-button")
       .addEventListener("click", function () {
-        let form = document.getElementById("create-multipleLineChart-form");
+        const form = document.getElementById("create-multipleLineChart-form");
         if (!form.checkValidity()) {
           form.classList.add("was-validated");
           return;
@@ -223,6 +232,16 @@ SPDX-License-Identifier: Apache-2.0 -->
           chartData[pair[0]] = pair[1];
         }
 
+        if (chartData.stopTime <= chartData.startTime) {
+          const invalidTimeFeedback = form.querySelector(".invalid-time");
+          invalidTimeFeedback.innerHTML = "Stop time should be greater than start time";
+          invalidTimeFeedback.style.color = "red";
+          const invalidTimeInput = form.querySelector("#stop-time");
+          invalidTimeInput.classList.remove("was-validated");
+          invalidTimeInput.classList.add("is-invalid");
+          return;
+        }
+
         var widgetID = "multipleLineChart-" + Date.now();
 
         chartData["Type"] = "multipleLineChart";
@@ -232,6 +251,18 @@ SPDX-License-Identifier: Apache-2.0 -->
         form.reset();
         form.classList.remove("was-validated");
         bootstrap.Modal.getInstance(document.getElementById("multipleLineChartModal")).hide();
+      });
+
+    document
+      .getElementById("close-multipleLineChart-button")
+      .addEventListener("click", function () {
+        const form = document.getElementById("create-multipleLineChart-form");
+        const invalidTimeFeedback = form.querySelector(".invalid-time");
+        invalidTimeFeedback.innerHTML = "";
+        const invalidTimeInput = form.querySelector("#stop-time");
+        invalidTimeInput.classList.remove("is-invalid");
+        form.reset();
+        form.classList.remove("was-validated");
       });
   </script>
 {{ end }}

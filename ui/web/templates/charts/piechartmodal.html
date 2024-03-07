@@ -133,7 +133,14 @@ SPDX-License-Identifier: Apache-2.0 -->
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="close-pieChart-button"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
           <button type="button" class="btn body-button" id="create-pieChart-button">
             Create Chart
           </button>
@@ -144,7 +151,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // pie chart form
     document.getElementById("create-pieChart-button").addEventListener("click", function () {
-      let form = document.getElementById("create-pieChart-form");
+      const form = document.getElementById("create-pieChart-form");
       if (!form.checkValidity()) {
         form.classList.add("was-validated");
         return;
@@ -166,6 +173,12 @@ SPDX-License-Identifier: Apache-2.0 -->
       form.reset();
       form.classList.remove("was-validated");
       bootstrap.Modal.getInstance(document.getElementById("pieChartModal")).hide();
+    });
+
+    document.getElementById("close-pieChart-button").addEventListener("click", function () {
+      const form = document.getElementById("create-pieChart-form");
+      form.reset();
+      form.classList.remove("was-validated");
     });
   </script>
 {{ end }}

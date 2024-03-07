@@ -133,7 +133,14 @@ SPDX-License-Identifier: Apache-2.0 -->
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="close-donut-button"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
           <button type="button" class="btn body-button" id="create-donut-button">
             Create Chart
           </button>
@@ -144,7 +151,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // donut form
     document.getElementById("create-donut-button").addEventListener("click", function () {
-      let form = document.getElementById("create-donutChart-form");
+      const form = document.getElementById("create-donutChart-form");
       if (!form.checkValidity()) {
         form.classList.add("was-validated");
         return;
@@ -166,6 +173,12 @@ SPDX-License-Identifier: Apache-2.0 -->
       form.reset();
       form.classList.remove("was-validated");
       bootstrap.Modal.getInstance(document.getElementById("donutModal")).hide();
+    });
+
+    document.getElementById("close-donut-button").addEventListener("click", function () {
+      const form = document.getElementById("create-donutChart-form");
+      form.reset();
+      form.classList.remove("was-validated");
     });
   </script>
 {{ end }}

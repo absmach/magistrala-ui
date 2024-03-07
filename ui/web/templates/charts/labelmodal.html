@@ -50,7 +50,14 @@ SPDX-License-Identifier: Apache-2.0 -->
             <div class="invalid-feedback">Please enter a valid uuid</div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              id="close-label-button"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
             <button type="button" class="btn body-button" id="create-label-button">
               Create Chart
             </button>
@@ -62,7 +69,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // Label card form
     document.getElementById("create-label-button").addEventListener("click", function () {
-      let form = document.getElementById("create-label-form");
+      const form = document.getElementById("create-label-form");
       if (!form.checkValidity()) {
         form.classList.add("was-validated");
         return;
@@ -84,6 +91,12 @@ SPDX-License-Identifier: Apache-2.0 -->
       form.reset();
       form.classList.remove("was-validated");
       bootstrap.Modal.getInstance(document.getElementById("labelModal")).hide();
+    });
+
+    document.getElementById("close-label-button").addEventListener("click", function () {
+      const form = document.getElementById("create-label-form");
+      form.reset();
+      form.classList.remove("was-validated");
     });
   </script>
 {{ end }}

@@ -336,3 +336,25 @@ function updateMetadata(layout, savedMetadata) {
   }
   return upMetadata;
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+  function formatDateTime(date) {
+    let formatted = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+      .toISOString()
+      .slice(0, 16);
+    return formatted;
+  }
+
+  let now = new Date();
+  let formattedNow = formatDateTime(now);
+  let startTimes = document.querySelectorAll("#start-time");
+  let stopTimes = document.querySelectorAll("#stop-time");
+
+  startTimes.forEach(function (startTime) {
+    startTime.setAttribute("max", formattedNow);
+  });
+
+  stopTimes.forEach(function (stopTime) {
+    stopTime.setAttribute("max", formattedNow);
+  });
+});

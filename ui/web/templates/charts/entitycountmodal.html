@@ -52,7 +52,14 @@ SPDX-License-Identifier: Apache-2.0 -->
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              id="close-entityCount-button"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
             <button type="button" class="btn body-button" id="create-entityCount-button">
               Create Chart
             </button>
@@ -86,6 +93,12 @@ SPDX-License-Identifier: Apache-2.0 -->
       form.reset();
       form.classList.remove("was-validated");
       bootstrap.Modal.getInstance(document.getElementById("entityCountModal")).hide();
+    });
+
+    document.getElementById("close-entityCount-button").addEventListener("click", function () {
+      const form = document.getElementById("create-entityCount-form");
+      form.reset();
+      form.classList.remove("was-validated");
     });
   </script>
 {{ end }}

@@ -143,7 +143,14 @@ SPDX-License-Identifier: Apache-2.0 -->
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="close-horizontalBarChart-button"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
           <button type="button" class="btn body-button" id="create-horizontalBarChart-button">
             Create Chart
           </button>
@@ -156,7 +163,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     document
       .getElementById("create-horizontalBarChart-button")
       .addEventListener("click", function () {
-        let form = document.getElementById("create-horizontalBarChart-form");
+        const form = document.getElementById("create-horizontalBarChart-form");
         if (!form.checkValidity()) {
           form.classList.add("was-validated");
           return;
@@ -178,6 +185,14 @@ SPDX-License-Identifier: Apache-2.0 -->
         form.reset();
         form.classList.remove("was-validated");
         bootstrap.Modal.getInstance(document.getElementById("horizontalBarChartModal")).hide();
+      });
+
+    document
+      .getElementById("horizontalBarChartModal")
+      .addEventListener("hidden.bs.modal", function () {
+        const form = document.getElementById("create-horizontalBarChart-form");
+        form.reset();
+        form.classList.remove("was-validated");
       });
   </script>
 {{ end }}

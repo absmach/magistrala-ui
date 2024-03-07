@@ -155,7 +155,14 @@ SPDX-License-Identifier: Apache-2.0 -->
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="close-progressBar-button"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
           <button type="button" class="btn body-button" id="create-progressBar-button">
             Create Chart
           </button>
@@ -166,7 +173,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // Progress bar form
     document.getElementById("create-progressBar-button").addEventListener("click", function () {
-      let form = document.getElementById("create-progressBar-form");
+      const form = document.getElementById("create-progressBar-form");
       if (!form.checkValidity()) {
         form.classList.add("was-validated");
         return;
@@ -188,6 +195,12 @@ SPDX-License-Identifier: Apache-2.0 -->
       form.reset();
       form.classList.remove("was-validated");
       bootstrap.Modal.getInstance(document.getElementById("progressBarModal")).hide();
+    });
+
+    document.getElementById("close-progressBar-button").addEventListener("click", function () {
+      const form = document.getElementById("create-progressBar-form");
+      form.reset();
+      form.classList.remove("was-validated");
     });
   </script>
 {{ end }}

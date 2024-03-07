@@ -154,7 +154,14 @@ SPDX-License-Identifier: Apache-2.0 -->
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="close-multiBarChart-button"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
           <button type="button" class="btn body-button" id="create-multiBarChart-button">
             Create Chart
           </button>
@@ -165,7 +172,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // Multibar chart form
     document.getElementById("create-multiBarChart-button").addEventListener("click", function () {
-      let form = document.getElementById("create-multiBarChart-form");
+      const form = document.getElementById("create-multiBarChart-form");
       if (!form.checkValidity()) {
         form.classList.add("was-validated");
         return;
@@ -187,6 +194,12 @@ SPDX-License-Identifier: Apache-2.0 -->
       form.reset();
       form.classList.remove("was-validated");
       bootstrap.Modal.getInstance(document.getElementById("multiBarChartModal")).hide();
+    });
+
+    document.getElementById("close-multiBarChart-button").addEventListener("click", function () {
+      const form = document.getElementById("create-multiBarChart-form");
+      form.reset();
+      form.classList.remove("was-validated");
     });
   </script>
 {{ end }}

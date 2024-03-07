@@ -156,7 +156,14 @@ SPDX-License-Identifier: Apache-2.0 -->
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="close-multiGauge-button"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
           <button type="button" class="btn body-button" id="create-multiGauge-button">
             Create Chart
           </button>
@@ -167,7 +174,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // multi gauge form
     document.getElementById("create-multiGauge-button").addEventListener("click", function () {
-      let form = document.getElementById("create-multiGaugeChart-form");
+      const form = document.getElementById("create-multiGaugeChart-form");
       if (!form.checkValidity()) {
         form.classList.add("was-validated");
         return;
@@ -189,6 +196,12 @@ SPDX-License-Identifier: Apache-2.0 -->
       form.reset();
       form.classList.remove("was-validated");
       bootstrap.Modal.getInstance(document.getElementById("multiGaugeModal")).hide();
+    });
+
+    document.getElementById("close-multiGauge-button").addEventListener("click", function () {
+      const form = document.getElementById("create-multiGaugeChart-form");
+      form.reset();
+      form.classList.remove("was-validated");
     });
   </script>
 {{ end }}

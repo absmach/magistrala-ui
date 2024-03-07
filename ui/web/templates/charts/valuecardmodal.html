@@ -102,14 +102,17 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </div>
                 <div class="mb-3">
                   <label for="update-interval" class="form-label">Update interval</label>
-                  <input
-                    type="number"
-                    class="form-control mb-3"
-                    name="updateInterval"
-                    id="update-interval"
-                    placeholder="Enter the update interval in seconds"
-                    required
-                  />
+                  <select class="form-select mb-3" name="updateInterval" id="update-interval">
+                    <option value="" disabled>Select an update interval</option>
+                    <option value="1">1s</option>
+                    <option value="2">2s</option>
+                    <option value="5">5s</option>
+                    <option value="10">10s</option>
+                    <option value="15">15s</option>
+                    <option value="20">20s</option>
+                    <option value="30">30s</option>
+                    <option value="60">60s</option>
+                  </select>
                 </div>
               </div>
               <!-- Appearance Tab -->
@@ -154,7 +157,14 @@ SPDX-License-Identifier: Apache-2.0 -->
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="close-valueCard-button"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
           <button type="button" class="btn body-button" id="create-valueCard-button">
             Create Chart
           </button>
@@ -165,7 +175,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // Value card form
     document.getElementById("create-valueCard-button").addEventListener("click", function () {
-      let form = document.getElementById("create-valueCard-form");
+      const form = document.getElementById("create-valueCard-form");
       if (!form.checkValidity()) {
         form.classList.add("was-validated");
         return;
@@ -187,6 +197,12 @@ SPDX-License-Identifier: Apache-2.0 -->
       form.reset();
       form.classList.remove("was-validated");
       bootstrap.Modal.getInstance(document.getElementById("valueCardModal")).hide();
+    });
+
+    document.getElementById("close-valueCard-button").addEventListener("click", function () {
+      const form = document.getElementById("create-valueCard-form");
+      form.reset();
+      form.classList.remove("was-validated");
     });
   </script>
 {{ end }}
