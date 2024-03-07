@@ -3,7 +3,7 @@
 const gridClass = ".grid";
 const editableGridClass = ".grid-editable";
 var grid = initGrid(layout);
-const gridSize = 50;
+const gridSize = 25;
 
 // Editable canvas is used to make the canvas editable allowing the user to add widgets and be able to move the
 // widgets around the canvas
@@ -232,6 +232,12 @@ const resizeObserver = new ResizeObserver((entries) => {
       });
 
       const finalizeResize = (event) => {
+        let finalWidth = snapToGrid(resizeHelper.offsetWidth);
+        let finalHeight = snapToGrid(resizeHelper.offsetHeight);
+
+        target.style.width = `${finalWidth}px`;
+        target.style.height = `${finalHeight}px`;
+
         contentEl.style.width = resizeHelper.style.width;
         contentEl.style.height = resizeHelper.style.height;
 

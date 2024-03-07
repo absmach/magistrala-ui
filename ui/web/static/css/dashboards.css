@@ -11,10 +11,10 @@ SPDX-License-Identifier: Apache-2.0 */
 }
 
 .grid-editable {
-  background-size: calc(10rem + 10px) calc(10rem + 10px);
+  background-size: 25px 25px;
   background-image: linear-gradient(to right, lightgrey 1px, transparent 1px),
     linear-gradient(to bottom, lightgrey 1px, transparent 1px);
-
+  background-position: 5px 5px;
   min-width: 100%;
   min-height: 50vh;
 }
