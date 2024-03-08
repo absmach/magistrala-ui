@@ -123,17 +123,16 @@ SPDX-License-Identifier: Apache-2.0 -->
                 </div>
                 <div class="mb-3">
                   <label for="update-interval" class="form-label">Update interval</label>
-                  <select class="form-select mb-3" name="updateInterval" id="update-interval">
-                    <option value="" disabled>Select an update interval</option>
-                    <option value="1">1s</option>
-                    <option value="2">2s</option>
-                    <option value="5">5s</option>
-                    <option value="10">10s</option>
-                    <option value="15">15s</option>
-                    <option value="20">20s</option>
-                    <option value="30">30s</option>
-                    <option value="60">60s</option>
-                  </select>
+                  <input
+                    type="text"
+                    pattern="^([0-9][0-9]*[smhd])$"
+                    class="form-control mb-3"
+                    name="updateInterval"
+                    id="update-interval"
+                    placeholder="Enter the update interval, eg. 5s, 10m, 1h, 1d"
+                    required
+                  />
+                  <div class="invalid-feedback">Please eneter a valid interval</div>
                 </div>
                 <div class="mb-3">
                   <label for="aggregation-type" class="form-label">Aggregation</label>
@@ -270,10 +269,8 @@ SPDX-License-Identifier: Apache-2.0 -->
       .getElementById("close-multipleLineChart-button")
       .addEventListener("click", function () {
         const form = document.getElementById("create-multipleLineChart-form");
-        const invalidTimeFeedback = form.querySelector(".invalid-time");
-        invalidTimeFeedback.innerHTML = "";
-        const invalidTimeInput = form.querySelector("#stop-time");
-        invalidTimeInput.classList.remove("is-invalid");
+        form.querySelector(".invalid-time").innerHTML = "";
+        form.querySelector("#stop-time").classList.remove("is-invalid");
         form.reset();
         form.classList.remove("was-validated");
       });

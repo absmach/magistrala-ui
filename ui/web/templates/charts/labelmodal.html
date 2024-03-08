@@ -23,31 +23,33 @@ SPDX-License-Identifier: Apache-2.0 -->
           ></button>
         </div>
         <form id="create-label-form">
-          <div class="mb-3">
-            <label for="channel-id" class="form-label">Channel ID</label>
-            <input
-              type="text"
-              pattern="{{ .UUIDPattern }}"
-              class="form-control mb-3"
-              name="channel"
-              id="channel-id"
-              placeholder="Enter the channel ID"
-              required
-            />
-            <div class="invalid-feedback">Please enter a valid uuid</div>
-          </div>
-          <div class="mb-3">
-            <label for="thing-id" class="form-label">Thing ID</label>
-            <input
-              type="text"
-              pattern="{{ .UUIDPattern }}"
-              class="form-control mb-3"
-              name="thing"
-              id="thing-id"
-              placeholder="Enter the thing ID"
-              required
-            />
-            <div class="invalid-feedback">Please enter a valid uuid</div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="channel-id" class="form-label">Channel ID</label>
+              <input
+                type="text"
+                pattern="{{ .UUIDPattern }}"
+                class="form-control mb-3"
+                name="channel"
+                id="channel-id"
+                placeholder="Enter the channel ID"
+                required
+              />
+              <div class="invalid-feedback">Please enter a valid uuid</div>
+            </div>
+            <div class="mb-3">
+              <label for="thing-id" class="form-label">Thing ID</label>
+              <input
+                type="text"
+                pattern="{{ .UUIDPattern }}"
+                class="form-control mb-3"
+                name="thing"
+                id="thing-id"
+                placeholder="Enter the thing ID"
+                required
+              />
+              <div class="invalid-feedback">Please enter a valid uuid</div>
+            </div>
           </div>
           <div class="modal-footer">
             <button
