@@ -68,23 +68,27 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
                     type="text"
+                    pattern="{{ .UUIDPattern }}"
                     class="form-control mb-3"
                     name="channel"
                     id="channel-id"
                     placeholder="Enter the channel ID"
                     required
                   />
+                  <div class="invalid-feedback">Please enter a valid uuid</div>
                 </div>
                 <div class="mb-3">
                   <label for="thing-id" class="form-label">Thing IDs</label>
                   <input
                     type="text"
+                    pattern="{{ .UUIDPattern }}"
                     class="form-control mb-3"
                     name="thing"
                     id="thing-id"
                     placeholder="Enter the thing IDs"
                     required
                   />
+                  <div class="invalid-feedback">Please enter a valid uuid</div>
                 </div>
                 <div class="mb-3">
                   <label for="value-name" class="form-label">Value name</label>
@@ -116,6 +120,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     id="start-time"
                     required
                   />
+                  <div class="invalid-time"></div>
                 </div>
                 <div class="mb-3">
                   <label for="stop-time" class="form-label">Stop time</label>
@@ -124,18 +129,32 @@ SPDX-License-Identifier: Apache-2.0 -->
                     class="form-control mb-3"
                     name="stopTime"
                     id="stop-time"
+                    required
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="time-interval" class="form-label">Time interval</label>
+                  <label for="update-interval" class="form-label">Update interval</label>
                   <input
                     type="text"
+                    pattern="{{ .IntervalPattern }}"
                     class="form-control mb-3"
-                    name="timeInterval"
-                    id="time-interval"
-                    placeholder="Enter the time interval in seconds"
+                    name="updateInterval"
+                    id="update-interval"
+                    placeholder="Enter the update interval, eg. 5s, 10m, 1h, 1d"
                     required
                   />
+                  <div class="invalid-feedback">Please enter a valid interval</div>
+                </div>
+                <div class="mb-3">
+                  <label for="aggregation-type" class="form-label">Aggregation</label>
+                  <select class="form-select mb-3" name="aggregationType" id="aggregation-type">
+                    <option value="" disabled>Select an aggregation type</option>
+                    <option value="MAX">Maximum</option>
+                    <option value="MIN">Minimum</option>
+                    <option value="SUM">Sum</option>
+                    <option value="COUNT">Count</option>
+                    <option value="AVG">Average</option>
+                  </select>
                 </div>
               </div>
               <!-- Appearance Tab -->
@@ -183,7 +202,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                     name="seriesName"
                     id="series-name"
                     placeholder="Enter the series name eg. thing1, thing2"
-                    required
                   />
                 </div>
               </div>
@@ -191,13 +209,15 @@ SPDX-License-Identifier: Apache-2.0 -->
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           <button
             type="button"
-            class="btn body-button"
-            id="create-doubleBarChart-button"
+            class="btn btn-secondary"
+            id="close-doubleBarChart-button"
             data-bs-dismiss="modal"
           >
+            Close
+          </button>
+          <button type="button" class="btn body-button" id="create-doubleBarChart-button">
             Create Chart
           </button>
         </div>
@@ -207,7 +227,12 @@ SPDX-License-Identifier: Apache-2.0 -->
   <script>
     // double bar chart form
     document.getElementById("create-doubleBarChart-button").addEventListener("click", function () {
-      let form = document.getElementById("create-doubleBarChart-form");
+      const form = document.getElementById("create-doubleBarChart-form");
+      if (!form.checkValidity()) {
+        form.classList.add("was-validated");
+        return;
+      }
+
       // Create an object to store the form data
       let chartData = {};
       let formData = new FormData(form);
@@ -215,11 +240,33 @@ SPDX-License-Identifier: Apache-2.0 -->
         chartData[pair[0]] = pair[1];
       }
 
+      if (chartData.stopTime <= chartData.startTime) {
+        const invalidTimeFeedback = form.querySelector(".invalid-time");
+        invalidTimeFeedback.innerHTML = "Stop time should be greater than start time";
+        invalidTimeFeedback.style.color = "red";
+        const invalidTimeInput = form.querySelector("#stop-time");
+        invalidTimeInput.classList.remove("was-validated");
+        invalidTimeInput.classList.add("is-invalid");
+        return;
+      }
+
       var widgetID = "doubleBarChart-" + Date.now();
 
       chartData["Type"] = "doubleBarChart";
       addWidget(chartData, widgetID);
       metadataBuffer[widgetID] = chartData;
+
+      form.reset();
+      form.classList.remove("was-validated");
+      bootstrap.Modal.getInstance(document.getElementById("doubleBarChartModal")).hide();
+    });
+
+    document.getElementById("close-doubleBarChart-button").addEventListener("click", function () {
+      const form = document.getElementById("create-doubleBarChart-form");
+      form.querySelector(".invalid-time").innerHTML = "";
+      form.querySelector("#stop-time").classList.remove("is-invalid");
+      form.reset();
+      form.classList.remove("was-validated");
     });
   </script>
 {{ end }}
