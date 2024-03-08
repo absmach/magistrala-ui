@@ -627,24 +627,44 @@ class GaugeChart extends Echart {
       ],
     };
 
-    gaugeChart.setOption(option);
+    gaugeChart.setOption(option)
+    getData(gaugeChart);
 
-    function updateGauge() {
-        const randomValue = Math.floor(Math.random() * (${this.chartData.maxValue} - ${this.chartData.minValue} + 1)) + ${this.chartData.minValue};
-        gaugeChart.setOption({
-          series: [
-            {
-              data: [
-                {
-                  value: randomValue,
-                  name: "${this.chartData.gaugeLabel}",
-                },
-              ],
-            },
-          ],
-        });
+    async function getData(gaugeChart) {
+      try {
+        const response = await fetch(
+          "/data?channel=${this.chartData.channel}"+
+          "&limit=1",
+        );
+        if (response.ok) {
+          const data = await response.json();
+          console.log("message:", data.messages);
+          gaugeChart.setOption({
+            series: [
+              {
+                data: [
+                  { 
+                    value: data.messages[0].value,
+                    name: "${this.chartData.gaugeLabel}",
+                   
+                  },
+                ],
+              },
+            ],
+          });
+        } else {
+        console.error("HTTP request failed with status: ", response.status);
+        }
+        setTimeout(function () {
+          getData();
+        }, 2000000);
+      } catch (error) {
+        console.error("Failed to fetch gauge data: ", error);
+        setTimeout(function () {
+          getData();
+        }, 2000000);
+      }
     }
-    setInterval(updateGauge, 2000);
   })();`;
   }
 }
@@ -1135,7 +1155,51 @@ class MultiGaugeChart extends Echart {
       }
     ]
   };
-  multiGaugeChart.setOption(option);
+  multiGaugeChart.setOption(option)
+  getData(multiGaugeChart);
+
+  async function getData(multiGaugeChart) {
+    try {
+      const response = await fetch(
+        "/data?channel=${this.chartData.channel}"+
+        "&limit=3",
+      );
+      if (response.ok) {
+        const data = await response.json();
+        console.log("message:", data.messages);
+        multiGaugeChart.setOption({
+          series: [
+            {
+              data: [
+                { 
+                  value: data.messages[0].value,
+                  name: '${gaugeLabel[0]}',
+                },
+                { 
+                  value: data.messages[1].value,
+                  name: '${gaugeLabel[1]}',
+                },
+                { 
+                  value: data.messages[2].value,
+                  name: '${gaugeLabel[2]}',
+                },
+              ],
+            },
+          ],
+        });
+      } else {
+      console.error("HTTP request failed with status: ", response.status);
+      }
+      setTimeout(function () {
+        getData();
+      }, 2000000);
+    } catch (error) {
+      console.error("Failed to fetch gauge data: ", error);
+      setTimeout(function () {
+        getData();
+      }, 2000000);
+    }
+  }
   `;
   }
 }
@@ -1367,6 +1431,7 @@ class SpeedGaugeChart extends Echart {
 
   #generateScript() {
     return `
+  (function() {
     var speedGaugeChart = echarts.init(document.getElementById("${this.ID}"));
     var option = {
         title: {
@@ -1428,22 +1493,46 @@ class SpeedGaugeChart extends Echart {
           }
         ]
       };
-      setInterval(function () {
-        speedGaugeChart.setOption({
-          series: [
-            {
-              data: [
-                {
-                  value: +(Math.random() * 100).toFixed(2),
-                  name: "${this.chartData.gaugeLabel}",
-                }
-              ]
-            }
-          ]
-        });
-      }, 2000);
 
-    speedGaugeChart.setOption(option);`;
+    speedGaugeChart.setOption(option)
+    getData(speedGaugeChart);
+    
+    async function getData(speedGaugeChart) {
+      try {
+        const response = await fetch(
+          "/data?channel=${this.chartData.channel}"+
+          "&limit=1",
+        );
+        if (response.ok) {
+          const data = await response.json();
+          console.log("message:", data.messages);
+          speedGaugeChart.setOption({
+            series: [
+              {
+                data: [
+                  { 
+                    value: data.messages[0].value,
+                    name: "${this.chartData.gaugeLabel}",
+                   
+                  },
+                ],
+              },
+            ],
+          });
+        } else {
+        console.error("HTTP request failed with status: ", response.status);
+        }
+        setTimeout(function () {
+          getData();
+        }, 2000000);
+      } catch (error) {
+        console.error("Failed to fetch gauge data: ", error);
+        setTimeout(function () {
+          getData();
+        }, 2000000);
+      }
+    }
+  })();`;
   }
 }
 
@@ -1670,11 +1759,7 @@ class TempGaugeChart extends Echart {
               formatter: '{value} °C',
               color: 'inherit'
             },
-            data: [
-              {
-                value: 20
-              }
-            ]
+            data: []
           },
           {
             type: 'gauge',
@@ -1709,38 +1794,63 @@ class TempGaugeChart extends Echart {
               show: false
             },
             data: [
-              {
-                value: 37,
-                name: '${this.chartData.gaugeLabel}'
-              }
+              { 
+                value: 37,               
+              },
             ]
           }
         ]
       };
-      setInterval(function () {
-        const random = +(Math.random() * 60).toFixed(2);
-        tempGaugeChart.setOption({
-          series: [
-            {
-              data: [
-                {
-                  value: random
-                }
-              ]
-            },
-            {
-              data: [
-                {
-                  value: random,
-                  name: '${this.chartData.gaugeLabel}'
-                }
-              ]
-            }
-          ]
-        });
-      }, 2000);
 
-    tempGaugeChart.setOption(option);`;
+    tempGaugeChart.setOption(option)
+    getData(tempGaugeChart);
+
+    async function getData(tempGaugeChart) {
+      try {
+        const response = await fetch(
+          "/data?channel=${this.chartData.channel}"+
+          "&limit=1",
+        );
+        if (response.ok) {
+          const data = await response.json();
+          var newValue = data.messages[0].value;
+          console.log("message:", data.messages);
+          tempGaugeChart.setOption({
+            series: [
+              {
+                data: [
+                  { 
+                    value: newValue,
+                    name: "${this.chartData.gaugeLabel}",
+                   
+                  },
+                ],
+              },
+              {
+                data: [
+                  { 
+                    value: newValue,
+                    name: "${this.chartData.gaugeLabel}",
+                   
+                  },
+                ],
+              }
+            ],
+          });
+        } else {
+        console.error("HTTP request failed with status: ", response.status);
+        }
+        setTimeout(function () {
+          getData();
+        }, 2000000);
+      } catch (error) {
+        console.error("Failed to fetch gauge data: ", error);
+        setTimeout(function () {
+          getData();
+        }, 2000000);
+      }
+    }    
+    `;
   }
 }
 
