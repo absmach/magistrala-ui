@@ -233,6 +233,7 @@ var (
 	groupRelations  = []string{"administrator", "editor", "viewer"}
 	statusOptions   = []string{"all", "enabled", "disabled"}
 	uuidPattern     = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+	intervalPattern = "^([0-9][0-9]*[smhd])$"
 )
 
 // Service specifies service API.
@@ -2561,13 +2562,14 @@ func (us *uiService) ViewDashboard(s Session, dashboardID string) ([]byte, error
 	}
 
 	data := struct {
-		NavbarActive   string
-		CollapseActive string
-		Charts         []Item
-		Dashboard      Dashboard
-		Breadcrumbs    []breadcrumb
-		Session        Session
-		UUIDPattern    string
+		NavbarActive    string
+		CollapseActive  string
+		Charts          []Item
+		Dashboard       Dashboard
+		Breadcrumbs     []breadcrumb
+		Session         Session
+		UUIDPattern     string
+		IntervalPattern string
 	}{
 		dashboardsActive,
 		dashboardsActive,
@@ -2576,6 +2578,7 @@ func (us *uiService) ViewDashboard(s Session, dashboardID string) ([]byte, error
 		crumbs,
 		s,
 		uuidPattern,
+		intervalPattern,
 	}
 
 	if err := us.tpls.ExecuteTemplate(&btpl, "dashboard", data); err != nil {
