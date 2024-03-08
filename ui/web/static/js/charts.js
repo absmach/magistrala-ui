@@ -1321,6 +1321,7 @@ class ProgressBar extends Chart {
       height: "100px",
     };
     this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
   }
 
   #generateContent() {
@@ -1344,6 +1345,38 @@ class ProgressBar extends Chart {
         </div>
     </div>
       `;
+  }
+
+  #generateScript() {
+    return `
+    (function() {
+      var progressBar = document.querySelector("#${this.ID} .progress-bar");
+
+      async function getData() {
+        try {
+          const response = await fetch(
+            "/data?channel=${this.chartData.channel}"+
+            "&limit=1",
+          );
+          if (response.ok) {
+            const data = await response.json();
+            console.log("message: ", data.messages);
+            var progress = data.value;
+            progressBar.style.width = progress + "%";
+            progressBar.setAttribute("aria-valuenow", progress);
+            document.querySelector("#${this.ID} .card-footer .card-text").textContent = "Status: " + progress + "%";
+          } else {
+            console.error("HTTP request failed with status: ", response.status);
+          }
+        } catch (error) {
+          console.error("Failed to fetch card data: ", error);
+        }
+      }
+
+      getData();
+      setInterval(getData, 2000000);
+    })();
+    `;
   }
 }
 
@@ -1856,6 +1889,7 @@ class ValueCard extends Chart {
       height: "200px",
     };
     this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
   }
 
   #generateContent() {
@@ -1875,6 +1909,35 @@ class ValueCard extends Chart {
     </div>
     </div>
   `;
+  }
+
+  #generateScript() {
+    return `
+    (function() {
+      var valueCard = document.getElementById("${this.ID}");
+
+      async function getData() {
+        try {
+          const response = await fetch(
+            "/data?channel=${this.chartData.channel}"+
+            "&limit=1",
+          );
+          if (response.ok) {
+            const data = await response.json();
+            console.log("message: ", data.messages)
+            valueCard.querySelector(".value").textContent = data.messages[0].value;
+          } else {
+            console.error("HTTP request failed with status: ", response.status);
+          }
+        } catch (error) {
+          console.error("Failed to fetch card data: ", error);
+        }
+      }
+
+      getData();
+      setInterval(getData, 2000000);
+    })();
+    `;
   }
 }
 
