@@ -638,7 +638,6 @@ class GaugeChart extends Echart {
         );
         if (response.ok) {
           const data = await response.json();
-          console.log("message:", data.messages);
           gaugeChart.setOption({
             series: [
               {
@@ -1166,23 +1165,43 @@ class MultiGaugeChart extends Echart {
       );
       if (response.ok) {
         const data = await response.json();
-        console.log("message:", data.messages);
         multiGaugeChart.setOption({
           series: [
             {
               data: [
-                { 
+                {
                   value: data.messages[0].value,
                   name: '${gaugeLabel[0]}',
+                  title: {
+                    offsetCenter: ['0%', '-30%']
+                  },
+                  detail: {
+                    valueAnimation: true,
+                    offsetCenter: ['0%', '-18%']
+                  }
                 },
-                { 
+                {
                   value: data.messages[1].value,
                   name: '${gaugeLabel[1]}',
+                  title: {
+                    offsetCenter: ['0%', '0%']
+                  },
+                  detail: {
+                    valueAnimation: true,
+                    offsetCenter: ['0%', '12%']
+                  }
                 },
-                { 
+                {
                   value: data.messages[2].value,
                   name: '${gaugeLabel[2]}',
-                },
+                  title: {
+                    offsetCenter: ['0%', '28%']
+                  },
+                  detail: {
+                    valueAnimation: true,
+                    offsetCenter: ['0%', '40%']
+                  }
+                }
               ],
             },
           ],
@@ -1505,7 +1524,6 @@ class SpeedGaugeChart extends Echart {
         );
         if (response.ok) {
           const data = await response.json();
-          console.log("message:", data.messages);
           speedGaugeChart.setOption({
             series: [
               {
@@ -1814,7 +1832,6 @@ class TempGaugeChart extends Echart {
         if (response.ok) {
           const data = await response.json();
           var newValue = data.messages[0].value;
-          console.log("message:", data.messages);
           tempGaugeChart.setOption({
             series: [
               {
