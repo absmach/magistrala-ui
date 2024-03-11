@@ -387,6 +387,59 @@ class DoubleBarChart extends Echart {
     };
 
     doubleBarChart.setOption(option);
+    var chartData = {
+      channels: '${this.chartData.channels}'.split(','),
+      things: '${this.chartData.things}'.split(','),
+      name: '${this.chartData.valueName}',
+      from: ${this.chartData.startTime},
+      to: ${this.chartData.stopTime},
+      aggregation: '${this.chartData.aggregationType}',
+      limit: 100,
+      interval:'${this.chartData.updateInterval}'
+    };
+
+    async function fetchData(doubleBarChart, chartData) {
+      try {
+          const dataSeries0 = [];
+          const dataSeries1 = [];
+          const xAxisArray = [];
+
+  
+          for (let i = 0; i < chartData.channels.length; i++) {
+              const apiEndpoint = '${pathPrefix}/data?channel=' + chartData.channels[i] +
+                  '&name=' + chartData.name +
+                  '&from='+ chartData.from +
+                  '&to=' + chartData.to +
+                  '&aggregation=' + chartData.aggregation +
+                  '&limit=10' +
+                  '&interval=' + chartData.interval +
+                  '&publisher=' + chartData.things[i];
+  
+              const response = await fetch(apiEndpoint);
+              if (!response.ok) {
+                  throw new Error('HTTP request failed with status:', response.status)
+              }
+              const data = await response.json();
+              if (data.messages != undefined && data.messages.length > 0) {
+                data.messages.forEach((message) => {
+                  xAxisArray.push(new Date(message.time).toLocaleTimeString());
+                  dataSeries0.push(message.value);
+                });
+              }
+          }
+          updateChart(horizontalBarChart, plotData);
+      } catch (error) {
+          console.error("Error fetching data:", error);
+      }
+    }
+
+    updateChart(data) {
+      const barChart = echarts.init(document.getElementById(this.ID));
+      const option = barChart.getOption(); 
+      option.series[0].data = data.seriesData; 
+      barChart.setOption(option); 
+    }
+  }
   `;
   }
 }
