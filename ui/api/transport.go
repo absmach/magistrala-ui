@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -33,7 +32,6 @@ import (
 const (
 	htmContentType          = "text/html"
 	jsonContentType         = "application/json"
-	staticDir               = "ui/web/static"
 	protocol                = "http"
 	pageKey                 = "page"
 	limitKey                = "limit"
@@ -94,7 +92,7 @@ type number interface {
 }
 
 // MakeHandler returns a HTTP handler for API endpoints.
-func MakeHandler(svc ui.Service, r *chi.Mux, instanceID, prefix string, secureCookie *securecookie.SecureCookie, providers ...oauth2.Provider) http.Handler {
+func MakeHandler(svc ui.Service, r *chi.Mux, instanceID, prefix string, secureCookie *securecookie.SecureCookie, providers ...oauth2.Provider) (http.Handler, error) {
 	opts := []kithttp.ServerOption{
 		kithttp.ServerErrorEncoder(encodeError(prefix)),
 	}
@@ -874,9 +872,11 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID, prefix string, secureCo
 		opts...,
 	).ServeHTTP)
 
-	handleStaticFiles(r)
+	if err := handleStaticFiles(r); err != nil {
+		return nil, err
+	}
 
-	return r
+	return r, nil
 }
 
 func decodeIndexRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -2541,7 +2541,6 @@ func TokenMiddleware(prefix string) func(http.Handler) http.Handler {
 			// Parse the token without validation to get the expiration time
 			token, _, err := new(jwt.Parser).ParseUnverified(session.AccessToken, jwt.MapClaims{})
 			if err != nil {
-				fmt.Println(err)
 				http.Redirect(w, r, fmt.Sprintf("%s/%s?error=%s", prefix, errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
 				return
 			}
@@ -2603,23 +2602,26 @@ func DecryptCookieMiddleware(s *securecookie.SecureCookie, prefix string) func(h
 	}
 }
 
-func handleStaticFiles(m *chi.Mux) {
-	file, err := os.Open(staticDir)
+func handleStaticFiles(m *chi.Mux) error {
+	dirs, err := ui.StaticFS.ReadDir(ui.StaticDir)
 	if err != nil {
-		panic(err)
+		return err
 	}
-	defer file.Close()
-
-	infos, err := file.ReadDir(0)
-	if err != nil {
-		panic(err)
-	}
-	fs := http.FileServer(http.Dir(staticDir))
-	for _, info := range infos {
-		if info.IsDir() {
-			m.Handle(fmt.Sprintf("/%s/*", info.Name()), fs)
+	for _, d := range dirs {
+		if d.IsDir() {
+			fs := http.FileServer(http.FS(ui.StaticFS))
+			m.Handle(fmt.Sprintf("/%s/*", d.Name()), addPrefix(ui.StaticDir, fs))
 		}
 	}
+
+	return nil
+}
+
+func addPrefix(prefix string, h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = fmt.Sprintf("%s%s", prefix, r.URL.Path)
+		h.ServeHTTP(w, r)
+	})
 }
 
 func parseMetadata(r *http.Request) (map[string]interface{}, error) {

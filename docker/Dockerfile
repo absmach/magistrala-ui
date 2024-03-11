@@ -21,5 +21,4 @@ RUN apk update \
 
 FROM scratch
 COPY --from=builder /exe /
-COPY --from=builder /app/ui/web /ui/web
 ENTRYPOINT ["/exe"]

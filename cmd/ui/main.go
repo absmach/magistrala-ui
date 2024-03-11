@@ -125,10 +125,15 @@ func main() {
 
 	s := securecookie.New([]byte(cfg.HashKey), []byte(cfg.BlockKey))
 
+	handler, err := api.MakeHandler(svc, mux, cfg.InstanceID, cfg.Prefix, s, oauthProvider)
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
+
 	go func() {
 		p := fmt.Sprintf(":%s", cfg.Port)
 		logger.Info("GUI service started", slog.String("port", p))
-		errs <- http.ListenAndServe(p, api.MakeHandler(svc, mux, cfg.InstanceID, cfg.Prefix, s, oauthProvider))
+		errs <- http.ListenAndServe(p, handler)
 	}()
 
 	go func() {
