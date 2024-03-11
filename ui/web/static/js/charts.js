@@ -706,13 +706,7 @@ class HorizontalBarChart extends Echart {
           },
           dataset: {
             source: [
-              ['score', 'amount', 'product'],
-              [79.3,85212, 'thing1'],
-              [57.1, 78254, 'thing2'],
-              [14.4, 41032, 'thing3'],
-              [30.1, 12755, 'thing4'],
-              [18.7, 20145, 'thing5'],
-              [88.1, 89146, 'thing6'],
+              [],
             ]
           },
           grid: { containLabel: true },
@@ -731,7 +725,7 @@ class HorizontalBarChart extends Echart {
           visualMap: {
             orient: 'horizontal',
             left: 'center',
-            min: 10,
+            min: 0,
             max: 100,
             text: ['High temperature', 'Low temperature'],
             // Map the score column to color
@@ -751,7 +745,56 @@ class HorizontalBarChart extends Echart {
           ]
         };
 
-      horizontalBarChart.setOption(option);`;
+      horizontalBarChart.setOption(option);
+      var chartData = {
+        channel: '${this.chartData.channel}',
+        publisher: '${this.chartData.thing}',
+        name: '${this.chartData.valueName}',
+        from: ${this.chartData.startTime},
+        to: ${this.chartData.stopTime},
+        aggregation: '${this.chartData.aggregationType}',
+        limit: 100,
+        interval : getInterval(),
+      }
+      
+      async getData(horizontalBarChart, chartData) {
+        try {
+          const apiEndpoint = "/data?channel=" + chartData.channel +
+          "&name=" + chartData.name +
+          "&from=" + chartData.from +
+          "&to=" + chartData.to +
+          "&aggregation=" + chartData.aggregation +
+          "&limit=" + chartData.limit +
+          "&interval=" + chartData.interval;
+
+          const response = await fetch(apiEndpoint);
+    
+          if (!response.ok) {
+            throw new Error('API request failed with status ${response.status}');
+          }
+    
+          const data = await response.json();
+          updateChart(data);
+    
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          // Handle the error (e.g., display an error message)
+        } finally {
+          // Schedule the next update
+          setTimeout(() => this.fetchDataAndUpdate(), 5000); // Example: 5 seconds 
+        }
+      }
+    
+      updateChart(data) {
+        const barChart = echarts.init(document.getElementById(this.ID));
+        const option = barChart.getOption(); // Get the existing options
+        
+        option.series[0].data = data.seriesData; 
+    
+        barChart.setOption(option); // Update the chart
+      }
+    }
+      `;
   }
 }
 
