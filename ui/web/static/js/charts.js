@@ -143,7 +143,39 @@ class TimeSeriesBarChart extends Echart {
         ]
     };
 
-    barChart.setOption(option);`;
+    barChart.setOption(option);
+
+    async fetchDataAndUpdate() {
+      try {
+        const apiEndpoint = '/data?channel=${this.chartData.channel}';
+        const response = await fetch(apiEndpoint);
+  
+        if (!response.ok) {
+          throw new Error('API request failed with status ${response.status}');
+        }
+  
+        const data = await response.json();
+        updateChart(data);
+  
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        // Handle the error (e.g., display an error message)
+      } finally {
+        // Schedule the next update
+        setTimeout(() => this.fetchDataAndUpdate(), 5000); // Example: 5 seconds 
+      }
+    }
+  
+    updateChart(data) {
+      const barChart = echarts.init(document.getElementById(this.ID));
+      const option = barChart.getOption(); // Get the existing options
+      
+      option.series[0].data = data.seriesData; 
+  
+      barChart.setOption(option); // Update the chart
+    }
+  }
+    `;
   }
 }
 
