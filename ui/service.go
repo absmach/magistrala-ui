@@ -8,6 +8,7 @@ package ui
 import (
 	"bytes"
 	"context"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -30,8 +31,9 @@ import (
 )
 
 const (
-	templatesDir            = "ui/web/templates"
-	chartTemplatesDir       = "ui/web/templates/charts"
+	templatesDir            = "web/templates"
+	chartTemplatesDir       = "web/templates/charts"
+	StaticDir               = "web/static"
 	enabled                 = "enabled"
 	statePending            = "pending"
 	statusAll               = "all"
@@ -116,84 +118,10 @@ type Session struct {
 }
 
 var (
-	templates = []string{
-		"header",
-		"navbar",
-		"tableheader",
-		"tablefooter",
-		"error",
-		"breadcrumb",
-		"metadatamodal",
-		"statusupdate",
-
-		"bootstrap",
-		"bootstraps",
-		"terminal",
-
-		"channel",
-		"channelthings",
-		"channels",
-		"channelusers",
-		"channelgroups",
-
-		"group",
-		"groupusers",
-		"groups",
-		"groupchannels",
-
-		"index",
-
-		"registration",
-		"login",
-		"resetpassword",
-		"updatepassword",
-
-		"readmessages",
-
-		"thing",
-		"thingchannels",
-		"things",
-		"thingusers",
-
-		"users",
-		"user",
-
-		"domains",
-		"domain",
-		"member",
-		"members",
-		"invitations",
-
-		"dashboard",
-		"dashboards",
-	}
-
-	chartTemplates = []string{
-		"linechartmodal",
-		"gaugemodal",
-		"barchartmodal",
-		"piechartmodal",
-		"donutmodal",
-		"speedgaugemodal",
-		"tempgaugemodal",
-		"stackedlinechartmodal",
-		"arealinechartmodal",
-		"horizontalbarchartmodal",
-		"dynamicdatachartmodal",
-		"doublebarchartmodal",
-		"multiplelinechartmodal",
-		"stepchartmodal",
-		"multigaugemodal",
-		"multibarchartmodal",
-		"shareddatasetmodal",
-		"valuecardmodal",
-		"alarmcountmodal",
-		"alarmstablemodal",
-		"entitiestablemodal",
-		"entitycountmodal",
-		"progressbarmodal",
-		"labelmodal",
-	}
+	//go:embed all:web/static
+	StaticFS embed.FS
+	//go:embed web/templates
+	templatesFS embed.FS
 
 	ErrToken                = errors.New("failed to create token")
 	ErrTokenRefresh         = errors.New("failed to refresh token")
@@ -461,7 +389,7 @@ type uiService struct {
 
 // New instantiates the HTTP adapter implementation.
 func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider, prefix string, providers ...oauth2.Provider) (Service, error) {
-	tpl, err := parseTemplates(sdk, templates, prefix)
+	tpl, err := parseTemplates(sdk, prefix)
 	if err != nil {
 		return nil, err
 	}
@@ -2673,7 +2601,7 @@ func (us *uiService) DeleteDashboard(token, dashboardID string) error {
 	return nil
 }
 
-func parseTemplates(mfsdk sdk.SDK, templates []string, prefix string) (tpl *template.Template, err error) {
+func parseTemplates(mfsdk sdk.SDK, prefix string) (tpl *template.Template, err error) {
 	tpl = template.New("magistrala")
 	tpl = tpl.Funcs(template.FuncMap{
 		"toJSON": func(data map[string]interface{}) string {
@@ -2759,17 +2687,25 @@ func parseTemplates(mfsdk sdk.SDK, templates []string, prefix string) (tpl *temp
 		},
 	})
 
-	var tmplFiles []string
-	for _, value := range templates {
-		tmplFiles = append(tmplFiles, templatesDir+"/"+value+".html")
-	}
-	for _, value := range chartTemplates {
-		tmplFiles = append(tmplFiles, chartTemplatesDir+"/"+value+".html")
-	}
-	tpl, err = tpl.ParseFiles(tmplFiles...)
+	var templates []string
+	entries, err := templatesFS.ReadDir(templatesDir)
 	if err != nil {
 		return nil, err
 	}
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+		templates = append(templates, templatesDir+"/"+entry.Name())
+	}
 
-	return tpl, nil
+	entries, err = templatesFS.ReadDir(chartTemplatesDir)
+	if err != nil {
+		return nil, err
+	}
+	for _, entry := range entries {
+		templates = append(templates, chartTemplatesDir+"/"+entry.Name())
+	}
+
+	return tpl.ParseFS(templatesFS, templates...)
 }

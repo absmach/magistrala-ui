@@ -4,5 +4,4 @@
 FROM scratch
 ARG SVC
 COPY ./build/$SVC /exe
-COPY ./ui/web /ui/web
 ENTRYPOINT ["/exe"]
