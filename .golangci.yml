@@ -3,8 +3,6 @@
 
 run:
   timeout: 3m
-  build-tags:
-    - "nats"
 
 issues:
   max-issues-per-linter: 10
@@ -25,9 +23,6 @@ linters-settings:
       - style
       - experimental
       - opinionated
-  misspell:
-    ignore-words:
-      - "mosquitto"
   stylecheck:
     checks: ["-ST1000", "-ST1003", "-ST1020", "-ST1021", "-ST1022"]
   goheader:
@@ -79,3 +74,7 @@ linters:
     - nakedret
     - dupword
     - revive
+    - nilerr
+    - unconvert
+    - unparam
+    - usestdlibvars

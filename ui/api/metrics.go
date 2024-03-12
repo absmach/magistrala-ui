@@ -343,7 +343,7 @@ func (mm *metricsMiddleware) DisableThing(token, id string) error {
 func (mm *metricsMiddleware) ShareThing(token, thingID string, req sdk.UsersRelationRequest) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "share_thing").Add(1)
-		mm.latency.With("method", "share_thing").Observe(float64(time.Since(begin).Seconds()))
+		mm.latency.With("method", "share_thing").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
 	return mm.svc.ShareThing(token, thingID, req)
@@ -353,7 +353,7 @@ func (mm *metricsMiddleware) ShareThing(token, thingID string, req sdk.UsersRela
 func (mm *metricsMiddleware) UnshareThing(token, thingID string, req sdk.UsersRelationRequest) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "unshare_thing").Add(1)
-		mm.latency.With("method", "unshare_thing").Observe(float64(time.Since(begin).Seconds()))
+		mm.latency.With("method", "unshare_thing").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
 	return mm.svc.UnshareThing(token, thingID, req)
@@ -503,7 +503,7 @@ func (mm *metricsMiddleware) DisconnectThing(thingID, channelID, token string) e
 func (mm *metricsMiddleware) AddUserToChannel(token, channelID string, req sdk.UsersRelationRequest) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "add_user_to_channel").Add(1)
-		mm.latency.With("method", "add_user_to_channel").Observe(float64(time.Since(begin).Seconds()))
+		mm.latency.With("method", "add_user_to_channel").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
 	return mm.svc.AddUserToChannel(token, channelID, req)
@@ -513,7 +513,7 @@ func (mm *metricsMiddleware) AddUserToChannel(token, channelID string, req sdk.U
 func (mm *metricsMiddleware) RemoveUserFromChannel(token, channelID string, req sdk.UsersRelationRequest) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "remove_user_from_channel").Add(1)
-		mm.latency.With("method", "remove_user_from_channel").Observe(float64(time.Since(begin).Seconds()))
+		mm.latency.With("method", "remove_user_from_channel").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
 	return mm.svc.RemoveUserFromChannel(token, channelID, req)
@@ -533,7 +533,7 @@ func (mm *metricsMiddleware) ListChannelUsers(s ui.Session, id, relation string,
 func (mm *metricsMiddleware) AddUserGroupToChannel(token, channelID string, req sdk.UserGroupsRequest) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "add_usergroup_to_channel").Add(1)
-		mm.latency.With("method", "add_usergroup_to_channel").Observe(float64(time.Since(begin).Seconds()))
+		mm.latency.With("method", "add_usergroup_to_channel").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
 	return mm.svc.AddUserGroupToChannel(token, channelID, req)
@@ -543,7 +543,7 @@ func (mm *metricsMiddleware) AddUserGroupToChannel(token, channelID string, req 
 func (mm *metricsMiddleware) RemoveUserGroupFromChannel(token, channelID string, req sdk.UserGroupsRequest) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "remove_usergroup_from_channel").Add(1)
-		mm.latency.With("method", "remove_usergroup_from_channel").Observe(float64(time.Since(begin).Seconds()))
+		mm.latency.With("method", "remove_usergroup_from_channel").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
 	return mm.svc.RemoveUserGroupFromChannel(token, channelID, req)
@@ -883,7 +883,7 @@ func (mm *metricsMiddleware) DisableDomain(token, id string) error {
 func (mm *metricsMiddleware) AssignMember(token, domainID string, req sdk.UsersRelationRequest) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "assign_member").Add(1)
-		mm.latency.With("method", "assign_member").Observe(float64(time.Since(begin).Seconds()))
+		mm.latency.With("method", "assign_member").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
 	return mm.svc.AssignMember(token, domainID, req)
@@ -893,7 +893,7 @@ func (mm *metricsMiddleware) AssignMember(token, domainID string, req sdk.UsersR
 func (mm *metricsMiddleware) UnassignMember(token, domainID string, req sdk.UsersRelationRequest) error {
 	defer func(begin time.Time) {
 		mm.counter.With("method", "unassign_member").Add(1)
-		mm.latency.With("method", "unassign_member").Observe(float64(time.Since(begin).Seconds()))
+		mm.latency.With("method", "unassign_member").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
 	return mm.svc.UnassignMember(token, domainID, req)
