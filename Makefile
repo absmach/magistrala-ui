@@ -53,14 +53,14 @@ cleandocker:
 	docker compose -f docker/docker-compose.yml --env-file docker/.env down -v
 
 install:
-	cp ${BUILD_DIR}/* $(GOBIN)
+	cp ${BUILD_DIR}/$(SVC) $(GOBIN)/magistrala-${SVC}
 
 test:
-	go test -v -race -count 1 -tags test $(shell go list ./... | grep -v 'vendor\|cmd')
+	go test -v -race -count 1 -tags test $(shell go list ./... | grep -v 'cmd')
 
 lint:
-	golangci-lint run --no-config --disable-all --enable gosimple --enable errcheck --enable govet --enable unused --enable goconst --enable godot --timeout 3m
-	prettier --check --write ui
+	golangci-lint run --config .golangci.yml
+	npx prettier --config .prettierrc --plugin prettier-plugin-go-template --check .
 
 $(SVC):
 	$(call compile_service)
