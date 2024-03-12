@@ -119,7 +119,6 @@ class TimeSeriesBarChart extends Echart {
       },
       xAxis: {
         type: 'category',
-        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
         name: '${this.chartData.xAxisLabel}',
         nameLocation: 'middle',
         nameGap: 35
@@ -134,47 +133,100 @@ class TimeSeriesBarChart extends Echart {
         show: true,
         left: 'right',
       },
-        series: [
-          {
-            data: [120, 200, 150, 80, 70, 110, 130],
-            type: 'bar',
-            name: '${this.chartData.seriesName}'
-          }
-        ]
+      series: [
+        {
+          data:  [],
+          type: 'bar',
+          name: '${this.chartData.seriesName}'
+        }
+      ]
     };
 
     barChart.setOption(option);
+    
+    var chartData = {
+      channel: '${this.chartData.channel}',
+      publisher: '${this.chartData.thing}',
+      name: '${this.chartData.valueName}',
+      from: '${this.chartData.startTime / 1000}',
+      to: '${this.chartData.stopTime / 1000}',
+      aggregation: '${this.chartData.aggregationType}',
+      limit: 100,
+      interval : '${this.chartData.updateInterval}'
+    }
 
-    async fetchDataAndUpdate() {
-      try {
-        const apiEndpoint = '/data?channel=${this.chartData.channel}';
-        const response = await fetch(apiEndpoint);
+    const xAxisArray = [];
+    const yAxisArray = [];
+
+    async function fetchDataAndUpdate() {
+        try {
+          const apiEndpoint = "/data?channel=" + chartData.channel +
+          "&publisher=" + chartData.publisher +
+          "&name=" + chartData.name +
+          "&from=" + chartData.from +
+          "&to=" + chartData.to +
+          "&aggregation=" + chartData.aggregation +
+          "&limit=" + chartData.limit +
+          "&interval=" + chartData.interval;
+          console.log('Fetching data from:', apiEndpoint);
+
+          const response = await fetch(apiEndpoint);
   
-        if (!response.ok) {
-          throw new Error('API request failed with status ${response.status}');
+          if (!response.ok) {
+            throw new Error("HTTP request failed with status: " + response.status);
+          }
+  
+          const data = await response.json();
+          console.log("Data fetched:", data);
+          let previousTimestamp = chartData.from;
+          let endTimestamp = chartData.to;
+          let stepSize = 2000;
+          let currentTimestamp;
+
+          while (currentTimestamp <= endTimestamp) {
+            let messageIndex = data.messages.length - 1;
+            let isempty= true;
+            while (messageIndex >= 0 && (data.messages[messageIndex].time) >= previousTimestamp) {
+              const item = data.messages[messageIndex];
+              if ((item.time) <= currentTimestamp) {
+                const date = new Date(item.time);
+                xAxisArray.push(date.toLocaleTimeString());
+                yAxisArray.push(item.value);
+                isempty=false;
+              }
+              messageIndex--;
+            }
+            if (isempty) {
+              const date = new Date(currentTimestamp);
+              xAxisArray.push(date.toLocaleTimeString());
+              yAxisArray.push("-");
+            }
+            previousTimestamp = currentTimestamp;
+            currentTimestamp += stepSize * 1e3;
+          }
+
+          updateChart();
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          // Handle the error (e.g., display an error message)
+        } finally {
+          // Schedule the next update
+          setTimeout(fetchDataAndUpdate, 5000);
         }
-  
-        const data = await response.json();
-        updateChart(data);
-  
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        // Handle the error (e.g., display an error message)
-      } finally {
-        // Schedule the next update
-        setTimeout(() => this.fetchDataAndUpdate(), 5000); // Example: 5 seconds 
       }
-    }
   
-    updateChart(data) {
-      const barChart = echarts.init(document.getElementById(this.ID));
-      const option = barChart.getOption(); // Get the existing options
-      
-      option.series[0].data = data.seriesData; 
+      function updateChart() {
+        const option = barChart.getOption();
+
+        console.log('x axis array:', xAxisArray);
+        console.log('y axis array:', yAxisArray);
+        option.series[0].data = yAxisArray;
+        option.xAxis[0].data = xAxisArray;
   
-      barChart.setOption(option); // Update the chart
-    }
-  }
+        barChart.setOption(option);
+     }
+
+    fetchDataAndUpdate();
     `;
   }
 }

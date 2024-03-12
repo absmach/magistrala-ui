@@ -226,7 +226,12 @@ SPDX-License-Identifier: Apache-2.0 -->
       let chartData = {};
       let formData = new FormData(form);
       for (var pair of formData.entries()) {
-        chartData[pair[0]] = pair[1];
+        if (pair[0] === "startTime" || pair[0] === "stopTime") {
+          const inputDate = new Date(pair[1]);
+          chartData[pair[0]] = inputDate.getTime();
+        } else {
+          chartData[pair[0]] = pair[1];
+        }
       }
 
       if (chartData.stopTime <= chartData.startTime) {
