@@ -2603,14 +2603,14 @@ func DecryptCookieMiddleware(s *securecookie.SecureCookie, prefix string) func(h
 }
 
 func handleStaticFiles(m *chi.Mux) error {
-	dirs, err := ui.StaticFS.ReadDir(ui.StaticDir)
+	entries, err := ui.StaticFS.ReadDir(ui.StaticDir)
 	if err != nil {
 		return err
 	}
-	for _, d := range dirs {
-		if d.IsDir() {
+	for _, entry := range entries {
+		if entry.IsDir() {
 			fs := http.FileServer(http.FS(ui.StaticFS))
-			m.Handle(fmt.Sprintf("/%s/*", d.Name()), addPrefix(ui.StaticDir, fs))
+			m.Handle(fmt.Sprintf("/%s/*", entry.Name()), addPrefix(ui.StaticDir, fs))
 		}
 	}
 

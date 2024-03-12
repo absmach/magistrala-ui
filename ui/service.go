@@ -117,13 +117,12 @@ type Session struct {
 	sdk.Token   `json:"token"`
 }
 
-//go:embed web/templates
-var templatesFS embed.FS
-
-//go:embed all:web/static
-var StaticFS embed.FS
-
 var (
+	//go:embed all:web/static
+	StaticFS embed.FS
+	//go:embed web/templates
+	templatesFS embed.FS
+
 	ErrToken                = errors.New("failed to create token")
 	ErrTokenRefresh         = errors.New("failed to refresh token")
 	ErrFailedCreate         = errors.New("failed to create entity")
@@ -2689,29 +2688,24 @@ func parseTemplates(mfsdk sdk.SDK, prefix string) (tpl *template.Template, err e
 	})
 
 	var templates []string
-	dir, err := templatesFS.ReadDir(templatesDir)
+	entries, err := templatesFS.ReadDir(templatesDir)
 	if err != nil {
 		return nil, err
 	}
-	for _, file := range dir {
-		if file.IsDir() {
+	for _, entry := range entries {
+		if entry.IsDir() {
 			continue
 		}
-		templates = append(templates, templatesDir+"/"+file.Name())
+		templates = append(templates, templatesDir+"/"+entry.Name())
 	}
 
-	dir, err = templatesFS.ReadDir(chartTemplatesDir)
+	entries, err = templatesFS.ReadDir(chartTemplatesDir)
 	if err != nil {
 		return nil, err
 	}
-	for _, file := range dir {
-		templates = append(templates, chartTemplatesDir+"/"+file.Name())
+	for _, entry := range entries {
+		templates = append(templates, chartTemplatesDir+"/"+entry.Name())
 	}
 
-	tpl, err = tpl.ParseFS(templatesFS, templates...)
-	if err != nil {
-		return nil, err
-	}
-
-	return tpl, nil
+	return tpl.ParseFS(templatesFS, templates...)
 }
