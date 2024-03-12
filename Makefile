@@ -56,7 +56,7 @@ install:
 	cp ${BUILD_DIR}/$(SVC) $(GOBIN)/magistrala-${SVC}
 
 test:
-	go test -v -race -count 1 -tags test $(shell go list ./... | grep -v 'cmd')
+	go test -v -race -count 1 -tags test -coverprofile=coverage.out $(shell go list ./... | grep -v 'cmd')
 
 lint:
 	golangci-lint run --config .golangci.yml
