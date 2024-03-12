@@ -394,7 +394,7 @@ type Service interface {
 	UpdateBootstrapState(token string, config sdk.BootstrapConfig) error
 	// ViewBootstrap retrieves a bootstrap config by thing id.
 	ViewBootstrap(s Session, id string) ([]byte, error)
-	// GetRemoteTerminal returns remote terminal for a bootstrap config with mainflux agent installed.
+	// GetRemoteTerminal returns remote terminal for a bootstrap config with magistrala agent installed.
 	GetRemoteTerminal(s Session, thingID string) ([]byte, error)
 	// ProcessTerminalCommand sends mqtt command to agent and retrieves a response asynchronously.
 	ProcessTerminalCommand(ctx context.Context, thingID, token, command string, res chan string) error
@@ -2674,7 +2674,7 @@ func (us *uiService) DeleteDashboard(token, dashboardID string) error {
 }
 
 func parseTemplates(mfsdk sdk.SDK, templates []string, prefix string) (tpl *template.Template, err error) {
-	tpl = template.New("mainflux")
+	tpl = template.New("magistrala")
 	tpl = tpl.Funcs(template.FuncMap{
 		"toJSON": func(data map[string]interface{}) string {
 			if data == nil {

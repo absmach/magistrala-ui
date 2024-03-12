@@ -76,13 +76,13 @@ Similar to users, you can create single or multiple groups by uploading a CSV fi
 
 When using a CSV file to create multiple groups, the file should contain group names in one column and corresponding Parent IDs in subsequent columns.
 
-For more details, refer to the official [Documentation](http://docs.mainflux.io/cli/#things-management).
+For more details, refer to the official [Documentation](https://docs.magistrala.abstractmachines.fr/cli/#things-management).
 
 ### Things
 
 You can create individual things or upload a CSV file for multiple things. When adding a thing, provide the Thing Name (required), Thing ID, Identity, Secret, Tags (as a string slice), and Metadata (in JSON format). The Thing Secret should be unique and is used to identify the thing. Metadata offers additional information about the thing.
 
-For multiple things, use a CSV file with thing names in one column. Refer to the official [Documentation](http://docs.mainflux.io/cli/#things-management) for CSV file details.
+For multiple things, use a CSV file with thing names in one column. Refer to the official [Documentation](https://docs.magistrala.abstractmachines.fr/cli/#things-management) for CSV file details.
 
 ### Channels
 
@@ -90,7 +90,7 @@ Similarly, you can add individual or multiple channels using a CSV file. For cha
 
 ### Bootstrap
 
-To use bootstrap, ensure that the [bootstrap](http://docs.mainflux.io/bootstrap/) addon is active as part of the Magistrala core services.
+To use bootstrap, ensure that the [bootstrap](https://docs.magistrala.abstractmachines.fr/bootstrap/) addon is active as part of the Magistrala core services.
 
 To configure bootstrap, provide the Name, Thing ID, External ID, External Key, Channel (as a string slice), Content (in JSON format), Client Cert, Client Key, and CA Cert.
 
