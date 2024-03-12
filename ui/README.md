@@ -34,8 +34,8 @@ The service is configured using the environment variables presented in the follo
 | MG_GOOGLE_CLIENT_SECRET | Google client secret                                                    | ""                                       |
 | MG_GOOGLE_REDIRECT_URL  | Google redirect URL                                                     | <http://localhost/oauth/callback/google> |
 | MG_GOOGLE_STATE         | Google state                                                            | ""                                       |
-| MG_UI_HASH_KEY          | Secure cookie encoding key                                              | ""                                       |
-| MG_UI_BLOCK_KEY         | Secure cookie encrypting key                                            | ""                                       |
+| MG_UI_HASH_KEY          | Secure cookie encoding key                                              | 5jx4x2Qg9OUmzpP5dbveWQ                   |
+| MG_UI_BLOCK_KEY         | Secure cookie encrypting key                                            | UtgZjr92jwRY6SPUndHXiyl9QY8qTUyZ         |
 | MG_UI_PATH_PREFIX       | URL path prefix                                                         | ""                                       |
 
 ## Deployment
@@ -70,12 +70,12 @@ MG_BOOTSTRAP_URL="http://localhost:9013" \
 MG_UI_INSTANCE_ID="" \
 MG_UI_HOST_URL="http://localhost:9095" \
 MG_UI_CONTENT_TYPE="application/senml+json" \
-MG_UI_DB_HOST="localhost" \
+MG_UI_DB_HOST=localhost \
 MG_UI_DB_PORT=5432 \
-MG_UI_DB_USER="magistrala-ui" \
-MG_UI_DB_PASSWORD="magistrala-ui" \
-MG_UI_DB_NAME="dashboards" \
-MG_UI_DB_SSL_MODE="disable" \
+MG_UI_DB_USER=magistrala-ui \
+MG_UI_DB_PASSWORD=magistrala-ui \
+MG_UI_DB_NAME=dashboards \
+MG_UI_DB_SSL_MODE=disable \
 MG_UI_DB_SSL_CERT="" \
 MG_UI_DB_SSL_KEY="" \
 MG_UI_DB_SSL_ROOT_CERT="" \
@@ -83,8 +83,8 @@ MG_GOOGLE_CLIENT_ID="" \
 MG_GOOGLE_CLIENT_SECRET="" \
 MG_GOOGLE_REDIRECT_URL="http://localhost/oauth/callback/google" \
 MG_GOOGLE_STATE="" \
-MG_UI_HASH_KEY=""\
-MG_UI_BLOCK_KEY=""\
-MG_UI_PATH_PREFIX=""\
+MG_UI_HASH_KEY="5jx4x2Qg9OUmzpP5dbveWQ" \
+MG_UI_BLOCK_KEY="UtgZjr92jwRY6SPUndHXiyl9QY8qTUyZ" \
+MG_UI_PATH_PREFIX="" \
 $GOBIN/magistrala-ui
 ```
