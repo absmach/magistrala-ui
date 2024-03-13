@@ -1840,7 +1840,7 @@ func decodePublishRequest(_ context.Context, r *http.Request) (interface{}, erro
 		thingKey:  r.PostFormValue("thingKey"),
 		channelID: r.PostFormValue("channelID"),
 		Message: ui.Message{
-			BaseTime: float64(time.Now().Unix()),
+			BaseTime: float64(time.Now().UnixMilli()),
 			BaseUnit: r.PostFormValue("unit"),
 			Name:     r.PostFormValue("name"),
 			Unit:     r.PostFormValue("unit"),

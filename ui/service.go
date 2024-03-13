@@ -2656,11 +2656,11 @@ func parseTemplates(mfsdk sdk.SDK, prefix string) (tpl *template.Template, err e
 			}
 			return result
 		},
-		"unixTimeToHumanTime": func(t float64) string {
+		"unixTimeToHumanTime": func(t float64, precision int) string {
 			if t == 0 {
 				return ""
 			}
-			return time.Unix(int64(t), 0).String()
+			return time.Unix(adjustPrecision(int64(t), precision), 0).String()
 		},
 		"hasPermission": func(permissions []string, permission string) bool {
 			return slices.Contains(permissions, permission)
@@ -2703,4 +2703,22 @@ func parseTemplates(mfsdk sdk.SDK, prefix string) (tpl *template.Template, err e
 	}
 
 	return tpl.ParseFS(templatesFS, templates...)
+}
+
+// Function to adjust the precision of a timestamp
+func adjustPrecision(timestamp int64, desiredPrecision int) int64 {
+	currentPrecision := len(fmt.Sprintf("%d", timestamp))
+	precisionDifference := desiredPrecision - currentPrecision
+	var adjustedTimestamp int64
+	switch {
+	case precisionDifference < 0:
+		adjustedTimestamp = timestamp / int64(math.Pow10(-precisionDifference))
+	case precisionDifference > 0:
+		adjustedTimestamp = timestamp * int64(math.Pow10(precisionDifference))
+	default:
+		adjustedTimestamp = timestamp
+
+	}
+
+	return adjustedTimestamp
 }
