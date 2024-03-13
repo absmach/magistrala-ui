@@ -799,18 +799,19 @@ class TimeSeriesLineChart extends Echart {
         left: 'center',
         show: true
       },
+      tooltip: {
+        trigger: 'axis',
+      },
       xAxis: {
         type: 'category',
-        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
         name: '${this.chartData.xAxisLabel}',
-        nameLocation: 'middle',
-        nameGap: 35
+        min: '${new Date(this.chartData.startTime)}',
+        max: '${new Date(this.chartData.stopTime)}',
       },
       yAxis: {
         type: 'value',
         name: '${this.chartData.yAxisLabel}',
         nameLocation: 'middle',
-        nameGap: 35
       },
       legend: {
         show: true,
@@ -818,10 +819,10 @@ class TimeSeriesLineChart extends Echart {
       },
       series: [
         {
-          data: [150, 230, 224, 218, 135, 147, 260],
+          data: [],
           type: 'line',
           lineStyle: {
-            width: '${this.chartData.lineWidth}',
+            width: ${this.chartData.lineWidth},
             type: 'solid',
             color: '${this.chartData.lineColor}'
           },
@@ -830,7 +831,83 @@ class TimeSeriesLineChart extends Echart {
       ]
     };
 
-    lineChart.setOption(option);`;
+    lineChart.setOption(option);
+    var chartdata = {
+      channel:'${this.chartData.channel}',
+      publisher:'${this.chartData.thing}',
+      name:'${this.chartData.valueName}',
+      from:${this.chartData.startTime},
+      to:${this.chartData.stopTime},
+      aggregation:'${this.chartData.aggregationType}',
+      limit:100,
+      interval:'${this.chartData.updateInterval}',
+    };
+    getData(lineChart,chartdata);
+  
+    async function getData(linechart,chartData) {
+      try {
+        const response = await fetch(
+          "${pathPrefix}/data?channel=" + chartData.channel +
+            "&publisher=" + chartData.publisher +
+            "&name=" + chartData.name +
+            "&from=" + chartData.from +
+            "&to=" + chartData.to +
+            "&aggregation=" + chartData.aggregation +
+            "&limit=" + chartData.limit +
+            "&interval=" + chartData.interval,
+        );
+        if (response.ok) {
+          const data = await response.json();
+          const xAxisArray = [];
+          const yAxisArray = [];
+          let currentTimestamp = chartData.from;
+          let previousTimestamp;
+          const endTimestamp = chartData.to;
+          const intervalNum = 3600;
+          while (currentTimestamp <= endTimestamp) {
+            let messageIndex = data.messages.length - 1;
+            let isempty= true;
+            while (messageIndex >= 0 && (data.messages[messageIndex].time) >= previousTimestamp) {
+              const item = data.messages[messageIndex];
+              if ((item.time) <= currentTimestamp) {
+                const date = new Date(item.time);
+                xAxisArray.push(date.toLocaleTimeString());
+                yAxisArray.push(item.value);
+                isempty=false;
+              }
+              messageIndex--;
+            }
+            if (isempty) {
+              const date = new Date(currentTimestamp);
+              xAxisArray.push(date.toLocaleTimeString());
+              yAxisArray.push("-");
+            }
+            previousTimestamp = currentTimestamp;
+            currentTimestamp += intervalNum * 1e3;
+          }
+          linechart.setOption({
+            xAxis: {
+              data: xAxisArray,
+            },
+            series: [
+              {
+                data: yAxisArray,
+              },
+            ],
+          });
+        } else {
+          // Handle errors
+          console.error("HTTP request failed with status:", response.status);
+        }
+      } catch (error) {
+        // Handle fetch or other errors
+        console.error("Error:", error);
+        // Retry after a couple of seconds
+        setTimeout(function () {
+          getData(linechart, chartData);
+        }, 20000);
+      }
+    }`;
   }
 }
 

@@ -123,6 +123,17 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                 </div>
                 <div class="mb-3">
+                  <label for="aggregation-type" class="form-label">Aggregation</label>
+                  <select class="form-select mb-3" name="aggregationType" id="aggregation-type">
+                    <option value="">Select an aggregation type</option>
+                    <option value="MAX">Maximum</option>
+                    <option value="MIN">Minimum</option>
+                    <option value="SUM">Sum</option>
+                    <option value="COUNT">Count</option>
+                    <option value="AVG">Average</option>
+                  </select>
+                </div>
+                <div class="mb-3">
                   <label for="update-interval" class="form-label">Update interval</label>
                   <input
                     type="text"
@@ -131,20 +142,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                     name="updateInterval"
                     id="update-interval"
                     placeholder="Enter the update interval, eg. 5s, 10m, 1h, 1d"
-                    required
                   />
-                  <div class="invalid-feedback">Please enter a valid interval</div>
-                </div>
-                <div class="mb-3">
-                  <label for="aggregation-type" class="form-label">Aggregation</label>
-                  <select class="form-select mb-3" name="aggregationType" id="aggregation-type">
-                    <option value="" disabled>Select an aggregation type</option>
-                    <option value="MAX">Maximum</option>
-                    <option value="MIN">Minimum</option>
-                    <option value="SUM">Sum</option>
-                    <option value="COUNT">Count</option>
-                    <option value="AVG">Average</option>
-                  </select>
+                  <div class="invalid-feedback invalid-interval">Please enter a valid interval</div>
                 </div>
               </div>
               <!-- Appearance Tab -->
@@ -241,20 +240,42 @@ SPDX-License-Identifier: Apache-2.0 -->
       }
 
       // Create an object to store the form data
-      let chartData = {};
+      const chartData = {};
       let formData = new FormData(form);
       for (var pair of formData.entries()) {
-        chartData[pair[0]] = pair[1];
+        if (pair[0] === "startTime" || pair[0] === "stopTime") {
+          const inputDate = new Date(pair[1]);
+          chartData[pair[0]] = inputDate.getTime();
+        } else {
+          chartData[pair[0]] = pair[1];
+        }
       }
 
+      if (chartData.aggregationType != "") {
+        const updateInterval = form.querySelector("#update-interval");
+        if (chartData.updateInterval === "") {
+          form.querySelector(".invalid-interval").innerHTML = "Please enter an Interval";
+          updateInterval.classList.remove("was-validated");
+          updateInterval.classList.add("is-invalid");
+          return;
+        } else {
+          form.querySelector(".invalid-interval").innerHTML = "";
+          updateInterval.classList.remove("is-invalid");
+          updateInterval.classList.add("was-validated");
+        }
+      }
+      const invalidTimeFeedback = form.querySelector(".invalid-time");
+      const invalidTimeInput = form.querySelector("#stop-time");
       if (chartData.stopTime <= chartData.startTime) {
-        const invalidTimeFeedback = form.querySelector(".invalid-time");
         invalidTimeFeedback.innerHTML = "Stop time should be greater than start time";
         invalidTimeFeedback.style.color = "red";
-        const invalidTimeInput = form.querySelector("#stop-time");
         invalidTimeInput.classList.remove("was-validated");
         invalidTimeInput.classList.add("is-invalid");
         return;
+      } else {
+        invalidTimeFeedback.innerHTML = "";
+        invalidTimeInput.classList.remove("is-invalid");
+        invalidTimeInput.classList.add("was-validated");
       }
 
       var widgetID = "lineChart-" + Date.now();
