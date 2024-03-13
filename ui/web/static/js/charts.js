@@ -119,6 +119,7 @@ class TimeSeriesBarChart extends Echart {
       },
       xAxis: {
         type: 'category',
+        data: [],
         name: '${this.chartData.xAxisLabel}',
         nameLocation: 'middle',
         nameGap: 35
@@ -148,14 +149,15 @@ class TimeSeriesBarChart extends Echart {
       channel: '${this.chartData.channel}',
       publisher: '${this.chartData.thing}',
       name: '${this.chartData.valueName}',
-      from: ${this.chartData.startTime / 1000},
-      to: ${this.chartData.stopTime / 1000},
+      from: ${this.chartData.startTime},
+      to: ${this.chartData.stopTime},
       aggregation: '${this.chartData.aggregationType}',
       limit: 100,
       interval : '${this.chartData.updateInterval}'
     }
+    getData(barChart, chartData);
 
-   async function fetchDataAndUpdate() {
+    async function getData(barChart, chartData) {
         try {
           const apiEndpoint = "/data?channel=" + chartData.channel +
           "&publisher=" + chartData.publisher +
@@ -167,33 +169,34 @@ class TimeSeriesBarChart extends Echart {
           "&interval=" + chartData.interval;
 
           const response = await fetch(apiEndpoint);
-  
           if (!response.ok) {
             throw new Error("HTTP request failed with status: " + response.status);
           }
-  
           const data = await response.json();
+          console.log(data);
           const xAxisArray = [];
           const yAxisArray = [];
-
-          data.messages.forEach((message) => {
-            xAxisArray.push(new Date(message.time).toLocaleTimeString());
-            yAxisArray.push(message.value);
-          });
-          updateChart(xAxisArray, yAxisArray);
+          if (data.message != undefined && data.messages.length > 0) {
+            data.messages.forEach((message) => {
+              xAxisArray.push(new Date(message.time).toLocaleTimeString());
+              yAxisArray.push(message.value);
+            });
+          }
+          updateChart(barChart,xAxisArray, yAxisArray);
         } catch (error) {
           console.error("Error fetching data:", error);
-        }
+          setTimeout(function () {
+            getData(barChart, chartData);
+          }, 20000);
+        } 
       }
   
-      function updateChart(xAxisArray, yAxisArray) {
+      function updateChart(barChart, xAxisArray, yAxisArray) {
         const option = barChart.getOption();
-        option.series[0].data = yAxisArray;
-        option.xAxis[0].data = xAxisArray;
+        option.series[0].data = yAxisArray.reverse();
+        option.xAxis[0].data = xAxisArray.reverse();
         barChart.setOption(option);
      }
-
-    fetchDataAndUpdate();
     `;
   }
 }

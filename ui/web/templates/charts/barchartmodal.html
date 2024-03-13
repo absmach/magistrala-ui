@@ -228,7 +228,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       for (var pair of formData.entries()) {
         if (pair[0] === "startTime" || pair[0] === "stopTime") {
           const inputDate = new Date(pair[1]);
-          chartData[pair[0]] = inputDate.getTime();
+          chartData[pair[0]] = inputDate.getTime() * 1e6;
         } else {
           chartData[pair[0]] = pair[1];
         }
