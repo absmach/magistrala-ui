@@ -899,11 +899,6 @@ class TimeSeriesLineChart extends Echart {
           // Handle errors
           console.error("HTTP request failed with status:", response.status);
         }
-    
-        // Poll again after a couple of seconds
-        setTimeout(function () {
-          getData(linechart, chartData);
-        }, 20000);
       } catch (error) {
         // Handle fetch or other errors
         console.error("Error:", error);
