@@ -604,9 +604,10 @@ class EntityCount extends Chart {
     super(widgetID, chartData);
     this.Style = {
       width: "400px",
-      height: "175px",
+      height: "200px",
     };
     this.Content = this.#generateContent();
+    this.Script = this.#generateScript();
   }
 
   #generateContent() {
@@ -617,16 +618,46 @@ class EntityCount extends Chart {
             <h5 class="card-title">Entity Count</h5>
           </div>
           <div class="card-body text-center">
-            <p class="card-text value"> 35</p>
+            <p class="card-text count"> 35</p>
           </div>
           <div class="card-footer text-right">
-            <p class="card-text">
-              Domain Name: D1
-            </p>
+            <p class="card-text"> Domain : ${this.chartData.domain}</p>
+            <p class="card-text"> Channel : ${this.chartData.channel}</p>
           </div>
         </div>
     </div>
-        `;
+    `;
+  }
+
+  #generateScript() {
+    return`
+    (function() {
+      var entityCount = document.getElementById("${this.ID}");
+
+      async function getData() {
+        try{
+          const response = await fetch(
+            "/channels/${this.chartData.channel}/things"+
+            "?domain=${this.chartData.domain}"
+          );
+          console.log("Response: ", response);
+          if (response.ok) {
+            const data = await response.json();
+            console.log("Things: ", data);
+            entityCount.querySelector(".count").textContent = data.total;
+            
+          } else {
+            console.error("HTTP request failed with status: ", response.status);
+          }
+        } catch (error) {
+          console.error("Failed to fetch card data: ", error);
+        }
+      }
+
+      getData();
+      setInterval(getData, 20000);
+    })();
+    `;
   }
 }
 
@@ -1824,6 +1855,8 @@ class ValueCard extends Chart {
         try {
           const response = await fetch(
             "/data?channel=${this.chartData.channel}"+
+            "&publisher=${this.chartData.thing}" +
+            "&name=${this.chartData.valueName}" +
             "&limit=1",
           );
           if (response.ok) {
@@ -1839,7 +1872,7 @@ class ValueCard extends Chart {
       }
 
       getData();
-      setInterval(getData, 2000000);
+      setInterval(getData, 20000);
     })();
     `;
   }
