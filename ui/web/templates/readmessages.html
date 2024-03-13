@@ -75,7 +75,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                           {{ end }}
                         </td>
                         <td>{{ if $c.Sum }}{{ $c.Sum }}{{ end }}</td>
-                        <td>{{ unixTimeToHumanTime $c.Time 10 }}</td>
+                        <td>{{ unixTimeToHumanTime $c.Time }}</td>
                       </tr>
                     {{ end }}
                   </tbody>
