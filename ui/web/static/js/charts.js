@@ -1738,7 +1738,19 @@ class StepChart extends Echart {
 class TempGaugeChart extends Echart {
   constructor(chartData, widgetID) {
     super(widgetID, chartData);
+    this.Style = {
+      width: "480px",
+      height: "420px",
+    };
+    this.Content = this.#generateContent();
     this.Script = this.#generateScript();
+  }
+
+  #generateContent() {
+    return `
+      <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
+      </div>
+    `;
   }
 
   #generateScript() {
@@ -1761,7 +1773,6 @@ class TempGaugeChart extends Echart {
             endAngle: -20,
             min: ${this.chartData.minValue},
             max: ${this.chartData.maxValue},
-            splitNumber: 12,
             itemStyle: {
               color: '#FFAB91'
             },
@@ -1815,7 +1826,12 @@ class TempGaugeChart extends Echart {
               formatter: '{value} °C',
               color: 'inherit'
             },
-            data: []
+            data: [
+              {
+                value: "${this.chartData.minValue}",
+                name: "${this.chartData.gaugeLabel}"
+              }
+            ]
           },
           {
             type: 'gauge',
@@ -1849,7 +1865,12 @@ class TempGaugeChart extends Echart {
             detail: {
               show: false
             },
-            data: []
+            data: [
+              {
+                value: "${this.chartData.minValue}",
+                name: "${this.chartData.gaugeLabel}",
+              }
+            ]
           }
         ]
       };
