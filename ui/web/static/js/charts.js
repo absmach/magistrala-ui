@@ -148,17 +148,14 @@ class TimeSeriesBarChart extends Echart {
       channel: '${this.chartData.channel}',
       publisher: '${this.chartData.thing}',
       name: '${this.chartData.valueName}',
-      from: '${this.chartData.startTime / 1000}',
-      to: '${this.chartData.stopTime / 1000}',
+      from: ${this.chartData.startTime / 1000},
+      to: ${this.chartData.stopTime / 1000},
       aggregation: '${this.chartData.aggregationType}',
       limit: 100,
       interval : '${this.chartData.updateInterval}'
     }
 
-    const xAxisArray = [];
-    const yAxisArray = [];
-
-    async function fetchDataAndUpdate() {
+   async function fetchDataAndUpdate() {
         try {
           const apiEndpoint = "/data?channel=" + chartData.channel +
           "&publisher=" + chartData.publisher +
@@ -168,7 +165,6 @@ class TimeSeriesBarChart extends Echart {
           "&aggregation=" + chartData.aggregation +
           "&limit=" + chartData.limit +
           "&interval=" + chartData.interval;
-          console.log('Fetching data from:', apiEndpoint);
 
           const response = await fetch(apiEndpoint);
   
@@ -177,52 +173,23 @@ class TimeSeriesBarChart extends Echart {
           }
   
           const data = await response.json();
-          console.log("Data fetched:", data);
-          let previousTimestamp = chartData.from;
-          let endTimestamp = chartData.to;
-          let stepSize = 2000;
-          let currentTimestamp;
+          const xAxisArray = [];
+          const yAxisArray = [];
 
-          while (currentTimestamp <= endTimestamp) {
-            let messageIndex = data.messages.length - 1;
-            let isempty= true;
-            while (messageIndex >= 0 && (data.messages[messageIndex].time) >= previousTimestamp) {
-              const item = data.messages[messageIndex];
-              if ((item.time) <= currentTimestamp) {
-                const date = new Date(item.time);
-                xAxisArray.push(date.toLocaleTimeString());
-                yAxisArray.push(item.value);
-                isempty=false;
-              }
-              messageIndex--;
-            }
-            if (isempty) {
-              const date = new Date(currentTimestamp);
-              xAxisArray.push(date.toLocaleTimeString());
-              yAxisArray.push("-");
-            }
-            previousTimestamp = currentTimestamp;
-            currentTimestamp += stepSize * 1e3;
-          }
-
-          updateChart();
+          data.messages.forEach((message) => {
+            xAxisArray.push(new Date(message.time).toLocaleTimeString());
+            yAxisArray.push(message.value);
+          });
+          updateChart(xAxisArray, yAxisArray);
         } catch (error) {
           console.error("Error fetching data:", error);
-          // Handle the error (e.g., display an error message)
-        } finally {
-          // Schedule the next update
-          setTimeout(fetchDataAndUpdate, 5000);
         }
       }
   
-      function updateChart() {
+      function updateChart(xAxisArray, yAxisArray) {
         const option = barChart.getOption();
-
-        console.log('x axis array:', xAxisArray);
-        console.log('y axis array:', yAxisArray);
         option.series[0].data = yAxisArray;
         option.xAxis[0].data = xAxisArray;
-  
         barChart.setOption(option);
      }
 
