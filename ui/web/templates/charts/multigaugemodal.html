@@ -94,12 +94,14 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <label for="value-name" class="form-label">Value names</label>
                   <input
                     type="text"
+                    pattern="^[a-zA-Z0-9]+,[a-zA-Z0-9]+,[a-zA-Z0-9]+$"
                     class="form-control mb-3"
                     name="valueName"
                     id="value-name"
-                    placeholder="Enter the value names eg. temperature, voltage"
+                    placeholder="Enter three value names eg. temperature,voltage"
                     required
                   />
+                  <div class="invalid-feedback">Please enter three value names without spaces between them</div>
                 </div>
               </div>
               <!-- Appearance Tab -->

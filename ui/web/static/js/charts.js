@@ -1193,47 +1193,54 @@ class MultiGaugeChart extends Echart {
           const data2 = await response2.json(); 
           const data3 = await response3.json();
 
-          multiGaugeChart.setOption({
-            series: [
-              {
-                data: [
-                  {
-                    value: data1.messages[0].value,
-                    name: '${gaugeLabel[0]}',
-                    title: {
-                      offsetCenter: ['0%', '-30%']
+          if (data1.messages && data1.messages.length > 0 &&
+            data2.messages && data2.messages.length > 0 &&
+            data3.messages && data3.messages.length > 0) {
+
+            multiGaugeChart.setOption({
+              series: [
+                {
+                  data: [
+                    {
+                      value: data1.messages[0].value,
+                      name: '${gaugeLabel[0]}',
+                      title: {
+                        offsetCenter: ['0%', '-30%']
+                      },
+                      detail: {
+                        valueAnimation: true,
+                        offsetCenter: ['0%', '-18%']
+                      }
                     },
-                    detail: {
-                      valueAnimation: true,
-                      offsetCenter: ['0%', '-18%']
-                    }
-                  },
-                  {
-                    value: data2.messages[0].value,
-                    name: '${gaugeLabel[1]}',
-                    title: {
-                      offsetCenter: ['0%', '0%']
+                    {
+                      value: data2.messages[0].value,
+                      name: '${gaugeLabel[1]}',
+                      title: {
+                        offsetCenter: ['0%', '0%']
+                      },
+                      detail: {
+                        valueAnimation: true,
+                        offsetCenter: ['0%', '12%']
+                      }
                     },
-                    detail: {
-                      valueAnimation: true,
-                      offsetCenter: ['0%', '12%']
+                    {
+                      value: data3.messages[0].value,
+                      name: '${gaugeLabel[2]}',
+                      title: {
+                        offsetCenter: ['0%', '28%']
+                      },
+                      detail: {
+                        valueAnimation: true,
+                        offsetCenter: ['0%', '40%']
+                      }
                     }
-                  },
-                  {
-                    value: data3.messages[0].value,
-                    name: '${gaugeLabel[2]}',
-                    title: {
-                      offsetCenter: ['0%', '28%']
-                    },
-                    detail: {
-                      valueAnimation: true,
-                      offsetCenter: ['0%', '40%']
-                    }
-                  }
-                ],
-              },
-            ],
-          });
+                  ],
+                },
+              ],
+            });
+          } else {
+            console.error("Response is an empty array");
+          }
         } else {
           console.error("HTTP request failed with status: ", response.status);
         }
