@@ -847,7 +847,7 @@ class TimeSeriesLineChart extends Echart {
     async function getData(linechart,chartData) {
       try {
         const response = await fetch(
-          "/data?channel=" + chartData.channel +
+          "${pathPrefix}/data?channel=" + chartData.channel +
             "&publisher=" + chartData.publisher +
             "&name=" + chartData.name +
             "&from=" + chartData.from +
