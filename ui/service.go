@@ -228,7 +228,7 @@ type Service interface {
 	// UpdateThingTags updates the tags of the thing with the given ID.
 	UpdateThingTags(token string, thing sdk.Thing) error
 	// UpdateThingSecret updates the secret of the thing with the given ID.
-	UpdateThingSecret(token, id, secret string) error
+	UpdateThingSecret(token string, thing sdk.Thing) error
 	// EnableThing updates the status of the thing with the given ID to enabled.
 	EnableThing(token, id string) error
 	// DisableThing updates the status of the thing with the given ID to disabled.
@@ -364,17 +364,17 @@ type Service interface {
 	DeleteInvitation(token, userID, domainID string) error
 
 	// Create a dashboard for a user.
-	CreateDashboard(token string, dashboardReq DashboardReq) ([]byte, error)
+	CreateDashboard(ctx context.Context, token string, dashboardReq DashboardReq) ([]byte, error)
 	// View a dashboard for a user.
-	ViewDashboard(s Session, dashboardID string) ([]byte, error)
+	ViewDashboard(ctx context.Context, s Session, dashboardID string) ([]byte, error)
 	// List Dashboards retrieves all dashboards for a user.
-	ListDashboards(token string, page, limit uint64) ([]byte, error)
+	ListDashboards(ctx context.Context, token string, page, limit uint64) ([]byte, error)
 	// Dashboards displays the dashboards page.
 	Dashboards(Session) ([]byte, error)
 	// Update a dashboard for a user.
-	UpdateDashboard(token, dashboardID string, dashboardReq DashboardReq) error
+	UpdateDashboard(ctx context.Context, token, dashboardID string, dashboardReq DashboardReq) error
 	// Delete a dashboard for a user.
-	DeleteDashboard(token, dashboardID string) error
+	DeleteDashboard(ctx context.Context, token, dashboardID string) error
 }
 
 var _ Service = (*uiService)(nil)
@@ -410,10 +410,8 @@ func (us *uiService) Index(s Session) ([]byte, error) {
 		Status: statusAll,
 	}
 
-	enabledPgm := sdk.PageMetadata{
-		Offset: uint64(0),
-		Status: enabled,
-	}
+	enabledPgm := pgm
+	enabledPgm.Status = enabled
 
 	users, err := us.sdk.Users(pgm, s.Token)
 	if err != nil {
@@ -606,7 +604,12 @@ func (us *uiService) RefreshToken(refreshToken string) (sdk.Token, error) {
 }
 
 func (us *uiService) DomainLogin(login sdk.Login, refreshToken string) (t sdk.Token, err error) {
-	return us.sdk.RefreshToken(login, refreshToken)
+	token, err := us.sdk.RefreshToken(login, refreshToken)
+	if err != nil {
+		return sdk.Token{}, errors.Wrap(err, ErrTokenRefresh)
+	}
+
+	return token, nil
 }
 
 func (us *uiService) Session(s Session) (Session, error) {
@@ -914,8 +917,8 @@ func (us *uiService) UpdateThingTags(token string, thing sdk.Thing) error {
 	return nil
 }
 
-func (us *uiService) UpdateThingSecret(token, id, secret string) error {
-	if _, err := us.sdk.UpdateThingSecret(id, secret, token); err != nil {
+func (us *uiService) UpdateThingSecret(token string, thing sdk.Thing) error {
+	if _, err := us.sdk.UpdateThingSecret(thing.ID, thing.Credentials.Secret, token); err != nil {
 		return errors.Wrap(ErrFailedUpdate, err)
 	}
 
@@ -2005,7 +2008,6 @@ func (us *uiService) ProcessTerminalCommand(ctx context.Context, thingID, tkn, c
 	}
 
 	var content bootstrap.ServicesConfig
-
 	if err := json.Unmarshal([]byte(cfg.Content), &content); err != nil {
 		return errors.Wrap(ErrJSONUnmarshal, err)
 	}
@@ -2031,7 +2033,6 @@ func (us *uiService) ProcessTerminalCommand(ctx context.Context, thingID, tkn, c
 
 	opts.SetClientID(fmt.Sprintf("ui-terminal-%s", cfg.ThingID))
 	client := mqtt.NewClient(opts)
-
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
 		return errors.Wrap(ErrFailedConnect, token.Error())
 	}
@@ -2297,10 +2298,14 @@ func (us *uiService) UnassignMember(token, domainID string, req sdk.UsersRelatio
 func (us *uiService) ViewMember(s Session, userIdentity string) ([]byte, error) {
 	pgm := sdk.PageMetadata{
 		Identity: userIdentity,
+		Limit:    1,
 	}
 	usersPage, err := us.sdk.Users(pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
+	}
+	if len(usersPage.Users) == 0 {
+		return []byte{}, errors.Wrap(ErrFailedRetreive, errors.New("user not found"))
 	}
 
 	crumbs := []breadcrumb{
@@ -2468,7 +2473,7 @@ func (us *uiService) DeleteInvitation(token, userID, domainID string) error {
 	return nil
 }
 
-func (us *uiService) CreateDashboard(token string, dashboardReq DashboardReq) ([]byte, error) {
+func (us *uiService) CreateDashboard(ctx context.Context, token string, dashboardReq DashboardReq) ([]byte, error) {
 	user, sdkerr := us.sdk.UserProfile(token)
 	if sdkerr != nil {
 		return []byte{}, errors.Wrap(ErrFailedRetrieveUserID, sdkerr)
@@ -2487,7 +2492,7 @@ func (us *uiService) CreateDashboard(token string, dashboardReq DashboardReq) ([
 		CreatedAt:   time.Now(),
 	}
 
-	ds, err := us.drepo.Create(context.Background(), dashboard)
+	ds, err := us.drepo.Create(ctx, dashboard)
 	if err != nil {
 		return []byte{}, errors.Wrap(ErrFailedDashboardSave, err)
 	}
@@ -2502,16 +2507,15 @@ func (us *uiService) CreateDashboard(token string, dashboardReq DashboardReq) ([
 	return data, nil
 }
 
-func (us *uiService) ViewDashboard(s Session, dashboardID string) ([]byte, error) {
+func (us *uiService) ViewDashboard(ctx context.Context, s Session, dashboardID string) ([]byte, error) {
 	var btpl bytes.Buffer
-	charts := CreateItem()
 
 	user, sdkerr := us.sdk.UserProfile(s.Token)
 	if sdkerr != nil {
 		return btpl.Bytes(), errors.Wrap(ErrFailedRetrieveUserID, sdkerr)
 	}
 
-	dashboard, err := us.drepo.Retrieve(context.Background(), dashboardID, user.ID)
+	dashboard, err := us.drepo.Retrieve(ctx, dashboardID, user.ID)
 	if err != nil {
 		return btpl.Bytes(), errors.Wrap(ErrFailedDashboardRetrieve, err)
 	}
@@ -2524,7 +2528,7 @@ func (us *uiService) ViewDashboard(s Session, dashboardID string) ([]byte, error
 	data := struct {
 		NavbarActive    string
 		CollapseActive  string
-		Charts          []Item
+		Charts          []Chart
 		Dashboard       Dashboard
 		Breadcrumbs     []breadcrumb
 		Session         Session
@@ -2533,7 +2537,7 @@ func (us *uiService) ViewDashboard(s Session, dashboardID string) ([]byte, error
 	}{
 		dashboardsActive,
 		dashboardsActive,
-		charts,
+		CreateCharts(),
 		dashboard,
 		crumbs,
 		s,
@@ -2548,7 +2552,7 @@ func (us *uiService) ViewDashboard(s Session, dashboardID string) ([]byte, error
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, error) {
+func (us *uiService) ListDashboards(ctx context.Context, token string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 
 	user, sdkerr := us.sdk.UserProfile(token)
@@ -2561,7 +2565,7 @@ func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, e
 		Limit:     limit,
 		CreatedBy: user.ID,
 	}
-	dashboardsPage, err := us.drepo.RetrieveAll(context.Background(), pgm)
+	dashboardsPage, err := us.drepo.RetrieveAll(ctx, pgm)
 	if err != nil {
 		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
@@ -2576,7 +2580,7 @@ func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, e
 	items["pages"] = noOfPages
 	data, err := json.Marshal(items)
 	if err != nil {
-		return []byte{}, errors.Wrap(ErrExecTemplate, err)
+		return []byte{}, errors.Wrap(ErrJSONMarshal, err)
 	}
 
 	return data, nil
@@ -2607,26 +2611,26 @@ func (us *uiService) Dashboards(s Session) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) UpdateDashboard(token, dashboardID string, dashboardReq DashboardReq) error {
+func (us *uiService) UpdateDashboard(ctx context.Context, token, dashboardID string, dashboardReq DashboardReq) error {
 	user, sdkerr := us.sdk.UserProfile(token)
 	if sdkerr != nil {
 		return errors.Wrap(ErrFailedRetrieveUserID, sdkerr)
 	}
 
-	if err := us.drepo.Update(context.Background(), dashboardID, user.ID, dashboardReq); err != nil {
+	if err := us.drepo.Update(ctx, dashboardID, user.ID, dashboardReq); err != nil {
 		return errors.Wrap(ErrFailedDashboardUpdate, err)
 	}
 
 	return nil
 }
 
-func (us *uiService) DeleteDashboard(token, dashboardID string) error {
+func (us *uiService) DeleteDashboard(ctx context.Context, token, dashboardID string) error {
 	user, sdkerr := us.sdk.UserProfile(token)
 	if sdkerr != nil {
 		return errors.Wrap(ErrFailedRetrieveUserID, sdkerr)
 	}
 
-	if err := us.drepo.Delete(context.Background(), dashboardID, user.ID); err != nil {
+	if err := us.drepo.Delete(ctx, dashboardID, user.ID); err != nil {
 		return errors.Wrap(ErrFailedDashboardDelete, err)
 	}
 

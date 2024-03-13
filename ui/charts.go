@@ -3,7 +3,7 @@
 
 package ui
 
-type Item struct {
+type Chart struct {
 	ID      int    `json:"id"`
 	Title   string `json:"title"`
 	Content string `json:"content"`
@@ -11,8 +11,8 @@ type Item struct {
 	Widget  string `json:"widget"`
 }
 
-func CreateItem() []Item {
-	items := []Item{
+func CreateCharts() []Chart {
+	items := []Chart{
 		{
 			Title:   "Time Series Line Chart",
 			Content: "This is simple cartesian axis time series line chart",

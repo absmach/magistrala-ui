@@ -33,6 +33,29 @@ jobs:
           go mod tidy
           git diff --exit-code
 
+      - name: Check Mocks are up to Date
+        run: |
+          MOCKERY_VERSION=v2.42.0
+          go install github.com/vektra/mockery/v2@$MOCKERY_VERSION
+
+          mv ./ui/mocks/repository.go ./ui/mocks/repository.go.tmp
+
+          make mocks
+
+          check_mock_changes() {
+            local file_path=$1
+            local tmp_file_path=$1.tmp
+            local entity_name=$2
+
+            if ! cmp -s "$file_path" "$tmp_file_path"; then
+              echo "Error: Generated mocks for $entity_name are out of sync!"
+              echo "Please run 'make mocks' with mockery version $MOCKERY_VERSION and commit the changes."
+              exit 1
+            fi
+          }
+
+          check_mock_changes ./ui/mocks/repository.go "Dashboard Repository ./ui/mocks/repository.go"
+
       - name: Install node dependencies
         run: npm install
 

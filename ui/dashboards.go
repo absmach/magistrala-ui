@@ -40,6 +40,9 @@ type DashboardReq struct {
 	Metadata    string `json:"metadata,omitempty"`
 }
 
+// DashboardRepository provides an interface for interacting with the dashboard storage.
+//
+//go:generate mockery --name DashboardRepository --output=./mocks --filename repository.go --quiet --note "Copyright (c) Abstract Machines"
 type DashboardRepository interface {
 	// Persists dashboard  for a user. A non-nil error is returned to indicate
 	// a failure to persist.
