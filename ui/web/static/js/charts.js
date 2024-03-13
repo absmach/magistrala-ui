@@ -604,7 +604,7 @@ class EntityCount extends Chart {
     super(widgetID, chartData);
     this.Style = {
       width: "400px",
-      height: "200px",
+      height: "220px",
     };
     this.Content = this.#generateContent();
   }
@@ -620,8 +620,8 @@ class EntityCount extends Chart {
             <p class="card-text count"> 35</p>
           </div>
           <div class="card-footer text-right">
-            <p class="card-text"> Domain : ${this.chartData.domain}</p>
-            <p class="card-text"> Channel : ${this.chartData.channel}</p>
+            <p class="card-text"> Domain Name: ${this.chartData.domainName}</p>
+            <p class="card-text"> Channel Name: ${this.chartData.channelName}</p>
           </div>
         </div>
     </div>
