@@ -1789,7 +1789,7 @@ class ValueCard extends Chart {
     super(widgetID, chartData);
     this.Style = {
       width: "400px",
-      height: "200px",
+      height: "220px",
     };
     this.Content = this.#generateContent();
     this.Script = this.#generateScript();
@@ -1829,7 +1829,6 @@ class ValueCard extends Chart {
           );
           if (response.ok) {
             const data = await response.json();
-            console.log("message: ", data.messages)
             valueCard.querySelector(".value").textContent = data.messages[0].value;
           } else {
             console.error("HTTP request failed with status: ", response.status);
@@ -1840,7 +1839,7 @@ class ValueCard extends Chart {
       }
 
       getData();
-      setInterval(getData, 20000);
+      setInterval(getData, "${this.chartData.updateInterval}");
     })();
     `;
   }
