@@ -123,16 +123,6 @@ func CreateItem() []Item {
 			Content: "This is a card that displays dynamic entity count data",
 			Widget:  "entityCount",
 		},
-		{
-			Title:   "Label Card",
-			Content: "This is a label card",
-			Widget:  "label",
-		},
-		{
-			Title:   "Progress Bar",
-			Content: "This is a progress bar",
-			Widget:  "progressBar",
-		},
 	}
 
 	return items

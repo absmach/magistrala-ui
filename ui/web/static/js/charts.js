@@ -755,35 +755,6 @@ class HorizontalBarChart extends Echart {
   }
 }
 
-class LabelCard extends Chart {
-  constructor(chartData, widgetID) {
-    super(widgetID, chartData);
-    this.Style = {
-      width: "420px",
-      height: "180px",
-    };
-    this.Content = this.#generateContent();
-  }
-
-  #generateContent() {
-    return `
-    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
-    <div class="card widgetcard">
-    <div class="card-header text-center">
-      <h5 class="card-title">Label</h5>
-    </div>
-    <div class="card-body text-center">
-      <p class="card-subtitle mb-2 text-muted">Selected Entity: <span class="badge bg-primary">Thing6</span></p>
-    </div>
-    <div class="card-footer">
-      <p class="card-text text"> ThingID: 666 666 666</p>
-    </div>
-    </div>
-    </div>
-`;
-  }
-}
-
 class TimeSeriesLineChart extends Echart {
   constructor(chartData, widgetID) {
     super(widgetID, chartData);
@@ -1310,73 +1281,6 @@ class PieChart extends Echart {
     };
 
     pieChart.setOption(option);`;
-  }
-}
-
-class ProgressBar extends Chart {
-  constructor(chartData, widgetID) {
-    super(widgetID, chartData);
-    this.Style = {
-      width: "400px",
-      height: "100px",
-    };
-    this.Content = this.#generateContent();
-    this.Script = this.#generateScript();
-  }
-
-  #generateContent() {
-    return `
-    <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
-        <div class="card widgetcard">
-          <div class="card-header text-center">
-            <h5 class="card-title">${this.chartData.title}</h5>
-          </div>
-          <div class="card-body p-2">
-            <div class="progress">
-              <div class="progress-bar ${this.chartData.progressBarColor}" role="progressbar" style="width: 70%" aria-valuemin=${this.chartData.minValue} 
-              aria-valuemax=${this.chartData.maxValue}></div>
-            </div>
-          </div>
-          <div class="card-footer text-center">
-            <p class="card-text">
-              Status: 70%
-            </p>
-          </div>
-        </div>
-    </div>
-      `;
-  }
-
-  #generateScript() {
-    return `
-    (function() {
-      var progressBar = document.querySelector("#${this.ID} .progress-bar");
-
-      async function getData() {
-        try {
-          const response = await fetch(
-            "/data?channel=${this.chartData.channel}"+
-            "&limit=1",
-          );
-          if (response.ok) {
-            const data = await response.json();
-            console.log("message: ", data.messages);
-            var progress = data.value;
-            progressBar.style.width = progress + "%";
-            progressBar.setAttribute("aria-valuenow", progress);
-            document.querySelector("#${this.ID} .card-footer .card-text").textContent = "Status: " + progress + "%";
-          } else {
-            console.error("HTTP request failed with status: ", response.status);
-          }
-        } catch (error) {
-          console.error("Failed to fetch card data: ", error);
-        }
-      }
-
-      getData();
-      setInterval(getData, 2000000);
-    })();
-    `;
   }
 }
 
@@ -1953,13 +1857,11 @@ const chartTypes = {
   entityCount: EntityCount,
   gaugeChart: GaugeChart,
   horizontalBarChart: HorizontalBarChart,
-  labelCard: LabelCard,
   lineChart: TimeSeriesLineChart,
   multiBarChart: MultiBarChart,
   multiGaugeChart: MultiGaugeChart,
   multipleLineChart: MultipleLineChart,
   pieChart: PieChart,
-  progressBar: ProgressBar,
   sharedDatasetChart: SharedDatasetChart,
   speedGaugeChart: SpeedGaugeChart,
   stackedLineChart: StackedLineChart,
