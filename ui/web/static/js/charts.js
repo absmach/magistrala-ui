@@ -607,7 +607,6 @@ class EntityCount extends Chart {
       height: "200px",
     };
     this.Content = this.#generateContent();
-    this.Script = this.#generateScript();
   }
 
   #generateContent() {
@@ -626,37 +625,6 @@ class EntityCount extends Chart {
           </div>
         </div>
     </div>
-    `;
-  }
-
-  #generateScript() {
-    return`
-    (function() {
-      var entityCount = document.getElementById("${this.ID}");
-
-      async function getData() {
-        try{
-          const response = await fetch(
-            "/channels/${this.chartData.channel}/things"+
-            "?domain=${this.chartData.domain}"
-          );
-          console.log("Response: ", response);
-          if (response.ok) {
-            const data = await response.json();
-            console.log("Things: ", data);
-            entityCount.querySelector(".count").textContent = data.total;
-            
-          } else {
-            console.error("HTTP request failed with status: ", response.status);
-          }
-        } catch (error) {
-          console.error("Failed to fetch card data: ", error);
-        }
-      }
-
-      getData();
-      setInterval(getData, 20000);
-    })();
     `;
   }
 }
