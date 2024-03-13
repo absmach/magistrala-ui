@@ -55,11 +55,6 @@ const (
 	membersActive           = "members"
 	invitationsActive       = "invitations"
 	domainInvitationsActive = "domaininvitations"
-	usersEndpoint           = "/users"
-	thingsEndpoint          = "/things"
-	channelsEndpoint        = "/channels"
-	groupsEndpoint          = "/groups"
-	bootstrapEndpoint       = "/bootstraps"
 )
 
 type LoginStatus string
@@ -710,7 +705,7 @@ func (us *uiService) ViewUser(s Session, id string) (b []byte, err error) {
 	}
 
 	crumbs := []breadcrumb{
-		{Name: usersActive, URL: usersEndpoint},
+		{Name: usersActive, URL: fmt.Sprintf("%s/%s", us.prefix, usersActive)},
 		{Name: user.Name},
 	}
 
@@ -865,7 +860,7 @@ func (us *uiService) ViewThing(s Session, id string) (b []byte, err error) {
 	}
 
 	crumbs := []breadcrumb{
-		{Name: thingsActive, URL: us.prefix + thingsEndpoint},
+		{Name: thingsActive, URL: fmt.Sprintf("%s/%s", us.prefix, thingsActive)},
 		{Name: thing.Name},
 	}
 
@@ -973,8 +968,8 @@ func (us *uiService) ListThingUsers(s Session, id, relation string, page, limit 
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumb{
-		{Name: thingsActive, URL: us.prefix + thingsEndpoint},
-		{Name: id, URL: us.prefix + thingsEndpoint + "/" + id},
+		{Name: thingsActive, URL: fmt.Sprintf("%s/%s", us.prefix, thingsActive)},
+		{Name: id, URL: fmt.Sprintf("%s/%s/%s", us.prefix, thingsActive, id)},
 		{Name: "Share"},
 	}
 
@@ -1038,8 +1033,8 @@ func (us *uiService) ListChannelsByThing(s Session, id string, page, limit uint6
 	noOfPages := int(math.Ceil(float64(chsPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumb{
-		{Name: thingsActive, URL: us.prefix + thingsEndpoint},
-		{Name: id, URL: us.prefix + thingsEndpoint + "/" + id},
+		{Name: thingsActive, URL: fmt.Sprintf("%s/%s", us.prefix, thingsActive)},
+		{Name: id, URL: fmt.Sprintf("%s/%s/%s", us.prefix, thingsActive, id)},
 		{Name: "Connect"},
 	}
 
@@ -1153,7 +1148,7 @@ func (us *uiService) ViewChannel(s Session, channelID string) (b []byte, err err
 	}
 
 	crumbs := []breadcrumb{
-		{Name: channelsActive, URL: us.prefix + channelsEndpoint},
+		{Name: channelsActive, URL: fmt.Sprintf("%s/%s", us.prefix, channelsActive)},
 		{Name: channel.Name},
 	}
 
@@ -1214,8 +1209,8 @@ func (us *uiService) ListThingsByChannel(s Session, channelID string, page, limi
 	noOfPages := int(math.Ceil(float64(thsPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumb{
-		{Name: channelsActive, URL: us.prefix + channelsEndpoint},
-		{Name: channelID, URL: us.prefix + channelsEndpoint + "/" + channelID},
+		{Name: channelsActive, URL: fmt.Sprintf("%s/%s", us.prefix, channelsActive)},
+		{Name: channelID, URL: fmt.Sprintf("%s/%s/%s", us.prefix, channelsActive, channelID)},
 		{Name: "Connect"},
 	}
 
@@ -1333,8 +1328,8 @@ func (us *uiService) ListChannelUsers(s Session, id, relation string, page, limi
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumb{
-		{Name: channelsActive, URL: us.prefix + channelsEndpoint},
-		{Name: id, URL: us.prefix + channelsEndpoint + "/" + id},
+		{Name: channelsActive, URL: fmt.Sprintf("%s/%s", us.prefix, channelsActive)},
+		{Name: id, URL: fmt.Sprintf("%s/%s/%s", us.prefix, channelsActive, id)},
 		{Name: "Assign Users"},
 	}
 
@@ -1408,8 +1403,8 @@ func (us *uiService) ListChannelUserGroups(s Session, id string, page, limit uin
 	noOfPages := int(math.Ceil(float64(groupsPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumb{
-		{Name: channelsActive, URL: us.prefix + channelsEndpoint},
-		{Name: id, URL: us.prefix + channelsEndpoint + "/" + id},
+		{Name: channelsActive, URL: fmt.Sprintf("%s/%s", us.prefix, channelsActive)},
+		{Name: id, URL: fmt.Sprintf("%s/%s/%s", us.prefix, channelsActive, id)},
 		{Name: "Assign Groups"},
 	}
 
@@ -1480,8 +1475,8 @@ func (us *uiService) ListGroupUsers(s Session, id, relation string, page, limit 
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumb{
-		{Name: groupsActive, URL: us.prefix + groupsEndpoint},
-		{Name: id, URL: us.prefix + groupsEndpoint + "/" + id},
+		{Name: groupsActive, URL: fmt.Sprintf("%s/%s", us.prefix, groupsActive)},
+		{Name: id, URL: fmt.Sprintf("%s/%s/%s", us.prefix, groupsActive, id)},
 		{Name: "Assign Users"},
 	}
 
@@ -1553,7 +1548,7 @@ func (us *uiService) ViewGroup(s Session, id string) (b []byte, err error) {
 	}
 
 	crumbs := []breadcrumb{
-		{Name: groupsActive, URL: us.prefix + groupsEndpoint},
+		{Name: groupsActive, URL: fmt.Sprintf("%s/%s", us.prefix, groupsActive)},
 		{Name: group.Name},
 	}
 
@@ -1678,8 +1673,8 @@ func (us *uiService) ListUserGroupChannels(s Session, id string, page, limit uin
 	noOfPages := int(math.Ceil(float64(channelsPage.Total) / float64(limit)))
 
 	crumbs := []breadcrumb{
-		{Name: groupsActive, URL: us.prefix + groupsEndpoint},
-		{Name: id, URL: us.prefix + groupsEndpoint + "/" + id},
+		{Name: groupsActive, URL: fmt.Sprintf("%s/%s", us.prefix, groupsActive)},
+		{Name: id, URL: fmt.Sprintf("%s/%s/%s", us.prefix, groupsActive, id)},
 		{Name: "Assign Channels"},
 	}
 
@@ -1928,7 +1923,7 @@ func (us *uiService) ViewBootstrap(s Session, thingID string) ([]byte, error) {
 	}
 
 	crumbs := []breadcrumb{
-		{Name: bootstrapsActive, URL: bootstrapEndpoint},
+		{Name: bootstrapsActive, URL: fmt.Sprintf("%s/%s", us.prefix, bootstrapsActive)},
 		{Name: thingID},
 	}
 
@@ -1958,8 +1953,8 @@ func (us *uiService) ViewBootstrap(s Session, thingID string) ([]byte, error) {
 
 func (us *uiService) GetRemoteTerminal(s Session, thingID string) (b []byte, err error) {
 	crumbs := []breadcrumb{
-		{Name: bootstrapsActive, URL: bootstrapEndpoint},
-		{Name: thingID, URL: bootstrapEndpoint + "/" + thingID},
+		{Name: bootstrapsActive, URL: fmt.Sprintf("%s/%s", us.prefix, bootstrapsActive)},
+		{Name: thingID, URL: fmt.Sprintf("%s/%s/%s", us.prefix, bootstrapsActive, thingID)},
 		{Name: "Remote Terminal"},
 	}
 
@@ -2284,7 +2279,7 @@ func (us *uiService) ViewMember(s Session, userIdentity string) (b []byte, err e
 	}
 
 	crumbs := []breadcrumb{
-		{Name: membersActive, URL: "/members"},
+		{Name: membersActive, URL: fmt.Sprintf("%s/%s", us.prefix, membersActive)},
 		{Name: usersPage.Users[0].Name},
 	}
 
@@ -2485,7 +2480,7 @@ func (us *uiService) ViewDashboard(s Session, dashboardID string) ([]byte, error
 	}
 
 	crumbs := []breadcrumb{
-		{Name: dashboardsActive, URL: "/dashboards"},
+		{Name: dashboardsActive, URL: fmt.Sprintf("%s/%s", us.prefix, dashboardsActive)},
 		{Name: dashboard.Name},
 	}
 
