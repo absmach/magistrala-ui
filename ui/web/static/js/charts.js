@@ -1823,13 +1823,12 @@ class TempGaugeChart extends Echart {
               offsetCenter: [0, '-5%'],
               fontSize: 30,
               fontWeight: 'bolder',
-              formatter: '{value} °C',
+              formatter: '{value} °${this.chartData.gaugeLabel}',
               color: 'inherit'
             },
             data: [
               {
                 value: "${this.chartData.minValue}",
-                name: "${this.chartData.gaugeLabel}"
               }
             ]
           },
@@ -1868,7 +1867,6 @@ class TempGaugeChart extends Echart {
             data: [
               {
                 value: "${this.chartData.minValue}",
-                name: "${this.chartData.gaugeLabel}",
               }
             ]
           }
@@ -1896,7 +1894,6 @@ class TempGaugeChart extends Echart {
                   data: [
                     { 
                       value: newValue,
-                      name: "${this.chartData.gaugeLabel}",
                     
                     },
                   ],
@@ -1905,7 +1902,6 @@ class TempGaugeChart extends Echart {
                   data: [
                     { 
                       value: newValue,
-                      name: "${this.chartData.gaugeLabel}",
                     
                     },
                   ],
