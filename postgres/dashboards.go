@@ -184,9 +184,9 @@ func (r *repo) Delete(ctx context.Context, dashboardID, userID string) error {
 }
 
 type dbDashboard struct {
-	ID          *string   `db:"id"`
-	CreatedBy   *string   `db:"created_by"`
-	Name        *string   `db:"name"`
+	ID          string    `db:"id"`
+	CreatedBy   string    `db:"created_by"`
+	Name        string    `db:"name"`
 	Description string    `db:"description"`
 	Layout      []byte    `db:"layout"`
 	Metadata    []byte    `db:"metadata"`
@@ -203,23 +203,11 @@ func toDBDashboard(ds ui.Dashboard) (dbDashboard, error) {
 	if err != nil {
 		return dbDashboard{}, errors.Wrap(ErrJSONMarshal, err)
 	}
-	var id *string
-	if ds.ID != "" {
-		id = &ds.ID
-	}
-	var createdBy *string
-	if ds.CreatedBy != "" {
-		createdBy = &ds.CreatedBy
-	}
-	var name *string
-	if ds.Name != "" {
-		name = &ds.Name
-	}
 
 	return dbDashboard{
-		ID:          id,
-		CreatedBy:   createdBy,
-		Name:        name,
+		ID:          ds.ID,
+		CreatedBy:   ds.CreatedBy,
+		Name:        ds.Name,
 		Description: ds.Description,
 		Layout:      lt,
 		Metadata:    md,
@@ -243,9 +231,9 @@ func toDashboard(dsDB dbDashboard) (ui.Dashboard, error) {
 	}
 
 	return ui.Dashboard{
-		ID:          *dsDB.ID,
-		CreatedBy:   *dsDB.CreatedBy,
-		Name:        *dsDB.Name,
+		ID:          dsDB.ID,
+		CreatedBy:   dsDB.CreatedBy,
+		Name:        dsDB.Name,
 		Description: dsDB.Description,
 		Layout:      lt,
 		Metadata:    md,
