@@ -158,7 +158,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         }
 
         function viewChannel(channelID) {
-          window.location.href = '{{ printf "%s/channels/%s" pathPrefix}}' + channelID;
+          window.location.href = '{{ printf "%s/channels/" pathPrefix}}' + channelID;
         }
       </script>      <script type="module">
         import { fetchIndividualEntity } from "/js/infinitescroll.js";
