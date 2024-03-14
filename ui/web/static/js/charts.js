@@ -620,8 +620,7 @@ class EntityCount extends Chart {
             <p class="card-text count"> 35</p>
           </div>
           <div class="card-footer text-right">
-            <p class="card-text"> Domain Name: ${this.chartData.domainName}</p>
-            <p class="card-text"> Channel Name: ${this.chartData.channelName}</p>
+            <p class="card-text"> Entity Name: ${this.chartData.entityType}</p>
           </div>
         </div>
     </div>
@@ -1822,7 +1821,7 @@ class ValueCard extends Chart {
       async function getData() {
         try {
           const response = await fetch(
-            "/data?channel=${this.chartData.channel}"+
+            "${pathPrefix}/data?channel=${this.chartData.channel}"+
             "&publisher=${this.chartData.thing}" +
             "&name=${this.chartData.valueName}" +
             "&limit=1",
