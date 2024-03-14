@@ -122,6 +122,8 @@ class TimeSeriesBarChart extends Echart {
         data: [],
         name: '${this.chartData.xAxisLabel}',
         nameLocation: 'middle',
+        min: '${new Date(this.chartData.startTime)}',
+        max: '${new Date(this.chartData.stopTime)}',
         nameGap: 35
       },
       yAxis: {
@@ -159,7 +161,7 @@ class TimeSeriesBarChart extends Echart {
 
     async function getData(barChart, chartData) {
         try {
-          const apiEndpoint = "/data?channel=" + chartData.channel +
+          const apiEndpoint = "${pathPrefix}/data?channel=" + chartData.channel +
           "&publisher=" + chartData.publisher +
           "&name=" + chartData.name +
           "&from=" + chartData.from +
@@ -173,7 +175,6 @@ class TimeSeriesBarChart extends Echart {
             throw new Error("HTTP request failed with status: " + response.status);
           }
           const data = await response.json();
-          console.log(data);
           const xAxisArray = [];
           const yAxisArray = [];
           if (data.message != undefined && data.messages.length > 0) {

@@ -122,6 +122,17 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                 </div>
                 <div class="mb-3">
+                  <label for="aggregation-type" class="form-label">Aggregation</label>
+                  <select class="form-select mb-3" name="aggregationType" id="aggregation-type">
+                    <option value="">Select an aggregation type</option>
+                    <option value="MAX">Maximum</option>
+                    <option value="MIN">Minimum</option>
+                    <option value="SUM">Sum</option>
+                    <option value="COUNT">Count</option>
+                    <option value="AVG">Average</option>
+                  </select>
+                </div>
+                <div class="mb-3">
                   <label for="update-interval" class="form-label">Update interval</label>
                   <input
                     type="text"
@@ -133,17 +144,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                     required
                   />
                   <div class="invalid-feedback">Please enter a valid interval</div>
-                </div>
-                <div class="mb-3">
-                  <label for="aggregation-type" class="form-label">Aggregation</label>
-                  <select class="form-select mb-3" name="aggregationType" id="aggregation-type">
-                    <option value="" disabled>Select an aggregation type</option>
-                    <option value="MAX">Maximum</option>
-                    <option value="MIN">Minimum</option>
-                    <option value="SUM">Sum</option>
-                    <option value="COUNT">Count</option>
-                    <option value="AVG">Average</option>
-                  </select>
                 </div>
               </div>
               <!-- Appearance Tab -->
@@ -214,6 +214,24 @@ SPDX-License-Identifier: Apache-2.0 -->
     </div>
   </div>
   <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("barChartModal").addEventListener("shown.bs.modal", function () {
+        const form = document.getElementById("create-barChart-form");
+        const aggregationTypeInput = form.querySelector("#aggregation-type");
+        const updateIntervalInput = form.querySelector("#update-interval");
+
+        function toggleUpdateInterval() {
+          if (aggregationTypeInput.value === "") {
+            updateIntervalInput.disabled = true;
+          } else {
+            updateIntervalInput.disabled = false;
+          }
+        }
+        toggleUpdateInterval();
+        aggregationTypeInput.addEventListener("change", toggleUpdateInterval);
+      });
+    });
+
     // bar chart form
     document.getElementById("create-barChart-button").addEventListener("click", function () {
       const form = document.getElementById("create-barChart-form");
