@@ -55,15 +55,7 @@ const (
 	membersActive           = "members"
 	invitationsActive       = "invitations"
 	domainInvitationsActive = "domaininvitations"
-)
-
-type precisionLevel uint8
-
-const (
-	SecondsLevel precisionLevel = iota
-	MillisecondsLevel
-	MicrosecondsLevel
-	NanosecondsLevel
+	PrecisionDiff           = 6
 )
 
 type LoginStatus string
@@ -1728,7 +1720,7 @@ func (us *uiService) ReadMessages(s Session, channelID, thingKey string, mpgm sd
 	}
 
 	for _, message := range msg.Messages {
-		message.Time = FixUnixPrecision(message.Time, MillisecondsLevel)
+		message.Time = message.Time / math.Pow10(-PrecisionDiff)
 	}
 
 	noOfPages := int(math.Ceil(float64(msg.Total) / float64(mpgm.Limit)))
@@ -1778,7 +1770,7 @@ func (us *uiService) FetchChartData(token string, channelID string, mpgm sdk.Mes
 	}
 
 	for _, message := range msg.Messages {
-		message.Time = FixUnixPrecision(message.Time, MillisecondsLevel)
+		message.Time = message.Time / math.Pow10(-PrecisionDiff)
 	}
 
 	data, err := json.Marshal(msg)
@@ -2720,32 +2712,4 @@ func parseTemplates(mfsdk sdk.SDK, prefix string) (tpl *template.Template, err e
 	}
 
 	return tpl.ParseFS(templatesFS, templates...)
-}
-
-func FixUnixPrecision(currTime float64, precisionLevel precisionLevel) float64 {
-	currentPrecision := len(fmt.Sprint(int64(currTime)))
-	var desiredPrecision int
-	switch precisionLevel {
-	case SecondsLevel:
-		desiredPrecision = len(fmt.Sprint(time.Now().Unix()))
-	case MillisecondsLevel:
-		desiredPrecision = len(fmt.Sprint(time.Now().UnixMilli()))
-	case MicrosecondsLevel:
-		desiredPrecision = len(fmt.Sprint(time.Now().UnixMicro()))
-	case NanosecondsLevel:
-		desiredPrecision = len(fmt.Sprint(time.Now().UnixNano()))
-	}
-
-	precisionDiff := desiredPrecision - currentPrecision
-	var adjustedTime float64
-	switch {
-	case precisionDiff < 0:
-		adjustedTime = currTime / math.Pow10(-precisionDiff)
-	case precisionDiff > 0:
-		adjustedTime = currTime * math.Pow10(precisionDiff)
-	default:
-		adjustedTime = currTime
-	}
-
-	return adjustedTime
 }
