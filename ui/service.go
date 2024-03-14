@@ -2669,7 +2669,7 @@ func parseTemplates(mfsdk sdk.SDK, prefix string) (tpl *template.Template, err e
 			if t == 0 {
 				return ""
 			}
-			return time.UnixMilli(int64(t)).String()
+			return time.UnixMilli(int64(t)).Format(time.RFC1123)
 		},
 		"hasPermission": func(permissions []string, permission string) bool {
 			return slices.Contains(permissions, permission)
