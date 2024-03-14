@@ -34,6 +34,14 @@ linters-settings:
   unused:
     field-writes-are-uses: false
     generated-is-used: false
+  wrapcheck:
+    ignoreSigRegexps:
+      - "github.com/absmach/magistrala-ui/ui.Service"
+      - "encoding/json.*"
+      - "net/http.Request"
+      - "golang.org/x/sync/errgroup.Group"
+      - "net/http.ResponseWriter"
+      - "database/sql"
 
 linters:
   disable-all: true
@@ -78,3 +86,4 @@ linters:
     - unconvert
     - unparam
     - usestdlibvars
+    - wrapcheck
