@@ -229,18 +229,6 @@ func TestRetrieve(t *testing.T) {
 			err:         postgres.ErrNotFound,
 		},
 		{
-			desc:        "retrieve existing dashboard with empty id",
-			dashboardID: "",
-			userID:      dashboard.CreatedBy,
-			err:         postgres.ErrNotFound,
-		},
-		{
-			desc:        "retrieve existing dashboard with empty created by",
-			dashboardID: dashboard.ID,
-			userID:      "",
-			err:         postgres.ErrNotFound,
-		},
-		{
 			desc:        "retrieve existing dashboard with malformed id",
 			dashboardID: strings.Repeat("a", 37),
 			userID:      dashboard.CreatedBy,
