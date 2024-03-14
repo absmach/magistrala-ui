@@ -24,7 +24,7 @@ type indexReq struct {
 }
 
 func (req indexReq) validate() error {
-	if req.AccessToken == "" {
+	if req.Token == "" {
 		return errInvalidCredentials
 	}
 	return nil
@@ -62,7 +62,7 @@ func (req tokenReq) validate() error {
 }
 
 type secureTokenReq struct {
-	ui.Session
+	sdk.Token
 }
 
 func (req secureTokenReq) validate() error {
@@ -81,7 +81,7 @@ type refreshTokenReq struct {
 }
 
 func (req refreshTokenReq) validate() error {
-	if req.RefreshToken == "" {
+	if req.Token == "" {
 		return errMissingRefreshToken
 	}
 	if req.ref == "" {
@@ -137,7 +137,7 @@ type listEntityReq struct {
 }
 
 func (req listEntityReq) validate() error {
-	if req.AccessToken == "" {
+	if req.Token == "" {
 		return errInvalidCredentials
 	}
 	if req.page == 0 {
@@ -158,7 +158,7 @@ type listEntityByIDReq struct {
 }
 
 func (req listEntityByIDReq) validate() error {
-	if req.AccessToken == "" {
+	if req.Token == "" {
 		return errInvalidCredentials
 	}
 	if req.id == "" {
@@ -179,7 +179,7 @@ type viewResourceReq struct {
 }
 
 func (req viewResourceReq) validate() error {
-	if req.AccessToken == "" {
+	if req.Token == "" {
 		return errInvalidCredentials
 	}
 	if req.id == "" {
@@ -659,7 +659,7 @@ type readMessagesReq struct {
 }
 
 func (req readMessagesReq) validate() error {
-	if req.AccessToken == "" && req.thingKey == "" {
+	if req.Token == "" && req.thingKey == "" {
 		return errInvalidCredentials
 	}
 	if req.channelID == "" {
@@ -889,7 +889,7 @@ type domainLoginReq struct {
 }
 
 func (req domainLoginReq) validate() error {
-	if req.AccessToken == "" {
+	if req.Token == "" {
 		return errAuthentication
 	}
 	if req.DomainID == "" {
@@ -906,7 +906,7 @@ type listDomainsReq struct {
 }
 
 func (req listDomainsReq) validate() error {
-	if req.Token.AccessToken == "" {
+	if req.Token == "" {
 		return errAuthentication
 	}
 	if req.page == 0 {
@@ -1010,7 +1010,7 @@ type viewMemberReq struct {
 }
 
 func (req viewMemberReq) validate() error {
-	if req.AccessToken == "" {
+	if req.Token == "" {
 		return errAuthentication
 	}
 	if req.userIdentity == "" {
@@ -1086,7 +1086,7 @@ type listInvitationsReq struct {
 }
 
 func (req listInvitationsReq) validate() error {
-	if req.AccessToken == "" {
+	if req.Token == "" {
 		return errAuthentication
 	}
 	if req.page == 0 {
@@ -1105,7 +1105,7 @@ type viewDashboardReq struct {
 }
 
 func (req viewDashboardReq) validate() error {
-	if req.AccessToken == "" {
+	if req.Token == "" {
 		return errInvalidCredentials
 	}
 	return nil

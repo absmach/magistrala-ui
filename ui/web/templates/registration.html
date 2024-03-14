@@ -80,7 +80,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <div class="text-center text-light">
                     <p>or sign up with:</p>
                     <button type="button" class="btn btn-link btn-floating mx-1">
-                      <a href="/signup/{{ $c.Name }}">
+                      <a href="{{ printf "%s/signup/%s" pathPrefix $c.Name }}">
                         <i class="fab {{ $c.Icon }}"></i>
                       </a>
                     </button>

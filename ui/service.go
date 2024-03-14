@@ -109,7 +109,7 @@ type Session struct {
 	User        User        `json:"user"`
 	Domain      Domain      `json:"domain"`
 	LoginStatus LoginStatus `json:"login_status"`
-	sdk.Token   `json:"token"`
+	Token       string      `json:"token"`
 }
 
 var (
@@ -409,42 +409,42 @@ func (us *uiService) Index(s Session) (b []byte, err error) {
 		Status: enabled,
 	}
 
-	users, err := us.sdk.Users(pgm, s.AccessToken)
+	users, err := us.sdk.Users(pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	things, err := us.sdk.Things(pgm, s.AccessToken)
+	things, err := us.sdk.Things(pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	groups, err := us.sdk.Groups(pgm, s.AccessToken)
+	groups, err := us.sdk.Groups(pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	channels, err := us.sdk.Channels(pgm, s.AccessToken)
+	channels, err := us.sdk.Channels(pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	enabledUsers, err := us.sdk.Users(enabledPgm, s.AccessToken)
+	enabledUsers, err := us.sdk.Users(enabledPgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	enabledThings, err := us.sdk.Things(enabledPgm, s.AccessToken)
+	enabledThings, err := us.sdk.Things(enabledPgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	enabledGroups, err := us.sdk.Groups(enabledPgm, s.AccessToken)
+	enabledGroups, err := us.sdk.Groups(enabledPgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	enabledChannels, err := us.sdk.Channels(enabledPgm, s.AccessToken)
+	enabledChannels, err := us.sdk.Channels(enabledPgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -604,7 +604,7 @@ func (us *uiService) DomainLogin(login sdk.Login, refreshToken string) (t sdk.To
 }
 
 func (us *uiService) Session(s Session) (Session, error) {
-	user, err := us.sdk.UserProfile(s.AccessToken)
+	user, err := us.sdk.UserProfile(s.Token)
 	if err != nil {
 		return Session{}, err
 	}
@@ -620,11 +620,11 @@ func (us *uiService) Session(s Session) (Session, error) {
 	}
 
 	if s.LoginStatus == DomainLoginStatus {
-		domain, err := us.sdk.Domain(s.Domain.ID, s.AccessToken)
+		domain, err := us.sdk.Domain(s.Domain.ID, s.Token)
 		if err != nil {
 			return Session{}, err
 		}
-		permissions, err := us.sdk.DomainPermissions(s.Domain.ID, s.AccessToken)
+		permissions, err := us.sdk.DomainPermissions(s.Domain.ID, s.Token)
 		if err != nil {
 			return Session{}, err
 		}
@@ -655,7 +655,7 @@ func (us *uiService) ListUsers(s Session, status string, page, limit uint64) ([]
 		Limit:  limit,
 		Status: status,
 	}
-	users, err := us.sdk.Users(pgm, s.AccessToken)
+	users, err := us.sdk.Users(pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -699,7 +699,7 @@ func (us *uiService) ListUsers(s Session, status string, page, limit uint64) ([]
 }
 
 func (us *uiService) ViewUser(s Session, id string) (b []byte, err error) {
-	user, err := us.sdk.User(id, s.AccessToken)
+	user, err := us.sdk.User(id, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -807,7 +807,7 @@ func (us *uiService) ListThings(s Session, status string, page, limit uint64) ([
 		Limit:  limit,
 		Status: status,
 	}
-	things, err := us.sdk.Things(pgm, s.AccessToken)
+	things, err := us.sdk.Things(pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -849,12 +849,12 @@ func (us *uiService) ListThings(s Session, status string, page, limit uint64) ([
 }
 
 func (us *uiService) ViewThing(s Session, id string) (b []byte, err error) {
-	thing, err := us.sdk.Thing(id, s.AccessToken)
+	thing, err := us.sdk.Thing(id, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	permissions, err := us.sdk.ThingPermissions(id, s.AccessToken)
+	permissions, err := us.sdk.ThingPermissions(id, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -955,12 +955,12 @@ func (us *uiService) ListThingUsers(s Session, id, relation string, page, limit 
 		Limit:      limit,
 		Permission: relation,
 	}
-	usersPage, err := us.sdk.ListThingUsers(id, pgm, s.AccessToken)
+	usersPage, err := us.sdk.ListThingUsers(id, pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	permissions, err := us.sdk.ThingPermissions(id, s.AccessToken)
+	permissions, err := us.sdk.ThingPermissions(id, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -1015,17 +1015,17 @@ func (us *uiService) ListChannelsByThing(s Session, id string, page, limit uint6
 		Visibility: statusAll,
 	}
 
-	chsPage, err := us.sdk.ChannelsByThing(id, pgm, s.AccessToken)
+	chsPage, err := us.sdk.ChannelsByThing(id, pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	permissions, err := us.sdk.ThingPermissions(id, s.AccessToken)
+	permissions, err := us.sdk.ThingPermissions(id, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	thing, err := us.sdk.Thing(id, s.AccessToken)
+	thing, err := us.sdk.Thing(id, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -1093,7 +1093,7 @@ func (us *uiService) ListChannels(s Session, status string, page, limit uint64) 
 		Limit:  limit,
 		Status: status,
 	}
-	chsPage, err := us.sdk.Channels(pgm, s.AccessToken)
+	chsPage, err := us.sdk.Channels(pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -1137,12 +1137,12 @@ func (us *uiService) ListChannels(s Session, status string, page, limit uint64) 
 }
 
 func (us *uiService) ViewChannel(s Session, channelID string) (b []byte, err error) {
-	channel, err := us.sdk.Channel(channelID, s.AccessToken)
+	channel, err := us.sdk.Channel(channelID, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	permissions, err := us.sdk.ChannelPermissions(channelID, s.AccessToken)
+	permissions, err := us.sdk.ChannelPermissions(channelID, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -1196,12 +1196,12 @@ func (us *uiService) ListThingsByChannel(s Session, channelID string, page, limi
 		Visibility: statusAll,
 	}
 
-	thsPage, err := us.sdk.ThingsByChannel(channelID, pgm, s.AccessToken)
+	thsPage, err := us.sdk.ThingsByChannel(channelID, pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	permissions, err := us.sdk.ChannelPermissions(channelID, s.AccessToken)
+	permissions, err := us.sdk.ChannelPermissions(channelID, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -1315,12 +1315,12 @@ func (us *uiService) ListChannelUsers(s Session, id, relation string, page, limi
 		Limit:      limit,
 		Permission: relation,
 	}
-	usersPage, err := us.sdk.ListChannelUsers(id, pgm, s.AccessToken)
+	usersPage, err := us.sdk.ListChannelUsers(id, pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	permissions, err := us.sdk.ChannelPermissions(id, s.AccessToken)
+	permissions, err := us.sdk.ChannelPermissions(id, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -1390,12 +1390,12 @@ func (us *uiService) ListChannelUserGroups(s Session, id string, page, limit uin
 		Offset: offset,
 		Limit:  limit,
 	}
-	groupsPage, err := us.sdk.ListChannelUserGroups(id, pgm, s.AccessToken)
+	groupsPage, err := us.sdk.ListChannelUserGroups(id, pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	permissions, err := us.sdk.ChannelPermissions(id, s.AccessToken)
+	permissions, err := us.sdk.ChannelPermissions(id, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -1462,12 +1462,12 @@ func (us *uiService) ListGroupUsers(s Session, id, relation string, page, limit 
 		Permission: relation,
 	}
 
-	usersPage, err := us.sdk.ListGroupUsers(id, pgm, s.AccessToken)
+	usersPage, err := us.sdk.ListGroupUsers(id, pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	permissions, err := us.sdk.GroupPermissions(id, s.AccessToken)
+	permissions, err := us.sdk.GroupPermissions(id, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -1532,17 +1532,17 @@ func (us *uiService) Unassign(token, groupID string, userRelation sdk.UsersRelat
 }
 
 func (us *uiService) ViewGroup(s Session, id string) (b []byte, err error) {
-	group, err := us.sdk.Group(id, s.AccessToken)
+	group, err := us.sdk.Group(id, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	parent, err := us.sdk.Group(group.ParentID, s.AccessToken)
+	parent, err := us.sdk.Group(group.ParentID, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	permissions, err := us.sdk.GroupPermissions(id, s.AccessToken)
+	permissions, err := us.sdk.GroupPermissions(id, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -1595,7 +1595,7 @@ func (us *uiService) ListGroups(s Session, status string, page, limit uint64) ([
 		Limit:  limit,
 		Status: status,
 	}
-	grpPage, err := us.sdk.Groups(pgm, s.AccessToken)
+	grpPage, err := us.sdk.Groups(pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -1660,12 +1660,12 @@ func (us *uiService) ListUserGroupChannels(s Session, id string, page, limit uin
 		Offset: offset,
 		Limit:  limit,
 	}
-	channelsPage, err := us.sdk.ListGroupChannels(id, pgm, s.AccessToken)
+	channelsPage, err := us.sdk.ListGroupChannels(id, pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
 
-	permissions, err := us.sdk.GroupPermissions(id, s.AccessToken)
+	permissions, err := us.sdk.GroupPermissions(id, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -1713,7 +1713,7 @@ func (us *uiService) ListUserGroupChannels(s Session, id string, page, limit uin
 }
 
 func (us *uiService) ReadMessages(s Session, channelID, thingKey string, mpgm sdk.MessagePageMetadata) ([]byte, error) {
-	msg, err := us.sdk.ReadMessages(mpgm, channelID, s.AccessToken)
+	msg, err := us.sdk.ReadMessages(mpgm, channelID, s.Token)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -1805,7 +1805,7 @@ func (us *uiService) ListBootstrap(s Session, page, limit uint64) ([]byte, error
 		Visibility: statusAll,
 	}
 
-	bootstraps, err := us.sdk.Bootstraps(pgm, s.AccessToken)
+	bootstraps, err := us.sdk.Bootstraps(pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -1816,7 +1816,7 @@ func (us *uiService) ListBootstrap(s Session, page, limit uint64) ([]byte, error
 		Limit:  uint64(100),
 	}
 
-	things, err := us.sdk.Things(filter, s.AccessToken)
+	things, err := us.sdk.Things(filter, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -1897,7 +1897,7 @@ func (us *uiService) UpdateBootstrapState(token string, config sdk.BootstrapConf
 }
 
 func (us *uiService) ViewBootstrap(s Session, thingID string) ([]byte, error) {
-	bootstrap, err := us.sdk.ViewBootstrap(thingID, s.AccessToken)
+	bootstrap, err := us.sdk.ViewBootstrap(thingID, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -1917,7 +1917,7 @@ func (us *uiService) ViewBootstrap(s Session, thingID string) ([]byte, error) {
 		return nil, errors.Wrap(errors.New("invalid channels"), ErrFailedRetreive)
 	}
 
-	thing, err := us.sdk.Thing(thingID, s.AccessToken)
+	thing, err := us.sdk.Thing(thingID, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -2143,7 +2143,7 @@ func (us *uiService) ListDomains(s Session, status string, page, limit uint64) (
 		Status: status,
 	}
 
-	domainsPage, err := us.sdk.Domains(pgm, s.AccessToken)
+	domainsPage, err := us.sdk.Domains(pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
@@ -2197,12 +2197,12 @@ func (us *uiService) UpdateDomain(token string, domain sdk.Domain) error {
 }
 
 func (us *uiService) Domain(s Session) ([]byte, error) {
-	domain, err := us.sdk.Domain(s.Domain.ID, s.AccessToken)
+	domain, err := us.sdk.Domain(s.Domain.ID, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
-	permissions, err := us.sdk.DomainPermissions(s.Domain.ID, s.AccessToken)
+	permissions, err := us.sdk.DomainPermissions(s.Domain.ID, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
@@ -2273,7 +2273,7 @@ func (us *uiService) ViewMember(s Session, userIdentity string) (b []byte, err e
 	pgm := sdk.PageMetadata{
 		Identity: userIdentity,
 	}
-	usersPage, err := us.sdk.Users(pgm, s.AccessToken)
+	usersPage, err := us.sdk.Users(pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -2313,7 +2313,7 @@ func (us *uiService) Members(s Session, page, limit uint64) ([]byte, error) {
 		Limit:  limit,
 	}
 
-	membersPage, err := us.sdk.ListDomainUsers(s.Domain.ID, pgm, s.AccessToken)
+	membersPage, err := us.sdk.ListDomainUsers(s.Domain.ID, pgm, s.Token)
 	if err != nil {
 		return []byte{}, err
 	}
@@ -2367,7 +2367,7 @@ func (us *uiService) Invitations(s Session, domainID string, page, limit uint64)
 		DomainID: domainID,
 		State:    statePending,
 	}
-	invitationsPage, err := us.sdk.Invitations(pgm, s.AccessToken)
+	invitationsPage, err := us.sdk.Invitations(pgm, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
 	}
@@ -2469,7 +2469,7 @@ func (us *uiService) ViewDashboard(s Session, dashboardID string) ([]byte, error
 	var btpl bytes.Buffer
 	charts := CreateItem()
 
-	user, sdkerr := us.sdk.UserProfile(s.AccessToken)
+	user, sdkerr := us.sdk.UserProfile(s.Token)
 	if sdkerr != nil {
 		return btpl.Bytes(), errors.Wrap(ErrFailedRetrieveUserID, sdkerr)
 	}

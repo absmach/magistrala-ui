@@ -137,7 +137,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID, prefix string, secureCo
 		).ServeHTTP)
 
 		r.Get("/token/refresh", kithttp.NewServer(
-			refreshTokenEndpoint(svc, secureCookie),
+			refreshTokenEndpoint(svc, secureCookie, prefix),
 			decodeRefreshTokenRequest(secureCookie),
 			encodeResponse,
 			opts...,
@@ -151,7 +151,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID, prefix string, secureCo
 		).ServeHTTP)
 
 		r.Get("/logout", kithttp.NewServer(
-			logoutEndpoint(svc),
+			logoutEndpoint(svc, prefix),
 			decodeLogoutRequest,
 			encodeResponse,
 			opts...,
@@ -777,7 +777,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID, prefix string, secureCo
 			r.Route("/domains", func(r chi.Router) {
 				r.Post("/login", kithttp.NewServer(
 					domainLoginEndpoint(svc, secureCookie, prefix),
-					decodeDomainLoginRequest,
+					decodeDomainLoginRequest(secureCookie),
 					encodeResponse,
 					opts...,
 				).ServeHTTP)
@@ -905,7 +905,7 @@ func decodeCreateDashboardRequest(_ context.Context, r *http.Request) (interface
 	}
 
 	return createDashboardReq{
-		token:       session.AccessToken,
+		token:       session.Token,
 		Name:        data.Name,
 		Description: data.Description,
 	}, nil
@@ -928,7 +928,7 @@ func decodeListDashboardsRequest(_ context.Context, r *http.Request) (interface{
 	}
 
 	return listDashboardsReq{
-		token: session.AccessToken,
+		token: session.Token,
 		page:  page,
 		limit: limit,
 	}, nil
@@ -955,7 +955,7 @@ func decodeUpdateDashboardRequest(_ context.Context, r *http.Request) (interface
 	}
 
 	return updateDashboardReq{
-		token:       session.AccessToken,
+		token:       session.Token,
 		ID:          data.ID,
 		Name:        data.Name,
 		Description: data.Description,
@@ -975,7 +975,7 @@ func decodeDeleteDashboardRequest(_ context.Context, r *http.Request) (interface
 	}
 
 	return deleteDashboardReq{
-		token: session.AccessToken,
+		token: session.Token,
 		ID:    data.ID,
 	}, nil
 }
@@ -1012,7 +1012,7 @@ func decodePasswordUpdate(_ context.Context, r *http.Request) (interface{}, erro
 		return nil, err
 	}
 	return updateUserPasswordReq{
-		token:   session.AccessToken,
+		token:   session.Token,
 		oldPass: r.PostFormValue("oldpass"),
 		newPass: r.PostFormValue("newpass"),
 	}, nil
@@ -1072,16 +1072,11 @@ func decodeSecureTokenRequest(_ context.Context, r *http.Request) (interface{}, 
 		return nil, err
 	}
 
-	session := ui.Session{
+	return secureTokenReq{
 		Token: sdk.Token{
 			AccessToken:  accessToken,
 			RefreshToken: refreshToken,
 		},
-		LoginStatus: ui.UserLoginStatus,
-	}
-
-	return secureTokenReq{
-		Session: session,
 	}, nil
 }
 
@@ -1091,6 +1086,11 @@ func decodeRefreshTokenRequest(s *securecookie.SecureCookie) kithttp.DecodeReque
 		if err != nil {
 			return nil, err
 		}
+		refreshTokenCookie, err := tokenFromCookie(r, refreshTokenKey)
+		if err != nil {
+			return nil, err
+		}
+
 		var session string
 		if err := s.Decode(sessionDetailsKey, sessionCookie, &session); err != nil {
 			return nil, err
@@ -1099,6 +1099,13 @@ func decodeRefreshTokenRequest(s *securecookie.SecureCookie) kithttp.DecodeReque
 		if err := json.Unmarshal([]byte(session), &sessionDetails); err != nil {
 			return ui.Session{}, err
 		}
+
+		var refreshToken string
+		if err := s.Decode(refreshTokenKey, refreshTokenCookie, &refreshToken); err != nil {
+			return ui.Session{}, err
+		}
+		sessionDetails.Token = refreshToken
+
 		referer, err := readStringQuery(r, refererKey, defKey)
 		if err != nil {
 			return nil, err
@@ -1162,7 +1169,7 @@ func decodeUserCreation(_ context.Context, r *http.Request) (interface{}, error)
 	}
 
 	return createUserReq{
-		token: session.AccessToken,
+		token: session.Token,
 		User:  user,
 	}, nil
 }
@@ -1227,7 +1234,7 @@ func decodeUsersCreation(_ context.Context, r *http.Request) (interface{}, error
 	}
 
 	return createUsersReq{
-		token: session.AccessToken,
+		token: session.Token,
 		users: users,
 	}, nil
 }
@@ -1256,7 +1263,7 @@ func decodeUserUpdate(_ context.Context, r *http.Request) (interface{}, error) {
 	user.ID = chi.URLParam(r, "id")
 
 	return updateUserReq{
-		token: session.AccessToken,
+		token: session.Token,
 		User:  user,
 	}, nil
 }
@@ -1273,7 +1280,7 @@ func decodeUserTagsUpdate(_ context.Context, r *http.Request) (interface{}, erro
 	user.ID = chi.URLParam(r, "id")
 
 	return updateUserTagsReq{
-		token: session.AccessToken,
+		token: session.Token,
 		User:  user,
 	}, nil
 }
@@ -1289,7 +1296,7 @@ func decodeUserIdentityUpdate(_ context.Context, r *http.Request) (interface{}, 
 	}
 
 	return updateUserIdentityReq{
-		token: session.AccessToken,
+		token: session.Token,
 		User: sdk.User{
 			ID:          chi.URLParam(r, "id"),
 			Credentials: credentials,
@@ -1303,7 +1310,7 @@ func decodeUserStatusUpdate(_ context.Context, r *http.Request) (interface{}, er
 		return nil, err
 	}
 	return updateUserStatusReq{
-		token: session.AccessToken,
+		token: session.Token,
 		id:    r.PostFormValue("entityID"),
 	}, nil
 }
@@ -1314,7 +1321,7 @@ func decodeUserRoleUpdate(_ context.Context, r *http.Request) (interface{}, erro
 		return nil, err
 	}
 	return updateUserRoleReq{
-		token: session.AccessToken,
+		token: session.Token,
 		User: sdk.User{
 			ID:   chi.URLParam(r, "id"),
 			Role: r.PostFormValue("role"),
@@ -1332,7 +1339,7 @@ func decodeAssignGroupRequest(_ context.Context, r *http.Request) (interface{}, 
 	}
 
 	return assignReq{
-		token:   session.AccessToken,
+		token:   session.Token,
 		groupID: chi.URLParam(r, "id"),
 		UsersRelationRequest: sdk.UsersRelationRequest{
 			UserIDs:  r.Form["userID"],
@@ -1351,7 +1358,7 @@ func decodeShareThingRequest(_ context.Context, r *http.Request) (interface{}, e
 	}
 
 	return shareThingReq{
-		token: session.AccessToken,
+		token: session.Token,
 		id:    chi.URLParam(r, "id"),
 		UsersRelationRequest: sdk.UsersRelationRequest{
 			UserIDs:  r.Form["userID"],
@@ -1370,7 +1377,7 @@ func decodeAddMemberToChannelRequest(_ context.Context, r *http.Request) (interf
 	}
 
 	return addUserToChannelReq{
-		token:     session.AccessToken,
+		token:     session.Token,
 		ChannelID: chi.URLParam(r, "id"),
 		UsersRelationRequest: sdk.UsersRelationRequest{
 			Relation: r.Form.Get("relation"),
@@ -1394,7 +1401,7 @@ func decodeThingCreation(_ context.Context, r *http.Request) (interface{}, error
 	}
 
 	return createThingReq{
-		token: session.AccessToken,
+		token: session.Token,
 		Thing: sdk.Thing{
 			Name: r.PostFormValue("name"),
 			ID:   r.PostFormValue("thingID"),
@@ -1420,7 +1427,7 @@ func decodeThingUpdate(_ context.Context, r *http.Request) (interface{}, error) 
 	thing.ID = chi.URLParam(r, "id")
 
 	return updateThingReq{
-		token: session.AccessToken,
+		token: session.Token,
 		Thing: thing,
 	}, nil
 }
@@ -1437,7 +1444,7 @@ func decodeThingTagsUpdate(_ context.Context, r *http.Request) (interface{}, err
 	thing.ID = chi.URLParam(r, "id")
 
 	return updateThingTagsReq{
-		token: session.AccessToken,
+		token: session.Token,
 		Thing: thing,
 	}, nil
 }
@@ -1453,7 +1460,7 @@ func decodeThingSecretUpdate(_ context.Context, r *http.Request) (interface{}, e
 	}
 
 	return updateThingSecretReq{
-		token: session.AccessToken,
+		token: session.Token,
 		Thing: sdk.Thing{
 			ID:          chi.URLParam(r, "id"),
 			Credentials: credentials,
@@ -1467,7 +1474,7 @@ func decodeThingStatusUpdate(_ context.Context, r *http.Request) (interface{}, e
 		return nil, err
 	}
 	return updateThingStatusReq{
-		token: session.AccessToken,
+		token: session.Token,
 		id:    r.PostFormValue("entityID"),
 	}, nil
 }
@@ -1536,7 +1543,7 @@ func decodeThingsCreation(_ context.Context, r *http.Request) (interface{}, erro
 	}
 
 	return createThingsReq{
-		token:  session.AccessToken,
+		token:  session.Token,
 		things: things,
 	}, nil
 }
@@ -1559,7 +1566,7 @@ func decodeChannelCreation(_ context.Context, r *http.Request) (interface{}, err
 	}
 
 	return createChannelReq{
-		token:   session.AccessToken,
+		token:   session.Token,
 		Channel: ch,
 	}, nil
 }
@@ -1616,7 +1623,7 @@ func decodeChannelsCreation(_ context.Context, r *http.Request) (interface{}, er
 	}
 
 	return createChannelsReq{
-		token:    session.AccessToken,
+		token:    session.Token,
 		Channels: channels,
 	}, nil
 }
@@ -1633,7 +1640,7 @@ func decodeChannelUpdate(_ context.Context, r *http.Request) (interface{}, error
 	channel.ID = chi.URLParam(r, "id")
 
 	return updateChannelReq{
-		token:   session.AccessToken,
+		token:   session.Token,
 		Channel: channel,
 	}, nil
 }
@@ -1657,14 +1664,14 @@ func decodeConnectChannel(_ context.Context, r *http.Request) (interface{}, erro
 	switch item {
 	case thingsItem:
 		req = connectThingReq{
-			token:     session.AccessToken,
+			token:     session.Token,
 			channelID: r.Form.Get("channelID"),
 			thingID:   chi.URLParam(r, "id"),
 			item:      item,
 		}
 	case channelsItem:
 		req = connectThingReq{
-			token:     session.AccessToken,
+			token:     session.Token,
 			channelID: chi.URLParam(r, "id"),
 			thingID:   r.Form.Get("thingID"),
 			item:      item,
@@ -1680,7 +1687,7 @@ func decodeChannelStatusUpdate(_ context.Context, r *http.Request) (interface{},
 		return nil, err
 	}
 	return updateChannelStatusReq{
-		token: session.AccessToken,
+		token: session.Token,
 		id:    r.PostFormValue("entityID"),
 	}, nil
 }
@@ -1700,7 +1707,7 @@ func decodeAddGroupToChannelRequest(_ context.Context, r *http.Request) (interfa
 	}
 
 	req := addUserGroupToChannelReq{
-		token: session.AccessToken,
+		token: session.Token,
 		item:  item,
 	}
 
@@ -1727,7 +1734,7 @@ func decodeGroupCreation(_ context.Context, r *http.Request) (interface{}, error
 	}
 
 	return createGroupReq{
-		token: session.AccessToken,
+		token: session.Token,
 		Group: sdk.Group{
 			Name:        r.PostFormValue("name"),
 			Description: r.PostFormValue("description"),
@@ -1789,7 +1796,7 @@ func decodeGroupsCreation(_ context.Context, r *http.Request) (interface{}, erro
 	}
 
 	return createGroupsReq{
-		token:  session.AccessToken,
+		token:  session.Token,
 		Groups: groups,
 	}, nil
 }
@@ -1807,7 +1814,7 @@ func decodeGroupUpdate(_ context.Context, r *http.Request) (interface{}, error) 
 	group.ID = chi.URLParam(r, "id")
 
 	return updateGroupReq{
-		token: session.AccessToken,
+		token: session.Token,
 		Group: group,
 	}, nil
 }
@@ -1818,7 +1825,7 @@ func decodeGroupStatusUpdate(_ context.Context, r *http.Request) (interface{}, e
 		return nil, err
 	}
 	return updateGroupStatusReq{
-		token: session.AccessToken,
+		token: session.Token,
 		id:    r.PostFormValue("entityID"),
 	}, nil
 }
@@ -1958,7 +1965,7 @@ func decodeTerminalCommandRequest(_ context.Context, r *http.Request) (interface
 		return nil, err
 	}
 	return bootstrapCommandReq{
-		token:   session.AccessToken,
+		token:   session.Token,
 		id:      chi.URLParam(r, "id"),
 		command: strings.ReplaceAll(strings.Trim(r.PostFormValue("command"), " "), " ", ","),
 	}, nil
@@ -1974,7 +1981,7 @@ func decodeCreateBootstrapRequest(_ context.Context, r *http.Request) (interface
 	}
 
 	return createBootstrapReq{
-		token: session.AccessToken,
+		token: session.Token,
 		BootstrapConfig: sdk.BootstrapConfig{
 			ThingID:     r.FormValue("thingID"),
 			ExternalID:  r.FormValue("externalID"),
@@ -2002,7 +2009,7 @@ func decodeUpdateBootstrap(_ context.Context, r *http.Request) (interface{}, err
 	config.ThingID = chi.URLParam(r, "id")
 
 	return updateBootstrapReq{
-		token:           session.AccessToken,
+		token:           session.Token,
 		BootstrapConfig: config,
 	}, nil
 }
@@ -2013,7 +2020,7 @@ func decodeDeleteBootstrap(_ context.Context, r *http.Request) (interface{}, err
 		return nil, err
 	}
 	return deleteBootstrapReq{
-		token: session.AccessToken,
+		token: session.Token,
 		id:    chi.URLParam(r, "id"),
 	}, nil
 }
@@ -2029,7 +2036,7 @@ func decodeUpdateBootstrapState(_ context.Context, r *http.Request) (interface{}
 	}
 
 	return updateBootstrapStateReq{
-		token: session.AccessToken,
+		token: session.Token,
 		BootstrapConfig: sdk.BootstrapConfig{
 			ThingID: chi.URLParam(r, "id"),
 			State:   state,
@@ -2049,7 +2056,7 @@ func decodeUpdateBootstrapCerts(_ context.Context, r *http.Request) (interface{}
 	config.ThingID = chi.URLParam(r, "id")
 
 	return updateBootstrapCertReq{
-		token:           session.AccessToken,
+		token:           session.Token,
 		BootstrapConfig: config,
 	}, nil
 }
@@ -2064,7 +2071,7 @@ func decodeUpdateBootstrapConnections(_ context.Context, r *http.Request) (inter
 	}
 
 	return updateBootstrapConnReq{
-		token: session.AccessToken,
+		token: session.Token,
 		BootstrapConfig: sdk.BootstrapConfig{
 			ThingID:  chi.URLParam(r, "id"),
 			Channels: r.PostForm["channelID"],
@@ -2166,7 +2173,7 @@ func decodeGetEntitiesRequest(_ context.Context, r *http.Request) (interface{}, 
 	}
 
 	return getEntitiesReq{
-		token:      session.AccessToken,
+		token:      session.Token,
 		item:       item,
 		page:       page,
 		name:       name,
@@ -2176,19 +2183,31 @@ func decodeGetEntitiesRequest(_ context.Context, r *http.Request) (interface{}, 
 	}, nil
 }
 
-func decodeDomainLoginRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	session, err := sessionFromHeader(r)
-	if err != nil {
-		return nil, err
-	}
-	session.LoginStatus = ui.DomainLoginStatus
+func decodeDomainLoginRequest(s *securecookie.SecureCookie) kithttp.DecodeRequestFunc {
+	return func(_ context.Context, r *http.Request) (interface{}, error) {
+		refreshTokenCookie, err := tokenFromCookie(r, refreshTokenKey)
+		if err != nil {
+			return nil, err
+		}
+		var refreshToken string
+		if err := s.Decode(refreshTokenKey, refreshTokenCookie, &refreshToken); err != nil {
+			return ui.Session{}, err
+		}
 
-	return domainLoginReq{
-		Session: session,
-		Login: sdk.Login{
-			DomainID: r.FormValue("domainID"),
-		},
-	}, nil
+		session, err := sessionFromHeader(r)
+		if err != nil {
+			return nil, err
+		}
+		session.LoginStatus = ui.DomainLoginStatus
+		session.Token = refreshToken
+
+		return domainLoginReq{
+			Session: session,
+			Login: sdk.Login{
+				DomainID: r.FormValue("domainID"),
+			},
+		}, nil
+	}
 }
 
 func decodeListDomainsRequest(_ context.Context, r *http.Request) (interface{}, error) {
@@ -2237,7 +2256,7 @@ func decodeCreateDomainRequest(_ context.Context, r *http.Request) (interface{},
 	}
 
 	return createDomainReq{
-		token: session.AccessToken,
+		token: session.Token,
 		Domain: sdk.Domain{
 			Name:     r.FormValue("name"),
 			Alias:    r.FormValue("alias"),
@@ -2259,7 +2278,7 @@ func decodeUpdateDomainRequest(_ context.Context, r *http.Request) (interface{},
 	domain.ID = chi.URLParam(r, "id")
 
 	return updateDomainReq{
-		token:  session.AccessToken,
+		token:  session.Token,
 		Domain: domain,
 	}, nil
 }
@@ -2276,7 +2295,7 @@ func decodeUpdateDomainTagsRequest(_ context.Context, r *http.Request) (interfac
 	domain.ID = chi.URLParam(r, "id")
 
 	return updateDomainTagsReq{
-		token:  session.AccessToken,
+		token:  session.Token,
 		Domain: domain,
 	}, nil
 }
@@ -2287,7 +2306,7 @@ func decodeDomainStatusUpdate(_ context.Context, r *http.Request) (interface{}, 
 		return nil, err
 	}
 	return updateDomainStatusReq{
-		token: session.AccessToken,
+		token: session.Token,
 		id:    r.PostFormValue("entityID"),
 	}, nil
 }
@@ -2302,7 +2321,7 @@ func decodeAssignMemberRequest(_ context.Context, r *http.Request) (interface{},
 	}
 
 	return assignMemberReq{
-		token:    session.AccessToken,
+		token:    session.Token,
 		domainID: chi.URLParam(r, "id"),
 		UsersRelationRequest: sdk.UsersRelationRequest{
 			UserIDs:  r.Form["userID"],
@@ -2334,7 +2353,7 @@ func decodeSendInvitationRequest(_ context.Context, r *http.Request) (interface{
 		return nil, err
 	}
 	return sendInvitationReq{
-		token: session.AccessToken,
+		token: session.Token,
 		Invitation: sdk.Invitation{
 			DomainID: r.PostFormValue("domainID"),
 			UserID:   r.PostFormValue("userID"),
@@ -2382,7 +2401,7 @@ func decodeAcceptInvitationRequest(_ context.Context, r *http.Request) (interfac
 	}
 
 	return acceptInvitationReq{
-		token:    session.AccessToken,
+		token:    session.Token,
 		domainID: r.Form.Get("domainID"),
 	}, nil
 }
@@ -2402,7 +2421,7 @@ func decodeDeleteInvitationRequest(_ context.Context, r *http.Request) (interfac
 	}
 
 	return deleteInvitationReq{
-		token:    session.AccessToken,
+		token:    session.Token,
 		domain:   domain,
 		domainID: r.Form.Get("domainID"),
 		userID:   r.Form.Get("userID"),
@@ -2539,7 +2558,7 @@ func TokenMiddleware(prefix string) func(http.Handler) http.Handler {
 			}
 
 			// Parse the token without validation to get the expiration time
-			token, _, err := new(jwt.Parser).ParseUnverified(session.AccessToken, jwt.MapClaims{})
+			token, _, err := new(jwt.Parser).ParseUnverified(session.Token, jwt.MapClaims{})
 			if err != nil {
 				http.Redirect(w, r, fmt.Sprintf("%s/%s?error=%s", prefix, errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
 				return
@@ -2564,7 +2583,7 @@ func AuthnMiddleware(prefix string) func(http.Handler) http.Handler {
 				return
 			}
 
-			token, _, err := new(jwt.Parser).ParseUnverified(session.AccessToken, jwt.MapClaims{})
+			token, _, err := new(jwt.Parser).ParseUnverified(session.Token, jwt.MapClaims{})
 			if err != nil {
 				http.Redirect(w, r, fmt.Sprintf("%s/%s?error=%s", prefix, errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
 				return
