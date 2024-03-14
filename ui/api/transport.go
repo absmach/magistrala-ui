@@ -8,7 +8,6 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
-	"math"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -1952,8 +1951,8 @@ func decodeReadMessagesRequest(_ context.Context, r *http.Request) (interface{},
 			StringValue: vs,
 			DataValue:   vd,
 			BoolValue:   &vb,
-			From:        from * math.Pow10(ui.PrecisionDiff),
-			To:          to * math.Pow10(ui.PrecisionDiff),
+			From:        from * ui.MilliToNanoConverter,
+			To:          to * ui.MilliToNanoConverter,
 			Aggregation: aggregation,
 			Interval:    interval,
 		},
