@@ -88,12 +88,15 @@ func main() {
 	oauthProvider := google.NewProvider(oauthConfig)
 
 	dbConfig := postgres.Config{}
+	if err := env.Parse(&dbConfig); err != nil {
+		log.Fatalf("failed to load database configuration : %s", err.Error())
+	}
 	db, err := postgres.Setup(dbConfig, *repo.Migration())
 	if err != nil {
 		log.Fatalf("Failed to setup postgres db : %s", err)
 	}
 
-	dbs := repo.New(db)
+	dbs := repo.NewRepository(db)
 
 	idp := uuid.New()
 

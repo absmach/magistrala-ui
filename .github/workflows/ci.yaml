@@ -62,5 +62,12 @@ jobs:
 
       - name: Run Tests
         run: |
-          go mod vendor
           make test
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV }}
+          file: ./coverage.out
+          name: codecov-umbrella
+          verbose: true
