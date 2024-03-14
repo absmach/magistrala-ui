@@ -104,7 +104,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <tbody>
                         {{ $channelID := .ChannelID }}
                         {{ range $i, $t := .Things }}
-                          <tr>
+                          <tr onclick="viewThing('{{ $t.ID }}')" class="clickable-row">
                             <td>{{ $t.Name }}</td>
                             <td class="tags-col">
                               {{ range $j, $tag := $t.Tags }}
@@ -160,8 +160,12 @@ SPDX-License-Identifier: Apache-2.0 -->
         function openThingModal() {
           thingModal.show();
         }
-      </script>
-      <script type="module">
+
+        function viewThing(id) {
+          let pathPrefix = "{{ pathPrefix }}";
+          window.location.href = `${pathPrefix}/things/${id}`;
+        }
+      </script>      <script type="module">
         import { fetchIndividualEntity } from "/js/infinitescroll.js";
 
         fetchIndividualEntity({
