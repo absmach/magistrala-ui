@@ -597,7 +597,6 @@ class GaugeChart extends Echart {
 
   #generateScript() {
     return `
-  (function() {
     var gaugeChart = echarts.init(document.getElementById("${this.ID}"));
     var option = {
       title: {
@@ -633,7 +632,7 @@ class GaugeChart extends Echart {
     async function getData(gaugeChart) {
       try {
         const response = await fetch(
-          "/data?channel=${this.chartData.channel}"+
+          "${pathPrefix}/data?channel=${this.chartData.channel}"+
           "&publisher=${this.chartData.thing}"+
           "&name=${this.chartData.valueName}"+
           "&limit=1",
@@ -665,8 +664,7 @@ class GaugeChart extends Echart {
           getData(gaugeChart);
         }, 20000);
       }
-    }
-  })();`;
+    };`;
   }
 }
 
@@ -1063,43 +1061,42 @@ class MultiGaugeChart extends Echart {
   #generateScript() {
     let gaugeLabel = this.chartData.gaugeLabel.split(",");
     return `
-    (function() {
-      var multiGaugeChart = echarts.init(document.getElementById("${this.ID}"));
-      var gaugeData = [
-        {
-          value: 20,
-          name: '${gaugeLabel[0]}',
-          title: {
-            offsetCenter: ['0%', '-30%']
-          },
-          detail: {
-            valueAnimation: true,
-            offsetCenter: ['0%', '-18%']
-          }
+    var multiGaugeChart = echarts.init(document.getElementById("${this.ID}"));
+    var gaugeData = [
+      {
+        value: 20,
+        name: '${gaugeLabel[0]}',
+        title: {
+          offsetCenter: ['0%', '-30%']
         },
-        {
-          value: 40,
-          name: '${gaugeLabel[1]}',
-          title: {
-            offsetCenter: ['0%', '0%']
-          },
-          detail: {
-            valueAnimation: true,
-            offsetCenter: ['0%', '12%']
-          }
-        },
-        {
-          value: 60,
-          name: '${gaugeLabel[2]}',
-          title: {
-            offsetCenter: ['0%', '28%']
-          },
-          detail: {
-            valueAnimation: true,
-            offsetCenter: ['0%', '40%']
-          }
+        detail: {
+          valueAnimation: true,
+          offsetCenter: ['0%', '-18%']
         }
-      ];
+      },
+      {
+        value: 40,
+        name: '${gaugeLabel[1]}',
+        title: {
+          offsetCenter: ['0%', '0%']
+        },
+        detail: {
+          valueAnimation: true,
+          offsetCenter: ['0%', '12%']
+        }
+      },
+      {
+        value: 60,
+        name: '${gaugeLabel[2]}',
+        title: {
+          offsetCenter: ['0%', '28%']
+        },
+        detail: {
+          valueAnimation: true,
+          offsetCenter: ['0%', '40%']
+        }
+      }
+    ];
     var option = {
       title: {
         text: '${this.chartData.title}',
@@ -1168,21 +1165,21 @@ class MultiGaugeChart extends Echart {
         const name3 = names[2];
 
         const response1 = await fetch(
-          "/data?channel=${this.chartData.channel}"+
+          "${pathPrefix}/data?channel=${this.chartData.channel}"+
           "&publisher=${this.chartData.thing}"+
           "&name="+ name1 +
           "&limit=1",
         );
 
         const response2 = await fetch(
-          "/data?channel=${this.chartData.channel}"+
+          "${pathPrefix}/data?channel=${this.chartData.channel}"+
           "&publisher=${this.chartData.thing}"+
           "&name="+ name2 +
           "&limit=1",
         );
 
         const response3 = await fetch(
-          "/data?channel=${this.chartData.channel}"+
+          "${pathPrefix}/data?channel=${this.chartData.channel}"+
           "&publisher=${this.chartData.thing}"+
           "&name="+ name3 +
           "&limit=1",
@@ -1250,8 +1247,7 @@ class MultiGaugeChart extends Echart {
           getData(multiGaugeChart);
         }, 20000);
       }
-    }
-  })();`;
+    };`;
   }
 }
 
@@ -1482,70 +1478,70 @@ class SpeedGaugeChart extends Echart {
 
   #generateScript() {
     return `
-  (function() {
+
     var speedGaugeChart = echarts.init(document.getElementById("${this.ID}"));
     var option = {
-        title: {
-          text: '${this.chartData.title}',
-          left: 'center',
-          top: 20,
-          show: true,
-        },
-        series: [
-          {
-            type: 'gauge',
-            min: ${this.chartData.minValue},
-            max: ${this.chartData.maxValue},
-            axisLine: {
-              lineStyle: {
-                width: 30,
-                color: [
-                  [0.3, '#67e0e3'],
-                  [0.7, '#37a2da'],
-                  [1, '#fd666d']
-                ]
-              }
-            },
-            pointer: {
-              itemStyle: {
-                color: 'auto'
-              }
-            },
-            axisTick: {
-              distance: -30,
-              length: 8,
-              lineStyle: {
-                color: '#fff',
-                width: 2
-              }
-            },
-            splitLine: {
-              distance: -30,
-              length: 30,
-              lineStyle: {
-                color: '#fff',
-                width: 4
-              }
-            },
-            axisLabel: {
-              color: 'inherit',
-              distance: 40,
-              fontSize: 20
-            },
-            detail: {
-              valueAnimation: true,
-              formatter: '{value} km/h',
-              color: 'inherit'
-            },
-            data: [
-              {
-                value: "${this.chartData.minValue}",
-                name: "${this.chartData.gaugeLabel}",
-              }
-            ]
-          }
-        ]
-      };
+      title: {
+        text: '${this.chartData.title}',
+        left: 'center',
+        top: 20,
+        show: true,
+      },
+      series: [
+        {
+          type: 'gauge',
+          min: ${this.chartData.minValue},
+          max: ${this.chartData.maxValue},
+          axisLine: {
+            lineStyle: {
+              width: 30,
+              color: [
+                [0.3, '#67e0e3'],
+                [0.7, '#37a2da'],
+                [1, '#fd666d']
+              ]
+            }
+          },
+          pointer: {
+            itemStyle: {
+              color: 'auto'
+            }
+          },
+          axisTick: {
+            distance: -30,
+            length: 8,
+            lineStyle: {
+              color: '#fff',
+              width: 2
+            }
+          },
+          splitLine: {
+            distance: -30,
+            length: 30,
+            lineStyle: {
+              color: '#fff',
+              width: 4
+            }
+          },
+          axisLabel: {
+            color: 'inherit',
+            distance: 40,
+            fontSize: 20
+          },
+          detail: {
+            valueAnimation: true,
+            formatter: '{value} km/h',
+            color: 'inherit'
+          },
+          data: [
+            {
+              value: "${this.chartData.minValue}",
+              name: "${this.chartData.gaugeLabel}",
+            }
+          ]
+        }
+      ]
+    };
 
     speedGaugeChart.setOption(option)
     getData(speedGaugeChart);
@@ -1553,7 +1549,7 @@ class SpeedGaugeChart extends Echart {
     async function getData(speedGaugeChart) {
       try {
         const response = await fetch(
-          "/data?channel=${this.chartData.channel}"+
+          "${pathPrefix}/data?channel=${this.chartData.channel}"+
           "&publisher=${this.chartData.thing}"+
           "&name=${this.chartData.valueName}"+
           "&unit=${this.chartData.valueUnit}"+
@@ -1586,8 +1582,7 @@ class SpeedGaugeChart extends Echart {
           getData(speedGaugeChart);
         }, 20000);
       }
-    }
-  })();`;
+    };`;
   }
 }
 
@@ -1755,173 +1750,175 @@ class TempGaugeChart extends Echart {
 
   #generateScript() {
     return `
-    (function() {
-      var tempGaugeChart = echarts.init(document.getElementById("${this.ID}"));
-      var option = {
-        title: {
-          text: '${this.chartData.title}',
-          left: 'center',
-          textStyle: {
-            color: '#FFAB91'
-          }
-        },
-        series: [
-          {
-            type: 'gauge',
-            center: ['50%', '80%'],
-            startAngle: 200,
-            endAngle: -20,
-            min: ${this.chartData.minValue},
-            max: ${this.chartData.maxValue},
-            itemStyle: {
-              color: '#FFAB91'
-            },
-            progress: {
-              show: true,
-              width: 30
-            },
-            pointer: {
-              show: false
-            },
-            axisLine: {
-              lineStyle: {
-                width: 30
-              }
-            },
-            axisTick: {
-              distance: -44,
-              splitNumber: 5,
-              lineStyle: {
-                width: 2,
-                color: '#999'
-              }
-            },
-            splitLine: {
-              distance: -52,
-              length: 7,
-              lineStyle: {
-                width: 2,
-                color: '#999'
-              }
-            },
-            axisLabel: {
-              distance: -20,
-              color: '#999',
-              fontSize: 20
-            },
-            anchor: {
-              show: false
-            },
-            title: {
-              show: false
-            },
-            detail: {
-              valueAnimation: true,
-              width: '60%',
-              lineHeight: 40,
-              borderRadius: 1,
-              offsetCenter: [0, '-5%'],
-              fontSize: 30,
-              fontWeight: 'bolder',
-              formatter: '{value} °${this.chartData.gaugeLabel}',
-              color: 'inherit'
-            },
-            data: [
-              {
-                value: "${this.chartData.minValue}",
-              }
-            ]
-          },
-          {
-            type: 'gauge',
-            center: ['50%', '80%'],
-            startAngle: 200,
-            endAngle: -20,
-            min: ${this.chartData.minValue},
-            max: ${this.chartData.maxValue},
-            itemStyle: {
-              color: '#FD7347'
-            },
-            progress: {
-              show: true,
-              width: 8
-            },
-            pointer: {
-              show: false
-            },
-            axisLine: {
-              show: false
-            },
-            axisTick: {
-              show: false
-            },
-            splitLine: {
-              show: false
-            },
-            axisLabel: {
-              show: false
-            },
-            detail: {
-              show: false
-            },
-            data: [
-              {
-                value: "${this.chartData.minValue}",
-              }
-            ]
-          }
-        ]
-      };
-
-      tempGaugeChart.setOption(option)
-      getData(tempGaugeChart);
-
-      async function getData(tempGaugeChart) {
-        try {
-          const response = await fetch(
-            "/data?channel=${this.chartData.channel}"+
-            "&publisher=${this.chartData.thing}"+
-            "&name=${this.chartData.valueName}"+
-            "&unit=${this.chartData.valueUnit}"+
-            "&limit=1",
-          );
-          if (response.ok) {
-            const data = await response.json();
-            var newValue = data.messages[0].value;
-            tempGaugeChart.setOption({
-              series: [
-                {
-                  data: [
-                    { 
-                      value: newValue,
-                    
-                    },
-                  ],
-                },
-                {
-                  data: [
-                    { 
-                      value: newValue,
-                    
-                    },
-                  ],
-                }
-              ],
-            });
-          } else {
-          console.error("HTTP request failed with status: ", response.status);
-          }
-          setTimeout(function () {
-            getData(tempGaugeChart);
-          }, 20000);
-        } catch (error) {
-          console.error("Failed to fetch gauge data: ", error);
-          setTimeout(function () {
-            getData(tempGaugeChart);
-          }, 20000);
+    var tempGaugeChart = echarts.init(document.getElementById("${this.ID}"));
+    var option = {
+      title: {
+        text: '${this.chartData.title}',
+        left: 'center',
+        textStyle: {
+          color: '#FFAB91',
+          fontSize: 30,
+          fontWeight: 'bolder',
         }
-      }    
-    })();`;
+      },
+      series: [
+        {
+          type: 'gauge',
+          center: ['50%', '80%'],
+          startAngle: 200,
+          endAngle: -20,
+          min: ${this.chartData.minValue},
+          max: ${this.chartData.maxValue},
+          itemStyle: {
+            color: '#FFAB91'
+          },
+          progress: {
+            show: true,
+            width: 30
+          },
+          pointer: {
+            show: false
+          },
+          axisLine: {
+            lineStyle: {
+              width: 30
+            }
+          },
+          axisTick: {
+            distance: -44,
+            splitNumber: 5,
+            lineStyle: {
+              width: 2,
+              color: '#999'
+            }
+          },
+          splitLine: {
+            distance: -52,
+            length: 7,
+            lineStyle: {
+              width: 2,
+              color: '#999'
+            }
+          },
+          axisLabel: {
+            distance: -20,
+            color: '#999',
+            fontSize: 20
+          },
+          anchor: {
+            show: false
+          },
+          title: {
+            show: false
+          },
+          detail: {
+            valueAnimation: true,
+            width: '60%',
+            lineHeight: 40,
+            borderRadius: 1,
+            offsetCenter: [0, '-5%'],
+            fontSize: 30,
+            fontWeight: 'bolder',
+            formatter: '{value} °${this.chartData.valueUnit}',
+            color: 'inherit'
+          },
+          data: [
+            {
+              value: "${this.chartData.minValue}",
+              name: '${this.chartData.gaugeLabel}',
+            }
+          ]
+        },
+        {
+          type: 'gauge',
+          center: ['50%', '80%'],
+          startAngle: 200,
+          endAngle: -20,
+          min: ${this.chartData.minValue},
+          max: ${this.chartData.maxValue},
+          itemStyle: {
+            color: '#FD7347'
+          },
+          progress: {
+            show: true,
+            width: 8
+          },
+          pointer: {
+            show: false
+          },
+          axisLine: {
+            show: false
+          },
+          axisTick: {
+            show: false
+          },
+          splitLine: {
+            show: false
+          },
+          axisLabel: {
+            show: false
+          },
+          detail: {
+            show: false
+          },
+          data: [
+            {
+              value: "${this.chartData.minValue}",
+              name: '${this.chartData.gaugeLabel}',
+            }
+          ]
+        }
+      ]
+    };
+
+    tempGaugeChart.setOption(option)
+    getData(tempGaugeChart);
+
+    async function getData(tempGaugeChart) {
+      try {
+        const response = await fetch(
+          "${pathPrefix}/data?channel=${this.chartData.channel}"+
+          "&publisher=${this.chartData.thing}"+
+          "&name=${this.chartData.valueName}"+
+          "&unit=${this.chartData.valueUnit}"+
+          "&limit=1",
+        );
+        if (response.ok) {
+          const data = await response.json();
+          var newValue = data.messages[0].value;
+          tempGaugeChart.setOption({
+            series: [
+              {
+                data: [
+                  { 
+                    value: newValue,
+                    name: '${this.chartData.gaugeLabel}',
+                  },
+                ],
+              },
+              {
+                data: [
+                  { 
+                    value: newValue,
+                    name: '${this.chartData.gaugeLabel}',
+                  },
+                ],
+              }
+            ],
+          });
+        } else {
+        console.error("HTTP request failed with status: ", response.status);
+        }
+        setTimeout(function () {
+          getData(tempGaugeChart);
+        }, 20000);
+      } catch (error) {
+        console.error("Failed to fetch gauge data: ", error);
+        setTimeout(function () {
+          getData(tempGaugeChart);
+        }, 20000);
+      }
+    };`;
   }
 }
 
