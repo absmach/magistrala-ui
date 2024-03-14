@@ -57,6 +57,15 @@ const (
 	domainInvitationsActive = "domaininvitations"
 )
 
+type precisionLevel uint8
+
+const (
+	SecondsLevel precisionLevel = iota
+	MillisecondsLevel
+	MicrosecondsLevel
+	NanosecondsLevel
+)
+
 type LoginStatus string
 
 const (
@@ -1718,6 +1727,10 @@ func (us *uiService) ReadMessages(s Session, channelID, thingKey string, mpgm sd
 		return []byte{}, err
 	}
 
+	for _, message := range msg.Messages {
+		message.Time = FixUnixPrecision(message.Time, MillisecondsLevel)
+	}
+
 	noOfPages := int(math.Ceil(float64(msg.Total) / float64(mpgm.Limit)))
 
 	crumbs := []breadcrumb{
@@ -1762,6 +1775,10 @@ func (us *uiService) FetchChartData(token string, channelID string, mpgm sdk.Mes
 	msg, sdkErr := us.sdk.ReadMessages(mpgm, channelID, token)
 	if sdkErr != nil {
 		return []byte{}, sdkErr
+	}
+
+	for _, message := range msg.Messages {
+		message.Time = FixUnixPrecision(message.Time, MillisecondsLevel)
 	}
 
 	data, err := json.Marshal(msg)
@@ -2660,23 +2677,7 @@ func parseTemplates(mfsdk sdk.SDK, prefix string) (tpl *template.Template, err e
 			if t == 0 {
 				return ""
 			}
-			currentPrecision := len(fmt.Sprintf("%d", int64(t)))
-			switch currentPrecision {
-			// Seconds precision
-			case len(fmt.Sprintf("%d", time.Now().Unix())):
-				return time.Unix(int64(t), 0).String()
-			// Milliseconds precision
-			case len(fmt.Sprintf("%d", time.Now().UnixMilli())):
-				return time.UnixMilli(int64(t)).String()
-			// Microseconds precision
-			case len(fmt.Sprintf("%d", time.Now().UnixMicro())):
-				return time.UnixMicro(int64(t)).String()
-			// Nanoseconds precision
-			case len(fmt.Sprintf("%d", time.Now().UnixNano())):
-				return time.Unix(0, int64(t)).String()
-			default:
-				return ""
-			}
+			return time.UnixMilli(int64(t)).String()
 		},
 		"hasPermission": func(permissions []string, permission string) bool {
 			return slices.Contains(permissions, permission)
@@ -2719,4 +2720,32 @@ func parseTemplates(mfsdk sdk.SDK, prefix string) (tpl *template.Template, err e
 	}
 
 	return tpl.ParseFS(templatesFS, templates...)
+}
+
+func FixUnixPrecision(currTime float64, precisionLevel precisionLevel) float64 {
+	currentPrecision := len(fmt.Sprint(int64(currTime)))
+	var desiredPrecision int
+	switch precisionLevel {
+	case SecondsLevel:
+		desiredPrecision = len(fmt.Sprint(time.Now().Unix()))
+	case MillisecondsLevel:
+		desiredPrecision = len(fmt.Sprint(time.Now().UnixMilli()))
+	case MicrosecondsLevel:
+		desiredPrecision = len(fmt.Sprint(time.Now().UnixMicro()))
+	case NanosecondsLevel:
+		desiredPrecision = len(fmt.Sprint(time.Now().UnixNano()))
+	}
+
+	precisionDiff := desiredPrecision - currentPrecision
+	var adjustedTime float64
+	switch {
+	case precisionDiff < 0:
+		adjustedTime = currTime / math.Pow10(-precisionDiff)
+	case precisionDiff > 0:
+		adjustedTime = currTime * math.Pow10(precisionDiff)
+	default:
+		adjustedTime = currTime
+	}
+
+	return adjustedTime
 }
