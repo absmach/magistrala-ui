@@ -52,11 +52,7 @@ var (
 			Permissions: []string{"view", "edit"},
 		},
 		LoginStatus: ui.DomainLoginStatus,
-		Token: sdk.Token{
-			AccessToken:  accessToken,
-			RefreshToken: accessToken,
-			AccessType:   accessToken,
-		},
+		Token:       accessToken,
 	}
 	validUser = sdk.User{
 		ID:   generateID(&testing.T{}),
@@ -277,14 +273,14 @@ func TestIndex(t *testing.T) {
 			}
 			enabledPage := allPage
 			enabledPage.Status = "enabled"
-			sdkCall := sdkmock.On("Users", allPage, validSession.AccessToken).Return(validUsersPage, tc.errUsers)
-			sdkCall1 := sdkmock.On("Users", enabledPage, validSession.AccessToken).Return(validUsersPage, tc.errEnabledUsers)
-			sdkCall2 := sdkmock.On("Groups", allPage, validSession.AccessToken).Return(validGroupsPage, tc.errGroups)
-			sdkCall3 := sdkmock.On("Groups", enabledPage, validSession.AccessToken).Return(validGroupsPage, tc.errEnabledGroup)
-			sdkCall4 := sdkmock.On("Things", allPage, validSession.AccessToken).Return(validThingsPage, tc.errThings)
-			sdkCall5 := sdkmock.On("Things", enabledPage, validSession.AccessToken).Return(validThingsPage, tc.errEnabledThings)
-			sdkCall6 := sdkmock.On("Channels", allPage, validSession.AccessToken).Return(validChannelsPage, tc.errChannels)
-			sdkCall7 := sdkmock.On("Channels", enabledPage, validSession.AccessToken).Return(validChannelsPage, tc.errEnabledChannels)
+			sdkCall := sdkmock.On("Users", allPage, validSession.Token).Return(validUsersPage, tc.errUsers)
+			sdkCall1 := sdkmock.On("Users", enabledPage, validSession.Token).Return(validUsersPage, tc.errEnabledUsers)
+			sdkCall2 := sdkmock.On("Groups", allPage, validSession.Token).Return(validGroupsPage, tc.errGroups)
+			sdkCall3 := sdkmock.On("Groups", enabledPage, validSession.Token).Return(validGroupsPage, tc.errEnabledGroup)
+			sdkCall4 := sdkmock.On("Things", allPage, validSession.Token).Return(validThingsPage, tc.errThings)
+			sdkCall5 := sdkmock.On("Things", enabledPage, validSession.Token).Return(validThingsPage, tc.errEnabledThings)
+			sdkCall6 := sdkmock.On("Channels", allPage, validSession.Token).Return(validChannelsPage, tc.errChannels)
+			sdkCall7 := sdkmock.On("Channels", enabledPage, validSession.Token).Return(validChannelsPage, tc.errEnabledChannels)
 
 			_, err := svc.Index(validSession)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
@@ -730,15 +726,15 @@ func TestSession(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("UserProfile", validSession.AccessToken).Return(validUser, tc.errUserProfile)
-			sdkCall1 := sdkmock.On("Domain", validSession.Domain.ID, validSession.AccessToken).Return(validDomain, tc.errDomain)
-			sdkCall2 := sdkmock.On("DomainPermissions", validSession.Domain.ID, validSession.AccessToken).Return(validDomain, tc.errPermissions)
+			sdkCall := sdkmock.On("UserProfile", validSession.Token).Return(validUser, tc.errUserProfile)
+			sdkCall1 := sdkmock.On("Domain", validSession.Domain.ID, validSession.Token).Return(validDomain, tc.errDomain)
+			sdkCall2 := sdkmock.On("DomainPermissions", validSession.Domain.ID, validSession.Token).Return(validDomain, tc.errPermissions)
 			_, err := svc.Session(validSession)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UserProfile", validSession.AccessToken)
-				sdkCall1.Parent.AssertCalled(t, "Domain", validSession.Domain.ID, validSession.AccessToken)
-				sdkCall2.Parent.AssertCalled(t, "DomainPermissions", validSession.Domain.ID, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UserProfile", validSession.Token)
+				sdkCall1.Parent.AssertCalled(t, "Domain", validSession.Domain.ID, validSession.Token)
+				sdkCall2.Parent.AssertCalled(t, "DomainPermissions", validSession.Domain.ID, validSession.Token)
 			}
 			sdkCall.Unset()
 			sdkCall1.Unset()
@@ -805,11 +801,11 @@ func TestListUsers(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("Users", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.AccessToken).Return(validUsersPage, tc.sdkerr)
+			sdkCall := sdkmock.On("Users", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.Token).Return(validUsersPage, tc.sdkerr)
 			_, err := svc.ListUsers(validSession, "enabled", 1, 10)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "Users", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "Users", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -839,11 +835,11 @@ func TestViewUser(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("User", id, validSession.AccessToken).Return(validUser, tc.sdkerr)
+			sdkCall := sdkmock.On("User", id, validSession.Token).Return(validUser, tc.sdkerr)
 			_, err := svc.ViewUser(validSession, id)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "User", id, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "User", id, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -873,11 +869,11 @@ func TestUpdateUser(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("UpdateUser", validUser, validSession.AccessToken).Return(validUser, tc.sdkerr)
-			err := svc.UpdateUser(validSession.AccessToken, validUser)
+			sdkCall := sdkmock.On("UpdateUser", validUser, validSession.Token).Return(validUser, tc.sdkerr)
+			err := svc.UpdateUser(validSession.Token, validUser)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UpdateUser", validUser, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UpdateUser", validUser, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -907,11 +903,11 @@ func TestUpdateUserTags(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("UpdateUserTags", validUser, validSession.AccessToken).Return(validUser, tc.sdkerr)
-			err := svc.UpdateUserTags(validSession.AccessToken, validUser)
+			sdkCall := sdkmock.On("UpdateUserTags", validUser, validSession.Token).Return(validUser, tc.sdkerr)
+			err := svc.UpdateUserTags(validSession.Token, validUser)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UpdateUserTags", validUser, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UpdateUserTags", validUser, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -941,11 +937,11 @@ func TestUpdateUserIdentity(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("UpdateUserIdentity", validUser, validSession.AccessToken).Return(validUser, tc.sdkerr)
-			err := svc.UpdateUserIdentity(validSession.AccessToken, validUser)
+			sdkCall := sdkmock.On("UpdateUserIdentity", validUser, validSession.Token).Return(validUser, tc.sdkerr)
+			err := svc.UpdateUserIdentity(validSession.Token, validUser)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UpdateUserIdentity", validUser, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UpdateUserIdentity", validUser, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -975,11 +971,11 @@ func TestUpdateUserRole(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("UpdateUserRole", validUser, validSession.AccessToken).Return(validUser, tc.sdkerr)
-			err := svc.UpdateUserRole(validSession.AccessToken, validUser)
+			sdkCall := sdkmock.On("UpdateUserRole", validUser, validSession.Token).Return(validUser, tc.sdkerr)
+			err := svc.UpdateUserRole(validSession.Token, validUser)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UpdateUserRole", validUser, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UpdateUserRole", validUser, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -1009,11 +1005,11 @@ func TestEnableUser(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("EnableUser", validUser.ID, validSession.AccessToken).Return(validUser, tc.sdkerr)
-			err := svc.EnableUser(validSession.AccessToken, validUser.ID)
+			sdkCall := sdkmock.On("EnableUser", validUser.ID, validSession.Token).Return(validUser, tc.sdkerr)
+			err := svc.EnableUser(validSession.Token, validUser.ID)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "EnableUser", validUser.ID, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "EnableUser", validUser.ID, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -1043,11 +1039,11 @@ func TestDisableUser(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("DisableUser", validUser.ID, validSession.AccessToken).Return(validUser, tc.sdkerr)
-			err := svc.DisableUser(validSession.AccessToken, validUser.ID)
+			sdkCall := sdkmock.On("DisableUser", validUser.ID, validSession.Token).Return(validUser, tc.sdkerr)
+			err := svc.DisableUser(validSession.Token, validUser.ID)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "DisableUser", validUser.ID, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "DisableUser", validUser.ID, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -1146,11 +1142,11 @@ func TestListThings(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("Things", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.AccessToken).Return(validThingsPage, tc.sdkerr)
+			sdkCall := sdkmock.On("Things", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.Token).Return(validThingsPage, tc.sdkerr)
 			_, err := svc.ListThings(validSession, "enabled", 1, 10)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "Things", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "Things", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -1184,12 +1180,12 @@ func TestViewThing(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("Thing", id, validSession.AccessToken).Return(validThing, tc.errThing)
-			sdkCall1 := sdkmock.On("ThingPermissions", id, validSession.AccessToken).Return(validThing, tc.errPermissions)
+			sdkCall := sdkmock.On("Thing", id, validSession.Token).Return(validThing, tc.errThing)
+			sdkCall1 := sdkmock.On("ThingPermissions", id, validSession.Token).Return(validThing, tc.errPermissions)
 			_, err := svc.ViewThing(validSession, id)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "Thing", id, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "Thing", id, validSession.Token)
 			}
 			sdkCall.Unset()
 			sdkCall1.Unset()
@@ -1220,11 +1216,11 @@ func TestUpdateThing(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("UpdateThing", validThing, validSession.AccessToken).Return(validThing, tc.sdkerr)
-			err := svc.UpdateThing(validSession.AccessToken, validThing)
+			sdkCall := sdkmock.On("UpdateThing", validThing, validSession.Token).Return(validThing, tc.sdkerr)
+			err := svc.UpdateThing(validSession.Token, validThing)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UpdateThing", validThing, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UpdateThing", validThing, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -1254,11 +1250,11 @@ func TestUpdateThingTags(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("UpdateThingTags", validThing, validSession.AccessToken).Return(validThing, tc.sdkerr)
-			err := svc.UpdateThingTags(validSession.AccessToken, validThing)
+			sdkCall := sdkmock.On("UpdateThingTags", validThing, validSession.Token).Return(validThing, tc.sdkerr)
+			err := svc.UpdateThingTags(validSession.Token, validThing)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UpdateThingTags", validThing, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UpdateThingTags", validThing, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -1288,11 +1284,11 @@ func TestUpdateThingSecret(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("UpdateThingSecret", validThing.ID, validThing.Credentials.Secret, validSession.AccessToken).Return(validThing, tc.sdkerr)
-			err := svc.UpdateThingSecret(validSession.AccessToken, validThing)
+			sdkCall := sdkmock.On("UpdateThingSecret", validThing.ID, validThing.Credentials.Secret, validSession.Token).Return(validThing, tc.sdkerr)
+			err := svc.UpdateThingSecret(validSession.Token, validThing)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UpdateThingSecret", validThing.ID, validThing.Credentials.Secret, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UpdateThingSecret", validThing.ID, validThing.Credentials.Secret, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -1322,11 +1318,11 @@ func TestEnableThing(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("EnableThing", validThing.ID, validSession.AccessToken).Return(validThing, tc.sdkerr)
-			err := svc.EnableThing(validSession.AccessToken, validThing.ID)
+			sdkCall := sdkmock.On("EnableThing", validThing.ID, validSession.Token).Return(validThing, tc.sdkerr)
+			err := svc.EnableThing(validSession.Token, validThing.ID)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "EnableThing", validThing.ID, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "EnableThing", validThing.ID, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -1356,11 +1352,11 @@ func TestDisableThing(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("DisableThing", validThing.ID, validSession.AccessToken).Return(validThing, tc.sdkerr)
-			err := svc.DisableThing(validSession.AccessToken, validThing.ID)
+			sdkCall := sdkmock.On("DisableThing", validThing.ID, validSession.Token).Return(validThing, tc.sdkerr)
+			err := svc.DisableThing(validSession.Token, validThing.ID)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "DisableThing", validThing.ID, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "DisableThing", validThing.ID, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -1390,11 +1386,11 @@ func TestShareThing(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("ShareThing", validThing.ID, validUsersRelationReq, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.ShareThing(validSession.AccessToken, validThing.ID, validUsersRelationReq)
+			sdkCall := sdkmock.On("ShareThing", validThing.ID, validUsersRelationReq, validSession.Token).Return(tc.sdkerr)
+			err := svc.ShareThing(validSession.Token, validThing.ID, validUsersRelationReq)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "ShareThing", validThing.ID, validUsersRelationReq, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "ShareThing", validThing.ID, validUsersRelationReq, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -1424,11 +1420,11 @@ func TestUnshareThing(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("UnshareThing", validThing.ID, validUsersRelationReq, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.UnshareThing(validSession.AccessToken, validThing.ID, validUsersRelationReq)
+			sdkCall := sdkmock.On("UnshareThing", validThing.ID, validUsersRelationReq, validSession.Token).Return(tc.sdkerr)
+			err := svc.UnshareThing(validSession.Token, validThing.ID, validUsersRelationReq)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UnshareThing", validThing.ID, validUsersRelationReq, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UnshareThing", validThing.ID, validUsersRelationReq, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -1467,12 +1463,12 @@ func TestListThingUsers(t *testing.T) {
 				Limit:      10,
 				Permission: "view",
 			}
-			sdkCall := sdkmock.On("ListThingUsers", id, page, validSession.AccessToken).Return(validUsersPage, tc.errListThingUsers)
-			sdkCall1 := sdkmock.On("ThingPermissions", id, validSession.AccessToken).Return(validThing, tc.errPermissions)
+			sdkCall := sdkmock.On("ListThingUsers", id, page, validSession.Token).Return(validUsersPage, tc.errListThingUsers)
+			sdkCall1 := sdkmock.On("ThingPermissions", id, validSession.Token).Return(validThing, tc.errPermissions)
 			_, err := svc.ListThingUsers(validSession, id, "view", 1, 10)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "ListThingUsers", id, page, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "ListThingUsers", id, page, validSession.Token)
 			}
 			sdkCall.Unset()
 			sdkCall1.Unset()
@@ -1513,15 +1509,15 @@ func TestListChannelsByThing(t *testing.T) {
 				Limit:      10,
 				Visibility: "all",
 			}
-			sdkCall := sdkmock.On("ChannelsByThing", id, page, validSession.AccessToken).Return(validChannelsPage, tc.errListChannelUsers)
-			sdkCall1 := sdkmock.On("ThingPermissions", id, validSession.AccessToken).Return(validThing, tc.errPermissions)
-			sdkCall2 := sdkmock.On("Thing", id, validSession.AccessToken).Return(validThing, tc.errPermissions)
+			sdkCall := sdkmock.On("ChannelsByThing", id, page, validSession.Token).Return(validChannelsPage, tc.errListChannelUsers)
+			sdkCall1 := sdkmock.On("ThingPermissions", id, validSession.Token).Return(validThing, tc.errPermissions)
+			sdkCall2 := sdkmock.On("Thing", id, validSession.Token).Return(validThing, tc.errPermissions)
 			_, err := svc.ListChannelsByThing(validSession, id, 1, 10)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "ChannelsByThing", id, page, validSession.AccessToken)
-				sdkCall1.Parent.AssertCalled(t, "ThingPermissions", id, validSession.AccessToken)
-				sdkCall2.Parent.AssertCalled(t, "Thing", id, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "ChannelsByThing", id, page, validSession.Token)
+				sdkCall1.Parent.AssertCalled(t, "ThingPermissions", id, validSession.Token)
+				sdkCall2.Parent.AssertCalled(t, "Thing", id, validSession.Token)
 			}
 			sdkCall.Unset()
 			sdkCall1.Unset()
@@ -1622,11 +1618,11 @@ func TestListChannels(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("Channels", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.AccessToken).Return(validChannelsPage, tc.sdkerr)
+			sdkCall := sdkmock.On("Channels", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.Token).Return(validChannelsPage, tc.sdkerr)
 			_, err := svc.ListChannels(validSession, "enabled", 1, 10)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "Channels", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "Channels", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -1660,12 +1656,12 @@ func TestViewChannel(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("Channel", id, validSession.AccessToken).Return(validChannel, tc.errChannel)
-			sdkCall1 := sdkmock.On("ChannelPermissions", id, validSession.AccessToken).Return(validChannel, tc.errPermissions)
+			sdkCall := sdkmock.On("Channel", id, validSession.Token).Return(validChannel, tc.errChannel)
+			sdkCall1 := sdkmock.On("ChannelPermissions", id, validSession.Token).Return(validChannel, tc.errPermissions)
 			_, err := svc.ViewChannel(validSession, id)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "Channel", id, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "Channel", id, validSession.Token)
 			}
 			sdkCall.Unset()
 			sdkCall1.Unset()
@@ -1696,11 +1692,11 @@ func TestUpdateChannel(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("UpdateChannel", validChannel, validSession.AccessToken).Return(validChannel, tc.sdkerr)
-			err := svc.UpdateChannel(validSession.AccessToken, validChannel)
+			sdkCall := sdkmock.On("UpdateChannel", validChannel, validSession.Token).Return(validChannel, tc.sdkerr)
+			err := svc.UpdateChannel(validSession.Token, validChannel)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UpdateChannel", validChannel, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UpdateChannel", validChannel, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -1739,13 +1735,13 @@ func TestListThingsByChannel(t *testing.T) {
 				Limit:      10,
 				Visibility: "all",
 			}
-			sdkCall := sdkmock.On("ThingsByChannel", id, page, validSession.AccessToken).Return(validThingsPage, tc.errListThingByChannel)
-			sdkCall1 := sdkmock.On("ChannelPermissions", id, validSession.AccessToken).Return(validChannel, tc.errPermissions)
+			sdkCall := sdkmock.On("ThingsByChannel", id, page, validSession.Token).Return(validThingsPage, tc.errListThingByChannel)
+			sdkCall1 := sdkmock.On("ChannelPermissions", id, validSession.Token).Return(validChannel, tc.errPermissions)
 			_, err := svc.ListThingsByChannel(validSession, id, 1, 10)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "ThingsByChannel", id, page, validSession.AccessToken)
-				sdkCall1.Parent.AssertCalled(t, "ChannelPermissions", id, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "ThingsByChannel", id, page, validSession.Token)
+				sdkCall1.Parent.AssertCalled(t, "ChannelPermissions", id, validSession.Token)
 			}
 			sdkCall.Unset()
 			sdkCall1.Unset()
@@ -1776,11 +1772,11 @@ func TestEnableChannel(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("EnableChannel", validChannel.ID, validSession.AccessToken).Return(validChannel, tc.sdkerr)
-			err := svc.EnableChannel(validSession.AccessToken, validChannel.ID)
+			sdkCall := sdkmock.On("EnableChannel", validChannel.ID, validSession.Token).Return(validChannel, tc.sdkerr)
+			err := svc.EnableChannel(validSession.Token, validChannel.ID)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "EnableChannel", validChannel.ID, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "EnableChannel", validChannel.ID, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -1810,11 +1806,11 @@ func TestDisableChannel(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("DisableChannel", validChannel.ID, validSession.AccessToken).Return(validChannel, tc.sdkerr)
-			err := svc.DisableChannel(validSession.AccessToken, validChannel.ID)
+			sdkCall := sdkmock.On("DisableChannel", validChannel.ID, validSession.Token).Return(validChannel, tc.sdkerr)
+			err := svc.DisableChannel(validSession.Token, validChannel.ID)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "DisableChannel", validChannel.ID, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "DisableChannel", validChannel.ID, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -1844,11 +1840,11 @@ func TestConnect(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("Connect", sdk.Connection{}, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.Connect(validSession.AccessToken, sdk.Connection{})
+			sdkCall := sdkmock.On("Connect", sdk.Connection{}, validSession.Token).Return(tc.sdkerr)
+			err := svc.Connect(validSession.Token, sdk.Connection{})
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "Connect", sdk.Connection{}, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "Connect", sdk.Connection{}, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -1878,11 +1874,11 @@ func TestDisconnect(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("Disconnect", sdk.Connection{}, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.Disconnect(validSession.AccessToken, sdk.Connection{})
+			sdkCall := sdkmock.On("Disconnect", sdk.Connection{}, validSession.Token).Return(tc.sdkerr)
+			err := svc.Disconnect(validSession.Token, sdk.Connection{})
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "Disconnect", sdk.Connection{}, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "Disconnect", sdk.Connection{}, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -1912,11 +1908,11 @@ func TestConnectThing(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("ConnectThing", id, id, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.ConnectThing(id, id, validSession.AccessToken)
+			sdkCall := sdkmock.On("ConnectThing", id, id, validSession.Token).Return(tc.sdkerr)
+			err := svc.ConnectThing(id, id, validSession.Token)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "ConnectThing", id, id, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "ConnectThing", id, id, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -1946,11 +1942,11 @@ func TestDisconnectThing(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("DisconnectThing", id, id, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.DisconnectThing(id, id, validSession.AccessToken)
+			sdkCall := sdkmock.On("DisconnectThing", id, id, validSession.Token).Return(tc.sdkerr)
+			err := svc.DisconnectThing(id, id, validSession.Token)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "DisconnectThing", id, id, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "DisconnectThing", id, id, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -1980,11 +1976,11 @@ func TestAddUserToChannel(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("AddUserToChannel", id, validUsersRelationReq, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.AddUserToChannel(validSession.AccessToken, id, validUsersRelationReq)
+			sdkCall := sdkmock.On("AddUserToChannel", id, validUsersRelationReq, validSession.Token).Return(tc.sdkerr)
+			err := svc.AddUserToChannel(validSession.Token, id, validUsersRelationReq)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "AddUserToChannel", id, validUsersRelationReq, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "AddUserToChannel", id, validUsersRelationReq, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -2014,11 +2010,11 @@ func TestRemoveUserFromChannel(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("RemoveUserFromChannel", id, validUsersRelationReq, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.RemoveUserFromChannel(validSession.AccessToken, id, validUsersRelationReq)
+			sdkCall := sdkmock.On("RemoveUserFromChannel", id, validUsersRelationReq, validSession.Token).Return(tc.sdkerr)
+			err := svc.RemoveUserFromChannel(validSession.Token, id, validUsersRelationReq)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "RemoveUserFromChannel", id, validUsersRelationReq, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "RemoveUserFromChannel", id, validUsersRelationReq, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -2057,12 +2053,12 @@ func TestListChannelUsers(t *testing.T) {
 				Limit:      10,
 				Permission: "view",
 			}
-			sdkCall := sdkmock.On("ListChannelUsers", id, page, validSession.AccessToken).Return(validUsersPage, tc.errListChannelUsers)
-			sdkCall1 := sdkmock.On("ChannelPermissions", id, validSession.AccessToken).Return(validChannel, tc.errPermissions)
+			sdkCall := sdkmock.On("ListChannelUsers", id, page, validSession.Token).Return(validUsersPage, tc.errListChannelUsers)
+			sdkCall1 := sdkmock.On("ChannelPermissions", id, validSession.Token).Return(validChannel, tc.errPermissions)
 			_, err := svc.ListChannelUsers(validSession, id, "view", 1, 10)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "ListChannelUsers", id, page, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "ListChannelUsers", id, page, validSession.Token)
 			}
 			sdkCall.Unset()
 			sdkCall1.Unset()
@@ -2093,11 +2089,11 @@ func TestAddUserGroupToChannel(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("AddUserGroupToChannel", id, validUserGroupsReq, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.AddUserGroupToChannel(validSession.AccessToken, id, validUserGroupsReq)
+			sdkCall := sdkmock.On("AddUserGroupToChannel", id, validUserGroupsReq, validSession.Token).Return(tc.sdkerr)
+			err := svc.AddUserGroupToChannel(validSession.Token, id, validUserGroupsReq)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "AddUserGroupToChannel", id, validUserGroupsReq, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "AddUserGroupToChannel", id, validUserGroupsReq, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -2127,11 +2123,11 @@ func TestRemoveUserGroupFromChannel(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("RemoveUserGroupFromChannel", id, validUserGroupsReq, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.RemoveUserGroupFromChannel(validSession.AccessToken, id, validUserGroupsReq)
+			sdkCall := sdkmock.On("RemoveUserGroupFromChannel", id, validUserGroupsReq, validSession.Token).Return(tc.sdkerr)
+			err := svc.RemoveUserGroupFromChannel(validSession.Token, id, validUserGroupsReq)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "RemoveUserGroupFromChannel", id, validUserGroupsReq, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "RemoveUserGroupFromChannel", id, validUserGroupsReq, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -2169,12 +2165,12 @@ func TestListChannelUserGroups(t *testing.T) {
 				Offset: 0,
 				Limit:  10,
 			}
-			sdkCall := sdkmock.On("ListChannelUserGroups", id, page, validSession.AccessToken).Return(validGroupsPage, tc.errListChannelUserGroups)
-			sdkCall1 := sdkmock.On("ChannelPermissions", id, validSession.AccessToken).Return(validChannel, tc.errPermissions)
+			sdkCall := sdkmock.On("ListChannelUserGroups", id, page, validSession.Token).Return(validGroupsPage, tc.errListChannelUserGroups)
+			sdkCall1 := sdkmock.On("ChannelPermissions", id, validSession.Token).Return(validChannel, tc.errPermissions)
 			_, err := svc.ListChannelUserGroups(validSession, id, 1, 10)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "ListChannelUserGroups", id, page, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "ListChannelUserGroups", id, page, validSession.Token)
 			}
 			sdkCall.Unset()
 			sdkCall1.Unset()
@@ -2205,11 +2201,11 @@ func TestAssign(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("AddUserToGroup", id, validUsersRelationReq, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.Assign(validSession.AccessToken, id, validUsersRelationReq)
+			sdkCall := sdkmock.On("AddUserToGroup", id, validUsersRelationReq, validSession.Token).Return(tc.sdkerr)
+			err := svc.Assign(validSession.Token, id, validUsersRelationReq)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "AddUserToGroup", id, validUsersRelationReq, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "AddUserToGroup", id, validUsersRelationReq, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -2239,11 +2235,11 @@ func TestUnassign(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("RemoveUserFromGroup", id, validUsersRelationReq, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.Unassign(validSession.AccessToken, id, validUsersRelationReq)
+			sdkCall := sdkmock.On("RemoveUserFromGroup", id, validUsersRelationReq, validSession.Token).Return(tc.sdkerr)
+			err := svc.Unassign(validSession.Token, id, validUsersRelationReq)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "RemoveUserFromGroup", id, validUsersRelationReq, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "RemoveUserFromGroup", id, validUsersRelationReq, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -2318,12 +2314,12 @@ func TestListGroupUsers(t *testing.T) {
 				Visibility: "all",
 				Permission: "view",
 			}
-			sdkCall := sdkmock.On("ListGroupUsers", id, page, validSession.AccessToken).Return(validUsersPage, tc.errListGroupUsers)
-			sdkCall1 := sdkmock.On("GroupPermissions", id, validSession.AccessToken).Return(validGroup, tc.errPermissions)
+			sdkCall := sdkmock.On("ListGroupUsers", id, page, validSession.Token).Return(validUsersPage, tc.errListGroupUsers)
+			sdkCall1 := sdkmock.On("GroupPermissions", id, validSession.Token).Return(validGroup, tc.errPermissions)
 			_, err := svc.ListGroupUsers(validSession, id, "view", 1, 10)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "ListGroupUsers", id, page, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "ListGroupUsers", id, page, validSession.Token)
 			}
 			sdkCall.Unset()
 			sdkCall1.Unset()
@@ -2366,13 +2362,13 @@ func TestViewGroup(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("Group", id, validSession.AccessToken).Return(validGroup, tc.errGroup)
-			sdkCall1 := sdkmock.On("Group", validGroup.ParentID, validSession.AccessToken).Return(validGroup, tc.errParent)
-			sdkCall2 := sdkmock.On("GroupPermissions", id, validSession.AccessToken).Return(validGroup, tc.errPermissions)
+			sdkCall := sdkmock.On("Group", id, validSession.Token).Return(validGroup, tc.errGroup)
+			sdkCall1 := sdkmock.On("Group", validGroup.ParentID, validSession.Token).Return(validGroup, tc.errParent)
+			sdkCall2 := sdkmock.On("GroupPermissions", id, validSession.Token).Return(validGroup, tc.errPermissions)
 			_, err := svc.ViewGroup(validSession, id)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "Group", id, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "Group", id, validSession.Token)
 			}
 			sdkCall.Unset()
 			sdkCall1.Unset()
@@ -2404,11 +2400,11 @@ func TestListGroups(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("Groups", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.AccessToken).Return(validGroupsPage, tc.sdkerr)
+			sdkCall := sdkmock.On("Groups", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.Token).Return(validGroupsPage, tc.sdkerr)
 			_, err := svc.ListGroups(validSession, "enabled", 1, 10)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "Groups", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "Groups", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -2438,11 +2434,11 @@ func TestUpdateGroup(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("UpdateGroup", validGroup, validSession.AccessToken).Return(validGroup, tc.sdkerr)
-			err := svc.UpdateGroup(validSession.AccessToken, validGroup)
+			sdkCall := sdkmock.On("UpdateGroup", validGroup, validSession.Token).Return(validGroup, tc.sdkerr)
+			err := svc.UpdateGroup(validSession.Token, validGroup)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UpdateGroup", validGroup, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UpdateGroup", validGroup, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -2472,11 +2468,11 @@ func TestEnableGroup(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("EnableGroup", validGroup.ID, validSession.AccessToken).Return(validGroup, tc.sdkerr)
-			err := svc.EnableGroup(validSession.AccessToken, validGroup.ID)
+			sdkCall := sdkmock.On("EnableGroup", validGroup.ID, validSession.Token).Return(validGroup, tc.sdkerr)
+			err := svc.EnableGroup(validSession.Token, validGroup.ID)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "EnableGroup", validGroup.ID, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "EnableGroup", validGroup.ID, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -2506,11 +2502,11 @@ func TestDisableGroup(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("DisableGroup", validGroup.ID, validSession.AccessToken).Return(validGroup, tc.sdkerr)
-			err := svc.DisableGroup(validSession.AccessToken, validGroup.ID)
+			sdkCall := sdkmock.On("DisableGroup", validGroup.ID, validSession.Token).Return(validGroup, tc.sdkerr)
+			err := svc.DisableGroup(validSession.Token, validGroup.ID)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "DisableGroup", validGroup.ID, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "DisableGroup", validGroup.ID, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -2548,12 +2544,12 @@ func TestListUserGroupChannels(t *testing.T) {
 				Offset: 0,
 				Limit:  10,
 			}
-			sdkCall := sdkmock.On("ListGroupChannels", id, page, validSession.AccessToken).Return(validGroupsPage, tc.errListUserGroupChannels)
-			sdkCall1 := sdkmock.On("GroupPermissions", id, validSession.AccessToken).Return(validGroup, tc.errPermissions)
+			sdkCall := sdkmock.On("ListGroupChannels", id, page, validSession.Token).Return(validGroupsPage, tc.errListUserGroupChannels)
+			sdkCall1 := sdkmock.On("GroupPermissions", id, validSession.Token).Return(validGroup, tc.errPermissions)
 			_, err := svc.ListUserGroupChannels(validSession, id, 1, 10)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "ListGroupChannels", id, page, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "ListGroupChannels", id, page, validSession.Token)
 			}
 			sdkCall.Unset()
 			sdkCall1.Unset()
@@ -2584,11 +2580,11 @@ func TestReadMessages(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("ReadMessages", sdk.MessagePageMetadata{}, id, validSession.AccessToken).Return(validMessage, tc.sdkerr)
+			sdkCall := sdkmock.On("ReadMessages", sdk.MessagePageMetadata{}, id, validSession.Token).Return(validMessage, tc.sdkerr)
 			_, err := svc.ReadMessages(validSession, id, id, sdk.MessagePageMetadata{})
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "ReadMessages", sdk.MessagePageMetadata{}, id, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "ReadMessages", sdk.MessagePageMetadata{}, id, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -2732,18 +2728,18 @@ func TestListBootstrap(t *testing.T) {
 				Limit:      10,
 				Visibility: "all",
 			}
-			sdkCall := sdkmock.On("Bootstraps", page, validSession.AccessToken).Return(validBootstrapPage, tc.errBootstrap)
+			sdkCall := sdkmock.On("Bootstraps", page, validSession.Token).Return(validBootstrapPage, tc.errBootstrap)
 			filter := sdk.PageMetadata{
 				Offset: uint64(0),
 				Total:  uint64(100),
 				Limit:  uint64(100),
 			}
-			sdkCall1 := sdkmock.On("Things", filter, validSession.AccessToken).Return(validThingsPage, tc.errThings)
+			sdkCall1 := sdkmock.On("Things", filter, validSession.Token).Return(validThingsPage, tc.errThings)
 			_, err := svc.ListBootstrap(validSession, 1, 10)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "Bootstraps", page, validSession.AccessToken)
-				sdkCall1.Parent.AssertCalled(t, "Things", filter, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "Bootstraps", page, validSession.Token)
+				sdkCall1.Parent.AssertCalled(t, "Things", filter, validSession.Token)
 			}
 			sdkCall.Unset()
 			sdkCall1.Unset()
@@ -2774,11 +2770,11 @@ func TestUpdateBootstrap(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("UpdateBootstrap", validBootstrapConfig, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.UpdateBootstrap(validSession.AccessToken, validBootstrapConfig)
+			sdkCall := sdkmock.On("UpdateBootstrap", validBootstrapConfig, validSession.Token).Return(tc.sdkerr)
+			err := svc.UpdateBootstrap(validSession.Token, validBootstrapConfig)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UpdateBootstrap", validBootstrapConfig, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UpdateBootstrap", validBootstrapConfig, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -2818,11 +2814,11 @@ func TestUpdateBootstrapConnections(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("UpdateBootstrapConnection", tc.conf.ThingID, tc.conf.Channels, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.UpdateBootstrapConnections(validSession.AccessToken, tc.conf)
+			sdkCall := sdkmock.On("UpdateBootstrapConnection", tc.conf.ThingID, tc.conf.Channels, validSession.Token).Return(tc.sdkerr)
+			err := svc.UpdateBootstrapConnections(validSession.Token, tc.conf)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UpdateBootstrapConnection", tc.conf.ThingID, tc.conf.Channels, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UpdateBootstrapConnection", tc.conf.ThingID, tc.conf.Channels, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -2852,11 +2848,11 @@ func TestUpdateBootstrapCerts(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("UpdateBootstrapCerts", validBootstrapConfig.ThingID, validBootstrapConfig.ClientCert, validBootstrapConfig.ClientKey, validBootstrapConfig.CACert, validSession.AccessToken).Return(validBootstrapConfig, tc.sdkerr)
-			err := svc.UpdateBootstrapCerts(validSession.AccessToken, validBootstrapConfig)
+			sdkCall := sdkmock.On("UpdateBootstrapCerts", validBootstrapConfig.ThingID, validBootstrapConfig.ClientCert, validBootstrapConfig.ClientKey, validBootstrapConfig.CACert, validSession.Token).Return(validBootstrapConfig, tc.sdkerr)
+			err := svc.UpdateBootstrapCerts(validSession.Token, validBootstrapConfig)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UpdateBootstrapCerts", validBootstrapConfig.ThingID, validBootstrapConfig.ClientCert, validBootstrapConfig.ClientKey, validBootstrapConfig.CACert, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UpdateBootstrapCerts", validBootstrapConfig.ThingID, validBootstrapConfig.ClientCert, validBootstrapConfig.ClientKey, validBootstrapConfig.CACert, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -2886,11 +2882,11 @@ func TestDeleteBootstrap(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("RemoveBootstrap", validBootstrapConfig.ThingID, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.DeleteBootstrap(validSession.AccessToken, validBootstrapConfig.ThingID)
+			sdkCall := sdkmock.On("RemoveBootstrap", validBootstrapConfig.ThingID, validSession.Token).Return(tc.sdkerr)
+			err := svc.DeleteBootstrap(validSession.Token, validBootstrapConfig.ThingID)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "RemoveBootstrap", validBootstrapConfig.ThingID, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "RemoveBootstrap", validBootstrapConfig.ThingID, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -2920,11 +2916,11 @@ func TestUpdateBootstrapState(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("Whitelist", validBootstrapConfig, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.UpdateBootstrapState(validSession.AccessToken, validBootstrapConfig)
+			sdkCall := sdkmock.On("Whitelist", validBootstrapConfig, validSession.Token).Return(tc.sdkerr)
+			err := svc.UpdateBootstrapState(validSession.Token, validBootstrapConfig)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "Whitelist", validBootstrapConfig, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "Whitelist", validBootstrapConfig, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -2984,13 +2980,13 @@ func TestViewBootstrap(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("ViewBootstrap", id, validSession.AccessToken).Return(tc.conf, tc.errBootstrap)
-			sdkCall1 := sdkmock.On("Thing", id, validSession.AccessToken).Return(validThing, tc.errThing)
+			sdkCall := sdkmock.On("ViewBootstrap", id, validSession.Token).Return(tc.conf, tc.errBootstrap)
+			sdkCall1 := sdkmock.On("Thing", id, validSession.Token).Return(validThing, tc.errThing)
 			_, err := svc.ViewBootstrap(validSession, id)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "ViewBootstrap", id, validSession.AccessToken)
-				sdkCall1.Parent.AssertCalled(t, "Thing", id, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "ViewBootstrap", id, validSession.Token)
+				sdkCall1.Parent.AssertCalled(t, "Thing", id, validSession.Token)
 			}
 			sdkCall.Unset()
 			sdkCall1.Unset()
@@ -3235,11 +3231,11 @@ func TestListDomains(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("Domains", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.AccessToken).Return(validDomainsPage, tc.sdkerr)
+			sdkCall := sdkmock.On("Domains", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.Token).Return(validDomainsPage, tc.sdkerr)
 			_, err := svc.ListDomains(validSession, "enabled", 1, 10)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "Domains", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "Domains", sdk.PageMetadata{Offset: 0, Limit: 10, Status: "enabled"}, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -3273,12 +3269,12 @@ func TestDomain(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("Domain", validSession.Domain.ID, validSession.AccessToken).Return(validDomain, tc.errDomain)
-			sdkCall1 := sdkmock.On("DomainPermissions", validSession.Domain.ID, validSession.AccessToken).Return(validDomain, tc.errPermissions)
+			sdkCall := sdkmock.On("Domain", validSession.Domain.ID, validSession.Token).Return(validDomain, tc.errDomain)
+			sdkCall1 := sdkmock.On("DomainPermissions", validSession.Domain.ID, validSession.Token).Return(validDomain, tc.errPermissions)
 			_, err := svc.Domain(validSession)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "Domain", validSession.Domain.ID, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "Domain", validSession.Domain.ID, validSession.Token)
 			}
 			sdkCall.Unset()
 			sdkCall1.Unset()
@@ -3309,11 +3305,11 @@ func TestUpdateDomain(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("UpdateDomain", validDomain, validSession.AccessToken).Return(validDomain, tc.sdkerr)
-			err := svc.UpdateDomain(validSession.AccessToken, validDomain)
+			sdkCall := sdkmock.On("UpdateDomain", validDomain, validSession.Token).Return(validDomain, tc.sdkerr)
+			err := svc.UpdateDomain(validSession.Token, validDomain)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UpdateDomain", validDomain, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UpdateDomain", validDomain, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -3343,11 +3339,11 @@ func TestEnableDomain(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("EnableDomain", validDomain.ID, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.EnableDomain(validSession.AccessToken, validDomain.ID)
+			sdkCall := sdkmock.On("EnableDomain", validDomain.ID, validSession.Token).Return(tc.sdkerr)
+			err := svc.EnableDomain(validSession.Token, validDomain.ID)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "EnableDomain", validDomain.ID, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "EnableDomain", validDomain.ID, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -3377,11 +3373,11 @@ func TestDisableDomain(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("DisableDomain", validDomain.ID, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.DisableDomain(validSession.AccessToken, validDomain.ID)
+			sdkCall := sdkmock.On("DisableDomain", validDomain.ID, validSession.Token).Return(tc.sdkerr)
+			err := svc.DisableDomain(validSession.Token, validDomain.ID)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "DisableDomain", validDomain.ID, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "DisableDomain", validDomain.ID, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -3411,11 +3407,11 @@ func TestAssignMember(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("AddUserToDomain", validDomain.ID, validUsersRelationReq, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.AssignMember(validSession.AccessToken, validDomain.ID, validUsersRelationReq)
+			sdkCall := sdkmock.On("AddUserToDomain", validDomain.ID, validUsersRelationReq, validSession.Token).Return(tc.sdkerr)
+			err := svc.AssignMember(validSession.Token, validDomain.ID, validUsersRelationReq)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "AddUserToDomain", validDomain.ID, validUsersRelationReq, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "AddUserToDomain", validDomain.ID, validUsersRelationReq, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -3445,11 +3441,11 @@ func TestUnassignMember(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("RemoveUserFromDomain", validDomain.ID, validUsersRelationReq, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.UnassignMember(validSession.AccessToken, validDomain.ID, validUsersRelationReq)
+			sdkCall := sdkmock.On("RemoveUserFromDomain", validDomain.ID, validUsersRelationReq, validSession.Token).Return(tc.sdkerr)
+			err := svc.UnassignMember(validSession.Token, validDomain.ID, validUsersRelationReq)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "RemoveUserFromDomain", validDomain.ID, validUsersRelationReq, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "RemoveUserFromDomain", validDomain.ID, validUsersRelationReq, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -3485,11 +3481,11 @@ func TestViewMember(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("Users", sdk.PageMetadata{Identity: "test", Limit: 1}, validSession.AccessToken).Return(tc.usersPage, tc.sdkerr)
+			sdkCall := sdkmock.On("Users", sdk.PageMetadata{Identity: "test", Limit: 1}, validSession.Token).Return(tc.usersPage, tc.sdkerr)
 			_, err := svc.ViewMember(validSession, "test")
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "Users", sdk.PageMetadata{Identity: "test", Limit: 1}, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "Users", sdk.PageMetadata{Identity: "test", Limit: 1}, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -3517,11 +3513,11 @@ func TestMembers(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("ListDomainUsers", validSession.Domain.ID, sdk.PageMetadata{Offset: 0, Limit: 10}, validSession.AccessToken).Return(validUsersPage, tc.sdkerr)
+			sdkCall := sdkmock.On("ListDomainUsers", validSession.Domain.ID, sdk.PageMetadata{Offset: 0, Limit: 10}, validSession.Token).Return(validUsersPage, tc.sdkerr)
 			_, err := svc.Members(validSession, 1, 10)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "ListDomainUsers", validSession.Domain.ID, sdk.PageMetadata{Offset: 0, Limit: 10}, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "ListDomainUsers", validSession.Domain.ID, sdk.PageMetadata{Offset: 0, Limit: 10}, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -3549,11 +3545,11 @@ func TestSendInvitation(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("SendInvitation", sdk.Invitation{}, validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.SendInvitation(validSession.AccessToken, sdk.Invitation{})
+			sdkCall := sdkmock.On("SendInvitation", sdk.Invitation{}, validSession.Token).Return(tc.sdkerr)
+			err := svc.SendInvitation(validSession.Token, sdk.Invitation{})
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "SendInvitation", sdk.Invitation{}, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "SendInvitation", sdk.Invitation{}, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -3587,11 +3583,11 @@ func TestInvitations(t *testing.T) {
 				DomainID: "test",
 				State:    "pending",
 			}
-			sdkCall := sdkmock.On("Invitations", page, validSession.AccessToken).Return(sdk.InvitationPage{}, tc.sdkerr)
+			sdkCall := sdkmock.On("Invitations", page, validSession.Token).Return(sdk.InvitationPage{}, tc.sdkerr)
 			_, err := svc.Invitations(validSession, "test", 1, 10)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "Invitations", page, validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "Invitations", page, validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -3619,11 +3615,11 @@ func TestAcceptInvitation(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("AcceptInvitation", "test", validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.AcceptInvitation(validSession.AccessToken, "test")
+			sdkCall := sdkmock.On("AcceptInvitation", "test", validSession.Token).Return(tc.sdkerr)
+			err := svc.AcceptInvitation(validSession.Token, "test")
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "AcceptInvitation", "test", validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "AcceptInvitation", "test", validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -3651,11 +3647,11 @@ func TestDeleteInvitation(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("DeleteInvitation", "test", "test", validSession.AccessToken).Return(tc.sdkerr)
-			err := svc.DeleteInvitation(validSession.AccessToken, "test", "test")
+			sdkCall := sdkmock.On("DeleteInvitation", "test", "test", validSession.Token).Return(tc.sdkerr)
+			err := svc.DeleteInvitation(validSession.Token, "test", "test")
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "DeleteInvitation", "test", "test", validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "DeleteInvitation", "test", "test", validSession.Token)
 			}
 			sdkCall.Unset()
 		})
@@ -3689,12 +3685,12 @@ func TestCreateDashboard(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("UserProfile", validSession.AccessToken).Return(validUser, tc.errUserProfile)
+			sdkCall := sdkmock.On("UserProfile", validSession.Token).Return(validUser, tc.errUserProfile)
 			repoCall := repo.On("Create", context.Background(), mock.Anything).Return(ui.Dashboard{}, tc.errCreate)
-			_, err := svc.CreateDashboard(context.Background(), validSession.AccessToken, validDashboardReq)
+			_, err := svc.CreateDashboard(context.Background(), validSession.Token, validDashboardReq)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UserProfile", validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UserProfile", validSession.Token)
 				repoCall.Parent.AssertCalled(t, "Create", context.Background(), mock.Anything)
 			}
 			sdkCall.Unset()
@@ -3730,12 +3726,12 @@ func TestViewDashboard(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("UserProfile", validSession.AccessToken).Return(validUser, tc.errUserProfile)
+			sdkCall := sdkmock.On("UserProfile", validSession.Token).Return(validUser, tc.errUserProfile)
 			repoCall := repo.On("Retrieve", context.Background(), "test", mock.Anything).Return(ui.Dashboard{}, tc.errView)
 			_, err := svc.ViewDashboard(context.Background(), validSession, "test")
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UserProfile", validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UserProfile", validSession.Token)
 				repoCall.Parent.AssertCalled(t, "Retrieve", context.Background(), "test", mock.Anything)
 			}
 			sdkCall.Unset()
@@ -3776,12 +3772,12 @@ func TestListDashboards(t *testing.T) {
 				Limit:     10,
 				CreatedBy: validUser.ID,
 			}
-			sdkCall := sdkmock.On("UserProfile", validSession.AccessToken).Return(validUser, tc.errUserProfile)
+			sdkCall := sdkmock.On("UserProfile", validSession.Token).Return(validUser, tc.errUserProfile)
 			repoCall := repo.On("RetrieveAll", context.Background(), page).Return(ui.DashboardPage{}, tc.errRetrieve)
-			_, err := svc.ListDashboards(context.Background(), validSession.AccessToken, 1, 10)
+			_, err := svc.ListDashboards(context.Background(), validSession.Token, 1, 10)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UserProfile", validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UserProfile", validSession.Token)
 				repoCall.Parent.AssertCalled(t, "RetrieveAll", context.Background(), page)
 			}
 			sdkCall.Unset()
@@ -3844,12 +3840,12 @@ func TestUpdateDashboard(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("UserProfile", validSession.AccessToken).Return(validUser, tc.errUserProfile)
+			sdkCall := sdkmock.On("UserProfile", validSession.Token).Return(validUser, tc.errUserProfile)
 			repoCall := repo.On("Update", context.Background(), "test", validUser.ID, validDashboardReq).Return(tc.errUpdate)
-			err := svc.UpdateDashboard(context.Background(), validSession.AccessToken, "test", validDashboardReq)
+			err := svc.UpdateDashboard(context.Background(), validSession.Token, "test", validDashboardReq)
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UserProfile", validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UserProfile", validSession.Token)
 				repoCall.Parent.AssertCalled(t, "Update", context.Background(), "test", validUser.ID, validDashboardReq)
 			}
 			sdkCall.Unset()
@@ -3885,12 +3881,12 @@ func TestDeleteDashboard(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
-			sdkCall := sdkmock.On("UserProfile", validSession.AccessToken).Return(validUser, tc.errUserProfile)
+			sdkCall := sdkmock.On("UserProfile", validSession.Token).Return(validUser, tc.errUserProfile)
 			repoCall := repo.On("Delete", context.Background(), "test", validUser.ID).Return(tc.errDelete)
-			err := svc.DeleteDashboard(context.Background(), validSession.AccessToken, "test")
+			err := svc.DeleteDashboard(context.Background(), validSession.Token, "test")
 			assert.True(t, errors.Contains(err, tc.err), fmt.Sprintf("expected error: %s, got: %s", tc.err, err))
 			if err == nil {
-				sdkCall.Parent.AssertCalled(t, "UserProfile", validSession.AccessToken)
+				sdkCall.Parent.AssertCalled(t, "UserProfile", validSession.Token)
 				repoCall.Parent.AssertCalled(t, "Delete", context.Background(), "test", validUser.ID)
 			}
 			sdkCall.Unset()
