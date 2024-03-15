@@ -86,7 +86,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                             name="channel"
                             placeholder="channel ID"
                             required
-                            value="b6b2bdf4-de46-45c9-bbaa-a3c972d60f33"
                           />
                         </td>
                         <td>
@@ -97,7 +96,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                             name="thing"
                             placeholder="thing ID"
                             required
-                            value="3ca685f2-34cb-4614-84b2-f0ec3793e0b4"
                           />
                         </td>
                         <td>
@@ -107,7 +105,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                             name="valueName"
                             placeholder="value name"
                             required
-                            value="Temp"
                           />
                         </td>
                         <td>
@@ -133,7 +130,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                     name="startTime"
                     id="start-time"
                     required
-                    value="1710242880000"
                   />
                   <div class="invalid-time"></div>
                 </div>
@@ -145,7 +141,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                     name="stopTime"
                     id="stop-time"
                     required
-                    value="1710329220000"
                   />
                 </div>
                 <div class="mb-3">
@@ -342,15 +337,15 @@ SPDX-License-Identifier: Apache-2.0 -->
     newRow.innerHTML =
       ` <td>
             <input type="text" pattern="${uuidPattern}" class="form-control" name="channel"
-              placeholder="channel ID" required value="aae29203-2c25-4c78-8823-fb7e4148faa8" />
+              placeholder="channel ID" required />
         </td>
         <td>
           <input type="text" pattern="${uuidPattern}" class="form-control" name="thing"
-            placeholder="thing ID" required value="a20570d3-33c5-4669-ac3f-9f804e26431d" />
+            placeholder="thing ID" required />
        </td>
         <td>
           <input type="text" class="form-control" name="valueName"
-            placeholder="value name" required value="random-testvoltage"/>
+            placeholder="value name" required />
         </td>
         <td>
           <input type="color" class="form-control" name="lineColor" />
