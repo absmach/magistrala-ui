@@ -1093,16 +1093,16 @@ func decodeRefreshTokenRequest(s *securecookie.SecureCookie) kithttp.DecodeReque
 
 		var session string
 		if err := s.Decode(sessionDetailsKey, sessionCookie, &session); err != nil {
-			return nil, err
+			return nil, errors.Wrap(errCookieDecryption, err)
 		}
 		var sessionDetails ui.Session
 		if err := json.Unmarshal([]byte(session), &sessionDetails); err != nil {
-			return ui.Session{}, err
+			return ui.Session{}, errors.Wrap(ui.ErrJSONUnmarshal, err)
 		}
 
 		var refreshToken string
 		if err := s.Decode(refreshTokenKey, refreshTokenCookie, &refreshToken); err != nil {
-			return ui.Session{}, err
+			return ui.Session{}, errors.Wrap(errCookieDecryption, err)
 		}
 		sessionDetails.Token = refreshToken
 
@@ -1151,11 +1151,11 @@ func decodeUserCreation(_ context.Context, r *http.Request) (interface{}, error)
 	}
 	var meta map[string]interface{}
 	if err := json.Unmarshal([]byte(r.PostFormValue("metadata")), &meta); err != nil {
-		return nil, err
+		return nil, errors.Wrap(ui.ErrJSONUnmarshal, err)
 	}
 	var tags []string
 	if err := json.Unmarshal([]byte(r.PostFormValue("tags")), &tags); err != nil {
-		return nil, err
+		return nil, errors.Wrap(ui.ErrJSONUnmarshal, err)
 	}
 	credentials := sdk.Credentials{
 		Identity: r.PostFormValue("identity"),
@@ -1393,11 +1393,11 @@ func decodeThingCreation(_ context.Context, r *http.Request) (interface{}, error
 	}
 	var meta map[string]interface{}
 	if err := json.Unmarshal([]byte(r.PostFormValue("metadata")), &meta); err != nil {
-		return nil, err
+		return nil, errors.Wrap(ui.ErrJSONUnmarshal, err)
 	}
 	var tags []string
 	if err := json.Unmarshal([]byte(r.PostFormValue("tags")), &tags); err != nil {
-		return nil, err
+		return nil, errors.Wrap(ui.ErrJSONUnmarshal, err)
 	}
 
 	return createThingReq{
@@ -1555,7 +1555,7 @@ func decodeChannelCreation(_ context.Context, r *http.Request) (interface{}, err
 	}
 	var meta map[string]interface{}
 	if err := json.Unmarshal([]byte(r.PostFormValue("metadata")), &meta); err != nil {
-		return nil, err
+		return nil, errors.Wrap(ui.ErrJSONUnmarshal, err)
 	}
 
 	ch := sdk.Channel{
@@ -1730,7 +1730,7 @@ func decodeGroupCreation(_ context.Context, r *http.Request) (interface{}, error
 	}
 	var meta map[string]interface{}
 	if err := json.Unmarshal([]byte(r.PostFormValue("metadata")), &meta); err != nil {
-		return nil, err
+		return nil, errors.Wrap(ui.ErrJSONUnmarshal, err)
 	}
 
 	return createGroupReq{
@@ -1833,7 +1833,7 @@ func decodeGroupStatusUpdate(_ context.Context, r *http.Request) (interface{}, e
 func decodePublishRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	floatValue, err := strconv.ParseFloat(r.PostFormValue("value"), 64)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(errInvalidFormValue, err)
 	}
 
 	return publishReq{
@@ -2032,7 +2032,7 @@ func decodeUpdateBootstrapState(_ context.Context, r *http.Request) (interface{}
 	}
 	state, err := strconv.Atoi(r.FormValue("state"))
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(errInvalidFormValue, err)
 	}
 
 	return updateBootstrapStateReq{
@@ -2191,7 +2191,7 @@ func decodeDomainLoginRequest(s *securecookie.SecureCookie) kithttp.DecodeReques
 		}
 		var refreshToken string
 		if err := s.Decode(refreshTokenKey, refreshTokenCookie, &refreshToken); err != nil {
-			return ui.Session{}, err
+			return ui.Session{}, errors.Wrap(errCookieDecryption, err)
 		}
 
 		session, err := sessionFromHeader(r)
@@ -2507,7 +2507,7 @@ func readBoolQuery(r *http.Request, key string, def bool) (bool, error) {
 func tokenFromCookie(r *http.Request, cookie string) (string, error) {
 	c, err := r.Cookie(cookie)
 	if err != nil {
-		return "", errors.Wrap(err, errInvalidCredentials)
+		return "", errors.Wrap(errInvalidCredentials, err)
 	}
 
 	return c.Value, nil
@@ -2517,7 +2517,7 @@ func sessionFromHeader(r *http.Request) (ui.Session, error) {
 	session := r.Header.Get(sessionDetailsKey)
 	var sessionDetails ui.Session
 	if err := json.Unmarshal([]byte(session), &sessionDetails); err != nil {
-		return ui.Session{}, err
+		return ui.Session{}, errors.Wrap(ui.ErrJSONUnmarshal, err)
 	}
 
 	return sessionDetails, nil
@@ -2609,8 +2609,7 @@ func DecryptCookieMiddleware(s *securecookie.SecureCookie, prefix string) func(h
 				return
 			}
 			if err = s.Decode(sessionDetailsKey, sessionCookie, &decryptedSessionCookie); err != nil {
-				err = errors.Wrap(err, errCookieDecryption)
-				http.Redirect(w, r, fmt.Sprintf("%s/%s?error=%s", prefix, errorAPIEndpoint, url.QueryEscape(err.Error())), http.StatusSeeOther)
+				http.Redirect(w, r, fmt.Sprintf("%s/%s?error=%s", prefix, errorAPIEndpoint, url.QueryEscape(errors.Wrap(errCookieDecryption, err).Error())), http.StatusSeeOther)
 				return
 			}
 
@@ -2624,7 +2623,7 @@ func DecryptCookieMiddleware(s *securecookie.SecureCookie, prefix string) func(h
 func handleStaticFiles(m *chi.Mux) error {
 	entries, err := ui.StaticFS.ReadDir(ui.StaticDir)
 	if err != nil {
-		return err
+		return errors.Wrap(ui.ErrReadDir, err)
 	}
 	for _, entry := range entries {
 		if entry.IsDir() {
@@ -2649,7 +2648,7 @@ func parseMetadata(r *http.Request) (map[string]interface{}, error) {
 	metadata := make(map[string]interface{})
 	if len(metadataStr) > 0 {
 		if err := json.Unmarshal([]byte(metadataStr), &metadata); err != nil {
-			return nil, err
+			return nil, errors.Wrap(ui.ErrJSONUnmarshal, err)
 		}
 	}
 
@@ -2662,7 +2661,7 @@ func parseTags(r *http.Request) ([]string, error) {
 	tags := make([]string, 0)
 	if len(tagsStr) > 0 {
 		if err := json.Unmarshal([]byte(tagsStr), &tags); err != nil {
-			return nil, err
+			return nil, errors.Wrap(ui.ErrJSONUnmarshal, err)
 		}
 	}
 
@@ -2717,6 +2716,7 @@ func encodeError(prefix string) kithttp.ErrorEncoder {
 		switch {
 		case errors.Contains(err, errInvalidCredentials),
 			errors.Contains(err, errAuthentication),
+			errors.Contains(err, errParseToken),
 			errors.Contains(err, ui.ErrTokenRefresh):
 			w.Header().Set("Location", fmt.Sprintf("%s/login", prefix))
 			w.WriteHeader(http.StatusSeeOther)
@@ -2728,7 +2728,10 @@ func encodeError(prefix string) kithttp.ErrorEncoder {
 		case errors.Contains(err, errInvalidFile):
 			w.Header().Set("X-Error-Message", err.Error())
 			w.WriteHeader(http.StatusUnsupportedMediaType)
-		case errors.Contains(err, errFileFormat):
+		case errors.Contains(err, errFileFormat),
+			errors.Contains(err, errCookieEncrypt),
+			errors.Contains(err, errInvalidQueryParams),
+			errors.Contains(err, errInvalidFormValue):
 			w.Header().Set("X-Error-Message", err.Error())
 			w.WriteHeader(http.StatusBadRequest)
 		case errors.Contains(err, ui.ErrFailedCreate),
@@ -2747,6 +2750,8 @@ func encodeError(prefix string) kithttp.ErrorEncoder {
 			errors.Contains(err, ui.ErrFailedResetRequest),
 			errors.Contains(err, ui.ErrFailedPublish),
 			errors.Contains(err, ui.ErrExecTemplate),
+			errors.Contains(err, ui.ErrParseTemplate),
+			errors.Contains(err, ui.ErrReadDir),
 			errors.Contains(err, ui.ErrFailedDelete),
 			errors.Contains(err, ui.ErrFailedShare),
 			errors.Contains(err, ui.ErrFailedUnshare),
@@ -2754,6 +2759,9 @@ func encodeError(prefix string) kithttp.ErrorEncoder {
 			errors.Contains(err, ui.ErrFailedDashboardDelete),
 			errors.Contains(err, ui.ErrFailedDashboardUpdate),
 			errors.Contains(err, ui.ErrJSONMarshal),
+			errors.Contains(err, ui.ErrJSONUnmarshal),
+			errors.Contains(err, ui.ErrFailedSend),
+			errors.Contains(err, ui.ErrFailedAccept),
 			errors.Contains(err, ui.ErrFailedDashboardRetrieve):
 			w.Header().Set("Location", fmt.Sprintf("%s/%s?error=%s", prefix, errorAPIEndpoint, url.QueryEscape(displayError.Error())))
 			w.WriteHeader(http.StatusSeeOther)

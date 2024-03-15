@@ -143,6 +143,11 @@ var (
 	ErrConflict             = errors.New("entity already exists")
 	ErrSessionType          = errors.New("invalid session type")
 	ErrJSONMarshal          = errors.New("failed to encode to json")
+	ErrJSONUnmarshal        = errors.New("failed to decode from json")
+	ErrFailedSend           = errors.New("failed to send invitation")
+	ErrFailedAccept         = errors.New("failed to accept invitation")
+	ErrParseTemplate        = errors.New("failed to parse template")
+	ErrReadDir              = errors.New("failed to read template directory")
 
 	ErrFailedViewDashboard     = errors.New("failed to view dashboard")
 	ErrFailedDashboardSave     = errors.New("failed to save dashboard")
@@ -387,7 +392,7 @@ type uiService struct {
 func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider, prefix string, providers ...oauth2.Provider) (Service, error) {
 	tpl, err := parseTemplates(sdk, prefix)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(ErrParseTemplate, err)
 	}
 	return &uiService{
 		sdk:        sdk,
@@ -412,42 +417,42 @@ func (us *uiService) Index(s Session) (b []byte, err error) {
 
 	users, err := us.sdk.Users(pgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	things, err := us.sdk.Things(pgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	groups, err := us.sdk.Groups(pgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	channels, err := us.sdk.Channels(pgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	enabledUsers, err := us.sdk.Users(enabledPgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	enabledThings, err := us.sdk.Things(enabledPgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	enabledGroups, err := us.sdk.Groups(enabledPgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	enabledChannels, err := us.sdk.Channels(enabledPgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	summary := dataSummary{
@@ -479,7 +484,7 @@ func (us *uiService) Index(s Session) (b []byte, err error) {
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "index", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -494,7 +499,7 @@ func (us *uiService) ViewRegistration() ([]byte, error) {
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "registration", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -502,7 +507,7 @@ func (us *uiService) ViewRegistration() ([]byte, error) {
 
 func (us *uiService) RegisterUser(user sdk.User) (sdk.Token, error) {
 	if _, err := us.sdk.CreateUser(user, ""); err != nil {
-		return sdk.Token{}, errors.Wrap(err, ErrFailedCreate)
+		return sdk.Token{}, errors.Wrap(ErrFailedCreate, err)
 	}
 
 	login := sdk.Login{
@@ -521,7 +526,7 @@ func (us *uiService) Login() ([]byte, error) {
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "login", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -533,7 +538,7 @@ func (us *uiService) Logout() error {
 
 func (us *uiService) PasswordResetRequest(email string) error {
 	if err := us.sdk.ResetPasswordRequest(email); err != nil {
-		return errors.Wrap(err, ErrFailedResetRequest)
+		return errors.Wrap(ErrFailedResetRequest, err)
 	}
 
 	return nil
@@ -541,7 +546,7 @@ func (us *uiService) PasswordResetRequest(email string) error {
 
 func (us *uiService) PasswordReset(token, password, confirmPass string) error {
 	if err := us.sdk.ResetPassword(token, password, confirmPass); err != nil {
-		return errors.Wrap(err, ErrFailedReset)
+		return errors.Wrap(ErrFailedReset, err)
 	}
 
 	return nil
@@ -550,7 +555,7 @@ func (us *uiService) PasswordReset(token, password, confirmPass string) error {
 func (us *uiService) ShowPasswordReset() ([]byte, error) {
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "resetPassword", ""); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 	return btpl.Bytes(), nil
 }
@@ -568,7 +573,7 @@ func (us *uiService) PasswordUpdate(s Session) (b []byte, err error) {
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "updatePassword", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -576,7 +581,7 @@ func (us *uiService) PasswordUpdate(s Session) (b []byte, err error) {
 
 func (us *uiService) UpdatePassword(token, oldPass, newPass string) error {
 	if _, err := us.sdk.UpdatePassword(oldPass, newPass, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdatePassword)
+		return errors.Wrap(ErrFailedUpdatePassword, err)
 	}
 
 	return nil
@@ -585,7 +590,7 @@ func (us *uiService) UpdatePassword(token, oldPass, newPass string) error {
 func (us *uiService) Token(login sdk.Login) (t sdk.Token, err error) {
 	token, err := us.sdk.CreateToken(login)
 	if err != nil {
-		return sdk.Token{}, errors.Wrap(err, ErrToken)
+		return sdk.Token{}, errors.Wrap(ErrToken, err)
 	}
 
 	return token, nil
@@ -594,7 +599,7 @@ func (us *uiService) Token(login sdk.Login) (t sdk.Token, err error) {
 func (us *uiService) RefreshToken(refreshToken string) (sdk.Token, error) {
 	token, err := us.sdk.RefreshToken(sdk.Login{}, refreshToken)
 	if err != nil {
-		return sdk.Token{}, errors.Wrap(err, ErrTokenRefresh)
+		return sdk.Token{}, errors.Wrap(ErrTokenRefresh, err)
 	}
 
 	return token, nil
@@ -641,7 +646,7 @@ func (us *uiService) CreateUsers(token string, users ...sdk.User) error {
 	for i := range users {
 		_, err := us.sdk.CreateUser(users[i], token)
 		if err != nil {
-			return errors.Wrap(err, ErrFailedCreate)
+			return errors.Wrap(ErrFailedCreate, err)
 		}
 	}
 
@@ -658,7 +663,7 @@ func (us *uiService) ListUsers(s Session, status string, page, limit uint64) ([]
 	}
 	users, err := us.sdk.Users(pgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	noOfPages := int(math.Ceil(float64(users.Total) / float64(limit)))
@@ -693,7 +698,7 @@ func (us *uiService) ListUsers(s Session, status string, page, limit uint64) ([]
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "users", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -702,7 +707,7 @@ func (us *uiService) ListUsers(s Session, status string, page, limit uint64) ([]
 func (us *uiService) ViewUser(s Session, id string) (b []byte, err error) {
 	user, err := us.sdk.User(id, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	crumbs := []breadcrumb{
@@ -728,7 +733,7 @@ func (us *uiService) ViewUser(s Session, id string) (b []byte, err error) {
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "user", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -736,7 +741,7 @@ func (us *uiService) ViewUser(s Session, id string) (b []byte, err error) {
 
 func (us *uiService) UpdateUser(token string, user sdk.User) error {
 	if _, err := us.sdk.UpdateUser(user, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdate)
+		return errors.Wrap(ErrFailedUpdate, err)
 	}
 
 	return nil
@@ -744,7 +749,7 @@ func (us *uiService) UpdateUser(token string, user sdk.User) error {
 
 func (us *uiService) UpdateUserTags(token string, user sdk.User) error {
 	if _, err := us.sdk.UpdateUserTags(user, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdate)
+		return errors.Wrap(ErrFailedUpdate, err)
 	}
 
 	return nil
@@ -752,7 +757,7 @@ func (us *uiService) UpdateUserTags(token string, user sdk.User) error {
 
 func (us *uiService) UpdateUserIdentity(token string, user sdk.User) error {
 	if _, err := us.sdk.UpdateUserIdentity(user, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdate)
+		return errors.Wrap(ErrFailedUpdate, err)
 	}
 
 	return nil
@@ -760,7 +765,7 @@ func (us *uiService) UpdateUserIdentity(token string, user sdk.User) error {
 
 func (us *uiService) UpdateUserRole(token string, user sdk.User) error {
 	if _, err := us.sdk.UpdateUserRole(user, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdate)
+		return errors.Wrap(ErrFailedUpdate, err)
 	}
 
 	return nil
@@ -768,7 +773,7 @@ func (us *uiService) UpdateUserRole(token string, user sdk.User) error {
 
 func (us *uiService) EnableUser(token, id string) error {
 	if _, err := us.sdk.EnableUser(id, token); err != nil {
-		return errors.Wrap(err, ErrFailedEnable)
+		return errors.Wrap(ErrFailedEnable, err)
 	}
 
 	return nil
@@ -776,7 +781,7 @@ func (us *uiService) EnableUser(token, id string) error {
 
 func (us *uiService) DisableUser(token, id string) error {
 	if _, err := us.sdk.DisableUser(id, token); err != nil {
-		return errors.Wrap(err, ErrFailedDisable)
+		return errors.Wrap(ErrFailedDisable, err)
 	}
 
 	return nil
@@ -784,7 +789,7 @@ func (us *uiService) DisableUser(token, id string) error {
 
 func (us *uiService) CreateThing(thing sdk.Thing, token string) error {
 	if _, err := us.sdk.CreateThing(thing, token); err != nil {
-		return errors.Wrap(err, ErrFailedCreate)
+		return errors.Wrap(ErrFailedCreate, err)
 	}
 
 	return nil
@@ -793,7 +798,7 @@ func (us *uiService) CreateThing(thing sdk.Thing, token string) error {
 func (us *uiService) CreateThings(token string, things ...sdk.Thing) error {
 	for _, thing := range things {
 		if _, err := us.sdk.CreateThing(thing, token); err != nil {
-			return errors.Wrap(err, ErrFailedCreate)
+			return errors.Wrap(ErrFailedCreate, err)
 		}
 	}
 
@@ -810,7 +815,7 @@ func (us *uiService) ListThings(s Session, status string, page, limit uint64) ([
 	}
 	things, err := us.sdk.Things(pgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	noOfPages := int(math.Ceil(float64(things.Total) / float64(limit)))
@@ -844,7 +849,7 @@ func (us *uiService) ListThings(s Session, status string, page, limit uint64) ([
 	}
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "things", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 	return btpl.Bytes(), nil
 }
@@ -852,12 +857,12 @@ func (us *uiService) ListThings(s Session, status string, page, limit uint64) ([
 func (us *uiService) ViewThing(s Session, id string) (b []byte, err error) {
 	thing, err := us.sdk.Thing(id, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	permissions, err := us.sdk.ThingPermissions(id, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	crumbs := []breadcrumb{
@@ -887,7 +892,7 @@ func (us *uiService) ViewThing(s Session, id string) (b []byte, err error) {
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "thing", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -895,7 +900,7 @@ func (us *uiService) ViewThing(s Session, id string) (b []byte, err error) {
 
 func (us *uiService) UpdateThing(token string, thing sdk.Thing) error {
 	if _, err := us.sdk.UpdateThing(thing, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdate)
+		return errors.Wrap(ErrFailedUpdate, err)
 	}
 
 	return nil
@@ -903,7 +908,7 @@ func (us *uiService) UpdateThing(token string, thing sdk.Thing) error {
 
 func (us *uiService) UpdateThingTags(token string, thing sdk.Thing) error {
 	if _, err := us.sdk.UpdateThingTags(thing, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdate)
+		return errors.Wrap(ErrFailedUpdate, err)
 	}
 
 	return nil
@@ -911,7 +916,7 @@ func (us *uiService) UpdateThingTags(token string, thing sdk.Thing) error {
 
 func (us *uiService) UpdateThingSecret(token, id, secret string) error {
 	if _, err := us.sdk.UpdateThingSecret(id, secret, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdate)
+		return errors.Wrap(ErrFailedUpdate, err)
 	}
 
 	return nil
@@ -919,7 +924,7 @@ func (us *uiService) UpdateThingSecret(token, id, secret string) error {
 
 func (us *uiService) EnableThing(token, id string) error {
 	if _, err := us.sdk.EnableThing(id, token); err != nil {
-		return errors.Wrap(err, ErrFailedEnable)
+		return errors.Wrap(ErrFailedEnable, err)
 	}
 
 	return nil
@@ -927,7 +932,7 @@ func (us *uiService) EnableThing(token, id string) error {
 
 func (us *uiService) DisableThing(token, id string) error {
 	if _, err := us.sdk.DisableThing(id, token); err != nil {
-		return errors.Wrap(err, ErrFailedDisable)
+		return errors.Wrap(ErrFailedDisable, err)
 	}
 
 	return nil
@@ -935,7 +940,7 @@ func (us *uiService) DisableThing(token, id string) error {
 
 func (us *uiService) ShareThing(token, id string, req sdk.UsersRelationRequest) error {
 	if err := us.sdk.ShareThing(id, req, token); err != nil {
-		return errors.Wrap(err, ErrFailedShare)
+		return errors.Wrap(ErrFailedShare, err)
 	}
 
 	return nil
@@ -943,7 +948,7 @@ func (us *uiService) ShareThing(token, id string, req sdk.UsersRelationRequest) 
 
 func (us *uiService) UnshareThing(token, id string, req sdk.UsersRelationRequest) error {
 	if err := us.sdk.UnshareThing(id, req, token); err != nil {
-		return errors.Wrap(err, ErrFailedUnshare)
+		return errors.Wrap(ErrFailedUnshare, err)
 	}
 
 	return nil
@@ -958,12 +963,12 @@ func (us *uiService) ListThingUsers(s Session, id, relation string, page, limit 
 	}
 	usersPage, err := us.sdk.ListThingUsers(id, pgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	permissions, err := us.sdk.ThingPermissions(id, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
@@ -1002,7 +1007,7 @@ func (us *uiService) ListThingUsers(s Session, id, relation string, page, limit 
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "thingusers", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 	return btpl.Bytes(), nil
 }
@@ -1018,17 +1023,17 @@ func (us *uiService) ListChannelsByThing(s Session, id string, page, limit uint6
 
 	chsPage, err := us.sdk.ChannelsByThing(id, pgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	permissions, err := us.sdk.ThingPermissions(id, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	thing, err := us.sdk.Thing(id, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	noOfPages := int(math.Ceil(float64(chsPage.Total) / float64(limit)))
@@ -1065,14 +1070,14 @@ func (us *uiService) ListChannelsByThing(s Session, id string, page, limit uint6
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "thingchannels", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 	return btpl.Bytes(), nil
 }
 
 func (us *uiService) CreateChannel(channel sdk.Channel, token string) error {
 	if _, err := us.sdk.CreateChannel(channel, token); err != nil {
-		return errors.Wrap(err, ErrFailedCreate)
+		return errors.Wrap(ErrFailedCreate, err)
 	}
 	return nil
 }
@@ -1080,7 +1085,7 @@ func (us *uiService) CreateChannel(channel sdk.Channel, token string) error {
 func (us *uiService) CreateChannels(token string, channels ...sdk.Channel) error {
 	for _, channel := range channels {
 		if _, err := us.sdk.CreateChannel(channel, token); err != nil {
-			return errors.Wrap(err, ErrFailedCreate)
+			return errors.Wrap(ErrFailedCreate, err)
 		}
 	}
 	return nil
@@ -1096,7 +1101,7 @@ func (us *uiService) ListChannels(s Session, status string, page, limit uint64) 
 	}
 	chsPage, err := us.sdk.Channels(pgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	noOfPages := int(math.Ceil(float64(chsPage.Total) / float64(limit)))
@@ -1131,7 +1136,7 @@ func (us *uiService) ListChannels(s Session, status string, page, limit uint64) 
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "channels", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -1140,12 +1145,12 @@ func (us *uiService) ListChannels(s Session, status string, page, limit uint64) 
 func (us *uiService) ViewChannel(s Session, channelID string) (b []byte, err error) {
 	channel, err := us.sdk.Channel(channelID, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	permissions, err := us.sdk.ChannelPermissions(channelID, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	crumbs := []breadcrumb{
@@ -1175,14 +1180,14 @@ func (us *uiService) ViewChannel(s Session, channelID string) (b []byte, err err
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "channel", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 	return btpl.Bytes(), nil
 }
 
 func (us *uiService) UpdateChannel(token string, channel sdk.Channel) error {
 	if _, err := us.sdk.UpdateChannel(channel, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdate)
+		return errors.Wrap(ErrFailedUpdate, err)
 	}
 
 	return nil
@@ -1199,12 +1204,12 @@ func (us *uiService) ListThingsByChannel(s Session, channelID string, page, limi
 
 	thsPage, err := us.sdk.ThingsByChannel(channelID, pgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	permissions, err := us.sdk.ChannelPermissions(channelID, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	noOfPages := int(math.Ceil(float64(thsPage.Total) / float64(limit)))
@@ -1241,14 +1246,14 @@ func (us *uiService) ListThingsByChannel(s Session, channelID string, page, limi
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "channelthings", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 	return btpl.Bytes(), nil
 }
 
 func (us *uiService) EnableChannel(token, channelID string) error {
 	if _, err := us.sdk.EnableChannel(channelID, token); err != nil {
-		return errors.Wrap(err, ErrFailedEnable)
+		return errors.Wrap(ErrFailedEnable, err)
 	}
 
 	return nil
@@ -1256,14 +1261,14 @@ func (us *uiService) EnableChannel(token, channelID string) error {
 
 func (us *uiService) DisableChannel(token, channelID string) error {
 	if _, err := us.sdk.DisableChannel(channelID, token); err != nil {
-		return errors.Wrap(err, ErrFailedDisable)
+		return errors.Wrap(ErrFailedDisable, err)
 	}
 	return nil
 }
 
 func (us *uiService) Connect(token string, connIDs sdk.Connection) error {
 	if err := us.sdk.Connect(connIDs, token); err != nil {
-		return errors.Wrap(err, ErrFailedConnect)
+		return errors.Wrap(ErrFailedConnect, err)
 	}
 
 	return nil
@@ -1271,7 +1276,7 @@ func (us *uiService) Connect(token string, connIDs sdk.Connection) error {
 
 func (us *uiService) Disconnect(token string, connIDs sdk.Connection) error {
 	if err := us.sdk.Disconnect(connIDs, token); err != nil {
-		return errors.Wrap(err, ErrFailedDisconnect)
+		return errors.Wrap(ErrFailedDisconnect, err)
 	}
 
 	return nil
@@ -1279,7 +1284,7 @@ func (us *uiService) Disconnect(token string, connIDs sdk.Connection) error {
 
 func (us *uiService) ConnectThing(thingID, channelID, token string) error {
 	if err := us.sdk.ConnectThing(thingID, channelID, token); err != nil {
-		return errors.Wrap(err, ErrFailedConnect)
+		return errors.Wrap(ErrFailedConnect, err)
 	}
 
 	return nil
@@ -1287,7 +1292,7 @@ func (us *uiService) ConnectThing(thingID, channelID, token string) error {
 
 func (us *uiService) DisconnectThing(thingID, channelID, token string) error {
 	if err := us.sdk.DisconnectThing(thingID, channelID, token); err != nil {
-		return errors.Wrap(err, ErrFailedDisconnect)
+		return errors.Wrap(ErrFailedDisconnect, err)
 	}
 
 	return nil
@@ -1295,7 +1300,7 @@ func (us *uiService) DisconnectThing(thingID, channelID, token string) error {
 
 func (us *uiService) AddUserToChannel(token, id string, req sdk.UsersRelationRequest) error {
 	if err := us.sdk.AddUserToChannel(id, req, token); err != nil {
-		return errors.Wrap(err, ErrFailedAssign)
+		return errors.Wrap(ErrFailedAssign, err)
 	}
 
 	return nil
@@ -1303,7 +1308,7 @@ func (us *uiService) AddUserToChannel(token, id string, req sdk.UsersRelationReq
 
 func (us *uiService) RemoveUserFromChannel(token, id string, req sdk.UsersRelationRequest) error {
 	if err := us.sdk.RemoveUserFromChannel(id, req, token); err != nil {
-		return errors.Wrap(err, ErrFailedUnassign)
+		return errors.Wrap(ErrFailedUnassign, err)
 	}
 
 	return nil
@@ -1318,12 +1323,12 @@ func (us *uiService) ListChannelUsers(s Session, id, relation string, page, limi
 	}
 	usersPage, err := us.sdk.ListChannelUsers(id, pgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	permissions, err := us.sdk.ChannelPermissions(id, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
@@ -1364,14 +1369,14 @@ func (us *uiService) ListChannelUsers(s Session, id, relation string, page, limi
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "channelusers", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 	return btpl.Bytes(), nil
 }
 
 func (us *uiService) AddUserGroupToChannel(token, id string, req sdk.UserGroupsRequest) error {
 	if err := us.sdk.AddUserGroupToChannel(id, req, token); err != nil {
-		return errors.Wrap(err, ErrFailedAssign)
+		return errors.Wrap(ErrFailedAssign, err)
 	}
 
 	return nil
@@ -1379,7 +1384,7 @@ func (us *uiService) AddUserGroupToChannel(token, id string, req sdk.UserGroupsR
 
 func (us *uiService) RemoveUserGroupFromChannel(token, id string, req sdk.UserGroupsRequest) error {
 	if err := us.sdk.RemoveUserGroupFromChannel(id, req, token); err != nil {
-		return errors.Wrap(err, ErrFailedUnassign)
+		return errors.Wrap(ErrFailedUnassign, err)
 	}
 
 	return nil
@@ -1393,12 +1398,12 @@ func (us *uiService) ListChannelUserGroups(s Session, id string, page, limit uin
 	}
 	groupsPage, err := us.sdk.ListChannelUserGroups(id, pgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	permissions, err := us.sdk.ChannelPermissions(id, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	noOfPages := int(math.Ceil(float64(groupsPage.Total) / float64(limit)))
@@ -1437,7 +1442,7 @@ func (us *uiService) ListChannelUserGroups(s Session, id string, page, limit uin
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "channelgroups", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -1446,7 +1451,7 @@ func (us *uiService) ListChannelUserGroups(s Session, id string, page, limit uin
 func (us *uiService) CreateGroups(token string, groups ...sdk.Group) error {
 	for _, group := range groups {
 		if _, err := us.sdk.CreateGroup(group, token); err != nil {
-			return errors.Wrap(err, ErrFailedCreate)
+			return errors.Wrap(ErrFailedCreate, err)
 		}
 	}
 
@@ -1465,12 +1470,12 @@ func (us *uiService) ListGroupUsers(s Session, id, relation string, page, limit 
 
 	usersPage, err := us.sdk.ListGroupUsers(id, pgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	permissions, err := us.sdk.GroupPermissions(id, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	noOfPages := int(math.Ceil(float64(usersPage.Total) / float64(limit)))
@@ -1511,14 +1516,14 @@ func (us *uiService) ListGroupUsers(s Session, id, relation string, page, limit 
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "groupusers", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 	return btpl.Bytes(), nil
 }
 
 func (us *uiService) Assign(token, groupID string, userRelation sdk.UsersRelationRequest) error {
 	if err := us.sdk.AddUserToGroup(groupID, userRelation, token); err != nil {
-		return errors.Wrap(err, ErrFailedAssign)
+		return errors.Wrap(ErrFailedAssign, err)
 	}
 
 	return nil
@@ -1526,7 +1531,7 @@ func (us *uiService) Assign(token, groupID string, userRelation sdk.UsersRelatio
 
 func (us *uiService) Unassign(token, groupID string, userRelation sdk.UsersRelationRequest) error {
 	if err := us.sdk.RemoveUserFromGroup(groupID, userRelation, token); err != nil {
-		return errors.Wrap(err, ErrFailedUnassign)
+		return errors.Wrap(ErrFailedUnassign, err)
 	}
 
 	return nil
@@ -1535,17 +1540,17 @@ func (us *uiService) Unassign(token, groupID string, userRelation sdk.UsersRelat
 func (us *uiService) ViewGroup(s Session, id string) (b []byte, err error) {
 	group, err := us.sdk.Group(id, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	parent, err := us.sdk.Group(group.ParentID, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	permissions, err := us.sdk.GroupPermissions(id, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	crumbs := []breadcrumb{
@@ -1575,14 +1580,14 @@ func (us *uiService) ViewGroup(s Session, id string) (b []byte, err error) {
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "group", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 	return btpl.Bytes(), nil
 }
 
 func (us *uiService) UpdateGroup(token string, group sdk.Group) error {
 	if _, err := us.sdk.UpdateGroup(group, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdate)
+		return errors.Wrap(ErrFailedUpdate, err)
 	}
 
 	return nil
@@ -1598,7 +1603,7 @@ func (us *uiService) ListGroups(s Session, status string, page, limit uint64) ([
 	}
 	grpPage, err := us.sdk.Groups(pgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	noOfPages := int(math.Ceil(float64(grpPage.Total) / float64(limit)))
@@ -1633,7 +1638,7 @@ func (us *uiService) ListGroups(s Session, status string, page, limit uint64) ([
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "groups", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -1641,7 +1646,7 @@ func (us *uiService) ListGroups(s Session, status string, page, limit uint64) ([
 
 func (us *uiService) EnableGroup(token, id string) error {
 	if _, err := us.sdk.EnableGroup(id, token); err != nil {
-		return errors.Wrap(err, ErrFailedEnable)
+		return errors.Wrap(ErrFailedEnable, err)
 	}
 
 	return nil
@@ -1649,7 +1654,7 @@ func (us *uiService) EnableGroup(token, id string) error {
 
 func (us *uiService) DisableGroup(token, id string) error {
 	if _, err := us.sdk.DisableGroup(id, token); err != nil {
-		return errors.Wrap(err, ErrFailedDisable)
+		return errors.Wrap(ErrFailedDisable, err)
 	}
 
 	return nil
@@ -1663,12 +1668,12 @@ func (us *uiService) ListUserGroupChannels(s Session, id string, page, limit uin
 	}
 	channelsPage, err := us.sdk.ListGroupChannels(id, pgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	permissions, err := us.sdk.GroupPermissions(id, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	noOfPages := int(math.Ceil(float64(channelsPage.Total) / float64(limit)))
@@ -1707,7 +1712,7 @@ func (us *uiService) ListUserGroupChannels(s Session, id string, page, limit uin
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "groupchannels", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -1757,7 +1762,7 @@ func (us *uiService) ReadMessages(s Session, channelID, thingKey string, mpgm sd
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "readmessages", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -1775,7 +1780,7 @@ func (us *uiService) FetchChartData(token string, channelID string, mpgm sdk.Mes
 
 	data, err := json.Marshal(msg)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrJSONMarshal)
+		return []byte{}, errors.Wrap(ErrJSONMarshal, err)
 	}
 
 	return data, nil
@@ -1784,13 +1789,13 @@ func (us *uiService) FetchChartData(token string, channelID string, mpgm sdk.Mes
 func (us *uiService) Publish(channelID, thingKey string, message Message) error {
 	jsonMessage, err := json.Marshal(message)
 	if err != nil {
-		return errors.Wrap(err, ErrFailedPublish)
+		return errors.Wrap(ErrJSONMarshal, err)
 	}
 
 	messageArray := "[" + string(jsonMessage) + "]"
 
 	if err := us.sdk.SendMessage(channelID, messageArray, thingKey); err != nil {
-		return errors.Wrap(err, ErrFailedPublish)
+		return errors.Wrap(ErrFailedPublish, err)
 	}
 
 	return nil
@@ -1799,7 +1804,7 @@ func (us *uiService) Publish(channelID, thingKey string, message Message) error 
 func (us *uiService) CreateBootstrap(token string, configs ...sdk.BootstrapConfig) error {
 	for _, cfg := range configs {
 		if _, err := us.sdk.AddBootstrap(cfg, token); err != nil {
-			return errors.Wrap(err, ErrFailedCreate)
+			return errors.Wrap(ErrFailedCreate, err)
 		}
 	}
 	return nil
@@ -1816,7 +1821,7 @@ func (us *uiService) ListBootstrap(s Session, page, limit uint64) ([]byte, error
 
 	bootstraps, err := us.sdk.Bootstraps(pgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	filter := sdk.PageMetadata{
@@ -1827,7 +1832,7 @@ func (us *uiService) ListBootstrap(s Session, page, limit uint64) ([]byte, error
 
 	things, err := us.sdk.Things(filter, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	noOfPages := int(math.Ceil(float64(bootstraps.Total) / float64(limit)))
@@ -1860,7 +1865,7 @@ func (us *uiService) ListBootstrap(s Session, page, limit uint64) ([]byte, error
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "bootstraps", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -1868,7 +1873,7 @@ func (us *uiService) ListBootstrap(s Session, page, limit uint64) ([]byte, error
 
 func (us *uiService) UpdateBootstrap(token string, config sdk.BootstrapConfig) error {
 	if err := us.sdk.UpdateBootstrap(config, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdate)
+		return errors.Wrap(ErrFailedUpdate, err)
 	}
 
 	return nil
@@ -1877,21 +1882,21 @@ func (us *uiService) UpdateBootstrap(token string, config sdk.BootstrapConfig) e
 func (us *uiService) UpdateBootstrapConnections(token string, config sdk.BootstrapConfig) error {
 	channels, ok := config.Channels.([]string)
 	if !ok {
-		return errors.Wrap(errors.New("invalid channel"), ErrFailedUpdate)
+		return errors.Wrap(ErrFailedUpdate, errors.New("invalid channel"))
 	}
 	return us.sdk.UpdateBootstrapConnection(config.ThingID, channels, token)
 }
 
 func (us *uiService) UpdateBootstrapCerts(token string, config sdk.BootstrapConfig) error {
 	if _, err := us.sdk.UpdateBootstrapCerts(config.ThingID, config.ClientCert, config.ClientKey, config.CACert, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdate)
+		return errors.Wrap(ErrFailedUpdate, err)
 	}
 	return nil
 }
 
 func (us *uiService) DeleteBootstrap(token, thingID string) error {
 	if err := us.sdk.RemoveBootstrap(thingID, token); err != nil {
-		return errors.Wrap(err, ErrFailedDelete)
+		return errors.Wrap(ErrFailedDelete, err)
 	}
 
 	return nil
@@ -1899,7 +1904,7 @@ func (us *uiService) DeleteBootstrap(token, thingID string) error {
 
 func (us *uiService) UpdateBootstrapState(token string, config sdk.BootstrapConfig) error {
 	if err := us.sdk.Whitelist(config, token); err != nil {
-		return errors.Wrap(err, ErrFailedUpdate)
+		return errors.Wrap(ErrFailedUpdate, err)
 	}
 
 	return nil
@@ -1908,7 +1913,7 @@ func (us *uiService) UpdateBootstrapState(token string, config sdk.BootstrapConf
 func (us *uiService) ViewBootstrap(s Session, thingID string) ([]byte, error) {
 	bootstrap, err := us.sdk.ViewBootstrap(thingID, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	switch channels := bootstrap.Channels.(type) {
@@ -1923,12 +1928,12 @@ func (us *uiService) ViewBootstrap(s Session, thingID string) ([]byte, error) {
 	case nil:
 		bootstrap.Channels = []string{}
 	default:
-		return nil, errors.Wrap(errors.New("invalid channels"), ErrFailedRetreive)
+		return nil, errors.Wrap(ErrFailedRetreive, errors.New("invalid channels"))
 	}
 
 	thing, err := us.sdk.Thing(thingID, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	crumbs := []breadcrumb{
@@ -1954,7 +1959,7 @@ func (us *uiService) ViewBootstrap(s Session, thingID string) ([]byte, error) {
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "bootstrap", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -1982,7 +1987,7 @@ func (us *uiService) GetRemoteTerminal(s Session, thingID string) (b []byte, err
 	}
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "remoteTerminal", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -1991,13 +1996,13 @@ func (us *uiService) GetRemoteTerminal(s Session, thingID string) (b []byte, err
 func (us *uiService) ProcessTerminalCommand(ctx context.Context, thingID, tkn, command string, res chan string) error {
 	cfg, err := us.sdk.ViewBootstrap(thingID, tkn)
 	if err != nil {
-		return errors.Wrap(err, ErrFailedRetreive)
+		return errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	var content bootstrap.ServicesConfig
 
 	if err := json.Unmarshal([]byte(cfg.Content), &content); err != nil {
-		return err
+		return errors.Wrap(ErrJSONUnmarshal, err)
 	}
 
 	channels, ok := cfg.Channels.([]sdk.Channel)
@@ -2023,7 +2028,7 @@ func (us *uiService) ProcessTerminalCommand(ctx context.Context, thingID, tkn, c
 	client := mqtt.NewClient(opts)
 
 	if token := client.Connect(); token.Wait() && token.Error() != nil {
-		return token.Error()
+		return errors.Wrap(ErrFailedConnect, token.Error())
 	}
 
 	req := []mgsenml.Record{
@@ -2031,14 +2036,14 @@ func (us *uiService) ProcessTerminalCommand(ctx context.Context, thingID, tkn, c
 	}
 	reqByte, err1 := json.Marshal(req)
 	if err1 != nil {
-		return err1
+		return errors.Wrap(ErrJSONMarshal, err1)
 	}
 
 	token := client.Publish(pubTopic, 0, false, string(reqByte))
 	token.Wait()
 
 	if token.Error() != nil {
-		return token.Error()
+		return errors.Wrap(ErrFailedPublish, token.Error())
 	}
 
 	var wg sync.WaitGroup
@@ -2048,7 +2053,7 @@ func (us *uiService) ProcessTerminalCommand(ctx context.Context, thingID, tkn, c
 	client.Subscribe(subTopic, 0, func(_ mqtt.Client, m mqtt.Message) {
 		var data []mgsenml.Record
 		if err := json.Unmarshal(m.Payload(), &data); err != nil {
-			errChan <- err
+			errChan <- errors.Wrap(ErrJSONUnmarshal, err)
 		}
 		res <- *data[0].StringValue
 		wg.Done()
@@ -2084,44 +2089,44 @@ func (us *uiService) GetEntities(token, entity, entityName, domainID, permission
 	case "groups":
 		groups, err := us.sdk.Groups(pgm, token)
 		if err != nil {
-			return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+			return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 		}
 		items["data"] = groups.Groups
 	case "users":
 		users, err := us.sdk.Users(pgm, token)
 		if err != nil {
-			return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+			return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 		}
 		items["data"] = users.Users
 	case "things":
 		things, err := us.sdk.Things(pgm, token)
 		if err != nil {
-			return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+			return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 		}
 		items["data"] = things.Things
 	case "channels":
 		channels, err := us.sdk.Channels(pgm, token)
 		if err != nil {
-			return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+			return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 		}
 		items["data"] = channels.Channels
 	case "members":
 		members, err := us.sdk.ListDomainUsers(domainID, pgm, token)
 		if err != nil {
-			return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+			return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 		}
 		items["data"] = members.Users
 	case "domains":
 		domains, err := us.sdk.Domains(pgm, token)
 		if err != nil {
-			return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+			return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 		}
 		items["data"] = domains.Domains
 	}
 
 	data, err := json.Marshal(items)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrJSONMarshal)
+		return []byte{}, errors.Wrap(ErrJSONMarshal, err)
 	}
 	return data, nil
 }
@@ -2137,7 +2142,7 @@ func (us *uiService) ErrorPage(errMsg, url string) ([]byte, error) {
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "error", data); err != nil {
-		return nil, errors.Wrap(err, ErrExecTemplate)
+		return nil, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -2189,7 +2194,7 @@ func (us *uiService) ListDomains(s Session, status string, page, limit uint64) (
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "domains", data); err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -2240,7 +2245,7 @@ func (us *uiService) Domain(s Session) ([]byte, error) {
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "domain", data); err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -2248,7 +2253,7 @@ func (us *uiService) Domain(s Session) ([]byte, error) {
 
 func (us *uiService) EnableDomain(token, id string) error {
 	if err := us.sdk.EnableDomain(id, token); err != nil {
-		return errors.Wrap(err, ErrFailedEnable)
+		return errors.Wrap(ErrFailedEnable, err)
 	}
 
 	return nil
@@ -2256,7 +2261,7 @@ func (us *uiService) EnableDomain(token, id string) error {
 
 func (us *uiService) DisableDomain(token, id string) error {
 	if err := us.sdk.DisableDomain(id, token); err != nil {
-		return errors.Wrap(err, ErrFailedDisable)
+		return errors.Wrap(ErrFailedDisable, err)
 	}
 
 	return nil
@@ -2284,7 +2289,7 @@ func (us *uiService) ViewMember(s Session, userIdentity string) (b []byte, err e
 	}
 	usersPage, err := us.sdk.Users(pgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	crumbs := []breadcrumb{
@@ -2308,7 +2313,7 @@ func (us *uiService) ViewMember(s Session, userIdentity string) (b []byte, err e
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "member", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -2357,14 +2362,18 @@ func (us *uiService) Members(s Session, page, limit uint64) ([]byte, error) {
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "members", data); err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
 }
 
 func (us *uiService) SendInvitation(token string, invitation sdk.Invitation) error {
-	return us.sdk.SendInvitation(invitation, token)
+	if err := us.sdk.SendInvitation(invitation, token); err != nil {
+		return errors.Wrap(ErrFailedSend, err)
+	}
+
+	return nil
 }
 
 func (us *uiService) Invitations(s Session, domainID string, page, limit uint64) ([]byte, error) {
@@ -2378,7 +2387,7 @@ func (us *uiService) Invitations(s Session, domainID string, page, limit uint64)
 	}
 	invitationsPage, err := us.sdk.Invitations(pgm, s.Token)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	noOfPages := int(math.Ceil(float64(invitationsPage.Total) / float64(limit)))
@@ -2426,18 +2435,26 @@ func (us *uiService) Invitations(s Session, domainID string, page, limit uint64)
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "invitations", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
 }
 
 func (us *uiService) AcceptInvitation(token, domainID string) error {
-	return us.sdk.AcceptInvitation(domainID, token)
+	if err := us.sdk.AcceptInvitation(domainID, token); err != nil {
+		return errors.Wrap(ErrFailedAccept, err)
+	}
+
+	return nil
 }
 
 func (us *uiService) DeleteInvitation(token, userID, domainID string) error {
-	return us.sdk.DeleteInvitation(userID, domainID, token)
+	if err := us.sdk.DeleteInvitation(userID, domainID, token); err != nil {
+		return errors.Wrap(ErrFailedDelete, err)
+	}
+
+	return nil
 }
 
 func (us *uiService) CreateDashboard(token string, dashboardReq DashboardReq) ([]byte, error) {
@@ -2461,14 +2478,14 @@ func (us *uiService) CreateDashboard(token string, dashboardReq DashboardReq) ([
 
 	ds, err := us.drepo.Create(context.Background(), dashboard)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedDashboardSave)
+		return []byte{}, errors.Wrap(ErrFailedDashboardSave, err)
 	}
 
 	item := make(map[string]interface{})
 	item["dashboard"] = ds
 	data, err := json.Marshal(item)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(ErrJSONMarshal, err)
 	}
 
 	return data, nil
@@ -2514,7 +2531,7 @@ func (us *uiService) ViewDashboard(s Session, dashboardID string) ([]byte, error
 	}
 
 	if err := us.tpls.ExecuteTemplate(&btpl, "dashboard", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -2535,7 +2552,7 @@ func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, e
 	}
 	dashboardsPage, err := us.drepo.RetrieveAll(context.Background(), pgm)
 	if err != nil {
-		return []byte{}, errors.Wrap(err, ErrFailedRetreive)
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	noOfPages := int(math.Ceil(float64(dashboardsPage.Total) / float64(limit)))
@@ -2548,7 +2565,7 @@ func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, e
 	items["pages"] = noOfPages
 	data, err := json.Marshal(items)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return data, nil
@@ -2573,7 +2590,7 @@ func (us *uiService) Dashboards(s Session) (b []byte, err error) {
 
 	var btpl bytes.Buffer
 	if err := us.tpls.ExecuteTemplate(&btpl, "dashboards", data); err != nil {
-		return []byte{}, errors.Wrap(err, ErrExecTemplate)
+		return []byte{}, errors.Wrap(ErrExecTemplate, err)
 	}
 
 	return btpl.Bytes(), nil
@@ -2694,7 +2711,7 @@ func parseTemplates(mfsdk sdk.SDK, prefix string) (tpl *template.Template, err e
 	var templates []string
 	entries, err := templatesFS.ReadDir(templatesDir)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(ErrReadDir, err)
 	}
 	for _, entry := range entries {
 		if entry.IsDir() {
@@ -2705,11 +2722,16 @@ func parseTemplates(mfsdk sdk.SDK, prefix string) (tpl *template.Template, err e
 
 	entries, err = templatesFS.ReadDir(chartTemplatesDir)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(ErrReadDir, err)
 	}
 	for _, entry := range entries {
 		templates = append(templates, chartTemplatesDir+"/"+entry.Name())
 	}
 
-	return tpl.ParseFS(templatesFS, templates...)
+	template, err := tpl.ParseFS(templatesFS, templates...)
+	if err != nil {
+		return nil, errors.Wrap(ErrParseTemplate, err)
+	}
+
+	return template, nil
 }

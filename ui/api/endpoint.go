@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/absmach/magistrala-ui/ui"
+	"github.com/absmach/magistrala/pkg/errors"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/golang-jwt/jwt"
 	"github.com/gorilla/securecookie"
@@ -311,16 +312,16 @@ func secureTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix st
 		sessionDetails.Token = req.AccessToken
 		session, err := json.Marshal(sessionDetails)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(ui.ErrJSONMarshal, err)
 		}
 		secureSessionDetails, err := s.Encode(sessionDetailsKey, string(session))
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(errCookieEncrypt, err)
 		}
 
 		secureRefreshToken, err := s.Encode(refreshTokenKey, req.RefreshToken)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(errCookieEncrypt, err)
 		}
 
 		refreshExp, err := extractTokenExpiry(req.RefreshToken)
@@ -384,16 +385,16 @@ func refreshTokenEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix s
 		req.Session.Token = token.AccessToken
 		session, err := json.Marshal(req.Session)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(ui.ErrJSONMarshal, err)
 		}
 		secureSessionDetails, err := s.Encode(sessionDetailsKey, string(session))
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(errCookieEncrypt, err)
 		}
 
 		secureRefreshToken, err := s.Encode(refreshTokenKey, token.RefreshToken)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(errCookieEncrypt, err)
 		}
 		refreshExp, err := extractTokenExpiry(token.RefreshToken)
 		if err != nil {
@@ -1637,16 +1638,16 @@ func domainLoginEndpoint(svc ui.Service, s *securecookie.SecureCookie, prefix st
 		sessionDetails.Token = token.AccessToken
 		session, err := json.Marshal(sessionDetails)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(ui.ErrJSONMarshal, err)
 		}
 		secureSessionDetails, err := s.Encode(sessionDetailsKey, string(session))
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(errCookieEncrypt, err)
 		}
 
 		secureRefreshToken, err := s.Encode(refreshTokenKey, token.RefreshToken)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(errCookieEncrypt, err)
 		}
 
 		refreshExp, err := extractTokenExpiry(token.RefreshToken)
@@ -2144,7 +2145,7 @@ func deleteDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 func extractTokenExpiry(token string) (time.Time, error) {
 	jwtToken, _, err := new(jwt.Parser).ParseUnverified(token, jwt.MapClaims{})
 	if err != nil {
-		return time.Time{}, err
+		return time.Time{}, errors.Wrap(errParseToken, err)
 	}
 	var expTime time.Time
 	if claims, ok := jwtToken.Claims.(jwt.MapClaims); ok {
