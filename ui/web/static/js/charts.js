@@ -791,6 +791,10 @@ class TimeSeriesLineChart extends Echart {
   }
 
   #generateScript() {
+    const channels = JSON.stringify(this.chartData.channels);
+    const things = JSON.stringify(this.chartData.things);
+    const names = JSON.stringify(this.chartData.valueNames);
+    const colors = JSON.stringify(this.chartData.colors);
     return `
     var lineChart = echarts.init(document.getElementById("${this.ID}")); 
     var option = {
@@ -824,18 +828,17 @@ class TimeSeriesLineChart extends Echart {
           lineStyle: {
             width: ${this.chartData.lineWidth},
             type: 'solid',
-            color: '${this.chartData.lineColor}'
           },
-          name: '${this.chartData.seriesName}'
         }
       ]
     };
 
     lineChart.setOption(option);
     var chartdata = {
-      channel:'${this.chartData.channel}',
-      publisher:'${this.chartData.thing}',
-      name:'${this.chartData.valueName}',
+      channels:${channels},
+      publishers:${things},
+      names:${names},
+      colors:${colors},
       from:${this.chartData.startTime},
       to:${this.chartData.stopTime},
       aggregation:'${this.chartData.aggregationType}',
@@ -846,68 +849,99 @@ class TimeSeriesLineChart extends Echart {
   
     async function getData(linechart,chartData) {
       try {
-        const response = await fetch(
-          "${pathPrefix}/data?channel=" + chartData.channel +
-            "&publisher=" + chartData.publisher +
-            "&name=" + chartData.name +
-            "&from=" + chartData.from +
-            "&to=" + chartData.to +
-            "&aggregation=" + chartData.aggregation +
-            "&limit=" + chartData.limit +
-            "&interval=" + chartData.interval,
-        );
-        if (response.ok) {
-          const data = await response.json();
-          const xAxisArray = [];
-          const yAxisArray = [];
-          let currentTimestamp = chartData.from;
-          let previousTimestamp;
-          const endTimestamp = chartData.to;
-          const intervalNum = 3600;
-          while (currentTimestamp <= endTimestamp) {
-            let messageIndex = data.messages.length - 1;
-            let isempty= true;
-            while (messageIndex >= 0 && (data.messages[messageIndex].time) >= previousTimestamp) {
-              const item = data.messages[messageIndex];
-              if ((item.time) <= currentTimestamp) {
-                const date = new Date(item.time);
-                xAxisArray.push(date.toLocaleTimeString());
-                yAxisArray.push(item.value);
-                isempty=false;
+        let xAxisArray=[];
+        const yAxisArray = [];
+        for (let i=0; i<chartData.channels.length; i++) {
+          const url = "${pathPrefix}/data?channel=" + chartData.channels[i] +
+          "&publisher=" + chartData.publishers[i] +
+          "&name=" + chartData.names[i] +
+          "&from=" + chartData.from +
+          "&to=" + chartData.to +
+          "&aggregation=" + chartData.aggregation +
+          "&limit=" + chartData.limit +
+          "&interval=" + chartData.interval;
+          const response = await fetch(url);
+          if (response.ok) {
+            const data = await response.json();
+            let currentTimestamp = chartData.from;
+            let previousTimestamp;
+            const endTimestamp = chartData.to;
+            const intervalNum = 3600;
+            const xAxis=[];
+            const yAxis=[];
+            if (data.messages){
+              while (currentTimestamp <= endTimestamp) {
+                let messageIndex = data.messages.length - 1;
+                let isempty= true;
+                while (messageIndex >= 0 && (data.messages[messageIndex].time) >= previousTimestamp) {
+                  const item = data.messages[messageIndex];
+                  if ((item.time) <= currentTimestamp) {
+                    if (xAxisArray.length > 0 && xAxisArray[xAxisArray.length-1].length > 0) {
+                      xAxisArray[xAxisArray.length-1].forEach((element) => {
+                        if (item.time!=element) {
+                          xAxis.push(item.time);
+                        }else {
+                          xAxis.push(element);
+                        }
+                      })
+                    }else {
+                      xAxis.push(item.time);
+                    }
+                    yAxis.push(item.value);
+                    isempty=false;
+                  }
+                  messageIndex--;
+                }
+                if (isempty) {
+                    xAxis.push(currentTimestamp);
+                    yAxis.push("-");
+                }
+                previousTimestamp = currentTimestamp;
+                currentTimestamp += intervalNum * 1e3;
               }
-              messageIndex--;
             }
-            if (isempty) {
-              const date = new Date(currentTimestamp);
-              xAxisArray.push(date.toLocaleTimeString());
-              yAxisArray.push("-");
-            }
-            previousTimestamp = currentTimestamp;
-            currentTimestamp += intervalNum * 1e3;
+            xAxisArray.push(xAxis);
+            yAxisArray.push(yAxis);
+          } else {
+            // Handle errors
+            console.error("HTTP request failed with status:", response.status);
           }
-          linechart.setOption({
-            xAxis: {
-              data: xAxisArray,
-            },
-            series: [
-              {
-                data: yAxisArray,
-              },
-            ],
-          });
-        } else {
-          // Handle errors
-          console.error("HTTP request failed with status:", response.status);
         }
+
+        const xAxisData=[];
+        xAxisArray[xAxisArray.length-1].forEach((element) => {
+          const date = new Date(element);
+          xAxisData.push(date.toLocaleTimeString());
+        })
+        const seriesData = []
+        for (i=0; i<yAxisArray.length; i++) {
+          const data = {
+            data: yAxisArray[i],
+            type: 'line',
+            lineStyle: {
+              color: chartData.colors[i],
+            },
+            name: chartData.names[i],
+          };
+          seriesData.push(data);
+        }
+        linechart.setOption({
+            xAxis: {
+              data: xAxisData,
+            },
+            series: seriesData,
+          });
+
       } catch (error) {
-        // Handle fetch or other errors
-        console.error("Error:", error);
-        // Retry after a couple of seconds
-        setTimeout(function () {
-          getData(linechart, chartData);
-        }, 20000);
-      }
-    }`;
+          // Handle fetch or other errors
+          console.error("Error:", error);
+          // Retry after a couple of seconds
+          setTimeout(function () {
+            getData(linechart, chartData);
+          }, 20000);
+        }
+      };
+    `;
   }
 }
 
