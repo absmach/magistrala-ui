@@ -102,8 +102,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <input
                             type="text"
                             class="form-control"
-                            name="valueName"
-                            placeholder="value name"
+                            name="seriesName"
+                            placeholder="series name"
                             required
                           />
                         </td>
@@ -121,6 +121,17 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <button type="button" class="btn body-button btn-sm" onclick="addRow()">
                     Add source
                   </button>
+                </div>
+                <div class="mb-3">
+                  <label for="value-name" class="form-label">Value name</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="valueName"
+                    id="value-name"
+                    placeholder="Enter the value name eg. temperature"
+                    required
+                  />
                 </div>
                 <div class="mb-3">
                   <label for="start-time" class="form-label">Start time</label>
@@ -265,7 +276,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         case "thing":
           things.push(value);
           break;
-        case "valueName":
+        case "seriesName":
           names.push(value);
           break;
         case "lineColor":
@@ -279,7 +290,7 @@ SPDX-License-Identifier: Apache-2.0 -->
 
     chartData["channels"] = channels;
     chartData["things"] = things;
-    chartData["valueNames"]= names;
+    chartData["seriesNames"]= names;
     chartData["colors"]=colors;
 
     if (chartData.aggregationType != "") {
