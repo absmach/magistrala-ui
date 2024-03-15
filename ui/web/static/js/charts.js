@@ -130,7 +130,7 @@ class TimeSeriesBarChart extends Echart {
         type: 'value',
         name: '${this.chartData.yAxisLabel}',
         nameLocation: 'middle',
-        nameGap: 35
+        nameGap: 25
       },
       legend: {
         show: true,
@@ -177,13 +177,13 @@ class TimeSeriesBarChart extends Echart {
           const data = await response.json();
           const xAxisArray = [];
           const yAxisArray = [];
-          if (data.message != undefined && data.messages.length > 0) {
+          if (data.messages != undefined && data.messages.length > 0) {
             data.messages.forEach((message) => {
               xAxisArray.push(new Date(message.time).toLocaleTimeString());
               yAxisArray.push(message.value);
             });
           }
-          updateChart(barChart,xAxisArray, yAxisArray);
+          updateChart(barChart, xAxisArray, yAxisArray);
         } catch (error) {
           console.error("Error fetching data:", error);
           setTimeout(function () {
