@@ -793,7 +793,7 @@ class TimeSeriesLineChart extends Echart {
   #generateScript() {
     const channels = JSON.stringify(this.chartData.channels);
     const things = JSON.stringify(this.chartData.things);
-    const names = JSON.stringify(this.chartData.valueNames);
+    const names = JSON.stringify(this.chartData.seriesNames);
     const colors = JSON.stringify(this.chartData.colors);
     return `
     var lineChart = echarts.init(document.getElementById("${this.ID}")); 
@@ -839,6 +839,7 @@ class TimeSeriesLineChart extends Echart {
       publishers:${things},
       names:${names},
       colors:${colors},
+      valueName: '${this.chartData.valueName}',
       from:${this.chartData.startTime},
       to:${this.chartData.stopTime},
       aggregation:'${this.chartData.aggregationType}',
@@ -854,7 +855,7 @@ class TimeSeriesLineChart extends Echart {
         for (let i=0; i<chartData.channels.length; i++) {
           const url = "${pathPrefix}/data?channel=" + chartData.channels[i] +
           "&publisher=" + chartData.publishers[i] +
-          "&name=" + chartData.names[i] +
+          "&name=" + chartData.valueName +
           "&from=" + chartData.from +
           "&to=" + chartData.to +
           "&aggregation=" + chartData.aggregation +
@@ -866,7 +867,25 @@ class TimeSeriesLineChart extends Echart {
             let currentTimestamp = chartData.from;
             let previousTimestamp;
             const endTimestamp = chartData.to;
-            const intervalNum = 3600;
+            const timeDifference = chartData.to - chartData.from;
+            let intervalNum;
+            switch (true) {
+              case (timeDifference <= 8.64 * 1e7):
+                intervalNum = 6*1e4;
+                break;
+              case (timeDifference <= 6.05 * 1e8):
+                intervalNum = 6*1e5;
+                break;
+              case (timeDifference <= 2.63 * 1e9):
+                intervalNum = 6*1e7;
+                break;
+              case (timeDifference <= 3.16 * 1e10):
+                intervalNum = 6*1e7;
+                break;
+              default:
+                intervalNum = 6*1e8;
+                break;
+            }
             const xAxis=[];
             const yAxis=[];
             if (data.messages){
@@ -897,7 +916,7 @@ class TimeSeriesLineChart extends Echart {
                     yAxis.push("-");
                 }
                 previousTimestamp = currentTimestamp;
-                currentTimestamp += intervalNum * 1e3;
+                currentTimestamp += intervalNum;
               }
             }
             xAxisArray.push(xAxis);
