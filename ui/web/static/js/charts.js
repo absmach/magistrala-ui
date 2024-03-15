@@ -706,7 +706,10 @@ class HorizontalBarChart extends Echart {
           },
           dataset: {
             source: [
-              [],
+              [
+                "thing",
+                "value"
+            ],
             ]
           },
           grid: { containLabel: true },
@@ -727,7 +730,7 @@ class HorizontalBarChart extends Echart {
             left: 'center',
             min: 0,
             max: 100,
-            text: ['High temperature', 'Low temperature'],
+            text: ['High', 'Low'],
             // Map the score column to color
             dimension: 0,
             inRange: {
@@ -747,53 +750,73 @@ class HorizontalBarChart extends Echart {
 
       horizontalBarChart.setOption(option);
       var chartData = {
-        channel: '${this.chartData.channel}',
-        publisher: '${this.chartData.thing}',
+        channels: '${this.chartData.channels}'.split(','),
+        things: '${this.chartData.things}'.split(','),
         name: '${this.chartData.valueName}',
         from: ${this.chartData.startTime},
         to: ${this.chartData.stopTime},
         aggregation: '${this.chartData.aggregationType}',
         limit: 100,
-        interval : getInterval(),
-      }
-      
-      async getData(horizontalBarChart, chartData) {
-        try {
-          const apiEndpoint = "/data?channel=" + chartData.channel +
-          "&name=" + chartData.name +
-          "&from=" + chartData.from +
-          "&to=" + chartData.to +
-          "&aggregation=" + chartData.aggregation +
-          "&limit=" + chartData.limit +
-          "&interval=" + chartData.interval;
+      };
+      fetchData(horizontalBarChart, chartData);
 
-          const response = await fetch(apiEndpoint);
+      async function fetchData(horizontalBarChart, chartData) {
+        try {
+            const plotData = [['value', 'thing']];
     
-          if (!response.ok) {
-            throw new Error('API request failed with status ${response.status}');
-          }
+            for (let i = 0; i < chartData.channels.length; i++) {
+                const apiEndpoint = '${pathPrefix}/data?channel=' + chartData.channels[i] +
+                    '&name=' + chartData.name +
+                    '&from='+ chartData.from +
+                    '&to=' + chartData.to +
+                    '&aggregation=' + chartData.aggregation +
+                    '&limit=10' +
+                    '&interval=' + getInterval(chartData) +
+                    '&publisher=' + chartData.things[i];
     
-          const data = await response.json();
-          updateChart(data);
-    
+                const response = await fetch(apiEndpoint);
+                if (!response.ok) {
+                    throw new Error('HTTP request failed with status:', response.status)
+                }
+                const data = await response.json();
+                plotData.push([data.messages[0].value, 'thing'+i.toString()]);
+            }
+            updateChart(horizontalBarChart, plotData);
         } catch (error) {
-          console.error("Error fetching data:", error);
-          // Handle the error (e.g., display an error message)
-        } finally {
-          // Schedule the next update
-          setTimeout(() => this.fetchDataAndUpdate(), 5000); // Example: 5 seconds 
+            console.error("Error fetching data:", error);
         }
       }
     
-      updateChart(data) {
-        const barChart = echarts.init(document.getElementById(this.ID));
-        const option = barChart.getOption(); // Get the existing options
-        
-        option.series[0].data = data.seriesData; 
-    
-        barChart.setOption(option); // Update the chart
+      function updateChart(horizontalBarChart, plotData) {
+        option = horizontalBarChart.getOption();
+        option.series[0].encode.x = 'value';
+        option.series[0].encode.y = 'thing';
+        option.visualMap.text = ['High', 'Low'];
+        option.dataset[0].source = plotData;
+        horizontalBarChart.setOption(option);
       }
-    }
+
+      function getInterval(chartData) {
+        const interval = chartData.to - chartData.from;
+        const nanosecondsPerSecond = 1e3;
+        const secondsPerMinute = 60;
+        const minutesPerHour = 60;
+        let minutes = 0;
+        let hours = 0;
+        let intervalString = "";
+
+        let seconds = parseInt(interval) / nanosecondsPerSecond;
+        intervalString = Math.ceil(seconds).toString() +'s';
+        if (seconds >= secondsPerMinute) {
+          minutes = seconds/ secondsPerMinute;
+          intervalString = Math.ceil(minutes).toString() + 'm';
+        }
+        if (minutes >= minutesPerHour) {
+          hours = minutes /minutesPerHour;
+          intervalString = Math.ceil(hours).toString() + 'h';
+        }
+        return intervalString;      
+      }
       `;
   }
 }
