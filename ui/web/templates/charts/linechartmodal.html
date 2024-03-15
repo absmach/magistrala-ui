@@ -64,42 +64,66 @@ SPDX-License-Identifier: Apache-2.0 -->
                 role="tabpanel"
                 aria-labelledby="data-tab"
               >
-                <div class="mb-3">
-                  <label for="channel-id" class="form-label">Channel ID</label>
-                  <input
-                    type="text"
-                    pattern="{{ .UUIDPattern }}"
-                    class="form-control mb-3"
-                    name="channel"
-                    id="channel-id"
-                    placeholder="Enter the channel ID"
-                    required
-                  />
-                  <div class="invalid-feedback">Please enter a valid uuid</div>
-                </div>
-                <div class="mb-3">
-                  <label for="thing-id" class="form-label">Thing ID</label>
-                  <input
-                    type="text"
-                    pattern="{{ .UUIDPattern }}"
-                    class="form-control mb-3"
-                    name="thing"
-                    id="thing-id"
-                    placeholder="Enter the thing ID"
-                    required
-                  />
-                  <div class="invalid-feedback">Please enter a valid uuid</div>
-                </div>
-                <div class="mb-3">
-                  <label for="value-name" class="form-label">Value name</label>
-                  <input
-                    type="text"
-                    class="form-control mb-3"
-                    name="valueName"
-                    id="value-name"
-                    placeholder="Enter the value name eg. temperature"
-                    required
-                  />
+                <div class="table-responsive-md mb-3 p-2 border rounded">
+                  <h5>Data Source</h5>
+                  <table class="table" id="linechart-data">
+                    <thead>
+                      <tr>
+                        <th scope="col">Channel</th>
+                        <th scope="col">Thing</th>
+                        <th scope="col">Value</th>
+                        <th scope="col">Color</th>
+                        <th scope="col"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <input
+                            type="text"
+                            pattern="{{ .UUIDPattern }}"
+                            class="form-control"
+                            name="channel"
+                            placeholder="channel ID"
+                            required
+                            value="b6b2bdf4-de46-45c9-bbaa-a3c972d60f33"
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            pattern="{{ .UUIDPattern }}"
+                            class="form-control"
+                            name="thing"
+                            placeholder="thing ID"
+                            required
+                            value="3ca685f2-34cb-4614-84b2-f0ec3793e0b4"
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            class="form-control"
+                            name="valueName"
+                            placeholder="value name"
+                            required
+                            value="Temp"
+                          />
+                        </td>
+                        <td>
+                          <input type="color" class="form-control" name="lineColor" />
+                        </td>
+                        <td class="text-center">
+                          <button type="button" class="btn btn-sm" onclick="removeRow(this)">
+                            <i class="fas fa-trash-alt"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <button type="button" class="btn body-button btn-sm" onclick="addRow()">
+                    Add source
+                  </button>
                 </div>
                 <div class="mb-3">
                   <label for="start-time" class="form-label">Start time</label>
@@ -109,6 +133,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     name="startTime"
                     id="start-time"
                     required
+                    value="1710242880000"
                   />
                   <div class="invalid-time"></div>
                 </div>
@@ -120,6 +145,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                     name="stopTime"
                     id="stop-time"
                     required
+                    value="1710329220000"
                   />
                 </div>
                 <div class="mb-3">
@@ -184,20 +210,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="series-name" class="form-label">Series name</label>
-                  <input
-                    type="text"
-                    class="form-control mb-3"
-                    name="seriesName"
-                    id="series-name"
-                    placeholder="Enter the series name eg. temperature"
-                  />
-                </div>
-                <div class="mb-3">
-                  <label for="line-color" class="form-label">Line color</label>
-                  <input type="color" class="form-control mb-3" name="lineColor" id="line-color" />
-                </div>
-                <div class="mb-3">
                   <label for="line-width" class="form-label">Line width</label>
                   <select class="form-select mb-3" name="lineWidth" id="line-width">
                     <option value="" disabled>Select the line width</option>
@@ -230,71 +242,118 @@ SPDX-License-Identifier: Apache-2.0 -->
       </div>
     </div>
   </div>
-  <script>
-    // line chart form
-    document.getElementById("create-lineChart-button").addEventListener("click", function () {
-      const form = document.getElementById("create-lineChart-form");
-      if (!form.checkValidity()) {
-        form.classList.add("was-validated");
-        return;
+<script>
+  // line chart form
+  document.getElementById("create-lineChart-button").addEventListener("click", function () {
+    const form = document.getElementById("create-lineChart-form");
+    if (!form.checkValidity()) {
+      form.classList.add("was-validated");
+      return;
+    }
+    // Create an object to store the form data
+    const chartData = {};
+    const channels = [];
+    const things = [];
+    let formData = new FormData(form);
+    for (let [name, value] of formData) {
+      switch (name) {
+        case "startTime", "stopTime":
+          const inputDate = new Date(value);
+          chartData[name] = inputDate.getTime();
+          break;
+        case "channel":
+          channels.push(pair[1]);
+          break;
+        case "thing":
+          things.push(pair[1]);
+          break;
+        default:
+        chartData[name] = value;
+        break
       }
+    }
 
-      // Create an object to store the form data
-      const chartData = {};
-      let formData = new FormData(form);
-      for (var pair of formData.entries()) {
-        if (pair[0] === "startTime" || pair[0] === "stopTime") {
-          const inputDate = new Date(pair[1]);
-          chartData[pair[0]] = inputDate.getTime();
-        } else {
-          chartData[pair[0]] = pair[1];
-        }
-      }
+    chartData["channels"] = channels;
+    chartData["things"] = things;
 
-      if (chartData.aggregationType != "") {
-        const updateInterval = form.querySelector("#update-interval");
-        if (chartData.updateInterval === "") {
-          form.querySelector(".invalid-interval").innerHTML = "Please enter an Interval";
-          updateInterval.classList.remove("was-validated");
-          updateInterval.classList.add("is-invalid");
-          return;
-        } else {
-          form.querySelector(".invalid-interval").innerHTML = "";
-          updateInterval.classList.remove("is-invalid");
-          updateInterval.classList.add("was-validated");
-        }
-      }
-      const invalidTimeFeedback = form.querySelector(".invalid-time");
-      const invalidTimeInput = form.querySelector("#stop-time");
-      if (chartData.stopTime <= chartData.startTime) {
-        invalidTimeFeedback.innerHTML = "Stop time should be greater than start time";
-        invalidTimeFeedback.style.color = "red";
-        invalidTimeInput.classList.remove("was-validated");
-        invalidTimeInput.classList.add("is-invalid");
+    if (chartData.aggregationType != "") {
+      const updateInterval = form.querySelector("#update-interval");
+      if (chartData.updateInterval === "") {
+        form.querySelector(".invalid-interval").innerHTML = "Please enter an Interval";
+        updateInterval.classList.remove("was-validated");
+        updateInterval.classList.add("is-invalid");
         return;
       } else {
-        invalidTimeFeedback.innerHTML = "";
-        invalidTimeInput.classList.remove("is-invalid");
-        invalidTimeInput.classList.add("was-validated");
+        form.querySelector(".invalid-interval").innerHTML = "";
+        updateInterval.classList.remove("is-invalid");
+        updateInterval.classList.add("was-validated");
       }
+    }
+    const invalidTimeFeedback = form.querySelector(".invalid-time");
+    const invalidTimeInput = form.querySelector("#stop-time");
+    if (chartData.stopTime <= chartData.startTime) {
+      invalidTimeFeedback.innerHTML = "Stop time should be greater than start time";
+      invalidTimeFeedback.style.color = "red";
+      invalidTimeInput.classList.remove("was-validated");
+      invalidTimeInput.classList.add("is-invalid");
+      return;
+    } else {
+      invalidTimeFeedback.innerHTML = "";
+      invalidTimeInput.classList.remove("is-invalid");
+      invalidTimeInput.classList.add("was-validated");
+    }
 
-      var widgetID = "lineChart-" + Date.now();
+    var widgetID = "lineChart-" + Date.now();
 
-      chartData["Type"] = "lineChart";
-      addWidget(chartData, widgetID);
-      metadataBuffer[widgetID] = chartData;
+    chartData["Type"] = "lineChart";
+    addWidget(chartData, widgetID);
+    metadataBuffer[widgetID] = chartData;
 
-      form.reset();
-      form.classList.remove("was-validated");
-      bootstrap.Modal.getInstance(document.getElementById("lineChartModal")).hide();
-    });
+    form.reset();
+    form.classList.remove("was-validated");
+    bootstrap.Modal.getInstance(document.getElementById("lineChartModal")).hide();
 
-    document.getElementById("close-lineChart-button").addEventListener("click", function () {
-      const form = document.getElementById("create-lineChart-form");
-      form.querySelector(".invalid-time").innerHTML = "";
-      form.querySelector("#stop-time").classList.remove("is-invalid");
-      form.reset();
-      form.classList.remove("was-validated");
-    });
-  </script>
+  });
+
+  document.getElementById("close-lineChart-button").addEventListener("click", function () {
+    const form = document.getElementById("create-lineChart-form");
+    form.querySelector(".invalid-time").innerHTML = "";
+    form.querySelector("#stop-time").classList.remove("is-invalid");
+    form.reset();
+    form.classList.remove("was-validated");
+  });
+
+  function addRow() {
+    const uuidPattern = "{{ .UUIDPattern }}";
+    const table = document
+      .getElementById("linechart-data");
+    const newRow = table.insertRow(-1);
+    newRow.innerHTML =
+      ` <td>
+            <input type="text" pattern="${uuidPattern}" class="form-control" name="channel"
+              placeholder="channel ID" required value="aae29203-2c25-4c78-8823-fb7e4148faa8" />
+        </td>
+        <td>
+          <input type="text" pattern="${uuidPattern}" class="form-control" name="thing"
+            placeholder="thing ID" required value="a20570d3-33c5-4669-ac3f-9f804e26431d" />
+       </td>
+        <td>
+          <input type="text" class="form-control" name="valueName"
+            placeholder="value name" required value="random-testvoltage"/>
+        </td>
+        <td>
+          <input type="color" class="form-control" name="lineColor" />
+        </td>
+        <td class="text-center">
+          <button type="button" class="btn btn-sm" onclick="removeRow(this)">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </td>`;
+  }
+
+  function removeRow(button) {
+    const row = button.parentNode.parentNode;
+    row.parentNode.removeChild(row);
+  }
+</script>
 {{ end }}
