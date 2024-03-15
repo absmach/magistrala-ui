@@ -1244,61 +1244,6 @@ class MultiGaugeChart extends Echart {
   }
 }
 
-class MultipleLineChart extends Echart {
-  constructor(chartData, widgetID) {
-    super(widgetID, chartData);
-    this.Script = this.#generateScript();
-  }
-
-  #generateScript() {
-    let seriesName = this.chartData.seriesName.split(",");
-    return `
-    var multipleLineChart = echarts.init(document.getElementById("${this.ID}"));
-    var option = {
-      title: {
-        text: '${this.chartData.title}',
-        left: 'left'
-      },
-      legend: {
-        show: true,
-        left: 'right',
-      },
-      xAxis: {
-        type: 'category',
-        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        name: '${this.chartData.xAxisLabel}',
-        nameLocation: 'middle',
-        nameGap: 30
-      },
-      yAxis: {
-        type: 'value',
-        name: '${this.chartData.yAxisLabel}',
-        nameLocation: 'middle',
-        nameGap: 40
-      },
-      series: [
-        {
-          data: [150, 230, 224, 218, 135, 147, 260],
-          type: 'line',
-          name: '${seriesName[0]}',
-        },
-        {
-          data: [10, 200, 300, 75, 68, 34, 192],
-          type: 'line',
-          name: '${seriesName[1]}',
-        },
-        {
-          data: [300, 270, 230, 155, 268, 234, 112],
-          type: 'line',
-          name: '${seriesName[2]}',
-        },
-      ]
-    };
-
-    multipleLineChart.setOption(option);`;
-  }
-}
-
 class PieChart extends Echart {
   constructor(chartData, widgetID) {
     super(widgetID, chartData);
@@ -1928,7 +1873,6 @@ const chartTypes = {
   lineChart: TimeSeriesLineChart,
   multiBarChart: MultiBarChart,
   multiGaugeChart: MultiGaugeChart,
-  multipleLineChart: MultipleLineChart,
   pieChart: PieChart,
   progressBar: ProgressBar,
   sharedDatasetChart: SharedDatasetChart,

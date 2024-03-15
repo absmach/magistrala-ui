@@ -74,11 +74,6 @@ func CreateItem() []Item {
 			Widget:  "doubleBarChart",
 		},
 		{
-			Title:   "Multiple Line Chart",
-			Content: "This is a multiple line chart",
-			Widget:  "multipleLineChart",
-		},
-		{
 			Title:   "Step Chart",
 			Content: "This is a step chart",
 			Widget:  "stepChart",
