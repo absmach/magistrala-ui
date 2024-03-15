@@ -254,18 +254,27 @@ SPDX-License-Identifier: Apache-2.0 -->
     const chartData = {};
     const channels = [];
     const things = [];
+    const names = [];
+    const colors = [];
     let formData = new FormData(form);
     for (let [name, value] of formData) {
       switch (name) {
-        case "startTime", "stopTime":
+        case "startTime":
+        case "stopTime":
           const inputDate = new Date(value);
           chartData[name] = inputDate.getTime();
           break;
         case "channel":
-          channels.push(pair[1]);
+          channels.push(value);
           break;
         case "thing":
-          things.push(pair[1]);
+          things.push(value);
+          break;
+        case "valueName":
+          names.push(value);
+          break;
+        case "lineColor":
+          colors.push(value);
           break;
         default:
         chartData[name] = value;
@@ -275,6 +284,8 @@ SPDX-License-Identifier: Apache-2.0 -->
 
     chartData["channels"] = channels;
     chartData["things"] = things;
+    chartData["valueNames"]= names;
+    chartData["colors"]=colors;
 
     if (chartData.aggregationType != "") {
       const updateInterval = form.querySelector("#update-interval");
