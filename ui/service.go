@@ -152,11 +152,12 @@ var (
 	ErrFailedDashboardUpdate   = errors.New("failed to update dashboard")
 	ErrFailedDashboardDelete   = errors.New("failed to delete dashboard")
 
-	domainRelations = []string{"administrator", "editor", "viewer", "member"}
-	groupRelations  = []string{"administrator", "editor", "viewer"}
-	statusOptions   = []string{"all", "enabled", "disabled"}
-	uuidPattern     = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
-	intervalPattern = "^([0-9][0-9]*[smhd])$"
+	domainRelations  = []string{"administrator", "editor", "viewer", "member"}
+	groupRelations   = []string{"administrator", "editor", "viewer"}
+	statusOptions    = []string{"all", "enabled", "disabled"}
+	uuidPattern      = "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+	intervalPattern  = "^([0-9][0-9]*[smhd])$"
+	MilliToNanoRatio = 1e6
 )
 
 // Service specifies service API.
@@ -1718,6 +1719,10 @@ func (us *uiService) ReadMessages(s Session, channelID, thingKey string, mpgm sd
 		return []byte{}, err
 	}
 
+	for i := 0; i < len(msg.Messages); i++ {
+		msg.Messages[i].Time = msg.Messages[i].Time / MilliToNanoRatio
+	}
+
 	noOfPages := int(math.Ceil(float64(msg.Total) / float64(mpgm.Limit)))
 
 	crumbs := []breadcrumb{
@@ -1762,6 +1767,10 @@ func (us *uiService) FetchChartData(token string, channelID string, mpgm sdk.Mes
 	msg, sdkErr := us.sdk.ReadMessages(mpgm, channelID, token)
 	if sdkErr != nil {
 		return []byte{}, sdkErr
+	}
+
+	for i := 0; i < len(msg.Messages); i++ {
+		msg.Messages[i].Time = msg.Messages[i].Time / MilliToNanoRatio
 	}
 
 	data, err := json.Marshal(msg)
@@ -2660,7 +2669,7 @@ func parseTemplates(mfsdk sdk.SDK, prefix string) (tpl *template.Template, err e
 			if t == 0 {
 				return ""
 			}
-			return time.Unix(int64(t), 0).String()
+			return time.UnixMilli(int64(t)).Format(time.RFC1123)
 		},
 		"hasPermission": func(permissions []string, permission string) bool {
 			return slices.Contains(permissions, permission)
