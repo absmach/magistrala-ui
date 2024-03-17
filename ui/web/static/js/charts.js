@@ -819,7 +819,6 @@ class TimeSeriesLineChart extends Echart {
       },
       legend: {
         show: true,
-        left: 'right',
       },
       series: [
         {
@@ -937,7 +936,6 @@ class TimeSeriesLineChart extends Echart {
           xAxisData.push(date);
         })
         const seriesData = []
-        console.log(yAxisArray);
         for (i=0; i<yAxisArray.length; i++) {
           const data = {
             data: yAxisArray[i],
@@ -948,7 +946,6 @@ class TimeSeriesLineChart extends Echart {
             name: chartData.names[i],
           };
           seriesData.push(data);
-          console.log(seriesData);
         }
         linechart.setOption({
             xAxis: {
