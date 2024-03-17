@@ -886,7 +886,7 @@ class TimeSeriesLineChart extends Echart {
         }
         xAxisArray.push(initialXAxisArray);
 
-        for (let i=0; i<chartData.channels.length; i++) {
+        for (i=0; i < chartData.channels.length; i++) {
           const url = "${pathPrefix}/data?channel=" + chartData.channels[i] +
           "&publisher=" + chartData.publishers[i] +
           "&name=" + chartData.valueName +
@@ -903,11 +903,11 @@ class TimeSeriesLineChart extends Echart {
             if (data.messages){
               const currArray = xAxisArray[xAxisArray.length-1];
               let currentTime, previousTime;
-              for (i=0; i < currArray.length; i++) {
+              for (j=0; j < currArray.length; j++) {
                 let isempty = true;
-                let currentTime = currArray[i];
-                for (j = (data.messages.length -1); j>= 0 ; j--) {
-                  const item = data.messages[j];
+                let currentTime = currArray[j];
+                for (k = (data.messages.length -1); k>= 0 ; k--) {
+                  const item = data.messages[k];
                   if (item.time > previousTime && item.time <= currentTime ) {
                     xAxis.push(item.time);
                     yAxis.push(item.value);
@@ -937,6 +937,7 @@ class TimeSeriesLineChart extends Echart {
           xAxisData.push(date);
         })
         const seriesData = []
+        console.log(yAxisArray);
         for (i=0; i<yAxisArray.length; i++) {
           const data = {
             data: yAxisArray[i],
@@ -947,6 +948,7 @@ class TimeSeriesLineChart extends Echart {
             name: chartData.names[i],
           };
           seriesData.push(data);
+          console.log(seriesData);
         }
         linechart.setOption({
             xAxis: {
