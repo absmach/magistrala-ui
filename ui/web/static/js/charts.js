@@ -922,7 +922,7 @@ class TimeSeriesLineChart extends Echart {
               }
             }
             xAxisArray.push(xAxis);
-            // Remove the previous element in the array;
+            // Remove the previous element in the array
             xAxisArray.shift();
             yAxisArray.push(yAxis);
           } else {
