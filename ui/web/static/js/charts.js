@@ -852,6 +852,40 @@ class TimeSeriesLineChart extends Echart {
       try {
         let xAxisArray=[];
         const yAxisArray = [];
+        let currentTimestamp = chartData.from;
+        let previousTimestamp=0;
+        const endTimestamp = chartData.to;
+        const timeDifference = chartData.to - chartData.from;
+        let intervalNum;
+        switch (true) {
+          case (timeDifference <= 3.6*1e6):
+            intervalNum = 6*1e5;
+            break;
+          case (timeDifference <= 8.64 * 1e7):
+            intervalNum = 6*1e6;
+            break;
+          case (timeDifference <= 6.05 * 1e8):
+            intervalNum = 6*1e7;
+            break;
+          case (timeDifference <= 2.63 * 1e9):
+            intervalNum = 6*1e8;
+            break;
+          case (timeDifference <= 3.16 * 1e10):
+            intervalNum = 6*1e9;
+            break;
+          default:
+            intervalNum = 6*1e8;
+            break;
+        }
+
+        const initialXAxisArray = []
+        const NoOfValues = Math.ceil(timeDifference/intervalNum);
+        for (i=0; i<=NoOfValues; i++) {
+          initialXAxisArray.push(currentTimestamp);
+          currentTimestamp += intervalNum;
+        }
+        xAxisArray.push(initialXAxisArray);
+
         for (let i=0; i<chartData.channels.length; i++) {
           const url = "${pathPrefix}/data?channel=" + chartData.channels[i] +
           "&publisher=" + chartData.publishers[i] +
@@ -864,62 +898,32 @@ class TimeSeriesLineChart extends Echart {
           const response = await fetch(url);
           if (response.ok) {
             const data = await response.json();
-            let currentTimestamp = chartData.from;
-            let previousTimestamp;
-            const endTimestamp = chartData.to;
-            const timeDifference = chartData.to - chartData.from;
-            let intervalNum;
-            switch (true) {
-              case (timeDifference <= 8.64 * 1e7):
-                intervalNum = 6*1e4;
-                break;
-              case (timeDifference <= 6.05 * 1e8):
-                intervalNum = 6*1e5;
-                break;
-              case (timeDifference <= 2.63 * 1e9):
-                intervalNum = 6*1e7;
-                break;
-              case (timeDifference <= 3.16 * 1e10):
-                intervalNum = 6*1e7;
-                break;
-              default:
-                intervalNum = 6*1e8;
-                break;
-            }
             const xAxis=[];
             const yAxis=[];
             if (data.messages){
-              while (currentTimestamp <= endTimestamp) {
-                let messageIndex = data.messages.length - 1;
-                let isempty= true;
-                while (messageIndex >= 0 && (data.messages[messageIndex].time) >= previousTimestamp) {
-                  const item = data.messages[messageIndex];
-                  if ((item.time) <= currentTimestamp) {
-                    if (xAxisArray.length > 0 && xAxisArray[xAxisArray.length-1].length > 0) {
-                      xAxisArray[xAxisArray.length-1].forEach((element) => {
-                        if (item.time!=element) {
-                          xAxis.push(item.time);
-                        }else {
-                          xAxis.push(element);
-                        }
-                      })
-                    }else {
-                      xAxis.push(item.time);
-                    }
+              const currArray = xAxisArray[xAxisArray.length-1];
+              let currentTime, previousTime;
+              for (i=0; i < currArray.length; i++) {
+                let isempty = true;
+                let currentTime = currArray[i];
+                for (j = (data.messages.length -1); j>= 0 ; j--) {
+                  const item = data.messages[j];
+                  if (item.time > previousTime && item.time <= currentTime ) {
+                    xAxis.push(item.time);
                     yAxis.push(item.value);
-                    isempty=false;
+                    isEmpty= false;
                   }
-                  messageIndex--;
                 }
                 if (isempty) {
-                    xAxis.push(currentTimestamp);
-                    yAxis.push("-");
+                  xAxis.push(currentTime);
+                  yAxis.push("-");
                 }
-                previousTimestamp = currentTimestamp;
-                currentTimestamp += intervalNum;
+                previousTime=currentTime;
               }
             }
             xAxisArray.push(xAxis);
+            // Remove the previous element in the array;
+            xAxisArray.shift();
             yAxisArray.push(yAxis);
           } else {
             // Handle errors
@@ -930,7 +934,7 @@ class TimeSeriesLineChart extends Echart {
         const xAxisData=[];
         xAxisArray[xAxisArray.length-1].forEach((element) => {
           const date = new Date(element);
-          xAxisData.push(date.toLocaleTimeString());
+          xAxisData.push(date);
         })
         const seriesData = []
         for (i=0; i<yAxisArray.length; i++) {
