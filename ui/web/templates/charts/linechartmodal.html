@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <h5 class="modal-title" id="lineChartModalLabel">Time Series Line Chart</h5>
           <button
             type="button"
-            class="btn-close"
+            class="btn-close close-lineChart-button"
             data-bs-dismiss="modal"
             aria-label="Close"
           ></button>
@@ -235,8 +235,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         <div class="modal-footer">
           <button
             type="button"
-            class="btn btn-secondary"
-            id="close-lineChart-button"
+            class="btn btn-secondary close-lineChart-button"
             data-bs-dismiss="modal"
           >
             Close
@@ -250,8 +249,8 @@ SPDX-License-Identifier: Apache-2.0 -->
   </div>
 <script>
   // line chart form
+  const form = document.getElementById("create-lineChart-form");
   document.getElementById("create-lineChart-button").addEventListener("click", function () {
-    const form = document.getElementById("create-lineChart-form");
     if (!form.checkValidity()) {
       form.classList.add("was-validated");
       return;
@@ -332,12 +331,13 @@ SPDX-License-Identifier: Apache-2.0 -->
 
   });
 
-  document.getElementById("close-lineChart-button").addEventListener("click", function () {
-    const form = document.getElementById("create-lineChart-form");
-    form.querySelector(".invalid-time").innerHTML = "";
-    form.querySelector("#stop-time").classList.remove("is-invalid");
-    form.reset();
-    form.classList.remove("was-validated");
+  document.querySelectorAll(".close-lineChart-button").forEach((element) => {
+    element.addEventListener("click", function () {
+      form.querySelector(".invalid-time").innerHTML = "";
+      form.querySelector("#stop-time").classList.remove("is-invalid");
+      form.reset();
+      form.classList.remove("was-validated");
+    })
   });
 
   function addRow() {
