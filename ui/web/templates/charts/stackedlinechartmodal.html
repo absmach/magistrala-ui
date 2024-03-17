@@ -17,7 +17,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <h5 class="modal-title" id="stackedLineChartModalLabel">Stacked Line Charts</h5>
           <button
             type="button"
-            class="btn-close"
+            class="btn-close close-stackedLineChart-button"
             data-bs-dismiss="modal"
             aria-label="Close"
           ></button>
@@ -54,7 +54,6 @@ SPDX-License-Identifier: Apache-2.0 -->
               </button>
             </li>
           </ul>
-          <!-- Single Form for both Data and Appearance Tabs -->
           <form id="create-stackedLineChart-form">
             <div class="tab-content" id="myTabContent">
               <!-- Data Tab -->
@@ -64,31 +63,63 @@ SPDX-License-Identifier: Apache-2.0 -->
                 role="tabpanel"
                 aria-labelledby="data-tab"
               >
-                <div class="mb-3">
-                  <label for="channel-id" class="form-label">Channel ID</label>
-                  <input
-                    type="text"
-                    pattern="{{ .UUIDPattern }}"
-                    class="form-control mb-3"
-                    name="channel"
-                    id="channel-id"
-                    placeholder="Enter the channel ID"
-                    required
-                  />
-                  <div class="invalid-feedback">Please enter a valid uuid</div>
-                </div>
-                <div class="mb-3">
-                  <label for="thing-id" class="form-label">Thing ID</label>
-                  <input
-                    type="text"
-                    pattern="{{ .UUIDPattern }}"
-                    class="form-control mb-3"
-                    name="thing"
-                    id="thing-id"
-                    placeholder="Enter the thing ID"
-                    required
-                  />
-                  <div class="invalid-feedback">Please enter a valid uuid</div>
+                <div class="table-responsive-md mb-3 p-2 border rounded">
+                  <h5>Data Source</h5>
+                  <table class="table" id="stackedLineChart-data">
+                    <thead>
+                      <tr>
+                        <th scope="col">Channel</th>
+                        <th scope="col">Thing</th>
+                        <th scope="col">Value</th>
+                        <th scope="col">Color</th>
+                        <th scope="col"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <input
+                            type="text"
+                            pattern="{{ .UUIDPattern }}"
+                            class="form-control"
+                            name="channel"
+                            placeholder="channel ID"
+                            required
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            pattern="{{ .UUIDPattern }}"
+                            class="form-control"
+                            name="thing"
+                            placeholder="thing ID"
+                            required
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            class="form-control"
+                            name="seriesName"
+                            placeholder="series name"
+                            required
+                          />
+                        </td>
+                        <td>
+                          <input type="color" class="form-control" name="lineColor" />
+                        </td>
+                        <td class="text-center">
+                          <button type="button" class="btn btn-sm" onclick="removeRow(this)">
+                            <i class="fas fa-trash-alt"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <button type="button" class="btn body-button btn-sm" onclick="addRow()">
+                    Add source
+                  </button>
                 </div>
                 <div class="mb-3">
                   <label for="value-name" class="form-label">Value name</label>
@@ -123,6 +154,17 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                 </div>
                 <div class="mb-3">
+                  <label for="aggregation-type" class="form-label">Aggregation</label>
+                  <select class="form-select mb-3" name="aggregationType" id="aggregation-type">
+                    <option value="">Select an aggregation type</option>
+                    <option value="MAX">Maximum</option>
+                    <option value="MIN">Minimum</option>
+                    <option value="SUM">Sum</option>
+                    <option value="COUNT">Count</option>
+                    <option value="AVG">Average</option>
+                  </select>
+                </div>
+                <div class="mb-3">
                   <label for="update-interval" class="form-label">Update interval</label>
                   <input
                     type="text"
@@ -131,20 +173,8 @@ SPDX-License-Identifier: Apache-2.0 -->
                     name="updateInterval"
                     id="update-interval"
                     placeholder="Enter the update interval, eg. 5s, 10m, 1h, 1d"
-                    required
                   />
-                  <div class="invalid-feedback">Please enter a valid interval</div>
-                </div>
-                <div class="mb-3">
-                  <label for="aggregation-type" class="form-label">Aggregation</label>
-                  <select class="form-select mb-3" name="aggregationType" id="aggregation-type">
-                    <option value="" disabled>Select an aggregation type</option>
-                    <option value="MAX">Maximum</option>
-                    <option value="MIN">Minimum</option>
-                    <option value="SUM">Sum</option>
-                    <option value="COUNT">Count</option>
-                    <option value="AVG">Average</option>
-                  </select>
+                  <div class="invalid-feedback invalid-interval">Please enter a valid interval</div>
                 </div>
               </div>
               <!-- Appearance Tab -->
@@ -185,16 +215,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="series-name" class="form-label">Series name</label>
-                  <input
-                    type="text"
-                    class="form-control mb-3"
-                    name="seriesName"
-                    id="series-name"
-                    placeholder="Enter the series name eg. temperature, voltage"
-                  />
-                </div>
-                <div class="mb-3">
                   <label for="line-width" class="form-label">Line width</label>
                   <select class="form-select mb-3" name="lineWidth" id="line-width">
                     <option value="" disabled>Select the line width</option>
@@ -214,8 +234,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         <div class="modal-footer">
           <button
             type="button"
-            class="btn btn-secondary"
-            id="close-stackedLineChart-button"
+            class="btn btn-secondary close-stackedLineChart-button"
             data-bs-dismiss="modal"
           >
             Close
@@ -228,50 +247,129 @@ SPDX-License-Identifier: Apache-2.0 -->
     </div>
   </div>
   <script>
-    // Stacked line chart form
-    document
-      .getElementById("create-stackedLineChart-button")
-      .addEventListener("click", function () {
-        const form = document.getElementById("create-stackedLineChart-form");
-        if (!form.checkValidity()) {
-          form.classList.add("was-validated");
-          return;
-        }
-
-        // Create an object to store the form data
-        let chartData = {};
-        let formData = new FormData(form);
-        for (var pair of formData.entries()) {
-          chartData[pair[0]] = pair[1];
-        }
-
-        if (chartData.stopTime <= chartData.startTime) {
-          const invalidTimeFeedback = form.querySelector(".invalid-time");
-          invalidTimeFeedback.innerHTML = "Stop time should be greater than start time";
-          invalidTimeFeedback.style.color = "red";
-          const invalidTimeInput = form.querySelector("#stop-time");
-          invalidTimeInput.classList.remove("was-validated");
-          invalidTimeInput.classList.add("is-invalid");
-          return;
-        }
-
-        var widgetID = "stackedLineChart-" + Date.now();
-
-        chartData["Type"] = "stackedLineChart";
-        addWidget(chartData, widgetID);
-        metadataBuffer[widgetID] = chartData;
-
-        form.reset();
-        form.classList.remove("was-validated");
-        bootstrap.Modal.getInstance(document.getElementById("stackedLineChartModal")).hide();
-      });
-
-    document.getElementById("close-stackedLineChart-button").addEventListener("click", function () {
+    document.getElementById("create-stackedLineChart-button").addEventListener("click", function () {
       const form = document.getElementById("create-stackedLineChart-form");
-      form.querySelector(".invalid-time").innerHTML = "";
-      form.querySelector("#stop-time").classList.remove("is-invalid");
+      if (!form.checkValidity()) {
+        form.classList.add("was-validated");
+        return;
+      }
+      // Create an object to store the form data
+      const chartData = {};
+      const channels = [];
+      const things = [];
+      const names = [];
+      const colors = [];
+      let formData = new FormData(form);
+      for (let [name, value] of formData) {
+        switch (name) {
+          case "startTime":
+          case "stopTime":
+            const inputDate = new Date(value);
+            chartData[name] = inputDate.getTime();
+            break;
+          case "channel":
+            channels.push(value);
+            break;
+          case "thing":
+            things.push(value);
+            break;
+          case "seriesName":
+            names.push(value);
+            break;
+          case "lineColor":
+            colors.push(value);
+            break;
+          default:
+          chartData[name] = value;
+          break
+        }
+      }
+  
+      chartData["channels"] = channels;
+      chartData["things"] = things;
+      chartData["seriesNames"]= names;
+      chartData["colors"]=colors;
+  
+      if (chartData.aggregationType != "") {
+        const updateInterval = form.querySelector("#update-interval");
+        if (chartData.updateInterval === "") {
+          form.querySelector(".invalid-interval").innerHTML = "Please enter an Interval";
+          updateInterval.classList.remove("was-validated");
+          updateInterval.classList.add("is-invalid");
+          return;
+        } else {
+          form.querySelector(".invalid-interval").innerHTML = "";
+          updateInterval.classList.remove("is-invalid");
+          updateInterval.classList.add("was-validated");
+        }
+      }
+      const invalidTimeFeedback = form.querySelector(".invalid-time");
+      const invalidTimeInput = form.querySelector("#stop-time");
+      if (chartData.stopTime <= chartData.startTime) {
+        invalidTimeFeedback.innerHTML = "Stop time should be greater than start time";
+        invalidTimeFeedback.style.color = "red";
+        invalidTimeInput.classList.remove("was-validated");
+        invalidTimeInput.classList.add("is-invalid");
+        return;
+      } else {
+        invalidTimeFeedback.innerHTML = "";
+        invalidTimeInput.classList.remove("is-invalid");
+        invalidTimeInput.classList.add("was-validated");
+      }
+  
+      var widgetID = "stackedLineChart-" + Date.now();
+  
+      chartData["Type"] = "stackedLineChart";
+      addWidget(chartData, widgetID);
+      metadataBuffer[widgetID] = chartData;
+  
       form.reset();
       form.classList.remove("was-validated");
+      bootstrap.Modal.getInstance(document.getElementById("stackedLineChartModal")).hide();
+  
     });
+  
+    document.querySelectorAll(".close-stackedLineChart-button").forEach((element) => {
+      const form = document.getElementById("create-stackedLineChart-form");
+      element.addEventListener("click", function () {
+        form.querySelector(".invalid-time").innerHTML = "";
+        form.querySelector("#stop-time").classList.remove("is-invalid");
+        form.reset();
+        form.classList.remove("was-validated");
+      })
+    });
+  
+    function addRow() {
+      const uuidPattern = "{{ .UUIDPattern }}";
+      const table = document
+        .getElementById("stackedLineChart-data");
+      const newRow = table.insertRow(-1);
+      newRow.innerHTML =
+        ` <td>
+              <input type="text" pattern="${uuidPattern}" class="form-control" name="channel"
+                placeholder="channel ID" required />
+          </td>
+          <td>
+            <input type="text" pattern="${uuidPattern}" class="form-control" name="thing"
+              placeholder="thing ID" required />
+         </td>
+          <td>
+            <input type="text" class="form-control" name="seriesName"
+              placeholder="series name" required />
+          </td>
+          <td>
+            <input type="color" class="form-control" name="lineColor" />
+          </td>
+          <td class="text-center">
+            <button type="button" class="btn btn-sm" onclick="removeRow(this)">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>`;
+    }
+  
+    function removeRow(button) {
+      const row = button.parentNode.parentNode;
+      row.parentNode.removeChild(row);
+    }
   </script>
 {{ end }}

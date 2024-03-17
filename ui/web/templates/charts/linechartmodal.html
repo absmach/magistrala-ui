@@ -252,9 +252,8 @@ SPDX-License-Identifier: Apache-2.0 -->
     </div>
   </div>
 <script>
-  // line chart form
-  const form = document.getElementById("create-lineChart-form");
   document.getElementById("create-lineChart-button").addEventListener("click", function () {
+    const form = document.getElementById("create-lineChart-form");
     if (!form.checkValidity()) {
       form.classList.add("was-validated");
       return;
@@ -336,6 +335,7 @@ SPDX-License-Identifier: Apache-2.0 -->
   });
 
   document.querySelectorAll(".close-lineChart-button").forEach((element) => {
+    const form = document.getElementById("create-lineChart-form");
     element.addEventListener("click", function () {
       form.querySelector(".invalid-time").innerHTML = "";
       form.querySelector("#stop-time").classList.remove("is-invalid");

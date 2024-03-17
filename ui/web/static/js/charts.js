@@ -956,26 +956,142 @@ class TimeSeriesLineChart extends Echart {
             data: yAxisArray[i],
             type: 'line',
             lineStyle: {
-              color: chartData.colors[i],
+              width: ${this.chartData.lineWidth},
+              type: 'solid',
             },
-            name: chartData.names[i],
-          };
-          seriesData.push(data);
-        }
-        linechart.setOption({
-            xAxis: {
-              data: xAxisData,
-            },
-            series: seriesData,
-          });
+          }
+        ]
+      };
 
-      } catch (error) {
-          // Handle fetch or other errors
-          console.error("Error:", error);
-          // Retry after a couple of seconds
-          setTimeout(function () {
-            getData(linechart, chartData);
-          }, 20000);
+      lineChart.setOption(option);
+      var chartdata = {
+        channels:${channels},
+        publishers:${things},
+        names:${names},
+        colors:${colors},
+        valueName: '${this.chartData.valueName}',
+        from:${this.chartData.startTime},
+        to:${this.chartData.stopTime},
+        aggregation:'${this.chartData.aggregationType}',
+        limit:100,
+        interval:'${this.chartData.updateInterval}',
+      };
+      getData(lineChart,chartdata);
+    
+      async function getData(linechart,chartData) {
+        try {
+          let xAxisArray=[];
+          const yAxisArray = [];
+          let currentTimestamp = chartData.from;
+          let previousTimestamp=0;
+          const endTimestamp = chartData.to;
+          const timeDifference = chartData.to - chartData.from;
+          let intervalNum;
+          switch (true) {
+            case (timeDifference <= 3.6*1e6):
+              intervalNum = 6*1e5;
+              break;
+            case (timeDifference <= 8.64 * 1e7):
+              intervalNum = 6*1e6;
+              break;
+            case (timeDifference <= 6.05 * 1e8):
+              intervalNum = 6*1e7;
+              break;
+            case (timeDifference <= 2.63 * 1e9):
+              intervalNum = 6*1e8;
+              break;
+            case (timeDifference <= 3.16 * 1e10):
+              intervalNum = 6*1e9;
+              break;
+            default:
+              intervalNum = 6*1e8;
+              break;
+          }
+
+          const initialXAxisArray = []
+          const NoOfValues = Math.ceil(timeDifference/intervalNum);
+          for (i=0; i<=NoOfValues; i++) {
+            initialXAxisArray.push(currentTimestamp);
+            currentTimestamp += intervalNum;
+          }
+          xAxisArray.push(initialXAxisArray);
+
+          for (i=0; i < chartData.channels.length; i++) {
+            const url = "${pathPrefix}/data?channel=" + chartData.channels[i] +
+            "&publisher=" + chartData.publishers[i] +
+            "&name=" + chartData.valueName +
+            "&from=" + chartData.from +
+            "&to=" + chartData.to +
+            "&aggregation=" + chartData.aggregation +
+            "&limit=" + chartData.limit +
+            "&interval=" + chartData.interval;
+            const response = await fetch(url);
+            if (response.ok) {
+              const data = await response.json();
+              const xAxis=[];
+              const yAxis=[];
+              if (data.messages){
+                const currArray = xAxisArray[xAxisArray.length-1];
+                let currentTime, previousTime;
+                for (j=0; j < currArray.length; j++) {
+                  let isempty = true;
+                  let currentTime = currArray[j];
+                  for (k = (data.messages.length -1); k>= 0 ; k--) {
+                    const item = data.messages[k];
+                    if (item.time > previousTime && item.time <= currentTime ) {
+                      xAxis.push(item.time);
+                      yAxis.push(item.value);
+                      isEmpty= false;
+                    }
+                  }
+                  if (isempty) {
+                    xAxis.push(currentTime);
+                    yAxis.push("-");
+                  }
+                  previousTime=currentTime;
+                }
+              }
+              xAxisArray.push(xAxis);
+              // Remove the previous element in the array
+              xAxisArray.shift();
+              yAxisArray.push(yAxis);
+            } else {
+              // Handle errors
+              console.error("HTTP request failed with status:", response.status);
+            }
+          }
+
+          const xAxisData=[];
+          xAxisArray[xAxisArray.length-1].forEach((element) => {
+            const date = new Date(element);
+            xAxisData.push(date);
+          })
+          const seriesData = []
+          for (i=0; i<yAxisArray.length; i++) {
+            const data = {
+              data: yAxisArray[i],
+              type: 'line',
+              lineStyle: {
+                color: chartData.colors[i],
+              },
+              name: chartData.names[i],
+            };
+            seriesData.push(data);
+          }
+          linechart.setOption({
+              xAxis: {
+                data: xAxisData,
+              },
+              series: seriesData,
+            });
+
+        } catch (error) {
+            // Handle fetch or other errors
+            console.error("Error:", error);
+            // Retry after a couple of seconds
+            setTimeout(function () {
+              getData(linechart, chartData);
+            }, 20000);
         }
       };
     `;
@@ -1574,69 +1690,188 @@ class StackedLineChart extends Echart {
   }
 
   #generateScript() {
-    let seriesName = this.chartData.seriesName.split(",");
+    const channels = JSON.stringify(this.chartData.channels);
+    const things = JSON.stringify(this.chartData.things);
+    const names = JSON.stringify(this.chartData.seriesNames);
+    const colors = JSON.stringify(this.chartData.colors);
     return `
-    var stackedLineChart = echarts.init(document.getElementById("${this.ID}"));
-    var option = {
-        title: {
-          text: "${this.chartData.title}",
-          left: 'left',
-        },
-        tooltip: {
-          trigger: 'axis'
-        },
-        legend: {
-          data: ['${seriesName[0]}', '${seriesName[1]}', '${seriesName[2]}'],
-          left: 'right',
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          containLabel: true
-        },
-        toolbox: {
-          feature: {
-            saveAsImage: {}
-          }
-        },
-        xAxis: {
-          type: 'category',
-          boundaryGap: false,
-          data: ['Thing1', 'Thing2', 'Thing3', 'Thing4', 'Thing5', 'Thing6', 'Thing7'],
-          name: '${this.chartData.xAxisLabel}',
-          nameLocation: 'middle',
-          nameGap: 35,
-        },
-        yAxis: {
-          type: 'value',
-          name: '${this.chartData.yAxisLabel}',
-          nameLocation: 'middle',
-          nameGap: 35,
-        },
-        series: [
-          {
-            name: '${seriesName[0]}',
-            type: 'line',
-            stack: 'Total',
-            data: [120, 132, 101, 134, 90, 230, 210]
+      var stackedLineChart = echarts.init(document.getElementById("${this.ID}"));
+      let legendData =[];
+      ${names}.forEach((element) => {
+        legendData.push(element);
+      });
+      var option = {
+          title: {
+            text: "${this.chartData.title}",
+            left: 'left',
           },
-          {
-            name: '${seriesName[1]}',
-            type: 'line',
-            stack: 'Total',
-            data: [220, 182, 191, 234, 290, 330, 310]
+          tooltip: {
+            trigger: 'axis'
           },
-          {
-            name: '${seriesName[2]}',
-            type: 'line',
-            stack: 'Total',
-            data: [150, 232, 201, 154, 190, 330, 410]
+          legend: {
+            data: legendData,
           },
-        ]
-      };
+          grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+          },
+          xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            name: '${this.chartData.xAxisLabel}',
 
-    stackedLineChart.setOption(option);`;
+          },
+          yAxis: {
+            type: 'value',
+            name: '${this.chartData.yAxisLabel}',
+          },
+          series: [
+            {
+              data: [],
+              type: 'line',
+              stack: 'Total',
+              lineStyle: {
+                width: ${this.chartData.lineWidth},
+                type: 'solid',
+              },
+            }
+          ]
+        }
+
+      stackedLineChart.setOption(option);
+      var chartdata = {
+        channels:${channels},
+        publishers:${things},
+        names:${names},
+        colors:${colors},
+        valueName: '${this.chartData.valueName}',
+        from:${this.chartData.startTime},
+        to:${this.chartData.stopTime},
+        aggregation:'${this.chartData.aggregationType}',
+        limit:100,
+        interval:'${this.chartData.updateInterval}',
+      };
+      getData(stackedLineChart,chartdata);
+      async function getData(stackedLineChart,chartData) {
+        try {
+          let xAxisArray=[];
+          const yAxisArray = [];
+          let currentTimestamp = chartData.from;
+          let previousTimestamp=0;
+          const endTimestamp = chartData.to;
+          const timeDifference = chartData.to - chartData.from;
+          let intervalNum;
+          switch (true) {
+            case (timeDifference <= 3.6*1e6):
+              intervalNum = 6*1e5;
+              break;
+            case (timeDifference <= 8.64 * 1e7):
+              intervalNum = 6*1e6;
+              break;
+            case (timeDifference <= 6.05 * 1e8):
+              intervalNum = 6*1e7;
+              break;
+            case (timeDifference <= 2.63 * 1e9):
+              intervalNum = 6*1e8;
+              break;
+            case (timeDifference <= 3.16 * 1e10):
+              intervalNum = 6*1e9;
+              break;
+            default:
+              intervalNum = 6*1e8;
+              break;
+          }
+
+          const initialXAxisArray = []
+          const NoOfValues = Math.ceil(timeDifference/intervalNum);
+          for (i=0; i<=NoOfValues; i++) {
+            initialXAxisArray.push(currentTimestamp);
+            currentTimestamp += intervalNum;
+          }
+          xAxisArray.push(initialXAxisArray);
+
+          for (i=0; i < chartData.channels.length; i++) {
+            const url = "${pathPrefix}/data?channel=" + chartData.channels[i] +
+            "&publisher=" + chartData.publishers[i] +
+            "&name=" + chartData.valueName +
+            "&from=" + chartData.from +
+            "&to=" + chartData.to +
+            "&aggregation=" + chartData.aggregation +
+            "&limit=" + chartData.limit +
+            "&interval=" + chartData.interval;
+            const response = await fetch(url);
+            if (response.ok) {
+              const data = await response.json();
+              const xAxis=[];
+              const yAxis=[];
+              if (data.messages){
+                const currArray = xAxisArray[xAxisArray.length-1];
+                let currentTime, previousTime;
+                for (j=0; j < currArray.length; j++) {
+                  let isempty = true;
+                  let currentTime = currArray[j];
+                  for (k = (data.messages.length -1); k>= 0 ; k--) {
+                    const item = data.messages[k];
+                    if (item.time > previousTime && item.time <= currentTime ) {
+                      xAxis.push(item.time);
+                      yAxis.push(item.value);
+                      isEmpty= false;
+                    }
+                  }
+                  if (isempty) {
+                    xAxis.push(currentTime);
+                    yAxis.push("-");
+                  }
+                  previousTime=currentTime;
+                }
+              }
+              xAxisArray.push(xAxis);
+              // Remove the previous element in the array
+              xAxisArray.shift();
+              yAxisArray.push(yAxis);
+            } else {
+              // Handle errors
+              console.error("HTTP request failed with status:", response.status);
+            }
+          }
+
+          const xAxisData=[];
+          xAxisArray[xAxisArray.length-1].forEach((element) => {
+            const date = new Date(element);
+            xAxisData.push(date);
+          })
+          const seriesData = []
+          for (i=0; i<yAxisArray.length; i++) {
+            const data = {
+              data: yAxisArray[i],
+              type: 'line',
+              stack: 'Total',
+              lineStyle: {
+                color: chartData.colors[i],
+              },
+              name: chartData.names[i],
+            };
+            seriesData.push(data);
+          }
+          stackedLineChart.setOption({
+              xAxis: {
+                data: xAxisData,
+              },
+              series: seriesData,
+            });
+
+        } catch (error) {
+            // Handle fetch or other errors
+            console.error("Error:", error);
+            // Retry after a couple of seconds
+            setTimeout(function () {
+              getData(stackedLineChart, chartData);
+            }, 20000);
+        }
+      };
+    `;
   }
 }
 
