@@ -111,14 +111,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <input type="color" class="form-control" name="lineColor" />
                         </td>
                         <td class="text-center">
-                          <button type="button" class="btn btn-sm" onclick="removeRow(this)">
+                          <button
+                            type="button"
+                            class="btn btn-sm"
+                            onclick="removeLineChartRow(this)"
+                          >
                             <i class="fas fa-trash-alt"></i>
                           </button>
                         </td>
                       </tr>
                     </tbody>
                   </table>
-                  <button type="button" class="btn body-button btn-sm" onclick="addRow()">
+                  <button type="button" class="btn body-button btn-sm" onclick="addLineChartRow()">
                     Add source
                   </button>
                 </div>
@@ -340,7 +344,7 @@ SPDX-License-Identifier: Apache-2.0 -->
     })
   });
 
-  function addRow() {
+  function addLineChartRow() {
     const uuidPattern = "{{ .UUIDPattern }}";
     const table = document
       .getElementById("linechart-data");
@@ -368,7 +372,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         </td>`;
   }
 
-  function removeRow(button) {
+  function removeLineChartRow(button) {
     const row = button.parentNode.parentNode;
     row.parentNode.removeChild(row);
   }
