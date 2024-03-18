@@ -1060,6 +1060,9 @@ class MultiGaugeChart extends Echart {
 
   #generateScript() {
     let gaugeLabel = this.chartData.gaugeLabel.split(",");
+    const channels = JSON.stringify(this.chartData.channel);
+    const things = JSON.stringify(this.chartData.thing);
+    const valueName = JSON.stringify(this.chartData.valueName);
     return `
     var multiGaugeChart = echarts.init(document.getElementById("${this.ID}"));
     var gaugeData = [

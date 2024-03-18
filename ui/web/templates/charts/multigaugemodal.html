@@ -64,6 +64,60 @@ SPDX-License-Identifier: Apache-2.0 -->
                 role="tabpanel"
                 aria-labelledby="data-tab"
               >
+                <div class="table-responsive-md mb-3 p-2 border rounded">
+                  <h5>Data Source</h5>
+                  <table class="table" id="multigauge-data">
+                    <thead>
+                      <tr>
+                        <th scope="col">Channel</th>
+                        <th scope="col">Thing</th>
+                        <th scope="col">Value</th>
+                        <th scope="col"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <input
+                            type="text"
+                            pattern="{{ .UUIDPattern }}"
+                            class="form-control"
+                            name="channel"
+                            placeholder="Channel ID"
+                            required
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            pattern="{{ .UUIDPattern }}"
+                            class="form-control"
+                            name="thing"
+                            placeholder="Thing ID"
+                            required
+                          />
+                          <div class="invalid-feedback">Please enter a valid uuid</div>
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            class="form-control"
+                            name="valueName"
+                            placeholder="Value name"
+                            required
+                          />
+                        </td>
+                        <td>
+                          <button type="button" class="btn btn-sm" onclick="deleteRow(this)">
+                            <i class="fas fa-trash-alt"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <button type="button" class="btn body-button btn-sm" onclick="addRow()">
+                    Add Source
+                  </button>
                 <div class="mb-3">
                   <label for="channel-id" class="form-label">Channel ID</label>
                   <input
