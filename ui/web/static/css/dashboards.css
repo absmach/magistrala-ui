@@ -119,14 +119,3 @@ SPDX-License-Identifier: Apache-2.0 */
 .min-vh-50 {
   min-height: 50vh;
 }
-
-.resize-helper {
-  position: absolute;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1000;
-  border: 1px dashed #1d2231;
-  pointer-events: none;
-}
