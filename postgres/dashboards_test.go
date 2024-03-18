@@ -20,7 +20,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var namegen = namegenerator.NewNameGenerator()
+var namegen = namegenerator.NewGenerator()
 
 func TestCreate(t *testing.T) {
 	t.Cleanup(func() {
