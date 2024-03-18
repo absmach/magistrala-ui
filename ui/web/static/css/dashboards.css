@@ -11,7 +11,7 @@ SPDX-License-Identifier: Apache-2.0 */
 }
 
 .grid-editable {
-  background-size: 25px 25px;
+  background-size: 10px 10px;
   background-image: linear-gradient(to right, lightgrey 1px, transparent 1px),
     linear-gradient(to bottom, lightgrey 1px, transparent 1px);
   background-position: 5px 5px;

@@ -1,9 +1,8 @@
 // Copyright (c) Abstract Machines
 // SPDX-License-Identifier: Apache-2.0
 const gridClass = ".grid";
-const editableGridClass = ".grid-editable";
 var grid = initGrid(layout);
-const gridSize = 25;
+const gridSize = 20;
 const previousSizes = new Map();
 let isResizing = false;
 let currentFinalizeResizeFunction = null;
@@ -137,13 +136,11 @@ function loadLayout(savedLayout) {
 // widgets around the canvas
 function editableCanvas() {
   removeNoWidgetPlaceholder();
-  let ltgrid = document.querySelector(".grid");
-  ltgrid.classList.add("grid-editable");
   try {
     if (grid) {
       grid.destroy(true);
     }
-    grid = new Muuri(editableGridClass, {
+    grid = new Muuri(gridClass, {
       dragEnabled: true,
       dragHandle: ".item-content",
     });
@@ -196,6 +193,8 @@ const resizeObserver = new ResizeObserver((entries) => {
       width: target.clientWidth,
       height: target.clientHeight,
     };
+    let ltgrid = document.querySelector(".grid");
+    ltgrid.classList.add("grid-editable");
     const contentEl = target.querySelector(".item-content");
     const gridRightPosition = target.parentNode.getBoundingClientRect().right;
     const widgetRightPosition = target.getBoundingClientRect().right;
@@ -203,6 +202,8 @@ const resizeObserver = new ResizeObserver((entries) => {
     if (isOverflowing) {
       target.style.maxWidth = target.clientWidth + "px";
       target.style.maxHeight = target.clientHeight + "px";
+      grid.refreshItems();
+      grid.layout(true);
     } else {
       target.style.maxWidth = "none";
       target.style.maxHeight = "none";
@@ -281,6 +282,8 @@ function snapToGrid(target, entry) {
   resizeWidgetContent(target, entry, itemContentWidth, itemContentHeight);
   document.removeEventListener("mouseup", currentFinalizeResizeFunction);
   isResizing = false;
+  let ltgrid = document.querySelector(".grid");
+  ltgrid.classList.remove("grid-editable");
 }
 
 function resizeWidgetContent(target, entry, itemContentWidth, itemContentHeight) {
