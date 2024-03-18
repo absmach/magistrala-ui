@@ -284,12 +284,12 @@ SPDX-License-Identifier: Apache-2.0 -->
           break
         }
       }
-  
+
       chartData["channels"] = channels;
       chartData["things"] = things;
       chartData["seriesNames"]= names;
       chartData["colors"]=colors;
-  
+
       if (chartData.aggregationType != "") {
         const updateInterval = form.querySelector("#update-interval");
         if (chartData.updateInterval === "") {
@@ -316,19 +316,19 @@ SPDX-License-Identifier: Apache-2.0 -->
         invalidTimeInput.classList.remove("is-invalid");
         invalidTimeInput.classList.add("was-validated");
       }
-  
+
       var widgetID = "stackedLineChart-" + Date.now();
-  
+
       chartData["Type"] = "stackedLineChart";
       addWidget(chartData, widgetID);
       metadataBuffer[widgetID] = chartData;
-  
+
       form.reset();
       form.classList.remove("was-validated");
       bootstrap.Modal.getInstance(document.getElementById("stackedLineChartModal")).hide();
-  
+
     });
-  
+
     document.querySelectorAll(".close-stackedLineChart-button").forEach((element) => {
       const form = document.getElementById("create-stackedLineChart-form");
       element.addEventListener("click", function () {
@@ -338,7 +338,7 @@ SPDX-License-Identifier: Apache-2.0 -->
         form.classList.remove("was-validated");
       })
     });
-  
+
     function addRow() {
       const uuidPattern = "{{ .UUIDPattern }}";
       const table = document
@@ -366,7 +366,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             </button>
           </td>`;
     }
-  
+
     function removeRow(button) {
       const row = button.parentNode.parentNode;
       row.parentNode.removeChild(row);
