@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <button
             type="button"
             class="btn-close"
-            data-bs-dismiss="modal"
+            onclick="resetForm();"
             aria-label="Close"
           ></button>
         </div>
@@ -222,7 +222,7 @@ SPDX-License-Identifier: Apache-2.0 -->
             case "startTime":
             case "stopTime":
               const inputDate = new Date(pair[1]);
-              chartData[pair[0]] = inputDate.getTime() * 1e6;
+              chartData[pair[0]] = inputDate.getTime();
               break;
             case "channel":
               channels.push(pair[1]);
