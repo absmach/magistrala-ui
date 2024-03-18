@@ -921,8 +921,6 @@ class TimeSeriesLineChart extends Echart {
               }
             }
             xAxisArray.push(xAxis);
-            // Remove the previous element in the array
-            xAxisArray.shift();
             yAxisArray.push(yAxis);
           } else {
             // Handle errors
@@ -930,6 +928,23 @@ class TimeSeriesLineChart extends Echart {
           }
         }
 
+        for (i =1; i< xAxisArray.length; i++) {
+          const missingData = findMissingValuesIndices(xAxisArray[i], xAxisArray[xAxisArray.length-1]);
+          missingData.forEach((value, index) => {
+            yAxisArray[i-1].splice(value,0,"-");
+          });
+        }
+
+        function findMissingValuesIndices(array1, array2) {
+          const missingIndices = [];
+          array2.forEach((item, index) => {
+              if (!array1.includes(item)) {
+                  missingIndices.push(index);
+              }
+          });
+          return missingIndices;
+        }
+        
         const xAxisData=[];
         xAxisArray[xAxisArray.length-1].forEach((element) => {
           const date = new Date(element);
