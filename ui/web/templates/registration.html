@@ -43,9 +43,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </div>
                   <div class="row mb-3">
                     <div class="col-md-12 input-field email-field">
-                      <i class="fas fa-solid fa-envelope"></i>
+                      <i class="fas fa-solid fa-envelope me-2"></i>
                       <input
-                        class="p-3 w-100"
+                        class="p-3 w-100 me-2"
                         type="email"
                         name="email"
                         id="email"
@@ -56,14 +56,15 @@ SPDX-License-Identifier: Apache-2.0 -->
                   </div>
                   <div class="row mb-3">
                     <div class="col-md-12 input-field password-field">
-                      <i class="fas fa-solid fa-lock"></i>
+                      <i class="fas fa-solid fa-lock me-2"></i>
                       <input
-                        class="p-3 w-100"
+                        class="p-3 w-100 me-2"
                         type="password"
                         name="password"
                         id="password"
                         placeholder="Password"
                       />
+                      <span class="password-toggle-icon"><i class="fas fa-eye"></i></span>
                     </div>
                     <div id="passwordError" class="text-danger"></div>
                   </div>
@@ -126,12 +127,25 @@ SPDX-License-Identifier: Apache-2.0 -->
       </script>
       <script>
         const nameField = document.querySelector(".name-field");
-        const passwordField = document.querySelector(".password-field");
+        const passwordField = document.getElementById("password");
+        const togglePassword = document.querySelector(".password-toggle-icon i");
         const emailField = document.querySelector(".email-field");
         const registrationError = document.getElementById("registrationError");
 
         document.getElementById("register-button").addEventListener("click", () => {
           registrationError.innerHTML = "";
+        });
+        // Code for toggling the visibility of the password
+        togglePassword.addEventListener("click", function () {
+          if (passwordField.type === "password") {
+            passwordField.type = "text";
+            togglePassword.classList.remove("fa-eye");
+            togglePassword.classList.add("fa-eye-slash");
+          } else {
+            passwordField.type = "password";
+            togglePassword.classList.remove("fa-eye-slash");
+            togglePassword.classList.add("fa-eye");
+          }
         });
 
         function submitRegistrationForm() {
