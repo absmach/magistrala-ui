@@ -51,7 +51,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                         id="password"
                         placeholder="Password"
                       />
-                      <span class ="password-toggle-icon"><i class="fas fa-eye"></i></i></span>
+                      <span class="password-toggle-icon"><i class="fas fa-eye"></i></span>
                     </div>
                     <div id="passwordError" class="text-danger"></div>
                   </div>
@@ -178,13 +178,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                   window.location.href = `${pathPrefix}/tokens/secure`;
                   break;
               }
-              
+
             })
-        
+
             .catch((error) => {
               console.error("error submitting login form: ", error);
             });
-        }  
+        }
          //code for toggling the visibility of the password
         togglePassword.addEventListener("click", function () {
          if (passwordField.type === "password")  {
@@ -196,8 +196,8 @@ SPDX-License-Identifier: Apache-2.0 -->
              togglePassword.classList.remove("fa-eye-slash");
              togglePassword.classList.add("fa-eye");
             }
-        })    
-        
+        })
+
 
         function showError(errorMessage) {
           loginError.innerHTML = errorMessage;
