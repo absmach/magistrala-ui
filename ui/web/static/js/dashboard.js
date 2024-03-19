@@ -197,18 +197,16 @@ const resizeObserver = new ResizeObserver((entries) => {
     ltgrid.classList.add("grid-editable");
     const contentEl = target.querySelector(".item-content");
     const gridRightPosition = target.parentNode.getBoundingClientRect().right;
+    console.log("gridRightPosition", gridRightPosition);
     const widgetRightPosition = target.getBoundingClientRect().right;
     const isOverflowing = widgetRightPosition > gridRightPosition;
+    console.log("isOverflowing", isOverflowing);
+    console.log("target", target);
+    console.log("Target max width", target.style.maxWidth);
     if (isOverflowing) {
       target.style.maxWidth = target.clientWidth + "px";
       target.style.maxHeight = target.clientHeight + "px";
-      grid.refreshItems();
-      grid.layout(true);
-    } else {
-      target.style.maxWidth = "none";
-      target.style.maxHeight = "none";
     }
-
     if (widgetRightPosition < gridRightPosition - 5) {
       // Calculate the change in width and height
       let widthChange = target.clientWidth - previousSize.width;
@@ -241,17 +239,22 @@ const resizeObserver = new ResizeObserver((entries) => {
         if (currentFinalizeResizeFunction) {
           document.removeEventListener("mouseup", currentFinalizeResizeFunction);
           currentFinalizeResizeFunction = null;
+          console.log("Event listener removed");
         }
-        currentFinalizeResizeFunction = function () {
-          snapToGrid(target, entry);
-        };
-        document.addEventListener("mouseup", currentFinalizeResizeFunction);
+        if (!currentFinalizeResizeFunction) {
+          currentFinalizeResizeFunction = function () {
+            snapToGrid(target, entry);
+          };
+          document.addEventListener("mouseup", currentFinalizeResizeFunction);
+          console.log("Event listener added");
+        }
       }
     }
   }
 });
 
 function snapToGrid(target, entry) {
+  console.log("Snapped to grid started");
   const previousSize = previousSizes.get(target) || {
     width: target.clientWidth,
     height: target.clientHeight,
@@ -281,9 +284,12 @@ function snapToGrid(target, entry) {
 
   resizeWidgetContent(target, entry, itemContentWidth, itemContentHeight);
   document.removeEventListener("mouseup", currentFinalizeResizeFunction);
-  isResizing = false;
   let ltgrid = document.querySelector(".grid");
   ltgrid.classList.remove("grid-editable");
+  isResizing = false;
+  console.log("ltgrid", ltgrid);
+  console.log("Current Finalize Resize Function", currentFinalizeResizeFunction);
+  console.log("Snapped to grid ended");
 }
 
 function resizeWidgetContent(target, entry, itemContentWidth, itemContentHeight) {
