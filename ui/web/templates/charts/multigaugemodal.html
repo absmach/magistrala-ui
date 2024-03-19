@@ -71,7 +71,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       <tr>
                         <th scope="col">Channel</th>
                         <th scope="col">Thing</th>
-                        <th scope="col">Value</th>
+                        <th scope="col">Label</th>
                         <th scope="col"></th>
                       </tr>
                     </thead>
@@ -96,14 +96,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                             placeholder="Thing ID"
                             required
                           />
-                          <div class="invalid-feedback">Please enter a valid uuid</div>
                         </td>
                         <td>
                           <input
                             type="text"
                             class="form-control"
-                            name="valueName"
-                            placeholder="Value name"
+                            name="gaugeLabel"
+                            placeholder="Gauge Label"
                             required
                           />
                         </td>
@@ -118,46 +117,17 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <button type="button" class="btn body-button btn-sm" onclick="addRow()">
                     Add Source
                   </button>
-                <div class="mb-3">
-                  <label for="channel-id" class="form-label">Channel ID</label>
-                  <input
-                    type="text"
-                    pattern="{{ .UUIDPattern }}"
-                    class="form-control mb-3"
-                    name="channel"
-                    id="channel-id"
-                    placeholder="Enter the channel ID"
-                    required
-                  />
-                  <div class="invalid-feedback">Please enter a valid uuid</div>
                 </div>
                 <div class="mb-3">
-                  <label for="thing-id" class="form-label">Thing ID</label>
+                  <label for="valueName" class="form-label">Value Name</label>
                   <input
                     type="text"
-                    pattern="{{ .UUIDPattern }}"
-                    class="form-control mb-3"
-                    name="thing"
-                    id="thing-id"
-                    placeholder="Enter the thing ID"
-                    required
-                  />
-                  <div class="invalid-feedback">Please enter a valid uuid</div>
-                </div>
-                <div class="mb-3">
-                  <label for="value-name" class="form-label">Value names</label>
-                  <input
-                    type="text"
-                    pattern="^[a-zA-Z0-9]+,[a-zA-Z0-9]+,[a-zA-Z0-9]+$"
                     class="form-control mb-3"
                     name="valueName"
                     id="value-name"
-                    placeholder="Enter three value names eg. temperature,voltage"
+                    placeholder="Enter the value name"
                     required
                   />
-                  <div class="invalid-feedback">
-                    Please enter three value names without spaces between them
-                  </div>
                 </div>
               </div>
               <!-- Appearance Tab -->
@@ -178,13 +148,13 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="gauge-label" class="form-label">Gauge Labels</label>
+                  <label for="value-units" class="form-label">Units</label>
                   <input
                     type="text"
-                    class="form-control mb-3"
-                    name="gaugeLabel"
-                    id="gauge-label"
-                    placeholder="Enter the three gauge labels eg temperature, voltage, pressure"
+                    class="form-control"
+                    name="valueUnits"
+                    id="value-units"
+                    placeholder="Enter the Units"
                   />
                 </div>
                 <div class="mb-3">
@@ -231,8 +201,8 @@ SPDX-License-Identifier: Apache-2.0 -->
   </div>
   <script>
     // multi gauge form
+    const form = document.getElementById("create-multiGaugeChart-form");
     document.getElementById("create-multiGauge-button").addEventListener("click", function () {
-      const form = document.getElementById("create-multiGaugeChart-form");
       if (!form.checkValidity()) {
         form.classList.add("was-validated");
         return;
@@ -240,10 +210,29 @@ SPDX-License-Identifier: Apache-2.0 -->
 
       // Create an object to store the form data
       let chartData = {};
+      const channels = [];
+      const things = [];
+      const labels = [];
       let formData = new FormData(form);
-      for (var pair of formData.entries()) {
-        chartData[pair[0]] = pair[1];
+      for (let [name, value] of formData) {
+        switch (name) {
+          case "channel":
+            channels.push(value);
+            break;
+          case "thing":
+            things.push(value);
+            break;
+          case "gaugeLabel":
+            labels.push(value);
+            break;
+          default:
+            chartData[name] = value;
+            break;
+        }
       }
+      chartData["channels"] = channels;
+      chartData["things"] = things;
+      chartData["labels"] = labels;
 
       var widgetID = "multiGaugeChart-" + Date.now();
 
@@ -261,5 +250,36 @@ SPDX-License-Identifier: Apache-2.0 -->
       form.reset();
       form.classList.remove("was-validated");
     });
+
+    function addRow() {
+      const uuidPattern = "{{ .UUIDPattern }}";
+      const table = document
+        .getElementById("multigauge-data");
+      const newRow = table.insertRow(-1);
+      newRow.innerHTML =
+        ` <td>
+            <input type="text" pattern="${uuidPattern}" class="form-control" name="channel"
+              placeholder="channel ID" required />
+          </td>
+          <td>
+            <input type="text" pattern="${uuidPattern}" class="form-control" name="thing"
+              placeholder="thing ID" required />
+          </td>
+          <td>
+            <input type="text" class="form-control" name="gaugeLabel"
+              placeholder="Gauge Label" required />
+          </td>
+          <td class="text-center">
+            <button type="button" class="btn btn-sm" onclick="removeRow(this)">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        `;
+    }
+
+    function removeRow(button) {
+      const row = button.parentNode.parentNode;
+      row.parentNode.removeChild(row);
+    }
   </script>
 {{ end }}

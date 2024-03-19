@@ -1059,47 +1059,29 @@ class MultiGaugeChart extends Echart {
   }
 
   #generateScript() {
-    let gaugeLabel = this.chartData.gaugeLabel.split(",");
-    const channels = JSON.stringify(this.chartData.channel);
-    const things = JSON.stringify(this.chartData.thing);
-    const valueName = JSON.stringify(this.chartData.valueName);
+    const channels = JSON.stringify(this.chartData.channels);
+    const things = JSON.stringify(this.chartData.things);
+    const gaugeLabel = this.chartData.labels;
+
     return `
     var multiGaugeChart = echarts.init(document.getElementById("${this.ID}"));
-    var gaugeData = [
-      {
-        value: 20,
-        name: '${gaugeLabel[0]}',
-        title: {
-          offsetCenter: ['0%', '-30%']
-        },
+
+    gaugeLabel = ${JSON.stringify(gaugeLabel)};
+
+    var gaugeData = gaugeLabel.map((label, index) => {
+      // Dynamic positioning can be improved based on the number of gauges
+      var position = (index - (gaugeLabel.length - 1) / 2) * 40;
+      return {
+        name: label,
+        value: 0,
+        title: { offsetCenter: ['0%', position + '%'] },
         detail: {
           valueAnimation: true,
-          offsetCenter: ['0%', '-18%']
+          offsetCenter: ['0%', (position + 12) + '%']
         }
-      },
-      {
-        value: 40,
-        name: '${gaugeLabel[1]}',
-        title: {
-          offsetCenter: ['0%', '0%']
-        },
-        detail: {
-          valueAnimation: true,
-          offsetCenter: ['0%', '12%']
-        }
-      },
-      {
-        value: 60,
-        name: '${gaugeLabel[2]}',
-        title: {
-          offsetCenter: ['0%', '28%']
-        },
-        detail: {
-          valueAnimation: true,
-          offsetCenter: ['0%', '40%']
-        }
-      }
-    ];
+      };
+    });
+
     var option = {
       title: {
         text: '${this.chartData.title}',
@@ -1152,98 +1134,62 @@ class MultiGaugeChart extends Echart {
             borderColor: 'inherit',
             borderRadius: 20,
             borderWidth: 1,
-            formatter: '{value}%'
+            formatter: '{value}${this.chartData.valueUnits}'
           }
         }
       ]
     };
     multiGaugeChart.setOption(option)
-    getData(multiGaugeChart);
+    var chartData = {
+      channels: ${channels},
+      publishers: ${things},
+      gaugeLabel: gaugeLabel,
+    }
+    getData(multiGaugeChart, chartData);
 
-    async function getData(multiGaugeChart) {
+    async function getData(multiGaugeChart, chartData) {
       try {
-        var names = "${this.chartData.valueName}".split(",");
-        const name1 = names[0];
-        const name2 = names[1];
-        const name3 = names[2];
-
-        const response1 = await fetch(
-          "${pathPrefix}/data?channel=${this.chartData.channel}"+
-          "&publisher=${this.chartData.thing}"+
-          "&name="+ name1 +
-          "&limit=1",
-        );
-
-        const response2 = await fetch(
-          "${pathPrefix}/data?channel=${this.chartData.channel}"+
-          "&publisher=${this.chartData.thing}"+
-          "&name="+ name2 +
-          "&limit=1",
-        );
-
-        const response3 = await fetch(
-          "${pathPrefix}/data?channel=${this.chartData.channel}"+
-          "&publisher=${this.chartData.thing}"+
-          "&name="+ name3 +
-          "&limit=1",
-        );
-
-        if (response1.ok && response2.ok && response3.ok) {
-          const data1 = await response1.json();
-          const data2 = await response2.json(); 
-          const data3 = await response3.json();
-
-          if (data1.messages && data1.messages.length > 0 &&
-            data2.messages && data2.messages.length > 0 &&
-            data3.messages && data3.messages.length > 0) {
-
-            multiGaugeChart.setOption({
-              series: [
-                {
-                  data: [
-                    {
-                      value: data1.messages[0].value,
-                      name: '${gaugeLabel[0]}',
-                      title: {
-                        offsetCenter: ['0%', '-30%']
-                      },
-                      detail: {
-                        valueAnimation: true,
-                        offsetCenter: ['0%', '-18%']
-                      }
-                    },
-                    {
-                      value: data2.messages[0].value,
-                      name: '${gaugeLabel[1]}',
-                      title: {
-                        offsetCenter: ['0%', '0%']
-                      },
-                      detail: {
-                        valueAnimation: true,
-                        offsetCenter: ['0%', '12%']
-                      }
-                    },
-                    {
-                      value: data3.messages[0].value,
-                      name: '${gaugeLabel[2]}',
-                      title: {
-                        offsetCenter: ['0%', '28%']
-                      },
-                      detail: {
-                        valueAnimation: true,
-                        offsetCenter: ['0%', '40%']
-                      }
-                    }
-                  ],
-                },
-              ],
-            });
+        for (let i = 0; i < chartData.channels.length; i++) {
+          const url = "${pathPrefix}/data?channel=" + chartData.channels[i] +
+            "&publisher=" + chartData.publishers[i] +
+            "&name=" + ${this.chartData.valueName};
+          const response = await fetch(url);
+          console.log("Response: ", response);
+          if (response.ok) {
+            const data = await response.json();
+            console.log("Data: ", data);
+            if (data.messages && data.messages.length > 0) {
+              gaugeData[i].value = data.messages[0].value;
+            } else {
+              console.error("Response is an empty array");
+            }
           } else {
-            console.error("Response is an empty array");
+            console.error("HTTP request failed with status: ", response.status);
           }
-        } else {
-          console.error("HTTP request failed with status: ", response.status);
+
+          let seriesData = gaugeData.map((gauge, index) => {
+            return {
+              value: gauge.value,
+              name: gaugeLabel[index],
+              title: {
+                offsetCenter: ['0%', (index - (gaugeLabel.length - 1) / 2) * 40 + '%']
+              },
+              detail: {
+                valueAnimation: true,
+                offsetCenter: ['0%', (index - (gaugeLabel.length - 1) / 2) * 40 + 12 + '%']
+              }
+            };
+          });
+
+          multiGaugeChart.setOption({
+            series: [
+              {
+                data: seriesData
+              }
+            ]
+          });
         }
+
       }catch (error) {
         console.error("Failed to fetch gauge data: ", error);
         setTimeout(function () {
