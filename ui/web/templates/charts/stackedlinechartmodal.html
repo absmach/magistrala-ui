@@ -110,14 +110,22 @@ SPDX-License-Identifier: Apache-2.0 -->
                           <input type="color" class="form-control" name="lineColor" />
                         </td>
                         <td class="text-center">
-                          <button type="button" class="btn btn-sm" onclick="removeRow(this)">
+                          <button
+                            type="button"
+                            class="btn btn-sm"
+                            onclick="removeStackLineChartRow(this)"
+                          >
                             <i class="fas fa-trash-alt"></i>
                           </button>
                         </td>
                       </tr>
                     </tbody>
                   </table>
-                  <button type="button" class="btn body-button btn-sm" onclick="addRow()">
+                  <button
+                    type="button"
+                    class="btn body-button btn-sm"
+                    onclick="addStackLineChartRow()"
+                  >
                     Add source
                   </button>
                 </div>
@@ -339,7 +347,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       })
     });
 
-    function addRow() {
+    function addStackLineChartRow() {
       const uuidPattern = "{{ .UUIDPattern }}";
       const table = document
         .getElementById("stackedLineChart-data");
@@ -367,7 +375,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </td>`;
     }
 
-    function removeRow(button) {
+    function removeStackLineChartRow(button) {
       const row = button.parentNode.parentNode;
       row.parentNode.removeChild(row);
     }

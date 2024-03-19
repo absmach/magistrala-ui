@@ -956,142 +956,26 @@ class TimeSeriesLineChart extends Echart {
             data: yAxisArray[i],
             type: 'line',
             lineStyle: {
-              width: ${this.chartData.lineWidth},
-              type: 'solid',
+              color: chartData.colors[i],
             },
-          }
-        ]
-      };
+            name: chartData.names[i],
+          };
+          seriesData.push(data);
+        }
+        linechart.setOption({
+            xAxis: {
+              data: xAxisData,
+            },
+            series: seriesData,
+          });
 
-      lineChart.setOption(option);
-      var chartdata = {
-        channels:${channels},
-        publishers:${things},
-        names:${names},
-        colors:${colors},
-        valueName: '${this.chartData.valueName}',
-        from:${this.chartData.startTime},
-        to:${this.chartData.stopTime},
-        aggregation:'${this.chartData.aggregationType}',
-        limit:100,
-        interval:'${this.chartData.updateInterval}',
-      };
-      getData(lineChart,chartdata);
-    
-      async function getData(linechart,chartData) {
-        try {
-          let xAxisArray=[];
-          const yAxisArray = [];
-          let currentTimestamp = chartData.from;
-          let previousTimestamp=0;
-          const endTimestamp = chartData.to;
-          const timeDifference = chartData.to - chartData.from;
-          let intervalNum;
-          switch (true) {
-            case (timeDifference <= 3.6*1e6):
-              intervalNum = 6*1e5;
-              break;
-            case (timeDifference <= 8.64 * 1e7):
-              intervalNum = 6*1e6;
-              break;
-            case (timeDifference <= 6.05 * 1e8):
-              intervalNum = 6*1e7;
-              break;
-            case (timeDifference <= 2.63 * 1e9):
-              intervalNum = 6*1e8;
-              break;
-            case (timeDifference <= 3.16 * 1e10):
-              intervalNum = 6*1e9;
-              break;
-            default:
-              intervalNum = 6*1e8;
-              break;
-          }
-
-          const initialXAxisArray = []
-          const NoOfValues = Math.ceil(timeDifference/intervalNum);
-          for (i=0; i<=NoOfValues; i++) {
-            initialXAxisArray.push(currentTimestamp);
-            currentTimestamp += intervalNum;
-          }
-          xAxisArray.push(initialXAxisArray);
-
-          for (i=0; i < chartData.channels.length; i++) {
-            const url = "${pathPrefix}/data?channel=" + chartData.channels[i] +
-            "&publisher=" + chartData.publishers[i] +
-            "&name=" + chartData.valueName +
-            "&from=" + chartData.from +
-            "&to=" + chartData.to +
-            "&aggregation=" + chartData.aggregation +
-            "&limit=" + chartData.limit +
-            "&interval=" + chartData.interval;
-            const response = await fetch(url);
-            if (response.ok) {
-              const data = await response.json();
-              const xAxis=[];
-              const yAxis=[];
-              if (data.messages){
-                const currArray = xAxisArray[xAxisArray.length-1];
-                let currentTime, previousTime;
-                for (j=0; j < currArray.length; j++) {
-                  let isempty = true;
-                  let currentTime = currArray[j];
-                  for (k = (data.messages.length -1); k>= 0 ; k--) {
-                    const item = data.messages[k];
-                    if (item.time > previousTime && item.time <= currentTime ) {
-                      xAxis.push(item.time);
-                      yAxis.push(item.value);
-                      isEmpty= false;
-                    }
-                  }
-                  if (isempty) {
-                    xAxis.push(currentTime);
-                    yAxis.push("-");
-                  }
-                  previousTime=currentTime;
-                }
-              }
-              xAxisArray.push(xAxis);
-              // Remove the previous element in the array
-              xAxisArray.shift();
-              yAxisArray.push(yAxis);
-            } else {
-              // Handle errors
-              console.error("HTTP request failed with status:", response.status);
-            }
-          }
-
-          const xAxisData=[];
-          xAxisArray[xAxisArray.length-1].forEach((element) => {
-            const date = new Date(element);
-            xAxisData.push(date);
-          })
-          const seriesData = []
-          for (i=0; i<yAxisArray.length; i++) {
-            const data = {
-              data: yAxisArray[i],
-              type: 'line',
-              lineStyle: {
-                color: chartData.colors[i],
-              },
-              name: chartData.names[i],
-            };
-            seriesData.push(data);
-          }
-          linechart.setOption({
-              xAxis: {
-                data: xAxisData,
-              },
-              series: seriesData,
-            });
-
-        } catch (error) {
-            // Handle fetch or other errors
-            console.error("Error:", error);
-            // Retry after a couple of seconds
-            setTimeout(function () {
-              getData(linechart, chartData);
-            }, 20000);
+      } catch (error) {
+          // Handle fetch or other errors
+          console.error("Error:", error);
+          // Retry after a couple of seconds
+          setTimeout(function () {
+            getData(linechart, chartData);
+          }, 20000);
         }
       };
     `;
@@ -1696,7 +1580,7 @@ class StackedLineChart extends Echart {
     const colors = JSON.stringify(this.chartData.colors);
     return `
       var stackedLineChart = echarts.init(document.getElementById("${this.ID}"));
-      let legendData =[];
+      var legendData =[];
       ${names}.forEach((element) => {
         legendData.push(element);
       });
@@ -1828,14 +1712,29 @@ class StackedLineChart extends Echart {
                 }
               }
               xAxisArray.push(xAxis);
-              // Remove the previous element in the array
-              xAxisArray.shift();
               yAxisArray.push(yAxis);
             } else {
               // Handle errors
               console.error("HTTP request failed with status:", response.status);
             }
           }
+
+          for (i =1; i< xAxisArray.length; i++) {
+            const missingData = findMissingValuesIndices(xAxisArray[i], xAxisArray[xAxisArray.length-1]);
+            missingData.forEach((value, index) => {
+              yAxisArray[i-1].splice(value,0,"-");
+            });
+          }
+  
+          function findMissingValuesIndices(array1, array2) {
+            const missingIndices = [];
+            array2.forEach((item, index) => {
+                if (!array1.includes(item)) {
+                    missingIndices.push(index);
+                }
+            });
+            return missingIndices;
+          }  
 
           const xAxisData=[];
           xAxisArray[xAxisArray.length-1].forEach((element) => {
