@@ -1062,13 +1062,12 @@ class MultiGaugeChart extends Echart {
     const channels = JSON.stringify(this.chartData.channels);
     const things = JSON.stringify(this.chartData.things);
     const gaugeLabel = this.chartData.labels;
-    const colours = this.chartData.colours;
+    const colours = JSON.stringify(this.chartData.colours);
 
     return `
     var multiGaugeChart = echarts.init(document.getElementById("${this.ID}"));
 
     var gaugeLabel = ${JSON.stringify(gaugeLabel)};
-    var colours = ${JSON.stringify(colours)};
 
     var gaugeData = gaugeLabel.map((label, index) => {
       // Dynamic positioning can be improved based on the number of gauges
@@ -1147,7 +1146,7 @@ class MultiGaugeChart extends Echart {
       publishers: ${things},
       gaugeLabel: gaugeLabel,
       name: '${this.chartData.valueName}',
-      colours: colours,
+      colours: ${colours},
     }
     getData(multiGaugeChart, chartData);
 
@@ -1158,10 +1157,8 @@ class MultiGaugeChart extends Echart {
             "&publisher=" + chartData.publishers[i] +
             "&name=" + name;
           const response = await fetch(url);
-          console.log("Response: ", response);
           if (response.ok) {
             const data = await response.json();
-            console.log("Data: ", data);
             if (data.messages && data.messages.length > 0) {
               gaugeData[i].value = data.messages[0].value;
             } else {
@@ -1183,7 +1180,7 @@ class MultiGaugeChart extends Echart {
                 offsetCenter: ['0%', (index - (gaugeLabel.length - 1) / 2) * 40 + 12 + '%']
               },
               itemStyle: {
-                color: chartData.colours[i],
+                color: chartData.colours[index],
               }
             };
           });
