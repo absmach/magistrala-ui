@@ -1062,11 +1062,13 @@ class MultiGaugeChart extends Echart {
     const channels = JSON.stringify(this.chartData.channels);
     const things = JSON.stringify(this.chartData.things);
     const gaugeLabel = this.chartData.labels;
+    const colours = this.chartData.colours;
 
     return `
     var multiGaugeChart = echarts.init(document.getElementById("${this.ID}"));
 
-    gaugeLabel = ${JSON.stringify(gaugeLabel)};
+    var gaugeLabel = ${JSON.stringify(gaugeLabel)};
+    var colours = ${JSON.stringify(colours)};
 
     var gaugeData = gaugeLabel.map((label, index) => {
       // Dynamic positioning can be improved based on the number of gauges
@@ -1144,7 +1146,8 @@ class MultiGaugeChart extends Echart {
       channels: ${channels},
       publishers: ${things},
       gaugeLabel: gaugeLabel,
-      name: '${this.chartData.valueName}'
+      name: '${this.chartData.valueName}',
+      colours: colours,
     }
     getData(multiGaugeChart, chartData);
 
@@ -1178,6 +1181,9 @@ class MultiGaugeChart extends Echart {
               detail: {
                 valueAnimation: true,
                 offsetCenter: ['0%', (index - (gaugeLabel.length - 1) / 2) * 40 + 12 + '%']
+              },
+              itemStyle: {
+                color: chartData.colours[i],
               }
             };
           });

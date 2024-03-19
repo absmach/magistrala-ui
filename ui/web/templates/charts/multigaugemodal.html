@@ -72,6 +72,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                         <th scope="col">Channel</th>
                         <th scope="col">Thing</th>
                         <th scope="col">Label</th>
+                        <th scope="col">Colour</th>
                         <th scope="col"></th>
                       </tr>
                     </thead>
@@ -107,7 +108,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                           />
                         </td>
                         <td>
-                          <button type="button" class="btn btn-sm" onclick="deleteRow(this)">
+                          <input
+                            type="color"
+                            class="form-control"
+                            name="gaugeColour"
+                          />
+                        </td>
+                        <td class="text-center">
+                          <button 
+                            type="button" 
+                            class="btn btn-sm" 
+                            onclick="deleteRow(this)"
+                          >
                             <i class="fas fa-trash-alt"></i>
                           </button>
                         </td>
@@ -213,6 +225,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       const channels = [];
       const things = [];
       const labels = [];
+      const colours = [];
       let formData = new FormData(form);
       for (let [name, value] of formData) {
         switch (name) {
@@ -225,6 +238,9 @@ SPDX-License-Identifier: Apache-2.0 -->
           case "gaugeLabel":
             labels.push(value);
             break;
+          case "gaugeColour":
+            colours.push(value);
+            break;
           default:
             chartData[name] = value;
             break;
@@ -233,6 +249,7 @@ SPDX-License-Identifier: Apache-2.0 -->
       chartData["channels"] = channels;
       chartData["things"] = things;
       chartData["labels"] = labels;
+      chartData["colours"] = colours;
 
       var widgetID = "multiGaugeChart-" + Date.now();
 
@@ -268,6 +285,9 @@ SPDX-License-Identifier: Apache-2.0 -->
           <td>
             <input type="text" class="form-control" name="gaugeLabel"
               placeholder="Gauge Label" required />
+          </td>
+          <td>
+            <input type="color" class="form-control" name="gaugeColour" />
           </td>
           <td class="text-center">
             <button type="button" class="btn btn-sm" onclick="removeRow(this)">
