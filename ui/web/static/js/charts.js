@@ -1144,6 +1144,7 @@ class MultiGaugeChart extends Echart {
       channels: ${channels},
       publishers: ${things},
       gaugeLabel: gaugeLabel,
+      name: '${this.chartData.valueName}'
     }
     getData(multiGaugeChart, chartData);
 
@@ -1152,7 +1153,7 @@ class MultiGaugeChart extends Echart {
         for (let i = 0; i < chartData.channels.length; i++) {
           const url = "${pathPrefix}/data?channel=" + chartData.channels[i] +
             "&publisher=" + chartData.publishers[i] +
-            "&name=" + ${this.chartData.valueName};
+            "&name=" + name;
           const response = await fetch(url);
           console.log("Response: ", response);
           if (response.ok) {
