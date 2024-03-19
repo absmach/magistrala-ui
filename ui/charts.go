@@ -49,11 +49,6 @@ func CreateItem() []Item {
 			Widget:  "stackedLineChart",
 		},
 		{
-			Title:   "Area Line Chart",
-			Content: "This is a stacked area line chart",
-			Widget:  "areaLineChart",
-		},
-		{
 			Title:   "Temperature Gauge",
 			Content: "This is an analogue temperature gauge",
 			Widget:  "tempGauge",
