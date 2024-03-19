@@ -197,15 +197,16 @@ const resizeObserver = new ResizeObserver((entries) => {
     ltgrid.classList.add("grid-editable");
     const contentEl = target.querySelector(".item-content");
     const gridRightPosition = target.parentNode.getBoundingClientRect().right;
-    console.log("gridRightPosition", gridRightPosition);
     const widgetRightPosition = target.getBoundingClientRect().right;
     const isOverflowing = widgetRightPosition > gridRightPosition;
-    console.log("isOverflowing", isOverflowing);
-    console.log("target", target);
-    console.log("Target max width", target.style.maxWidth);
+    target.style.maxWidth = 1300 + "px";
+    target.style.maxHeight = 1300 + "px";
     if (isOverflowing) {
       target.style.maxWidth = target.clientWidth + "px";
       target.style.maxHeight = target.clientHeight + "px";
+    } else {
+      target.style.maxWidth = 1300 + "px";
+      target.style.maxHeight = 1300 + "px";
     }
     if (widgetRightPosition < gridRightPosition - 5) {
       // Calculate the change in width and height
@@ -222,9 +223,6 @@ const resizeObserver = new ResizeObserver((entries) => {
         height: target.clientHeight,
       });
 
-      target.style.width = target.clientWidth + "px";
-      target.style.height = target.clientHeight + "px";
-
       contentEl.style.width = itemContentWidth + "px";
       contentEl.style.height = itemContentHeight + "px";
 
@@ -239,14 +237,12 @@ const resizeObserver = new ResizeObserver((entries) => {
         if (currentFinalizeResizeFunction) {
           document.removeEventListener("mouseup", currentFinalizeResizeFunction);
           currentFinalizeResizeFunction = null;
-          console.log("Event listener removed");
         }
         if (!currentFinalizeResizeFunction) {
           currentFinalizeResizeFunction = function () {
             snapToGrid(target, entry);
           };
           document.addEventListener("mouseup", currentFinalizeResizeFunction);
-          console.log("Event listener added");
         }
       }
     }
@@ -254,7 +250,6 @@ const resizeObserver = new ResizeObserver((entries) => {
 });
 
 function snapToGrid(target, entry) {
-  console.log("Snapped to grid started");
   const previousSize = previousSizes.get(target) || {
     width: target.clientWidth,
     height: target.clientHeight,
@@ -287,9 +282,6 @@ function snapToGrid(target, entry) {
   let ltgrid = document.querySelector(".grid");
   ltgrid.classList.remove("grid-editable");
   isResizing = false;
-  console.log("ltgrid", ltgrid);
-  console.log("Current Finalize Resize Function", currentFinalizeResizeFunction);
-  console.log("Snapped to grid ended");
 }
 
 function resizeWidgetContent(target, entry, itemContentWidth, itemContentHeight) {
