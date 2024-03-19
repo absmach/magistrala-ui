@@ -117,6 +117,9 @@ class TimeSeriesBarChart extends Echart {
         left: 'center',
         show: true
       },
+      tooltip: {
+        trigger: 'axis',
+      },
       xAxis: {
         type: 'category',
         data: [],
