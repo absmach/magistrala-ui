@@ -104,11 +104,11 @@ SPDX-License-Identifier: Apache-2.0 -->
                   <label for="update-interval" class="form-label">Update interval</label>
                   <input
                     type="text"
-                    pattern="{{ .IntervalPattern }}"
+                    pattern="^\d+$"
                     class="form-control mb-3"
                     name="updateInterval"
                     id="update-interval"
-                    placeholder="Enter the update interval, eg. 5s, 10m, 1h, 1d"
+                    placeholder="Enter the update interval in milliseconds"
                     required
                   />
                   <div class="invalid-feedback">Please enter a valid interval</div>
