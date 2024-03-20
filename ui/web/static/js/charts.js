@@ -798,14 +798,14 @@ class HorizontalBarChart extends Echart {
 
       function getInterval(chartData) {
         const interval = chartData.to - chartData.from;
-        const nanosecondsPerSecond = 1e3;
+        const millisecondsPerSecond = 1e3;
         const secondsPerMinute = 60;
         const minutesPerHour = 60;
         let minutes = 0;
         let hours = 0;
         let intervalString = "";
 
-        let seconds = parseInt(interval) / nanosecondsPerSecond;
+        let seconds = parseInt(interval) / millisecondsPerSecond;
         intervalString = Math.ceil(seconds).toString() +'s';
         if (seconds >= secondsPerMinute) {
           minutes = seconds/ secondsPerMinute;
