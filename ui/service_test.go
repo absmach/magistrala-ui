@@ -35,7 +35,7 @@ var (
 	sdkerr       = errors.NewSDKError(fmt.Errorf("sdk error"))
 	emailSuffix  = "@example.com"
 	password     = "$tr0ngPassw0rd"
-	namesgen     = namegenerator.NewNameGenerator()
+	namesgen     = namegenerator.NewGenerator()
 	accessToken  = strings.Repeat("a", 32)
 	name         = namesgen.Generate()
 	id           = generateID(&testing.T{})
@@ -61,7 +61,7 @@ var (
 			Identity: namesgen.Generate() + emailSuffix,
 			Secret:   password,
 		},
-		Tags: namesgen.GenerateNames(3),
+		Tags: namesgen.GenerateMultiple(3),
 		Metadata: map[string]interface{}{
 			"key": "value",
 		},
@@ -80,7 +80,7 @@ var (
 			Identity: generateID(&testing.T{}),
 			Secret:   generateID(&testing.T{}),
 		},
-		Tags: namesgen.GenerateNames(3),
+		Tags: namesgen.GenerateMultiple(3),
 		Metadata: map[string]interface{}{
 			"key": "value",
 		},
@@ -170,7 +170,7 @@ var (
 		Metadata: map[string]interface{}{
 			"key": "value",
 		},
-		Tags:        namesgen.GenerateNames(3),
+		Tags:        namesgen.GenerateMultiple(3),
 		CreatedAt:   time.Now().Add(-time.Hour),
 		CreatedBy:   generateID(&testing.T{}),
 		UpdatedAt:   time.Now(),
