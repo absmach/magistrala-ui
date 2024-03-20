@@ -828,6 +828,7 @@ class TimeSeriesLineChart extends Echart {
             width: ${this.chartData.lineWidth},
             type: 'solid',
           },
+          connectNulls: true,
         }
       ]
     };
@@ -915,7 +916,7 @@ class TimeSeriesLineChart extends Echart {
                 }
                 if (isempty) {
                   xAxis.push(currentTime);
-                  yAxis.push("-");
+                  yAxis.push(null);
                 }
                 previousTime=currentTime;
               }
@@ -931,7 +932,7 @@ class TimeSeriesLineChart extends Echart {
         for (i =1; i< xAxisArray.length; i++) {
           const missingData = findMissingValuesIndices(xAxisArray[i], xAxisArray[xAxisArray.length-1]);
           missingData.forEach((value, index) => {
-            yAxisArray[i-1].splice(value,0,"-");
+            yAxisArray[i-1].splice(value,0,null);
           });
         }
 
