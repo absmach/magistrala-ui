@@ -17,6 +17,7 @@ class Echart extends Chart {
     };
     this.Content = this.#generateContent();
   }
+
   #generateContent() {
     return `
       <div class="item-content" id="${this.ID}" style="width: ${this.Style.width}; height: ${this.Style.height};">
@@ -49,6 +50,7 @@ class AlarmCount extends Chart {
             Warning Level
           </p>
         </div>
+    </div>
     </div>
     </div>
   `;

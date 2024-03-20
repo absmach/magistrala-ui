@@ -2,9 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 const gridClass = ".grid";
 var grid = initGrid(layout);
-
-// Editable canvas is used to make the canvas editable allowing the user to add widgets and be able to move the
-// widgets around the canvas
+const gridSize = 20;
+const previousSizes = new Map();
+let isResizing = false;
+let currentFinalizeResizeFunction = null;
 
 function cancelEdit() {
   grid._settings.dragEnabled = false;
@@ -185,8 +186,6 @@ function editableCanvas() {
   return grid;
 }
 
-const previousSizes = new Map();
-
 const resizeObserver = new ResizeObserver((entries) => {
   for (let entry of entries) {
     const { target } = entry;
@@ -194,25 +193,28 @@ const resizeObserver = new ResizeObserver((entries) => {
       width: target.clientWidth,
       height: target.clientHeight,
     };
+    let ltgrid = document.querySelector(".grid");
+    ltgrid.classList.add("grid-editable");
     const contentEl = target.querySelector(".item-content");
     const gridRightPosition = target.parentNode.getBoundingClientRect().right;
     const widgetRightPosition = target.getBoundingClientRect().right;
     const isOverflowing = widgetRightPosition > gridRightPosition;
+    target.style.maxWidth = 1300 + "px";
+    target.style.maxHeight = 1300 + "px";
     if (isOverflowing) {
       target.style.maxWidth = target.clientWidth + "px";
       target.style.maxHeight = target.clientHeight + "px";
     } else {
-      target.style.maxWidth = "none";
-      target.style.maxHeight = "none";
+      target.style.maxWidth = 1300 + "px";
+      target.style.maxHeight = 1300 + "px";
     }
-
     if (widgetRightPosition < gridRightPosition - 5) {
       // Calculate the change in width and height
-      var widthChange = target.clientWidth - previousSize.width;
-      var heightChange = target.clientHeight - previousSize.height;
-      var itemContentWidth =
+      let widthChange = target.clientWidth - previousSize.width;
+      let heightChange = target.clientHeight - previousSize.height;
+      let itemContentWidth =
         parseInt(window.getComputedStyle(contentEl).getPropertyValue("width")) + widthChange;
-      var itemContentHeight =
+      let itemContentHeight =
         parseInt(window.getComputedStyle(contentEl).getPropertyValue("height")) + heightChange;
 
       // Update the previous size for the next callback
@@ -221,65 +223,112 @@ const resizeObserver = new ResizeObserver((entries) => {
         height: target.clientHeight,
       });
 
-      target.style.width = target.clientWidth + "px";
-      target.style.height = target.clientHeight + "px";
-
       contentEl.style.width = itemContentWidth + "px";
       contentEl.style.height = itemContentHeight + "px";
 
-      // Resize apache echarts chart
-      const chart = echarts.getInstanceByDom(contentEl);
-      if (chart) {
-        chart.resize({
-          width: itemContentWidth,
-          height: itemContentHeight,
-        });
-      } else {
-        const cardDiv = target.querySelector(".widgetcard");
-        const h5Elem = cardDiv.querySelector("h5");
-        const cardBody = cardDiv.querySelector(".card-body");
-        const cardFooter = cardDiv.querySelector(".card-footer");
+      //Resize the widget content
+      resizeWidgetContent(target, entry, itemContentWidth, itemContentHeight);
 
-        if (entry.contentBoxSize) {
-          // The standard makes contentBoxSize an array...
-          if (entry.contentBoxSize[0]) {
-            h5Elem.style.fontSize = Math.max(1, entry.contentBoxSize[0].inlineSize / 300) + "rem";
-            if (cardBody) {
-              cardBody.style.fontSize =
-                Math.max(1.5, entry.contentBoxSize[0].inlineSize / 300) + "rem";
-            }
-            if (cardFooter) {
-              cardFooter.style.fontSize =
-                Math.max(1, entry.contentBoxSize[0].inlineSize / 600) + "rem";
-            }
-          } else {
-            // ...but old versions of Firefox treat it as a single item
-            h5Elem.style.fontSize = Math.max(1, entry.contentBoxSize.inlineSize / 300) + "rem";
-            if (cardBody) {
-              cardBody.style.fontSize =
-                Math.max(1.5, entry.contentBoxSize.inlineSize / 300) + "rem";
-            }
-            if (cardFooter) {
-              cardFooter.style.fontSize =
-                Math.max(1, entry.contentBoxSize.inlineSize / 600) + "rem";
-            }
-          }
-        } else {
-          h5Elem.style.fontSize = `${Math.max(1, entry.contentRect.width / 300)}rem`;
-          if (cardBody) {
-            cardBody.style.fontSize = `${Math.max(1.5, entry.contentRect.width / 300)}rem`;
-          }
-          if (cardFooter) {
-            cardFooter.style.fontSize = `${Math.max(1, entry.contentRect.width / 600)}rem`;
-          }
-        }
-      }
       grid.refreshItems();
       grid.layout(true);
+      if (!isResizing) {
+        isResizing = true;
+
+        if (currentFinalizeResizeFunction) {
+          document.removeEventListener("mouseup", currentFinalizeResizeFunction);
+          currentFinalizeResizeFunction = null;
+        }
+        if (!currentFinalizeResizeFunction) {
+          currentFinalizeResizeFunction = function () {
+            snapToGrid(target, entry);
+          };
+          document.addEventListener("mouseup", currentFinalizeResizeFunction);
+        }
+      }
     }
   }
 });
 
+function snapToGrid(target, entry) {
+  const previousSize = previousSizes.get(target) || {
+    width: target.clientWidth,
+    height: target.clientHeight,
+  };
+  const contentEl = target.querySelector(".item-content");
+  const snapToGrid = (size) => Math.round(size / gridSize) * gridSize;
+  let snappedWidth = snapToGrid(target.clientWidth);
+  let snappedHeight = snapToGrid(target.clientHeight);
+
+  let widthChange = snappedWidth - previousSize.width;
+  let heightChange = snappedHeight - previousSize.height;
+  let itemContentWidth =
+    parseInt(window.getComputedStyle(contentEl).getPropertyValue("width")) + widthChange;
+  let itemContentHeight =
+    parseInt(window.getComputedStyle(contentEl).getPropertyValue("height")) + heightChange;
+
+  target.style.width = snappedWidth + "px";
+  target.style.height = snappedHeight + "px";
+
+  contentEl.style.width = itemContentWidth + "px";
+  contentEl.style.height = itemContentHeight + "px";
+
+  previousSizes.set(target, {
+    width: snappedWidth,
+    height: snappedHeight,
+  });
+
+  resizeWidgetContent(target, entry, itemContentWidth, itemContentHeight);
+  document.removeEventListener("mouseup", currentFinalizeResizeFunction);
+  let ltgrid = document.querySelector(".grid");
+  ltgrid.classList.remove("grid-editable");
+  isResizing = false;
+}
+
+function resizeWidgetContent(target, entry, itemContentWidth, itemContentHeight) {
+  const contentEl = target.querySelector(".item-content");
+  const chart = echarts.getInstanceByDom(contentEl);
+  if (chart) {
+    chart.resize({
+      width: itemContentWidth,
+      height: itemContentHeight,
+    });
+  } else {
+    const cardDiv = target.querySelector(".widgetcard");
+    const h5Elem = cardDiv.querySelector("h5");
+    const cardBody = cardDiv.querySelector(".card-body");
+    const cardFooter = cardDiv.querySelector(".card-footer");
+
+    if (target.contentBoxSize) {
+      // The standard makes contentBoxSize an array...
+      if (entry.contentBoxSize[0]) {
+        h5Elem.style.fontSize = Math.max(1, entry.contentBoxSize[0].inlineSize / 300) + "rem";
+        if (cardBody) {
+          cardBody.style.fontSize = Math.max(1.5, entry.contentBoxSize[0].inlineSize / 300) + "rem";
+        }
+        if (cardFooter) {
+          cardFooter.style.fontSize = Math.max(1, entry.contentBoxSize[0].inlineSize / 600) + "rem";
+        }
+      } else {
+        // ...but old versions of Firefox treat it as a single item
+        h5Elem.style.fontSize = Math.max(1, entry.contentBoxSize.inlineSize / 300) + "rem";
+        if (cardBody) {
+          cardBody.style.fontSize = Math.max(1.5, entry.contentBoxSize.inlineSize / 300) + "rem";
+        }
+        if (cardFooter) {
+          cardFooter.style.fontSize = Math.max(1, entry.contentBoxSize.inlineSize / 600) + "rem";
+        }
+      }
+    } else {
+      h5Elem.style.fontSize = `${Math.max(1, entry.contentRect.width / 300)}rem`;
+      if (cardBody) {
+        cardBody.style.fontSize = `${Math.max(1.5, entry.contentRect.width / 300)}rem`;
+      }
+      if (cardFooter) {
+        cardFooter.style.fontSize = `${Math.max(1, entry.contentRect.width / 600)}rem`;
+      }
+    }
+  }
+}
 // No widget placeholder
 function showNoWidgetPlaceholder() {
   const noWidgetPlaceholder = document.querySelector(".no-widget-placeholder");
