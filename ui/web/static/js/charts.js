@@ -213,8 +213,9 @@ class DonutChart extends Echart {
 
   #generateScript() {
     return `
-    var donut = echarts.init(document.getElementById("${this.ID}"));
-    var option = {
+    (function() {
+    let donutChart = echarts.init(document.getElementById("${this.ID}"));
+    let option = {
         title:{
           text:'${this.chartData.title}',
           left: 'center',
@@ -228,7 +229,7 @@ class DonutChart extends Echart {
         },
         series: [
           {
-            name: '${this.chartData.seriesName}',
+            name: '${this.chartData.valueName}',
             type: 'pie',
             radius: ['40%', '70%'],
             avoidLabelOverlap: false,
@@ -247,17 +248,80 @@ class DonutChart extends Echart {
               show: false
             },
             data: [
-              { value: 1048, name: 'Thing1' },
-              { value: 735, name: 'Thing2' },
-              { value: 580, name: 'Thing3' },
-              { value: 484, name: 'Thing4' },
-              { value: 300, name: 'Thing5' }
             ]
           }
         ]
     };
 
-    donut.setOption(option);`;
+    donutChart.setOption(option);
+    let chartData = {
+      channels: '${this.chartData.channels}'.split(','),
+      publishers: '${this.chartData.things}'.split(','),
+      name: '${this.chartData.valueName}',
+      from: ${this.chartData.startTime},
+      to: ${this.chartData.stopTime},
+      aggregation: '${this.chartData.aggregationType}',
+      limit: 10,
+      donutColors: '${this.chartData.donutColors}'.split(','),
+    };
+    fetchData(donutChart, chartData);
+
+    async function fetchData(donutChart, chartData) {
+      try {
+          const plotData = [];
+  
+          for (let i = 0; i < chartData.channels.length; i++) {
+              const apiEndpoint = '${pathPrefix}/data?channel=' + chartData.channels[i] +
+                  '&name=' + chartData.name +
+                  '&from='+ chartData.from +
+                  '&to=' + chartData.to +
+                  '&aggregation=' + chartData.aggregation +
+                  '&limit=10' +
+                  '&interval=' + getInterval(chartData) +
+                  '&publisher=' + chartData.publishers[i];
+  
+              const response = await fetch(apiEndpoint);
+              if (!response.ok) {
+                  throw new Error('HTTP request failed with status:', response.status)
+              }
+              const data = await response.json();
+              plotData.push({value: data.messages[0].value, name: 'thing'+i.toString()});
+          }
+          updateChart(donutChart, plotData, chartData);
+      } catch (error) {
+          console.error("Error fetching data:", error);
+          setTimeout(fetchData(donutChart, chartData), 20000);
+      }
+    }
+  
+    function updateChart(donutChart, plotData, chartData) {
+      let option = donutChart.getOption();
+      option.color = chartData.donutColors;
+      option.series[0].data = plotData;
+      donutChart.setOption(option);
+    }
+
+    function getInterval(chartData) {
+      const interval = chartData.to - chartData.from;
+      const millisecondsPerSecond = 1e3;
+      const secondsPerMinute = 60;
+      const minutesPerHour = 60;
+      let minutes = 0;
+      let hours = 0;
+      let intervalString = "";
+      let seconds = parseInt(interval) / millisecondsPerSecond;
+      intervalString = Math.ceil(seconds).toString() +'s';
+      if (seconds >= secondsPerMinute) {
+        minutes = seconds/ secondsPerMinute;
+        intervalString = Math.ceil(minutes).toString() + 'm';
+      }
+      if (minutes >= minutesPerHour) {
+        hours = minutes /minutesPerHour;
+        intervalString = Math.ceil(hours).toString() + 'h';
+      }
+      return intervalString;      
+    }})();
+    `;
   }
 }
 
@@ -1203,8 +1267,9 @@ class PieChart extends Echart {
 
   #generateScript() {
     return `
-    var pieChart = echarts.init(document.getElementById("${this.ID}"));
-    var option = {
+    (function() {
+    let pieChart = echarts.init(document.getElementById("${this.ID}"));
+    let option = {
         title: {
             text: '${this.chartData.title}',
             left: 'center',
@@ -1218,15 +1283,10 @@ class PieChart extends Echart {
         },
         series: [
             {
-            name: '${this.chartData.seriesName}',
+            name: '${this.chartData.valueName}',
             type: 'pie',
             radius: '50%',
             data: [
-                { value: 1048, name: 'thing1' },
-                { value: 735, name: 'thing2' },
-                { value: 580, name: 'thing3' },
-                { value: 484, name: 'thing4' },
-                { value: 300, name: 'thing5' }
             ],
             emphasis: {
                 itemStyle: {
@@ -1239,7 +1299,75 @@ class PieChart extends Echart {
         ]
     };
 
-    pieChart.setOption(option);`;
+    pieChart.setOption(option);
+    let chartData = {
+      channels: '${this.chartData.channels}'.split(','),
+      publishers: '${this.chartData.things}'.split(','),
+      name: '${this.chartData.valueName}',
+      from: ${this.chartData.startTime},
+      to: ${this.chartData.stopTime},
+      aggregation: '${this.chartData.aggregationType}',
+      limit: 10,
+      pieColors: '${this.chartData.pieColors}'.split(','),
+    };
+    fetchData(pieChart, chartData);
+    
+    async function fetchData(pieChart, chartData) {
+      try {
+          const plotData = [];
+  
+          for (let i = 0; i < chartData.channels.length; i++) {
+              const apiEndpoint = '${pathPrefix}/data?channel=' + chartData.channels[i] +
+                  '&name=' + chartData.name +
+                  '&from='+ chartData.from +
+                  '&to=' + chartData.to +
+                  '&aggregation=' + chartData.aggregation +
+                  '&limit=10' +
+                  '&interval=' + getInterval(chartData) +
+                  '&publisher=' + chartData.publishers[i];
+  
+              const response = await fetch(apiEndpoint);
+              if (!response.ok) {
+                  throw new Error('HTTP request failed with status:', response.status)
+              }
+              const data = await response.json();
+              plotData.push({value: data.messages[0].value, name: 'thing'+i.toString()});
+          }
+          updateChart(pieChart, plotData, chartData);
+      } catch (error) {
+          console.error("Error fetching data:", error);
+          setTimeout(fetchData(pieChart, chartData), 20000);
+      }
+    }
+  
+    function updateChart(pieChart, plotData, chartData) {
+      let option = pieChart.getOption();
+      option.color = chartData.pieColors;
+      option.series[0].data = plotData;
+      pieChart.setOption(option);
+    }
+
+    function getInterval(chartData) {
+      const interval = chartData.to - chartData.from;
+      const millisecondsPerSecond = 1e3;
+      const secondsPerMinute = 60;
+      const minutesPerHour = 60;
+      let minutes = 0;
+      let hours = 0;
+      let intervalString = "";
+      let seconds = parseInt(interval) / millisecondsPerSecond;
+      intervalString = Math.ceil(seconds).toString() +'s';
+      if (seconds >= secondsPerMinute) {
+        minutes = seconds/ secondsPerMinute;
+        intervalString = Math.ceil(minutes).toString() + 'm';
+      }
+      if (minutes >= minutesPerHour) {
+        hours = minutes /minutesPerHour;
+        intervalString = Math.ceil(hours).toString() + 'h';
+      }
+      return intervalString;      
+    }})();
+    `;
   }
 }
 
