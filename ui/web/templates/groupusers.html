@@ -22,7 +22,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                     {{ $shareButton = true }}
                   {{ end }}
                   <div class="d-flex flex-row justify-content-between">
-                    <h4>Group Users</h4>
+                    <div class="group-title">
+                      <h4>Group Users</h4>
+                    </div>
                     <button
                       role="button"
                       class="btn body-button"
@@ -56,21 +58,23 @@ SPDX-License-Identifier: Apache-2.0 -->
                           >
                             <div class="modal-body">
                               <div class="mb-3">
-                                <label for="infiniteScroll" class="form-label">User ID</label>
+                                <label for="infiniteScroll" class="form-label">User Name</label>
                                 <input
                                   type="text"
                                   name="userFilter"
                                   id="userFilter"
-                                  placeholder="Filter by User ID"
+                                  placeholder="Filter by User Name"
+                                  class="ms-5"
                                 />
                                 <select
                                   class="form-select"
                                   name="userID"
                                   id="infiniteScroll"
                                   size="5"
+                                  class="ms-5"
                                   required
                                 >
-                                  <option disabled>select a User</option>
+                                  <option disabled>Select a User</option>
                                 </select>
                               </div>
                               <div class="mb-3">

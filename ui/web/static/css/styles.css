@@ -332,6 +332,7 @@ body .body-button:hover {
   background: transparent;
   border: 0;
   outline: 0;
+  margin-top: 10px;
 }
 
 .login-card .logo {
@@ -540,7 +541,7 @@ button.edit-btn {
   border-radius: var(--border-radius);
   color: #fff;
   font-size: 1rem;
-  border: 1px solid var(--main-color);
+  border: 10px solid var(--main-color);
 }
 
 .domains-table .body-button:hover {
@@ -746,4 +747,32 @@ button.edit-btn {
   padding: 5px;
   margin-right: 5px;
   cursor: pointer;
+}
+
+.custom-select-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.custom-select-wrapper:after {
+  content: "▼";
+  position: absolute;
+  top: 7.5px;
+  right: 15px;
+  pointer-events: none;
+  color: #333;
+}
+
+.custom-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: transparent;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  padding-right: 30px;
+}
+
+.group-title {
+  color: var(--main-color);
 }

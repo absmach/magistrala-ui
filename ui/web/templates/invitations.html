@@ -128,16 +128,17 @@ SPDX-License-Identifier: Apache-2.0 -->
               </div>
               <form id="invitation-form">
                 <div class="modal-body">
-                  <div class="mb-3">
+                  <div class="mb-3" id="users-select">
                     <label for="users-scroll" class="form-label">User</label>
                     <input
                       type="text"
                       name="userFilter"
                       id="userFilter"
                       placeholder="Filter by User Name"
+                      class="ms-5"
                     />
                     <select class="form-select" name="userID" id="users-scroll" size="5" required>
-                      <option disabled>select a User</option>
+                      <option disabled>Select a User</option>
                     </select>
                   </div>
                   <div class="mb-3" id="domains-select">
@@ -147,6 +148,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                       name="domainFilter"
                       id="domainFilter"
                       placeholder="Filter by Domain"
+                      class="ms-5"
                     />
                     <select
                       class="form-select"
@@ -155,25 +157,27 @@ SPDX-License-Identifier: Apache-2.0 -->
                       size="5"
                       required
                     >
-                      <option disabled>select a domain</option>
+                      <option disabled>Select a Domain</option>
                     </select>
                   </div>
                   <div class="mb-3">
                     <label for="relation" class="form-label">Relation</label>
-                    <select
-                      class="form-control"
-                      name="relation"
-                      id="relation"
-                      aria-describedby="relationHelp"
-                      required
-                    >
-                      <option value="" disabled>Select relation</option>
-                      {{ range $i, $r := .Relations }}
-                        <option value="{{ $r }}">
-                          {{ $r }}
-                        </option>
-                      {{ end }}
-                    </select>
+                    <div class="custom-select-wrapper">
+                      <select
+                        class="form-control custom-select"
+                        name="relation"
+                        id="relation"
+                        aria-describedby="relationHelp"
+                        required
+                      >
+                        <option value="" disabled selected>Select relation</option>
+                        {{ range $i, $r := .Relations }}
+                          <option value="{{ $r }}">
+                            {{ $r }}
+                          </option>
+                        {{ end }}
+                      </select>
+                    </div>
                     <div id="relationHelp" class="form-text">Select Relation.</div>
                   </div>
                 </div>

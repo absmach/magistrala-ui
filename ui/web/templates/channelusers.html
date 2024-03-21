@@ -22,7 +22,9 @@ SPDX-License-Identifier: Apache-2.0 -->
                     {{ $shareButton = true }}
                   {{ end }}
                   <div class="d-flex flex-row justify-content-between">
-                    <h4>Channel Users</h4>
+                    <div class="group-title">
+                      <h4>Channel Users</h4>
+                    </div>
                     <button
                       role="button"
                       class="btn body-button"
@@ -62,6 +64,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   name="userFilter"
                                   id="userFilter"
                                   placeholder="Filter by User ID"
+                                  class="ms-5"
                                 />
                                 <select
                                   class="form-select"
@@ -70,7 +73,7 @@ SPDX-License-Identifier: Apache-2.0 -->
                                   size="5"
                                   required
                                 >
-                                  <option disabled>select a User</option>
+                                  <option disabled>Select a User</option>
                                 </select>
                               </div>
                               <div class="mb-3">
