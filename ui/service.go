@@ -238,7 +238,7 @@ type Service interface {
 	// UnshareThing unshares a thing with a user.
 	UnshareThing(token, id string, req sdk.UsersRelationRequest) error
 	// ListThingUsers retrieves users that share a thing.
-	ListThingUsers(s Session, id, relation string, page, limit uint64) (b []byte, err error)
+	ListThingUsers(s Session, id, relation string, page, limit uint64) ([]byte, error)
 	// ListChannelsByThing retrieves a list of channels based on the given thing ID.
 	ListChannelsByThing(s Session, id string, page, limit uint64) ([]byte, error)
 
@@ -271,13 +271,13 @@ type Service interface {
 	// RemoveUserFromChannel removes a user from a channel.
 	RemoveUserFromChannel(token, id string, req sdk.UsersRelationRequest) error
 	// ListChannelUsers retrieves a list of users that are connected to a channel.
-	ListChannelUsers(s Session, id, relation string, page, limit uint64) (b []byte, err error)
+	ListChannelUsers(s Session, id, relation string, page, limit uint64) ([]byte, error)
 	// AddUserGroupToChannel adds a userGroup to a channel.
 	AddUserGroupToChannel(token, id string, req sdk.UserGroupsRequest) error
 	// RemoveGroupFromChannel removes a userGroup from a channel.
 	RemoveUserGroupFromChannel(token, id string, req sdk.UserGroupsRequest) error
 	// ListChannelUserGroups retrieves a list of userGroups connected to a channel.
-	ListChannelUserGroups(s Session, id string, page, limit uint64) (b []byte, err error)
+	ListChannelUserGroups(s Session, id string, page, limit uint64) ([]byte, error)
 
 	// CreateGroups creates new groups.
 	CreateGroups(token string, groups ...sdk.Group) error
@@ -298,7 +298,7 @@ type Service interface {
 	// DisableGroup updates the status of the group to disabled.
 	DisableGroup(token, id string) error
 	// ListUserGroupChannels retrieves a list of channels that a userGroup is connected to.
-	ListUserGroupChannels(s Session, id string, page, limit uint64) (b []byte, err error)
+	ListUserGroupChannels(s Session, id string, page, limit uint64) ([]byte, error)
 
 	// Publish facilitates a thing publishin messages to a channel.
 	Publish(channelID, thingKey string, message Message) error
@@ -404,7 +404,7 @@ func New(sdk sdk.SDK, db DashboardRepository, idp magistrala.IDProvider, prefix 
 	}, nil
 }
 
-func (us *uiService) Index(s Session) (b []byte, err error) {
+func (us *uiService) Index(s Session) ([]byte, error) {
 	pgm := sdk.PageMetadata{
 		Offset: uint64(0),
 		Status: statusAll,
@@ -560,7 +560,7 @@ func (us *uiService) ShowPasswordReset() ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) PasswordUpdate(s Session) (b []byte, err error) {
+func (us *uiService) PasswordUpdate(s Session) ([]byte, error) {
 	data := struct {
 		NavbarActive   string
 		CollapseActive string
@@ -612,7 +612,7 @@ func (us *uiService) DomainLogin(login sdk.Login, refreshToken string) (t sdk.To
 func (us *uiService) Session(s Session) (Session, error) {
 	user, err := us.sdk.UserProfile(s.Token)
 	if err != nil {
-		return Session{}, err
+		return Session{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	session := Session{
@@ -628,11 +628,11 @@ func (us *uiService) Session(s Session) (Session, error) {
 	if s.LoginStatus == DomainLoginStatus {
 		domain, err := us.sdk.Domain(s.Domain.ID, s.Token)
 		if err != nil {
-			return Session{}, err
+			return Session{}, errors.Wrap(ErrFailedRetreive, err)
 		}
 		permissions, err := us.sdk.DomainPermissions(s.Domain.ID, s.Token)
 		if err != nil {
-			return Session{}, err
+			return Session{}, errors.Wrap(ErrFailedRetreive, err)
 		}
 		session.Domain.Name = domain.Name
 		session.Domain.ID = domain.ID
@@ -704,7 +704,7 @@ func (us *uiService) ListUsers(s Session, status string, page, limit uint64) ([]
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) ViewUser(s Session, id string) (b []byte, err error) {
+func (us *uiService) ViewUser(s Session, id string) ([]byte, error) {
 	user, err := us.sdk.User(id, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
@@ -854,7 +854,7 @@ func (us *uiService) ListThings(s Session, status string, page, limit uint64) ([
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) ViewThing(s Session, id string) (b []byte, err error) {
+func (us *uiService) ViewThing(s Session, id string) ([]byte, error) {
 	thing, err := us.sdk.Thing(id, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
@@ -954,7 +954,7 @@ func (us *uiService) UnshareThing(token, id string, req sdk.UsersRelationRequest
 	return nil
 }
 
-func (us *uiService) ListThingUsers(s Session, id, relation string, page, limit uint64) (b []byte, err error) {
+func (us *uiService) ListThingUsers(s Session, id, relation string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 	pgm := sdk.PageMetadata{
 		Offset:     offset,
@@ -1142,7 +1142,7 @@ func (us *uiService) ListChannels(s Session, status string, page, limit uint64) 
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) ViewChannel(s Session, channelID string) (b []byte, err error) {
+func (us *uiService) ViewChannel(s Session, channelID string) ([]byte, error) {
 	channel, err := us.sdk.Channel(channelID, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
@@ -1314,7 +1314,7 @@ func (us *uiService) RemoveUserFromChannel(token, id string, req sdk.UsersRelati
 	return nil
 }
 
-func (us *uiService) ListChannelUsers(s Session, id, relation string, page, limit uint64) (b []byte, err error) {
+func (us *uiService) ListChannelUsers(s Session, id, relation string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 	pgm := sdk.PageMetadata{
 		Offset:     offset,
@@ -1390,7 +1390,7 @@ func (us *uiService) RemoveUserGroupFromChannel(token, id string, req sdk.UserGr
 	return nil
 }
 
-func (us *uiService) ListChannelUserGroups(s Session, id string, page, limit uint64) (b []byte, err error) {
+func (us *uiService) ListChannelUserGroups(s Session, id string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 	pgm := sdk.PageMetadata{
 		Offset: offset,
@@ -1537,7 +1537,7 @@ func (us *uiService) Unassign(token, groupID string, userRelation sdk.UsersRelat
 	return nil
 }
 
-func (us *uiService) ViewGroup(s Session, id string) (b []byte, err error) {
+func (us *uiService) ViewGroup(s Session, id string) ([]byte, error) {
 	group, err := us.sdk.Group(id, s.Token)
 	if err != nil {
 		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
@@ -1660,7 +1660,7 @@ func (us *uiService) DisableGroup(token, id string) error {
 	return nil
 }
 
-func (us *uiService) ListUserGroupChannels(s Session, id string, page, limit uint64) (b []byte, err error) {
+func (us *uiService) ListUserGroupChannels(s Session, id string, page, limit uint64) ([]byte, error) {
 	offset := (page - 1) * limit
 	pgm := sdk.PageMetadata{
 		Offset: offset,
@@ -1721,7 +1721,7 @@ func (us *uiService) ListUserGroupChannels(s Session, id string, page, limit uin
 func (us *uiService) ReadMessages(s Session, channelID, thingKey string, mpgm sdk.MessagePageMetadata) ([]byte, error) {
 	msg, err := us.sdk.ReadMessages(mpgm, channelID, s.Token)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	for i := 0; i < len(msg.Messages); i++ {
@@ -1771,7 +1771,7 @@ func (us *uiService) ReadMessages(s Session, channelID, thingKey string, mpgm sd
 func (us *uiService) FetchChartData(token string, channelID string, mpgm sdk.MessagePageMetadata) ([]byte, error) {
 	msg, sdkErr := us.sdk.ReadMessages(mpgm, channelID, token)
 	if sdkErr != nil {
-		return []byte{}, sdkErr
+		return []byte{}, errors.Wrap(ErrFailedRetreive, sdkErr)
 	}
 
 	for i := 0; i < len(msg.Messages); i++ {
@@ -1884,13 +1884,18 @@ func (us *uiService) UpdateBootstrapConnections(token string, config sdk.Bootstr
 	if !ok {
 		return errors.Wrap(ErrFailedUpdate, errors.New("invalid channel"))
 	}
-	return us.sdk.UpdateBootstrapConnection(config.ThingID, channels, token)
+	if err := us.sdk.UpdateBootstrapConnection(config.ThingID, channels, token); err != nil {
+		return errors.Wrap(ErrFailedUpdate, err)
+	}
+
+	return nil
 }
 
 func (us *uiService) UpdateBootstrapCerts(token string, config sdk.BootstrapConfig) error {
 	if _, err := us.sdk.UpdateBootstrapCerts(config.ThingID, config.ClientCert, config.ClientKey, config.CACert, token); err != nil {
 		return errors.Wrap(ErrFailedUpdate, err)
 	}
+
 	return nil
 }
 
@@ -1965,7 +1970,7 @@ func (us *uiService) ViewBootstrap(s Session, thingID string) ([]byte, error) {
 	return btpl.Bytes(), nil
 }
 
-func (us *uiService) GetRemoteTerminal(s Session, thingID string) (b []byte, err error) {
+func (us *uiService) GetRemoteTerminal(s Session, thingID string) ([]byte, error) {
 	crumbs := []breadcrumb{
 		{Name: bootstrapsActive, URL: fmt.Sprintf("%s/%s", us.prefix, bootstrapsActive)},
 		{Name: thingID, URL: fmt.Sprintf("%s/%s/%s", us.prefix, bootstrapsActive, thingID)},
@@ -2007,7 +2012,7 @@ func (us *uiService) ProcessTerminalCommand(ctx context.Context, thingID, tkn, c
 
 	channels, ok := cfg.Channels.([]sdk.Channel)
 	if !ok {
-		return errors.New("invalid channels")
+		return errors.Wrap(ErrFailedRetreive, errors.New("invalid channels"))
 	}
 
 	pubTopic := fmt.Sprintf("channels/%s/messages/req", channels[0].ID)
@@ -2201,13 +2206,19 @@ func (us *uiService) ListDomains(s Session, status string, page, limit uint64) (
 }
 
 func (us *uiService) CreateDomain(token string, domain sdk.Domain) error {
-	_, err := us.sdk.CreateDomain(domain, token)
-	return err
+	if _, err := us.sdk.CreateDomain(domain, token); err != nil {
+		return errors.Wrap(ErrFailedCreate, err)
+	}
+
+	return nil
 }
 
 func (us *uiService) UpdateDomain(token string, domain sdk.Domain) error {
-	_, err := us.sdk.UpdateDomain(domain, token)
-	return err
+	if _, err := us.sdk.UpdateDomain(domain, token); err != nil {
+		return errors.Wrap(ErrFailedUpdate, err)
+	}
+
+	return nil
 }
 
 func (us *uiService) Domain(s Session) ([]byte, error) {
@@ -2283,7 +2294,7 @@ func (us *uiService) UnassignMember(token, domainID string, req sdk.UsersRelatio
 	return nil
 }
 
-func (us *uiService) ViewMember(s Session, userIdentity string) (b []byte, err error) {
+func (us *uiService) ViewMember(s Session, userIdentity string) ([]byte, error) {
 	pgm := sdk.PageMetadata{
 		Identity: userIdentity,
 	}
@@ -2329,7 +2340,7 @@ func (us *uiService) Members(s Session, page, limit uint64) ([]byte, error) {
 
 	membersPage, err := us.sdk.ListDomainUsers(s.Domain.ID, pgm, s.Token)
 	if err != nil {
-		return []byte{}, err
+		return []byte{}, errors.Wrap(ErrFailedRetreive, err)
 	}
 
 	noOfPages := int(math.Ceil(float64(membersPage.Total) / float64(limit)))
@@ -2571,7 +2582,7 @@ func (us *uiService) ListDashboards(token string, page, limit uint64) ([]byte, e
 	return data, nil
 }
 
-func (us *uiService) Dashboards(s Session) (b []byte, err error) {
+func (us *uiService) Dashboards(s Session) ([]byte, error) {
 	crumbs := []breadcrumb{
 		{Name: dashboardsActive},
 	}
