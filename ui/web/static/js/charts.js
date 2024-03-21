@@ -117,33 +117,91 @@ class TimeSeriesBarChart extends Echart {
         left: 'center',
         show: true
       },
+      tooltip: {
+        trigger: 'axis',
+      },
       xAxis: {
         type: 'category',
-        data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        data: [],
         name: '${this.chartData.xAxisLabel}',
         nameLocation: 'middle',
+        min: '${new Date(this.chartData.startTime)}',
+        max: '${new Date(this.chartData.stopTime)}',
         nameGap: 35
       },
       yAxis: {
         type: 'value',
         name: '${this.chartData.yAxisLabel}',
         nameLocation: 'middle',
-        nameGap: 35
+        nameGap: 25
       },
       legend: {
         show: true,
         left: 'right',
       },
-        series: [
-          {
-            data: [120, 200, 150, 80, 70, 110, 130],
-            type: 'bar',
-            name: '${this.chartData.seriesName}'
-          }
-        ]
+      series: [
+        {
+          data:  [],
+          type: 'bar',
+          name: '${this.chartData.seriesName}'
+        }
+      ]
     };
 
-    barChart.setOption(option);`;
+    barChart.setOption(option);
+    
+    var chartData = {
+      channel: '${this.chartData.channel}',
+      publisher: '${this.chartData.thing}',
+      name: '${this.chartData.valueName}',
+      from: ${this.chartData.startTime},
+      to: ${this.chartData.stopTime},
+      aggregation: '${this.chartData.aggregationType}',
+      limit: 100,
+      interval : '${this.chartData.updateInterval}'
+    }
+    getData(barChart, chartData);
+
+    async function getData(barChart, chartData) {
+        try {
+          const apiEndpoint = "${pathPrefix}/data?channel=" + chartData.channel +
+          "&publisher=" + chartData.publisher +
+          "&name=" + chartData.name +
+          "&from=" + chartData.from +
+          "&to=" + chartData.to +
+          "&aggregation=" + chartData.aggregation +
+          "&limit=" + chartData.limit +
+          "&interval=" + chartData.interval;
+
+          const response = await fetch(apiEndpoint);
+          if (!response.ok) {
+            throw new Error("HTTP request failed with status: " + response.status);
+          }
+          const data = await response.json();
+          const xAxisArray = [];
+          const yAxisArray = [];
+          if (data.messages != undefined && data.messages.length > 0) {
+            data.messages.forEach((message) => {
+              xAxisArray.push(new Date(message.time).toLocaleTimeString());
+              yAxisArray.push(message.value);
+            });
+          }
+          updateChart(barChart, xAxisArray, yAxisArray);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          setTimeout(function () {
+            getData(barChart, chartData);
+          }, 20000);
+        } 
+      }
+  
+      function updateChart(barChart, xAxisArray, yAxisArray) {
+        const option = barChart.getOption();
+        option.series[0].data = yAxisArray.reverse();
+        option.xAxis[0].data = xAxisArray.reverse();
+        barChart.setOption(option);
+     }
+    `;
   }
 }
 
