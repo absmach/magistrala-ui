@@ -1562,7 +1562,6 @@ func decodeChannelCreation(_ context.Context, r *http.Request) (interface{}, err
 		Name:        r.PostFormValue("name"),
 		Description: r.PostFormValue("description"),
 		Metadata:    meta,
-		ParentID:    r.PostFormValue("parentID"),
 	}
 
 	return createChannelReq{

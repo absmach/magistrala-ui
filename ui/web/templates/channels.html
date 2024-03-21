@@ -58,24 +58,6 @@ SPDX-License-Identifier: Apache-2.0 -->
                               <div id="nameError" class="text-danger"></div>
                             </div>
                             <div class="mb-3">
-                              <label for="infiniteScroll" class="form-label">Parent Name</label>
-                              <input
-                                type="text"
-                                class="itemsFilter"
-                                name="parentFilter"
-                                id="parentFilter"
-                                placeholder="Filter by parent name"
-                              />
-                              <select
-                                class="form-select"
-                                name="parentID"
-                                id="infiniteScroll"
-                                size="5"
-                              >
-                                <option disabled>select a channel</option>
-                              </select>
-                            </div>
-                            <div class="mb-3">
                               <label for="description" class="form-label">Description</label>
                               <input
                                 type="text"
@@ -279,13 +261,6 @@ SPDX-License-Identifier: Apache-2.0 -->
           formId: "bulkchannelsform",
           alertDiv: "alertBulkMessage",
           modal: channelsModal,
-        });
-
-        fetchIndividualEntity({
-          input: "parentFilter",
-          itemSelect: "infiniteScroll",
-          item: "channels",
-          pathPrefix: "{{ pathPrefix }}",
         });
       </script>
     </body>
