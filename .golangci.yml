@@ -37,11 +37,11 @@ linters-settings:
   wrapcheck:
     ignoreSigRegexps:
       - "github.com/absmach/magistrala-ui/ui.Service"
-      - "encoding/json.*"
-      - "net/http.Request"
-      - "golang.org/x/sync/errgroup.Group"
-      - "net/http.ResponseWriter"
+    ignorePackageGlobs:
+      - "net/http"
       - "database/sql"
+      - "encoding/json"
+      - "golang.org/x/sync/errgroup"
 
 linters:
   disable-all: true
