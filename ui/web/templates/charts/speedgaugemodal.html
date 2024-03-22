@@ -96,9 +96,18 @@ SPDX-License-Identifier: Apache-2.0 -->
                     class="form-control mb-3"
                     name="valueName"
                     id="value-name"
-                    placeholder="Enter the value name eg. temperature"
+                    placeholder="Enter the value name eg. velocity, speed"
                     required
                   />
+                </div>
+                <div class="mb-3">
+                  <label for="value-unit" class="form-label">Value unit</label>
+                  <select class="form-select mb-3" name="valueUnit" id="value-unit">
+                    <option value="" disabled>Select a speed unit</option>
+                    <option value="km/h">km/h</option>
+                    <option value="m/s">m/s</option>
+                    <option value="mph">mph</option>
+                  </select>
                 </div>
                 <div class="mb-3">
                   <label for="min-value" class="form-label">Min value</label>
