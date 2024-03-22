@@ -794,7 +794,7 @@ func updateThingSecretEndpoint(svc ui.Service) endpoint.Endpoint {
 			return nil, err
 		}
 
-		if err := svc.UpdateThingSecret(req.token, req.ID, req.Credentials.Secret); err != nil {
+		if err := svc.UpdateThingSecret(req.token, req.Thing); err != nil {
 			return nil, err
 		}
 
@@ -2021,13 +2021,13 @@ func deleteInvitationEndpoint(svc ui.Service, prefix string) endpoint.Endpoint {
 }
 
 func viewDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(viewDashboardReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.ViewDashboard(req.Session, req.DashboardID)
+		res, err := svc.ViewDashboard(ctx, req.Session, req.DashboardID)
 		if err != nil {
 			return nil, err
 		}
@@ -2040,7 +2040,7 @@ func viewDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func createDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(createDashboardReq)
 		if err := req.validate(); err != nil {
 			return nil, err
@@ -2051,7 +2051,7 @@ func createDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 			Layout:      req.Layout,
 		}
 
-		res, err := svc.CreateDashboard(req.token, dr)
+		res, err := svc.CreateDashboard(ctx, req.token, dr)
 		if err != nil {
 			return nil, err
 		}
@@ -2064,13 +2064,13 @@ func createDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func listDashboardsEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(listDashboardsReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		res, err := svc.ListDashboards(req.token, req.page, req.limit)
+		res, err := svc.ListDashboards(ctx, req.token, req.page, req.limit)
 		if err != nil {
 			return nil, err
 		}
@@ -2103,7 +2103,7 @@ func dashboardsEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func updateDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(updateDashboardReq)
 		if err := req.validate(); err != nil {
 			return nil, err
@@ -2115,7 +2115,7 @@ func updateDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 			Layout:      req.Layout,
 			Metadata:    req.Metadata,
 		}
-		if err := svc.UpdateDashboard(req.token, req.ID, d); err != nil {
+		if err := svc.UpdateDashboard(ctx, req.token, req.ID, d); err != nil {
 			return nil, err
 		}
 
@@ -2126,13 +2126,13 @@ func updateDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
 }
 
 func deleteDashboardEndpoint(svc ui.Service) endpoint.Endpoint {
-	return func(_ context.Context, request interface{}) (interface{}, error) {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(deleteDashboardReq)
 		if err := req.validate(); err != nil {
 			return nil, err
 		}
 
-		if err := svc.DeleteDashboard(req.token, req.ID); err != nil {
+		if err := svc.DeleteDashboard(ctx, req.token, req.ID); err != nil {
 			return nil, err
 		}
 

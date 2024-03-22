@@ -10,6 +10,7 @@ GOARCH ?= amd64
 VERSION ?= $(shell git describe --abbrev=0 --tags || echo "none")
 COMMIT ?= $(shell git rev-parse HEAD)
 TIME ?= $(shell date +%F_%T)
+MOCKERY_VERSION=v2.42.0
 
 define compile_service
 	CGO_ENABLED=$(CGO_ENABLED) GOOS=$(GOOS) GOARCH=$(GOARCH) GOARM=$(GOARM) \
@@ -54,6 +55,10 @@ cleandocker:
 
 install:
 	cp ${BUILD_DIR}/$(SVC) $(GOBIN)/magistrala-${SVC}
+
+mocks:
+	@which mockery > /dev/null || go install github.com/vektra/mockery/v2@$(MOCKERY_VERSION)
+	@unset MOCKERY_VERSION && go generate ./...
 
 test:
 	go test -v -race -count 1 -tags test -coverprofile=coverage.out $(shell go list ./... | grep -v 'cmd')
