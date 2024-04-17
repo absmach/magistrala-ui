@@ -1029,6 +1029,65 @@ class MultiBarChart extends Echart {
         ]
     };
     multiBarChart.setOption(option);
+
+    horizontalBarChart.setOption(option);
+    var chartData = {
+      channels: '${this.chartData.channels}'.split(','),
+      publishers: '${this.chartData.things}'.split(','),
+      name: '${this.chartData.valueName}',
+      from: ${this.chartData.startTime},
+      to: ${this.chartData.stopTime},
+      aggregation: '${this.chartData.aggregationType}',
+      interval: '${this.chartData.interval}',
+      limit: 100,
+      barColors:'${this.chartData.barColors}'.split(',')
+    };
+    fetchData(multiBarChart, chartData);
+    async function fetchData(multiBarChart, chartData) {
+      try {
+          const plotData = [['value', 'thing']];
+  
+          for (let i = 0; i < chartData.channels.length; i++) {
+              const apiEndpoint = '${pathPrefix}/data?channel=' + chartData.channels[i] +
+                  '&name=' + chartData.name +
+                  '&from='+ chartData.from +
+                  '&to=' + chartData.to +
+                  '&aggregation=' + chartData.aggregation +
+                  '&limit=100' +
+                  '&interval=' + getInterval(chartData) +
+                  '&publisher=' + chartData.publishers[i];
+  
+              const response = await fetch(apiEndpoint);
+              if (!response.ok) {
+                  throw new Error('HTTP request failed with status:', response.status)
+              }
+              const data = await response.json();
+              if (data.messages != undefined && data.messages.length > 0) {
+                dataSeries[i] = {
+                    xAxisArray: [],
+                    dataPoints: []
+                };
+        
+                data.messages.forEach((message) => {
+                    dataSeries[i].xAxisArray.push(new Date(message.time).toLocaleTimeString());
+                    dataSeries[i].dataPoints.push(message.value);
+                });
+              plotData.push(dataSeries[i])
+            }
+          }
+          updateChart(horizontalBarChart, plotData);
+      } catch (error) {
+          console.error("Error fetching data:", error);
+      }
+    }
+  
+    function updateChart(multiBarChart, plotData) {
+      option = multiBarChart.getOption();
+      for (let i = 0; i < plotData.length; i++) {
+          option.series[i].data = plotData[i];
+      }
+      multiBarChart.setOption(option);
+    }
   `;
   }
 }
