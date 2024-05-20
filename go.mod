@@ -17,7 +17,7 @@ require (
 	github.com/jackc/pgx/v5 v5.5.5
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/ory/dockertest/v3 v3.10.0
-	github.com/prometheus/client_golang v1.19.0
+	github.com/prometheus/client_golang v1.19.1
 	github.com/rubenv/sql-migrate v1.6.1
 	github.com/stretchr/testify v1.9.0
 	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225
@@ -84,7 +84,7 @@ require (
 	golang.org/x/tools v0.18.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240123012728-ef4313101c80 // indirect
-	google.golang.org/protobuf v1.32.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
