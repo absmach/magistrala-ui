@@ -25,30 +25,6 @@ type Provider interface {
 	// IsEnabled returns whether the provider is enabled.
 	IsEnabled() bool
 
-	// GenerateSignInURL generates a URL for the sign-in flow.
-	GenerateSignInURL() (string, error)
-
-	// GenerateSignUpURL generates a URL for the sign-up flow.
-	GenerateSignUpURL() (string, error)
-}
-
-// State is the state of the OAuth2 flow.
-type State uint8
-
-const (
-	// SignIn is the state for the sign-in flow.
-	SignIn State = iota
-	// SignUp is the state for the sign-up flow.
-	SignUp
-)
-
-func (s State) String() string {
-	switch s {
-	case SignIn:
-		return "signin"
-	case SignUp:
-		return "signup"
-	default:
-		return "unknown"
-	}
+	// GenerateURL generates a URL for the sign-in flow and sign-up flow.
+	GenerateURL() (string, error)
 }
