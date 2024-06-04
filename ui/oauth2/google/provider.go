@@ -50,15 +50,7 @@ func (cfg *config) IsEnabled() bool {
 	return cfg.oauth2.ClientID != "" && cfg.oauth2.ClientSecret != ""
 }
 
-func (cfg *config) GenerateSignInURL() (string, error) {
-	return cfg.generateURL(mgoauth2.SignIn.String())
-}
-
-func (cfg *config) GenerateSignUpURL() (string, error) {
-	return cfg.generateURL(mgoauth2.SignUp.String())
-}
-
-func (cfg *config) generateURL(state string) (string, error) {
+func (cfg *config) GenerateURL() (string, error) {
 	URL, err := url.Parse(cfg.oauth2.Endpoint.AuthURL)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse google auth url: %s", err)
@@ -72,8 +64,7 @@ func (cfg *config) generateURL(state string) (string, error) {
 	parameters.Add("access_type", "offline")
 	// prompt=consent is required to get the refresh token
 	parameters.Add("prompt", "consent")
-	// login or register state is prepended to the state to be used in the callback
-	parameters.Add("state", fmt.Sprintf("%s-%s", state, cfg.state))
+	parameters.Add("state", cfg.state)
 	URL.RawQuery = parameters.Encode()
 
 	return URL.String(), nil

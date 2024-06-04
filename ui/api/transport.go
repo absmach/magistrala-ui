@@ -159,8 +159,7 @@ func MakeHandler(svc ui.Service, r *chi.Mux, instanceID, prefix string, secureCo
 
 		for _, provider := range providers {
 			if provider.IsEnabled() {
-				r.HandleFunc("/signup/"+provider.Name(), oauth2Handler(oauth2.SignUp, provider))
-				r.HandleFunc("/signin/"+provider.Name(), oauth2Handler(oauth2.SignIn, provider))
+				r.HandleFunc("/signin/"+provider.Name(), oauth2Handler(provider))
 			}
 		}
 
@@ -1122,19 +1121,9 @@ func decodeLogoutRequest(_ context.Context, _ *http.Request) (interface{}, error
 	return nil, nil
 }
 
-func oauth2Handler(state oauth2.State, provider oauth2.Provider) http.HandlerFunc {
+func oauth2Handler(provider oauth2.Provider) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var url string
-		var err error
-		switch state {
-		case oauth2.SignIn:
-			url, err = provider.GenerateSignInURL()
-		case oauth2.SignUp:
-			url, err = provider.GenerateSignUpURL()
-		default:
-			err = fmt.Errorf("invalid state")
-		}
-
+		url, err := provider.GenerateURL()
 		if err != nil {
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
