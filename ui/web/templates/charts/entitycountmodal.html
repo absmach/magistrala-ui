@@ -22,53 +22,183 @@ SPDX-License-Identifier: Apache-2.0 -->
             aria-label="Close"
           ></button>
         </div>
-        <form id="create-entityCount-form">
-          <div class="modal-body">
-            <div class="mb-3">
-              <label for="channel-id" class="form-label">Channel ID</label>
-              <input
-                type="text"
-                pattern="{{ .UUIDPattern }}"
-                class="form-control mb-3"
-                name="channel"
-                id="channel-id"
-                placeholder="Enter the channel ID"
-                required
-              />
-              <div class="invalid-feedback">Please enter a valid uuid</div>
+        <div class="modal-body">
+          <!-- Tab Navs -->
+          <ul class="nav nav-tabs mb-3" id="chartTab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link active"
+                id="data-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#entityCountData"
+                type="button"
+                role="tab"
+                aria-controls="data"
+                aria-selected="true"
+              >
+                Data
+              </button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                class="nav-link"
+                id="appearance-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#entityCountAppearance"
+                type="button"
+                role="tab"
+                aria-controls="appearance"
+                aria-selected="false"
+              >
+                Appearance
+              </button>
+            </li>
+          </ul>
+          <form id="create-entityCount-form">
+            <div class="tab-content" id="myTabContent">
+              <!-- Data Tab -->
+              <div
+                class="tab-pane fade show active"
+                id="entityCountData"
+                role="tabpanel"
+                aria-labelledby="data-tab"
+              >
+                <div class="mb-3">
+                  <label for="entity-type" class="form-label">Select Entity</label>
+                  <select
+                    class="form-select mb-3"
+                    name="entityType"
+                    id="entity-type"
+                    onchange="handleEntityTypeChange(this)"
+                  >
+                    <option value="things">Things</option>
+                    <option value="groups">Groups</option>
+                    <option value="channels">Channels</option>
+                    <option value="thing-channels">Thing-Channels</option>
+                    <option value="channel-things">Channel-Things</option>
+                    <option value="group-things">Group-Things</option>
+                    <option value="channel-groups">Channel-Groups</option>
+                  </select>
+                </div>
+                <div id="thing-channels-input" style="display: none;">
+                  <label for="thing-channels-id" class="form-label">Thing ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="thingChannelsId"
+                    id="thing-channels-id"
+                    placeholder="Enter the Thing ID"
+                  />
+                </div>
+                <div id="channel-things-input" style="display: none;">
+                  <label for="channel-things-id" class="form-label">Channel ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="channelThingsId"
+                    id="channel-things-id"
+                    placeholder="Enter the Channel ID"
+                  />
+                </div>
+                <div id="group-things-input" style="display: none;">
+                  <label for="group-things-id" class="form-label">Group ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="groupThingsId"
+                    id="group-things-id"
+                    placeholder="Enter the Group ID"
+                  />
+                </div>
+                <div id="channel-groups-input" style="display: none;">
+                  <label for="channel-groups-id" class="form-label">Channel ID</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="channelGroupsId"
+                    id="channel-groups-id"
+                    placeholder="Enter the Channel ID"
+                  />
+                </div>
+              </div>
+              <!-- Appearance Tab -->
+              <div
+                class="tab-pane fade"
+                id="entityCountAppearance"
+                role="tabpanel"
+                aria-labelledby="appearance-tab"
+              >
+                <div class="mb-3">
+                  <label for="channel-name" class="form-label">Channel Name</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="channelName"
+                    id="channel-name"
+                    placeholder="Enter the channel name"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="domain-name" class="form-label">Domain Name</label>
+                  <input
+                    type="text"
+                    class="form-control mb-3"
+                    name="domainName"
+                    id="domain-name"
+                    placeholder="Enter the domain name"
+                  />
+                </div>
+              </div>
             </div>
-            <div class="mb-3">
-              <label for="domain-id" class="form-label">Domain ID</label>
-              <input
-                type="text"
-                pattern="{{ .UUIDPattern }}"
-                class="form-control mb-3"
-                name="domain"
-                id="domain-id"
-                placeholder="Enter the domain ID"
-                required
-              />
-              <div class="invalid-feedback">Please enter a valid uuid</div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              id="close-entityCount-button"
-              data-bs-dismiss="modal"
-            >
-              Close
-            </button>
-            <button type="button" class="btn body-button" id="create-entityCount-button">
-              Create Chart
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            id="close-entityCount-button"
+            data-bs-dismiss="modal"
+          >
+            Close
+          </button>
+          <button type="button" class="btn body-button" id="create-entityCount-button">
+            Create Chart
+          </button>
+        </div>
       </div>
     </div>
   </div>
   <script>
+    // add entity-entities blocks
+    function handleEntityTypeChange(selectElement) {
+      var thingChannelsInput = document.getElementById("thing-channels-input");
+      var channelThingsInput = document.getElementById("channel-things-input");
+      var groupThingsInput = document.getElementById("group-things-input");
+      var channelGroupsInput = document.getElementById("channel-groups-input");
+
+      // Hide all inputs by default
+      thingChannelsInput.style.display = "none";
+      channelThingsInput.style.display = "none";
+      groupThingsInput.style.display = "none";
+      channelGroupsInput.style.display = "none";
+
+      // Show the appropriate input based on the selected option
+      switch (selectElement.value) {
+        case "thing-channels":
+          thingChannelsInput.style.display = "block";
+          break;
+        case "channel-things":
+          channelThingsInput.style.display = "block";
+          break;
+        case "group-things":
+          groupThingsInput.style.display = "block";
+          break;
+        case "channel-groups":
+          channelGroupsInput.style.display = "block";
+          break;
+      }
+    }
+
     // entity count form
     document.getElementById("create-entityCount-button").addEventListener("click", function () {
       let form = document.getElementById("create-entityCount-form");
