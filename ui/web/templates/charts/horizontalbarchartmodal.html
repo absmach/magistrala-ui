@@ -18,7 +18,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           <button
             type="button"
             class="btn-close"
-            data-bs-dismiss="modal"
+            onclick="closeForm();"
             aria-label="Close"
           ></button>
         </div>
@@ -63,31 +63,49 @@ SPDX-License-Identifier: Apache-2.0 -->
                 role="tabpanel"
                 aria-labelledby="data-tab"
               >
-                <div class="mb-3">
-                  <label for="channel-id" class="form-label">Channel ID</label>
-                  <input
-                    type="text"
-                    pattern="{{ .UUIDPattern }}"
-                    class="form-control mb-3"
-                    name="channel"
-                    id="channel-id"
-                    placeholder="Enter the channel ID"
-                    required
-                  />
-                  <div class="invalid-feedback">Please enter a valid uuid</div>
-                </div>
-                <div class="mb-3">
-                  <label for="thing-id" class="form-label">Thing IDs</label>
-                  <input
-                    type="text"
-                    pattern="{{ .UUIDPattern }}"
-                    class="form-control mb-3"
-                    name="thing"
-                    id="thing-id"
-                    placeholder="Enter the thing IDs"
-                    required
-                  />
-                  <div class="invalid-feedback">Please enter a valid uuid</div>
+                <div class="table-responsive-md mb-3 p-2 border rounded">
+                  <h5>Data Source</h5>
+                  <table class="table" id="horizontalbarchart-data">
+                    <thead>
+                      <tr>
+                        <th scope="col">Channel</th>
+                        <th scope="col">Thing</th>
+                        <th scope="col"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <input
+                            type="text"
+                            pattern="{{ .UUIDPattern }}"
+                            class="form-control"
+                            name="channel"
+                            placeholder="channel ID"
+                            required
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            pattern="{{ .UUIDPattern }}"
+                            class="form-control"
+                            name="thing"
+                            placeholder="thing ID"
+                            required
+                          />
+                        </td>
+                        <td class="text-center">
+                          <button type="button" class="btn btn-sm" onclick="removeRow(this)">
+                            <i class="fas fa-trash-alt"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <button type="button" class="btn body-button btn-sm" onclick="addRow()">
+                    Add source
+                  </button>
                 </div>
                 <div class="mb-3">
                   <label for="value-name" class="form-label">Value name</label>
@@ -101,17 +119,25 @@ SPDX-License-Identifier: Apache-2.0 -->
                   />
                 </div>
                 <div class="mb-3">
-                  <label for="update-interval" class="form-label">Update interval</label>
+                  <label for="start-time" class="form-label">Start time</label>
                   <input
-                    type="text"
-                    pattern="{{ .IntervalPattern }}"
+                    type="datetime-local"
                     class="form-control mb-3"
-                    name="updateInterval"
-                    id="update-interval"
-                    placeholder="Enter the update interval, eg. 5s, 10m, 1h, 1d"
+                    name="startTime"
+                    id="start-time"
                     required
                   />
-                  <div class="invalid-feedback">Please enter a valid interval</div>
+                  <div class="invalid-time"></div>
+                </div>
+                <div class="mb-3">
+                  <label for="stop-time" class="form-label">Stop time</label>
+                  <input
+                    type="datetime-local"
+                    class="form-control mb-3"
+                    name="stopTime"
+                    id="stop-time"
+                    required
+                  />
                 </div>
                 <div class="mb-3">
                   <label for="aggregation-type" class="form-label">Aggregation</label>
@@ -167,14 +193,7 @@ SPDX-License-Identifier: Apache-2.0 -->
           </form>
         </div>
         <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            id="close-horizontalBarChart-button"
-            data-bs-dismiss="modal"
-          >
-            Close
-          </button>
+          <button type="button" class="btn btn-secondary" onclick="closeForm();">Close</button>
           <button type="button" class="btn body-button" id="create-horizontalBarChart-button">
             Create Chart
           </button>
@@ -184,10 +203,10 @@ SPDX-License-Identifier: Apache-2.0 -->
   </div>
   <script>
     // horizontal bar chart form
+    const form = document.getElementById("create-horizontalBarChart-form");
     document
       .getElementById("create-horizontalBarChart-button")
       .addEventListener("click", function () {
-        const form = document.getElementById("create-horizontalBarChart-form");
         if (!form.checkValidity()) {
           form.classList.add("was-validated");
           return;
@@ -195,28 +214,107 @@ SPDX-License-Identifier: Apache-2.0 -->
 
         // Create an object to store the form data
         let chartData = {};
+        const channels = [];
+        const things = [];
         let formData = new FormData(form);
-        for (var pair of formData.entries()) {
-          chartData[pair[0]] = pair[1];
+        for (let [name, value] of formData) {
+          switch (name) {
+            case "startTime":
+            case "stopTime":
+              const inputDate = new Date(value);
+              chartData[name] = inputDate.getTime();
+              break;
+            case "channel":
+              channels.push(value);
+              break;
+            case "thing":
+              things.push(value);
+              break;
+            default:
+              chartData[name] = value;
+              break;
+          }
+        }
+
+        if (chartData.stopTime <= chartData.startTime) {
+          const invalidTimeFeedback = form.querySelector(".invalid-time");
+          invalidTimeFeedback.innerHTML = "Stop time should be greater than start time";
+          invalidTimeFeedback.style.color = "red";
+          const invalidTimeInput = form.querySelector("#stop-time");
+          invalidTimeInput.classList.remove("was-validated");
+          invalidTimeInput.classList.add("is-invalid");
+          return;
         }
 
         var widgetID = "horizontalBarchart-" + Date.now();
 
         chartData["Type"] = "horizontalBarChart";
+        chartData["channels"] = channels;
+        chartData["things"] = things;
         addWidget(chartData, widgetID);
         metadataBuffer[widgetID] = chartData;
-
-        form.reset();
-        form.classList.remove("was-validated");
-        bootstrap.Modal.getInstance(document.getElementById("horizontalBarChartModal")).hide();
+        closeForm();
       });
 
-    document
-      .getElementById("horizontalBarChartModal")
-      .addEventListener("hidden.bs.modal", function () {
-        const form = document.getElementById("create-horizontalBarChart-form");
-        form.reset();
-        form.classList.remove("was-validated");
-      });
+    function closeForm() {
+      form.classList.remove("was-validated");
+      form.querySelector(".invalid-time").innerHTML = "";
+      form.querySelector("#stop-time").classList.remove("is-invalid");
+      form.reset();
+      resetTable();
+      bootstrap.Modal.getInstance(document.getElementById("horizontalBarChartModal")).hide();
+    }
+
+    function addRow() {
+      const uuidPattern = "{{ .UUIDPattern }}";
+      const table = document.getElementById("horizontalbarchart-data");
+      const newRow = table.insertRow(-1);
+      newRow.innerHTML = ` <td>
+            <input type="text" pattern="${uuidPattern}" class="form-control" name="channel"
+              placeholder="channel ID" required  />
+        </td>
+        <td>
+          <input type="text" pattern="${uuidPattern}" class="form-control" name="thing"
+            placeholder="thing ID" required  />
+       </td>
+        <td class="text-center">
+          <button type="button" class="btn btn-sm" onclick="removeRow(this)">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </td>`;
+    }
+
+    function removeRow(button) {
+      const row = button.parentNode.parentNode;
+      row.parentNode.removeChild(row);
+    }
+
+    function resetTable() {
+      const table = document.getElementById("horizontalbarchart-data");
+      table.innerHTML = ` <thead>
+        <tr>
+          <th scope="col">Channel</th>
+          <th scope="col">Thing</th>
+          <th scope="col"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <input type="text" pattern="{{ .UUIDPattern }}" class="form-control" name="channel"
+              placeholder="channel ID" required  />
+          </td>
+          <td>
+            <input type="text" pattern="{{ .UUIDPattern }}" class="form-control" name="thing"
+              placeholder="thing ID" required  />
+          </td>
+          <td class="text-center">
+            <button type="button" class="btn btn-sm" onclick="removeRow(this)">
+              <i class="fas fa-trash-alt"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>`;
+    }
   </script>
 {{ end }}

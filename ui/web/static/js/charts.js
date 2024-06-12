@@ -665,13 +665,10 @@ class HorizontalBarChart extends Echart {
           },
           dataset: {
             source: [
-              ['score', 'amount', 'product'],
-              [79.3,85212, 'thing1'],
-              [57.1, 78254, 'thing2'],
-              [14.4, 41032, 'thing3'],
-              [30.1, 12755, 'thing4'],
-              [18.7, 20145, 'thing5'],
-              [88.1, 89146, 'thing6'],
+              [
+                "thing",
+                "value"
+            ],
             ]
           },
           grid: { containLabel: true },
@@ -690,9 +687,9 @@ class HorizontalBarChart extends Echart {
           visualMap: {
             orient: 'horizontal',
             left: 'center',
-            min: 10,
+            min: 0,
             max: 100,
-            text: ['High temperature', 'Low temperature'],
+            text: ['High', 'Low'],
             // Map the score column to color
             dimension: 0,
             inRange: {
@@ -710,7 +707,76 @@ class HorizontalBarChart extends Echart {
           ]
         };
 
-      horizontalBarChart.setOption(option);`;
+      horizontalBarChart.setOption(option);
+      var chartData = {
+        channels: '${this.chartData.channels}'.split(','),
+        things: '${this.chartData.things}'.split(','),
+        name: '${this.chartData.valueName}',
+        from: ${this.chartData.startTime},
+        to: ${this.chartData.stopTime},
+        aggregation: '${this.chartData.aggregationType}',
+        limit: 100,
+      };
+      fetchData(horizontalBarChart, chartData);
+
+      async function fetchData(horizontalBarChart, chartData) {
+        try {
+            const plotData = [['value', 'thing']];
+    
+            for (let i = 0; i < chartData.channels.length; i++) {
+                const apiEndpoint = '${pathPrefix}/data?channel=' + chartData.channels[i] +
+                    '&name=' + chartData.name +
+                    '&from='+ chartData.from +
+                    '&to=' + chartData.to +
+                    '&aggregation=' + chartData.aggregation +
+                    '&limit=10' +
+                    '&interval=' + getInterval(chartData) +
+                    '&publisher=' + chartData.things[i];
+    
+                const response = await fetch(apiEndpoint);
+                if (!response.ok) {
+                    throw new Error('HTTP request failed with status:', response.status)
+                }
+                const data = await response.json();
+                plotData.push([data.messages[0].value, 'thing'+i.toString()]);
+            }
+            updateChart(horizontalBarChart, plotData);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+      }
+    
+      function updateChart(horizontalBarChart, plotData) {
+        option = horizontalBarChart.getOption();
+        option.series[0].encode.x = 'value';
+        option.series[0].encode.y = 'thing';
+        option.visualMap.text = ['High', 'Low'];
+        option.dataset[0].source = plotData;
+        horizontalBarChart.setOption(option);
+      }
+
+      function getInterval(chartData) {
+        const interval = chartData.to - chartData.from;
+        const millisecondsPerSecond = 1e3;
+        const secondsPerMinute = 60;
+        const minutesPerHour = 60;
+        let minutes = 0;
+        let hours = 0;
+        let intervalString = "";
+
+        let seconds = parseInt(interval) / millisecondsPerSecond;
+        intervalString = Math.ceil(seconds).toString() +'s';
+        if (seconds >= secondsPerMinute) {
+          minutes = seconds/ secondsPerMinute;
+          intervalString = Math.ceil(minutes).toString() + 'm';
+        }
+        if (minutes >= minutesPerHour) {
+          hours = minutes /minutesPerHour;
+          intervalString = Math.ceil(hours).toString() + 'h';
+        }
+        return intervalString;      
+      }
+      `;
   }
 }
 
